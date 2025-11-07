@@ -42,7 +42,7 @@
     letter-spacing: 0.25px;
     font-size: 0.75em;
     height: 2.5em;
-    text-shadow: 1px 1px 5px rgb(0, 0, 0, 0.5);
+    text-shadow: 1px 1px 5px rgb(0, 0, 0, 0.35);
 
     span {
       margin-left: 0;
@@ -119,6 +119,7 @@
       margin: 0 0 0 0.5em;
       color: #fff9e7;
       letter-spacing: 1px;
+      text-shadow: 1px 1px 7px rgba(0, 0, 0, 0.15);
     }
   }
 
@@ -171,8 +172,8 @@
     font-weight: bold;
 
     &:hover {
-      background: #7fd8d3 !important;
-      color: #2a7370;
+      background: #2a7370 !important;
+      color: rgb(250, 250, 210);
     }
   }
 }

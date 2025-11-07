@@ -34,27 +34,27 @@ $QBRanker-primary-palette: (
 
 // Coral Accent (Contrast highlight)
 $QBRanker-accent-palette: (
-  50: hsl(12, 90%, 95%),
-  100: hsl(12, 90%, 88%),
-  200: hsl(12, 90%, 80%),
-  300: hsl(12, 90%, 72%),
-  400: hsl(12, 90%, 65%),
-  500: hsl(12, 90%, 57%),
-  600: hsl(12, 90%, 50%),
-  700: hsl(12, 90%, 43%),
-  800: hsl(12, 90%, 35%),
-  900: hsl(12, 90%, 28%),
+  50: hsl(60, 67%, 97%),
+  100: hsl(60, 67%, 94%),
+  200: hsl(60, 67%, 88%),
+  300: hsl(60, 67%, 82%),
+  400: hsl(60, 67%, 82%),
+  500: hsl(60, 67%, 82%),
+  600: hsl(60, 67%, 82%),
+  700: hsl(60, 67%, 82%),
+  800: hsl(60, 67%, 82%),
+  900: hsl(60, 67%, 82%),
   contrast: (
-    50: rgba(black, 0.87),
-    100: rgba(black, 0.87),
-    200: rgba(black, 0.87),
-    300: rgba(black, 0.87),
-    400: rgba(white, 0.87),
-    500: rgba(white, 0.87),
-    600: rgba(white, 0.87),
-    700: rgba(white, 0.87),
-    800: rgba(white, 0.87),
-    900: rgba(white, 0.87),
+    50: rgba(0, 0, 0, 0.87),
+    100: rgba(0, 0, 0, 0.87),
+    200: rgba(0, 0, 0, 0.87),
+    300: rgba(0, 0, 0, 0.87),
+    400: rgba(0, 0, 0, 0.87),
+    500: rgba(0, 0, 0, 0.87),
+    600: rgba(0, 0, 0, 0.87),
+    700: rgba(255, 255, 255, 0.87),
+    800: rgba(255, 255, 255, 0.87),
+    900: rgba(255, 255, 255, 0.87),
   ),
 );
 
@@ -103,26 +103,28 @@ body {
 // ---------------------
 
 .mdc-menu-surface {
-  background: hsl(190, 65%, 38%) !important;
+  background: #4aa9a5 !important;
   transform: translate(-10px, 10px) !important;
 
   .mat-mdc-option span {
     color: white !important;
+    font-weight: bold !important;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.25);
   }
 
   .mat-mdc-option:hover span {
-    color: hsl(12, 90%, 72%) !important;
+    color: rgb(250, 250, 210) !important;
   }
 }
 
 .mat-mdc-menu-panel {
-  background: hsl(190, 65%, 32%) !important;
+  background: #4aa9a5 !important;
   border: solid 1px rgba(255, 255, 255, 0.15);
   box-shadow: 0 0 1em rgba(0, 0, 0, 0.4);
 
   span {
-    color: #fbebc7;
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.45);
+    color: #fff;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.25);
   }
 }
 
@@ -132,15 +134,15 @@ body {
 
 // Toggle accent styling → Coral
 html .mat-mdc-slide-toggle.mat-accent {
-  --mdc-switch-selected-focus-state-layer-color: hsl(12, 90%, 72%);
-  --mdc-switch-selected-handle-color: hsl(12, 90%, 57%);
-  --mdc-switch-selected-hover-state-layer-color: hsl(12, 90%, 72%);
-  --mdc-switch-selected-pressed-state-layer-color: hsl(12, 90%, 72%);
-  --mdc-switch-selected-focus-handle-color: hsl(12, 90%, 57%);
-  --mdc-switch-selected-hover-handle-color: hsl(12, 90%, 57%);
-  --mdc-switch-selected-pressed-handle-color: hsl(12, 90%, 57%);
-  --mdc-switch-selected-focus-track-color: hsl(12, 90%, 72%);
-  --mdc-switch-selected-hover-track-color: hsl(12, 90%, 72%);
-  --mdc-switch-selected-pressed-track-color: hsl(12, 90%, 72%);
-  --mdc-switch-selected-track-color: hsl(12, 90%, 72%);
+  --mdc-switch-selected-focus-state-layer-color: rgba(250, 250, 210, 0.45);
+  --mdc-switch-selected-handle-color: rgb(250, 250, 210);
+  --mdc-switch-selected-hover-state-layer-color: rgba(250, 250, 210, 0.45);
+  --mdc-switch-selected-pressed-state-layer-color: rgba(250, 250, 210, 0.45);
+  --mdc-switch-selected-focus-handle-color: rgb(250, 250, 210);
+  --mdc-switch-selected-hover-handle-color: rgb(250, 250, 210);
+  --mdc-switch-selected-pressed-handle-color: rgb(250, 250, 210);
+  --mdc-switch-selected-focus-track-color: rgba(250, 250, 210, 0.35);
+  --mdc-switch-selected-hover-track-color: rgba(250, 250, 210, 0.35);
+  --mdc-switch-selected-pressed-track-color: rgba(250, 250, 210, 0.35);
+  --mdc-switch-selected-track-color: rgba(250, 250, 210, 0.35);
 }
