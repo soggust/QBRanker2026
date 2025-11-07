@@ -1,0 +1,176 @@
+.sidebar {
+  background: #25743b;
+  border-right: solid 2px rgba(255, 252, 153, 0.4);
+  box-shadow: 0 0 0.75em rgba(0, 0, 0, 0.25);
+  position: relative;
+  height: 100dvh;
+  width: 22.5em;
+  font-family: "Montserrat", sans-serif;
+
+  .expanded-panel {
+    background: transparent;
+    color: white;
+    box-shadow: inset 0 0 10em rgba(0, 0, 0, 0.5);
+
+    &.mat-expanded {
+      padding: 1em 0 1em 1em;
+
+      span {
+        margin-left: 5em;
+      }
+
+      .mat-mdc-slider {
+        width: 60%;
+      }
+
+      ::ng-deep.mat-expansion-panel-body {
+        padding: 0;
+      }
+    }
+  }
+
+  p {
+    align-items: center;
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0;
+    margin-left: 0.75em;
+    margin-top: 0.5em;
+    font-weight: bold;
+    opacity: 1;
+    text-transform: uppercase;
+    letter-spacing: 0.25px;
+    font-size: 0.75em;
+    height: 2.5em;
+
+    span {
+      margin-left: 0;
+      font-size: 1em;
+    }
+
+    button {
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-right: 0.25em;
+      width: 2.5em;
+      height: 2.5em;
+      padding: 0;
+
+      &:hover {
+        border-color: #ffffc9 !important;
+        cursor: pointer;
+
+        .mat-icon {
+          color: #ffffc9;
+        }
+      }
+    }
+
+    .mat-icon {
+      color: #fffcfc;
+      margin-right: 0;
+    }
+
+    &.mt-0 {
+      margin-top: 0px;
+    }
+  }
+
+  button {
+    margin-left: 0.5em;
+    margin-right: 0.5em;
+    font-family: "Montserrat", sans-serif;
+    padding: 1.5em;
+    height: 2.25em;
+    background: rgb(53, 166, 85) !important;
+    color: white;
+
+    &:hover {
+      color: #ff0;
+    }
+  }
+
+  .logo {
+    border-bottom: solid 1px rgba(255, 252, 153, 0.4);
+    display: flex;
+    align-items: center;
+    padding: 2em 0.5em;
+    h1 {
+      display: flex;
+      align-items: center;
+      .sports-football {
+        margin-left: 0.5em;
+        margin-right: 0.5em;
+      }
+      font-size: 1.5em;
+      font-family: "Righteous", sans-serif;
+      text-transform: uppercase;
+      margin: 0;
+    }
+  }
+
+  .filters {
+    height: calc(100% - 13.5em);
+    overflow-y: auto;
+    padding-top: 1em;
+    box-shadow: inset 0 0 5em rgba(0, 0, 0, 0.35);
+
+    div {
+      padding: 0em 1.5em;
+    }
+  }
+
+  footer {
+    border-top: solid 1px rgba(255, 252, 152, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 1em;
+    height: 3.4em;
+  }
+
+  hr {
+    opacity: 0.2;
+  }
+
+  span {
+    font-size: 0.75em;
+    margin-left: 2.5em;
+  }
+
+  .mat-mdc-slider {
+    width: 72.5%;
+  }
+
+  .mat-mdc-select {
+    padding: 0.75em;
+    display: flex;
+    background: rgb(53, 166, 85) !important;
+    color: white;
+    box-sizing: border-box;
+    margin: 1em 0 2em 0;
+    border-radius: 0.35em !important;
+  }
+}
+
+.disabled {
+  opacity: 0.3;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  border-radius: 8px;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+::-webkit-scrollbar-thumb {
+  border-radius: 8px;
+  background: rgba(255, 252, 153, 0.75);
+  box-shadow: inset 0 0 0.5em rgba(0, 0, 0, 0.2), 0 0 1em rgba(0, 0, 0, 0.2);
+}

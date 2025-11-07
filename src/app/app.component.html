@@ -1,0 +1,17 @@
+<main [class.menu-open]="menuOpen">
+  <!-- Sidebar -->
+  <sidebar class="sidebar"></sidebar>
+  <div class="shade" (click)="menuOpen = false"></div>
+
+  <!-- Rankings-->
+  <rankings class="rankings"></rankings>
+
+  <button class="menu-toggle" (click)="menuOpen = !menuOpen">
+    <mat-icon
+      aria-hidden="false"
+      aria-label="menu icon"
+      fontIcon="filter_alt"
+      class="menu"
+    ></mat-icon>
+  </button>
+</main>

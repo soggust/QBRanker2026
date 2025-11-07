@@ -1,0 +1,330 @@
+<div class="sidebar">
+  <div class="logo">
+    <h1>
+      <mat-icon
+        aria-hidden="false"
+        aria-label="football icon"
+        fontIcon="sports_football"
+        class="sports-football"
+      ></mat-icon
+      >2024 QB Ranker
+    </h1>
+  </div>
+
+  <div class="filters">
+    <div>
+      <mat-select [(ngModel)]="preset" (ngModelChange)="onPresetChange()">
+        @if (preset === 'custom') {
+        <mat-option value="custom" disabled="disabled">Custom</mat-option>
+        }
+        <mat-option value="default">Default</mat-option>
+        <mat-option value="stats">Stats Only</mat-option>
+        <mat-option value="support">Least Support</mat-option>
+        <mat-option value="mvp">MVP</mat-option>
+      </mat-select>
+    </div>
+
+    <!-- Record -->
+    <div [ngClass]="{ disabled: recordValue === 0 }">
+      <p>Record</p>
+      <mat-slider min="0" max="100" step="5" color="accent">
+        <input
+          matSliderThumb
+          [(ngModel)]="recordValue"
+          (ngModelChange)="setCustomFilter(); saveFilters()"
+        />
+      </mat-slider>
+      <span>{{ recordValue }}%</span>
+    </div>
+
+    <!-- Completion % -->
+    <div [ngClass]="{ disabled: compValue === 0 }">
+      <p>Completion %</p>
+      <mat-slider min="0" max="100" step="5" color="accent">
+        <input
+          matSliderThumb
+          [(ngModel)]="compValue"
+          (ngModelChange)="setCustomFilter(); saveFilters()"
+        />
+      </mat-slider>
+      <span>{{ compValue }}%</span>
+    </div>
+
+    <!-- Yards -->
+    <div [ngClass]="{ disabled: yardsValue === 0 }">
+      <p>
+        <span>Yards</span>
+        <button
+          mat-button
+          style="border: solid 1px white; min-width: 1px"
+          (click)="yardsExpanded = !yardsExpanded"
+        >
+          <mat-icon>unfold_more</mat-icon>
+        </button>
+      </p>
+      <mat-slider min="0" max="100" step="5" color="accent">
+        <input
+          matSliderThumb
+          [(ngModel)]="yardsValue"
+          (ngModelChange)="setCustomFilter(); saveFilters()"
+        />
+      </mat-slider>
+      <span>{{ yardsValue }}%</span>
+    </div>
+
+    <mat-expansion-panel [expanded]="yardsExpanded" class="expanded-panel">
+      <!-- Pass Yards -->
+      <div [ngClass]="{ disabled: passYdValue === 0 || yardsValue === 0 }">
+        <p>Pass Yards</p>
+        <mat-slider min="0" max="100" step="5" color="accent">
+          <input
+            matSliderThumb
+            [(ngModel)]="passYdValue"
+            (ngModelChange)="setCustomFilter(); saveFilters()"
+          />
+        </mat-slider>
+        <span>{{ passYdValue }}%</span>
+      </div>
+
+      <!-- Rush Yards -->
+      <div [ngClass]="{ disabled: rushYdValue === 0 || yardsValue === 0 }">
+        <p>Rush Yards</p>
+        <mat-slider min="0" max="100" step="5" color="accent">
+          <input
+            matSliderThumb
+            [(ngModel)]="rushYdValue"
+            (ngModelChange)="setCustomFilter(); saveFilters()"
+          />
+        </mat-slider>
+        <span>{{ rushYdValue }}%</span>
+      </div>
+    </mat-expansion-panel>
+
+    <!-- Yards Per Attempt -->
+    <div [ngClass]="{ disabled: ypaValue === 0 }">
+      <p>Yards Per Attempt</p>
+      <mat-slider min="0" max="100" step="5" color="accent">
+        <input
+          matSliderThumb
+          [(ngModel)]="ypaValue"
+          (ngModelChange)="setCustomFilter(); saveFilters()"
+        />
+      </mat-slider>
+      <span>{{ ypaValue }}%</span>
+    </div>
+
+    <!-- Touchdowns -->
+    <div [ngClass]="{ disabled: touchdownValue === 0 }">
+      <p>
+        <span>Touchdowns</span>
+        <button
+          mat-button
+          style="border: solid 1px white; min-width: 1px"
+          (click)="tdsExpanded = !tdsExpanded"
+        >
+          <mat-icon>unfold_more</mat-icon>
+        </button>
+      </p>
+      <mat-slider min="0" max="100" step="5" color="accent">
+        <input
+          matSliderThumb
+          [(ngModel)]="touchdownValue"
+          (ngModelChange)="setCustomFilter(); saveFilters()"
+        />
+      </mat-slider>
+      <span>{{ touchdownValue }}%</span>
+    </div>
+
+    <mat-expansion-panel [expanded]="tdsExpanded" class="expanded-panel">
+      <!-- Pass Touchdowns -->
+      <div [ngClass]="{ disabled: passTdValue === 0 || touchdownValue === 0 }">
+        <p>Pass Touchdowns</p>
+        <mat-slider min="0" max="100" step="5" color="accent">
+          <input
+            matSliderThumb
+            [(ngModel)]="passTdValue"
+            (ngModelChange)="setCustomFilter(); saveFilters()"
+          />
+        </mat-slider>
+        <span>{{ passTdValue }}%</span>
+      </div>
+
+      <!-- Rush Touchdowns -->
+      <div [ngClass]="{ disabled: rushTdValue === 0 || touchdownValue === 0 }">
+        <p>Rush Touchdowns</p>
+        <mat-slider min="0" max="100" step="5" color="accent">
+          <input
+            matSliderThumb
+            [(ngModel)]="rushTdValue"
+            (ngModelChange)="setCustomFilter(); saveFilters()"
+          />
+        </mat-slider>
+        <span>{{ rushTdValue }}%</span>
+      </div>
+    </mat-expansion-panel>
+
+    <!-- Turnovers -->
+    <div [ngClass]="{ disabled: turnoverValue === 0 }">
+      <p>
+        <span>Turnovers</span>
+        <button
+          mat-button
+          style="border: solid 1px white; min-width: 1px"
+          (click)="tosExpanded = !tosExpanded"
+        >
+          <mat-icon>unfold_more</mat-icon>
+        </button>
+      </p>
+      <mat-slider min="0" max="100" step="5" color="accent">
+        <input
+          matSliderThumb
+          [(ngModel)]="turnoverValue"
+          (ngModelChange)="setCustomFilter(); saveFilters()"
+        />
+      </mat-slider>
+      <span>{{ turnoverValue }}%</span>
+    </div>
+
+    <mat-expansion-panel [expanded]="tosExpanded" class="expanded-panel">
+      <!-- Interceptions -->
+      <div [ngClass]="{ disabled: intValue === 0 || turnoverValue === 0 }">
+        <p>Interceptions</p>
+        <mat-slider min="0" max="100" step="5" color="accent">
+          <input
+            matSliderThumb
+            [(ngModel)]="intValue"
+            (ngModelChange)="setCustomFilter(); saveFilters()"
+          />
+        </mat-slider>
+        <span>{{ intValue }}%</span>
+      </div>
+
+      <!-- Fumbles Lost -->
+      <div [ngClass]="{ disabled: fumLostValue === 0 || turnoverValue === 0 }">
+        <p>Fumbles Lost</p>
+        <mat-slider min="0" max="100" step="5" color="accent">
+          <input
+            matSliderThumb
+            [(ngModel)]="fumLostValue"
+            (ngModelChange)="setCustomFilter(); saveFilters()"
+          />
+        </mat-slider>
+        <span>{{ fumLostValue }}%</span>
+      </div>
+    </mat-expansion-panel>
+
+    <!-- Rating -->
+    <div [ngClass]="{ disabled: ratingValue === 0 }">
+      <p>Rating</p>
+      <mat-slider min="0" max="100" step="5" color="accent">
+        <input
+          matSliderThumb
+          [(ngModel)]="ratingValue"
+          (ngModelChange)="setCustomFilter(); saveFilters()"
+        />
+      </mat-slider>
+      <span>{{ ratingValue }}%</span>
+    </div>
+
+    <!-- Recency -->
+    <div [ngClass]="{ disabled: recencyValue === 0 }">
+      <p>Recency Bias</p>
+      <mat-slider min="0" max="100" step="5" color="accent">
+        <input
+          matSliderThumb
+          [(ngModel)]="recencyValue"
+          (ngModelChange)="setCustomFilter(); saveFilters()"
+        />
+      </mat-slider>
+      <span>{{ recencyValue }}%</span>
+    </div>
+
+    <!-- Support -->
+    <div [ngClass]="{ disabled: supportValue === 0 }">
+      <p (click)="supportExpanded = !supportExpanded">
+        <span>Support Bias</span>
+        <button mat-button style="border: solid 1px white; min-width: 1px">
+          <mat-icon>unfold_more</mat-icon>
+        </button>
+      </p>
+      <mat-slider min="0" max="100" step="5" color="accent">
+        <input
+          matSliderThumb
+          [(ngModel)]="supportValue"
+          (ngModelChange)="setCustomFilter(); saveFilters()"
+        />
+      </mat-slider>
+      <span>{{ supportValue }}%</span>
+    </div>
+
+    <mat-expansion-panel [expanded]="supportExpanded" class="expanded-panel">
+      <!-- Weapons -->
+      <div [ngClass]="{ disabled: weaponsValue === 0 || supportValue === 0 }">
+        <p>Weapons Penalty</p>
+        <mat-slider min="0" max="100" step="5" color="accent">
+          <input
+            matSliderThumb
+            [(ngModel)]="weaponsValue"
+            (ngModelChange)="setCustomFilter(); saveFilters()"
+          />
+        </mat-slider>
+        <span>{{ weaponsValue }}%</span>
+      </div>
+      <!-- Coaching -->
+      <div [ngClass]="{ disabled: coachingValue === 0 || supportValue === 0 }">
+        <p>Coaching Penalty</p>
+        <mat-slider min="0" max="100" step="5" color="accent">
+          <input
+            matSliderThumb
+            [(ngModel)]="coachingValue"
+            (ngModelChange)="setCustomFilter(); saveFilters()"
+          />
+        </mat-slider>
+        <span>{{ coachingValue }}%</span>
+      </div>
+      <!-- Oline -->
+      <div [ngClass]="{ disabled: olineValue === 0 || supportValue === 0 }">
+        <p>O-line Penalty</p>
+        <mat-slider min="0" max="100" step="5" color="accent">
+          <input
+            matSliderThumb
+            [(ngModel)]="olineValue"
+            (ngModelChange)="setCustomFilter(); saveFilters()"
+          />
+        </mat-slider>
+        <span>{{ olineValue }}%</span>
+      </div>
+      <!-- Defense -->
+      <div [ngClass]="{ disabled: defenseValue === 0 || supportValue === 0 }">
+        <p>Defense Penalty</p>
+        <mat-slider min="0" max="100" step="5" color="accent">
+          <input
+            matSliderThumb
+            [(ngModel)]="defenseValue"
+            (ngModelChange)="setCustomFilter(); saveFilters()"
+          />
+        </mat-slider>
+        <span>{{ defenseValue }}%</span>
+      </div>
+      <!-- Responsibility -->
+      <div
+        [ngClass]="{
+          disabled: responsibilityValue === 0 || supportValue === 0
+        }"
+      >
+        <p>Responsibility Boost</p>
+        <mat-slider min="0" max="100" step="5" color="accent">
+          <input
+            matSliderThumb
+            [(ngModel)]="responsibilityValue"
+            (ngModelChange)="setCustomFilter(); saveFilters()"
+          />
+        </mat-slider>
+        <span>{{ responsibilityValue }}%</span>
+      </div>
+    </mat-expansion-panel>
+  </div>
+  <footer>
+    <button mat-raised-button (click)="clearFilters()">Clear All</button>
+  </footer>
+</div>
