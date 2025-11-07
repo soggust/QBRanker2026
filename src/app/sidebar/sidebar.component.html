@@ -15,11 +15,11 @@
     <div>
       <mat-select [(ngModel)]="preset" (ngModelChange)="onPresetChange()">
         @if (preset === 'custom') {
-        <mat-option value="custom" disabled="disabled">Custom</mat-option>
+        <mat-option value="custom" disabled="disabled">CUSTOM</mat-option>
         }
-        <mat-option value="default">Default</mat-option>
-        <mat-option value="stats">Stats Only</mat-option>
-        <mat-option value="support">Least Support</mat-option>
+        <mat-option value="default">DEFAULT</mat-option>
+        <mat-option value="stats">STATS ONLY</mat-option>
+        <mat-option value="support">LEAST SUPPORT</mat-option>
         <mat-option value="mvp">MVP</mat-option>
       </mat-select>
     </div>

@@ -1,5 +1,5 @@
 .sidebar {
-  background: #2a7370;
+  background: #4d9794;
   border-right: solid 2px rgba(255, 249, 231, 0.3);
   box-shadow: 0 0 0.75em rgba(0, 0, 0, 0.25);
   position: relative;
@@ -42,6 +42,7 @@
     letter-spacing: 0.25px;
     font-size: 0.75em;
     height: 2.5em;
+    text-shadow: 1px 1px 5px rgb(0, 0, 0, 0.5);
 
     span {
       margin-left: 0;
@@ -88,8 +89,8 @@
     font-size: 0.9em;
     padding: 1.5em;
     height: 2.25em;
-    background: #3fa7a3 !important;
-    color: #fff9e7;
+    background: rgb(250, 250, 210);
+    color: #2a7370;
     text-transform: uppercase;
     font-weight: bold;
 
@@ -117,6 +118,7 @@
       text-transform: uppercase;
       margin: 0 0 0 0.5em;
       color: #fff9e7;
+      letter-spacing: 1px;
     }
   }
 
@@ -160,11 +162,13 @@
   .mat-mdc-select {
     padding: 0.75em;
     display: flex;
-    background: #3fa7a3 !important;
-    color: #fff9e7;
+    background: rgb(250, 250, 210) !important;
+    color: #2a7370;
     margin: 1em 0 2em 0;
     border-radius: 0.35em !important;
     width: auto;
+    text-align: center;
+    font-weight: bold;
 
     &:hover {
       background: #7fd8d3 !important;
