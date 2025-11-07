@@ -15,40 +15,49 @@ import { getAnalytics } from 'firebase/analytics';
 import { LetterGradePipe } from './pipes/letter-grade.pipe';
 import { FormatRecentGamesPipe } from './pipes/format-recent-games.pipe';
 import { RankingsComponent } from './rankings/rankings.component';
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import {
+  provideHttpClient,
+  withInterceptorsFromDi,
+} from '@angular/common/http';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatExpansionModule } from '@angular/material/expansion';
 
 const firebaseConfig = {
-  apiKey: 'AIzaSyAJnhXlsdyalYitbz03v78x9Yrow1ZukvM',
-  authDomain: 'qbranker.firebaseapp.com',
-  projectId: 'qbranker',
-  storageBucket: 'qbranker.appspot.com',
-  messagingSenderId: '727904727710',
-  appId: '1:727904727710:web:15a73b5fa4cd979c03418f',
-  measurementId: 'G-SZVWE3DSY6',
+  apiKey: 'AIzaSyBSdGR9zFnQLudzKiqZOvl39BlqXDeDpzk',
+  authDomain: 'qbranker2025.firebaseapp.com',
+  projectId: 'qbranker2025',
+  storageBucket: 'qbranker2025.firebasestorage.app',
+  messagingSenderId: '547625475905',
+  appId: '1:547625475905:web:822d9ddbbe9f44b67a8bc0',
+  measurementId: 'G-4EWLP9S2WJ',
 };
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
 
-@NgModule({ declarations: [
-        AppComponent,
-        SidebarComponent,
-        LetterGradePipe,
-        FormatRecentGamesPipe,
-        RankingsComponent,
-    ],
-    bootstrap: [AppComponent], imports: [BrowserModule,
-        BrowserAnimationsModule,
-        MatSliderModule,
-        MatSelectModule,
-        MatIconModule,
-        FormsModule,
-        DragDropModule,
-        MatButtonModule,
-        MatMenuModule,
-        MatSlideToggleModule,
-        MatExpansionModule], providers: [provideHttpClient(withInterceptorsFromDi())] })
+@NgModule({
+  declarations: [
+    AppComponent,
+    SidebarComponent,
+    LetterGradePipe,
+    FormatRecentGamesPipe,
+    RankingsComponent,
+  ],
+  bootstrap: [AppComponent],
+  imports: [
+    BrowserModule,
+    BrowserAnimationsModule,
+    MatSliderModule,
+    MatSelectModule,
+    MatIconModule,
+    FormsModule,
+    DragDropModule,
+    MatButtonModule,
+    MatMenuModule,
+    MatSlideToggleModule,
+    MatExpansionModule,
+  ],
+  providers: [provideHttpClient(withInterceptorsFromDi())],
+})
 export class AppModule {}
