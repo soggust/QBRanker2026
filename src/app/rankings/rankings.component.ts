@@ -98,11 +98,13 @@ export class RankingsComponent {
 
   // Combine Total Weighted Value Of Each Stat
   totalWeighted(player: Player) {
+    const recordValue = player.wins + (player.ties ?? 0) * 0.5;
     const recordWeighted = this.applyWeight(
-      player.wins / player.games,
+      recordValue / (player.wins + player.losses + (player.ties ?? 0)),
       this.filters.recordValue,
       this.findMax('record')
     );
+
     const compPercentWeighted = this.applyWeight(
       player.compPercent,
       this.filters.compValue,
@@ -263,7 +265,7 @@ export class RankingsComponent {
     const values = this.playerList.map((player) => {
       switch (attribute) {
         case 'record':
-          return player.wins / player.games;
+          return player.wins + ((player.ties ?? 0) * 0.5) / player.games;
         case 'tdPerGame':
           return ((player.passTd + player.rushTd) / player.games) * 10;
         case 'touchdowns':
