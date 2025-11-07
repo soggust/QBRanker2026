@@ -37,6 +37,7 @@ export interface Player {
   rating: number;
   wins: number;
   losses: number;
+  ties?: number;
   games: number;
   id: number;
   lastFive: number[];
@@ -55,6 +56,7 @@ export interface StaticPlayerData {
   teamLogo: string;
   wins: number;
   losses: number;
+  ties?: number;
   id: number;
   lastFive: number[];
   injured: boolean;

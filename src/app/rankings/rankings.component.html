@@ -33,20 +33,27 @@
       @if (showUnused || this.filters.recordValue) {
       <div class="record">
         <p>
-          {{ player.wins }}-{{ player.losses }}
-          @if (player.outOfDate) {
+          {{ player.wins }}-{{ player.losses
+          }}<span *ngIf="player.ties">-{{ player.ties }}</span>
           <mat-icon
+            *ngIf="player.outOfDate"
             aria-hidden="false"
             aria-label="warning icon"
             fontIcon="warning"
             title="ESPN player stats are not up-to-date with team record stats"
             class="out-of-date-indicator"
           ></mat-icon>
-          }
         </p>
+
         <p
           class="stat-label"
-          [title]="player.wins + '-' + player.losses + ' Record as Starter'"
+          [title]="
+            player.wins +
+            '-' +
+            player.losses +
+            (player.ties ? '-' + player.ties : '') +
+            ' Record as Starter'
+          "
         >
           Record
         </p>

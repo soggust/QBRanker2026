@@ -11,7 +11,7 @@ import { Player } from 'app/types';
 })
 export class EspnApiService {
   private apiUrl =
-    'https://sports.core.api.espn.com/v2/sports/football/leagues/nfl/seasons/2024/types/2/athletes';
+    'https://sports.core.api.espn.com/v2/sports/football/leagues/nfl/seasons/2025/types/2/athletes';
   playerIds: number[] = StaticData.map((player) => player.id);
   playerStats$: Observable<Player[]>;
 
@@ -98,6 +98,7 @@ export class EspnApiService {
       rating: rating,
       wins: staticData ? staticData.wins : 0,
       losses: staticData ? staticData.losses : 0,
+      ties: staticData ? staticData.ties : 0,
       games: games,
       id: id,
       lastFive: staticData ? staticData.lastFive : [0, 0, 0, 0, 0],
@@ -108,7 +109,8 @@ export class EspnApiService {
       defense: staticData ? staticData.defense : 0,
       responsibility: staticData ? staticData.responsibility : 0,
       outOfDate:
-        staticData && games < staticData.wins + staticData.losses
+        staticData &&
+        games < staticData.wins + staticData.losses + (staticData.ties ?? 0)
           ? true
           : false,
     };
