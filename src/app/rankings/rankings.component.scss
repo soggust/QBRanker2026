@@ -1,25 +1,27 @@
+@use "../../variables.scss" as v;
+
 section {
   ul {
-    background: #2a7371ba;
+    background: var(--primary-800);
     border-radius: 0.5em;
-    border: solid 2px rgba(255, 249, 231, 0.3);
+    border: solid 1px var(--accent-200);
     box-shadow: 0 0 2em rgba(0, 0, 0, 0.35);
     height: calc(100dvh - 7em);
-    width: auto;
     overflow: auto;
     padding-left: 0;
     white-space: nowrap;
+    width: auto;
 
     li {
-      border-bottom: solid 1px rgba(0, 0, 0, 0.15);
+      border-bottom: solid 1px var(--primary-900);
       color: #fff;
-      text-shadow: 1px 1px 5px rgb(0, 0, 0, 0.35);
       list-style-type: none;
       padding: 0.25em 0.5em;
       justify-content: flex-start;
+      text-shadow: var(--text-shadow-small);
 
       &:hover {
-        background: hsl(174, 33%, 50%);
+        background: var(--primary-700);
       }
 
       &:first-of-type {
@@ -35,41 +37,42 @@ section {
         display: flex;
 
         .team-logo {
-          width: 2em;
-          max-height: 2em;
           margin-right: 1em;
+          max-height: 2em;
+          width: 2em;
         }
 
         .count {
           border-radius: 50%;
-          border: solid 1px rgba(255, 249, 231, 0.5);
+          border: solid 1px var(--primary-400);
           box-shadow: 0 0 1em rgba(0, 0, 0, 0.15);
-          font-weight: bold;
-          font-family: "Elms", sans-serif;
-          color: white;
+          color: var(--primary-50);
           display: block;
-          width: 3em;
-          line-height: 3em;
-          text-align: center;
-          margin-right: 1em;
+          font-family: v.$font-base;
           font-size: 1em;
+          font-weight: bold;
+          line-height: 3em;
+          margin-right: 1em;
+          text-align: center;
           text-shadow: none;
+          width: 3em;
 
           &.top-5,
           &.top-10 {
-            background: rgb(250, 250, 210);
+            background: var(--accent-200);
+            border-color: #fff;
             box-shadow: inset 0 0 2em rgba(0, 0, 0, 0.15),
               0 0 1em rgba(0, 0, 0, 0.15);
-            color: #2a7370;
+            color: var(--primary-900);
             font-weight: bolder;
           }
         }
 
         .drag-indicator {
+          min-width: 1em;
+          opacity: 0.3;
           padding: 0 0.5em;
           transform: scale(0.75);
-          opacity: 0.3;
-          min-width: 1em;
 
           &:hover {
             cursor: grabbing;
@@ -77,23 +80,25 @@ section {
           }
         }
 
-        .weapons,
         .coaching,
-        .o-line,
         .defense,
-        .responsibility {
+        .o-line,
+        .responsibility,
+        .weapons {
           .arrow-drop-down,
           .arrow-drop-up {
             display: none;
           }
+
           &:hover,
           &:focus {
             p {
               margin: 0;
             }
+
             .arrow-drop-down,
             .arrow-drop-up {
-              color: #fff9e7;
+              color: var(--primary-50);
               cursor: pointer;
               display: flex;
 
@@ -106,15 +111,15 @@ section {
 
         .injury-icon,
         .out-of-date-indicator {
+          color: #fb2;
+          height: 50%;
           font-size: 1em;
           margin-top: 0em;
           padding-left: 0.5em;
-          height: 50%;
-          color: #fc3;
 
           &:hover {
-            cursor: help;
             color: #fef4d5;
+            cursor: help;
           }
         }
 
@@ -123,19 +128,19 @@ section {
         }
 
         > div {
-          width: 6em;
           min-width: 6em;
+          width: 6em;
         }
 
         div {
-          display: flex;
           align-items: center;
+          display: flex;
+          flex-direction: column;
           justify-content: center;
           margin-inline-end: 0.5em;
-          flex-direction: column;
 
           &.box {
-            border: solid 1px rgba(255, 249, 231, 0.7);
+            border: solid 1px var(--primary-600);
             border-radius: 0.25em;
             display: flex;
             flex-direction: row;
@@ -143,16 +148,16 @@ section {
             padding-right: 0.5em;
 
             div {
-              flex-direction: column;
               flex: 1;
+              flex-direction: column;
               margin: 0;
             }
           }
 
           p {
-            margin: 0.25em 0;
-            display: flex;
             align-items: center;
+            display: flex;
+            margin: 0.25em 0;
             font-weight: bold;
           }
 
@@ -166,14 +171,14 @@ section {
           }
 
           .stat-label {
+            color: var(--primary-50);
+            cursor: help;
             font-size: 0.5em;
             font-weight: normal;
             letter-spacing: 0.25px;
             text-transform: uppercase;
-            color: #fff9e7;
             opacity: 0.75;
             z-index: 2;
-            cursor: help;
 
             &:hover {
               opacity: 1;
@@ -182,16 +187,16 @@ section {
 
           &.player-info {
             align-items: center;
-            justify-content: flex-start;
             flex-direction: row;
-            width: 20em;
-            min-width: 20em;
             height: 4em;
+            justify-content: flex-start;
+            min-width: 20em;
+            width: 20em;
           }
 
           &.support-box {
-            height: 3.75em;
             background: rgba(0, 0, 0, 0.35);
+            height: 3.75em;
             margin-right: 1em;
 
             p {
@@ -203,24 +208,25 @@ section {
           }
 
           &.last-five {
-            div {
-              font-size: 0.75em;
-              justify-content: center;
-              flex-direction: row;
-              margin: 0 auto;
-
-              p {
-                margin-right: 2px;
-                margin-bottom: 0.5em;
-                margin-top: 0.5em;
-                font-weight: bold;
-                letter-spacing: 1px;
-                text-shadow: none;
-              }
-            }
             align-items: center;
             display: flex;
             justify-content: center;
+
+            div {
+              flex-direction: row;
+              font-size: 0.75em;
+              justify-content: center;
+              margin: 0 auto;
+
+              p {
+                font-weight: bold;
+                letter-spacing: 1px;
+                margin-bottom: 0.5em;
+                margin-right: 2px;
+                margin-top: 0.5em;
+                text-shadow: none;
+              }
+            }
 
             .green {
               color: rgb(80, 207, 80);
@@ -236,9 +242,9 @@ section {
 
   footer {
     align-items: center;
-    color: #2a7371ba;
-    font-weight: bold;
+    color: var(--primary-900);
     display: flex;
+    font-weight: bold;
     justify-content: space-between;
 
     .ghost-div {
@@ -247,16 +253,16 @@ section {
 
     .sports-football {
       display: none;
-      margin-top: 0;
       margin-left: auto;
+      margin-top: 0;
       padding-left: 25%;
     }
 
     h1 {
       display: none;
+      font-family: v.$font-heading;
+      font-size: 1.35em;
       font-style: normal;
-      font-size: 1em;
-      font-family: "Righteous", sans-serif;
       text-transform: uppercase;
     }
 
@@ -272,11 +278,11 @@ section {
     }
 
     button {
-      cursor: pointer;
       background: transparent;
       border: none;
-      color: rgb(250, 250, 210);
-      text-shadow: 1px 1px 5px rgb(0, 0, 0, 0.35);
+      color: var(--primary-50);
+      cursor: pointer;
+      text-shadow: var(--text-shadow-small);
 
       &:hover {
         border-color: #333;
@@ -287,17 +293,13 @@ section {
 }
 
 .cdk-drag-preview {
-  background: #2a7371ba;
+  background: var(--primary-600);
   border-bottom: solid 1px rgba(0, 0, 0, 0.15);
   color: #fff;
-  text-shadow: 1px 1px 5px rgb(0, 0, 0, 0.5);
+  justify-content: flex-start;
   list-style-type: none;
   padding: 0.25em 0.5em;
-  justify-content: flex-start;
-
-  &:hover {
-    background: hsl(174, 33%, 50%);
-  }
+  text-shadow: 1px 1px 5px rgb(0, 0, 0, 0.5);
 
   &:first-of-type {
     border-radius: 0.5rem 0.5rem 0 0;
@@ -312,9 +314,9 @@ section {
     display: flex;
 
     .team-logo {
-      width: 2em;
-      max-height: 2em;
       margin-right: 1em;
+      max-height: 2em;
+      width: 2em;
     }
 
     .count {
@@ -322,7 +324,7 @@ section {
       border: solid 1px rgba(255, 249, 231, 0.5);
       box-shadow: 0 0 1em rgba(0, 0, 0, 0.15);
       font-weight: bold;
-      font-family: "Elms", sans-serif;
+      font-family: v.$font-base;
       color: white;
       display: block;
       width: 3em;
@@ -334,10 +336,11 @@ section {
 
       &.top-5,
       &.top-10 {
-        background: rgb(250, 250, 210);
+        background: var(--accent-200);
+        border-color: #fff;
         box-shadow: inset 0 0 2em rgba(0, 0, 0, 0.15),
           0 0 1em rgba(0, 0, 0, 0.15);
-        color: #2a7370;
+        color: var(--primary-900);
         font-weight: bolder;
       }
     }
@@ -516,24 +519,56 @@ section {
 
 .small {
   font-size: 80%;
+  font-style: italic;
   margin-top: 2em;
   opacity: 0.75;
-  font-style: italic;
 }
 
+.slide-toggle {
+  + span {
+    margin-left: 0.5em;
+  }
+}
+
+// Toast Messages
+.toast {
+  background-color: var(--primary-700);
+  border: solid 1px var(--primary-500);
+  border-radius: 5px;
+  bottom: 5em;
+  box-shadow: 0 0 1em rgba(0, 0, 0, 0.4);
+  color: #fff9e7;
+  min-width: 100px;
+  opacity: 0;
+  padding: 10px;
+  position: fixed;
+  right: 4em;
+  text-align: center;
+  transform: translateX(-50%);
+  transition: opacity 0.35s ease-in-out;
+  visibility: hidden;
+  z-index: 999;
+}
+
+.toast.show {
+  opacity: 1;
+  visibility: visible;
+}
+
+// Scrollbars
 ::-webkit-scrollbar {
-  width: 10px;
   height: 10px;
+  width: 10px;
 }
 
 ::-webkit-scrollbar-track {
+  background-color: var(--primary-900);
   border-radius: 8px;
-  background-color: rgba(0, 0, 0, 0.5);
 }
 
 ::-webkit-scrollbar-thumb {
+  background: var(--accent-200);
   border-radius: 8px;
-  background: rgb(250, 250, 210);
   box-shadow: inset 0 0 0.5em rgba(0, 0, 0, 0.2), 0 0 1em rgba(0, 0, 0, 0.2);
 }
 
@@ -541,16 +576,19 @@ section {
   background: transparent;
 }
 
+// Responsive Fixes
 @media (max-width: 1199px) {
   section {
-    display: flex;
     align-items: center;
-    justify-content: center;
+    display: flex;
     flex-direction: column;
+    justify-content: center;
+
     ul {
-      width: 100%;
       height: calc(100dvh - 6em);
+      width: 100%;
     }
+
     footer {
       width: 100%;
 
@@ -558,6 +596,7 @@ section {
       .sports-football {
         display: flex;
       }
+
       h1 {
         display: flex;
         margin: 0 auto;
@@ -569,36 +608,4 @@ section {
       }
     }
   }
-}
-
-.slide-toggle {
-  + span {
-    margin-left: 0.5em;
-  }
-}
-
-/* Styling for the toast message */
-.toast {
-  visibility: hidden;
-  min-width: 100px;
-  background-color: #4aa9a5;
-  border: solid 1px rgba(255, 249, 231, 0.3);
-  box-shadow: 0 0 1em rgba(0, 0, 0, 0.4);
-  color: #fff9e7;
-  text-align: center;
-  border-radius: 5px;
-  padding: 10px;
-  position: fixed;
-  z-index: 999;
-  bottom: 5em;
-  right: 4em;
-  transform: translateX(-50%);
-  opacity: 0;
-  transition: opacity 0.35s ease-in-out;
-}
-
-/* Show the toast */
-.toast.show {
-  visibility: visible;
-  opacity: 1;
 }

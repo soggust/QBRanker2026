@@ -1,82 +1,8 @@
-// Custom Theming for Angular Material
-@use "@angular/material" as mat;
-@include mat.core();
-
-// ---------------------
-// Color Palettes (2025)
-// ---------------------
-
-// Seafoam Blue Primary
-$QBRanker-primary-palette: (
-  50: hsl(190, 65%, 92%),
-  100: hsl(190, 65%, 85%),
-  200: hsl(190, 65%, 78%),
-  300: hsl(190, 65%, 70%),
-  400: hsl(190, 65%, 62%),
-  500: hsl(190, 65%, 55%),
-  600: hsl(190, 65%, 47%),
-  700: hsl(190, 65%, 40%),
-  800: hsl(190, 65%, 33%),
-  900: hsl(190, 65%, 25%),
-  contrast: (
-    50: rgba(black, 0.87),
-    100: rgba(black, 0.87),
-    200: rgba(black, 0.87),
-    300: rgba(black, 0.87),
-    400: rgba(black, 0.87),
-    500: rgba(white, 0.87),
-    600: rgba(white, 0.87),
-    700: rgba(white, 0.87),
-    800: rgba(white, 0.87),
-    900: rgba(white, 0.87),
-  ),
-);
-
-// Coral Accent (Contrast highlight)
-$QBRanker-accent-palette: (
-  50: hsl(60, 67%, 97%),
-  100: hsl(60, 67%, 94%),
-  200: hsl(60, 67%, 88%),
-  300: hsl(60, 67%, 82%),
-  400: hsl(60, 67%, 82%),
-  500: hsl(60, 67%, 82%),
-  600: hsl(60, 67%, 82%),
-  700: hsl(60, 67%, 82%),
-  800: hsl(60, 67%, 82%),
-  900: hsl(60, 67%, 82%),
-  contrast: (
-    50: rgba(0, 0, 0, 0.87),
-    100: rgba(0, 0, 0, 0.87),
-    200: rgba(0, 0, 0, 0.87),
-    300: rgba(0, 0, 0, 0.87),
-    400: rgba(0, 0, 0, 0.87),
-    500: rgba(0, 0, 0, 0.87),
-    600: rgba(0, 0, 0, 0.87),
-    700: rgba(255, 255, 255, 0.87),
-    800: rgba(255, 255, 255, 0.87),
-    900: rgba(255, 255, 255, 0.87),
-  ),
-);
-
-$QBRanker-primary: mat.m2-define-palette($QBRanker-primary-palette);
-$QBRanker-accent: mat.m2-define-palette($QBRanker-accent-palette);
-$QBRanker-warn: mat.m2-define-palette(mat.$m2-red-palette);
-
-$QBRanker-theme: mat.m2-define-light-theme(
-  (
-    color: (
-      primary: $QBRanker-primary,
-      accent: $QBRanker-accent,
-      warn: $QBRanker-warn,
-    ),
-  )
-);
-
-@include mat.all-component-themes($QBRanker-theme);
-
 // ---------------------
 // Global Styles
 // ---------------------
+@use "theme";
+@use "variables" as v;
 @import url("https://fonts.googleapis.com/css2?family=Bangers:wght@400;600;700;900&family=Elms+Sans:wght@400;500&display=swap");
 
 html,
@@ -90,59 +16,58 @@ body {
   background-attachment: fixed;
   background-image: linear-gradient(
     235deg,
-    #4aa9a5 0%,
-    /* teal base */ #a2faf7 50%,
-    /* mid-tone */ #fbebc7 100% /* warm soft cream accent */
+    var(--primary-400) 0%,
+    var(--primary-700) 50%,
+    var(--accent-300) 100%
   );
+  font-family: v.$font-base;
   font-size: 13px;
-  font-family: "Elms Sans", sans-serif;
 }
 
 // ---------------------
 // Material Overrides
 // ---------------------
-
 .mdc-menu-surface {
-  background: #4aa9a5 !important;
+  background: var(--primary-700) !important;
+  border: solid 1px var(--primary-400);
   transform: translate(-10px, 10px) !important;
 
   .mat-mdc-option span {
-    color: white !important;
+    color: var(--primary-50) !important;
     font-weight: bold !important;
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.25);
+    text-shadow: var(--text-shadow-small);
   }
 
   .mat-mdc-option:hover span {
-    color: rgb(250, 250, 210) !important;
+    color: var(--primary-50) !important;
   }
 }
 
 .mat-mdc-menu-panel {
-  background: #4aa9a5 !important;
-  border: solid 1px rgba(255, 255, 255, 0.15);
+  background: var(--primary-700) !important;
+  border: solid 1px var(--primary-600);
   box-shadow: 0 0 1em rgba(0, 0, 0, 0.4);
 
   span {
-    color: #fff;
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.25);
+    color: var(--primary-50);
+    text-shadow: var(--text-shadow-small);
   }
 }
 
 .mat-mdc-select-arrow {
-  color: #2a7370 !important;
+  color: var(--primary-900) !important;
 }
 
-// Toggle accent styling → Coral
 html .mat-mdc-slide-toggle.mat-accent {
-  --mdc-switch-selected-focus-state-layer-color: rgba(250, 250, 210, 0.45);
-  --mdc-switch-selected-handle-color: rgb(250, 250, 210);
-  --mdc-switch-selected-hover-state-layer-color: rgba(250, 250, 210, 0.45);
-  --mdc-switch-selected-pressed-state-layer-color: rgba(250, 250, 210, 0.45);
-  --mdc-switch-selected-focus-handle-color: rgb(250, 250, 210);
-  --mdc-switch-selected-hover-handle-color: rgb(250, 250, 210);
-  --mdc-switch-selected-pressed-handle-color: rgb(250, 250, 210);
-  --mdc-switch-selected-focus-track-color: rgba(250, 250, 210, 0.35);
-  --mdc-switch-selected-hover-track-color: rgba(250, 250, 210, 0.35);
-  --mdc-switch-selected-pressed-track-color: rgba(250, 250, 210, 0.35);
-  --mdc-switch-selected-track-color: rgba(250, 250, 210, 0.35);
+  --mdc-switch-selected-focus-handle-color: var(--primary-800);
+  --mdc-switch-selected-focus-state-layer-color: var(--mat-switch-accent);
+  --mdc-switch-selected-focus-track-color: var(--mat-switch-accent);
+  --mdc-switch-selected-handle-color: var(--primary-800);
+  --mdc-switch-selected-hover-handle-color: var(--primary-800);
+  --mdc-switch-selected-hover-state-layer-color: var(--mat-switch-accent);
+  --mdc-switch-selected-hover-track-color: var(--mat-switch-accent);
+  --mdc-switch-selected-pressed-handle-color: var(--primary-800);
+  --mdc-switch-selected-pressed-state-layer-color: var(--mat-switch-accent);
+  --mdc-switch-selected-pressed-track-color: var(--mat-switch-accent);
+  --mdc-switch-selected-track-color: var(--mat-switch-accent);
 }
