@@ -43,7 +43,7 @@ section {
         }
 
         .count {
-          border-radius: 50%;
+          border-radius: 0.5em;
           border: solid 1px var(--primary-400);
           box-shadow: 0 0 1em rgba(0, 0, 0, 0.15);
           color: var(--primary-50);
@@ -195,12 +195,12 @@ section {
           }
 
           &.support-box {
-            background: rgba(0, 0, 0, 0.35);
+            background: rgba(255, 255, 255, 0.1);
             height: 3.75em;
             margin-right: 1em;
+            text-shadow: var(--text-shadow-small);
 
             p {
-              text-shadow: none;
               span {
                 opacity: 0.85;
               }
@@ -232,7 +232,7 @@ section {
               color: rgb(80, 207, 80);
             }
             .red {
-              color: rgb(229, 59, 59);
+              color: hsl(0 80% 30% / 1);
             }
           }
         }
@@ -293,7 +293,7 @@ section {
 }
 
 .cdk-drag-preview {
-  background: var(--primary-600);
+  background: var(--primary-700);
   border-bottom: solid 1px rgba(0, 0, 0, 0.15);
   color: #fff;
   justify-content: flex-start;
@@ -320,7 +320,7 @@ section {
     }
 
     .count {
-      border-radius: 50%;
+      border-radius: 0.5em;
       border: solid 1px rgba(255, 249, 231, 0.5);
       box-shadow: 0 0 1em rgba(0, 0, 0, 0.15);
       font-weight: bold;
@@ -471,11 +471,11 @@ section {
 
       &.support-box {
         height: 3.75em;
-        background: rgba(0, 0, 0, 0.35);
+        background: rgba(255, 255, 255, 0.05);
         margin-right: 1em;
+        text-shadow: var(--text-shadow-small);
 
         p {
-          text-shadow: none;
           span {
             opacity: 0.85;
           }
@@ -505,8 +505,9 @@ section {
         .green {
           color: rgb(80, 207, 80);
         }
+
         .red {
-          color: rgb(229, 59, 59);
+          color: hsl(0 80% 30% / 1);
         }
       }
     }

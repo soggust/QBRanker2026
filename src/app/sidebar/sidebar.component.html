@@ -325,6 +325,15 @@
     </mat-expansion-panel>
   </div>
   <footer>
-    <button mat-raised-button (click)="clearFilters()">Clear All</button>
+    <button mat-raised-button (click)="preset = 'default'; reset()">
+      Default
+    </button>
+    <button
+      mat-raised-button
+      (click)="setCustomFilter(); clearFilters()"
+      class="negative"
+    >
+      Clear
+    </button>
   </footer>
 </div>
