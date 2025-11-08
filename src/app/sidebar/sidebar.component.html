@@ -17,7 +17,7 @@
         @if (preset === 'custom') {
         <mat-option value="custom" disabled="disabled">CUSTOM</mat-option>
         }
-        <mat-option value="default">DEFAULT</mat-option>
+        <mat-option value="default">DEFAULTS</mat-option>
         <mat-option value="stats">STATS ONLY</mat-option>
         <mat-option value="support">LEAST SUPPORT</mat-option>
         <mat-option value="mvp">MVP</mat-option>
@@ -326,7 +326,7 @@
   </div>
   <footer>
     <button mat-raised-button (click)="preset = 'default'; reset()">
-      Default
+      Defaults
     </button>
     <button
       mat-raised-button
