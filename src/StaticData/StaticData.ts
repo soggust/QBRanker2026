@@ -417,7 +417,7 @@ export let StaticData: StaticPlayerData[] = [
     wins: 3,
     losses: 6,
     lastFive: [0, 0, 0, 0, 1],
-    injured: false,
+    injured: true,
     weapons: 9,
     coaching: 5,
     oline: 7,
