@@ -1,7 +1,8 @@
 import { Pipe, PipeTransform } from '@angular/core';
 
 @Pipe({
-  name: 'formatRecentGames',
+    name: 'formatRecentGames',
+    standalone: false
 })
 export class FormatRecentGamesPipe implements PipeTransform {
   transform(value: number): string {

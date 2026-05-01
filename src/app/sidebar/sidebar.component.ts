@@ -3,9 +3,10 @@ import { FilterService } from '../services/filter.service';
 import { Filters } from 'app/types';
 
 @Component({
-  selector: 'sidebar',
-  templateUrl: './sidebar.component.html',
-  styleUrls: ['./sidebar.component.scss'],
+    selector: 'sidebar',
+    templateUrl: './sidebar.component.html',
+    styleUrls: ['./sidebar.component.scss'],
+    standalone: false
 })
 export class SidebarComponent {
   recordValue: number = 50;

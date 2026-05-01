@@ -5,9 +5,10 @@ import { EspnApiService } from 'app/services/espn-api.service';
 import { Filters, Player } from 'app/types';
 
 @Component({
-  selector: 'rankings',
-  templateUrl: './rankings.component.html',
-  styleUrls: ['./rankings.component.scss'],
+    selector: 'rankings',
+    templateUrl: './rankings.component.html',
+    styleUrls: ['./rankings.component.scss'],
+    standalone: false
 })
 export class RankingsComponent {
   playerList: Player[] = [];
