@@ -5,10 +5,10 @@ import { EspnApiService } from 'app/services/espn-api.service';
 import { Filters, Player } from 'app/types';
 
 @Component({
-    selector: 'rankings',
-    templateUrl: './rankings.component.html',
-    styleUrls: ['./rankings.component.scss'],
-    standalone: false
+  selector: 'rankings',
+  templateUrl: './rankings.component.html',
+  styleUrls: ['./rankings.component.scss'],
+  standalone: false,
 })
 export class RankingsComponent {
   playerList: Player[] = [];
@@ -43,7 +43,7 @@ export class RankingsComponent {
 
   constructor(
     private filterService: FilterService,
-    private espnApiService: EspnApiService
+    private espnApiService: EspnApiService,
   ) {
     this.espnApiService.playerStats$.subscribe((res: Player[]) => {
       this.playerList = res;
@@ -66,7 +66,7 @@ export class RankingsComponent {
 
     // Sort the filtered data
     this.playerList = [...filteredData].sort((a, b) =>
-      this.sortPlayersFunc(a, b)
+      this.sortPlayersFunc(a, b),
     );
   }
 
@@ -103,13 +103,13 @@ export class RankingsComponent {
     const recordWeighted = this.applyWeight(
       recordValue / (player.wins + player.losses + (player.ties ?? 0)),
       this.filters.recordValue,
-      this.findMax('record')
+      this.findMax('record'),
     );
 
     const compPercentWeighted = this.applyWeight(
       player.compPercent,
       this.filters.compValue,
-      this.findMax('compPercent')
+      this.findMax('compPercent'),
     );
 
     const passYardsWeighted =
@@ -122,12 +122,12 @@ export class RankingsComponent {
         ? ((passYardsWeighted + rushYardsWeighted) / player.games) * 10
         : passYardsWeighted + rushYardsWeighted,
       this.filters.yardsValue,
-      this.perGame ? this.findMax('yardsPerGame') : this.findMax('yards')
+      this.perGame ? this.findMax('yardsPerGame') : this.findMax('yards'),
     );
     const ypaWeighted = this.applyWeight(
       player.ypa,
       this.filters.ypaValue,
-      this.findMax('ypa')
+      this.findMax('ypa'),
     );
 
     const passTdsWeighted = player.passTd * (this.filters.passTdValue / 50);
@@ -137,7 +137,7 @@ export class RankingsComponent {
         ? ((passTdsWeighted + rushTdsWeighted) / player.games) * 10
         : passTdsWeighted + rushTdsWeighted,
       this.filters.touchdownValue,
-      this.perGame ? this.findMax('tdPerGame') : this.findMax('touchdowns')
+      this.perGame ? this.findMax('tdPerGame') : this.findMax('touchdowns'),
     );
 
     const intsWeighted = player.ints * (this.filters.intValue / 50);
@@ -147,43 +147,45 @@ export class RankingsComponent {
         ? ((intsWeighted + fumLostWeighted) / player.games) * 10
         : intsWeighted + fumLostWeighted,
       this.filters.turnoverValue,
-      this.findMax('turnovers')
+      this.perGame
+        ? this.findMax('turnoversPerGame')
+        : this.findMax('turnovers'),
     );
     const ratingWeighted = this.applyWeight(
       player.rating,
       this.filters.ratingValue,
-      this.findMax('rating')
+      this.findMax('rating'),
     );
     const recencyWeighted = this.applyWeight(
       this.calculateRecencyBias(player.lastFive),
       this.filters.recencyValue,
-      4
+      5,
     );
 
     const weaponsWeighted = this.applyWeight(
       player.weapons,
       this.filters.weaponsValue,
-      12
+      12,
     );
     const coachingWeighted = this.applyWeight(
       player.coaching,
       this.filters.coachingValue,
-      12
+      12,
     );
     const olineWeighted = this.applyWeight(
       player.oline,
       this.filters.olineValue,
-      12
+      12,
     );
     const defenseWeighted = this.applyWeight(
       player.defense,
       this.filters.defenseValue,
-      12
+      12,
     );
     const responsibilityWeighted = this.applyWeight(
       player.responsibility,
       this.filters.responsibilityValue,
-      12
+      12,
     );
 
     const pkg =
@@ -266,13 +268,18 @@ export class RankingsComponent {
     const values = this.playerList.map((player) => {
       switch (attribute) {
         case 'record':
-          return player.wins + ((player.ties ?? 0) * 0.5) / player.games;
+          return (
+            (player.wins + (player.ties ?? 0) * 0.5) /
+            (player.wins + player.losses + (player.ties ?? 0))
+          );
         case 'tdPerGame':
           return ((player.passTd + player.rushTd) / player.games) * 10;
         case 'touchdowns':
           return player.passTd + player.rushTd;
         case 'turnovers':
           return player.ints + player.fumLost;
+        case 'turnoversPerGame':
+          return ((player.ints + player.fumLost) / player.games) * 10;
         case 'yards':
           return player.passYards + player.rushYards;
         case 'yardsPerGame':
