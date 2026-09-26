@@ -99,6 +99,7 @@ $QBRanker-theme: mat.m2-define-light-theme(
   }
 
   // Other Vars
-  --mat-slide-toggle-accent: rgba(255, 236, 179, 0.4);
+  --mat-slide-toggle-accent: #fff;
+  --mat-slide-toggle-off-track: rgba(0, 0, 0, 0.2);
   --text-shadow-small: 1px 1px 2px rgba(0, 0, 0, 0.25);
 }

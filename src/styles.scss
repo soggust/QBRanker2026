@@ -81,4 +81,19 @@ html .mat-mdc-slide-toggle.mat-accent {
   --mat-slide-toggle-selected-pressed-state-layer-color: var(--mat-slide-toggle-accent);
   --mat-slide-toggle-selected-pressed-track-color: var(--mat-slide-toggle-accent);
   --mat-slide-toggle-selected-track-color: var(--mat-slide-toggle-accent);
+
+  // Off state: dark orange handle on a dark translucent track (instead of Material's default blue)
+  --mat-slide-toggle-unselected-handle-color: var(--primary-800);
+  --mat-slide-toggle-unselected-focus-handle-color: var(--primary-800);
+  --mat-slide-toggle-unselected-hover-handle-color: var(--primary-800);
+  --mat-slide-toggle-unselected-pressed-handle-color: var(--primary-800);
+  --mat-slide-toggle-unselected-track-color: var(--mat-slide-toggle-off-track);
+  --mat-slide-toggle-unselected-focus-track-color: var(--mat-slide-toggle-off-track);
+  --mat-slide-toggle-unselected-hover-track-color: var(--mat-slide-toggle-off-track);
+  --mat-slide-toggle-unselected-pressed-track-color: var(--mat-slide-toggle-off-track);
+  --mat-slide-toggle-unselected-focus-state-layer-color: var(--mat-slide-toggle-off-track);
+  --mat-slide-toggle-unselected-hover-state-layer-color: var(--mat-slide-toggle-off-track);
+  --mat-slide-toggle-unselected-pressed-state-layer-color: var(--mat-slide-toggle-off-track);
+  --mat-slide-toggle-unselected-icon-color: var(--primary-50);
+  --mat-slide-toggle-selected-icon-color: var(--primary-50);
 }
