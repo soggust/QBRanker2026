@@ -2,7 +2,7 @@
 
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, forkJoin, map } from 'rxjs';
+import { Observable, catchError, forkJoin, map, of } from 'rxjs';
 import { StaticData } from 'StaticData/StaticData';
 import { Player } from 'app/types';
 
@@ -11,21 +11,24 @@ import { Player } from 'app/types';
 })
 export class EspnApiService {
   private apiUrl =
-    'https://sports.core.api.espn.com/v2/sports/football/leagues/nfl/seasons/2025/types/2/athletes';
+    'https://sports.core.api.espn.com/v2/sports/football/leagues/nfl/seasons/2026/types/2/athletes';
   playerIds: number[] = StaticData.map((player) => player.id);
   playerStats$: Observable<Player[]>;
 
   constructor(private http: HttpClient) {
     // Bundle API Calls
+    // Skip players with no stats this season (ESPN returns 404) so one miss doesn't fail the whole list
     const observables = this.playerIds.map((playerId) =>
-      this.http.get(`${this.apiUrl}/${playerId}/statistics`)
+      this.http.get(`${this.apiUrl}/${playerId}/statistics`).pipe(
+        map((response) => this.mapPlayerStats(response, playerId)),
+        catchError(() => {
+          console.log('No stats found for player id: ' + playerId);
+          return of(null);
+        })
+      )
     );
     this.playerStats$ = forkJoin(observables).pipe(
-      map((responses) =>
-        responses.map((response, index) =>
-          this.mapPlayerStats(response, this.playerIds[index])
-        )
-      )
+      map((players) => players.filter((player): player is Player => !!player))
     );
   }
 

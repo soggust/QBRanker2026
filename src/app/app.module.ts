@@ -23,13 +23,13 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatExpansionModule } from '@angular/material/expansion';
 
 const firebaseConfig = {
-  apiKey: 'AIzaSyBSdGR9zFnQLudzKiqZOvl39BlqXDeDpzk',
-  authDomain: 'qbranker2025.firebaseapp.com',
-  projectId: 'qbranker2025',
-  storageBucket: 'qbranker2025.firebasestorage.app',
-  messagingSenderId: '547625475905',
-  appId: '1:547625475905:web:822d9ddbbe9f44b67a8bc0',
-  measurementId: 'G-4EWLP9S2WJ',
+  apiKey: 'AIzaSyD5sj0mL45M2p_MB3ZUSFE6Ve9nMiLm8Nc',
+  authDomain: 'qbranker2026.firebaseapp.com',
+  projectId: 'qbranker2026',
+  storageBucket: 'qbranker2026.firebasestorage.app',
+  messagingSenderId: '1027982765642',
+  appId: '1:1027982765642:web:05ea3880c08454b4b680b3',
+  measurementId: 'G-HKT8MVPT8V',
 };
 
 // Initialize Firebase
