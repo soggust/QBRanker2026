@@ -208,6 +208,6 @@
 @media (max-width: 1199px) {
   .sidebar {
     background: var(--primary-800);
-    width: max(22.5em, 40vw);
+    width: min(100vw, max(26em, 50vw));
   }
 }

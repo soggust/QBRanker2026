@@ -608,8 +608,8 @@ section {
 
     ul {
       // Leave room for the footer buttons below the table, plus the vertical margin
-      height: calc(100dvh - 7.5em - var(--position-bar-space, 0px));
-      margin: 0.5em 0;
+      height: calc(100dvh - 8.5em - var(--position-bar-space, 0px));
+      margin: 1em 0;
       width: 100%;
     }
 
