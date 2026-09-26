@@ -4,6 +4,12 @@ import { FilterService } from '../services/filter.service';
 import { EspnApiService } from 'app/services/espn-api.service';
 import { Filters, Player } from 'app/types';
 import { copyRankingsToClipboard } from 'app/utils/clipboard';
+import { PositionService } from 'app/services/position.service';
+import {
+  FANTASY_SCORING_LABELS,
+  FantasyScoring,
+  fantasyPoints,
+} from 'app/positions';
 
 @Component({
   selector: 'rankings',
@@ -32,6 +38,7 @@ export class RankingsComponent {
     epaValue: 50,
     cpoeValue: 50,
     successValue: 50,
+    fantasyValue: 0,
     recencyValue: 50,
     supportValue: 50,
     weaponsValue: 50,
@@ -45,11 +52,19 @@ export class RankingsComponent {
   showUnused: boolean = false;
   totalStats: boolean = true;
   isToastVisible: boolean = false;
+  fantasyScoring: FantasyScoring = 'ppr';
+  scoringLabels = FANTASY_SCORING_LABELS;
 
   constructor(
     private filterService: FilterService,
     private espnApiService: EspnApiService,
+    private positionService: PositionService,
   ) {
+    this.positionService.fantasyScoring$.subscribe((scoring) => {
+      this.fantasyScoring = scoring;
+      this.sortPlayers();
+    });
+
     this.espnApiService.playerStats$.subscribe((res: Player[]) => {
       this.playerList = res;
       this.unfilteredPlayerList = res;
@@ -73,6 +88,12 @@ export class RankingsComponent {
     this.playerList = [...filteredData].sort((a, b) =>
       this.sortPlayersFunc(a, b),
     );
+    this.publishRanks();
+  }
+
+  // Share the QB order with the WR/TE QB Play grade
+  publishRanks() {
+    this.positionService.setQbRanks(this.playerList.map((player) => player.id));
   }
 
   // Reset
@@ -83,6 +104,7 @@ export class RankingsComponent {
   // Drop Event
   drop(event: CdkDragDrop<string[]>) {
     moveItemInArray(this.playerList, event.previousIndex, event.currentIndex);
+    this.publishRanks();
   }
 
   // ---------------------------------------
@@ -166,11 +188,13 @@ export class RankingsComponent {
     const epaWeight = this.filters.epaValue;
     const cpoeWeight = this.filters.cpoeValue;
     const successWeight = this.filters.successValue;
-    const advancedMix = epaWeight + cpoeWeight + successWeight;
+    const fantasyWeight = this.filters.fantasyValue;
+    const advancedMix = epaWeight + cpoeWeight + successWeight + fantasyWeight;
     const advancedWeighted = advancedMix
-      ? ((this.rangeScore('epaPerPlay', player.epaPerPlay) * epaWeight +
-          this.rangeScore('cpoe', player.cpoe) * cpoeWeight +
-          this.rangeScore('successRate', player.successRate) * successWeight) /
+      ? ((this.rangeScore((p) => p.epaPerPlay, player) * epaWeight +
+          this.rangeScore((p) => p.cpoe, player) * cpoeWeight +
+          this.rangeScore((p) => p.successRate, player) * successWeight +
+          this.rangeScore((p) => this.fantasyPoints(p), player) * fantasyWeight) /
           advancedMix) *
         (this.filters.advancedValue / 50)
       : 0;
@@ -254,15 +278,25 @@ export class RankingsComponent {
   }
 
   // Scale A Stat Into 0.5-1 Based On The League Min/Max (Missing Data Counts As The Min)
-  rangeScore(attribute: 'epaPerPlay' | 'cpoe' | 'successRate', value: number | null) {
-    const values = this.playerList
-      .map((player) => player[attribute])
-      .filter((v): v is number => v !== null);
+  rangeScore(stat: (player: Player) => number | null, player: Player) {
+    const value = stat(player);
+    const values = this.playerList.map(stat).filter((v): v is number => v !== null);
     if (value === null || values.length === 0) return 0.5;
 
     const min = Math.min(...values);
     const max = Math.max(...values);
     return max === min ? 1 : 0.5 + (0.5 * (value - min)) / (max - min);
+  }
+
+  // Fantasy Points In The Chosen Scoring, Per Game When Toggled
+  fantasyPoints(player: Player): number | null {
+    if (player.fantasyStd === null) return null;
+    const points = fantasyPoints(player.fantasyStd, player.receptions, this.fantasyScoring);
+    return this.perGame && player.games ? points / player.games : points;
+  }
+
+  cycleFantasyScoring() {
+    this.positionService.cycleFantasyScoring();
   }
 
   // Modify Support Stat

@@ -1,17 +1,38 @@
 import { Component, Input, OnChanges } from '@angular/core';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import skillData from 'StaticData/skill-players.json';
+import { StaticData } from 'StaticData/StaticData';
 import {
+  FANTASY_SCORING_LABELS,
+  FantasyScoring,
   SKILL_STATS,
   SkillPlayer,
   SkillPosition,
   SkillStat,
   SkillWeights,
+  fantasyPoints,
 } from 'app/positions';
 import { PositionService } from 'app/services/position.service';
 import { copyRankingsToClipboard } from 'app/utils/clipboard';
 
 const PLAYERS = skillData as Record<SkillPosition, SkillPlayer[]>;
+
+// Average a per-QB value (0-12) for each team, weighted by how many games each QB started there
+function teamGrades(valueFor: (qbId: number) => number | undefined): Map<string, number> {
+  const totals = new Map<string, { sum: number; starts: number }>();
+  for (const qb of StaticData) {
+    const value = valueFor(qb.id);
+    if (value === undefined) continue;
+    for (const [team, starts] of Object.entries(qb.starts)) {
+      const total = totals.get(team) ?? { sum: 0, starts: 0 };
+      totals.set(team, { sum: total.sum + value * starts, starts: total.starts + starts });
+    }
+  }
+  return new Map([...totals].map(([team, { sum, starts }]) => [team, sum / starts]));
+}
+
+// O-line doesn't depend on the QB rankings, so it's computed once
+const TEAM_OLINE = teamGrades((id) => StaticData.find((qb) => qb.id === id)?.oline);
 
 @Component({
   selector: 'skill-rankings',
@@ -28,6 +49,9 @@ export class SkillRankingsComponent implements OnChanges {
   perGame: boolean = false;
   showUnused: boolean = false;
   isToastVisible: boolean = false;
+  fantasyScoring: FantasyScoring = 'ppr';
+  scoringLabels = FANTASY_SCORING_LABELS;
+  teamQbPlay = new Map<string, number>();
 
   constructor(private positionService: PositionService) {
     this.positionService.weights$.subscribe((weights) => {
@@ -35,6 +59,25 @@ export class SkillRankingsComponent implements OnChanges {
       this.weights = weights[this.position];
       this.sortPlayers();
     });
+
+    // QB Play: #1 QB grades 12 (A+), the last-ranked grades 0 (F)
+    this.positionService.qbRanks$.subscribe((ids) => {
+      const last = Math.max(ids.length - 1, 1);
+      this.teamQbPlay = teamGrades((id) => {
+        const rank = ids.indexOf(id);
+        return rank === -1 ? undefined : 12 * (1 - rank / last);
+      });
+      if (this.position) this.sortPlayers();
+    });
+
+    this.positionService.fantasyScoring$.subscribe((scoring) => {
+      this.fantasyScoring = scoring;
+      if (this.position) this.sortPlayers();
+    });
+  }
+
+  cycleFantasyScoring() {
+    this.positionService.cycleFantasyScoring();
   }
 
   ngOnChanges(): void {
@@ -58,8 +101,22 @@ export class SkillRankingsComponent implements OnChanges {
 
   // Stat Value, Per Game For Volume Stats When Toggled
   value(player: SkillPlayer, stat: SkillStat): number {
-    const raw = player.stats[stat.key];
+    const raw = this.rawValue(player, stat);
     return this.perGame && stat.kind === 'volume' && player.games ? raw / player.games : raw;
+  }
+
+  rawValue(player: SkillPlayer, stat: SkillStat): number {
+    switch (stat.key) {
+      case 'fantasy':
+        return fantasyPoints(player.stats.fantasyStd, player.stats.receptions, this.fantasyScoring);
+      // Teams without a graded QB yet count as average
+      case 'oline':
+        return TEAM_OLINE.get(player.teamLogo) ?? 6;
+      case 'qbPlay':
+        return this.teamQbPlay.get(player.teamLogo) ?? 6;
+      default:
+        return player.stats[stat.key];
+    }
   }
 
   // Combine Total Weighted Value Of Each Stat
@@ -67,6 +124,8 @@ export class SkillRankingsComponent implements OnChanges {
     return this.stats.reduce((total, stat) => {
       const weight = this.weights[stat.key] ?? 0;
       if (!weight) return total;
+      // Support grades mirror the QB page: out of 12, dampened to a fifth like the support bias
+      if (stat.support) return total - (this.value(player, stat) / 12) * (weight / 250);
       const score = this.normalize(stat, this.value(player, stat)) * (weight / 50);
       return stat.negative ? total - score : total + score;
     }, 0);
@@ -90,6 +149,8 @@ export class SkillRankingsComponent implements OnChanges {
     const value = this.value(player, stat);
     const perGameVolume = this.perGame && stat.kind === 'volume';
     switch (stat.format) {
+      case 'grade':
+        return this.grade(value);
       case 'pct':
         return `${Math.round(value * 100)}%`;
       case 'dec1':
@@ -99,6 +160,18 @@ export class SkillRankingsComponent implements OnChanges {
       default:
         return perGameVolume ? value.toFixed(1) : value.toLocaleString('en-US');
     }
+  }
+
+  // 0-12 -> F..A+, matching the QB support grades
+  grade(value: number): string {
+    const grades = ['F', 'D-', 'D', 'D+', 'C-', 'C', 'C+', 'B-', 'B', 'B+', 'A-', 'A', 'A+'];
+    return grades[Math.min(12, Math.max(0, Math.round(value)))];
+  }
+
+  // Red (0) to green (12), same scale as the QB page
+  gradeColor(player: SkillPlayer, stat: SkillStat): string | null {
+    if (stat.format !== 'grade') return null;
+    return `hsl(${Math.round((this.value(player, stat) / 12) * 120)}, 100%, 50%)`;
   }
 
   // Get Count Classes

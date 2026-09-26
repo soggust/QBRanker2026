@@ -17,6 +17,7 @@ export interface Filters {
   epaValue: number;
   cpoeValue: number;
   successValue: number;
+  fantasyValue: number;
   recencyValue: number;
   supportValue: number;
   weaponsValue: number;
@@ -42,6 +43,8 @@ export interface Player {
   epaPerPlay: number | null;
   cpoe: number | null;
   successRate: number | null;
+  fantasyStd: number | null;
+  receptions: number;
   wins: number;
   losses: number;
   ties?: number;
@@ -75,4 +78,8 @@ export interface StaticPlayerData {
   epaPerPlay: number | null;
   cpoe: number | null;
   successRate: number | null;
+  fantasyStd: number | null;
+  receptions: number;
+  // Starts per team, keyed by team logo path
+  starts: Record<string, number>;
 }

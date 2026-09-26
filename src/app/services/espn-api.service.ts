@@ -102,6 +102,8 @@ export class EspnApiService {
       epaPerPlay: staticData ? staticData.epaPerPlay : null,
       cpoe: staticData ? staticData.cpoe : null,
       successRate: staticData ? staticData.successRate : null,
+      fantasyStd: staticData ? staticData.fantasyStd : null,
+      receptions: staticData ? staticData.receptions : 0,
       wins: staticData ? staticData.wins : 0,
       losses: staticData ? staticData.losses : 0,
       ties: staticData ? staticData.ties : 0,

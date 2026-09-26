@@ -330,6 +330,21 @@
             </p>
           </div>
         }
+        @if (
+          showUnused || (this.filters.advancedValue && this.filters.fantasyValue)
+        ) {
+          <!-- Fantasy Points -->
+          <div class="fantasy">
+            @let points = fantasyPoints(player);
+            <p>{{ points === null ? "-" : (points | number: "1.1-1") }}</p>
+            <p
+              class="stat-label"
+              [title]="scoringLabels[fantasyScoring] + ' fantasy points'"
+            >
+              Fantasy Pts
+            </p>
+          </div>
+        }
         @if (showUnused || this.filters.recencyValue) {
           <!-- Recent-->
           <div class="box support-box">
@@ -651,6 +666,11 @@
           (click)="$event.stopPropagation()"
         ></mat-slide-toggle>
         <span>Show Injured Players</span>
+      </div>
+      <div mat-menu-item (click)="$event.stopPropagation(); cycleFantasyScoring()">
+        <!-- Fantasy Scoring -->
+        <mat-icon fontIcon="sports_score"></mat-icon>
+        <span>Fantasy: {{ scoringLabels[fantasyScoring] }}</span>
       </div>
     </mat-menu>
   </footer>

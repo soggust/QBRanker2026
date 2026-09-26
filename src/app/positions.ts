@@ -20,7 +20,25 @@ export type SkillStatKey =
   | 'totalTds'
   | 'catchPct'
   | 'epaPerCarry'
-  | 'epaPerTarget';
+  | 'epaPerTarget'
+  | 'fantasyStd';
+
+// Columns computed in the app: fantasy points in the chosen scoring, and team support grades
+export type SkillColumnKey = SkillStatKey | 'fantasy' | 'oline' | 'qbPlay';
+
+export type FantasyScoring = 'std' | 'half' | 'ppr';
+
+export const FANTASY_SCORING_LABELS: Record<FantasyScoring, string> = {
+  std: 'Standard',
+  half: 'Half PPR',
+  ppr: 'PPR',
+};
+
+// nflverse fantasy_points is standard scoring; PPR adds 1 per reception (verified against fantasy_points_ppr)
+export function fantasyPoints(standard: number, receptions: number, scoring: FantasyScoring): number {
+  const perReception = { std: 0, half: 0.5, ppr: 1 }[scoring];
+  return standard + receptions * perReception;
+}
 
 export interface SkillPlayer {
   id: number | null;
@@ -32,20 +50,30 @@ export interface SkillPlayer {
 }
 
 export interface SkillStat {
-  key: SkillStatKey;
+  key: SkillColumnKey;
   label: string;
   description: string;
   // Volume stats scale with games played (and can be shown per game); efficiency stats are rates
   kind: 'volume' | 'efficiency';
-  format: 'int' | 'dec1' | 'dec2' | 'pct';
+  format: 'int' | 'dec1' | 'dec2' | 'pct' | 'grade';
   // Can go negative, so it's scaled against the league range instead of the max
   signed?: boolean;
   // Counts against the player (e.g. fumbles)
   negative?: boolean;
+  // Team support graded 0-12; like the QB support sliders, better support is a (dampened) penalty
+  support?: boolean;
 }
 
-export type SkillWeights = Partial<Record<SkillStatKey, number>>;
-export type SkillPreset = 'default' | 'volume' | 'efficiency';
+export type SkillWeights = Partial<Record<SkillColumnKey, number>>;
+export type SkillPreset = 'default' | 'volume' | 'efficiency' | 'fantasy';
+
+const FANTASY_STAT: SkillStat = {
+  key: 'fantasy',
+  label: 'Fantasy Pts',
+  description: 'Fantasy points (scoring set in the settings menu)',
+  kind: 'volume',
+  format: 'dec1',
+};
 
 const RECEIVING_STATS: SkillStat[] = [
   { key: 'targets', label: 'Targets', description: 'Times targeted', kind: 'volume', format: 'int' },
@@ -68,6 +96,15 @@ const RECEIVING_STATS: SkillStat[] = [
     kind: 'efficiency',
     format: 'dec2',
     signed: true,
+  },
+  FANTASY_STAT,
+  {
+    key: 'qbPlay',
+    label: 'QB Play',
+    description: "Team QB grade from the current QB rankings, weighted by each QB's starts",
+    kind: 'efficiency',
+    format: 'grade',
+    support: true,
   },
 ];
 
@@ -107,17 +144,29 @@ export const SKILL_STATS: Record<SkillPosition, SkillStat[]> = {
       format: 'int',
       negative: true,
     },
+    FANTASY_STAT,
+    {
+      key: 'oline',
+      label: 'O-Line',
+      description: "Team O-line grade (from the QB support scores), weighted by each QB's starts",
+      kind: 'efficiency',
+      format: 'grade',
+      support: true,
+    },
   ],
   WR: RECEIVING_STATS,
   TE: RECEIVING_STATS,
 };
 
-// Default: everything at 50. Volume/Efficiency lean one way; penalties stay at 50.
+// Default: everything at 50. Volume/Efficiency lean one way; penalties and support stay at 50.
+// Fantasy points already combine yards and TDs, so they're off unless the Fantasy preset is picked.
 export function presetWeights(position: SkillPosition, preset: SkillPreset): SkillWeights {
   const weights: SkillWeights = {};
   for (const stat of SKILL_STATS[position]) {
-    weights[stat.key] =
-      preset === 'default' || stat.negative ? 50 : stat.kind === preset ? 75 : 25;
+    if (preset === 'fantasy') weights[stat.key] = stat.key === 'fantasy' ? 100 : 0;
+    else if (stat.key === 'fantasy') weights[stat.key] = 0;
+    else if (preset === 'default' || stat.negative || stat.support) weights[stat.key] = 50;
+    else weights[stat.key] = stat.kind === preset ? 75 : 25;
   }
   return weights;
 }

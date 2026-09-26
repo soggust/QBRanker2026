@@ -110,9 +110,11 @@ async function loadNflverse() {
 }
 
 // EPA/play and success rate cover the QB's dropbacks and runs; CPOE covers pass attempts.
-// Returns a Map of ESPN id -> { epaPerPlay, cpoe, successRate, plays }
-function advancedStats(espnIds, { pbp, gsisByEspn }) {
+// Fantasy points are nflverse standard scoring; half/full PPR add 0.5/1 per reception in the app.
+// Returns a Map of ESPN id -> { epaPerPlay, cpoe, successRate, plays, fantasyStd, receptions }
+function advancedStats(espnIds, { pbp, playerStats, gsisByEspn }) {
   const plays = pbp.filter((play) => play.season_type === 'REG' && (play.pass === '1' || play.rush === '1'));
+  const seasonRows = new Map(playerStats.map((row) => [row.player_id, row]));
 
   const stats = new Map();
   for (const espnId of espnIds) {
@@ -125,6 +127,8 @@ function advancedStats(espnIds, { pbp, gsisByEspn }) {
       cpoe: mean(cpoe.filter((v) => v !== null)),
       successRate: mean(own.map((play) => num(play.success)).filter((v) => v !== null)),
       plays: own.length,
+      fantasyStd: round(num(seasonRows.get(gsisId)?.fantasy_points) ?? 0, 2),
+      receptions: num(seasonRows.get(gsisId)?.receptions) ?? 0,
     });
   }
   return stats;
@@ -172,6 +176,7 @@ function skillPlayers({ playerStats, espnByGsis }) {
           firstDowns: n('rushing_first_downs') + n('receiving_first_downs'),
           fumbles: n('rushing_fumbles_lost') + n('receiving_fumbles_lost'),
           targetShare: round(n('target_share'), 3),
+          fantasyStd: round(n('fantasy_points'), 2),
         };
         return {
           id: espnByGsis.get(row.player_id) ?? null,
@@ -248,9 +253,10 @@ async function main() {
   // Games are in date order, so results accumulate chronologically
   const qbs = new Map();
   for (const { athlete, team, result } of perGame.flat()) {
-    const qb = qbs.get(athlete.id) ?? { id: Number(athlete.id), name: athlete.displayName, results: [] };
+    const qb = qbs.get(athlete.id) ?? { id: Number(athlete.id), name: athlete.displayName, results: [], starts: {} };
     qb.team = team;
     qb.results.push(result);
+    qb.starts[teamLogo(team)] = (qb.starts[teamLogo(team)] ?? 0) + 1;
     qbs.set(athlete.id, qb);
   }
 
@@ -267,6 +273,8 @@ async function main() {
         ties: count(0.5),
         // Most recent first, padded to 5 (the recency calculation needs exactly 5)
         lastFive: [...qb.results].reverse().concat([0, 0, 0, 0, 0]).slice(0, 5),
+        // Starts per team (keyed by logo path), used to weight team QB play for receivers
+        starts: qb.starts,
       };
     })
     .sort((a, b) => a.name.localeCompare(b.name));

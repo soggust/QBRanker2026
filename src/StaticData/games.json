@@ -14,11 +14,16 @@
       0,
       0
     ],
+    "starts": {
+      "../assets/NFL_Icons/Steelers.png": 2
+    },
     "advanced": {
       "epaPerPlay": -0.272,
       "cpoe": -2.536,
       "successRate": 0.409,
-      "plays": 93
+      "plays": 93,
+      "fantasyStd": 16.52,
+      "receptions": 0
     }
   },
   {
@@ -36,11 +41,16 @@
       0,
       0
     ],
+    "starts": {
+      "../assets/NFL_Icons/Bucs.png": 2
+    },
     "advanced": {
       "epaPerPlay": -0.204,
       "cpoe": 8.647,
       "successRate": 0.434,
-      "plays": 83
+      "plays": 83,
+      "fantasyStd": 23.82,
+      "receptions": 0
     }
   },
   {
@@ -58,11 +68,16 @@
       0,
       0
     ],
+    "starts": {
+      "../assets/NFL_Icons/Broncos.png": 2
+    },
     "advanced": {
       "epaPerPlay": -0.071,
       "cpoe": 2.192,
       "successRate": 0.465,
-      "plays": 71
+      "plays": 71,
+      "fantasyStd": 19.56,
+      "receptions": 0
     }
   },
   {
@@ -80,11 +95,16 @@
       0,
       0
     ],
+    "starts": {
+      "../assets/NFL_Icons/49ers.png": 2
+    },
     "advanced": {
       "epaPerPlay": 0.526,
       "cpoe": 11.565,
       "successRate": 0.667,
-      "plays": 66
+      "plays": 66,
+      "fantasyStd": 49.58,
+      "receptions": 0
     }
   },
   {
@@ -102,11 +122,16 @@
       0,
       0
     ],
+    "starts": {
+      "../assets/NFL_Icons/Panthers.png": 2
+    },
     "advanced": {
       "epaPerPlay": 0.308,
       "cpoe": 9.074,
       "successRate": 0.464,
-      "plays": 84
+      "plays": 84,
+      "fantasyStd": 55.52,
+      "receptions": 0
     }
   },
   {
@@ -124,11 +149,16 @@
       0,
       0
     ],
+    "starts": {
+      "../assets/NFL_Icons/Texans.png": 2
+    },
     "advanced": {
       "epaPerPlay": -0.001,
       "cpoe": -3.501,
       "successRate": 0.455,
-      "plays": 112
+      "plays": 112,
+      "fantasyStd": 33.48,
+      "receptions": 0
     }
   },
   {
@@ -146,11 +176,16 @@
       0,
       0
     ],
+    "starts": {
+      "../assets/NFL_Icons/Bears.png": 2
+    },
     "advanced": {
       "epaPerPlay": 0.318,
       "cpoe": 6.18,
       "successRate": 0.487,
-      "plays": 80
+      "plays": 80,
+      "fantasyStd": 44.98,
+      "receptions": 0
     }
   },
   {
@@ -168,11 +203,16 @@
       0,
       0
     ],
+    "starts": {
+      "../assets/NFL_Icons/Titans.png": 2
+    },
     "advanced": {
       "epaPerPlay": -0.037,
       "cpoe": 2.715,
       "successRate": 0.448,
-      "plays": 67
+      "plays": 67,
+      "fantasyStd": 31.72,
+      "receptions": 0
     }
   },
   {
@@ -190,11 +230,16 @@
       0,
       0
     ],
+    "starts": {
+      "../assets/NFL_Icons/Vikings.png": 2
+    },
     "advanced": {
       "epaPerPlay": 0.167,
       "cpoe": -7.791,
       "successRate": 0.455,
-      "plays": 55
+      "plays": 55,
+      "fantasyStd": 25.54,
+      "receptions": 0
     }
   },
   {
@@ -212,11 +257,16 @@
       0,
       0
     ],
+    "starts": {
+      "../assets/NFL_Icons/Falcons.png": 2
+    },
     "advanced": {
       "epaPerPlay": -0.69,
       "cpoe": -13.436,
       "successRate": 0.327,
-      "plays": 49
+      "plays": 49,
+      "fantasyStd": 5.16,
+      "receptions": 0
     }
   },
   {
@@ -234,11 +284,16 @@
       0,
       0
     ],
+    "starts": {
+      "../assets/NFL_Icons/Cowboys.png": 2
+    },
     "advanced": {
       "epaPerPlay": 0.441,
       "cpoe": 12.961,
       "successRate": 0.582,
-      "plays": 79
+      "plays": 79,
+      "fantasyStd": 44.16,
+      "receptions": 0
     }
   },
   {
@@ -256,11 +311,16 @@
       0,
       0
     ],
+    "starts": {
+      "../assets/NFL_Icons/Colts.png": 2
+    },
     "advanced": {
       "epaPerPlay": 0.013,
       "cpoe": -0.483,
       "successRate": 0.465,
-      "plays": 71
+      "plays": 71,
+      "fantasyStd": 20.44,
+      "receptions": 0
     }
   },
   {
@@ -278,11 +338,16 @@
       0,
       0
     ],
+    "starts": {
+      "../assets/NFL_Icons/Browns.png": 2
+    },
     "advanced": {
       "epaPerPlay": 0.145,
       "cpoe": 8.075,
       "successRate": 0.521,
-      "plays": 73
+      "plays": 73,
+      "fantasyStd": 33.72,
+      "receptions": 0
     }
   },
   {
@@ -300,11 +365,16 @@
       0,
       0
     ],
+    "starts": {
+      "../assets/NFL_Icons/Patriots.png": 2
+    },
     "advanced": {
       "epaPerPlay": 0.104,
       "cpoe": 3.904,
       "successRate": 0.5,
-      "plays": 74
+      "plays": 74,
+      "fantasyStd": 17.84,
+      "receptions": 0
     }
   },
   {
@@ -322,11 +392,16 @@
       0,
       0
     ],
+    "starts": {
+      "../assets/NFL_Icons/Seahawks.png": 2
+    },
     "advanced": {
       "epaPerPlay": 0.461,
       "cpoe": 6.884,
       "successRate": 0.519,
-      "plays": 54
+      "plays": 54,
+      "fantasyStd": 34.18,
+      "receptions": 0
     }
   },
   {
@@ -344,11 +419,16 @@
       0,
       0
     ],
+    "starts": {
+      "../assets/NFL_Icons/Jets.png": 2
+    },
     "advanced": {
       "epaPerPlay": 0.14,
       "cpoe": 8.582,
       "successRate": 0.468,
-      "plays": 79
+      "plays": 79,
+      "fantasyStd": 24.88,
+      "receptions": 0
     }
   },
   {
@@ -366,11 +446,16 @@
       0,
       0
     ],
+    "starts": {
+      "../assets/NFL_Icons/Cardinals.png": 2
+    },
     "advanced": {
       "epaPerPlay": 0.065,
       "cpoe": 0.407,
       "successRate": 0.474,
-      "plays": 78
+      "plays": 78,
+      "fantasyStd": 22.98,
+      "receptions": 0
     }
   },
   {
@@ -388,11 +473,16 @@
       0,
       0
     ],
+    "starts": {
+      "../assets/NFL_Icons/Eagles.png": 2
+    },
     "advanced": {
       "epaPerPlay": 0.191,
       "cpoe": 10.02,
       "successRate": 0.432,
-      "plays": 81
+      "plays": 81,
+      "fantasyStd": 40.88,
+      "receptions": 0
     }
   },
   {
@@ -410,11 +500,16 @@
       0,
       0
     ],
+    "starts": {
+      "../assets/NFL_Icons/Giants.png": 1
+    },
     "advanced": {
       "epaPerPlay": -0.45,
       "cpoe": -25.333,
       "successRate": 0.313,
-      "plays": 32
+      "plays": 32,
+      "fantasyStd": 2.54,
+      "receptions": 0
     }
   },
   {
@@ -432,11 +527,16 @@
       0,
       0
     ],
+    "starts": {
+      "../assets/NFL_Icons/Lions.png": 2
+    },
     "advanced": {
       "epaPerPlay": 0.288,
       "cpoe": 1.486,
       "successRate": 0.483,
-      "plays": 89
+      "plays": 89,
+      "fantasyStd": 46.22,
+      "receptions": 0
     }
   },
   {
@@ -454,11 +554,16 @@
       0,
       0
     ],
+    "starts": {
+      "../assets/NFL_Icons/Giants.png": 1
+    },
     "advanced": {
       "epaPerPlay": 0.619,
       "cpoe": 10.63,
       "successRate": 0.705,
-      "plays": 44
+      "plays": 44,
+      "fantasyStd": 27.4,
+      "receptions": 0
     }
   },
   {
@@ -476,11 +581,16 @@
       0,
       0
     ],
+    "starts": {
+      "../assets/NFL_Icons/Commanders.png": 2
+    },
     "advanced": {
       "epaPerPlay": 0.102,
       "cpoe": -0.978,
       "successRate": 0.412,
-      "plays": 68
+      "plays": 68,
+      "fantasyStd": 32.4,
+      "receptions": 0
     }
   },
   {
@@ -498,11 +608,16 @@
       0,
       0
     ],
+    "starts": {
+      "../assets/NFL_Icons/Bengals.png": 2
+    },
     "advanced": {
       "epaPerPlay": 0.009,
       "cpoe": 0.218,
       "successRate": 0.429,
-      "plays": 77
+      "plays": 77,
+      "fantasyStd": 30.34,
+      "receptions": 0
     }
   },
   {
@@ -520,11 +635,16 @@
       0,
       0
     ],
+    "starts": {
+      "../assets/NFL_Icons/Packers.png": 3
+    },
     "advanced": {
       "epaPerPlay": -0.001,
       "cpoe": -10.121,
       "successRate": 0.387,
-      "plays": 142
+      "plays": 142,
+      "fantasyStd": 51.76,
+      "receptions": 0
     }
   },
   {
@@ -542,11 +662,16 @@
       0,
       0
     ],
+    "starts": {
+      "../assets/NFL_Icons/Bills.png": 2
+    },
     "advanced": {
       "epaPerPlay": 0.463,
       "cpoe": 6.93,
       "successRate": 0.551,
-      "plays": 89
+      "plays": 89,
+      "fantasyStd": 76.48,
+      "receptions": 0
     }
   },
   {
@@ -564,11 +689,16 @@
       0,
       0
     ],
+    "starts": {
+      "../assets/NFL_Icons/Chargers.png": 2
+    },
     "advanced": {
       "epaPerPlay": -0.092,
       "cpoe": -6.242,
       "successRate": 0.392,
-      "plays": 74
+      "plays": 74,
+      "fantasyStd": 21.14,
+      "receptions": 0
     }
   },
   {
@@ -586,11 +716,16 @@
       0,
       0
     ],
+    "starts": {
+      "../assets/NFL_Icons/Raiders.png": 2
+    },
     "advanced": {
       "epaPerPlay": 0.105,
       "cpoe": 1.8,
       "successRate": 0.455,
-      "plays": 66
+      "plays": 66,
+      "fantasyStd": 34.02,
+      "receptions": 0
     }
   },
   {
@@ -608,11 +743,16 @@
       0,
       0
     ],
+    "starts": {
+      "../assets/NFL_Icons/Ravens.png": 2
+    },
     "advanced": {
       "epaPerPlay": 0.203,
       "cpoe": 6.473,
       "successRate": 0.528,
-      "plays": 72
+      "plays": 72,
+      "fantasyStd": 39.76,
+      "receptions": 0
     }
   },
   {
@@ -630,11 +770,16 @@
       0,
       0
     ],
+    "starts": {
+      "../assets/NFL_Icons/Dolphins.png": 2
+    },
     "advanced": {
       "epaPerPlay": 0.02,
       "cpoe": -8.743,
       "successRate": 0.378,
-      "plays": 74
+      "plays": 74,
+      "fantasyStd": 29.18,
+      "receptions": 0
     }
   },
   {
@@ -652,11 +797,16 @@
       0,
       0
     ],
+    "starts": {
+      "../assets/NFL_Icons/Rams.png": 2
+    },
     "advanced": {
       "epaPerPlay": 0.135,
       "cpoe": 1.957,
       "successRate": 0.444,
-      "plays": 63
+      "plays": 63,
+      "fantasyStd": 31.08,
+      "receptions": 0
     }
   },
   {
@@ -674,11 +824,16 @@
       0,
       0
     ],
+    "starts": {
+      "../assets/NFL_Icons/Falcons.png": 1
+    },
     "advanced": {
       "epaPerPlay": 0.398,
       "cpoe": 8.774,
       "successRate": 0.655,
-      "plays": 29
+      "plays": 29,
+      "fantasyStd": 14.04,
+      "receptions": 0
     }
   },
   {
@@ -696,11 +851,16 @@
       0,
       0
     ],
+    "starts": {
+      "../assets/NFL_Icons/Chiefs.png": 2
+    },
     "advanced": {
       "epaPerPlay": 0.147,
       "cpoe": -2.022,
       "successRate": 0.477,
-      "plays": 86
+      "plays": 86,
+      "fantasyStd": 50.64,
+      "receptions": 0
     }
   },
   {
@@ -718,11 +878,16 @@
       0,
       0
     ],
+    "starts": {
+      "../assets/NFL_Icons/Jaguars.png": 2
+    },
     "advanced": {
       "epaPerPlay": 0.228,
       "cpoe": 10.091,
       "successRate": 0.547,
-      "plays": 64
+      "plays": 64,
+      "fantasyStd": 32.26,
+      "receptions": 0
     }
   },
   {
@@ -740,11 +905,16 @@
       0,
       0
     ],
+    "starts": {
+      "../assets/NFL_Icons/Saints.png": 2
+    },
     "advanced": {
       "epaPerPlay": 0.123,
       "cpoe": 4.606,
       "successRate": 0.474,
-      "plays": 116
+      "plays": 116,
+      "fantasyStd": 45.58,
+      "receptions": 0
     }
   }
 ]

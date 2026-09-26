@@ -43,6 +43,7 @@ export class SidebarComponent {
   epaValue: number = 50;
   cpoeValue: number = 50;
   successValue: number = 50;
+  fantasyValue: number = 0;
   recencyValue: number = 50;
   yardsExpanded: boolean = false;
   tdsExpanded: boolean = false;
@@ -151,6 +152,7 @@ export class SidebarComponent {
       epaValue: this.epaValue,
       cpoeValue: this.cpoeValue,
       successValue: this.successValue,
+      fantasyValue: this.fantasyValue,
       recencyValue: this.recencyValue,
       supportValue: this.supportValue,
       weaponsValue: this.weaponsValue,
@@ -175,6 +177,10 @@ export class SidebarComponent {
 
       case 'mvp':
         this.mvp();
+        break;
+
+      case 'fantasy':
+        this.fantasyOnly();
         break;
 
       case 'support':
@@ -214,6 +220,7 @@ export class SidebarComponent {
     this.epaValue = 50;
     this.cpoeValue = 50;
     this.successValue = 50;
+    this.fantasyValue = 0;
     this.recencyValue = 0;
     this.yardsExpanded = false;
     this.tdsExpanded = false;
@@ -247,6 +254,7 @@ export class SidebarComponent {
     this.epaValue = 50;
     this.cpoeValue = 50;
     this.successValue = 50;
+    this.fantasyValue = 0;
     this.recencyValue = 0;
     this.yardsExpanded = false;
     this.tdsExpanded = false;
@@ -280,12 +288,25 @@ export class SidebarComponent {
     this.epaValue = 50;
     this.cpoeValue = 50;
     this.successValue = 50;
+    this.fantasyValue = 0;
     this.recencyValue = 15;
     this.yardsExpanded = false;
     this.tdsExpanded = false;
     this.tosExpanded = false;
     this.advancedExpanded = false;
     this.supportExpanded = false;
+    this.saveFilters();
+  }
+
+  // Rank purely on fantasy points (scoring is set in the settings menu)
+  fantasyOnly() {
+    this.clearFilters();
+    this.advancedValue = 100;
+    this.epaValue = 0;
+    this.cpoeValue = 0;
+    this.successValue = 0;
+    this.fantasyValue = 100;
+    this.advancedExpanded = true;
     this.saveFilters();
   }
 
@@ -313,6 +334,7 @@ export class SidebarComponent {
     this.epaValue = 50;
     this.cpoeValue = 50;
     this.successValue = 50;
+    this.fantasyValue = 0;
     this.recencyValue = 50;
     this.yardsExpanded = false;
     this.tdsExpanded = false;
@@ -346,6 +368,7 @@ export class SidebarComponent {
     this.epaValue = 50;
     this.cpoeValue = 50;
     this.successValue = 50;
+    this.fantasyValue = 0;
     this.recencyValue = 0;
 
     this.saveFilters();

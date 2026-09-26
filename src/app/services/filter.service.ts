@@ -25,6 +25,7 @@ export class FilterService {
       epaValue: 50,
       cpoeValue: 50,
       successValue: 50,
+      fantasyValue: 0,
       recencyValue: 50,
       supportValue: 50,
       weaponsValue: 50,

@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import {
+  FantasyScoring,
   Position,
   SkillPosition,
   SkillWeights,
@@ -21,6 +22,28 @@ export class PositionService {
     TE: presetWeights('TE', 'default'),
   });
   public weights$ = this.weightsSubject.asObservable();
+
+  // Current QB order (ESPN ids, best first) from the QB page, used for receivers' QB Play grade
+  private qbRanksSubject = new BehaviorSubject<number[]>([]);
+  public qbRanks$ = this.qbRanksSubject.asObservable();
+
+  private fantasyScoringSubject = new BehaviorSubject<FantasyScoring>('ppr');
+  public fantasyScoring$ = this.fantasyScoringSubject.asObservable();
+
+  setQbRanks(ids: number[]): void {
+    this.qbRanksSubject.next(ids);
+  }
+
+  get fantasyScoring(): FantasyScoring {
+    return this.fantasyScoringSubject.value;
+  }
+
+  // Cycle PPR -> Half -> Standard
+  cycleFantasyScoring(): void {
+    const order: FantasyScoring[] = ['ppr', 'half', 'std'];
+    const next = order[(order.indexOf(this.fantasyScoring) + 1) % order.length];
+    this.fantasyScoringSubject.next(next);
+  }
 
   setPosition(position: Position): void {
     this.positionSubject.next(position);
