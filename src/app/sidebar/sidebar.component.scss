@@ -1,7 +1,7 @@
 @use "../../variables.scss" as v;
 
 .sidebar {
-  background: var(--primary-800);
+  background: color-mix(in srgb, var(--primary-800) 75%, transparent);
   border-right: solid 1px var(--accent-200);
   box-shadow: 0 0 0.75em rgba(0, 0, 0, 0.25);
   font-family: v.$font-base;

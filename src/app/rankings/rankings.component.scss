@@ -2,7 +2,7 @@
 
 section {
   ul {
-    background: var(--primary-800);
+    background: color-mix(in srgb, var(--primary-800) 75%, transparent);
     border-radius: 0.5em;
     border: solid 1px var(--accent-200);
     box-shadow: 0 0 2em rgba(0, 0, 0, 0.35);
