@@ -242,11 +242,10 @@ section {
 
   footer {
     align-items: center;
-    color: var(--primary-50);
+    color: var(--primary-900);
     display: flex;
     font-weight: bold;
     justify-content: space-between;
-    text-shadow: var(--text-shadow-small);
 
     .ghost-div {
       display: none;
