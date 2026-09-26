@@ -22,17 +22,18 @@ interface GameData {
   } | null;
 }
 
+// defense is optional: normally it comes from the Defenses rankings, and a value here overrides it
 type SubjectiveScores = Pick<
   StaticPlayerData,
-  'injured' | 'weapons' | 'coaching' | 'oline' | 'defense' | 'responsibility'
-> & { name?: string };
+  'injured' | 'weapons' | 'coaching' | 'oline' | 'responsibility'
+> & { name?: string; defense?: number };
 
 const games = gamesJson as unknown as GameData[];
 const scores = subjective as Record<string, SubjectiveScores>;
 
 // Static Data
 export const StaticData: StaticPlayerData[] = games.map((game) => {
-  const { name, ...playerScores } = scores[game.id];
+  const { name, defense, ...playerScores } = scores[game.id];
 
   return {
     id: game.id,
@@ -48,6 +49,9 @@ export const StaticData: StaticPlayerData[] = games.map((game) => {
     fantasyStd: game.advanced?.fantasyStd ?? null,
     receptions: game.advanced?.receptions ?? 0,
     starts: game.starts,
+    // Placeholder until the Defenses rankings grade the team
+    defense: defense ?? 6,
+    defenseOverride: defense,
     ...playerScores,
   };
 });

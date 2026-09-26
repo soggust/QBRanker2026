@@ -5,7 +5,6 @@
     "weapons": 6,
     "coaching": 8,
     "oline": 6,
-    "defense": 9,
     "responsibility": 10
   },
   "12483": {
@@ -14,7 +13,6 @@
     "weapons": 11,
     "coaching": 11,
     "oline": 7,
-    "defense": 6,
     "responsibility": 10
   },
   "14880": {
@@ -23,7 +21,6 @@
     "weapons": 6,
     "coaching": 5,
     "oline": 4,
-    "defense": 4,
     "responsibility": 8
   },
   "15864": {
@@ -32,7 +29,6 @@
     "weapons": 7,
     "coaching": 5,
     "oline": 5,
-    "defense": 6,
     "responsibility": 7
   },
   "2573079": {
@@ -41,7 +37,6 @@
     "weapons": 11,
     "coaching": 10,
     "oline": 9,
-    "defense": 9,
     "responsibility": 6
   },
   "2577417": {
@@ -50,7 +45,6 @@
     "weapons": 10,
     "coaching": 7,
     "oline": 10,
-    "defense": 3,
     "responsibility": 9
   },
   "2578570": {
@@ -59,7 +53,6 @@
     "weapons": 9,
     "coaching": 6,
     "oline": 6,
-    "defense": 4,
     "responsibility": 9
   },
   "2969939": {
@@ -68,7 +61,6 @@
     "weapons": 5,
     "coaching": 6,
     "oline": 5,
-    "defense": 5,
     "responsibility": 6
   },
   "2972515": {
@@ -77,7 +69,6 @@
     "weapons": 10,
     "coaching": 6,
     "oline": 6,
-    "defense": 5,
     "responsibility": 6
   },
   "3046779": {
@@ -86,7 +77,6 @@
     "weapons": 10,
     "coaching": 10,
     "oline": 11,
-    "defense": 8,
     "responsibility": 8
   },
   "3052587": {
@@ -95,7 +85,6 @@
     "weapons": 9,
     "coaching": 8,
     "oline": 7,
-    "defense": 8,
     "responsibility": 10
   },
   "3122840": {
@@ -104,7 +93,6 @@
     "weapons": 5,
     "coaching": 8,
     "oline": 7,
-    "defense": 9,
     "responsibility": 6
   },
   "3139477": {
@@ -113,7 +101,6 @@
     "weapons": 8,
     "coaching": 12,
     "oline": 10,
-    "defense": 10,
     "responsibility": 11
   },
   "3915511": {
@@ -122,7 +109,6 @@
     "weapons": 11,
     "coaching": 6,
     "oline": 4,
-    "defense": 3,
     "responsibility": 10
   },
   "3916387": {
@@ -131,7 +117,6 @@
     "weapons": 8,
     "coaching": 11,
     "oline": 8,
-    "defense": 4,
     "responsibility": 12
   },
   "3917792": {
@@ -140,7 +125,6 @@
     "weapons": 9,
     "coaching": 9,
     "oline": 12,
-    "defense": 9,
     "responsibility": 6
   },
   "3918298": {
@@ -149,7 +133,6 @@
     "weapons": 6,
     "coaching": 7,
     "oline": 9,
-    "defense": 7,
     "responsibility": 12
   },
   "3924327": {
@@ -158,7 +141,6 @@
     "weapons": 9,
     "coaching": 9,
     "oline": 8,
-    "defense": 10,
     "responsibility": 6
   },
   "4036378": {
@@ -167,7 +149,6 @@
     "weapons": 8,
     "coaching": 10,
     "oline": 9,
-    "defense": 8,
     "responsibility": 8
   },
   "4038941": {
@@ -176,7 +157,6 @@
     "weapons": 7,
     "coaching": 10,
     "oline": 8,
-    "defense": 9,
     "responsibility": 9
   },
   "4040715": {
@@ -185,7 +165,6 @@
     "weapons": 11,
     "coaching": 10,
     "oline": 11,
-    "defense": 9,
     "responsibility": 8
   },
   "4242512": {
@@ -194,7 +173,6 @@
     "weapons": 12,
     "coaching": 9,
     "oline": 8,
-    "defense": 5,
     "responsibility": 6
   },
   "4360310": {
@@ -203,7 +181,6 @@
     "weapons": 6,
     "coaching": 6,
     "oline": 4,
-    "defense": 3,
     "responsibility": 9
   },
   "4360423": {
@@ -212,7 +189,6 @@
     "weapons": 10,
     "coaching": 6,
     "oline": 6,
-    "defense": 5,
     "responsibility": 8
   },
   "4360689": {
@@ -221,7 +197,6 @@
     "weapons": 7,
     "coaching": 5,
     "oline": 6,
-    "defense": 6,
     "responsibility": 8
   },
   "4361741": {
@@ -230,7 +205,6 @@
     "weapons": 12,
     "coaching": 12,
     "oline": 10,
-    "defense": 8,
     "responsibility": 3
   },
   "4426338": {
@@ -239,7 +213,6 @@
     "weapons": 7,
     "coaching": 10,
     "oline": 8,
-    "defense": 11,
     "responsibility": 6
   },
   "4426348": {
@@ -248,7 +221,6 @@
     "weapons": 8,
     "coaching": 5,
     "oline": 8,
-    "defense": 4,
     "responsibility": 9
   },
   "4431452": {
@@ -257,7 +229,6 @@
     "weapons": 4,
     "coaching": 9,
     "oline": 6,
-    "defense": 7,
     "responsibility": 8
   },
   "4431611": {
@@ -266,7 +237,6 @@
     "weapons": 8,
     "coaching": 10,
     "oline": 6,
-    "defense": 8,
     "responsibility": 9
   },
   "4432577": {
@@ -275,7 +245,6 @@
     "weapons": 10,
     "coaching": 9,
     "oline": 9,
-    "defense": 9,
     "responsibility": 9
   },
   "4685720": {
@@ -284,7 +253,6 @@
     "weapons": 5,
     "coaching": 6,
     "oline": 4,
-    "defense": 6,
     "responsibility": 7
   },
   "4688380": {
@@ -293,7 +261,6 @@
     "weapons": 3,
     "coaching": 5,
     "oline": 3,
-    "defense": 6,
     "responsibility": 4
   },
   "4689114": {
@@ -302,7 +269,6 @@
     "weapons": 5,
     "coaching": 6,
     "oline": 5,
-    "defense": 5,
     "responsibility": 7
   }
 }

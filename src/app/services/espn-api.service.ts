@@ -114,7 +114,8 @@ export class EspnApiService {
       weapons: staticData ? staticData.weapons : 0,
       coaching: staticData ? staticData.coaching : 0,
       oline: staticData ? staticData.oline : 0,
-      defense: staticData ? staticData.defense : 0,
+      defense: staticData ? staticData.defense : 6,
+      defenseOverride: staticData?.defenseOverride,
       responsibility: staticData ? staticData.responsibility : 0,
       outOfDate:
         staticData &&

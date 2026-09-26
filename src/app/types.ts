@@ -57,6 +57,7 @@ export interface Player {
   oline: number;
   defense: number;
   responsibility: number;
+  defenseOverride?: number;
   outOfDate: boolean;
 }
 
@@ -82,4 +83,6 @@ export interface StaticPlayerData {
   receptions: number;
   // Starts per team, keyed by team logo path
   starts: Record<string, number>;
+  // Hand-set defense grade from subjective.json; otherwise it comes from the Defenses rankings
+  defenseOverride?: number;
 }

@@ -1,6 +1,5 @@
 import { Component, Input, OnChanges } from '@angular/core';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
-import skillData from 'StaticData/skill-players.json';
 import { StaticData } from 'StaticData/StaticData';
 import {
   FANTASY_SCORING_LABELS,
@@ -15,8 +14,7 @@ import {
 } from 'app/positions';
 import { PositionService } from 'app/services/position.service';
 import { copyRankingsToClipboard } from 'app/utils/clipboard';
-
-const PLAYERS = skillData as Record<SkillPosition, SkillPlayer[]>;
+import { SKILL_UNITS, weightedTotals } from 'app/utils/unit-scoring';
 
 // Average a per-QB value (0-12) for each team, weighted by how many games each QB started there
 function teamGrades(valueFor: (qbId: number) => number | undefined): Map<string, number> {
@@ -85,15 +83,18 @@ export class SkillRankingsComponent implements OnChanges {
   ngOnChanges(): void {
     this.stats = SKILL_STATS[this.position];
     this.hasFantasy = hasFantasy(this.position);
-    this.playerList = [...PLAYERS[this.position]];
+    this.playerList = [...SKILL_UNITS[this.position]];
     this.weights = this.positionService.getWeights(this.position);
     this.sortPlayers();
   }
 
   // Sort Players By Weighted Total
   sortPlayers() {
+    const totals = weightedTotals(this.playerList, this.stats, this.weights, (player, stat) =>
+      this.value(player, stat),
+    );
     this.playerList = [...this.playerList].sort(
-      (a, b) => this.totalWeighted(b) - this.totalWeighted(a),
+      (a, b) => (totals.get(b) ?? 0) - (totals.get(a) ?? 0),
     );
   }
 
@@ -120,28 +121,6 @@ export class SkillRankingsComponent implements OnChanges {
       default:
         return player.stats[stat.key];
     }
-  }
-
-  // Combine Total Weighted Value Of Each Stat
-  totalWeighted(player: SkillPlayer): number {
-    return this.stats.reduce((total, stat) => {
-      const weight = this.weights[stat.key] ?? 0;
-      if (!weight) return total;
-      // Support grades mirror the QB page: out of 12, dampened to a fifth like the support bias
-      if (stat.support) return total - (this.value(player, stat) / 12) * (weight / 250);
-      const score = this.normalize(stat, this.value(player, stat)) * (weight / 50);
-      return stat.negative ? total - score : total + score;
-    }, 0);
-  }
-
-  // Scale Against The Max, Or Into 0.5-1 Of The League Range For Stats That Can Go Negative
-  normalize(stat: SkillStat, value: number): number {
-    const values = this.playerList.map((player) => this.value(player, stat));
-    const max = Math.max(...values);
-    if (!stat.signed) return max ? value / max : 0;
-
-    const min = Math.min(...values);
-    return max === min ? 1 : 0.5 + (0.5 * (value - min)) / (max - min);
   }
 
   isShown(stat: SkillStat): boolean {

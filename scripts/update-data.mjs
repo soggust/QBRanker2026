@@ -566,7 +566,7 @@ async function main() {
       weapons: context.weapons ?? DEFAULT_SCORE,
       coaching: context.coaching ?? DEFAULT_SCORE,
       oline: context.oline ?? DEFAULT_SCORE,
-      defense: context.defense ?? DEFAULT_SCORE,
+      // No defense score: it comes from the Defenses rankings unless you add a "defense" override
       responsibility: DEFAULT_SCORE,
     };
     added.push(`${qb.name} (${qb.team})`);

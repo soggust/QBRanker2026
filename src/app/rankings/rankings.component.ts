@@ -5,9 +5,11 @@ import { EspnApiService } from 'app/services/espn-api.service';
 import { Filters, Player } from 'app/types';
 import { copyRankingsToClipboard } from 'app/utils/clipboard';
 import { PositionService } from 'app/services/position.service';
+import { defenseGrades } from 'app/utils/unit-scoring';
 import {
   FANTASY_SCORING_LABELS,
   FantasyScoring,
+  SkillWeights,
   fantasyPoints,
 } from 'app/positions';
 
@@ -54,6 +56,8 @@ export class RankingsComponent {
   isToastVisible: boolean = false;
   fantasyScoring: FantasyScoring = 'ppr';
   scoringLabels = FANTASY_SCORING_LABELS;
+  teamDefense = new Map<string, number>();
+  defenseWeights?: SkillWeights;
 
   constructor(
     private filterService: FilterService,
@@ -65,9 +69,20 @@ export class RankingsComponent {
       this.sortPlayers();
     });
 
+    // Defense grades follow the Defenses rankings (and their sliders) unless overridden
+    // (only when the Defenses weights change, so manual +/- tweaks survive other tabs' slider moves)
+    this.positionService.weights$.subscribe((weights) => {
+      if (weights.DEF === this.defenseWeights) return;
+      this.defenseWeights = weights.DEF;
+      this.teamDefense = defenseGrades(weights.DEF);
+      this.applyDefenseGrades();
+      this.sortPlayers();
+    });
+
     this.espnApiService.playerStats$.subscribe((res: Player[]) => {
       this.playerList = res;
       this.unfilteredPlayerList = res;
+      this.applyDefenseGrades();
       this.sortPlayers();
     });
 
@@ -89,6 +104,14 @@ export class RankingsComponent {
       this.sortPlayersFunc(a, b),
     );
     this.publishRanks();
+  }
+
+  // Set each QB's defense grade (whole number, 0-12) from their team's Defenses ranking
+  applyDefenseGrades() {
+    for (const player of this.unfilteredPlayerList) {
+      const grade = this.teamDefense.get(player.teamLogo);
+      player.defense = player.defenseOverride ?? (grade === undefined ? 6 : Math.round(grade));
+    }
   }
 
   // Share the QB order with the WR/TE QB Play grade
