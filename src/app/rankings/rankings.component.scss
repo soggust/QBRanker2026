@@ -744,7 +744,7 @@ section ul {
     div > p[style*='color'] {
       background: color-mix(in srgb, currentColor 20%, rgba(0, 0, 0, 0.45));
       border-radius: 999px;
-      padding: 0.25em 0.8em;
+      padding: 0.25em 1em;
       text-shadow: none;
     }
   }
