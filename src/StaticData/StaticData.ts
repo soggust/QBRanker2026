@@ -15,6 +15,8 @@ interface GameData {
   ties: number;
   lastFive: number[];
   starts: Record<string, number>;
+  // From ESPN's injury report: Out, Doubtful or Injured Reserve
+  injured: boolean;
   advanced: {
     epaPerPlay: number | null;
     cpoe: number | null;
@@ -30,10 +32,10 @@ export interface TeamGrades {
   coaching: number;
 }
 
-// Per-QB scores. Team grades and defense can be overridden here for a single QB;
-// defense otherwise comes from the Defenses rankings.
-type SubjectiveScores = Pick<StaticPlayerData, 'injured' | 'responsibility'> &
-  Partial<TeamGrades> & { name?: string; defense?: number };
+// Per-QB scores. Team grades, defense (normally from the Defenses rankings) and injured
+// (normally from ESPN's injury report) can be overridden here for a single QB.
+type SubjectiveScores = Pick<StaticPlayerData, 'responsibility'> &
+  Partial<TeamGrades> & { name?: string; defense?: number; injured?: boolean };
 
 const games = gamesJson as unknown as GameData[];
 const scores = subjective as Record<string, SubjectiveScores>;
@@ -51,7 +53,7 @@ export function gradesForTeam(teamLogo: string): TeamGrades {
 
 // Static Data
 export const StaticData: StaticPlayerData[] = games.map((game) => {
-  const { name, defense, ...playerScores } = scores[game.id];
+  const { name, defense, injured, ...playerScores } = scores[game.id];
 
   return {
     id: game.id,
@@ -67,6 +69,7 @@ export const StaticData: StaticPlayerData[] = games.map((game) => {
     fantasyStd: game.advanced?.fantasyStd ?? null,
     receptions: game.advanced?.receptions ?? 0,
     starts: game.starts,
+    injured: injured ?? game.injured ?? false,
     // Placeholder until the Defenses rankings grade the team
     defense: defense ?? 6,
     defenseOverride: defense,

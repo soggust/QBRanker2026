@@ -591,7 +591,7 @@
         "winPct": 0.5,
         "winsOverExpected": 0.14,
         "atsPct": 1,
-        "fourthGoRate": 0.75,
+        "pointDiffPerGame": 5,
         "netEpa": 0.155
       }
     },
@@ -608,7 +608,7 @@
         "winPct": 1,
         "winsOverExpected": 0.76,
         "atsPct": 0.5,
-        "fourthGoRate": 1,
+        "pointDiffPerGame": 12,
         "netEpa": 0.208
       }
     },
@@ -625,7 +625,7 @@
         "winPct": 0.5,
         "winsOverExpected": -0.26,
         "atsPct": 0.5,
-        "fourthGoRate": 1,
+        "pointDiffPerGame": 8,
         "netEpa": 0.073
       }
     },
@@ -642,7 +642,7 @@
         "winPct": 0.5,
         "winsOverExpected": -0.26,
         "atsPct": 0.5,
-        "fourthGoRate": 0,
+        "pointDiffPerGame": 4.5,
         "netEpa": 0.06
       }
     },
@@ -659,7 +659,7 @@
         "winPct": 0.5,
         "winsOverExpected": -0.06,
         "atsPct": 0,
-        "fourthGoRate": 0,
+        "pointDiffPerGame": -4.5,
         "netEpa": -0.091
       }
     },
@@ -676,7 +676,7 @@
         "winPct": 0,
         "winsOverExpected": -0.66,
         "atsPct": 0.5,
-        "fourthGoRate": 0.667,
+        "pointDiffPerGame": -9.5,
         "netEpa": -0.086
       }
     },
@@ -693,7 +693,7 @@
         "winPct": 0.5,
         "winsOverExpected": 0.02,
         "atsPct": 0.5,
-        "fourthGoRate": 1,
+        "pointDiffPerGame": 4.5,
         "netEpa": 0.129
       }
     },
@@ -710,7 +710,7 @@
         "winPct": 0,
         "winsOverExpected": -1.07,
         "atsPct": 0,
-        "fourthGoRate": 0.667,
+        "pointDiffPerGame": -9.5,
         "netEpa": -0.165
       }
     },
@@ -727,7 +727,7 @@
         "winPct": 0,
         "winsOverExpected": -0.53,
         "atsPct": 0,
-        "fourthGoRate": 0.5,
+        "pointDiffPerGame": -18,
         "netEpa": -0.273
       }
     },
@@ -744,7 +744,7 @@
         "winPct": 0.5,
         "winsOverExpected": -0.35,
         "atsPct": 0.5,
-        "fourthGoRate": 0,
+        "pointDiffPerGame": 5.5,
         "netEpa": 0.182
       }
     },
@@ -761,7 +761,7 @@
         "winPct": 0,
         "winsOverExpected": -1.52,
         "atsPct": 0,
-        "fourthGoRate": 0,
+        "pointDiffPerGame": -12,
         "netEpa": -0.272
       }
     },
@@ -778,7 +778,7 @@
         "winPct": 1,
         "winsOverExpected": 0.82,
         "atsPct": 1,
-        "fourthGoRate": 1,
+        "pointDiffPerGame": 7.5,
         "netEpa": 0.202
       }
     },
@@ -795,7 +795,7 @@
         "winPct": 0.5,
         "winsOverExpected": 0.32,
         "atsPct": 0.5,
-        "fourthGoRate": 1,
+        "pointDiffPerGame": -7,
         "netEpa": -0.243
       }
     },
@@ -812,7 +812,7 @@
         "winPct": 0.5,
         "winsOverExpected": 0.49,
         "atsPct": 1,
-        "fourthGoRate": 0.667,
+        "pointDiffPerGame": 3,
         "netEpa": 0.042
       }
     },
@@ -829,7 +829,7 @@
         "winPct": 1,
         "winsOverExpected": 1.13,
         "atsPct": 1,
-        "fourthGoRate": 0.5,
+        "pointDiffPerGame": 11.5,
         "netEpa": 0.165
       }
     },
@@ -846,7 +846,7 @@
         "winPct": 0.333,
         "winsOverExpected": -0.03,
         "atsPct": 0.333,
-        "fourthGoRate": 0.333,
+        "pointDiffPerGame": -5.7,
         "netEpa": -0.1
       }
     },
@@ -863,7 +863,7 @@
         "winPct": 1,
         "winsOverExpected": 1.13,
         "atsPct": 1,
-        "fourthGoRate": 0.429,
+        "pointDiffPerGame": 13,
         "netEpa": 0.213
       }
     },
@@ -880,7 +880,7 @@
         "winPct": 1,
         "winsOverExpected": 0.79,
         "atsPct": 1,
-        "fourthGoRate": 0,
+        "pointDiffPerGame": 21,
         "netEpa": 0.393
       }
     },
@@ -897,7 +897,7 @@
         "winPct": 0.5,
         "winsOverExpected": -0.22,
         "atsPct": 0.5,
-        "fourthGoRate": 0,
+        "pointDiffPerGame": 8.5,
         "netEpa": 0.147
       }
     },
@@ -914,7 +914,7 @@
         "winPct": 0.333,
         "winsOverExpected": -0.76,
         "atsPct": 0,
-        "fourthGoRate": 0.75,
+        "pointDiffPerGame": -11.7,
         "netEpa": -0.201
       }
     },
@@ -931,7 +931,7 @@
         "winPct": 0.5,
         "winsOverExpected": 0.44,
         "atsPct": 0.5,
-        "fourthGoRate": 0.167,
+        "pointDiffPerGame": -6,
         "netEpa": -0.041
       }
     },
@@ -948,7 +948,7 @@
         "winPct": 1,
         "winsOverExpected": 0.74,
         "atsPct": 1,
-        "fourthGoRate": 0.8,
+        "pointDiffPerGame": 13.5,
         "netEpa": 0.268
       }
     },
@@ -965,7 +965,7 @@
         "winPct": 0.5,
         "winsOverExpected": -0.05,
         "atsPct": 0.5,
-        "fourthGoRate": 0.5,
+        "pointDiffPerGame": -5,
         "netEpa": -0.079
       }
     },
@@ -982,7 +982,7 @@
         "winPct": 0.5,
         "winsOverExpected": -0.06,
         "atsPct": 1,
-        "fourthGoRate": 0.5,
+        "pointDiffPerGame": 7,
         "netEpa": 0.107
       }
     },
@@ -999,7 +999,7 @@
         "winPct": 1,
         "winsOverExpected": 0.59,
         "atsPct": 0,
-        "fourthGoRate": 0.333,
+        "pointDiffPerGame": 3,
         "netEpa": -0.017
       }
     },
@@ -1016,7 +1016,7 @@
         "winPct": 0,
         "winsOverExpected": -0.78,
         "atsPct": 0.5,
-        "fourthGoRate": 1,
+        "pointDiffPerGame": -8.5,
         "netEpa": -0.126
       }
     },
@@ -1033,7 +1033,7 @@
         "winPct": 0.5,
         "winsOverExpected": -0.38,
         "atsPct": 0.5,
-        "fourthGoRate": 0.667,
+        "pointDiffPerGame": 1,
         "netEpa": 0.084
       }
     },
@@ -1050,7 +1050,7 @@
         "winPct": 0.5,
         "winsOverExpected": -0.03,
         "atsPct": 0.5,
-        "fourthGoRate": 0,
+        "pointDiffPerGame": -7,
         "netEpa": -0.142
       }
     },
@@ -1067,7 +1067,7 @@
         "winPct": 0,
         "winsOverExpected": -0.71,
         "atsPct": 0.5,
-        "fourthGoRate": 0.667,
+        "pointDiffPerGame": -10.5,
         "netEpa": -0.191
       }
     },
@@ -1084,7 +1084,7 @@
         "winPct": 0,
         "winsOverExpected": -1.13,
         "atsPct": 0,
-        "fourthGoRate": 0,
+        "pointDiffPerGame": -5,
         "netEpa": -0.154
       }
     },
@@ -1101,7 +1101,7 @@
         "winPct": 0.5,
         "winsOverExpected": 0.57,
         "atsPct": 0.5,
-        "fourthGoRate": 1,
+        "pointDiffPerGame": -10,
         "netEpa": -0.121
       }
     },
@@ -1118,7 +1118,7 @@
         "winPct": 1,
         "winsOverExpected": 0.93,
         "atsPct": 1,
-        "fourthGoRate": 0,
+        "pointDiffPerGame": 10,
         "netEpa": 0.122
       }
     }

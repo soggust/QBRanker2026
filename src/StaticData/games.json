@@ -24,7 +24,9 @@
       "plays": 93,
       "fantasyStd": 16.52,
       "receptions": 0
-    }
+    },
+    "injuryStatus": "Active",
+    "injured": false
   },
   {
     "id": 3052587,
@@ -51,7 +53,9 @@
       "plays": 83,
       "fantasyStd": 23.82,
       "receptions": 0
-    }
+    },
+    "injuryStatus": "Active",
+    "injured": false
   },
   {
     "id": 4426338,
@@ -78,7 +82,9 @@
       "plays": 71,
       "fantasyStd": 19.56,
       "receptions": 0
-    }
+    },
+    "injuryStatus": "Active",
+    "injured": false
   },
   {
     "id": 4361741,
@@ -105,7 +111,9 @@
       "plays": 66,
       "fantasyStd": 49.58,
       "receptions": 0
-    }
+    },
+    "injuryStatus": "Active",
+    "injured": false
   },
   {
     "id": 4685720,
@@ -132,7 +140,9 @@
       "plays": 84,
       "fantasyStd": 55.52,
       "receptions": 0
-    }
+    },
+    "injuryStatus": "Active",
+    "injured": false
   },
   {
     "id": 4432577,
@@ -159,7 +169,9 @@
       "plays": 112,
       "fantasyStd": 33.48,
       "receptions": 0
-    }
+    },
+    "injuryStatus": "Active",
+    "injured": false
   },
   {
     "id": 4431611,
@@ -186,7 +198,9 @@
       "plays": 80,
       "fantasyStd": 44.98,
       "receptions": 0
-    }
+    },
+    "injuryStatus": "Out",
+    "injured": true
   },
   {
     "id": 4688380,
@@ -213,7 +227,9 @@
       "plays": 67,
       "fantasyStd": 31.72,
       "receptions": 0
-    }
+    },
+    "injuryStatus": "Active",
+    "injured": false
   },
   {
     "id": 2573079,
@@ -240,7 +256,9 @@
       "plays": 55,
       "fantasyStd": 25.54,
       "receptions": 0
-    }
+    },
+    "injuryStatus": "Active",
+    "injured": false
   },
   {
     "id": 2972515,
@@ -267,7 +285,9 @@
       "plays": 49,
       "fantasyStd": 5.16,
       "receptions": 0
-    }
+    },
+    "injuryStatus": "Out",
+    "injured": true
   },
   {
     "id": 2577417,
@@ -294,7 +314,9 @@
       "plays": 79,
       "fantasyStd": 44.16,
       "receptions": 0
-    }
+    },
+    "injuryStatus": "Active",
+    "injured": false
   },
   {
     "id": 3917792,
@@ -321,7 +343,9 @@
       "plays": 71,
       "fantasyStd": 20.44,
       "receptions": 0
-    }
+    },
+    "injuryStatus": "Active",
+    "injured": false
   },
   {
     "id": 3122840,
@@ -348,7 +372,9 @@
       "plays": 73,
       "fantasyStd": 33.72,
       "receptions": 0
-    }
+    },
+    "injuryStatus": "Active",
+    "injured": false
   },
   {
     "id": 4431452,
@@ -375,7 +401,9 @@
       "plays": 74,
       "fantasyStd": 17.84,
       "receptions": 0
-    }
+    },
+    "injuryStatus": "Active",
+    "injured": false
   },
   {
     "id": 3924327,
@@ -402,7 +430,9 @@
       "plays": 54,
       "fantasyStd": 34.18,
       "receptions": 0
-    }
+    },
+    "injuryStatus": "Active",
+    "injured": false
   },
   {
     "id": 15864,
@@ -429,7 +459,9 @@
       "plays": 79,
       "fantasyStd": 24.88,
       "receptions": 0
-    }
+    },
+    "injuryStatus": "Active",
+    "injured": false
   },
   {
     "id": 2578570,
@@ -456,7 +488,9 @@
       "plays": 78,
       "fantasyStd": 22.98,
       "receptions": 0
-    }
+    },
+    "injuryStatus": "Active",
+    "injured": false
   },
   {
     "id": 4040715,
@@ -483,7 +517,9 @@
       "plays": 81,
       "fantasyStd": 40.88,
       "receptions": 0
-    }
+    },
+    "injuryStatus": "Active",
+    "injured": false
   },
   {
     "id": 2969939,
@@ -510,7 +546,9 @@
       "plays": 32,
       "fantasyStd": 2.54,
       "receptions": 0
-    }
+    },
+    "injuryStatus": "Active",
+    "injured": false
   },
   {
     "id": 3046779,
@@ -537,7 +575,9 @@
       "plays": 89,
       "fantasyStd": 46.22,
       "receptions": 0
-    }
+    },
+    "injuryStatus": "Active",
+    "injured": false
   },
   {
     "id": 4689114,
@@ -564,7 +604,9 @@
       "plays": 44,
       "fantasyStd": 27.4,
       "receptions": 0
-    }
+    },
+    "injuryStatus": "Injured Reserve",
+    "injured": true
   },
   {
     "id": 4426348,
@@ -591,7 +633,9 @@
       "plays": 68,
       "fantasyStd": 32.4,
       "receptions": 0
-    }
+    },
+    "injuryStatus": "Out",
+    "injured": true
   },
   {
     "id": 3915511,
@@ -618,7 +662,9 @@
       "plays": 77,
       "fantasyStd": 30.34,
       "receptions": 0
-    }
+    },
+    "injuryStatus": "Active",
+    "injured": false
   },
   {
     "id": 4036378,
@@ -645,7 +691,9 @@
       "plays": 142,
       "fantasyStd": 51.76,
       "receptions": 0
-    }
+    },
+    "injuryStatus": "Active",
+    "injured": false
   },
   {
     "id": 3918298,
@@ -672,7 +720,9 @@
       "plays": 89,
       "fantasyStd": 76.48,
       "receptions": 0
-    }
+    },
+    "injuryStatus": "Active",
+    "injured": false
   },
   {
     "id": 4038941,
@@ -699,7 +749,9 @@
       "plays": 74,
       "fantasyStd": 21.14,
       "receptions": 0
-    }
+    },
+    "injuryStatus": "Active",
+    "injured": false
   },
   {
     "id": 14880,
@@ -726,7 +778,9 @@
       "plays": 66,
       "fantasyStd": 34.02,
       "receptions": 0
-    }
+    },
+    "injuryStatus": "Active",
+    "injured": false
   },
   {
     "id": 3916387,
@@ -753,7 +807,9 @@
       "plays": 72,
       "fantasyStd": 39.76,
       "receptions": 0
-    }
+    },
+    "injuryStatus": "Active",
+    "injured": false
   },
   {
     "id": 4242512,
@@ -780,7 +836,9 @@
       "plays": 74,
       "fantasyStd": 29.18,
       "receptions": 0
-    }
+    },
+    "injuryStatus": "Active",
+    "injured": false
   },
   {
     "id": 12483,
@@ -807,7 +865,9 @@
       "plays": 63,
       "fantasyStd": 31.08,
       "receptions": 0
-    }
+    },
+    "injuryStatus": "Active",
+    "injured": false
   },
   {
     "id": 4360423,
@@ -834,7 +894,9 @@
       "plays": 29,
       "fantasyStd": 14.04,
       "receptions": 0
-    }
+    },
+    "injuryStatus": "Active",
+    "injured": false
   },
   {
     "id": 3139477,
@@ -861,7 +923,9 @@
       "plays": 86,
       "fantasyStd": 50.64,
       "receptions": 0
-    }
+    },
+    "injuryStatus": "Active",
+    "injured": false
   },
   {
     "id": 4360310,
@@ -888,7 +952,9 @@
       "plays": 64,
       "fantasyStd": 32.26,
       "receptions": 0
-    }
+    },
+    "injuryStatus": "Active",
+    "injured": false
   },
   {
     "id": 4360689,
@@ -915,6 +981,8 @@
       "plays": 116,
       "fantasyStd": 45.58,
       "receptions": 0
-    }
+    },
+    "injuryStatus": "Active",
+    "injured": false
   }
 ]

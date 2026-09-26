@@ -213,7 +213,7 @@ section {
           }
 
           &.support-box {
-            background: rgba(0, 0, 0, 0.15);
+            background: rgba(0, 0, 0, 0.3);
             height: 3.75em;
             margin-right: 1em;
             text-shadow: var(--text-shadow-small);
@@ -263,7 +263,7 @@ section {
     color: var(--primary-900);
     display: flex;
     padding-top: 0.75em;
-    font-weight: bold;
+    font-weight: 800;
     justify-content: space-between;
 
     .ghost-div {
@@ -492,7 +492,7 @@ section {
 
       &.support-box {
         height: 3.75em;
-        background: rgba(0, 0, 0, 0.15);
+        background: rgba(0, 0, 0, 0.3);
         margin-right: 1em;
         text-shadow: var(--text-shadow-small);
 

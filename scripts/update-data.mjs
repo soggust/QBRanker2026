@@ -2,12 +2,14 @@
 //
 // For every completed regular-season game, the QB with the most pass attempts
 // on each team is treated as that team's starter. Each starter gets a record,
-// last-five results, and team. Advanced stats (EPA/play, CPOE, success rate)
-// are aggregated from nflverse play-by-play. Hand-set scores live in
-// subjective.json; any new QB is added there with starter values to review.
+// last-five results, team, and an injury flag from ESPN's injury report. Advanced
+// stats (EPA/play, CPOE, success rate) are aggregated from nflverse play-by-play.
+// Hand-set per-QB scores live in subjective.json (new QBs are added with a starter
+// responsibility score) and team grades in team-grades.json.
 //
-// RB/WR/TE/K/P lists and season stats come from nflverse player stats and are
-// written to skill-players.json (top players at each position by usage).
+// RB/WR/TE/K/P lists and season stats come from nflverse player stats; team defenses
+// and head coaches come from nflverse play-by-play and schedules (coach names from
+// ESPN). All are written to skill-players.json.
 //
 // Usage: npm run update-data            (season defaults to 2026)
 //        SEASON=2027 npm run update-data
@@ -331,6 +333,22 @@ async function espnHeadCoaches() {
   return coaches;
 }
 
+// Injury report statuses that mean a player won't play (Questionable players usually do)
+const INJURED_STATUSES = ['Out', 'Doubtful', 'Injured Reserve'];
+
+// ESPN injury report: ESPN athlete id -> status (Out, Doubtful, Questionable, ...)
+async function espnInjuries() {
+  const report = await getJson(`${SITE}/injuries`);
+  const statuses = new Map();
+  for (const team of report.injuries) {
+    for (const injury of team.injuries ?? []) {
+      const id = Number(injury.athlete?.links?.[0]?.href?.match(/id\/(\d+)/)?.[1]);
+      if (id) statuses.set(id, injury.status);
+    }
+  }
+  return statuses;
+}
+
 // Moneyline -> implied win probability, with the bookmaker margin removed
 function winProbability(game, home) {
   const implied = (ml) => (ml < 0 ? -ml / (-ml + 100) : 100 / (ml + 100));
@@ -348,7 +366,7 @@ function winProbability(game, home) {
 }
 
 // Head coaches: record, wins over what the betting lines expected, record against the spread,
-// how often they go for it on 4th-and-2 or shorter, and their team's net EPA/play
+// point differential per game, and their team's net EPA/play
 // One row per team, named for the team's current head coach from ESPN (nflverse's coach
 // columns can lag offseason hires); a mid-season change credits the season to the current coach
 function coachUnits({ pbp, games, headCoaches }) {
@@ -366,14 +384,6 @@ function coachUnits({ pbp, games, headCoaches }) {
     const offense = plays.filter((play) => play.posteam === team && EPA_PLAY(play));
     const defense = plays.filter((play) => play.defteam === team && EPA_PLAY(play));
     const epa = (list) => mean(list.map((play) => num(play.epa))) ?? 0;
-    const fourthShort = plays.filter(
-      (play) =>
-        play.posteam === team &&
-        play.down === '4' &&
-        num(play.ydstogo) <= 2 &&
-        ['pass', 'run', 'punt', 'field_goal'].includes(play.play_type)
-    );
-    const goes = fourthShort.filter((play) => play.play_type === 'pass' || play.play_type === 'run').length;
 
     let wins = 0, losses = 0, ties = 0, expected = 0, covers = 0, atsGames = 0;
     for (const g of played) {
@@ -407,7 +417,7 @@ function coachUnits({ pbp, games, headCoaches }) {
         winPct: ratio(results, played.length),
         winsOverExpected: round(results - expected, 2),
         atsPct: ratio(covers, atsGames),
-        fourthGoRate: ratio(goes, fourthShort.length),
+        pointDiffPerGame: round(played.reduce((sum, g) => sum + g.pointsFor - g.pointsAgainst, 0) / played.length, 1),
         netEpa: round(epa(offense) - epa(defense), 3),
       },
     };
@@ -573,6 +583,19 @@ async function main() {
   const missing = gameData.filter((qb) => !qb.advanced).map((qb) => qb.name);
   if (missing.length) console.warn(`No advanced stats for: ${missing.join(', ')}`);
 
+  // Injury flags from ESPN's report; keep yesterday's if the report can't be loaded
+  const injuries = await espnInjuries().catch((err) => {
+    console.warn(`Could not load the ESPN injury report, keeping previous injury flags: ${err.message}`);
+    return null;
+  });
+  for (const qb of gameData) {
+    const status = injuries ? (injuries.get(qb.id) ?? 'Active') : previous.find((p) => p.id === qb.id)?.injuryStatus;
+    qb.injuryStatus = status ?? 'Active';
+    qb.injured = INJURED_STATUSES.includes(qb.injuryStatus);
+  }
+  const hurt = gameData.filter((qb) => qb.injured).map((qb) => `${qb.name} (${qb.injuryStatus})`);
+  if (hurt.length) console.log(`Injured QBs: ${hurt.join(', ')}`);
+
   await writeFile(GAMES_FILE, JSON.stringify(gameData, null, 2) + '\n');
   console.log(`Wrote ${gameData.length} QBs to games.json`);
 
@@ -582,7 +605,7 @@ async function main() {
   const added = [];
   for (const qb of gameData) {
     if (subjective[qb.id]) continue;
-    subjective[qb.id] = { name: qb.name, injured: false, responsibility: DEFAULT_SCORE };
+    subjective[qb.id] = { name: qb.name, responsibility: DEFAULT_SCORE };
     added.push(`${qb.name} (${qb.team})`);
   }
   if (added.length) {

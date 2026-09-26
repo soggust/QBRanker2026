@@ -56,7 +56,7 @@ export type SkillStatKey =
   | 'winPct'
   | 'winsOverExpected'
   | 'atsPct'
-  | 'fourthGoRate'
+  | 'pointDiffPerGame'
   | 'netEpa';
 
 // Columns computed in the app: fantasy points in the chosen scoring, and team support grades
@@ -326,11 +326,12 @@ export const SKILL_STATS: Record<SkillPosition, SkillStat[]> = {
       format: 'pct',
     },
     {
-      key: 'fourthGoRate',
-      label: '4th & Short Go %',
-      description: 'How often the team goes for it on 4th-and-2 or shorter',
+      key: 'pointDiffPerGame',
+      label: 'Pt Diff / Game',
+      description: 'Average points scored minus points allowed per game',
       kind: 'efficiency',
-      format: 'pct',
+      format: 'dec1',
+      signed: true,
     },
     {
       key: 'netEpa',
