@@ -7,11 +7,59 @@
         fontIcon="sports_football"
         class="sports-football"
       ></mat-icon
-      >2026 QB Ranker
+      >2026 {{ position }} Ranker
     </h1>
   </div>
 
-  <div class="filters">
+  <!-- Position Tabs -->
+  <nav class="position-tabs" aria-label="Position">
+    @for (tab of positions; track tab) {
+      <button
+        type="button"
+        [class.active]="tab === position"
+        [attr.aria-pressed]="tab === position"
+        (click)="selectPosition(tab)"
+      >
+        {{ tab }}
+      </button>
+    }
+  </nav>
+
+  <!-- RB / WR / TE Filters -->
+  @if (skillPosition; as skill) {
+    <div class="filters">
+      <div>
+        <mat-select
+          [(ngModel)]="skillPresets[skill]"
+          (ngModelChange)="onSkillPresetChange()"
+        >
+          @if (skillPresets[skill] === 'custom') {
+            <mat-option value="custom" disabled="disabled">CUSTOM</mat-option>
+          }
+          <mat-option value="default">DEFAULTS</mat-option>
+          <mat-option value="volume">VOLUME</mat-option>
+          <mat-option value="efficiency">EFFICIENCY</mat-option>
+        </mat-select>
+      </div>
+
+      @for (stat of skillStats; track stat.key) {
+        <div [ngClass]="{ disabled: skillWeights[stat.key] === 0 }">
+          <p [title]="stat.description">{{ stat.label }}</p>
+          <mat-slider min="0" max="100" step="5" color="accent">
+            <input
+              matSliderThumb
+              [(ngModel)]="skillWeights[stat.key]"
+              (ngModelChange)="skillPresets[skill] = 'custom'; saveSkillWeights()"
+            />
+          </mat-slider>
+          <span>{{ skillWeights[stat.key] }}%</span>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- QB Filters -->
+  <div class="filters" [hidden]="position !== 'QB'">
     <div>
       <mat-select [(ngModel)]="preset" (ngModelChange)="onPresetChange()">
         @if (preset === 'custom') {
@@ -388,14 +436,8 @@
     </mat-expansion-panel>
   </div>
   <footer>
-    <button mat-raised-button (click)="preset = 'default'; reset()">
-      Defaults
-    </button>
-    <button
-      mat-raised-button
-      (click)="setCustomFilter(); clearFilters()"
-      class="negative"
-    >
+    <button mat-raised-button (click)="resetDefaults()">Defaults</button>
+    <button mat-raised-button (click)="clearAll()" class="negative">
       Clear
     </button>
   </footer>

@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { PositionService } from './services/position.service';
 
 @Component({
     selector: 'app-root',
@@ -8,4 +9,7 @@ import { Component } from '@angular/core';
 })
 export class AppComponent {
   menuOpen: boolean = false;
+  position$ = this.positionService.position$;
+
+  constructor(private positionService: PositionService) {}
 }

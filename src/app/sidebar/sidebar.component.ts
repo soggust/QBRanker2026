@@ -1,6 +1,17 @@
 import { Component } from '@angular/core';
 import { FilterService } from '../services/filter.service';
+import { PositionService } from '../services/position.service';
 import { Filters } from 'app/types';
+import {
+  POSITIONS,
+  Position,
+  SKILL_STATS,
+  SkillPosition,
+  SkillPreset,
+  SkillStat,
+  SkillWeights,
+  presetWeights,
+} from 'app/positions';
 
 @Component({
     selector: 'sidebar',
@@ -40,10 +51,85 @@ export class SidebarComponent {
   supportExpanded: boolean = false;
   preset: string = 'default';
 
-  constructor(private filterService: FilterService) {}
+  // Position Tabs
+  positions: Position[] = POSITIONS;
+  position: Position = 'QB';
+  skillStats: SkillStat[] = [];
+  skillWeights: SkillWeights = {};
+  skillPresets: Record<SkillPosition, SkillPreset | 'custom'> = {
+    RB: 'default',
+    WR: 'default',
+    TE: 'default',
+  };
+
+  constructor(
+    private filterService: FilterService,
+    private positionService: PositionService,
+  ) {}
 
   ngOnInit(): void {
     this.saveFilters();
+
+    // Open the tab from a shared link, e.g. ?pos=WR
+    const linked = new URLSearchParams(location.search).get('pos')?.toUpperCase();
+    const match = this.positions.find((position) => position === linked);
+    if (match) this.selectPosition(match);
+  }
+
+  get skillPosition(): SkillPosition | null {
+    return this.position === 'QB' ? null : this.position;
+  }
+
+  selectPosition(position: Position): void {
+    this.position = position;
+    this.positionService.setPosition(position);
+
+    const url = new URL(location.href);
+    if (position === 'QB') url.searchParams.delete('pos');
+    else url.searchParams.set('pos', position);
+    history.replaceState(null, '', url);
+
+    if (position !== 'QB') {
+      this.skillStats = SKILL_STATS[position];
+      this.skillWeights = { ...this.positionService.getWeights(position) };
+    }
+  }
+
+  onSkillPresetChange(): void {
+    const skill = this.skillPosition;
+    const preset = skill && this.skillPresets[skill];
+    if (!skill || !preset || preset === 'custom') return;
+    this.skillWeights = presetWeights(skill, preset);
+    this.saveSkillWeights();
+  }
+
+  saveSkillWeights(): void {
+    const skill = this.skillPosition;
+    if (skill) this.positionService.saveWeights(skill, this.skillWeights);
+  }
+
+  // Footer Buttons
+  resetDefaults(): void {
+    const skill = this.skillPosition;
+    if (!skill) {
+      this.preset = 'default';
+      this.reset();
+      return;
+    }
+    this.skillPresets[skill] = 'default';
+    this.onSkillPresetChange();
+  }
+
+  clearAll(): void {
+    const skill = this.skillPosition;
+    if (!skill) {
+      this.setCustomFilter();
+      this.clearFilters();
+      return;
+    }
+    this.skillPresets[skill] = 'custom';
+    this.skillWeights = Object.fromEntries(this.skillStats.map((stat) => [stat.key, 0]));
+    this.saveSkillWeights();
   }
 
   saveFilters(): void {

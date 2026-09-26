@@ -3,8 +3,12 @@
   <sidebar class="sidebar"></sidebar>
   <div class="shade" (click)="menuOpen = false"></div>
 
-  <!-- Rankings-->
-  <rankings class="rankings"></rankings>
+  <!-- Rankings (QB stays mounted so switching tabs doesn't refetch ESPN stats) -->
+  @let position = position$ | async;
+  <rankings class="rankings" [hidden]="position !== 'QB'"></rankings>
+  @if (position && position !== 'QB') {
+    <skill-rankings class="rankings" [position]="position"></skill-rankings>
+  }
 
   <button class="menu-toggle" (click)="menuOpen = !menuOpen">
     <mat-icon

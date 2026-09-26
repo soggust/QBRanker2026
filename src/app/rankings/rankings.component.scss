@@ -1,5 +1,16 @@
 @use "../../variables.scss" as v;
 
+// Fewer columns (RB/WR/TE): spread the stats across the row instead of widening the name
+section.spread ul li.player {
+  > div {
+    flex: 1 0 6em;
+  }
+
+  > div.player-info {
+    flex: 0 0 20em;
+  }
+}
+
 section {
   ul {
     background: color-mix(in srgb, var(--primary-800) 75%, transparent);
@@ -129,7 +140,6 @@ section {
 
         > div {
           min-width: 6em;
-          padding-inline: 1em;
           width: 6em;
         }
 
@@ -271,6 +281,10 @@ section {
 
     p {
       margin: 0;
+
+      a {
+        color: inherit;
+      }
 
       img {
         margin-left: 0.5em;

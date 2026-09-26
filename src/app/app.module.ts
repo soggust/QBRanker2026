@@ -15,6 +15,7 @@ import { getAnalytics } from 'firebase/analytics';
 import { LetterGradePipe } from './pipes/letter-grade.pipe';
 import { FormatRecentGamesPipe } from './pipes/format-recent-games.pipe';
 import { RankingsComponent } from './rankings/rankings.component';
+import { SkillRankingsComponent } from './skill-rankings/skill-rankings.component';
 import {
   provideHttpClient,
   withInterceptorsFromDi,
@@ -43,6 +44,7 @@ const analytics = getAnalytics(app);
     LetterGradePipe,
     FormatRecentGamesPipe,
     RankingsComponent,
+    SkillRankingsComponent,
   ],
   bootstrap: [AppComponent],
   imports: [

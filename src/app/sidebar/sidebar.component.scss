@@ -123,6 +123,47 @@
     }
   }
 
+  // Segmented QB / RB / WR / TE switch
+  .position-tabs {
+    background: rgba(0, 0, 0, 0.15);
+    border-radius: 0.6em;
+    box-shadow: inset 0 0 0.75em rgba(0, 0, 0, 0.2);
+    display: flex;
+    flex-shrink: 0;
+    gap: 0.25em;
+    margin: 1em 1.5em 0;
+    padding: 0.3em;
+
+    button {
+      background: transparent;
+      border: none;
+      border-radius: 0.4em;
+      color: var(--primary-50);
+      cursor: pointer;
+      flex: 1;
+      font-family: v.$font-heading;
+      font-size: 1.15em;
+      font-weight: 800;
+      height: auto;
+      letter-spacing: 0.5px;
+      margin: 0;
+      padding: 0.45em 0 0.3em;
+      text-shadow: var(--text-shadow-small);
+      transition: background 0.15s ease, color 0.15s ease;
+
+      &:hover:not(.active) {
+        background: rgba(255, 255, 255, 0.12);
+      }
+
+      &.active {
+        background: var(--accent-200);
+        box-shadow: 0 2px 0.5em rgba(0, 0, 0, 0.25);
+        color: var(--primary-900);
+        text-shadow: none;
+      }
+    }
+  }
+
   .filters {
     box-shadow: inset 0 0 5em rgba(0, 0, 0, 0.3);
     flex: 1;

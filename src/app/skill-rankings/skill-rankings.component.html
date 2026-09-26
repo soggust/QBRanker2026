@@ -1,0 +1,104 @@
+<section class="rankings-wrapper spread">
+  <ul cdkDropList (cdkDropListDropped)="drop($event)">
+    @for (player of playerList; track player.gsisId; let i = $index) {
+      <li cdkDrag class="player">
+        <mat-icon
+          cdkDragHandle
+          aria-hidden="false"
+          aria-label="drag icon"
+          fontIcon="drag_indicator"
+          class="drag-indicator"
+        ></mat-icon>
+        <div class="player-info">
+          <span [ngClass]="getCountClasses(i)">{{ i + 1 }}</span>
+          <img [src]="player.teamLogo" class="team-logo" />
+          <p class="player-name">
+            <strong>{{ player.name }}</strong>
+          </p>
+        </div>
+
+        @for (stat of stats; track stat.key) {
+          @if (isShown(stat)) {
+            <div>
+              <p>{{ format(player, stat) }}</p>
+              <p class="stat-label" [title]="stat.description">
+                {{ stat.label }}
+              </p>
+            </div>
+          }
+        }
+      </li>
+    }
+  </ul>
+
+  <!-- Footer -->
+  <footer>
+    <mat-icon
+      aria-hidden="false"
+      aria-label="football icon"
+      fontIcon="sports_football"
+      class="sports-football"
+    ></mat-icon>
+    <h1>2026 {{ position }} Ranker</h1>
+    <p class="small">
+      Min Games: {{ getMinGames() }} | Stats courtesy of
+      <a href="https://github.com/nflverse" target="_blank" rel="noopener">nflverse</a>
+    </p>
+
+    <!-- Clipboard -->
+    <button
+      (click)="copyPlayerListToClipboard()"
+      aria-label="Copy To Clipboard Button"
+      style="margin-left: auto; margin-right: 1em"
+    >
+      <mat-icon
+        aria-hidden="false"
+        aria-label="Copy To Clipboard Icon"
+        fontIcon="content_copy"
+      ></mat-icon>
+    </button>
+
+    <!-- Toast -->
+    <div class="toast" [class.show]="isToastVisible">Copied!</div>
+
+    <!-- Settings Icon -->
+    <button
+      class="settings-toggle"
+      [matMenuTriggerFor]="menu"
+      aria-label="Settings menu"
+    >
+      <mat-icon aria-hidden="false" aria-label="Settings Icon" fontIcon="settings"></mat-icon>
+    </button>
+
+    <!-- Menu -->
+    <mat-menu #menu="matMenu" class="settings-menu">
+      <div
+        mat-menu-item
+        (click)="$event.stopPropagation(); perGame = !perGame; sortPlayers()"
+      >
+        <!-- Per Game Stats-->
+        <mat-slide-toggle
+          color="accent"
+          class="slide-toggle"
+          [(ngModel)]="perGame"
+          (ngModelChange)="sortPlayers()"
+          (click)="$event.stopPropagation()"
+        ></mat-slide-toggle>
+        <span>Use Per Game Stats</span>
+      </div>
+      <div
+        mat-menu-item
+        (click)="$event.stopPropagation(); showUnused = !showUnused"
+      >
+        <!-- Show Unused Stats -->
+        <mat-slide-toggle
+          color="accent"
+          class="slide-toggle"
+          [(ngModel)]="showUnused"
+          (click)="$event.stopPropagation()"
+        ></mat-slide-toggle>
+        <span>Show Unused Stats</span>
+      </div>
+    </mat-menu>
+  </footer>
+</section>

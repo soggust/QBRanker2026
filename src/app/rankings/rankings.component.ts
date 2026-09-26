@@ -3,6 +3,7 @@ import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { FilterService } from '../services/filter.service';
 import { EspnApiService } from 'app/services/espn-api.service';
 import { Filters, Player } from 'app/types';
+import { copyRankingsToClipboard } from 'app/utils/clipboard';
 
 @Component({
   selector: 'rankings',
@@ -399,53 +400,9 @@ export class RankingsComponent {
 
   // Copy Player Names
   copyPlayerListToClipboard() {
-    const baseURL = 'https://qbranker2026.web.app'; // Base URL
-
-    const playerNamesWithNumbersPlain = this.playerList
-      .map((player, index) => {
-        const number = index + 1;
-        const playerName = `${number}. ${player.name}`; // Plain text version
-
-        // Add an extra blank line every 10 players
-        return number % 10 === 0 ? `${playerName}\n` : playerName;
-      })
-      .join('\n'); // Plain text new lines
-
-    const playerNamesWithNumbersHTML = this.playerList
-      .map((player, index) => {
-        const number = index + 1;
-
-        // Add an img tag for the team logo with the full URL
-        const teamLogo = `<img src="${baseURL}/${player.teamLogo}" alt="${player.teamLogo}" loading="lazy" height="16px" width="auto">`;
-
-        const playerName = `${number}.  ${teamLogo}  <b>${player.name}</b>`;
-
-        // Add an extra blank line every 5 players
-        return number % 5 === 0 ? `${playerName}<br>` : playerName;
-      })
-      .join('<br>'); // HTML line breaks
-
-    // Wrap in a div for copying as HTML
-    const htmlContent = `<div>${playerNamesWithNumbersHTML}</div>`;
-
-    const plainTextBlob = new Blob([playerNamesWithNumbersPlain], {
-      type: 'text/plain',
-    });
-    const htmlBlob = new Blob([htmlContent], { type: 'text/html' });
-
-    const clipboardItem = new ClipboardItem({
-      'text/plain': plainTextBlob, // Plain text for Notepad
-      'text/html': htmlBlob, // HTML for web forums
-    });
-
-    navigator.clipboard
-      .write([clipboardItem])
-      .then(() => {
-        this.showToast();
-      })
-      .catch((err) => {
-        console.error('Failed to copy: ', err);
-      });
+    copyRankingsToClipboard(this.playerList)
+      .then(() => this.showToast())
+      .catch((err) => console.error('Failed to copy: ', err));
   }
 
   // Show toast for 2 seconds

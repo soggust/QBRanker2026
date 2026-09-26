@@ -6,6 +6,9 @@
 // are aggregated from nflverse play-by-play. Hand-set scores live in
 // subjective.json; any new QB is added there with starter values to review.
 //
+// RB/WR/TE lists and season stats come from nflverse player stats and are
+// written to skill-players.json (top players at each position by usage).
+//
 // Usage: npm run update-data            (season defaults to 2026)
 //        SEASON=2027 npm run update-data
 
@@ -18,6 +21,7 @@ const SITE = 'https://site.api.espn.com/apis/site/v2/sports/football/nfl';
 const DATA_DIR = new URL('../src/StaticData/', import.meta.url);
 const GAMES_FILE = new URL('games.json', DATA_DIR);
 const SUBJECTIVE_FILE = new URL('subjective.json', DATA_DIR);
+const SKILL_FILE = new URL('skill-players.json', DATA_DIR);
 const DEFAULT_SCORE = 6;
 const NFLVERSE = 'https://github.com/nflverse/nflverse-data/releases/download';
 
@@ -88,17 +92,26 @@ async function getCsvGz(url) {
 const mean = (values) =>
   values.length ? Number((values.reduce((a, b) => a + b, 0) / values.length).toFixed(3)) : null;
 
-// EPA/play and success rate cover the QB's dropbacks and runs; CPOE covers pass attempts.
-// Returns a Map of ESPN id -> { epaPerPlay, cpoe, successRate, plays }
-async function advancedStats(espnIds) {
-  const [players, pbp] = await Promise.all([
+const num = (v) => (v === undefined || v === '' || v === 'NA' ? null : Number(v));
+
+async function loadNflverse() {
+  const [players, pbp, playerStats] = await Promise.all([
     getCsvGz(`${NFLVERSE}/players/players.csv.gz`),
     getCsvGz(`${NFLVERSE}/pbp/play_by_play_${SEASON}.csv.gz`),
+    getCsvGz(`${NFLVERSE}/stats_player/stats_player_reg_${SEASON}.csv.gz`),
   ]);
-  const gsisByEspn = new Map(
-    players.filter((p) => p.espn_id && p.espn_id !== 'NA').map((p) => [Number(p.espn_id), p.gsis_id])
-  );
-  const num = (v) => (v === undefined || v === '' || v === 'NA' ? null : Number(v));
+  const espnIds = players.filter((p) => p.espn_id && p.espn_id !== 'NA');
+  return {
+    pbp,
+    playerStats,
+    gsisByEspn: new Map(espnIds.map((p) => [Number(p.espn_id), p.gsis_id])),
+    espnByGsis: new Map(espnIds.map((p) => [p.gsis_id, Number(p.espn_id)])),
+  };
+}
+
+// EPA/play and success rate cover the QB's dropbacks and runs; CPOE covers pass attempts.
+// Returns a Map of ESPN id -> { epaPerPlay, cpoe, successRate, plays }
+function advancedStats(espnIds, { pbp, gsisByEspn }) {
   const plays = pbp.filter((play) => play.season_type === 'REG' && (play.pass === '1' || play.rush === '1'));
 
   const stats = new Map();
@@ -115,6 +128,72 @@ async function advancedStats(espnIds) {
     });
   }
   return stats;
+}
+
+// nflverse team abbreviations -> logo file names in src/assets/NFL_Icons
+const TEAM_ICONS = {
+  ARI: 'Cardinals', ATL: 'Falcons', BAL: 'Ravens', BUF: 'Bills', CAR: 'Panthers', CHI: 'Bears',
+  CIN: 'Bengals', CLE: 'Browns', DAL: 'Cowboys', DEN: 'Broncos', DET: 'Lions', GB: 'Packers',
+  HOU: 'Texans', IND: 'Colts', JAX: 'Jaguars', KC: 'Chiefs', LA: 'Rams', LAC: 'Chargers',
+  LV: 'Raiders', MIA: 'Dolphins', MIN: 'Vikings', NE: 'Patriots', NO: 'Saints', NYG: 'Giants',
+  NYJ: 'Jets', PHI: 'Eagles', PIT: 'Steelers', SEA: 'Seahawks', SF: '49ers', TB: 'Bucs',
+  TEN: 'Titans', WAS: 'Commanders',
+};
+
+// How many players to list per position, ranked by usage
+const SKILL_POSITIONS = {
+  RB: { count: 40, usage: (s) => s.carries + s.targets },
+  WR: { count: 50, usage: (s) => s.targets },
+  TE: { count: 32, usage: (s) => s.targets },
+};
+
+const round = (value, digits) => Number(value.toFixed(digits));
+const ratio = (a, b, digits = 3) => (b ? round(a / b, digits) : 0);
+
+// Season totals for RB/WR/TE from nflverse, plus a few derived rates
+function skillPlayers({ playerStats, espnByGsis }) {
+  const result = {};
+  for (const [position, { count, usage }] of Object.entries(SKILL_POSITIONS)) {
+    result[position] = playerStats
+      .filter((row) => row.position === position)
+      .map((row) => {
+        const n = (key) => num(row[key]) ?? 0;
+        const icon = TEAM_ICONS[row.recent_team];
+        if (!icon) throw new Error(`Unknown team abbreviation "${row.recent_team}" for ${row.player_display_name}`);
+        const stats = {
+          carries: n('carries'),
+          rushYards: n('rushing_yards'),
+          rushTds: n('rushing_tds'),
+          targets: n('targets'),
+          receptions: n('receptions'),
+          recYards: n('receiving_yards'),
+          recTds: n('receiving_tds'),
+          yac: n('receiving_yards_after_catch'),
+          firstDowns: n('rushing_first_downs') + n('receiving_first_downs'),
+          fumbles: n('rushing_fumbles_lost') + n('receiving_fumbles_lost'),
+          targetShare: round(n('target_share'), 3),
+        };
+        return {
+          id: espnByGsis.get(row.player_id) ?? null,
+          gsisId: row.player_id,
+          name: row.player_display_name,
+          teamLogo: `../assets/NFL_Icons/${icon}.png`,
+          games: n('games'),
+          stats: {
+            ...stats,
+            ypc: ratio(stats.rushYards, stats.carries, 2),
+            totalTds: stats.rushTds + stats.recTds,
+            catchPct: ratio(stats.receptions, stats.targets),
+            epaPerCarry: ratio(n('rushing_epa'), stats.carries),
+            epaPerTarget: ratio(n('receiving_epa'), stats.targets),
+          },
+        };
+      })
+      .sort((a, b) => usage(b.stats) - usage(a.stats))
+      .slice(0, count)
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }
+  return result;
 }
 
 async function completedGames() {
@@ -195,10 +274,19 @@ async function main() {
   // nflverse can lag ESPN or be briefly unavailable; keep the last known values rather than failing
   const previous = JSON.parse(await readFile(GAMES_FILE, 'utf8').catch(() => '[]'));
   let advanced = new Map();
+  let skill = null;
   try {
-    advanced = await advancedStats(gameData.map((qb) => qb.id));
+    const nflverse = await loadNflverse();
+    advanced = advancedStats(gameData.map((qb) => qb.id), nflverse);
+    skill = skillPlayers(nflverse);
   } catch (err) {
-    console.warn(`Could not load nflverse advanced stats, keeping previous values: ${err.message}`);
+    console.warn(`Could not load nflverse data, keeping previous values: ${err.message}`);
+  }
+  if (skill) {
+    await writeFile(SKILL_FILE, JSON.stringify(skill, null, 2) + '\n');
+    console.log(
+      `Wrote skill players: ${Object.entries(skill).map(([pos, list]) => `${list.length} ${pos}`).join(', ')}`
+    );
   }
   for (const qb of gameData) {
     qb.advanced = advanced.get(qb.id) ?? previous.find((p) => p.id === qb.id)?.advanced ?? null;
