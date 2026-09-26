@@ -6,6 +6,6 @@ import { Pipe, PipeTransform } from '@angular/core';
 })
 export class FormatRecentGamesPipe implements PipeTransform {
   transform(value: number): string {
-    return value === 1 ? 'W' : 'L';
+    return value === 1 ? 'W' : value === 0.5 ? 'T' : 'L';
   }
 }

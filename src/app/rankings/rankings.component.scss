@@ -663,6 +663,8 @@ section ul {
 
   // Row hover and the column band (ColumnHighlightDirective) share one tint
   li:hover {
+    // Keep the card color; the white tint comes from the inset shadow, like the column band
+    background: color-mix(in srgb, var(--primary-800) 72%, transparent);
     box-shadow:
       inset 0 0 0 100vmax rgba(255, 255, 255, 0.08),
       0 2px 6px rgba(0, 0, 0, 0.25);
@@ -716,6 +718,16 @@ section ul {
 
       &.red {
         background: hsl(350 90% 72% / 0.85);
+      }
+
+      &.tie {
+        background: #ffd54a;
+      }
+
+      // Games not played yet: an empty ring
+      &.unplayed {
+        background: none;
+        box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.35);
       }
     }
 

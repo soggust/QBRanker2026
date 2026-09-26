@@ -339,9 +339,12 @@
           <div class="last-five">
             <div>
               @for (result of player.lastFive; track $index) {
-                <p [ngClass]="result === 1 ? 'green' : 'red'">
+                <p [ngClass]="result === 1 ? 'green' : result === 0.5 ? 'tie' : 'red'">
                   {{ result | formatRecentGames }}
                 </p>
+              }
+              @for (slot of unplayedGames(player.lastFive); track $index) {
+                <p class="unplayed">-</p>
               }
             </div>
             <p
@@ -551,7 +554,7 @@
       }
   </ng-template>
 
-  <ul cdkDropList (cdkDropListDropped)="drop($event)" columnHighlight>
+  <ul #rankingsList cdkDropList (cdkDropListDropped)="drop($event)" columnHighlight>
     @if (playerList.length < 1) {
       <h1 style="margin: 2em">LOADING...</h1>
     }

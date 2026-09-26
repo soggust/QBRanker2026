@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges } from '@angular/core';
+import { Component, Input, OnChanges, ElementRef, ViewChild } from '@angular/core';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { StaticData, gradesForTeam } from 'StaticData/StaticData';
 import {
@@ -38,6 +38,8 @@ function teamGrades(valueFor: (qbId: number) => number | undefined): Map<string,
   standalone: false,
 })
 export class SkillRankingsComponent implements OnChanges {
+  @ViewChild('rankingsList') rankingsList!: ElementRef<HTMLElement>;
+
   @Input({ required: true }) position!: SkillPosition;
 
   playerList: SkillPlayer[] = [];
@@ -175,7 +177,7 @@ export class SkillRankingsComponent implements OnChanges {
 
   // Copy Player Names
   copyPlayerListToClipboard() {
-    copyRankingsToClipboard(this.playerList)
+    copyRankingsToClipboard(this.rankingsList.nativeElement)
       .then(() => this.showToast())
       .catch((err) => console.error('Failed to copy: ', err));
   }

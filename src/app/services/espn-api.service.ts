@@ -109,7 +109,7 @@ export class EspnApiService {
       ties: staticData ? staticData.ties : 0,
       games: games,
       id: id,
-      lastFive: staticData ? staticData.lastFive : [0, 0, 0, 0, 0],
+      lastFive: staticData ? staticData.lastFive : [],
       injured: staticData ? staticData.injured : false,
       weapons: staticData ? staticData.weapons : 0,
       coaching: staticData ? staticData.coaching : 0,

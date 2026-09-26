@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ElementRef, ViewChild } from '@angular/core';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { FilterService } from '../services/filter.service';
 import { EspnApiService } from 'app/services/espn-api.service';
@@ -20,6 +20,8 @@ import {
   standalone: false,
 })
 export class RankingsComponent {
+  @ViewChild('rankingsList') rankingsList!: ElementRef<HTMLElement>;
+
   playerList: Player[] = [];
   unfilteredPlayerList: Player[] = [];
   filters: Filters = {
@@ -382,13 +384,21 @@ export class RankingsComponent {
   }
 
   // Calculate Recency Bias
+  // Weighted recent results (newest counts most), scaled to a full five games so unplayed
+  // games don't count as losses: 2-0 scores the same as 5-0
   calculateRecencyBias(games: number[]): number {
-    if (games.length !== 5) {
-      throw new Error('Array must have exactly 5 elements.');
-    }
-
     const weights = [1, 0.9, 0.8, 0.7, 0.6];
-    return games.reduce((sum, num, index) => sum + num * weights[index], 0);
+    const played = games.slice(0, 5);
+    if (!played.length) return 0;
+
+    const earned = played.reduce((sum, result, index) => sum + result * weights[index], 0);
+    const possible = played.reduce((sum, _, index) => sum + weights[index], 0);
+    return (earned / possible) * weights.reduce((a, b) => a + b, 0);
+  }
+
+  // Empty slots for recent games not played yet
+  unplayedGames(games: number[]): null[] {
+    return Array(Math.max(0, 5 - games.length)).fill(null);
   }
 
   getColor(value: number): string {
@@ -458,7 +468,7 @@ export class RankingsComponent {
 
   // Copy Player Names
   copyPlayerListToClipboard() {
-    copyRankingsToClipboard(this.playerList)
+    copyRankingsToClipboard(this.rankingsList.nativeElement)
       .then(() => this.showToast())
       .catch((err) => console.error('Failed to copy: ', err));
   }

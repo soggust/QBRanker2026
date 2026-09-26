@@ -548,8 +548,8 @@ async function main() {
         wins: count(1),
         losses: count(0),
         ties: count(0.5),
-        // Most recent first, padded to 5 (the recency calculation needs exactly 5)
-        lastFive: [...qb.results].reverse().concat([0, 0, 0, 0, 0]).slice(0, 5),
+        // Up to 5 most recent results, newest first (1 win, 0.5 tie, 0 loss); unplayed slots are left out
+        lastFive: [...qb.results].reverse().slice(0, 5),
         // Starts per team (keyed by logo path), used to weight team QB play for receivers
         starts: qb.starts,
       };

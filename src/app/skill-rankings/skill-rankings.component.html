@@ -1,5 +1,5 @@
 <section class="rankings-wrapper spread">
-  <ul cdkDropList (cdkDropListDropped)="drop($event)" columnHighlight>
+  <ul #rankingsList cdkDropList (cdkDropListDropped)="drop($event)" columnHighlight>
     <!-- Column headers -->
     <li class="player header-row" aria-hidden="true">
       <mat-icon fontIcon="drag_indicator" class="drag-indicator" style="visibility: hidden"></mat-icon>

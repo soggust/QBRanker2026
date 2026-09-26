@@ -314,7 +314,7 @@ export const SKILL_STATS: Record<SkillPosition, SkillStat[]> = {
       key: 'winsOverExpected',
       label: 'Wins Over Exp',
       description: 'Wins minus the wins implied by the betting lines before each game',
-      kind: 'volume',
+      kind: 'efficiency',
       format: 'dec2',
       signed: true,
     },

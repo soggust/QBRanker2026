@@ -9,10 +9,7 @@
     "ties": 0,
     "lastFive": [
       0,
-      1,
-      0,
-      0,
-      0
+      1
     ],
     "starts": {
       "../assets/NFL_Icons/Steelers.png": 2
@@ -37,9 +34,6 @@
     "losses": 2,
     "ties": 0,
     "lastFive": [
-      0,
-      0,
-      0,
       0,
       0
     ],
@@ -67,9 +61,6 @@
     "ties": 0,
     "lastFive": [
       1,
-      0,
-      0,
-      0,
       0
     ],
     "starts": {
@@ -96,10 +87,7 @@
     "ties": 0,
     "lastFive": [
       1,
-      1,
-      0,
-      0,
-      0
+      1
     ],
     "starts": {
       "../assets/NFL_Icons/49ers.png": 2
@@ -125,9 +113,6 @@
     "ties": 0,
     "lastFive": [
       1,
-      0,
-      0,
-      0,
       0
     ],
     "starts": {
@@ -153,9 +138,6 @@
     "losses": 2,
     "ties": 0,
     "lastFive": [
-      0,
-      0,
-      0,
       0,
       0
     ],
@@ -183,10 +165,7 @@
     "ties": 0,
     "lastFive": [
       0,
-      1,
-      0,
-      0,
-      0
+      1
     ],
     "starts": {
       "../assets/NFL_Icons/Bears.png": 2
@@ -211,9 +190,6 @@
     "losses": 2,
     "ties": 0,
     "lastFive": [
-      0,
-      0,
-      0,
       0,
       0
     ],
@@ -241,10 +217,7 @@
     "ties": 0,
     "lastFive": [
       1,
-      1,
-      0,
-      0,
-      0
+      1
     ],
     "starts": {
       "../assets/NFL_Icons/Vikings.png": 2
@@ -269,9 +242,6 @@
     "losses": 2,
     "ties": 0,
     "lastFive": [
-      0,
-      0,
-      0,
       0,
       0
     ],
@@ -299,9 +269,6 @@
     "ties": 0,
     "lastFive": [
       1,
-      0,
-      0,
-      0,
       0
     ],
     "starts": {
@@ -327,9 +294,6 @@
     "losses": 2,
     "ties": 0,
     "lastFive": [
-      0,
-      0,
-      0,
       0,
       0
     ],
@@ -357,9 +321,6 @@
     "ties": 0,
     "lastFive": [
       1,
-      0,
-      0,
-      0,
       0
     ],
     "starts": {
@@ -386,9 +347,6 @@
     "ties": 0,
     "lastFive": [
       1,
-      0,
-      0,
-      0,
       0
     ],
     "starts": {
@@ -415,10 +373,7 @@
     "ties": 0,
     "lastFive": [
       1,
-      1,
-      0,
-      0,
-      0
+      1
     ],
     "starts": {
       "../assets/NFL_Icons/Seahawks.png": 2
@@ -444,10 +399,7 @@
     "ties": 0,
     "lastFive": [
       0,
-      1,
-      0,
-      0,
-      0
+      1
     ],
     "starts": {
       "../assets/NFL_Icons/Jets.png": 2
@@ -473,10 +425,7 @@
     "ties": 0,
     "lastFive": [
       0,
-      1,
-      0,
-      0,
-      0
+      1
     ],
     "starts": {
       "../assets/NFL_Icons/Cardinals.png": 2
@@ -502,10 +451,7 @@
     "ties": 0,
     "lastFive": [
       1,
-      1,
-      0,
-      0,
-      0
+      1
     ],
     "starts": {
       "../assets/NFL_Icons/Eagles.png": 2
@@ -530,10 +476,6 @@
     "losses": 1,
     "ties": 0,
     "lastFive": [
-      0,
-      0,
-      0,
-      0,
       0
     ],
     "starts": {
@@ -560,10 +502,7 @@
     "ties": 0,
     "lastFive": [
       0,
-      1,
-      0,
-      0,
-      0
+      1
     ],
     "starts": {
       "../assets/NFL_Icons/Lions.png": 2
@@ -588,11 +527,7 @@
     "losses": 0,
     "ties": 0,
     "lastFive": [
-      1,
-      0,
-      0,
-      0,
-      0
+      1
     ],
     "starts": {
       "../assets/NFL_Icons/Giants.png": 1
@@ -617,9 +552,6 @@
     "losses": 2,
     "ties": 0,
     "lastFive": [
-      0,
-      0,
-      0,
       0,
       0
     ],
@@ -647,10 +579,7 @@
     "ties": 0,
     "lastFive": [
       1,
-      1,
-      0,
-      0,
-      0
+      1
     ],
     "starts": {
       "../assets/NFL_Icons/Bengals.png": 2
@@ -677,8 +606,6 @@
     "lastFive": [
       0,
       1,
-      0,
-      0,
       0
     ],
     "starts": {
@@ -705,10 +632,7 @@
     "ties": 0,
     "lastFive": [
       1,
-      1,
-      0,
-      0,
-      0
+      1
     ],
     "starts": {
       "../assets/NFL_Icons/Bills.png": 2
@@ -733,9 +657,6 @@
     "losses": 2,
     "ties": 0,
     "lastFive": [
-      0,
-      0,
-      0,
       0,
       0
     ],
@@ -763,10 +684,7 @@
     "ties": 0,
     "lastFive": [
       1,
-      1,
-      0,
-      0,
-      0
+      1
     ],
     "starts": {
       "../assets/NFL_Icons/Raiders.png": 2
@@ -792,10 +710,7 @@
     "ties": 0,
     "lastFive": [
       0,
-      1,
-      0,
-      0,
-      0
+      1
     ],
     "starts": {
       "../assets/NFL_Icons/Ravens.png": 2
@@ -820,9 +735,6 @@
     "losses": 2,
     "ties": 0,
     "lastFive": [
-      0,
-      0,
-      0,
       0,
       0
     ],
@@ -850,9 +762,6 @@
     "ties": 0,
     "lastFive": [
       1,
-      0,
-      0,
-      0,
       0
     ],
     "starts": {
@@ -878,11 +787,7 @@
     "losses": 0,
     "ties": 0,
     "lastFive": [
-      1,
-      0,
-      0,
-      0,
-      0
+      1
     ],
     "starts": {
       "../assets/NFL_Icons/Falcons.png": 1
@@ -908,10 +813,7 @@
     "ties": 0,
     "lastFive": [
       1,
-      1,
-      0,
-      0,
-      0
+      1
     ],
     "starts": {
       "../assets/NFL_Icons/Chiefs.png": 2
@@ -937,10 +839,7 @@
     "ties": 0,
     "lastFive": [
       0,
-      1,
-      0,
-      0,
-      0
+      1
     ],
     "starts": {
       "../assets/NFL_Icons/Jaguars.png": 2
@@ -966,9 +865,6 @@
     "ties": 0,
     "lastFive": [
       1,
-      0,
-      0,
-      0,
       0
     ],
     "starts": {
