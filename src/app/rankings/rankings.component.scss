@@ -688,6 +688,8 @@ section ul {
       opacity: 0.55;
       text-shadow: var(--text-shadow-small);
       margin-right: 0.35em;
+      // The heading font sits high in its line box; nudge it to center on the row
+      transform: translateY(0.1em);
       width: 1.6em;
     }
 

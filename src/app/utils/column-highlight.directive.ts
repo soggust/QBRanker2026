@@ -2,7 +2,7 @@ import { Directive, ElementRef, NgZone, OnDestroy, OnInit } from '@angular/core'
 
 // Crosshair highlight for the rankings list: the hovered row is styled with :hover, and this
 // lays a matching tint over the hovered column for the full height of the list (gaps included).
-// Grade boxes highlight just the hovered grade. Runs outside Angular so mouse movement
+// Grouped boxes (Recent, support grades) get no band. Runs outside Angular so mouse movement
 // doesn't trigger change detection.
 @Directive({
   selector: '[columnHighlight]',
@@ -49,16 +49,16 @@ export class ColumnHighlightDirective implements OnInit, OnDestroy {
     const list = this.host.nativeElement;
     let el = event.target as HTMLElement | null;
 
-    // The innermost cell: a grade inside a box, or a direct child of the row
+    // The row cell being hovered. No band for the header, the player name, the drag handle,
+    // or the grouped Recent / support boxes (the row highlight is enough there).
     let cell: HTMLElement | null = null;
     while (el && el !== list) {
       const parent = el.parentElement;
-      if (!cell && parent?.classList.contains('box')) cell = el;
       if (parent?.tagName === 'LI') {
-        cell = cell ?? el;
-        if (parent.classList.contains('header-row') || el.classList.contains('player-info')) {
-          cell = null;
-        }
+        const skip =
+          parent.classList.contains('header-row') ||
+          ['player-info', 'drag-indicator', 'box'].some((name) => el!.classList.contains(name));
+        cell = skip ? null : el;
         break;
       }
       el = parent;

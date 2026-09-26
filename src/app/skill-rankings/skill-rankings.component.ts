@@ -171,10 +171,6 @@ export class SkillRankingsComponent implements OnChanges {
     return 'count';
   }
 
-  getMinGames() {
-    return this.playerList.length ? Math.min(...this.playerList.map((p) => p.games)) : null;
-  }
-
   // Copy Player Names
   copyPlayerListToClipboard() {
     copyRankingsToClipboard(this.rankingsList.nativeElement)

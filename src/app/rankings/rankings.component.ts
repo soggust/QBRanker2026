@@ -448,24 +448,6 @@ export class RankingsComponent {
     return numberOfWins;
   }
 
-  // Get Number of Recent Wins
-  getMinGames() {
-    if (this.playerList.length === 0) {
-      // Handle the case when the array is empty
-      return null;
-    }
-
-    let lowestGames = this.playerList[0].games;
-
-    for (let i = 1; i < this.playerList.length; i++) {
-      if (this.playerList[i].games < lowestGames) {
-        lowestGames = this.playerList[i].games;
-      }
-    }
-
-    return lowestGames;
-  }
-
   // Copy Player Names
   copyPlayerListToClipboard() {
     copyRankingsToClipboard(this.rankingsList.nativeElement)
