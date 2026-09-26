@@ -6,7 +6,7 @@
 // are aggregated from nflverse play-by-play. Hand-set scores live in
 // subjective.json; any new QB is added there with starter values to review.
 //
-// RB/WR/TE lists and season stats come from nflverse player stats and are
+// RB/WR/TE/K/P lists and season stats come from nflverse player stats and are
 // written to skill-players.json (top players at each position by usage).
 //
 // Usage: npm run update-data            (season defaults to 2026)
@@ -144,58 +144,125 @@ const TEAM_ICONS = {
   TEN: 'Titans', WAS: 'Commanders',
 };
 
-// How many players to list per position, ranked by usage
-const SKILL_POSITIONS = {
-  RB: { count: 40, usage: (s) => s.carries + s.targets },
-  WR: { count: 50, usage: (s) => s.targets },
-  TE: { count: 32, usage: (s) => s.targets },
-};
-
 const round = (value, digits) => Number(value.toFixed(digits));
 const ratio = (a, b, digits = 3) => (b ? round(a / b, digits) : 0);
 
-// Season totals for RB/WR/TE from nflverse, plus a few derived rates
-function skillPlayers({ playerStats, espnByGsis }) {
+// RB/WR/TE season totals plus a few derived rates
+function offenseStats(n) {
+  const stats = {
+    carries: n('carries'),
+    rushYards: n('rushing_yards'),
+    rushTds: n('rushing_tds'),
+    targets: n('targets'),
+    receptions: n('receptions'),
+    recYards: n('receiving_yards'),
+    recTds: n('receiving_tds'),
+    yac: n('receiving_yards_after_catch'),
+    firstDowns: n('rushing_first_downs') + n('receiving_first_downs'),
+    fumbles: n('rushing_fumbles_lost') + n('receiving_fumbles_lost'),
+    targetShare: round(n('target_share'), 3),
+    fantasyStd: round(n('fantasy_points'), 2),
+  };
+  return {
+    ...stats,
+    ypc: ratio(stats.rushYards, stats.carries, 2),
+    totalTds: stats.rushTds + stats.recTds,
+    catchPct: ratio(stats.receptions, stats.targets),
+    epaPerCarry: ratio(n('rushing_epa'), stats.carries),
+    epaPerTarget: ratio(n('receiving_epa'), stats.targets),
+  };
+}
+
+// nflverse fantasy points leave out kicking, so kickers use standard scoring:
+// FG 0-39 = 3, 40-49 = 4, 50+ = 5, XP = 1, missed FG or XP = -1
+function kickerStats(n, epa) {
+  const fgMade = n('fg_made');
+  const fgAtt = n('fg_att');
+  const patMade = n('pat_made');
+  const patAtt = n('pat_att');
+  const fg50 = n('fg_made_50_59') + n('fg_made_60_');
+  const fgUnder40 = n('fg_made_0_19') + n('fg_made_20_29') + n('fg_made_30_39');
+  return {
+    fgMade,
+    fgAtt,
+    patAtt,
+    fgPct: ratio(fgMade, fgAtt),
+    fg50,
+    fgLong: n('fg_long'),
+    patPct: ratio(patMade, patAtt),
+    epaPerKick: epa,
+    fantasyStd: fgUnder40 * 3 + n('fg_made_40_49') * 4 + fg50 * 5 + patMade - (fgAtt - fgMade) - (patAtt - patMade),
+    receptions: 0,
+  };
+}
+
+function punterStats(n, epa) {
+  const punts = n('pt_att');
+  return {
+    punts,
+    grossAvg: ratio(n('pt_yards'), punts, 1),
+    netAvg: ratio(n('pt_net_yards'), punts, 1),
+    inside20: n('pt_inside_20'),
+    inside20Pct: ratio(n('pt_inside_20'), punts),
+    touchbacks: n('pt_touchback'),
+    epaPerPunt: epa,
+  };
+}
+
+// Players listed per position (top N by usage) and how their stats are built
+const SKILL_POSITIONS = {
+  RB: { count: 40, usage: (s) => s.carries + s.targets, stats: offenseStats },
+  WR: { count: 50, usage: (s) => s.targets, stats: offenseStats },
+  TE: { count: 32, usage: (s) => s.targets, stats: offenseStats },
+  K: { count: 32, usage: (s) => s.fgAtt + s.patAtt, stats: kickerStats, epa: 'kicks' },
+  P: { count: 32, usage: (s) => s.punts, stats: punterStats, epa: 'punts' },
+};
+
+// EPA per kick (FG + XP attempts) and per punt, keyed by nflverse player id
+function specialTeamsEpa(pbp) {
+  const perPlayer = (plays, idKey) => {
+    const byPlayer = new Map();
+    for (const play of plays) {
+      const id = play[idKey];
+      const epa = num(play.epa);
+      if (!id || id === 'NA' || epa === null) continue;
+      byPlayer.set(id, [...(byPlayer.get(id) ?? []), epa]);
+    }
+    return new Map([...byPlayer].map(([id, values]) => [id, mean(values)]));
+  };
+  const reg = pbp.filter((play) => play.season_type === 'REG');
+  return {
+    kicks: perPlayer(
+      reg.filter((play) => play.field_goal_attempt === '1' || play.extra_point_attempt === '1'),
+      'kicker_player_id'
+    ),
+    punts: perPlayer(reg.filter((play) => play.punt_attempt === '1'), 'punter_player_id'),
+  };
+}
+
+// Season stats for non-QB positions from nflverse
+function skillPlayers({ playerStats, pbp, espnByGsis }) {
+  const stEpa = specialTeamsEpa(pbp);
   const result = {};
-  for (const [position, { count, usage }] of Object.entries(SKILL_POSITIONS)) {
+  for (const [position, config] of Object.entries(SKILL_POSITIONS)) {
     result[position] = playerStats
       .filter((row) => row.position === position)
       .map((row) => {
         const n = (key) => num(row[key]) ?? 0;
         const icon = TEAM_ICONS[row.recent_team];
         if (!icon) throw new Error(`Unknown team abbreviation "${row.recent_team}" for ${row.player_display_name}`);
-        const stats = {
-          carries: n('carries'),
-          rushYards: n('rushing_yards'),
-          rushTds: n('rushing_tds'),
-          targets: n('targets'),
-          receptions: n('receptions'),
-          recYards: n('receiving_yards'),
-          recTds: n('receiving_tds'),
-          yac: n('receiving_yards_after_catch'),
-          firstDowns: n('rushing_first_downs') + n('receiving_first_downs'),
-          fumbles: n('rushing_fumbles_lost') + n('receiving_fumbles_lost'),
-          targetShare: round(n('target_share'), 3),
-          fantasyStd: round(n('fantasy_points'), 2),
-        };
+        const epa = config.epa ? (stEpa[config.epa].get(row.player_id) ?? 0) : undefined;
         return {
           id: espnByGsis.get(row.player_id) ?? null,
           gsisId: row.player_id,
           name: row.player_display_name,
           teamLogo: `../assets/NFL_Icons/${icon}.png`,
           games: n('games'),
-          stats: {
-            ...stats,
-            ypc: ratio(stats.rushYards, stats.carries, 2),
-            totalTds: stats.rushTds + stats.recTds,
-            catchPct: ratio(stats.receptions, stats.targets),
-            epaPerCarry: ratio(n('rushing_epa'), stats.carries),
-            epaPerTarget: ratio(n('receiving_epa'), stats.targets),
-          },
+          stats: config.stats(n, epa),
         };
       })
-      .sort((a, b) => usage(b.stats) - usage(a.stats))
-      .slice(0, count)
+      .sort((a, b) => config.usage(b.stats) - config.usage(a.stats))
+      .slice(0, config.count)
       .sort((a, b) => a.name.localeCompare(b.name));
   }
   return result;

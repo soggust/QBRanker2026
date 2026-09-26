@@ -9,6 +9,7 @@ import {
   SkillPreset,
   SkillStat,
   SkillWeights,
+  hasFantasy,
   presetWeights,
 } from 'app/positions';
 
@@ -59,6 +60,8 @@ export class SidebarComponent {
     RB: 'default',
     WR: 'default',
     TE: 'default',
+    K: 'default',
+    P: 'default',
   };
 
   constructor(
@@ -80,6 +83,11 @@ export class SidebarComponent {
 
   get skillPosition(): SkillPosition | null {
     return this.position === 'QB' ? null : this.position;
+  }
+
+  // Punters have no fantasy points, so no Fantasy preset
+  get skillHasFantasy(): boolean {
+    return !!this.skillPosition && hasFantasy(this.skillPosition);
   }
 
   onSkillPresetChange(): void {

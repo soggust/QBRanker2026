@@ -11,6 +11,7 @@ import {
   SkillStat,
   SkillWeights,
   fantasyPoints,
+  hasFantasy,
 } from 'app/positions';
 import { PositionService } from 'app/services/position.service';
 import { copyRankingsToClipboard } from 'app/utils/clipboard';
@@ -52,6 +53,7 @@ export class SkillRankingsComponent implements OnChanges {
   fantasyScoring: FantasyScoring = 'ppr';
   scoringLabels = FANTASY_SCORING_LABELS;
   teamQbPlay = new Map<string, number>();
+  hasFantasy: boolean = true;
 
   constructor(private positionService: PositionService) {
     this.positionService.weights$.subscribe((weights) => {
@@ -82,6 +84,7 @@ export class SkillRankingsComponent implements OnChanges {
 
   ngOnChanges(): void {
     this.stats = SKILL_STATS[this.position];
+    this.hasFantasy = hasFantasy(this.position);
     this.playerList = [...PLAYERS[this.position]];
     this.weights = this.positionService.getWeights(this.position);
     this.sortPlayers();
@@ -153,10 +156,11 @@ export class SkillRankingsComponent implements OnChanges {
         return this.grade(value);
       case 'pct':
         return `${Math.round(value * 100)}%`;
+      // + 0 turns -0 into 0 so tiny negatives don't show as "-0.00"
       case 'dec1':
-        return value.toFixed(1);
+        return (Number(value.toFixed(1)) + 0).toFixed(1);
       case 'dec2':
-        return value.toFixed(2);
+        return (Number(value.toFixed(2)) + 0).toFixed(2);
       default:
         return perGameVolume ? value.toFixed(1) : value.toLocaleString('en-US');
     }

@@ -99,11 +99,13 @@
         ></mat-slide-toggle>
         <span>Show Unused Stats</span>
       </div>
+      @if (hasFantasy) {
       <div mat-menu-item (click)="$event.stopPropagation(); cycleFantasyScoring()">
         <!-- Fantasy Scoring -->
         <mat-icon fontIcon="emoji_events" class="menu-icon"></mat-icon>
         <span>Fantasy: {{ scoringLabels[fantasyScoring] }}</span>
       </div>
+      }
     </mat-menu>
   </footer>
 </section>

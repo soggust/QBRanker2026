@@ -27,6 +27,8 @@ export class PositionService {
     RB: presetWeights('RB', 'default'),
     WR: presetWeights('WR', 'default'),
     TE: presetWeights('TE', 'default'),
+    K: presetWeights('K', 'default'),
+    P: presetWeights('P', 'default'),
   });
   public weights$ = this.weightsSubject.asObservable();
 

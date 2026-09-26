@@ -1,7 +1,8 @@
-export type Position = 'QB' | 'RB' | 'WR' | 'TE';
+export type Position = 'QB' | 'RB' | 'WR' | 'TE' | 'K' | 'P';
+// Every position except QB, which has its own page; all use the config-driven table below
 export type SkillPosition = Exclude<Position, 'QB'>;
 
-export const POSITIONS: Position[] = ['QB', 'RB', 'WR', 'TE'];
+export const POSITIONS: Position[] = ['QB', 'RB', 'WR', 'TE', 'K', 'P'];
 
 // Keys of the stats object in skill-players.json
 export type SkillStatKey =
@@ -21,7 +22,24 @@ export type SkillStatKey =
   | 'catchPct'
   | 'epaPerCarry'
   | 'epaPerTarget'
-  | 'fantasyStd';
+  | 'fantasyStd'
+  // Kickers
+  | 'fgMade'
+  | 'fgAtt'
+  | 'patAtt'
+  | 'fgPct'
+  | 'fg50'
+  | 'fgLong'
+  | 'patPct'
+  | 'epaPerKick'
+  // Punters
+  | 'punts'
+  | 'grossAvg'
+  | 'netAvg'
+  | 'inside20'
+  | 'inside20Pct'
+  | 'touchbacks'
+  | 'epaPerPunt';
 
 // Columns computed in the app: fantasy points in the chosen scoring, and team support grades
 export type SkillColumnKey = SkillStatKey | 'fantasy' | 'oline' | 'qbPlay';
@@ -156,7 +174,65 @@ export const SKILL_STATS: Record<SkillPosition, SkillStat[]> = {
   ],
   WR: RECEIVING_STATS,
   TE: RECEIVING_STATS,
+  K: [
+    { key: 'fgMade', label: 'FG Made', description: 'Field goals made', kind: 'volume', format: 'int' },
+    { key: 'fgPct', label: 'FG %', description: 'Field goal percentage', kind: 'efficiency', format: 'pct' },
+    { key: 'fg50', label: '50+ Made', description: 'Field goals made from 50+ yards', kind: 'volume', format: 'int' },
+    { key: 'fgLong', label: 'Long', description: 'Longest field goal', kind: 'efficiency', format: 'int' },
+    { key: 'patPct', label: 'XP %', description: 'Extra point percentage', kind: 'efficiency', format: 'pct' },
+    {
+      key: 'epaPerKick',
+      label: 'EPA / Kick',
+      description: 'Expected Points Added per field goal and extra point attempt',
+      kind: 'efficiency',
+      format: 'dec2',
+      signed: true,
+    },
+    {
+      ...FANTASY_STAT,
+      description: 'Standard kicker scoring: FG 3/4/5 by distance, XP 1, misses -1',
+    },
+  ],
+  P: [
+    { key: 'punts', label: 'Punts', description: 'Punts', kind: 'volume', format: 'int' },
+    { key: 'grossAvg', label: 'Gross Avg', description: 'Yards per punt', kind: 'efficiency', format: 'dec1' },
+    {
+      key: 'netAvg',
+      label: 'Net Avg',
+      description: 'Net yards per punt (after returns and touchbacks)',
+      kind: 'efficiency',
+      format: 'dec1',
+    },
+    { key: 'inside20', label: 'Inside 20', description: 'Punts downed inside the 20', kind: 'volume', format: 'int' },
+    {
+      key: 'inside20Pct',
+      label: 'In-20 %',
+      description: 'Share of punts downed inside the 20',
+      kind: 'efficiency',
+      format: 'pct',
+    },
+    {
+      key: 'epaPerPunt',
+      label: 'EPA / Punt',
+      description: 'Expected Points Added per punt (for the punting team)',
+      kind: 'efficiency',
+      format: 'dec2',
+      signed: true,
+    },
+    {
+      key: 'touchbacks',
+      label: 'Touchbacks',
+      description: 'Punts into the end zone',
+      kind: 'volume',
+      format: 'int',
+      negative: true,
+    },
+  ],
 };
+
+export function hasFantasy(position: SkillPosition): boolean {
+  return SKILL_STATS[position].some((stat) => stat.key === 'fantasy');
+}
 
 // Default: everything at 50. Volume/Efficiency lean one way; penalties and support stay at 50.
 // Fantasy ranks purely on fantasy points.

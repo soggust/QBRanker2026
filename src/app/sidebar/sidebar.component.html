@@ -25,7 +25,9 @@
           <mat-option value="default">DEFAULTS</mat-option>
           <mat-option value="volume">VOLUME</mat-option>
           <mat-option value="efficiency">EFFICIENCY</mat-option>
-          <mat-option value="fantasy">FANTASY</mat-option>
+          @if (skillHasFantasy) {
+            <mat-option value="fantasy">FANTASY</mat-option>
+          }
         </mat-select>
       </div>
 

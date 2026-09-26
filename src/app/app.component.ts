@@ -28,6 +28,8 @@ export class AppComponent {
     RB: 'Running Backs',
     WR: 'Wide Receivers',
     TE: 'Tight Ends',
+    K: 'Kickers',
+    P: 'Punters',
   };
 
   sidebarCollapsed: boolean = readCollapsed();
