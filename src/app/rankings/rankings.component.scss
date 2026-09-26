@@ -194,7 +194,7 @@ section {
             font-weight: normal;
             letter-spacing: 0.25px;
             text-transform: uppercase;
-            opacity: 0.75;
+            opacity: 0.95;
             z-index: 2;
 
             &:hover {
@@ -472,7 +472,7 @@ section {
         letter-spacing: 0.25px;
         text-transform: uppercase;
         color: #fff9e7;
-        opacity: 0.75;
+        opacity: 0.95;
         z-index: 2;
         cursor: help;
 
@@ -614,6 +614,7 @@ section {
     }
 
     footer {
+      padding-top: 1.25em;
       width: 100%;
 
       .ghost-div,

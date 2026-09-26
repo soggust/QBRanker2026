@@ -1,8 +1,9 @@
-export type Position = 'QB' | 'RB' | 'WR' | 'TE' | 'K' | 'P';
-// Every position except QB, which has its own page; all use the config-driven table below
+export type Position = 'QB' | 'RB' | 'WR' | 'TE' | 'K' | 'P' | 'DEF' | 'HC';
+// Everything except QB, which has its own page; all use the config-driven table below
+// (DEF rows are team defenses and HC rows are head coaches)
 export type SkillPosition = Exclude<Position, 'QB'>;
 
-export const POSITIONS: Position[] = ['QB', 'RB', 'WR', 'TE', 'K', 'P'];
+export const POSITIONS: Position[] = ['QB', 'RB', 'WR', 'TE', 'K', 'P', 'DEF', 'HC'];
 
 // Keys of the stats object in skill-players.json
 export type SkillStatKey =
@@ -39,7 +40,24 @@ export type SkillStatKey =
   | 'inside20'
   | 'inside20Pct'
   | 'touchbacks'
-  | 'epaPerPunt';
+  | 'epaPerPunt'
+  // Defenses
+  | 'epaAllowed'
+  | 'passEpaAllowed'
+  | 'rushEpaAllowed'
+  | 'successAllowed'
+  | 'sacks'
+  | 'takeaways'
+  | 'ptsAllowedPerGame'
+  // Head coaches
+  | 'wins'
+  | 'losses'
+  | 'ties'
+  | 'winPct'
+  | 'winsOverExpected'
+  | 'atsPct'
+  | 'fourthGoRate'
+  | 'netEpa';
 
 // Columns computed in the app: fantasy points in the chosen scoring, and team support grades
 export type SkillColumnKey = SkillStatKey | 'fantasy' | 'oline' | 'qbPlay';
@@ -73,8 +91,9 @@ export interface SkillStat {
   description: string;
   // Volume stats scale with games played (and can be shown per game); efficiency stats are rates
   kind: 'volume' | 'efficiency';
-  format: 'int' | 'dec1' | 'dec2' | 'pct' | 'grade';
-  // Can go negative, so it's scaled against the league range instead of the max
+  // 'record' shows W-L(-T) from the wins/losses/ties stats while ranking on the stat's value
+  format: 'int' | 'dec1' | 'dec2' | 'pct' | 'grade' | 'record';
+  // Scaled against the league range instead of the max (stats that can go negative, or bunch up)
   signed?: boolean;
   // Counts against the player (e.g. fumbles)
   negative?: boolean;
@@ -226,6 +245,100 @@ export const SKILL_STATS: Record<SkillPosition, SkillStat[]> = {
       kind: 'volume',
       format: 'int',
       negative: true,
+    },
+  ],
+  // Lower is better for everything "allowed", so those count against the defense
+  DEF: [
+    {
+      key: 'epaAllowed',
+      label: 'EPA / Play',
+      description: 'Expected Points Added per play allowed (lower is better)',
+      kind: 'efficiency',
+      format: 'dec2',
+      signed: true,
+      negative: true,
+    },
+    {
+      key: 'passEpaAllowed',
+      label: 'Pass EPA',
+      description: 'EPA per pass play allowed (lower is better)',
+      kind: 'efficiency',
+      format: 'dec2',
+      signed: true,
+      negative: true,
+    },
+    {
+      key: 'rushEpaAllowed',
+      label: 'Rush EPA',
+      description: 'EPA per run play allowed (lower is better)',
+      kind: 'efficiency',
+      format: 'dec2',
+      signed: true,
+      negative: true,
+    },
+    {
+      key: 'successAllowed',
+      label: 'Success %',
+      description: 'Share of plays where the offense gained positive EPA (lower is better)',
+      kind: 'efficiency',
+      format: 'pct',
+      signed: true,
+      negative: true,
+    },
+    { key: 'sacks', label: 'Sacks', description: 'Sacks', kind: 'volume', format: 'int' },
+    {
+      key: 'takeaways',
+      label: 'Takeaways',
+      description: 'Interceptions + fumbles recovered',
+      kind: 'volume',
+      format: 'int',
+    },
+    {
+      key: 'ptsAllowedPerGame',
+      label: 'Pts / Game',
+      description: 'Points allowed per game (lower is better)',
+      kind: 'efficiency',
+      format: 'dec1',
+      signed: true,
+      negative: true,
+    },
+    {
+      ...FANTASY_STAT,
+      description:
+        'Standard D/ST scoring: sack 1, takeaway 2, TD 6, safety 2, plus points-allowed tier each game',
+    },
+  ],
+  HC: [
+    { key: 'winPct', label: 'Record', description: 'Win-loss record', kind: 'efficiency', format: 'record' },
+    {
+      key: 'winsOverExpected',
+      label: 'Wins Over Exp',
+      description: 'Wins minus the wins implied by the betting lines before each game',
+      kind: 'volume',
+      format: 'dec2',
+      signed: true,
+    },
+    {
+      key: 'atsPct',
+      label: 'ATS %',
+      description: 'Share of games covering the point spread (pushes excluded)',
+      kind: 'efficiency',
+      format: 'pct',
+    },
+    {
+      key: 'fourthGoRate',
+      label: '4th & Short Go %',
+      description: 'How often the team goes for it on 4th-and-2 or shorter',
+      kind: 'efficiency',
+      format: 'pct',
+    },
+    {
+      key: 'netEpa',
+      label: 'Net EPA / Play',
+      description: "Team offense EPA/play minus defense EPA/play allowed in the coach's games",
+      kind: 'efficiency',
+      format: 'dec2',
+      signed: true,
     },
   ],
 };

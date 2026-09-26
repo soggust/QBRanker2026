@@ -142,7 +142,7 @@ main {
   .menu-toggle {
     background: transparent;
     border: none;
-    bottom: 2.5em;
+    bottom: 2em;
     color: var(--primary-900);
     cursor: pointer;
     display: block;
@@ -180,7 +180,7 @@ main {
 }
 
 // Mid-size screens: short labels, keep the eyebrow
-@media (min-width: 1200px) and (max-width: 1499px) {
+@media (min-width: 1200px) and (max-width: 1749px) {
   .position-bar button {
     .full {
       display: none;

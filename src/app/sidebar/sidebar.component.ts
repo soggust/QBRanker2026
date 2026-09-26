@@ -62,6 +62,8 @@ export class SidebarComponent {
     TE: 'default',
     K: 'default',
     P: 'default',
+    DEF: 'default',
+    HC: 'default',
   };
 
   constructor(

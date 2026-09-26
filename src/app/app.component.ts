@@ -30,6 +30,8 @@ export class AppComponent {
     TE: 'Tight Ends',
     K: 'Kickers',
     P: 'Punters',
+    DEF: 'Defenses',
+    HC: 'Head Coaches',
   };
 
   sidebarCollapsed: boolean = readCollapsed();

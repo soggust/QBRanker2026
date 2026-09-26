@@ -1,4 +1,1128 @@
 {
+  "DEF": [
+    {
+      "id": null,
+      "gsisId": "DEF-ARI",
+      "name": "Arizona Cardinals",
+      "teamLogo": "../assets/NFL_Icons/Cardinals.png",
+      "games": 2,
+      "stats": {
+        "epaAllowed": 0.008,
+        "passEpaAllowed": 0.205,
+        "rushEpaAllowed": -0.226,
+        "successAllowed": 0.448,
+        "sacks": 4,
+        "takeaways": 3,
+        "ptsAllowedPerGame": 22.5,
+        "fantasyStd": 10,
+        "receptions": 0
+      }
+    },
+    {
+      "id": null,
+      "gsisId": "DEF-ATL",
+      "name": "Atlanta Falcons",
+      "teamLogo": "../assets/NFL_Icons/Falcons.png",
+      "games": 3,
+      "stats": {
+        "epaAllowed": -0.062,
+        "passEpaAllowed": 0.03,
+        "rushEpaAllowed": -0.312,
+        "successAllowed": 0.378,
+        "sacks": 5,
+        "takeaways": 2,
+        "ptsAllowedPerGame": 22.7,
+        "fantasyStd": 10,
+        "receptions": 0
+      }
+    },
+    {
+      "id": null,
+      "gsisId": "DEF-BAL",
+      "name": "Baltimore Ravens",
+      "teamLogo": "../assets/NFL_Icons/Ravens.png",
+      "games": 2,
+      "stats": {
+        "epaAllowed": -0.025,
+        "passEpaAllowed": -0.06,
+        "rushEpaAllowed": 0.036,
+        "successAllowed": 0.438,
+        "sacks": 5,
+        "takeaways": 2,
+        "ptsAllowedPerGame": 23.5,
+        "fantasyStd": 9,
+        "receptions": 0
+      }
+    },
+    {
+      "id": null,
+      "gsisId": "DEF-BUF",
+      "name": "Buffalo Bills",
+      "teamLogo": "../assets/NFL_Icons/Bills.png",
+      "games": 2,
+      "stats": {
+        "epaAllowed": 0.166,
+        "passEpaAllowed": 0.295,
+        "rushEpaAllowed": -0.076,
+        "successAllowed": 0.486,
+        "sacks": 7,
+        "takeaways": 2,
+        "ptsAllowedPerGame": 31,
+        "fantasyStd": 9,
+        "receptions": 0
+      }
+    },
+    {
+      "id": null,
+      "gsisId": "DEF-CAR",
+      "name": "Carolina Panthers",
+      "teamLogo": "../assets/NFL_Icons/Panthers.png",
+      "games": 2,
+      "stats": {
+        "epaAllowed": -0.045,
+        "passEpaAllowed": -0.077,
+        "rushEpaAllowed": -0.003,
+        "successAllowed": 0.444,
+        "sacks": 5,
+        "takeaways": 7,
+        "ptsAllowedPerGame": 31,
+        "fantasyStd": 28,
+        "receptions": 0
+      }
+    },
+    {
+      "id": null,
+      "gsisId": "DEF-CHI",
+      "name": "Chicago Bears",
+      "teamLogo": "../assets/NFL_Icons/Bears.png",
+      "games": 2,
+      "stats": {
+        "epaAllowed": 0.042,
+        "passEpaAllowed": 0.161,
+        "rushEpaAllowed": -0.131,
+        "successAllowed": 0.417,
+        "sacks": 5,
+        "takeaways": 2,
+        "ptsAllowedPerGame": 23,
+        "fantasyStd": 9,
+        "receptions": 0
+      }
+    },
+    {
+      "id": null,
+      "gsisId": "DEF-CIN",
+      "name": "Cincinnati Bengals",
+      "teamLogo": "../assets/NFL_Icons/Bengals.png",
+      "games": 2,
+      "stats": {
+        "epaAllowed": -0.173,
+        "passEpaAllowed": -0.131,
+        "rushEpaAllowed": -0.31,
+        "successAllowed": 0.415,
+        "sacks": 8,
+        "takeaways": 4,
+        "ptsAllowedPerGame": 16.5,
+        "fantasyStd": 29,
+        "receptions": 0
+      }
+    },
+    {
+      "id": null,
+      "gsisId": "DEF-CLE",
+      "name": "Cleveland Browns",
+      "teamLogo": "../assets/NFL_Icons/Browns.png",
+      "games": 2,
+      "stats": {
+        "epaAllowed": 0.032,
+        "passEpaAllowed": 0.073,
+        "rushEpaAllowed": -0.024,
+        "successAllowed": 0.471,
+        "sacks": 4,
+        "takeaways": 1,
+        "ptsAllowedPerGame": 26.5,
+        "fantasyStd": 6,
+        "receptions": 0
+      }
+    },
+    {
+      "id": null,
+      "gsisId": "DEF-DAL",
+      "name": "Dallas Cowboys",
+      "teamLogo": "../assets/NFL_Icons/Cowboys.png",
+      "games": 2,
+      "stats": {
+        "epaAllowed": 0.191,
+        "passEpaAllowed": 0.333,
+        "rushEpaAllowed": -0.003,
+        "successAllowed": 0.54,
+        "sacks": 2,
+        "takeaways": 2,
+        "ptsAllowedPerGame": 24,
+        "fantasyStd": 6,
+        "receptions": 0
+      }
+    },
+    {
+      "id": null,
+      "gsisId": "DEF-DEN",
+      "name": "Denver Broncos",
+      "teamLogo": "../assets/NFL_Icons/Broncos.png",
+      "games": 2,
+      "stats": {
+        "epaAllowed": 0.039,
+        "passEpaAllowed": -0.07,
+        "rushEpaAllowed": 0.175,
+        "successAllowed": 0.429,
+        "sacks": 4,
+        "takeaways": 2,
+        "ptsAllowedPerGame": 22,
+        "fantasyStd": 11,
+        "receptions": 0
+      }
+    },
+    {
+      "id": null,
+      "gsisId": "DEF-DET",
+      "name": "Detroit Lions",
+      "teamLogo": "../assets/NFL_Icons/Lions.png",
+      "games": 2,
+      "stats": {
+        "epaAllowed": 0.205,
+        "passEpaAllowed": 0.232,
+        "rushEpaAllowed": 0.151,
+        "successAllowed": 0.506,
+        "sacks": 7,
+        "takeaways": 3,
+        "ptsAllowedPerGame": 35.5,
+        "fantasyStd": 8,
+        "receptions": 0
+      }
+    },
+    {
+      "id": null,
+      "gsisId": "DEF-GB",
+      "name": "Green Bay Packers",
+      "teamLogo": "../assets/NFL_Icons/Packers.png",
+      "games": 3,
+      "stats": {
+        "epaAllowed": 0.102,
+        "passEpaAllowed": 0.231,
+        "rushEpaAllowed": -0.055,
+        "successAllowed": 0.471,
+        "sacks": 7,
+        "takeaways": 2,
+        "ptsAllowedPerGame": 30.3,
+        "fantasyStd": 4,
+        "receptions": 0
+      }
+    },
+    {
+      "id": null,
+      "gsisId": "DEF-HOU",
+      "name": "Houston Texans",
+      "teamLogo": "../assets/NFL_Icons/Texans.png",
+      "games": 2,
+      "stats": {
+        "epaAllowed": 0.081,
+        "passEpaAllowed": 0.274,
+        "rushEpaAllowed": -0.256,
+        "successAllowed": 0.357,
+        "sacks": 7,
+        "takeaways": 0,
+        "ptsAllowedPerGame": 28,
+        "fantasyStd": 4,
+        "receptions": 0
+      }
+    },
+    {
+      "id": null,
+      "gsisId": "DEF-IND",
+      "name": "Indianapolis Colts",
+      "teamLogo": "../assets/NFL_Icons/Colts.png",
+      "games": 2,
+      "stats": {
+        "epaAllowed": 0.202,
+        "passEpaAllowed": 0.276,
+        "rushEpaAllowed": 0.098,
+        "successAllowed": 0.507,
+        "sacks": 4,
+        "takeaways": 1,
+        "ptsAllowedPerGame": 37,
+        "fantasyStd": 1,
+        "receptions": 0
+      }
+    },
+    {
+      "id": null,
+      "gsisId": "DEF-JAX",
+      "name": "Jacksonville Jaguars",
+      "teamLogo": "../assets/NFL_Icons/Jaguars.png",
+      "games": 2,
+      "stats": {
+        "epaAllowed": -0.026,
+        "passEpaAllowed": 0.031,
+        "rushEpaAllowed": -0.109,
+        "successAllowed": 0.455,
+        "sacks": 5,
+        "takeaways": 3,
+        "ptsAllowedPerGame": 15,
+        "fantasyStd": 16,
+        "receptions": 0
+      }
+    },
+    {
+      "id": null,
+      "gsisId": "DEF-KC",
+      "name": "Kansas City Chiefs",
+      "teamLogo": "../assets/NFL_Icons/Chiefs.png",
+      "games": 2,
+      "stats": {
+        "epaAllowed": -0.047,
+        "passEpaAllowed": -0.109,
+        "rushEpaAllowed": 0.049,
+        "successAllowed": 0.435,
+        "sacks": 4,
+        "takeaways": 3,
+        "ptsAllowedPerGame": 20,
+        "fantasyStd": 13,
+        "receptions": 0
+      }
+    },
+    {
+      "id": null,
+      "gsisId": "DEF-LV",
+      "name": "Las Vegas Raiders",
+      "teamLogo": "../assets/NFL_Icons/Raiders.png",
+      "games": 2,
+      "stats": {
+        "epaAllowed": -0.275,
+        "passEpaAllowed": -0.131,
+        "rushEpaAllowed": -0.496,
+        "successAllowed": 0.344,
+        "sacks": 8,
+        "takeaways": 5,
+        "ptsAllowedPerGame": 13.5,
+        "fantasyStd": 25,
+        "receptions": 0
+      }
+    },
+    {
+      "id": null,
+      "gsisId": "DEF-LAC",
+      "name": "Los Angeles Chargers",
+      "teamLogo": "../assets/NFL_Icons/Chargers.png",
+      "games": 2,
+      "stats": {
+        "epaAllowed": 0.031,
+        "passEpaAllowed": 0.252,
+        "rushEpaAllowed": -0.26,
+        "successAllowed": 0.424,
+        "sacks": 3,
+        "takeaways": 1,
+        "ptsAllowedPerGame": 26,
+        "fantasyStd": 5,
+        "receptions": 0
+      }
+    },
+    {
+      "id": null,
+      "gsisId": "DEF-LA",
+      "name": "Los Angeles Rams",
+      "teamLogo": "../assets/NFL_Icons/Rams.png",
+      "games": 2,
+      "stats": {
+        "epaAllowed": -0.08,
+        "passEpaAllowed": -0.103,
+        "rushEpaAllowed": -0.048,
+        "successAllowed": 0.439,
+        "sacks": 2,
+        "takeaways": 2,
+        "ptsAllowedPerGame": 16.5,
+        "fantasyStd": 13,
+        "receptions": 0
+      }
+    },
+    {
+      "id": null,
+      "gsisId": "DEF-MIA",
+      "name": "Miami Dolphins",
+      "teamLogo": "../assets/NFL_Icons/Dolphins.png",
+      "games": 2,
+      "stats": {
+        "epaAllowed": 0.149,
+        "passEpaAllowed": 0.432,
+        "rushEpaAllowed": -0.15,
+        "successAllowed": 0.478,
+        "sacks": 0,
+        "takeaways": 2,
+        "ptsAllowedPerGame": 31,
+        "fantasyStd": 0,
+        "receptions": 0
+      }
+    },
+    {
+      "id": null,
+      "gsisId": "DEF-MIN",
+      "name": "Minnesota Vikings",
+      "teamLogo": "../assets/NFL_Icons/Vikings.png",
+      "games": 2,
+      "stats": {
+        "epaAllowed": -0.159,
+        "passEpaAllowed": -0.042,
+        "rushEpaAllowed": -0.365,
+        "successAllowed": 0.348,
+        "sacks": 8,
+        "takeaways": 4,
+        "ptsAllowedPerGame": 12.5,
+        "fantasyStd": 23,
+        "receptions": 0
+      }
+    },
+    {
+      "id": null,
+      "gsisId": "DEF-NE",
+      "name": "New England Patriots",
+      "teamLogo": "../assets/NFL_Icons/Patriots.png",
+      "games": 2,
+      "stats": {
+        "epaAllowed": -0.175,
+        "passEpaAllowed": -0.197,
+        "rushEpaAllowed": -0.134,
+        "successAllowed": 0.387,
+        "sacks": 6,
+        "takeaways": 2,
+        "ptsAllowedPerGame": 8,
+        "fantasyStd": 27,
+        "receptions": 0
+      }
+    },
+    {
+      "id": null,
+      "gsisId": "DEF-NO",
+      "name": "New Orleans Saints",
+      "teamLogo": "../assets/NFL_Icons/Saints.png",
+      "games": 2,
+      "stats": {
+        "epaAllowed": 0.027,
+        "passEpaAllowed": 0.043,
+        "rushEpaAllowed": 0.002,
+        "successAllowed": 0.522,
+        "sacks": 4,
+        "takeaways": 2,
+        "ptsAllowedPerGame": 24,
+        "fantasyStd": 8,
+        "receptions": 0
+      }
+    },
+    {
+      "id": null,
+      "gsisId": "DEF-NYG",
+      "name": "New York Giants",
+      "teamLogo": "../assets/NFL_Icons/Giants.png",
+      "games": 2,
+      "stats": {
+        "epaAllowed": 0.257,
+        "passEpaAllowed": 0.46,
+        "rushEpaAllowed": -0.102,
+        "successAllowed": 0.509,
+        "sacks": 1,
+        "takeaways": 3,
+        "ptsAllowedPerGame": 24,
+        "fantasyStd": 7,
+        "receptions": 0
+      }
+    },
+    {
+      "id": null,
+      "gsisId": "DEF-NYJ",
+      "name": "New York Jets",
+      "teamLogo": "../assets/NFL_Icons/Jets.png",
+      "games": 2,
+      "stats": {
+        "epaAllowed": -0.144,
+        "passEpaAllowed": -0.051,
+        "rushEpaAllowed": -0.378,
+        "successAllowed": 0.376,
+        "sacks": 6,
+        "takeaways": 2,
+        "ptsAllowedPerGame": 15,
+        "fantasyStd": 15,
+        "receptions": 0
+      }
+    },
+    {
+      "id": null,
+      "gsisId": "DEF-PHI",
+      "name": "Philadelphia Eagles",
+      "teamLogo": "../assets/NFL_Icons/Eagles.png",
+      "games": 2,
+      "stats": {
+        "epaAllowed": 0.052,
+        "passEpaAllowed": 0.097,
+        "rushEpaAllowed": 0,
+        "successAllowed": 0.423,
+        "sacks": 3,
+        "takeaways": 0,
+        "ptsAllowedPerGame": 21,
+        "fantasyStd": 4,
+        "receptions": 0
+      }
+    },
+    {
+      "id": null,
+      "gsisId": "DEF-PIT",
+      "name": "Pittsburgh Steelers",
+      "teamLogo": "../assets/NFL_Icons/Steelers.png",
+      "games": 2,
+      "stats": {
+        "epaAllowed": -0.207,
+        "passEpaAllowed": -0.346,
+        "rushEpaAllowed": -0.065,
+        "successAllowed": 0.398,
+        "sacks": 7,
+        "takeaways": 4,
+        "ptsAllowedPerGame": 16.5,
+        "fantasyStd": 26,
+        "receptions": 0
+      }
+    },
+    {
+      "id": null,
+      "gsisId": "DEF-SF",
+      "name": "San Francisco 49ers",
+      "teamLogo": "../assets/NFL_Icons/49ers.png",
+      "games": 2,
+      "stats": {
+        "epaAllowed": -0.12,
+        "passEpaAllowed": -0.071,
+        "rushEpaAllowed": -0.177,
+        "successAllowed": 0.417,
+        "sacks": 4,
+        "takeaways": 2,
+        "ptsAllowedPerGame": 10,
+        "fantasyStd": 16,
+        "receptions": 0
+      }
+    },
+    {
+      "id": null,
+      "gsisId": "DEF-SEA",
+      "name": "Seattle Seahawks",
+      "teamLogo": "../assets/NFL_Icons/Seahawks.png",
+      "games": 2,
+      "stats": {
+        "epaAllowed": -0.17,
+        "passEpaAllowed": -0.026,
+        "rushEpaAllowed": -0.432,
+        "successAllowed": 0.38,
+        "sacks": 5,
+        "takeaways": 4,
+        "ptsAllowedPerGame": 8.5,
+        "fantasyStd": 21,
+        "receptions": 0
+      }
+    },
+    {
+      "id": null,
+      "gsisId": "DEF-TB",
+      "name": "Tampa Bay Buccaneers",
+      "teamLogo": "../assets/NFL_Icons/Bucs.png",
+      "games": 2,
+      "stats": {
+        "epaAllowed": 0.009,
+        "passEpaAllowed": 0.151,
+        "rushEpaAllowed": -0.224,
+        "successAllowed": 0.462,
+        "sacks": 3,
+        "takeaways": 1,
+        "ptsAllowedPerGame": 28,
+        "fantasyStd": 10,
+        "receptions": 0
+      }
+    },
+    {
+      "id": null,
+      "gsisId": "DEF-TEN",
+      "name": "Tennessee Titans",
+      "teamLogo": "../assets/NFL_Icons/Titans.png",
+      "games": 2,
+      "stats": {
+        "epaAllowed": 0.08,
+        "passEpaAllowed": 0.236,
+        "rushEpaAllowed": -0.081,
+        "successAllowed": 0.436,
+        "sacks": 3,
+        "takeaways": 2,
+        "ptsAllowedPerGame": 23.5,
+        "fantasyStd": 7,
+        "receptions": 0
+      }
+    },
+    {
+      "id": null,
+      "gsisId": "DEF-WAS",
+      "name": "Washington Commanders",
+      "teamLogo": "../assets/NFL_Icons/Commanders.png",
+      "games": 2,
+      "stats": {
+        "epaAllowed": 0.131,
+        "passEpaAllowed": 0.306,
+        "rushEpaAllowed": -0.204,
+        "successAllowed": 0.454,
+        "sacks": 5,
+        "takeaways": 0,
+        "ptsAllowedPerGame": 30.5,
+        "fantasyStd": 1,
+        "receptions": 0
+      }
+    }
+  ],
+  "HC": [
+    {
+      "id": null,
+      "gsisId": "HC-Aaron Glenn",
+      "name": "Aaron Glenn",
+      "teamLogo": "../assets/NFL_Icons/Jets.png",
+      "games": 2,
+      "stats": {
+        "wins": 1,
+        "losses": 1,
+        "ties": 0,
+        "winPct": 0.5,
+        "winsOverExpected": 0.14,
+        "atsPct": 1,
+        "fourthGoRate": 0.75,
+        "netEpa": 0.155
+      }
+    },
+    {
+      "id": null,
+      "gsisId": "HC-Andy Reid",
+      "name": "Andy Reid",
+      "teamLogo": "../assets/NFL_Icons/Chiefs.png",
+      "games": 2,
+      "stats": {
+        "wins": 2,
+        "losses": 0,
+        "ties": 0,
+        "winPct": 1,
+        "winsOverExpected": 0.76,
+        "atsPct": 0.5,
+        "fourthGoRate": 1,
+        "netEpa": 0.208
+      }
+    },
+    {
+      "id": null,
+      "gsisId": "HC-Ben Johnson",
+      "name": "Ben Johnson",
+      "teamLogo": "../assets/NFL_Icons/Bears.png",
+      "games": 2,
+      "stats": {
+        "wins": 1,
+        "losses": 1,
+        "ties": 0,
+        "winPct": 0.5,
+        "winsOverExpected": -0.26,
+        "atsPct": 0.5,
+        "fourthGoRate": 1,
+        "netEpa": 0.073
+      }
+    },
+    {
+      "id": null,
+      "gsisId": "HC-Brian Schottenheimer",
+      "name": "Brian Schottenheimer",
+      "teamLogo": "../assets/NFL_Icons/Cowboys.png",
+      "games": 2,
+      "stats": {
+        "wins": 1,
+        "losses": 1,
+        "ties": 0,
+        "winPct": 0.5,
+        "winsOverExpected": -0.26,
+        "atsPct": 0.5,
+        "fourthGoRate": 0,
+        "netEpa": 0.06
+      }
+    },
+    {
+      "id": null,
+      "gsisId": "HC-Dan Campbell",
+      "name": "Dan Campbell",
+      "teamLogo": "../assets/NFL_Icons/Lions.png",
+      "games": 2,
+      "stats": {
+        "wins": 1,
+        "losses": 1,
+        "ties": 0,
+        "winPct": 0.5,
+        "winsOverExpected": -0.06,
+        "atsPct": 0,
+        "fourthGoRate": 0,
+        "netEpa": -0.091
+      }
+    },
+    {
+      "id": null,
+      "gsisId": "HC-Dan Quinn",
+      "name": "Dan Quinn",
+      "teamLogo": "../assets/NFL_Icons/Commanders.png",
+      "games": 2,
+      "stats": {
+        "wins": 0,
+        "losses": 2,
+        "ties": 0,
+        "winPct": 0,
+        "winsOverExpected": -0.66,
+        "atsPct": 0.5,
+        "fourthGoRate": 0.667,
+        "netEpa": -0.086
+      }
+    },
+    {
+      "id": null,
+      "gsisId": "HC-Dave Canales",
+      "name": "Dave Canales",
+      "teamLogo": "../assets/NFL_Icons/Panthers.png",
+      "games": 2,
+      "stats": {
+        "wins": 1,
+        "losses": 1,
+        "ties": 0,
+        "winPct": 0.5,
+        "winsOverExpected": 0.02,
+        "atsPct": 0.5,
+        "fourthGoRate": 1,
+        "netEpa": 0.129
+      }
+    },
+    {
+      "id": null,
+      "gsisId": "HC-DeMeco Ryans",
+      "name": "DeMeco Ryans",
+      "teamLogo": "../assets/NFL_Icons/Texans.png",
+      "games": 2,
+      "stats": {
+        "wins": 0,
+        "losses": 2,
+        "ties": 0,
+        "winPct": 0,
+        "winsOverExpected": -1.07,
+        "atsPct": 0,
+        "fourthGoRate": 0.667,
+        "netEpa": -0.165
+      }
+    },
+    {
+      "id": null,
+      "gsisId": "HC-Jeff Hafley",
+      "name": "Jeff Hafley",
+      "teamLogo": "../assets/NFL_Icons/Dolphins.png",
+      "games": 2,
+      "stats": {
+        "wins": 0,
+        "losses": 2,
+        "ties": 0,
+        "winPct": 0,
+        "winsOverExpected": -0.53,
+        "atsPct": 0,
+        "fourthGoRate": 0.5,
+        "netEpa": -0.273
+      }
+    },
+    {
+      "id": null,
+      "gsisId": "HC-Jesse Minter",
+      "name": "Jesse Minter",
+      "teamLogo": "../assets/NFL_Icons/Ravens.png",
+      "games": 2,
+      "stats": {
+        "wins": 1,
+        "losses": 1,
+        "ties": 0,
+        "winPct": 0.5,
+        "winsOverExpected": -0.35,
+        "atsPct": 0.5,
+        "fourthGoRate": 0,
+        "netEpa": 0.182
+      }
+    },
+    {
+      "id": null,
+      "gsisId": "HC-Jim Harbaugh",
+      "name": "Jim Harbaugh",
+      "teamLogo": "../assets/NFL_Icons/Chargers.png",
+      "games": 2,
+      "stats": {
+        "wins": 0,
+        "losses": 2,
+        "ties": 0,
+        "winPct": 0,
+        "winsOverExpected": -1.52,
+        "atsPct": 0,
+        "fourthGoRate": 0,
+        "netEpa": -0.272
+      }
+    },
+    {
+      "id": null,
+      "gsisId": "HC-John Harbaugh",
+      "name": "John Harbaugh",
+      "teamLogo": "../assets/NFL_Icons/Giants.png",
+      "games": 2,
+      "stats": {
+        "wins": 1,
+        "losses": 1,
+        "ties": 0,
+        "winPct": 0.5,
+        "winsOverExpected": 0.32,
+        "atsPct": 0.5,
+        "fourthGoRate": 1,
+        "netEpa": -0.243
+      }
+    },
+    {
+      "id": null,
+      "gsisId": "HC-Jonathan Gannon",
+      "name": "Jonathan Gannon",
+      "teamLogo": "../assets/NFL_Icons/Cardinals.png",
+      "games": 2,
+      "stats": {
+        "wins": 1,
+        "losses": 1,
+        "ties": 0,
+        "winPct": 0.5,
+        "winsOverExpected": 0.44,
+        "atsPct": 0.5,
+        "fourthGoRate": 0.167,
+        "netEpa": -0.041
+      }
+    },
+    {
+      "id": null,
+      "gsisId": "HC-Kellen Moore",
+      "name": "Kellen Moore",
+      "teamLogo": "../assets/NFL_Icons/Saints.png",
+      "games": 2,
+      "stats": {
+        "wins": 1,
+        "losses": 1,
+        "ties": 0,
+        "winPct": 0.5,
+        "winsOverExpected": 0.49,
+        "atsPct": 1,
+        "fourthGoRate": 0.667,
+        "netEpa": 0.042
+      }
+    },
+    {
+      "id": null,
+      "gsisId": "HC-Kevin O'Connell",
+      "name": "Kevin O'Connell",
+      "teamLogo": "../assets/NFL_Icons/Vikings.png",
+      "games": 2,
+      "stats": {
+        "wins": 2,
+        "losses": 0,
+        "ties": 0,
+        "winPct": 1,
+        "winsOverExpected": 1.13,
+        "atsPct": 1,
+        "fourthGoRate": 0.5,
+        "netEpa": 0.165
+      }
+    },
+    {
+      "id": null,
+      "gsisId": "HC-Klint Kubliak",
+      "name": "Klint Kubliak",
+      "teamLogo": "../assets/NFL_Icons/Raiders.png",
+      "games": 2,
+      "stats": {
+        "wins": 2,
+        "losses": 0,
+        "ties": 0,
+        "winPct": 1,
+        "winsOverExpected": 1.13,
+        "atsPct": 1,
+        "fourthGoRate": 0.429,
+        "netEpa": 0.213
+      }
+    },
+    {
+      "id": null,
+      "gsisId": "HC-Kyle Shanahan",
+      "name": "Kyle Shanahan",
+      "teamLogo": "../assets/NFL_Icons/49ers.png",
+      "games": 2,
+      "stats": {
+        "wins": 2,
+        "losses": 0,
+        "ties": 0,
+        "winPct": 1,
+        "winsOverExpected": 0.79,
+        "atsPct": 1,
+        "fourthGoRate": 0,
+        "netEpa": 0.393
+      }
+    },
+    {
+      "id": null,
+      "gsisId": "HC-Liam Coen",
+      "name": "Liam Coen",
+      "teamLogo": "../assets/NFL_Icons/Jaguars.png",
+      "games": 2,
+      "stats": {
+        "wins": 1,
+        "losses": 1,
+        "ties": 0,
+        "winPct": 0.5,
+        "winsOverExpected": -0.22,
+        "atsPct": 0.5,
+        "fourthGoRate": 0,
+        "netEpa": 0.147
+      }
+    },
+    {
+      "id": null,
+      "gsisId": "HC-Matt LaFleur",
+      "name": "Matt LaFleur",
+      "teamLogo": "../assets/NFL_Icons/Packers.png",
+      "games": 3,
+      "stats": {
+        "wins": 1,
+        "losses": 2,
+        "ties": 0,
+        "winPct": 0.333,
+        "winsOverExpected": -0.76,
+        "atsPct": 0,
+        "fourthGoRate": 0.75,
+        "netEpa": -0.201
+      }
+    },
+    {
+      "id": null,
+      "gsisId": "HC-Mike Macdonald",
+      "name": "Mike Macdonald",
+      "teamLogo": "../assets/NFL_Icons/Seahawks.png",
+      "games": 2,
+      "stats": {
+        "wins": 2,
+        "losses": 0,
+        "ties": 0,
+        "winPct": 1,
+        "winsOverExpected": 0.74,
+        "atsPct": 1,
+        "fourthGoRate": 0.8,
+        "netEpa": 0.268
+      }
+    },
+    {
+      "id": null,
+      "gsisId": "HC-Mike McCarthy",
+      "name": "Mike McCarthy",
+      "teamLogo": "../assets/NFL_Icons/Steelers.png",
+      "games": 2,
+      "stats": {
+        "wins": 1,
+        "losses": 1,
+        "ties": 0,
+        "winPct": 0.5,
+        "winsOverExpected": -0.05,
+        "atsPct": 0.5,
+        "fourthGoRate": 0.5,
+        "netEpa": -0.079
+      }
+    },
+    {
+      "id": null,
+      "gsisId": "HC-Mike Vrabel",
+      "name": "Mike Vrabel",
+      "teamLogo": "../assets/NFL_Icons/Patriots.png",
+      "games": 2,
+      "stats": {
+        "wins": 1,
+        "losses": 1,
+        "ties": 0,
+        "winPct": 0.5,
+        "winsOverExpected": -0.06,
+        "atsPct": 1,
+        "fourthGoRate": 0.5,
+        "netEpa": 0.107
+      }
+    },
+    {
+      "id": null,
+      "gsisId": "HC-Nick Sirianni",
+      "name": "Nick Sirianni",
+      "teamLogo": "../assets/NFL_Icons/Eagles.png",
+      "games": 2,
+      "stats": {
+        "wins": 2,
+        "losses": 0,
+        "ties": 0,
+        "winPct": 1,
+        "winsOverExpected": 0.59,
+        "atsPct": 0,
+        "fourthGoRate": 0.333,
+        "netEpa": -0.017
+      }
+    },
+    {
+      "id": null,
+      "gsisId": "HC-Raheem Morris",
+      "name": "Raheem Morris",
+      "teamLogo": "../assets/NFL_Icons/Falcons.png",
+      "games": 3,
+      "stats": {
+        "wins": 1,
+        "losses": 2,
+        "ties": 0,
+        "winPct": 0.333,
+        "winsOverExpected": -0.03,
+        "atsPct": 0.333,
+        "fourthGoRate": 0.333,
+        "netEpa": -0.1
+      }
+    },
+    {
+      "id": null,
+      "gsisId": "HC-Robert Saleh",
+      "name": "Robert Saleh",
+      "teamLogo": "../assets/NFL_Icons/Titans.png",
+      "games": 2,
+      "stats": {
+        "wins": 0,
+        "losses": 2,
+        "ties": 0,
+        "winPct": 0,
+        "winsOverExpected": -0.78,
+        "atsPct": 0.5,
+        "fourthGoRate": 1,
+        "netEpa": -0.126
+      }
+    },
+    {
+      "id": null,
+      "gsisId": "HC-Sean McDermott",
+      "name": "Sean McDermott",
+      "teamLogo": "../assets/NFL_Icons/Bills.png",
+      "games": 2,
+      "stats": {
+        "wins": 2,
+        "losses": 0,
+        "ties": 0,
+        "winPct": 1,
+        "winsOverExpected": 0.82,
+        "atsPct": 1,
+        "fourthGoRate": 1,
+        "netEpa": 0.202
+      }
+    },
+    {
+      "id": null,
+      "gsisId": "HC-Sean McVay",
+      "name": "Sean McVay",
+      "teamLogo": "../assets/NFL_Icons/Rams.png",
+      "games": 2,
+      "stats": {
+        "wins": 1,
+        "losses": 1,
+        "ties": 0,
+        "winPct": 0.5,
+        "winsOverExpected": -0.38,
+        "atsPct": 0.5,
+        "fourthGoRate": 0.667,
+        "netEpa": 0.084
+      }
+    },
+    {
+      "id": null,
+      "gsisId": "HC-Sean Payton",
+      "name": "Sean Payton",
+      "teamLogo": "../assets/NFL_Icons/Broncos.png",
+      "games": 2,
+      "stats": {
+        "wins": 1,
+        "losses": 1,
+        "ties": 0,
+        "winPct": 0.5,
+        "winsOverExpected": -0.03,
+        "atsPct": 0.5,
+        "fourthGoRate": 0,
+        "netEpa": -0.142
+      }
+    },
+    {
+      "id": null,
+      "gsisId": "HC-Shane Steichen",
+      "name": "Shane Steichen",
+      "teamLogo": "../assets/NFL_Icons/Colts.png",
+      "games": 2,
+      "stats": {
+        "wins": 0,
+        "losses": 2,
+        "ties": 0,
+        "winPct": 0,
+        "winsOverExpected": -0.71,
+        "atsPct": 0.5,
+        "fourthGoRate": 0.667,
+        "netEpa": -0.191
+      }
+    },
+    {
+      "id": null,
+      "gsisId": "HC-Todd Bowles",
+      "name": "Todd Bowles",
+      "teamLogo": "../assets/NFL_Icons/Bucs.png",
+      "games": 2,
+      "stats": {
+        "wins": 0,
+        "losses": 2,
+        "ties": 0,
+        "winPct": 0,
+        "winsOverExpected": -1.13,
+        "atsPct": 0,
+        "fourthGoRate": 0,
+        "netEpa": -0.154
+      }
+    },
+    {
+      "id": null,
+      "gsisId": "HC-Todd Monken",
+      "name": "Todd Monken",
+      "teamLogo": "../assets/NFL_Icons/Browns.png",
+      "games": 2,
+      "stats": {
+        "wins": 1,
+        "losses": 1,
+        "ties": 0,
+        "winPct": 0.5,
+        "winsOverExpected": 0.57,
+        "atsPct": 0.5,
+        "fourthGoRate": 1,
+        "netEpa": -0.121
+      }
+    },
+    {
+      "id": null,
+      "gsisId": "HC-Zac Taylor",
+      "name": "Zac Taylor",
+      "teamLogo": "../assets/NFL_Icons/Bengals.png",
+      "games": 2,
+      "stats": {
+        "wins": 2,
+        "losses": 0,
+        "ties": 0,
+        "winPct": 1,
+        "winsOverExpected": 0.93,
+        "atsPct": 1,
+        "fourthGoRate": 0,
+        "netEpa": 0.122
+      }
+    }
+  ],
   "RB": [
     {
       "id": 3042519,

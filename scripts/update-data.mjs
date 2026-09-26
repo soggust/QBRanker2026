@@ -24,6 +24,7 @@ const SUBJECTIVE_FILE = new URL('subjective.json', DATA_DIR);
 const SKILL_FILE = new URL('skill-players.json', DATA_DIR);
 const DEFAULT_SCORE = 6;
 const NFLVERSE = 'https://github.com/nflverse/nflverse-data/releases/download';
+const SCHEDULE_URL = 'https://raw.githubusercontent.com/nflverse/nfldata/master/data/games.csv';
 
 async function getJson(url, attempts = 3) {
   for (let i = 1; ; i++) {
@@ -94,16 +95,27 @@ const mean = (values) =>
 
 const num = (v) => (v === undefined || v === '' || v === 'NA' ? null : Number(v));
 
+async function getCsv(url) {
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`${res.status} ${res.statusText} for ${url}`);
+  return parseCsv(await res.text());
+}
+
 async function loadNflverse() {
-  const [players, pbp, playerStats] = await Promise.all([
+  const [players, pbp, playerStats, schedule] = await Promise.all([
     getCsvGz(`${NFLVERSE}/players/players.csv.gz`),
     getCsvGz(`${NFLVERSE}/pbp/play_by_play_${SEASON}.csv.gz`),
     getCsvGz(`${NFLVERSE}/stats_player/stats_player_reg_${SEASON}.csv.gz`),
+    getCsv(SCHEDULE_URL),
   ]);
   const espnIds = players.filter((p) => p.espn_id && p.espn_id !== 'NA');
   return {
-    pbp,
+    pbp: pbp.filter((play) => play.season_type === 'REG'),
     playerStats,
+    // Completed regular-season games, with coaches, scores and betting lines
+    games: schedule.filter(
+      (game) => game.season === String(SEASON) && game.game_type === 'REG' && num(game.result) !== null
+    ),
     gsisByEspn: new Map(espnIds.map((p) => [Number(p.espn_id), p.gsis_id])),
     espnByGsis: new Map(espnIds.map((p) => [p.gsis_id, Number(p.espn_id)])),
   };
@@ -218,6 +230,171 @@ const SKILL_POSITIONS = {
   P: { count: 32, usage: (s) => s.punts, stats: punterStats, epa: 'punts' },
 };
 
+const TEAM_NAMES = {
+  ARI: 'Arizona Cardinals', ATL: 'Atlanta Falcons', BAL: 'Baltimore Ravens', BUF: 'Buffalo Bills',
+  CAR: 'Carolina Panthers', CHI: 'Chicago Bears', CIN: 'Cincinnati Bengals', CLE: 'Cleveland Browns',
+  DAL: 'Dallas Cowboys', DEN: 'Denver Broncos', DET: 'Detroit Lions', GB: 'Green Bay Packers',
+  HOU: 'Houston Texans', IND: 'Indianapolis Colts', JAX: 'Jacksonville Jaguars', KC: 'Kansas City Chiefs',
+  LA: 'Los Angeles Rams', LAC: 'Los Angeles Chargers', LV: 'Las Vegas Raiders', MIA: 'Miami Dolphins',
+  MIN: 'Minnesota Vikings', NE: 'New England Patriots', NO: 'New Orleans Saints', NYG: 'New York Giants',
+  NYJ: 'New York Jets', PHI: 'Philadelphia Eagles', PIT: 'Pittsburgh Steelers', SEA: 'Seattle Seahawks',
+  SF: 'San Francisco 49ers', TB: 'Tampa Bay Buccaneers', TEN: 'Tennessee Titans', WAS: 'Washington Commanders',
+};
+
+function teamIcon(abbr) {
+  const icon = TEAM_ICONS[abbr];
+  if (!icon) throw new Error(`Unknown team abbreviation "${abbr}"`);
+  return `../assets/NFL_Icons/${icon}.png`;
+}
+
+// Each completed game from one team's side
+function teamGames(games, team) {
+  return games
+    .filter((game) => game.home_team === team || game.away_team === team)
+    .map((game) => {
+      const home = game.home_team === team;
+      return {
+        game,
+        home,
+        pointsFor: num(home ? game.home_score : game.away_score),
+        pointsAgainst: num(home ? game.away_score : game.home_score),
+        coach: home ? game.home_coach : game.away_coach,
+      };
+    });
+}
+
+const EPA_PLAY = (play) => (play.pass === '1' || play.rush === '1') && num(play.epa) !== null;
+
+// Standard D/ST points allowed tiers
+function pointsAllowedFantasy(points) {
+  if (points === 0) return 10;
+  if (points <= 6) return 7;
+  if (points <= 13) return 4;
+  if (points <= 20) return 1;
+  if (points <= 27) return 0;
+  if (points <= 34) return -1;
+  return -4;
+}
+
+// Team defenses: EPA/success allowed, sacks, takeaways, points allowed and D/ST fantasy
+// (sack 1, takeaway 2, TD 6, safety 2, plus the points-allowed tier each game)
+function defenseUnits({ pbp, games }) {
+  return Object.keys(TEAM_ICONS).map((team) => {
+    const defPlays = pbp.filter((play) => play.defteam === team);
+    const scrimmage = defPlays.filter(EPA_PLAY);
+    const epa = (plays) => mean(plays.map((play) => num(play.epa))) ?? 0;
+    const count = (test) => defPlays.filter(test).length;
+    const sacks = count((play) => play.sack === '1');
+    const takeaways = count((play) => play.interception === '1' || play.fumble_lost === '1');
+    const tds = count((play) => play.td_team === team);
+    const safeties = count((play) => play.safety === '1');
+    const played = teamGames(games, team);
+    const allowed = played.map((g) => g.pointsAgainst);
+    return {
+      id: null,
+      gsisId: `DEF-${team}`,
+      name: TEAM_NAMES[team],
+      teamLogo: teamIcon(team),
+      games: played.length,
+      stats: {
+        epaAllowed: epa(scrimmage),
+        passEpaAllowed: epa(scrimmage.filter((play) => play.pass === '1')),
+        rushEpaAllowed: epa(scrimmage.filter((play) => play.rush === '1')),
+        successAllowed: mean(scrimmage.map((play) => num(play.success))) ?? 0,
+        sacks,
+        takeaways,
+        ptsAllowedPerGame: allowed.length ? round(allowed.reduce((a, b) => a + b, 0) / allowed.length, 1) : 0,
+        fantasyStd:
+          sacks + takeaways * 2 + tds * 6 + safeties * 2 + allowed.reduce((sum, p) => sum + pointsAllowedFantasy(p), 0),
+        receptions: 0,
+      },
+    };
+  });
+}
+
+// Moneyline -> implied win probability, with the bookmaker margin removed
+function winProbability(game, home) {
+  const implied = (ml) => (ml < 0 ? -ml / (-ml + 100) : 100 / (ml + 100));
+  const homeMl = num(game.home_moneyline);
+  const awayMl = num(game.away_moneyline);
+  let pHome;
+  if (homeMl !== null && awayMl !== null) {
+    pHome = implied(homeMl) / (implied(homeMl) + implied(awayMl));
+  } else {
+    // Fall back to the spread (home favored by spread_line) with a normal approximation
+    const z = (num(game.spread_line) ?? 0) / 13.45;
+    pHome = 0.5 * (1 + Math.tanh(0.7978845608 * (z + 0.044715 * z ** 3)));
+  }
+  return home ? pHome : 1 - pHome;
+}
+
+// Head coaches: record, wins over what the betting lines expected, record against the spread,
+// how often they go for it on 4th-and-2 or shorter, and their team's net EPA/play
+function coachUnits({ pbp, games }) {
+  const coaches = new Map();
+  for (const team of Object.keys(TEAM_ICONS)) {
+    for (const g of teamGames(games, team)) {
+      const entry = coaches.get(g.coach) ?? { name: g.coach, team, games: [] };
+      entry.team = team;
+      entry.games.push({ ...g, team });
+      coaches.set(g.coach, entry);
+    }
+  }
+
+  return [...coaches.values()].map(({ name, team, games: played }) => {
+    const gameIds = new Set(played.map((g) => g.game.game_id));
+    const plays = pbp.filter((play) => gameIds.has(play.game_id));
+    const offense = plays.filter((play) => play.posteam === team && EPA_PLAY(play));
+    const defense = plays.filter((play) => play.defteam === team && EPA_PLAY(play));
+    const epa = (list) => mean(list.map((play) => num(play.epa))) ?? 0;
+    const fourthShort = plays.filter(
+      (play) =>
+        play.posteam === team &&
+        play.down === '4' &&
+        num(play.ydstogo) <= 2 &&
+        ['pass', 'run', 'punt', 'field_goal'].includes(play.play_type)
+    );
+    const goes = fourthShort.filter((play) => play.play_type === 'pass' || play.play_type === 'run').length;
+
+    let wins = 0, losses = 0, ties = 0, expected = 0, covers = 0, atsGames = 0;
+    for (const g of played) {
+      const margin = g.pointsFor - g.pointsAgainst;
+      if (margin > 0) wins++;
+      else if (margin < 0) losses++;
+      else ties++;
+      expected += winProbability(g.game, g.home);
+      // spread_line is how many points the home team is favored by; pushes don't count
+      const spread = num(g.game.spread_line);
+      if (spread !== null) {
+        const homeMargin = num(g.game.result);
+        const coverMargin = g.home ? homeMargin - spread : spread - homeMargin;
+        if (coverMargin !== 0) {
+          atsGames++;
+          if (coverMargin > 0) covers++;
+        }
+      }
+    }
+    const results = wins + ties * 0.5;
+    return {
+      id: null,
+      gsisId: `HC-${name}`,
+      name,
+      teamLogo: teamIcon(team),
+      games: played.length,
+      stats: {
+        wins,
+        losses,
+        ties,
+        winPct: ratio(results, played.length),
+        winsOverExpected: round(results - expected, 2),
+        atsPct: ratio(covers, atsGames),
+        fourthGoRate: ratio(goes, fourthShort.length),
+        netEpa: round(epa(offense) - epa(defense), 3),
+      },
+    };
+  });
+}
+
 // EPA per kick (FG + XP attempts) and per punt, keyed by nflverse player id
 function specialTeamsEpa(pbp) {
   const perPlayer = (plays, idKey) => {
@@ -240,10 +417,14 @@ function specialTeamsEpa(pbp) {
   };
 }
 
-// Season stats for non-QB positions from nflverse
-function skillPlayers({ playerStats, pbp, espnByGsis }) {
+// Season stats for non-QB positions from nflverse, plus team defenses and head coaches
+function skillPlayers(nflverse) {
+  const { playerStats, pbp, espnByGsis } = nflverse;
   const stEpa = specialTeamsEpa(pbp);
-  const result = {};
+  const result = {
+    DEF: defenseUnits(nflverse).sort((a, b) => a.name.localeCompare(b.name)),
+    HC: coachUnits(nflverse).sort((a, b) => a.name.localeCompare(b.name)),
+  };
   for (const [position, config] of Object.entries(SKILL_POSITIONS)) {
     result[position] = playerStats
       .filter((row) => row.position === position)
