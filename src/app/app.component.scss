@@ -22,10 +22,68 @@ main {
     z-index: 2;
   }
 
-  .rankings {
+  .content {
+    // Space the bar takes above the table; the rankings table height subtracts it
+    --position-bar-space: 46px;
+    // Let the column shrink below the table's width so the table scrolls instead of overflowing
+    min-width: 0;
     padding: 1em 2em;
     width: calc(100% - 26.75em);
     z-index: 1;
+  }
+}
+
+// Eyebrow-style position switch above the rankings
+.position-bar {
+  align-items: center;
+  display: flex;
+  gap: 0.25em;
+  height: 34px;
+  margin-bottom: 12px;
+
+  .eyebrow,
+  .divider {
+    color: var(--primary-900);
+    font-size: 0.85em;
+    font-weight: 800;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .divider {
+    margin: 0 0.5em;
+    opacity: 0.5;
+  }
+
+  button {
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    color: var(--primary-900);
+    cursor: pointer;
+    font-family: v.$font-base;
+    font-size: 0.85em;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    padding: 0.45em 1.1em;
+    text-transform: uppercase;
+    transition: background 0.15s ease, color 0.15s ease;
+
+    &:hover:not(.active) {
+      background: rgba(0, 0, 0, 0.1);
+    }
+
+    &.active {
+      background: color-mix(in srgb, var(--primary-800) 75%, transparent);
+      border-color: var(--accent-200);
+      box-shadow: 0 0 1em rgba(0, 0, 0, 0.2);
+      color: var(--accent-50);
+      text-shadow: var(--text-shadow-small);
+    }
+
+    .short {
+      display: none;
+    }
   }
 }
 
@@ -41,8 +99,8 @@ main {
   main {
     justify-content: center;
 
-    .rankings {
-      padding: 0;
+    .content {
+      padding: 0.75em 0 0;
       width: 90%;
     }
 
@@ -68,18 +126,49 @@ main {
   .menu-toggle {
     background: transparent;
     border: none;
-    bottom: 1.75em;
-    color: var(--primary-50);
+    bottom: 0.75em;
+    color: var(--primary-900);
     cursor: pointer;
     display: block;
     left: 4.5%;
     position: fixed;
-    text-shadow: var(--text-shadow-small);
     z-index: 1;
 
     &:hover {
-      border-color: #333;
-      color: #333;
+      color: var(--primary-700);
+    }
+  }
+
+  // Drop the eyebrow label and use QB/RB/WR/TE so the bar fits
+  .position-bar {
+    .eyebrow,
+    .divider {
+      display: none;
+    }
+
+    button {
+      flex: 1;
+
+      .full {
+        display: none;
+      }
+
+      .short {
+        display: inline;
+      }
+    }
+  }
+}
+
+// Mid-size screens: short labels, keep the eyebrow
+@media (min-width: 1200px) and (max-width: 1499px) {
+  .position-bar button {
+    .full {
+      display: none;
+    }
+
+    .short {
+      display: inline;
     }
   }
 }

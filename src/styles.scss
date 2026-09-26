@@ -44,6 +44,12 @@ body {
   }
 }
 
+// Settings menu icons (e.g. the fantasy scoring trophy)
+.mat-mdc-menu-panel .menu-icon {
+  color: #fff !important;
+  filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.25));
+}
+
 .mat-mdc-menu-panel {
   background: var(--primary-700) !important;
   border: solid 1px var(--primary-600);

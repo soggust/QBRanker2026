@@ -21,7 +21,7 @@ section {
     border-radius: 0.5em;
     border: solid 1px var(--accent-200);
     box-shadow: 0 0 2em rgba(0, 0, 0, 0.35);
-    height: calc(100dvh - 7em);
+    height: calc(100dvh - 7em - var(--position-bar-space, 0px));
     overflow: auto;
     padding-left: 0;
     white-space: nowrap;
@@ -605,7 +605,7 @@ section {
     justify-content: center;
 
     ul {
-      height: calc(100dvh - 6em);
+      height: calc(100dvh - 6em - var(--position-bar-space, 0px));
       width: 100%;
     }
 
@@ -618,7 +618,10 @@ section {
       }
 
       h1 {
+        align-items: center;
         display: flex;
+        font-size: 1.1em;
+        line-height: 1;
         margin: 0 auto;
         margin-left: 0.5em;
       }

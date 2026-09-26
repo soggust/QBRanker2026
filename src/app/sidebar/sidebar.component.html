@@ -11,20 +11,6 @@
     </h1>
   </div>
 
-  <!-- Position Tabs -->
-  <nav class="position-tabs" aria-label="Position">
-    @for (tab of positions; track tab) {
-      <button
-        type="button"
-        [class.active]="tab === position"
-        [attr.aria-pressed]="tab === position"
-        (click)="selectPosition(tab)"
-      >
-        {{ tab }}
-      </button>
-    }
-  </nav>
-
   <!-- RB / WR / TE Filters -->
   @if (skillPosition; as skill) {
     <div class="filters">

@@ -3,7 +3,6 @@ import { FilterService } from '../services/filter.service';
 import { PositionService } from '../services/position.service';
 import { Filters } from 'app/types';
 import {
-  POSITIONS,
   Position,
   SKILL_STATS,
   SkillPosition,
@@ -52,8 +51,7 @@ export class SidebarComponent {
   supportExpanded: boolean = false;
   preset: string = 'default';
 
-  // Position Tabs
-  positions: Position[] = POSITIONS;
+  // Current position (switched from the bar above the rankings)
   position: Position = 'QB';
   skillStats: SkillStat[] = [];
   skillWeights: SkillWeights = {};
@@ -71,29 +69,17 @@ export class SidebarComponent {
   ngOnInit(): void {
     this.saveFilters();
 
-    // Open the tab from a shared link, e.g. ?pos=WR
-    const linked = new URLSearchParams(location.search).get('pos')?.toUpperCase();
-    const match = this.positions.find((position) => position === linked);
-    if (match) this.selectPosition(match);
+    this.positionService.position$.subscribe((position) => {
+      this.position = position;
+      if (position !== 'QB') {
+        this.skillStats = SKILL_STATS[position];
+        this.skillWeights = { ...this.positionService.getWeights(position) };
+      }
+    });
   }
 
   get skillPosition(): SkillPosition | null {
     return this.position === 'QB' ? null : this.position;
-  }
-
-  selectPosition(position: Position): void {
-    this.position = position;
-    this.positionService.setPosition(position);
-
-    const url = new URL(location.href);
-    if (position === 'QB') url.searchParams.delete('pos');
-    else url.searchParams.set('pos', position);
-    history.replaceState(null, '', url);
-
-    if (position !== 'QB') {
-      this.skillStats = SKILL_STATS[position];
-      this.skillWeights = { ...this.positionService.getWeights(position) };
-    }
   }
 
   onSkillPresetChange(): void {
