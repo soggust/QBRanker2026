@@ -156,7 +156,9 @@ export class SkillRankingsComponent implements OnChanges {
   // Red (0) to green (12), same scale as the QB page
   gradeColor(player: SkillPlayer, stat: SkillStat): string | null {
     if (stat.format !== 'grade') return null;
-    return `hsl(${Math.round((this.value(player, stat) / 12) * 120)}, 100%, 50%)`;
+    // Brighter at the red end so low grades stay readable on their dark pill
+    const value = this.value(player, stat);
+    return `hsl(${Math.round((value / 12) * 120)}, 100%, ${Math.round(50 + (1 - value / 12) * 16)}%)`;
   }
 
   // Get Count Classes

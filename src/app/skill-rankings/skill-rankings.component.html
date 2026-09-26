@@ -2,7 +2,7 @@
   <ul cdkDropList (cdkDropListDropped)="drop($event)" columnHighlight>
     <!-- Column headers -->
     <li class="player header-row" aria-hidden="true">
-      <span class="drag-indicator"></span>
+      <mat-icon fontIcon="drag_indicator" class="drag-indicator" style="visibility: hidden"></mat-icon>
       <div class="player-info"></div>
       @for (stat of stats; track stat.key) {
         @if (isShown(stat)) {

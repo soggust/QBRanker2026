@@ -395,7 +395,8 @@ export class RankingsComponent {
     // Assuming value ranges from 0 to 12
     const hue = Math.round((value / 12) * 120); // 0 is red, 120 is green on the hue scale
     const saturation = 100; // Full saturation
-    const lightness = 50; // Keep the lightness the same for all values (adjust this if needed)
+    // Brighter at the red end so low grades stay readable on their dark pill
+    const lightness = Math.round(50 + (1 - value / 12) * 16);
     return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
   }
 
