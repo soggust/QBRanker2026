@@ -844,3 +844,11 @@ section footer p img {
     display: flex;
   }
 }
+
+// Slightly larger player names and stat values (Recent and the grade boxes keep their size)
+section ul li.player:not(.header-row) {
+  .player-name strong,
+  > div:not(.box):not(.player-info) > p:not(.stat-label) {
+    font-size: 1.15em;
+  }
+}
