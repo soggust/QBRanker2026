@@ -203,3 +203,11 @@
   border-radius: 8px;
   box-shadow: inset 0 0 0.5em rgba(0, 0, 0, 0.2), 0 0 1em rgba(0, 0, 0, 0.2);
 }
+
+// Small screens: the sidebar slides over the rankings, so make it solid and a bit wider
+@media (max-width: 1199px) {
+  .sidebar {
+    background: var(--primary-800);
+    width: max(22.5em, 40vw);
+  }
+}
