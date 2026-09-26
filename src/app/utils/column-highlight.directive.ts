@@ -10,6 +10,7 @@ import { Directive, ElementRef, NgZone, OnDestroy, OnInit } from '@angular/core'
 })
 export class ColumnHighlightDirective implements OnInit, OnDestroy {
   private readonly band = document.createElement('div');
+  private cell: HTMLElement | null = null;
 
   constructor(
     private host: ElementRef<HTMLElement>,
@@ -64,17 +65,24 @@ export class ColumnHighlightDirective implements OnInit, OnDestroy {
     }
     if (!cell) return this.clear();
 
+    // Only move the band when the column changes; measure the scroll height with the band
+    // hidden so it can't grow the scroll area (which made the scrollbar flicker)
+    if (cell === this.cell) return;
+    this.cell = cell;
+    this.band.style.display = 'none';
+    const height = list.scrollHeight;
     const listBox = list.getBoundingClientRect();
     const cellBox = cell.getBoundingClientRect();
     Object.assign(this.band.style, {
       display: 'block',
-      height: `${list.scrollHeight}px`,
+      height: `${height}px`,
       left: `${cellBox.left - listBox.left + list.scrollLeft}px`,
       width: `${cellBox.width}px`,
     });
   };
 
   private clear = () => {
+    this.cell = null;
     this.band.style.display = 'none';
   };
 }

@@ -163,8 +163,6 @@ export class SkillRankingsComponent implements OnChanges {
 
   // Get Count Classes
   getCountClasses(i: number): string {
-    // Gold / silver / bronze for the top 3
-    if (i < 3) return `count top-5 rank-${i + 1}`;
     if (i < 5) return 'count top-5';
     if (i < 10) return 'count top-10';
     if (i < 15) return 'count top-15';

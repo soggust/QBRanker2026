@@ -65,8 +65,29 @@ body {
   color: var(--primary-900) !important;
 }
 
+// Slider thumbs shaped like a football, with laces
 .mdc-slider__thumb-knob {
-  border-radius: 0.35em !important;
+  --mat-slider-handle-width: 26px;
+  --mat-slider-handle-height: 16px;
+  border-radius: 50% !important;
+
+  &::after {
+    background:
+      linear-gradient(var(--primary-800), var(--primary-800)) center / 100% 1.5px no-repeat,
+      repeating-linear-gradient(90deg, var(--primary-800) 0 1.5px, transparent 1.5px 3px) center / 100% 6px no-repeat;
+    content: "";
+    height: 6px;
+    left: -5px;
+    position: absolute;
+    top: -3px;
+    width: 10.5px;
+  }
+}
+
+// The unused part of the track: Material draws it at 24% opacity, which disappears on orange
+.mdc-slider__track--inactive {
+  background-color: rgba(0, 0, 0, 0.3) !important;
+  opacity: 1 !important;
 }
 
 html .mat-mdc-slide-toggle.mat-accent {
