@@ -1,4 +1,4 @@
-@use "../../variables.scss" as v;
+﻿@use "../../variables.scss" as v;
 
 .sidebar {
   background: color-mix(in srgb, var(--primary-800) 75%, transparent);
@@ -115,7 +115,7 @@
       color: var(--accent-50);
       display: flex;
       font-family: v.$font-heading;
-      font-size: 2.3em;
+      font-size: 1.7em;
       font-weight: 900;
       margin: 0 0 0 0.5em;
       text-shadow: var(--text-shadow-small);
