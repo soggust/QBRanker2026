@@ -637,3 +637,108 @@ section {
     }
   }
 }
+
+// ---------------------------------------------------------------------------
+// 2026 polish: floating row cards, scoreboard rank numbers, form dots and
+// tinted grade chips (earlier years used one bordered table with boxed badges)
+// ---------------------------------------------------------------------------
+section ul {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 0 0.35em 0 0;
+
+  li,
+  li:first-of-type,
+  li:last-of-type {
+    backdrop-filter: blur(2px);
+    background: color-mix(in srgb, var(--primary-800) 72%, transparent);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 0.9em;
+    box-shadow: 0 0.35em 1em rgba(0, 0, 0, 0.18);
+    font-variant-numeric: tabular-nums;
+    margin-bottom: 0.45em;
+    transition: transform 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  li:hover {
+    background: color-mix(in srgb, var(--primary-700) 85%, transparent);
+    box-shadow: 0 0.6em 1.4em rgba(0, 0, 0, 0.25);
+    transform: translateY(-1px);
+  }
+
+  li.player {
+    // Rank as a big scoreboard number instead of a boxed badge
+    .count,
+    .count.top-5,
+    .count.top-10 {
+      background: none;
+      border: none;
+      box-shadow: none;
+      color: var(--primary-50);
+      font-family: v.$font-heading;
+      font-size: 1.9em;
+      font-weight: 900;
+      line-height: 1;
+      opacity: 0.55;
+      text-shadow: var(--text-shadow-small);
+      width: 1.6em;
+    }
+
+    .count.top-5,
+    .count.top-10 {
+      opacity: 1;
+    }
+
+    .count.rank-1 {
+      color: #ffd54a;
+    }
+
+    .count.rank-2 {
+      color: #eef2f6;
+    }
+
+    .count.rank-3 {
+      color: #f0a868;
+    }
+
+    // Recent form as green/red dots (the W/L letters stay for screen readers and copy)
+    div.last-five div p {
+      border-radius: 50%;
+      font-size: 0;
+      height: 9px;
+      margin: 0 2px;
+      width: 9px;
+
+      &.green {
+        background: rgb(80, 207, 80);
+        box-shadow: 0 0 0.4em rgba(80, 207, 80, 0.55);
+      }
+
+      &.red {
+        background: hsl(350 90% 72% / 0.85);
+      }
+    }
+
+    // Borderless support and recent panels
+    div.box {
+      border: none;
+      border-radius: 0.7em;
+    }
+
+    // Letter grades as pills tinted by their own grade color
+    div.box p > span,
+    div > p[style*='color'] {
+      background: color-mix(in srgb, currentColor 20%, rgba(0, 0, 0, 0.45));
+      border-radius: 999px;
+      padding: 0.1em 0.65em;
+      text-shadow: none;
+    }
+  }
+}
+
+.cdk-drag-preview {
+  border: 1px solid var(--accent-200);
+  border-radius: 0.9em;
+  box-shadow: 0 1em 2.5em rgba(0, 0, 0, 0.4);
+}

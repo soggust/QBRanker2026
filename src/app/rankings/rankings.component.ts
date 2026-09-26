@@ -421,6 +421,11 @@ export class RankingsComponent {
   getCountClasses(i: number): string {
     let classes = 'count';
 
+    // Gold / silver / bronze for the top 3
+    if (i < 3) {
+      classes += ` rank-${i + 1}`;
+    }
+
     if (i < 5) {
       classes += ' top-5';
     } else if (i >= 5 && i < 10) {
