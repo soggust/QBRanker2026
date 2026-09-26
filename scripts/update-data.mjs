@@ -103,17 +103,79 @@ async function getCsv(url) {
   return parseCsv(await res.text());
 }
 
+// Secondary data sets (Next Gen Stats, Pro Football Reference advanced stats, snap counts) are
+// optional: if one is missing or late, its stats show as "-" instead of failing the update
+async function optionalCsvGz(url) {
+  try {
+    return await getCsvGz(url);
+  } catch (err) {
+    console.warn(`Skipping ${url.split('/').pop()}: ${err.message}`);
+    return [];
+  }
+}
+
+// Sum numeric fields over rows, grouped by a key
+function totalsBy(rows, keyOf, fields) {
+  const totals = new Map();
+  for (const row of rows) {
+    const key = keyOf(row);
+    if (!key || key === 'NA') continue;
+    const total = totals.get(key) ?? { games: 0 };
+    total.games++;
+    for (const field of fields) total[field] = (total[field] ?? 0) + (num(row[field]) ?? 0);
+    totals.set(key, total);
+  }
+  return totals;
+}
+
 async function loadNflverse() {
-  const [players, pbp, playerStats, schedule] = await Promise.all([
-    getCsvGz(`${NFLVERSE}/players/players.csv.gz`),
-    getCsvGz(`${NFLVERSE}/pbp/play_by_play_${SEASON}.csv.gz`),
-    getCsvGz(`${NFLVERSE}/stats_player/stats_player_reg_${SEASON}.csv.gz`),
-    getCsv(SCHEDULE_URL),
-  ]);
+  const [players, pbp, playerStats, schedule, ngsPass, ngsRush, ngsRec, pfrPass, pfrRush, pfrRec, pfrDef, snaps] =
+    await Promise.all([
+      getCsvGz(`${NFLVERSE}/players/players.csv.gz`),
+      getCsvGz(`${NFLVERSE}/pbp/play_by_play_${SEASON}.csv.gz`),
+      getCsvGz(`${NFLVERSE}/stats_player/stats_player_reg_${SEASON}.csv.gz`),
+      getCsv(SCHEDULE_URL),
+      ...['passing', 'rushing', 'receiving'].map((type) =>
+        optionalCsvGz(`${NFLVERSE}/nextgen_stats/ngs_${type}.csv.gz`)
+      ),
+      ...['pass', 'rush', 'rec', 'def'].map((type) =>
+        optionalCsvGz(`${NFLVERSE}/pfr_advstats/advstats_week_${type}_${SEASON}.csv.gz`)
+      ),
+      optionalCsvGz(`${NFLVERSE}/snap_counts/snap_counts_${SEASON}.csv.gz`),
+    ]);
   const espnIds = players.filter((p) => p.espn_id && p.espn_id !== 'NA');
+
+  // Next Gen Stats: week 0 rows are regular-season totals
+  const ngsSeason = (rows) =>
+    new Map(
+      rows
+        .filter((r) => r.season === String(SEASON) && r.season_type === 'REG' && r.week === '0')
+        .map((r) => [r.player_gsis_id, r])
+    );
+  const regular = (rows) => rows.filter((r) => r.game_type === 'REG');
+
+  // Average offensive snap share over the games a player was on the field
+  const snapShare = new Map();
+  for (const [id, t] of totalsBy(
+    regular(snaps).filter((r) => (num(r.offense_snaps) ?? 0) > 0),
+    (r) => r.pfr_player_id,
+    ['offense_pct']
+  )) {
+    snapShare.set(id, round(t.offense_pct / t.games, 3));
+  }
+
   return {
     pbp: pbp.filter((play) => play.season_type === 'REG'),
     playerStats,
+    pfrByGsis: new Map(players.filter((p) => p.pfr_id && p.pfr_id !== 'NA').map((p) => [p.gsis_id, p.pfr_id])),
+    ngs: { pass: ngsSeason(ngsPass), rush: ngsSeason(ngsRush), rec: ngsSeason(ngsRec) },
+    pfr: {
+      pass: totalsBy(regular(pfrPass), (r) => r.pfr_player_id, ['times_sacked', 'times_pressured', 'passing_bad_throws']),
+      rush: totalsBy(regular(pfrRush), (r) => r.pfr_player_id, ['rushing_yards_after_contact', 'rushing_broken_tackles']),
+      rec: totalsBy(regular(pfrRec), (r) => r.pfr_player_id, ['receiving_drop', 'receiving_broken_tackles']),
+      def: totalsBy(regular(pfrDef), (r) => r.team, ['def_pressures', 'def_missed_tackles', 'def_tackles_combined']),
+    },
+    snapShare,
     // Completed regular-season games, with coaches, scores and betting lines
     games: schedule.filter(
       (game) => game.season === String(SEASON) && game.game_type === 'REG' && num(game.result) !== null
@@ -126,7 +188,9 @@ async function loadNflverse() {
 // EPA/play and success rate cover the QB's dropbacks and runs; CPOE covers pass attempts.
 // Fantasy points are nflverse standard scoring; half/full PPR add 0.5/1 per reception in the app.
 // Returns a Map of ESPN id -> { epaPerPlay, cpoe, successRate, plays, fantasyStd, receptions }
-function advancedStats(espnIds, { pbp, playerStats, gsisByEspn }) {
+// Also pressure-to-sack rate and bad-throw rate (Pro Football Reference via nflverse), and
+// time to throw, aDOT and aggressiveness (Next Gen Stats)
+function advancedStats(espnIds, { pbp, playerStats, gsisByEspn, pfrByGsis, ngs, pfr }) {
   const plays = pbp.filter((play) => play.season_type === 'REG' && (play.pass === '1' || play.rush === '1'));
   const seasonRows = new Map(playerStats.map((row) => [row.player_id, row]));
 
@@ -136,7 +200,15 @@ function advancedStats(espnIds, { pbp, playerStats, gsisByEspn }) {
     if (!gsisId) continue;
     const own = plays.filter((play) => play.id === gsisId && num(play.qb_epa) !== null);
     const cpoe = plays.filter((play) => play.passer_player_id === gsisId).map((play) => num(play.cpoe));
+    const pressure = pfr.pass.get(pfrByGsis.get(gsisId));
+    const tracking = ngs.pass.get(gsisId);
+    const attempts = num(seasonRows.get(gsisId)?.attempts) ?? 0;
     stats.set(espnId, {
+      pressureToSack: pressure?.times_pressured ? ratio(pressure.times_sacked, pressure.times_pressured) : null,
+      badThrowPct: pressure && attempts ? ratio(pressure.passing_bad_throws, attempts) : null,
+      timeToThrow: tracking ? round(num(tracking.avg_time_to_throw), 2) : null,
+      adot: tracking ? round(num(tracking.avg_intended_air_yards), 1) : null,
+      aggressiveness: tracking ? round(num(tracking.aggressiveness), 1) : null,
       epaPerPlay: mean(own.map((play) => num(play.qb_epa))),
       cpoe: mean(cpoe.filter((v) => v !== null)),
       successRate: mean(own.map((play) => num(play.success)).filter((v) => v !== null)),
@@ -158,11 +230,15 @@ const TEAM_ICONS = {
   TEN: 'Titans', WAS: 'Commanders',
 };
 
-const round = (value, digits) => Number(value.toFixed(digits));
+// Missing values (null) pass through as null
+const round = (value, digits) =>
+  value === null || value === undefined || Number.isNaN(value) ? null : Number(value.toFixed(digits));
 const ratio = (a, b, digits = 3) => (b ? round(a / b, digits) : 0);
+const ngsValue = (row, key, digits = 2) => (row ? round(num(row[key]), digits) : null);
 
-// RB/WR/TE season totals plus a few derived rates
-function offenseStats(n) {
+// RB/WR/TE season totals plus derived rates, tracking stats (Next Gen Stats), contact and drop
+// stats (Pro Football Reference via nflverse) and snap share
+function offenseStats(n, ctx) {
   const stats = {
     carries: n('carries'),
     rushYards: n('rushing_yards'),
@@ -184,12 +260,26 @@ function offenseStats(n) {
     catchPct: ratio(stats.receptions, stats.targets),
     epaPerCarry: ratio(n('rushing_epa'), stats.carries),
     epaPerTarget: ratio(n('receiving_epa'), stats.targets),
+    ryoePerAtt: ngsValue(ctx.ngsRush, 'rush_yards_over_expected_per_att'),
+    yacoPerCarry:
+      ctx.pfrRush && stats.carries ? ratio(ctx.pfrRush.rushing_yards_after_contact, stats.carries, 2) : null,
+    brokenTackles:
+      ctx.pfrRush || ctx.pfrRec
+        ? (ctx.pfrRush?.rushing_broken_tackles ?? 0) + (ctx.pfrRec?.receiving_broken_tackles ?? 0)
+        : null,
+    snapShare: ctx.snapShare ?? null,
+    separation: ngsValue(ctx.ngsRec, 'avg_separation', 1),
+    yacOverExp: ngsValue(ctx.ngsRec, 'avg_yac_above_expectation', 1),
+    adot: ngsValue(ctx.ngsRec, 'avg_intended_air_yards', 1),
+    airYardsShare: round(n('air_yards_share'), 3),
+    dropPct: ctx.pfrRec && stats.targets ? ratio(ctx.pfrRec.receiving_drop, stats.targets) : null,
   };
 }
 
 // nflverse fantasy points leave out kicking, so kickers use standard scoring:
 // FG 0-39 = 3, 40-49 = 4, 50+ = 5, XP = 1, missed FG or XP = -1
-function kickerStats(n, epa) {
+// FG % over expected: makes minus nflverse's make probability, per attempt, in percentage points
+function kickerStats(n, ctx) {
   const fgMade = n('fg_made');
   const fgAtt = n('fg_att');
   const patMade = n('pat_made');
@@ -204,13 +294,14 @@ function kickerStats(n, epa) {
     fg50,
     fgLong: n('fg_long'),
     patPct: ratio(patMade, patAtt),
-    epaPerKick: epa,
+    epaPerKick: ctx.epa,
+    fgOverExp: ctx.fgOverExp ?? null,
     fantasyStd: fgUnder40 * 3 + n('fg_made_40_49') * 4 + fg50 * 5 + patMade - (fgAtt - fgMade) - (patAtt - patMade),
     receptions: 0,
   };
 }
 
-function punterStats(n, epa) {
+function punterStats(n, ctx) {
   const punts = n('pt_att');
   return {
     punts,
@@ -219,7 +310,8 @@ function punterStats(n, epa) {
     inside20: n('pt_inside_20'),
     inside20Pct: ratio(n('pt_inside_20'), punts),
     touchbacks: n('pt_touchback'),
-    epaPerPunt: epa,
+    epaPerPunt: ctx.epa,
+    fairCatchPct: ratio(n('pt_fair_caught'), punts),
   };
 }
 
@@ -280,7 +372,7 @@ function pointsAllowedFantasy(points) {
 
 // Team defenses: EPA/success allowed, sacks, takeaways, points allowed and D/ST fantasy
 // (sack 1, takeaway 2, TD 6, safety 2, plus the points-allowed tier each game)
-function defenseUnits({ pbp, games }) {
+function defenseUnits({ pbp, games, pfr }) {
   return Object.keys(TEAM_ICONS).map((team) => {
     const defPlays = pbp.filter((play) => play.defteam === team);
     const scrimmage = defPlays.filter(EPA_PLAY);
@@ -292,6 +384,14 @@ function defenseUnits({ pbp, games }) {
     const safeties = count((play) => play.safety === '1');
     const played = teamGames(games, team);
     const allowed = played.map((g) => g.pointsAgainst);
+    const dropbacks = count((play) => play.qb_dropback === '1');
+    const thirdDowns = defPlays.filter((play) => play.third_down_converted === '1' || play.third_down_failed === '1');
+    // Drives that reached the red zone, and how each ended
+    const redZone = new Map();
+    for (const play of defPlays) {
+      if (play.drive_inside20 === '1') redZone.set(`${play.game_id}-${play.fixed_drive}`, play.fixed_drive_result);
+    }
+    const pressure = pfr.def.get(team);
     return {
       id: null,
       gsisId: `DEF-${team}`,
@@ -309,6 +409,12 @@ function defenseUnits({ pbp, games }) {
         fantasyStd:
           sacks + takeaways * 2 + tds * 6 + safeties * 2 + allowed.reduce((sum, p) => sum + pointsAllowedFantasy(p), 0),
         receptions: 0,
+        pressureRate: pressure && dropbacks ? ratio(pressure.def_pressures, dropbacks) : null,
+        missedTacklePct: pressure
+          ? ratio(pressure.def_missed_tackles, pressure.def_tackles_combined + pressure.def_missed_tackles)
+          : null,
+        thirdDownPct: ratio(thirdDowns.filter((play) => play.third_down_converted === '1').length, thirdDowns.length),
+        redZoneTdPct: ratio([...redZone.values()].filter((result) => result === 'Touchdown').length, redZone.size),
       },
     };
   });
@@ -385,12 +491,17 @@ function coachUnits({ pbp, games, headCoaches }) {
     const defense = plays.filter((play) => play.defteam === team && EPA_PLAY(play));
     const epa = (list) => mean(list.map((play) => num(play.epa))) ?? 0;
 
-    let wins = 0, losses = 0, ties = 0, expected = 0, covers = 0, atsGames = 0;
+    let wins = 0, losses = 0, ties = 0, expected = 0, covers = 0, atsGames = 0, oneScore = 0, oneScoreWins = 0;
     for (const g of played) {
       const margin = g.pointsFor - g.pointsAgainst;
       if (margin > 0) wins++;
       else if (margin < 0) losses++;
       else ties++;
+      // One-score games: decided by 8 points or fewer
+      if (Math.abs(margin) <= 8) {
+        oneScore++;
+        oneScoreWins += margin > 0 ? 1 : margin === 0 ? 0.5 : 0;
+      }
       expected += winProbability(g.game, g.home);
       // spread_line is how many points the home team is favored by; pushes don't count
       const spread = num(g.game.spread_line);
@@ -419,6 +530,11 @@ function coachUnits({ pbp, games, headCoaches }) {
         atsPct: ratio(covers, atsGames),
         pointDiffPerGame: round(played.reduce((sum, g) => sum + g.pointsFor - g.pointsAgainst, 0) / played.length, 1),
         netEpa: round(epa(offense) - epa(defense), 3),
+        oneScoreWinPct: oneScore ? ratio(oneScoreWins, oneScore) : null,
+        penaltiesPerGame: round(
+          plays.filter((play) => play.penalty === '1' && play.penalty_team === team).length / played.length,
+          1
+        ),
       },
     };
   });
@@ -446,10 +562,26 @@ function specialTeamsEpa(pbp) {
   };
 }
 
+// FG makes over expected per attempt (percentage points), from nflverse's fg_prob
+function fieldGoalsOverExpected(pbp) {
+  const totals = new Map();
+  for (const play of pbp) {
+    const prob = num(play.fg_prob);
+    if (play.field_goal_attempt !== '1' || prob === null || !play.kicker_player_id) continue;
+    const t = totals.get(play.kicker_player_id) ?? { made: 0, expected: 0, att: 0 };
+    t.made += play.field_goal_result === 'made' ? 1 : 0;
+    t.expected += prob;
+    t.att++;
+    totals.set(play.kicker_player_id, t);
+  }
+  return new Map([...totals].map(([id, t]) => [id, round(((t.made - t.expected) / t.att) * 100, 1)]));
+}
+
 // Season stats for non-QB positions from nflverse, plus team defenses and head coaches
 function skillPlayers(nflverse) {
-  const { playerStats, pbp, espnByGsis } = nflverse;
+  const { playerStats, pbp, espnByGsis, pfrByGsis, ngs, pfr, snapShare } = nflverse;
   const stEpa = specialTeamsEpa(pbp);
+  const fgOverExp = fieldGoalsOverExpected(pbp);
   const result = {
     DEF: defenseUnits(nflverse).sort((a, b) => a.name.localeCompare(b.name)),
     HC: coachUnits(nflverse).sort((a, b) => a.name.localeCompare(b.name)),
@@ -461,14 +593,23 @@ function skillPlayers(nflverse) {
         const n = (key) => num(row[key]) ?? 0;
         const icon = TEAM_ICONS[row.recent_team];
         if (!icon) throw new Error(`Unknown team abbreviation "${row.recent_team}" for ${row.player_display_name}`);
-        const epa = config.epa ? (stEpa[config.epa].get(row.player_id) ?? 0) : undefined;
+        const pfrId = pfrByGsis.get(row.player_id);
+        const ctx = {
+          epa: config.epa ? (stEpa[config.epa].get(row.player_id) ?? 0) : undefined,
+          fgOverExp: fgOverExp.get(row.player_id),
+          ngsRush: ngs.rush.get(row.player_id),
+          ngsRec: ngs.rec.get(row.player_id),
+          pfrRush: pfr.rush.get(pfrId),
+          pfrRec: pfr.rec.get(pfrId),
+          snapShare: snapShare.get(pfrId),
+        };
         return {
           id: espnByGsis.get(row.player_id) ?? null,
           gsisId: row.player_id,
           name: row.player_display_name,
           teamLogo: `../assets/NFL_Icons/${icon}.png`,
           games: n('games'),
-          stats: config.stats(n, epa),
+          stats: config.stats(n, ctx),
         };
       })
       .sort((a, b) => config.usage(b.stats) - config.usage(a.stats))

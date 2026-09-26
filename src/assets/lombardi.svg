@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 32">
+  <!-- Lombardi-style trophy silhouette: a football on a tapering spire and base -->
+  <defs>
+    <mask id="laces">
+      <rect width="24" height="32" fill="#fff"/>
+      <g transform="rotate(-35 12 7)" stroke="#000" stroke-width="0.7" stroke-linecap="round">
+        <line x1="9.2" y1="7" x2="14.8" y2="7"/>
+        <line x1="10.4" y1="6" x2="10.4" y2="8"/>
+        <line x1="12" y1="6" x2="12" y2="8"/>
+        <line x1="13.6" y1="6" x2="13.6" y2="8"/>
+      </g>
+    </mask>
+  </defs>
+  <g mask="url(#laces)">
+    <ellipse cx="12" cy="7" rx="6.4" ry="3.8" transform="rotate(-35 12 7)"/>
+    <path d="M10.9 11.2h2.2l2.3 14.3H8.6z"/>
+    <rect x="6.5" y="25.5" width="11" height="2.2" rx="0.4"/>
+    <rect x="5.5" y="28.2" width="13" height="2.8" rx="0.5"/>
+  </g>
+</svg>

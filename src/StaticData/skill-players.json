@@ -15,7 +15,11 @@
         "takeaways": 3,
         "ptsAllowedPerGame": 22.5,
         "fantasyStd": 10,
-        "receptions": 0
+        "receptions": 0,
+        "pressureRate": 0.226,
+        "missedTacklePct": 0.078,
+        "thirdDownPct": 0.381,
+        "redZoneTdPct": 0.625
       }
     },
     {
@@ -33,7 +37,11 @@
         "takeaways": 2,
         "ptsAllowedPerGame": 22.7,
         "fantasyStd": 10,
-        "receptions": 0
+        "receptions": 0,
+        "pressureRate": 0.191,
+        "missedTacklePct": 0.078,
+        "thirdDownPct": 0.357,
+        "redZoneTdPct": 0.5
       }
     },
     {
@@ -51,7 +59,11 @@
         "takeaways": 2,
         "ptsAllowedPerGame": 23.5,
         "fantasyStd": 9,
-        "receptions": 0
+        "receptions": 0,
+        "pressureRate": 0.192,
+        "missedTacklePct": 0.105,
+        "thirdDownPct": 0.44,
+        "redZoneTdPct": 0.8
       }
     },
     {
@@ -69,7 +81,11 @@
         "takeaways": 2,
         "ptsAllowedPerGame": 31,
         "fantasyStd": 9,
-        "receptions": 0
+        "receptions": 0,
+        "pressureRate": 0.291,
+        "missedTacklePct": 0.123,
+        "thirdDownPct": 0.407,
+        "redZoneTdPct": 0.778
       }
     },
     {
@@ -87,7 +103,11 @@
         "takeaways": 7,
         "ptsAllowedPerGame": 31,
         "fantasyStd": 28,
-        "receptions": 0
+        "receptions": 0,
+        "pressureRate": 0.351,
+        "missedTacklePct": 0.057,
+        "thirdDownPct": 0.519,
+        "redZoneTdPct": 1
       }
     },
     {
@@ -105,7 +125,11 @@
         "takeaways": 2,
         "ptsAllowedPerGame": 23,
         "fantasyStd": 9,
-        "receptions": 0
+        "receptions": 0,
+        "pressureRate": 0.373,
+        "missedTacklePct": 0.093,
+        "thirdDownPct": 0.318,
+        "redZoneTdPct": 0.8
       }
     },
     {
@@ -123,7 +147,11 @@
         "takeaways": 4,
         "ptsAllowedPerGame": 16.5,
         "fantasyStd": 29,
-        "receptions": 0
+        "receptions": 0,
+        "pressureRate": 0.289,
+        "missedTacklePct": 0.109,
+        "thirdDownPct": 0.37,
+        "redZoneTdPct": 0.25
       }
     },
     {
@@ -141,7 +169,11 @@
         "takeaways": 1,
         "ptsAllowedPerGame": 26.5,
         "fantasyStd": 6,
-        "receptions": 0
+        "receptions": 0,
+        "pressureRate": 0.156,
+        "missedTacklePct": 0.156,
+        "thirdDownPct": 0.462,
+        "redZoneTdPct": 0.5
       }
     },
     {
@@ -159,7 +191,11 @@
         "takeaways": 2,
         "ptsAllowedPerGame": 24,
         "fantasyStd": 6,
-        "receptions": 0
+        "receptions": 0,
+        "pressureRate": 0.2,
+        "missedTacklePct": 0.085,
+        "thirdDownPct": 0.68,
+        "redZoneTdPct": 0.714
       }
     },
     {
@@ -177,7 +213,11 @@
         "takeaways": 2,
         "ptsAllowedPerGame": 22,
         "fantasyStd": 11,
-        "receptions": 0
+        "receptions": 0,
+        "pressureRate": 0.203,
+        "missedTacklePct": 0.184,
+        "thirdDownPct": 0.483,
+        "redZoneTdPct": 0.571
       }
     },
     {
@@ -195,7 +235,11 @@
         "takeaways": 3,
         "ptsAllowedPerGame": 35.5,
         "fantasyStd": 8,
-        "receptions": 0
+        "receptions": 0,
+        "pressureRate": 0.267,
+        "missedTacklePct": 0.022,
+        "thirdDownPct": 0.586,
+        "redZoneTdPct": 0.9
       }
     },
     {
@@ -213,7 +257,11 @@
         "takeaways": 2,
         "ptsAllowedPerGame": 30.3,
         "fantasyStd": 4,
-        "receptions": 0
+        "receptions": 0,
+        "pressureRate": 0.267,
+        "missedTacklePct": 0.081,
+        "thirdDownPct": 0.5,
+        "redZoneTdPct": 0.833
       }
     },
     {
@@ -231,7 +279,11 @@
         "takeaways": 0,
         "ptsAllowedPerGame": 28,
         "fantasyStd": 4,
-        "receptions": 0
+        "receptions": 0,
+        "pressureRate": 0.261,
+        "missedTacklePct": 0.085,
+        "thirdDownPct": 0.333,
+        "redZoneTdPct": 0.5
       }
     },
     {
@@ -249,7 +301,11 @@
         "takeaways": 1,
         "ptsAllowedPerGame": 37,
         "fantasyStd": 1,
-        "receptions": 0
+        "receptions": 0,
+        "pressureRate": 0.175,
+        "missedTacklePct": 0.138,
+        "thirdDownPct": 0.364,
+        "redZoneTdPct": 0.667
       }
     },
     {
@@ -267,7 +323,11 @@
         "takeaways": 3,
         "ptsAllowedPerGame": 15,
         "fantasyStd": 16,
-        "receptions": 0
+        "receptions": 0,
+        "pressureRate": 0.311,
+        "missedTacklePct": 0.126,
+        "thirdDownPct": 0.263,
+        "redZoneTdPct": 0.286
       }
     },
     {
@@ -285,7 +345,11 @@
         "takeaways": 3,
         "ptsAllowedPerGame": 20,
         "fantasyStd": 13,
-        "receptions": 0
+        "receptions": 0,
+        "pressureRate": 0.212,
+        "missedTacklePct": 0.096,
+        "thirdDownPct": 0.292,
+        "redZoneTdPct": 0.6
       }
     },
     {
@@ -303,7 +367,11 @@
         "takeaways": 5,
         "ptsAllowedPerGame": 13.5,
         "fantasyStd": 25,
-        "receptions": 0
+        "receptions": 0,
+        "pressureRate": 0.5,
+        "missedTacklePct": 0.09,
+        "thirdDownPct": 0.292,
+        "redZoneTdPct": 0.6
       }
     },
     {
@@ -321,7 +389,11 @@
         "takeaways": 1,
         "ptsAllowedPerGame": 26,
         "fantasyStd": 5,
-        "receptions": 0
+        "receptions": 0,
+        "pressureRate": 0.282,
+        "missedTacklePct": 0.063,
+        "thirdDownPct": 0.357,
+        "redZoneTdPct": 0.5
       }
     },
     {
@@ -339,7 +411,11 @@
         "takeaways": 2,
         "ptsAllowedPerGame": 16.5,
         "fantasyStd": 13,
-        "receptions": 0
+        "receptions": 0,
+        "pressureRate": 0.186,
+        "missedTacklePct": 0.05,
+        "thirdDownPct": 0.385,
+        "redZoneTdPct": 0.4
       }
     },
     {
@@ -357,7 +433,11 @@
         "takeaways": 2,
         "ptsAllowedPerGame": 31,
         "fantasyStd": 0,
-        "receptions": 0
+        "receptions": 0,
+        "pressureRate": 0.125,
+        "missedTacklePct": 0.075,
+        "thirdDownPct": 0.5,
+        "redZoneTdPct": 0.889
       }
     },
     {
@@ -375,7 +455,11 @@
         "takeaways": 4,
         "ptsAllowedPerGame": 12.5,
         "fantasyStd": 23,
-        "receptions": 0
+        "receptions": 0,
+        "pressureRate": 0.448,
+        "missedTacklePct": 0.039,
+        "thirdDownPct": 0.296,
+        "redZoneTdPct": 0.143
       }
     },
     {
@@ -393,7 +477,11 @@
         "takeaways": 2,
         "ptsAllowedPerGame": 8,
         "fantasyStd": 27,
-        "receptions": 0
+        "receptions": 0,
+        "pressureRate": 0.247,
+        "missedTacklePct": 0.073,
+        "thirdDownPct": 0.174,
+        "redZoneTdPct": 0
       }
     },
     {
@@ -411,7 +499,11 @@
         "takeaways": 2,
         "ptsAllowedPerGame": 24,
         "fantasyStd": 8,
-        "receptions": 0
+        "receptions": 0,
+        "pressureRate": 0.269,
+        "missedTacklePct": 0.102,
+        "thirdDownPct": 0.409,
+        "redZoneTdPct": 0.714
       }
     },
     {
@@ -429,7 +521,11 @@
         "takeaways": 3,
         "ptsAllowedPerGame": 24,
         "fantasyStd": 7,
-        "receptions": 0
+        "receptions": 0,
+        "pressureRate": 0.103,
+        "missedTacklePct": 0.16,
+        "thirdDownPct": 0.65,
+        "redZoneTdPct": 1
       }
     },
     {
@@ -447,7 +543,11 @@
         "takeaways": 2,
         "ptsAllowedPerGame": 15,
         "fantasyStd": 15,
-        "receptions": 0
+        "receptions": 0,
+        "pressureRate": 0.254,
+        "missedTacklePct": 0.116,
+        "thirdDownPct": 0.238,
+        "redZoneTdPct": 0.6
       }
     },
     {
@@ -465,7 +565,11 @@
         "takeaways": 0,
         "ptsAllowedPerGame": 21,
         "fantasyStd": 4,
-        "receptions": 0
+        "receptions": 0,
+        "pressureRate": 0.222,
+        "missedTacklePct": 0.108,
+        "thirdDownPct": 0.393,
+        "redZoneTdPct": 0.714
       }
     },
     {
@@ -483,7 +587,11 @@
         "takeaways": 4,
         "ptsAllowedPerGame": 16.5,
         "fantasyStd": 26,
-        "receptions": 0
+        "receptions": 0,
+        "pressureRate": 0.302,
+        "missedTacklePct": 0.121,
+        "thirdDownPct": 0.25,
+        "redZoneTdPct": 0
       }
     },
     {
@@ -501,7 +609,11 @@
         "takeaways": 2,
         "ptsAllowedPerGame": 10,
         "fantasyStd": 16,
-        "receptions": 0
+        "receptions": 0,
+        "pressureRate": 0.333,
+        "missedTacklePct": 0.078,
+        "thirdDownPct": 0.375,
+        "redZoneTdPct": 0.2
       }
     },
     {
@@ -519,7 +631,11 @@
         "takeaways": 4,
         "ptsAllowedPerGame": 8.5,
         "fantasyStd": 21,
-        "receptions": 0
+        "receptions": 0,
+        "pressureRate": 0.233,
+        "missedTacklePct": 0.047,
+        "thirdDownPct": 0.286,
+        "redZoneTdPct": 0.667
       }
     },
     {
@@ -537,7 +653,11 @@
         "takeaways": 1,
         "ptsAllowedPerGame": 28,
         "fantasyStd": 10,
-        "receptions": 0
+        "receptions": 0,
+        "pressureRate": 0.181,
+        "missedTacklePct": 0.14,
+        "thirdDownPct": 0.481,
+        "redZoneTdPct": 0.375
       }
     },
     {
@@ -555,7 +675,11 @@
         "takeaways": 2,
         "ptsAllowedPerGame": 23.5,
         "fantasyStd": 7,
-        "receptions": 0
+        "receptions": 0,
+        "pressureRate": 0.206,
+        "missedTacklePct": 0.098,
+        "thirdDownPct": 0.433,
+        "redZoneTdPct": 0.714
       }
     },
     {
@@ -573,7 +697,11 @@
         "takeaways": 0,
         "ptsAllowedPerGame": 30.5,
         "fantasyStd": 1,
-        "receptions": 0
+        "receptions": 0,
+        "pressureRate": 0.304,
+        "missedTacklePct": 0.106,
+        "thirdDownPct": 0.52,
+        "redZoneTdPct": 0.714
       }
     }
   ],
@@ -592,7 +720,9 @@
         "winsOverExpected": 0.14,
         "atsPct": 1,
         "pointDiffPerGame": 5,
-        "netEpa": 0.155
+        "netEpa": 0.155,
+        "oneScoreWinPct": 0,
+        "penaltiesPerGame": 10.5
       }
     },
     {
@@ -609,7 +739,9 @@
         "winsOverExpected": 0.76,
         "atsPct": 0.5,
         "pointDiffPerGame": 12,
-        "netEpa": 0.208
+        "netEpa": 0.208,
+        "oneScoreWinPct": 1,
+        "penaltiesPerGame": 7.5
       }
     },
     {
@@ -626,7 +758,9 @@
         "winsOverExpected": -0.26,
         "atsPct": 0.5,
         "pointDiffPerGame": 8,
-        "netEpa": 0.073
+        "netEpa": 0.073,
+        "oneScoreWinPct": 0,
+        "penaltiesPerGame": 10
       }
     },
     {
@@ -643,7 +777,9 @@
         "winsOverExpected": -0.26,
         "atsPct": 0.5,
         "pointDiffPerGame": 4.5,
-        "netEpa": 0.06
+        "netEpa": 0.06,
+        "oneScoreWinPct": 0,
+        "penaltiesPerGame": 7
       }
     },
     {
@@ -660,7 +796,9 @@
         "winsOverExpected": -0.06,
         "atsPct": 0,
         "pointDiffPerGame": -4.5,
-        "netEpa": -0.091
+        "netEpa": -0.091,
+        "oneScoreWinPct": 1,
+        "penaltiesPerGame": 9
       }
     },
     {
@@ -677,7 +815,9 @@
         "winsOverExpected": -0.66,
         "atsPct": 0.5,
         "pointDiffPerGame": -9.5,
-        "netEpa": -0.086
+        "netEpa": -0.086,
+        "oneScoreWinPct": 0,
+        "penaltiesPerGame": 5.5
       }
     },
     {
@@ -694,7 +834,9 @@
         "winsOverExpected": 0.02,
         "atsPct": 0.5,
         "pointDiffPerGame": 4.5,
-        "netEpa": 0.129
+        "netEpa": 0.129,
+        "oneScoreWinPct": null,
+        "penaltiesPerGame": 10
       }
     },
     {
@@ -711,7 +853,9 @@
         "winsOverExpected": -1.07,
         "atsPct": 0,
         "pointDiffPerGame": -9.5,
-        "netEpa": -0.165
+        "netEpa": -0.165,
+        "oneScoreWinPct": 0,
+        "penaltiesPerGame": 8
       }
     },
     {
@@ -728,7 +872,9 @@
         "winsOverExpected": -0.53,
         "atsPct": 0,
         "pointDiffPerGame": -18,
-        "netEpa": -0.273
+        "netEpa": -0.273,
+        "oneScoreWinPct": null,
+        "penaltiesPerGame": 7.5
       }
     },
     {
@@ -745,7 +891,9 @@
         "winsOverExpected": -0.35,
         "atsPct": 0.5,
         "pointDiffPerGame": 5.5,
-        "netEpa": 0.182
+        "netEpa": 0.182,
+        "oneScoreWinPct": 0,
+        "penaltiesPerGame": 8.5
       }
     },
     {
@@ -762,7 +910,9 @@
         "winsOverExpected": -1.52,
         "atsPct": 0,
         "pointDiffPerGame": -12,
-        "netEpa": -0.272
+        "netEpa": -0.272,
+        "oneScoreWinPct": null,
+        "penaltiesPerGame": 7.5
       }
     },
     {
@@ -779,7 +929,9 @@
         "winsOverExpected": 0.82,
         "atsPct": 1,
         "pointDiffPerGame": 7.5,
-        "netEpa": 0.202
+        "netEpa": 0.202,
+        "oneScoreWinPct": 1,
+        "penaltiesPerGame": 7.5
       }
     },
     {
@@ -796,7 +948,9 @@
         "winsOverExpected": 0.32,
         "atsPct": 0.5,
         "pointDiffPerGame": -7,
-        "netEpa": -0.243
+        "netEpa": -0.243,
+        "oneScoreWinPct": 1,
+        "penaltiesPerGame": 6.5
       }
     },
     {
@@ -813,7 +967,9 @@
         "winsOverExpected": 0.49,
         "atsPct": 1,
         "pointDiffPerGame": 3,
-        "netEpa": 0.042
+        "netEpa": 0.042,
+        "oneScoreWinPct": 0.5,
+        "penaltiesPerGame": 5.5
       }
     },
     {
@@ -830,7 +986,9 @@
         "winsOverExpected": 1.13,
         "atsPct": 1,
         "pointDiffPerGame": 11.5,
-        "netEpa": 0.165
+        "netEpa": 0.165,
+        "oneScoreWinPct": 1,
+        "penaltiesPerGame": 3
       }
     },
     {
@@ -847,7 +1005,9 @@
         "winsOverExpected": -0.03,
         "atsPct": 0.333,
         "pointDiffPerGame": -5.7,
-        "netEpa": -0.1
+        "netEpa": -0.1,
+        "oneScoreWinPct": 0,
+        "penaltiesPerGame": 7
       }
     },
     {
@@ -864,7 +1024,9 @@
         "winsOverExpected": 1.13,
         "atsPct": 1,
         "pointDiffPerGame": 13,
-        "netEpa": 0.213
+        "netEpa": 0.213,
+        "oneScoreWinPct": null,
+        "penaltiesPerGame": 6
       }
     },
     {
@@ -881,7 +1043,9 @@
         "winsOverExpected": 0.79,
         "atsPct": 1,
         "pointDiffPerGame": 21,
-        "netEpa": 0.393
+        "netEpa": 0.393,
+        "oneScoreWinPct": null,
+        "penaltiesPerGame": 4.5
       }
     },
     {
@@ -898,7 +1062,9 @@
         "winsOverExpected": -0.22,
         "atsPct": 0.5,
         "pointDiffPerGame": 8.5,
-        "netEpa": 0.147
+        "netEpa": 0.147,
+        "oneScoreWinPct": 0,
+        "penaltiesPerGame": 3.5
       }
     },
     {
@@ -915,7 +1081,9 @@
         "winsOverExpected": -0.76,
         "atsPct": 0,
         "pointDiffPerGame": -11.7,
-        "netEpa": -0.201
+        "netEpa": -0.201,
+        "oneScoreWinPct": 1,
+        "penaltiesPerGame": 10.7
       }
     },
     {
@@ -932,7 +1100,9 @@
         "winsOverExpected": 0.44,
         "atsPct": 0.5,
         "pointDiffPerGame": -6,
-        "netEpa": -0.041
+        "netEpa": -0.041,
+        "oneScoreWinPct": null,
+        "penaltiesPerGame": 7
       }
     },
     {
@@ -949,7 +1119,9 @@
         "winsOverExpected": 0.74,
         "atsPct": 1,
         "pointDiffPerGame": 13.5,
-        "netEpa": 0.268
+        "netEpa": 0.268,
+        "oneScoreWinPct": 1,
+        "penaltiesPerGame": 6.5
       }
     },
     {
@@ -966,7 +1138,9 @@
         "winsOverExpected": -0.05,
         "atsPct": 0.5,
         "pointDiffPerGame": -5,
-        "netEpa": -0.079
+        "netEpa": -0.079,
+        "oneScoreWinPct": 1,
+        "penaltiesPerGame": 6
       }
     },
     {
@@ -983,7 +1157,9 @@
         "winsOverExpected": -0.06,
         "atsPct": 1,
         "pointDiffPerGame": 7,
-        "netEpa": 0.107
+        "netEpa": 0.107,
+        "oneScoreWinPct": 0,
+        "penaltiesPerGame": 6.5
       }
     },
     {
@@ -1000,7 +1176,9 @@
         "winsOverExpected": 0.59,
         "atsPct": 0,
         "pointDiffPerGame": 3,
-        "netEpa": -0.017
+        "netEpa": -0.017,
+        "oneScoreWinPct": 1,
+        "penaltiesPerGame": 4.5
       }
     },
     {
@@ -1017,7 +1195,9 @@
         "winsOverExpected": -0.78,
         "atsPct": 0.5,
         "pointDiffPerGame": -8.5,
-        "netEpa": -0.126
+        "netEpa": -0.126,
+        "oneScoreWinPct": 0,
+        "penaltiesPerGame": 5.5
       }
     },
     {
@@ -1034,7 +1214,9 @@
         "winsOverExpected": -0.38,
         "atsPct": 0.5,
         "pointDiffPerGame": 1,
-        "netEpa": 0.084
+        "netEpa": 0.084,
+        "oneScoreWinPct": null,
+        "penaltiesPerGame": 5
       }
     },
     {
@@ -1051,7 +1233,9 @@
         "winsOverExpected": -0.03,
         "atsPct": 0.5,
         "pointDiffPerGame": -7,
-        "netEpa": -0.142
+        "netEpa": -0.142,
+        "oneScoreWinPct": 1,
+        "penaltiesPerGame": 8.5
       }
     },
     {
@@ -1068,7 +1252,9 @@
         "winsOverExpected": -0.71,
         "atsPct": 0.5,
         "pointDiffPerGame": -10.5,
-        "netEpa": -0.191
+        "netEpa": -0.191,
+        "oneScoreWinPct": 0,
+        "penaltiesPerGame": 4.5
       }
     },
     {
@@ -1085,7 +1271,9 @@
         "winsOverExpected": -1.13,
         "atsPct": 0,
         "pointDiffPerGame": -5,
-        "netEpa": -0.154
+        "netEpa": -0.154,
+        "oneScoreWinPct": 0,
+        "penaltiesPerGame": 7
       }
     },
     {
@@ -1102,7 +1290,9 @@
         "winsOverExpected": 0.57,
         "atsPct": 0.5,
         "pointDiffPerGame": -10,
-        "netEpa": -0.121
+        "netEpa": -0.121,
+        "oneScoreWinPct": 1,
+        "penaltiesPerGame": 8.5
       }
     },
     {
@@ -1119,7 +1309,9 @@
         "winsOverExpected": 0.93,
         "atsPct": 1,
         "pointDiffPerGame": 10,
-        "netEpa": 0.122
+        "netEpa": 0.122,
+        "oneScoreWinPct": 1,
+        "penaltiesPerGame": 9.5
       }
     }
   ],
@@ -1147,7 +1339,16 @@
         "totalTds": 1,
         "catchPct": 0,
         "epaPerCarry": -0.097,
-        "epaPerTarget": -0.884
+        "epaPerTarget": -0.884,
+        "ryoePerAtt": 0.22,
+        "yacoPerCarry": 1.46,
+        "brokenTackles": 1,
+        "snapShare": 0.635,
+        "separation": null,
+        "yacOverExp": null,
+        "adot": null,
+        "airYardsShare": 0.012,
+        "dropPct": 1
       }
     },
     {
@@ -1173,7 +1374,16 @@
         "totalTds": 2,
         "catchPct": 0.769,
         "epaPerCarry": -0.295,
-        "epaPerTarget": -0.136
+        "epaPerTarget": -0.136,
+        "ryoePerAtt": -0.01,
+        "yacoPerCarry": 1.91,
+        "brokenTackles": 4,
+        "snapShare": 0.775,
+        "separation": null,
+        "yacOverExp": null,
+        "adot": null,
+        "airYardsShare": 0.039,
+        "dropPct": 0.231
       }
     },
     {
@@ -1199,7 +1409,16 @@
         "totalTds": 1,
         "catchPct": 1,
         "epaPerCarry": 0.004,
-        "epaPerTarget": -0.226
+        "epaPerTarget": -0.226,
+        "ryoePerAtt": 0.23,
+        "yacoPerCarry": 3.14,
+        "brokenTackles": 1,
+        "snapShare": 0.5,
+        "separation": null,
+        "yacOverExp": null,
+        "adot": null,
+        "airYardsShare": -0.024,
+        "dropPct": 0
       }
     },
     {
@@ -1225,7 +1444,16 @@
         "totalTds": 3,
         "catchPct": 0.813,
         "epaPerCarry": 0.072,
-        "epaPerTarget": -0.336
+        "epaPerTarget": -0.336,
+        "ryoePerAtt": 1.03,
+        "yacoPerCarry": 1.15,
+        "brokenTackles": 9,
+        "snapShare": 0.667,
+        "separation": null,
+        "yacOverExp": null,
+        "adot": null,
+        "airYardsShare": -0.073,
+        "dropPct": 0
       }
     },
     {
@@ -1251,7 +1479,16 @@
         "totalTds": 0,
         "catchPct": 1,
         "epaPerCarry": 0.14,
-        "epaPerTarget": 1.286
+        "epaPerTarget": 1.286,
+        "ryoePerAtt": 1.24,
+        "yacoPerCarry": 1.73,
+        "brokenTackles": 0,
+        "snapShare": 0.34,
+        "separation": null,
+        "yacOverExp": null,
+        "adot": null,
+        "airYardsShare": -0.01,
+        "dropPct": 0
       }
     },
     {
@@ -1277,7 +1514,16 @@
         "totalTds": 1,
         "catchPct": 1,
         "epaPerCarry": -0.123,
-        "epaPerTarget": 0.902
+        "epaPerTarget": 0.902,
+        "ryoePerAtt": -0.41,
+        "yacoPerCarry": 1.5,
+        "brokenTackles": 5,
+        "snapShare": 0.615,
+        "separation": null,
+        "yacOverExp": null,
+        "adot": null,
+        "airYardsShare": 0.005,
+        "dropPct": 0
       }
     },
     {
@@ -1303,7 +1549,16 @@
         "totalTds": 1,
         "catchPct": 1,
         "epaPerCarry": 0.103,
-        "epaPerTarget": 0.602
+        "epaPerTarget": 0.602,
+        "ryoePerAtt": -0.05,
+        "yacoPerCarry": 1.33,
+        "brokenTackles": 2,
+        "snapShare": 0.333,
+        "separation": null,
+        "yacOverExp": null,
+        "adot": null,
+        "airYardsShare": 0,
+        "dropPct": 0
       }
     },
     {
@@ -1329,7 +1584,16 @@
         "totalTds": 1,
         "catchPct": 1,
         "epaPerCarry": 0.137,
-        "epaPerTarget": -0.238
+        "epaPerTarget": -0.238,
+        "ryoePerAtt": 0.45,
+        "yacoPerCarry": 2.12,
+        "brokenTackles": 2,
+        "snapShare": 0.695,
+        "separation": null,
+        "yacOverExp": null,
+        "adot": null,
+        "airYardsShare": -0.083,
+        "dropPct": 0
       }
     },
     {
@@ -1355,7 +1619,16 @@
         "totalTds": 1,
         "catchPct": 1,
         "epaPerCarry": -0.094,
-        "epaPerTarget": -0.443
+        "epaPerTarget": -0.443,
+        "ryoePerAtt": 0.28,
+        "yacoPerCarry": 2.6,
+        "brokenTackles": 4,
+        "snapShare": 0.6,
+        "separation": null,
+        "yacOverExp": null,
+        "adot": null,
+        "airYardsShare": -0.007,
+        "dropPct": 0
       }
     },
     {
@@ -1381,7 +1654,16 @@
         "totalTds": 1,
         "catchPct": 0.727,
         "epaPerCarry": -0.137,
-        "epaPerTarget": -0.48
+        "epaPerTarget": -0.48,
+        "ryoePerAtt": -0.34,
+        "yacoPerCarry": 1.5,
+        "brokenTackles": 5,
+        "snapShare": 0.71,
+        "separation": null,
+        "yacOverExp": null,
+        "adot": null,
+        "airYardsShare": -0.068,
+        "dropPct": 0
       }
     },
     {
@@ -1407,7 +1689,16 @@
         "totalTds": 2,
         "catchPct": 0.75,
         "epaPerCarry": 0.109,
-        "epaPerTarget": 0.049
+        "epaPerTarget": 0.049,
+        "ryoePerAtt": 0.59,
+        "yacoPerCarry": 1.7,
+        "brokenTackles": 2,
+        "snapShare": 0.535,
+        "separation": null,
+        "yacOverExp": null,
+        "adot": null,
+        "airYardsShare": 0.024,
+        "dropPct": 0
       }
     },
     {
@@ -1433,7 +1724,16 @@
         "totalTds": 3,
         "catchPct": 1,
         "epaPerCarry": 0.074,
-        "epaPerTarget": 1.791
+        "epaPerTarget": 1.791,
+        "ryoePerAtt": 1.09,
+        "yacoPerCarry": 1.23,
+        "brokenTackles": 4,
+        "snapShare": 0.68,
+        "separation": null,
+        "yacOverExp": null,
+        "adot": null,
+        "airYardsShare": -0.006,
+        "dropPct": 0
       }
     },
     {
@@ -1459,7 +1759,16 @@
         "totalTds": 3,
         "catchPct": 1,
         "epaPerCarry": 0.01,
-        "epaPerTarget": 0.892
+        "epaPerTarget": 0.892,
+        "ryoePerAtt": 0.26,
+        "yacoPerCarry": 2.74,
+        "brokenTackles": 4,
+        "snapShare": 0.625,
+        "separation": null,
+        "yacOverExp": null,
+        "adot": null,
+        "airYardsShare": -0.022,
+        "dropPct": 0
       }
     },
     {
@@ -1485,7 +1794,16 @@
         "totalTds": 3,
         "catchPct": 1,
         "epaPerCarry": -0.258,
-        "epaPerTarget": 0.614
+        "epaPerTarget": 0.614,
+        "ryoePerAtt": -0.51,
+        "yacoPerCarry": 1.04,
+        "brokenTackles": 1,
+        "snapShare": 0.505,
+        "separation": null,
+        "yacOverExp": null,
+        "adot": null,
+        "airYardsShare": 0.018,
+        "dropPct": 0
       }
     },
     {
@@ -1511,7 +1829,16 @@
         "totalTds": 0,
         "catchPct": 0.636,
         "epaPerCarry": -0.213,
-        "epaPerTarget": 0.067
+        "epaPerTarget": 0.067,
+        "ryoePerAtt": -0.42,
+        "yacoPerCarry": 1.45,
+        "brokenTackles": 1,
+        "snapShare": 0.81,
+        "separation": null,
+        "yacOverExp": null,
+        "adot": null,
+        "airYardsShare": 0.059,
+        "dropPct": 0.091
       }
     },
     {
@@ -1537,7 +1864,16 @@
         "totalTds": 4,
         "catchPct": 1,
         "epaPerCarry": 0.242,
-        "epaPerTarget": 0.478
+        "epaPerTarget": 0.478,
+        "ryoePerAtt": 0.66,
+        "yacoPerCarry": 3.23,
+        "brokenTackles": 5,
+        "snapShare": 0.535,
+        "separation": null,
+        "yacOverExp": null,
+        "adot": null,
+        "airYardsShare": -0.024,
+        "dropPct": 0
       }
     },
     {
@@ -1563,7 +1899,16 @@
         "totalTds": 0,
         "catchPct": 0,
         "epaPerCarry": -0.252,
-        "epaPerTarget": -0.475
+        "epaPerTarget": -0.475,
+        "ryoePerAtt": 0.51,
+        "yacoPerCarry": 1.39,
+        "brokenTackles": 0,
+        "snapShare": 0.235,
+        "separation": null,
+        "yacOverExp": null,
+        "adot": null,
+        "airYardsShare": 0.003,
+        "dropPct": 0
       }
     },
     {
@@ -1589,7 +1934,16 @@
         "totalTds": 1,
         "catchPct": 1,
         "epaPerCarry": 0.031,
-        "epaPerTarget": -0.685
+        "epaPerTarget": -0.685,
+        "ryoePerAtt": -0.9,
+        "yacoPerCarry": 1.46,
+        "brokenTackles": 0,
+        "snapShare": 0.43,
+        "separation": null,
+        "yacOverExp": null,
+        "adot": null,
+        "airYardsShare": -0.012,
+        "dropPct": 0
       }
     },
     {
@@ -1615,7 +1969,16 @@
         "totalTds": 0,
         "catchPct": 0.75,
         "epaPerCarry": -0.28,
-        "epaPerTarget": -0.048
+        "epaPerTarget": -0.048,
+        "ryoePerAtt": -0.02,
+        "yacoPerCarry": 1.65,
+        "brokenTackles": 1,
+        "snapShare": 0.41,
+        "separation": null,
+        "yacOverExp": null,
+        "adot": null,
+        "airYardsShare": 0.039,
+        "dropPct": 0
       }
     },
     {
@@ -1641,7 +2004,16 @@
         "totalTds": 3,
         "catchPct": 0.846,
         "epaPerCarry": -0.024,
-        "epaPerTarget": 0.24
+        "epaPerTarget": 0.24,
+        "ryoePerAtt": 0.29,
+        "yacoPerCarry": 1.47,
+        "brokenTackles": 7,
+        "snapShare": 0.785,
+        "separation": null,
+        "yacOverExp": null,
+        "adot": null,
+        "airYardsShare": 0.055,
+        "dropPct": 0
       }
     },
     {
@@ -1667,7 +2039,16 @@
         "totalTds": 1,
         "catchPct": 0.571,
         "epaPerCarry": 0.146,
-        "epaPerTarget": -0.22
+        "epaPerTarget": -0.22,
+        "ryoePerAtt": 1.71,
+        "yacoPerCarry": 1.32,
+        "brokenTackles": 2,
+        "snapShare": 0.73,
+        "separation": null,
+        "yacOverExp": null,
+        "adot": null,
+        "airYardsShare": -0.005,
+        "dropPct": 0
       }
     },
     {
@@ -1693,7 +2074,16 @@
         "totalTds": 2,
         "catchPct": 0.889,
         "epaPerCarry": -0.098,
-        "epaPerTarget": 0.209
+        "epaPerTarget": 0.209,
+        "ryoePerAtt": -0.07,
+        "yacoPerCarry": 1.54,
+        "brokenTackles": 2,
+        "snapShare": 0.755,
+        "separation": null,
+        "yacOverExp": null,
+        "adot": null,
+        "airYardsShare": -0.042,
+        "dropPct": 0
       }
     },
     {
@@ -1719,7 +2109,16 @@
         "totalTds": 0,
         "catchPct": 0.7,
         "epaPerCarry": -0.166,
-        "epaPerTarget": -0.499
+        "epaPerTarget": -0.499,
+        "ryoePerAtt": 0.34,
+        "yacoPerCarry": 2.62,
+        "brokenTackles": 5,
+        "snapShare": 0.54,
+        "separation": null,
+        "yacOverExp": null,
+        "adot": null,
+        "airYardsShare": -0.027,
+        "dropPct": 0
       }
     },
     {
@@ -1745,7 +2144,16 @@
         "totalTds": 1,
         "catchPct": 0.714,
         "epaPerCarry": -0.111,
-        "epaPerTarget": -0.206
+        "epaPerTarget": -0.206,
+        "ryoePerAtt": 0.11,
+        "yacoPerCarry": 1.85,
+        "brokenTackles": 1,
+        "snapShare": 0.415,
+        "separation": null,
+        "yacOverExp": null,
+        "adot": null,
+        "airYardsShare": 0.013,
+        "dropPct": 0.143
       }
     },
     {
@@ -1771,7 +2179,16 @@
         "totalTds": 4,
         "catchPct": 0.875,
         "epaPerCarry": 0.14,
-        "epaPerTarget": -0.307
+        "epaPerTarget": -0.307,
+        "ryoePerAtt": 0.24,
+        "yacoPerCarry": 2.23,
+        "brokenTackles": 2,
+        "snapShare": 0.915,
+        "separation": null,
+        "yacOverExp": null,
+        "adot": null,
+        "airYardsShare": -0.003,
+        "dropPct": 0.125
       }
     },
     {
@@ -1797,7 +2214,16 @@
         "totalTds": 0,
         "catchPct": 1,
         "epaPerCarry": -0.081,
-        "epaPerTarget": 0.179
+        "epaPerTarget": 0.179,
+        "ryoePerAtt": -0.52,
+        "yacoPerCarry": 1.48,
+        "brokenTackles": 1,
+        "snapShare": 0.38,
+        "separation": null,
+        "yacOverExp": null,
+        "adot": null,
+        "airYardsShare": -0.015,
+        "dropPct": 0
       }
     },
     {
@@ -1823,7 +2249,16 @@
         "totalTds": 2,
         "catchPct": 0.563,
         "epaPerCarry": 0.233,
-        "epaPerTarget": 0.009
+        "epaPerTarget": 0.009,
+        "ryoePerAtt": 2.73,
+        "yacoPerCarry": 3.98,
+        "brokenTackles": 7,
+        "snapShare": 0.75,
+        "separation": null,
+        "yacOverExp": null,
+        "adot": null,
+        "airYardsShare": 0.028,
+        "dropPct": 0.125
       }
     },
     {
@@ -1849,7 +2284,16 @@
         "totalTds": 1,
         "catchPct": 1,
         "epaPerCarry": 0.171,
-        "epaPerTarget": 0.197
+        "epaPerTarget": 0.197,
+        "ryoePerAtt": 2.87,
+        "yacoPerCarry": 4.5,
+        "brokenTackles": 1,
+        "snapShare": 0.385,
+        "separation": null,
+        "yacOverExp": null,
+        "adot": null,
+        "airYardsShare": 0.02,
+        "dropPct": 0
       }
     },
     {
@@ -1875,7 +2319,16 @@
         "totalTds": 2,
         "catchPct": 1,
         "epaPerCarry": -0.121,
-        "epaPerTarget": 0.552
+        "epaPerTarget": 0.552,
+        "ryoePerAtt": 1.15,
+        "yacoPerCarry": 2.13,
+        "brokenTackles": 0,
+        "snapShare": 0.595,
+        "separation": null,
+        "yacOverExp": null,
+        "adot": null,
+        "airYardsShare": 0.02,
+        "dropPct": 0
       }
     },
     {
@@ -1901,7 +2354,16 @@
         "totalTds": 1,
         "catchPct": 0.667,
         "epaPerCarry": -0.422,
-        "epaPerTarget": 0.109
+        "epaPerTarget": 0.109,
+        "ryoePerAtt": -1.44,
+        "yacoPerCarry": 0.87,
+        "brokenTackles": 1,
+        "snapShare": 0.313,
+        "separation": null,
+        "yacOverExp": null,
+        "adot": null,
+        "airYardsShare": 0.002,
+        "dropPct": 0
       }
     },
     {
@@ -1927,7 +2389,16 @@
         "totalTds": 2,
         "catchPct": 1,
         "epaPerCarry": -0.447,
-        "epaPerTarget": 0.49
+        "epaPerTarget": 0.49,
+        "ryoePerAtt": -0.22,
+        "yacoPerCarry": 1.97,
+        "brokenTackles": 7,
+        "snapShare": 0.605,
+        "separation": null,
+        "yacOverExp": null,
+        "adot": null,
+        "airYardsShare": -0.015,
+        "dropPct": 0
       }
     },
     {
@@ -1953,7 +2424,16 @@
         "totalTds": 0,
         "catchPct": 1,
         "epaPerCarry": -0.46,
-        "epaPerTarget": 0.179
+        "epaPerTarget": 0.179,
+        "ryoePerAtt": -1.24,
+        "yacoPerCarry": 1.08,
+        "brokenTackles": 1,
+        "snapShare": 0.66,
+        "separation": null,
+        "yacOverExp": null,
+        "adot": null,
+        "airYardsShare": -0.021,
+        "dropPct": 0
       }
     },
     {
@@ -1979,7 +2459,16 @@
         "totalTds": 0,
         "catchPct": 1,
         "epaPerCarry": 0.057,
-        "epaPerTarget": -0.094
+        "epaPerTarget": -0.094,
+        "ryoePerAtt": null,
+        "yacoPerCarry": 1.93,
+        "brokenTackles": 4,
+        "snapShare": 0.465,
+        "separation": null,
+        "yacOverExp": null,
+        "adot": null,
+        "airYardsShare": -0.003,
+        "dropPct": 0
       }
     },
     {
@@ -2005,7 +2494,16 @@
         "totalTds": 0,
         "catchPct": 0.75,
         "epaPerCarry": -0.26,
-        "epaPerTarget": -0.631
+        "epaPerTarget": -0.631,
+        "ryoePerAtt": -0.02,
+        "yacoPerCarry": 2.42,
+        "brokenTackles": 1,
+        "snapShare": 0.605,
+        "separation": null,
+        "yacOverExp": null,
+        "adot": null,
+        "airYardsShare": -0.007,
+        "dropPct": 0.125
       }
     },
     {
@@ -2031,7 +2529,16 @@
         "totalTds": 0,
         "catchPct": 0.571,
         "epaPerCarry": -0.377,
-        "epaPerTarget": -0.277
+        "epaPerTarget": -0.277,
+        "ryoePerAtt": -0.75,
+        "yacoPerCarry": 0.73,
+        "brokenTackles": 0,
+        "snapShare": 0.42,
+        "separation": null,
+        "yacOverExp": null,
+        "adot": null,
+        "airYardsShare": 0.01,
+        "dropPct": 0.143
       }
     },
     {
@@ -2057,7 +2564,16 @@
         "totalTds": 0,
         "catchPct": 0.5,
         "epaPerCarry": -0.109,
-        "epaPerTarget": -0.157
+        "epaPerTarget": -0.157,
+        "ryoePerAtt": 1.28,
+        "yacoPerCarry": 3.47,
+        "brokenTackles": 1,
+        "snapShare": 0.435,
+        "separation": null,
+        "yacOverExp": null,
+        "adot": null,
+        "airYardsShare": 0.006,
+        "dropPct": 0.25
       }
     },
     {
@@ -2083,7 +2599,16 @@
         "totalTds": 0,
         "catchPct": 0.667,
         "epaPerCarry": -0.031,
-        "epaPerTarget": -0.775
+        "epaPerTarget": -0.775,
+        "ryoePerAtt": 1.06,
+        "yacoPerCarry": 2,
+        "brokenTackles": 2,
+        "snapShare": 0.535,
+        "separation": null,
+        "yacOverExp": null,
+        "adot": null,
+        "airYardsShare": 0.052,
+        "dropPct": 0
       }
     },
     {
@@ -2109,7 +2634,16 @@
         "totalTds": 0,
         "catchPct": 0.818,
         "epaPerCarry": -0.085,
-        "epaPerTarget": -0.131
+        "epaPerTarget": -0.131,
+        "ryoePerAtt": -1,
+        "yacoPerCarry": 1.53,
+        "brokenTackles": 2,
+        "snapShare": 0.565,
+        "separation": null,
+        "yacOverExp": null,
+        "adot": null,
+        "airYardsShare": -0.013,
+        "dropPct": 0
       }
     },
     {
@@ -2135,7 +2669,16 @@
         "totalTds": 0,
         "catchPct": 1,
         "epaPerCarry": -0.261,
-        "epaPerTarget": -0.144
+        "epaPerTarget": -0.144,
+        "ryoePerAtt": -0.57,
+        "yacoPerCarry": 1,
+        "brokenTackles": 3,
+        "snapShare": 0.615,
+        "separation": null,
+        "yacOverExp": null,
+        "adot": null,
+        "airYardsShare": -0.02,
+        "dropPct": 0
       }
     },
     {
@@ -2161,7 +2704,16 @@
         "totalTds": 0,
         "catchPct": 0.857,
         "epaPerCarry": -0.305,
-        "epaPerTarget": -0.217
+        "epaPerTarget": -0.217,
+        "ryoePerAtt": -0.34,
+        "yacoPerCarry": 1.41,
+        "brokenTackles": 1,
+        "snapShare": 0.495,
+        "separation": null,
+        "yacOverExp": null,
+        "adot": null,
+        "airYardsShare": 0.011,
+        "dropPct": 0
       }
     }
   ],
@@ -2189,7 +2741,16 @@
         "totalTds": 0,
         "catchPct": 0.6,
         "epaPerCarry": 0,
-        "epaPerTarget": 0.576
+        "epaPerTarget": 0.576,
+        "ryoePerAtt": null,
+        "yacoPerCarry": null,
+        "brokenTackles": 0,
+        "snapShare": 0.755,
+        "separation": 2.7,
+        "yacOverExp": -0.9,
+        "adot": 15.8,
+        "airYardsShare": 0.566,
+        "dropPct": 0.133
       }
     },
     {
@@ -2215,7 +2776,16 @@
         "totalTds": 4,
         "catchPct": 0.704,
         "epaPerCarry": 0,
-        "epaPerTarget": 0.426
+        "epaPerTarget": 0.426,
+        "ryoePerAtt": null,
+        "yacoPerCarry": null,
+        "brokenTackles": 1,
+        "snapShare": 0.925,
+        "separation": 2.9,
+        "yacOverExp": 0.5,
+        "adot": 8.1,
+        "airYardsShare": 0.401,
+        "dropPct": 0
       }
     },
     {
@@ -2241,7 +2811,16 @@
         "totalTds": 0,
         "catchPct": 0.545,
         "epaPerCarry": 0,
-        "epaPerTarget": 0.162
+        "epaPerTarget": 0.162,
+        "ryoePerAtt": null,
+        "yacoPerCarry": null,
+        "brokenTackles": 0,
+        "snapShare": 0.445,
+        "separation": 2.5,
+        "yacOverExp": -1.5,
+        "adot": 14.3,
+        "airYardsShare": 0.232,
+        "dropPct": 0.091
       }
     },
     {
@@ -2267,7 +2846,16 @@
         "totalTds": 0,
         "catchPct": 0.636,
         "epaPerCarry": 0,
-        "epaPerTarget": -0.295
+        "epaPerTarget": -0.295,
+        "ryoePerAtt": null,
+        "yacoPerCarry": null,
+        "brokenTackles": 0,
+        "snapShare": 0.815,
+        "separation": 2.5,
+        "yacOverExp": -0.6,
+        "adot": 9.8,
+        "airYardsShare": 0.355,
+        "dropPct": 0
       }
     },
     {
@@ -2293,7 +2881,16 @@
         "totalTds": 3,
         "catchPct": 0.765,
         "epaPerCarry": -0.838,
-        "epaPerTarget": 0.998
+        "epaPerTarget": 0.998,
+        "ryoePerAtt": null,
+        "yacoPerCarry": 0,
+        "brokenTackles": 0,
+        "snapShare": 0.78,
+        "separation": 3,
+        "yacOverExp": 1,
+        "adot": 14,
+        "airYardsShare": 0.409,
+        "dropPct": 0
       }
     },
     {
@@ -2319,7 +2916,16 @@
         "totalTds": 1,
         "catchPct": 0.783,
         "epaPerCarry": 0,
-        "epaPerTarget": 0.878
+        "epaPerTarget": 0.878,
+        "ryoePerAtt": null,
+        "yacoPerCarry": null,
+        "brokenTackles": 0,
+        "snapShare": 0.85,
+        "separation": 2.8,
+        "yacOverExp": -0.7,
+        "adot": 14.4,
+        "airYardsShare": 0.486,
+        "dropPct": 0.043
       }
     },
     {
@@ -2345,7 +2951,16 @@
         "totalTds": 4,
         "catchPct": 0.586,
         "epaPerCarry": 0,
-        "epaPerTarget": 0.176
+        "epaPerTarget": 0.176,
+        "ryoePerAtt": null,
+        "yacoPerCarry": null,
+        "brokenTackles": 0,
+        "snapShare": 0.82,
+        "separation": 2.3,
+        "yacOverExp": 3.5,
+        "adot": 10.9,
+        "airYardsShare": 0.282,
+        "dropPct": 0.069
       }
     },
     {
@@ -2371,7 +2986,16 @@
         "totalTds": 2,
         "catchPct": 0.688,
         "epaPerCarry": 0,
-        "epaPerTarget": 0.628
+        "epaPerTarget": 0.628,
+        "ryoePerAtt": null,
+        "yacoPerCarry": null,
+        "brokenTackles": 0,
+        "snapShare": 0.595,
+        "separation": 2.5,
+        "yacOverExp": 0.8,
+        "adot": 15.5,
+        "airYardsShare": 0.462,
+        "dropPct": 0
       }
     },
     {
@@ -2397,7 +3021,16 @@
         "totalTds": 1,
         "catchPct": 0.818,
         "epaPerCarry": 0.13,
-        "epaPerTarget": 0.451
+        "epaPerTarget": 0.451,
+        "ryoePerAtt": null,
+        "yacoPerCarry": 2.5,
+        "brokenTackles": 0,
+        "snapShare": 0.51,
+        "separation": 4.9,
+        "yacOverExp": -0.6,
+        "adot": 3.3,
+        "airYardsShare": 0.109,
+        "dropPct": 0.182
       }
     },
     {
@@ -2423,7 +3056,16 @@
         "totalTds": 2,
         "catchPct": 0.636,
         "epaPerCarry": 0,
-        "epaPerTarget": 1.106
+        "epaPerTarget": 1.106,
+        "ryoePerAtt": null,
+        "yacoPerCarry": null,
+        "brokenTackles": 0,
+        "snapShare": 0.925,
+        "separation": 2.4,
+        "yacOverExp": 5.8,
+        "adot": 16.5,
+        "airYardsShare": 0.518,
+        "dropPct": 0.091
       }
     },
     {
@@ -2449,7 +3091,16 @@
         "totalTds": 1,
         "catchPct": 0.75,
         "epaPerCarry": 0,
-        "epaPerTarget": 0.643
+        "epaPerTarget": 0.643,
+        "ryoePerAtt": null,
+        "yacoPerCarry": null,
+        "brokenTackles": 0,
+        "snapShare": 0.935,
+        "separation": 2.5,
+        "yacOverExp": -0.5,
+        "adot": 8.1,
+        "airYardsShare": 0.19,
+        "dropPct": 0.063
       }
     },
     {
@@ -2475,7 +3126,16 @@
         "totalTds": 1,
         "catchPct": 0.684,
         "epaPerCarry": 0,
-        "epaPerTarget": 0.11
+        "epaPerTarget": 0.11,
+        "ryoePerAtt": null,
+        "yacoPerCarry": null,
+        "brokenTackles": 1,
+        "snapShare": 0.915,
+        "separation": 2.7,
+        "yacOverExp": -0.1,
+        "adot": 14.7,
+        "airYardsShare": 0.516,
+        "dropPct": 0
       }
     },
     {
@@ -2501,7 +3161,16 @@
         "totalTds": 0,
         "catchPct": 0.421,
         "epaPerCarry": 0,
-        "epaPerTarget": -0.454
+        "epaPerTarget": -0.454,
+        "ryoePerAtt": null,
+        "yacoPerCarry": null,
+        "brokenTackles": 0,
+        "snapShare": 0.965,
+        "separation": 2.1,
+        "yacOverExp": -0.1,
+        "adot": 12.4,
+        "airYardsShare": 0.428,
+        "dropPct": 0.105
       }
     },
     {
@@ -2527,7 +3196,16 @@
         "totalTds": 1,
         "catchPct": 0.7,
         "epaPerCarry": 0,
-        "epaPerTarget": 1.481
+        "epaPerTarget": 1.481,
+        "ryoePerAtt": null,
+        "yacoPerCarry": null,
+        "brokenTackles": 0,
+        "snapShare": 0.765,
+        "separation": 2.8,
+        "yacOverExp": 1.5,
+        "adot": 15.4,
+        "airYardsShare": 0.286,
+        "dropPct": 0.1
       }
     },
     {
@@ -2553,7 +3231,16 @@
         "totalTds": 0,
         "catchPct": 0.789,
         "epaPerCarry": -1.751,
-        "epaPerTarget": 0.857
+        "epaPerTarget": 0.857,
+        "ryoePerAtt": null,
+        "yacoPerCarry": 2,
+        "brokenTackles": 1,
+        "snapShare": 0.843,
+        "separation": 3.4,
+        "yacOverExp": 1.8,
+        "adot": 7.8,
+        "airYardsShare": 0.369,
+        "dropPct": 0
       }
     },
     {
@@ -2579,7 +3266,16 @@
         "totalTds": 1,
         "catchPct": 0.727,
         "epaPerCarry": -1.623,
-        "epaPerTarget": 0.275
+        "epaPerTarget": 0.275,
+        "ryoePerAtt": null,
+        "yacoPerCarry": 0,
+        "brokenTackles": 0,
+        "snapShare": 0.86,
+        "separation": 2.9,
+        "yacOverExp": 0.5,
+        "adot": 15.1,
+        "airYardsShare": 0.282,
+        "dropPct": 0
       }
     },
     {
@@ -2605,7 +3301,16 @@
         "totalTds": 1,
         "catchPct": 0.786,
         "epaPerCarry": 0,
-        "epaPerTarget": 0.582
+        "epaPerTarget": 0.582,
+        "ryoePerAtt": null,
+        "yacoPerCarry": null,
+        "brokenTackles": 1,
+        "snapShare": 0.815,
+        "separation": 2.5,
+        "yacOverExp": -1.1,
+        "adot": 10.8,
+        "airYardsShare": 0.363,
+        "dropPct": 0.071
       }
     },
     {
@@ -2631,7 +3336,16 @@
         "totalTds": 0,
         "catchPct": 0.643,
         "epaPerCarry": 0,
-        "epaPerTarget": 0.079
+        "epaPerTarget": 0.079,
+        "ryoePerAtt": null,
+        "yacoPerCarry": null,
+        "brokenTackles": 0,
+        "snapShare": 0.8,
+        "separation": 2.4,
+        "yacOverExp": -0.8,
+        "adot": 12.3,
+        "airYardsShare": 0.338,
+        "dropPct": 0.143
       }
     },
     {
@@ -2657,7 +3371,16 @@
         "totalTds": 2,
         "catchPct": 0.692,
         "epaPerCarry": 0,
-        "epaPerTarget": 0.104
+        "epaPerTarget": 0.104,
+        "ryoePerAtt": null,
+        "yacoPerCarry": null,
+        "brokenTackles": 0,
+        "snapShare": 0.91,
+        "separation": 2.4,
+        "yacOverExp": 0,
+        "adot": 9.2,
+        "airYardsShare": 0.288,
+        "dropPct": 0.077
       }
     },
     {
@@ -2683,7 +3406,16 @@
         "totalTds": 0,
         "catchPct": 0.4,
         "epaPerCarry": 0,
-        "epaPerTarget": -1.521
+        "epaPerTarget": -1.521,
+        "ryoePerAtt": null,
+        "yacoPerCarry": null,
+        "brokenTackles": 0,
+        "snapShare": 0.68,
+        "separation": 2.4,
+        "yacOverExp": -1.7,
+        "adot": 13.4,
+        "airYardsShare": 0.374,
+        "dropPct": 0
       }
     },
     {
@@ -2709,7 +3441,16 @@
         "totalTds": 2,
         "catchPct": 0.889,
         "epaPerCarry": 0,
-        "epaPerTarget": 0.786
+        "epaPerTarget": 0.786,
+        "ryoePerAtt": null,
+        "yacoPerCarry": null,
+        "brokenTackles": 1,
+        "snapShare": 0.8,
+        "separation": 2.8,
+        "yacOverExp": -0.3,
+        "adot": 9.8,
+        "airYardsShare": 0.254,
+        "dropPct": 0
       }
     },
     {
@@ -2735,7 +3476,16 @@
         "totalTds": 0,
         "catchPct": 0.462,
         "epaPerCarry": 0,
-        "epaPerTarget": 0.149
+        "epaPerTarget": 0.149,
+        "ryoePerAtt": null,
+        "yacoPerCarry": null,
+        "brokenTackles": 0,
+        "snapShare": 0.905,
+        "separation": 2.8,
+        "yacOverExp": -1,
+        "adot": 13.9,
+        "airYardsShare": 0.325,
+        "dropPct": 0.231
       }
     },
     {
@@ -2761,7 +3511,16 @@
         "totalTds": 4,
         "catchPct": 0.773,
         "epaPerCarry": 0,
-        "epaPerTarget": 1.162
+        "epaPerTarget": 1.162,
+        "ryoePerAtt": null,
+        "yacoPerCarry": null,
+        "brokenTackles": 0,
+        "snapShare": 0.785,
+        "separation": 2.8,
+        "yacOverExp": 2.5,
+        "adot": 9.5,
+        "airYardsShare": 0.517,
+        "dropPct": 0.045
       }
     },
     {
@@ -2787,7 +3546,16 @@
         "totalTds": 0,
         "catchPct": 0.692,
         "epaPerCarry": 0,
-        "epaPerTarget": 0.344
+        "epaPerTarget": 0.344,
+        "ryoePerAtt": null,
+        "yacoPerCarry": null,
+        "brokenTackles": 1,
+        "snapShare": 0.68,
+        "separation": 4.1,
+        "yacOverExp": -0.6,
+        "adot": 12.6,
+        "airYardsShare": 0.461,
+        "dropPct": 0.077
       }
     },
     {
@@ -2813,7 +3581,16 @@
         "totalTds": 0,
         "catchPct": 0.692,
         "epaPerCarry": 0,
-        "epaPerTarget": 0.89
+        "epaPerTarget": 0.89,
+        "ryoePerAtt": null,
+        "yacoPerCarry": null,
+        "brokenTackles": 0,
+        "snapShare": 0.86,
+        "separation": 2.6,
+        "yacOverExp": 0.8,
+        "adot": 7.9,
+        "airYardsShare": 0.3,
+        "dropPct": 0
       }
     },
     {
@@ -2839,7 +3616,16 @@
         "totalTds": 2,
         "catchPct": 0.733,
         "epaPerCarry": 0,
-        "epaPerTarget": 0.933
+        "epaPerTarget": 0.933,
+        "ryoePerAtt": null,
+        "yacoPerCarry": null,
+        "brokenTackles": 1,
+        "snapShare": 0.96,
+        "separation": 3,
+        "yacOverExp": 1.3,
+        "adot": 12,
+        "airYardsShare": 0.514,
+        "dropPct": 0.2
       }
     },
     {
@@ -2865,7 +3651,16 @@
         "totalTds": 0,
         "catchPct": 0.929,
         "epaPerCarry": 0,
-        "epaPerTarget": 0.833
+        "epaPerTarget": 0.833,
+        "ryoePerAtt": null,
+        "yacoPerCarry": null,
+        "brokenTackles": 1,
+        "snapShare": 0.61,
+        "separation": 4.8,
+        "yacOverExp": 0.4,
+        "adot": 4.8,
+        "airYardsShare": 0.142,
+        "dropPct": 0
       }
     },
     {
@@ -2891,7 +3686,16 @@
         "totalTds": 0,
         "catchPct": 0.909,
         "epaPerCarry": -0.46,
-        "epaPerTarget": -0.144
+        "epaPerTarget": -0.144,
+        "ryoePerAtt": null,
+        "yacoPerCarry": 1,
+        "brokenTackles": 1,
+        "snapShare": 0.675,
+        "separation": 3.6,
+        "yacOverExp": -1.4,
+        "adot": 7,
+        "airYardsShare": 0.223,
+        "dropPct": 0
       }
     },
     {
@@ -2917,7 +3721,16 @@
         "totalTds": 0,
         "catchPct": 0.636,
         "epaPerCarry": 0,
-        "epaPerTarget": -0.695
+        "epaPerTarget": -0.695,
+        "ryoePerAtt": null,
+        "yacoPerCarry": null,
+        "brokenTackles": 0,
+        "snapShare": 0.59,
+        "separation": 1.9,
+        "yacOverExp": -0.3,
+        "adot": 4.8,
+        "airYardsShare": 0.146,
+        "dropPct": 0
       }
     },
     {
@@ -2943,7 +3756,16 @@
         "totalTds": 0,
         "catchPct": 0.909,
         "epaPerCarry": 0,
-        "epaPerTarget": 0.372
+        "epaPerTarget": 0.372,
+        "ryoePerAtt": null,
+        "yacoPerCarry": null,
+        "brokenTackles": 0,
+        "snapShare": 0.635,
+        "separation": 3.1,
+        "yacOverExp": 0.7,
+        "adot": 4.3,
+        "airYardsShare": 0.128,
+        "dropPct": 0.091
       }
     },
     {
@@ -2969,7 +3791,16 @@
         "totalTds": 0,
         "catchPct": 0.583,
         "epaPerCarry": 0,
-        "epaPerTarget": 0.092
+        "epaPerTarget": 0.092,
+        "ryoePerAtt": null,
+        "yacoPerCarry": null,
+        "brokenTackles": 0,
+        "snapShare": 0.51,
+        "separation": 4.1,
+        "yacOverExp": -1.1,
+        "adot": 8.2,
+        "airYardsShare": 0.181,
+        "dropPct": 0.083
       }
     },
     {
@@ -2995,7 +3826,16 @@
         "totalTds": 0,
         "catchPct": 0.667,
         "epaPerCarry": -0.357,
-        "epaPerTarget": -0.171
+        "epaPerTarget": -0.171,
+        "ryoePerAtt": null,
+        "yacoPerCarry": 0,
+        "brokenTackles": 1,
+        "snapShare": 0.65,
+        "separation": 2.7,
+        "yacOverExp": 1.2,
+        "adot": 9.6,
+        "airYardsShare": 0.242,
+        "dropPct": 0.083
       }
     },
     {
@@ -3021,7 +3861,16 @@
         "totalTds": 0,
         "catchPct": 0.538,
         "epaPerCarry": 0,
-        "epaPerTarget": -0.161
+        "epaPerTarget": -0.161,
+        "ryoePerAtt": null,
+        "yacoPerCarry": null,
+        "brokenTackles": 0,
+        "snapShare": 0.63,
+        "separation": 2.6,
+        "yacOverExp": -0.4,
+        "adot": 13.5,
+        "airYardsShare": 0.307,
+        "dropPct": 0
       }
     },
     {
@@ -3047,7 +3896,16 @@
         "totalTds": 0,
         "catchPct": 0.538,
         "epaPerCarry": 0.021,
-        "epaPerTarget": -0.114
+        "epaPerTarget": -0.114,
+        "ryoePerAtt": null,
+        "yacoPerCarry": 4,
+        "brokenTackles": 1,
+        "snapShare": 0.855,
+        "separation": 3.4,
+        "yacOverExp": -1.4,
+        "adot": 11.7,
+        "airYardsShare": 0.339,
+        "dropPct": 0.077
       }
     },
     {
@@ -3073,7 +3931,16 @@
         "totalTds": 1,
         "catchPct": 0.5,
         "epaPerCarry": 0,
-        "epaPerTarget": 0.222
+        "epaPerTarget": 0.222,
+        "ryoePerAtt": null,
+        "yacoPerCarry": null,
+        "brokenTackles": 0,
+        "snapShare": 0.833,
+        "separation": 2.6,
+        "yacOverExp": 1.3,
+        "adot": 14.7,
+        "airYardsShare": 0.386,
+        "dropPct": 0.067
       }
     },
     {
@@ -3099,7 +3966,16 @@
         "totalTds": 0,
         "catchPct": 0.5,
         "epaPerCarry": 0,
-        "epaPerTarget": -0.219
+        "epaPerTarget": -0.219,
+        "ryoePerAtt": null,
+        "yacoPerCarry": null,
+        "brokenTackles": 0,
+        "snapShare": 0.895,
+        "separation": 3.7,
+        "yacOverExp": -0.1,
+        "adot": 9.6,
+        "airYardsShare": 0.339,
+        "dropPct": 0
       }
     },
     {
@@ -3125,7 +4001,16 @@
         "totalTds": 1,
         "catchPct": 0.9,
         "epaPerCarry": 0,
-        "epaPerTarget": 1.292
+        "epaPerTarget": 1.292,
+        "ryoePerAtt": null,
+        "yacoPerCarry": null,
+        "brokenTackles": 0,
+        "snapShare": 0.645,
+        "separation": 2,
+        "yacOverExp": -0.9,
+        "adot": 10.2,
+        "airYardsShare": 0.289,
+        "dropPct": 0
       }
     },
     {
@@ -3151,7 +4036,16 @@
         "totalTds": 1,
         "catchPct": 0.7,
         "epaPerCarry": 0.907,
-        "epaPerTarget": 0.491
+        "epaPerTarget": 0.491,
+        "ryoePerAtt": null,
+        "yacoPerCarry": 0,
+        "brokenTackles": 0,
+        "snapShare": 0.72,
+        "separation": 1.1,
+        "yacOverExp": 0.3,
+        "adot": 12.6,
+        "airYardsShare": 0.151,
+        "dropPct": 0
       }
     },
     {
@@ -3177,7 +4071,16 @@
         "totalTds": 1,
         "catchPct": 0.667,
         "epaPerCarry": 0,
-        "epaPerTarget": 0.466
+        "epaPerTarget": 0.466,
+        "ryoePerAtt": null,
+        "yacoPerCarry": null,
+        "brokenTackles": 1,
+        "snapShare": 0.71,
+        "separation": 2.4,
+        "yacOverExp": -2.1,
+        "adot": 14.4,
+        "airYardsShare": 0.513,
+        "dropPct": 0
       }
     },
     {
@@ -3203,7 +4106,16 @@
         "totalTds": 0,
         "catchPct": 0.273,
         "epaPerCarry": 0.318,
-        "epaPerTarget": -0.314
+        "epaPerTarget": -0.314,
+        "ryoePerAtt": null,
+        "yacoPerCarry": 2,
+        "brokenTackles": 0,
+        "snapShare": 0.795,
+        "separation": 2.4,
+        "yacOverExp": -1,
+        "adot": 10.2,
+        "airYardsShare": 0.19,
+        "dropPct": 0.091
       }
     },
     {
@@ -3229,7 +4141,16 @@
         "totalTds": 1,
         "catchPct": 0.7,
         "epaPerCarry": 0,
-        "epaPerTarget": 0.474
+        "epaPerTarget": 0.474,
+        "ryoePerAtt": null,
+        "yacoPerCarry": null,
+        "brokenTackles": 0,
+        "snapShare": 0.855,
+        "separation": 3.2,
+        "yacOverExp": -0.3,
+        "adot": 13.4,
+        "airYardsShare": 0.251,
+        "dropPct": 0
       }
     },
     {
@@ -3255,7 +4176,16 @@
         "totalTds": 0,
         "catchPct": 0.667,
         "epaPerCarry": 0,
-        "epaPerTarget": -0.06
+        "epaPerTarget": -0.06,
+        "ryoePerAtt": null,
+        "yacoPerCarry": null,
+        "brokenTackles": 0,
+        "snapShare": 0.67,
+        "separation": 3.4,
+        "yacOverExp": -0.3,
+        "adot": 11.7,
+        "airYardsShare": 0.236,
+        "dropPct": 0
       }
     },
     {
@@ -3281,7 +4211,16 @@
         "totalTds": 0,
         "catchPct": 0.455,
         "epaPerCarry": 0,
-        "epaPerTarget": -0.211
+        "epaPerTarget": -0.211,
+        "ryoePerAtt": null,
+        "yacoPerCarry": null,
+        "brokenTackles": 0,
+        "snapShare": 0.313,
+        "separation": 3.8,
+        "yacOverExp": 1,
+        "adot": 7.6,
+        "airYardsShare": 0.072,
+        "dropPct": 0
       }
     },
     {
@@ -3307,7 +4246,16 @@
         "totalTds": 3,
         "catchPct": 0.6,
         "epaPerCarry": 0,
-        "epaPerTarget": 0.621
+        "epaPerTarget": 0.621,
+        "ryoePerAtt": null,
+        "yacoPerCarry": null,
+        "brokenTackles": 0,
+        "snapShare": 0.57,
+        "separation": 2.4,
+        "yacOverExp": 0.5,
+        "adot": 10.8,
+        "airYardsShare": 0.229,
+        "dropPct": 0.2
       }
     },
     {
@@ -3333,7 +4281,16 @@
         "totalTds": 0,
         "catchPct": 0.5,
         "epaPerCarry": 0,
-        "epaPerTarget": 0.487
+        "epaPerTarget": 0.487,
+        "ryoePerAtt": null,
+        "yacoPerCarry": null,
+        "brokenTackles": 1,
+        "snapShare": 0.72,
+        "separation": 2.5,
+        "yacOverExp": 2.5,
+        "adot": 13.1,
+        "airYardsShare": 0.526,
+        "dropPct": 0
       }
     },
     {
@@ -3359,7 +4316,16 @@
         "totalTds": 0,
         "catchPct": 0.308,
         "epaPerCarry": 0,
-        "epaPerTarget": 0.297
+        "epaPerTarget": 0.297,
+        "ryoePerAtt": null,
+        "yacoPerCarry": null,
+        "brokenTackles": 0,
+        "snapShare": 0.785,
+        "separation": 3.3,
+        "yacOverExp": 3.1,
+        "adot": 14.4,
+        "airYardsShare": 0.26,
+        "dropPct": 0.154
       }
     },
     {
@@ -3385,7 +4351,16 @@
         "totalTds": 0,
         "catchPct": 0.556,
         "epaPerCarry": 0,
-        "epaPerTarget": 0.059
+        "epaPerTarget": 0.059,
+        "ryoePerAtt": null,
+        "yacoPerCarry": null,
+        "brokenTackles": 0,
+        "snapShare": 0.81,
+        "separation": 2.7,
+        "yacOverExp": 0.1,
+        "adot": 14.2,
+        "airYardsShare": 0.371,
+        "dropPct": 0
       }
     },
     {
@@ -3411,7 +4386,16 @@
         "totalTds": 1,
         "catchPct": 0.636,
         "epaPerCarry": 0,
-        "epaPerTarget": 0.651
+        "epaPerTarget": 0.651,
+        "ryoePerAtt": null,
+        "yacoPerCarry": null,
+        "brokenTackles": 0,
+        "snapShare": 0.65,
+        "separation": 2,
+        "yacOverExp": -0.8,
+        "adot": 16.5,
+        "airYardsShare": 0.379,
+        "dropPct": 0
       }
     },
     {
@@ -3437,7 +4421,16 @@
         "totalTds": 0,
         "catchPct": 0.4,
         "epaPerCarry": 0,
-        "epaPerTarget": -0.074
+        "epaPerTarget": -0.074,
+        "ryoePerAtt": null,
+        "yacoPerCarry": null,
+        "brokenTackles": 0,
+        "snapShare": 0.685,
+        "separation": 2.9,
+        "yacOverExp": -1.4,
+        "adot": 11.8,
+        "airYardsShare": 0.212,
+        "dropPct": 0
       }
     },
     {
@@ -3463,7 +4456,16 @@
         "totalTds": 1,
         "catchPct": 0.615,
         "epaPerCarry": 0,
-        "epaPerTarget": -0.616
+        "epaPerTarget": -0.616,
+        "ryoePerAtt": null,
+        "yacoPerCarry": null,
+        "brokenTackles": 0,
+        "snapShare": 0.815,
+        "separation": 4.4,
+        "yacOverExp": -1.2,
+        "adot": 7.1,
+        "airYardsShare": 0.208,
+        "dropPct": 0.077
       }
     }
   ],
@@ -3491,7 +4493,16 @@
         "totalTds": 1,
         "catchPct": 0.667,
         "epaPerCarry": 0,
-        "epaPerTarget": 0.959
+        "epaPerTarget": 0.959,
+        "ryoePerAtt": null,
+        "yacoPerCarry": null,
+        "brokenTackles": 0,
+        "snapShare": 0.297,
+        "separation": null,
+        "yacOverExp": null,
+        "adot": null,
+        "airYardsShare": 0.06,
+        "dropPct": 0
       }
     },
     {
@@ -3517,7 +4528,16 @@
         "totalTds": 0,
         "catchPct": 0.727,
         "epaPerCarry": 0,
-        "epaPerTarget": -0.14
+        "epaPerTarget": -0.14,
+        "ryoePerAtt": null,
+        "yacoPerCarry": null,
+        "brokenTackles": 0,
+        "snapShare": 0.935,
+        "separation": 4,
+        "yacOverExp": -1.1,
+        "adot": 5.9,
+        "airYardsShare": 0.137,
+        "dropPct": 0.091
       }
     },
     {
@@ -3543,7 +4563,16 @@
         "totalTds": 2,
         "catchPct": 0.714,
         "epaPerCarry": 0,
-        "epaPerTarget": 1.097
+        "epaPerTarget": 1.097,
+        "ryoePerAtt": null,
+        "yacoPerCarry": null,
+        "brokenTackles": 0,
+        "snapShare": 0.6,
+        "separation": 2.8,
+        "yacOverExp": 2.7,
+        "adot": 6.6,
+        "airYardsShare": 0.108,
+        "dropPct": 0
       }
     },
     {
@@ -3569,7 +4598,16 @@
         "totalTds": 1,
         "catchPct": 0.857,
         "epaPerCarry": 0,
-        "epaPerTarget": 1.059
+        "epaPerTarget": 1.059,
+        "ryoePerAtt": null,
+        "yacoPerCarry": null,
+        "brokenTackles": 2,
+        "snapShare": 0.69,
+        "separation": 3.2,
+        "yacOverExp": 2.4,
+        "adot": 12.3,
+        "airYardsShare": 0.294,
+        "dropPct": 0
       }
     },
     {
@@ -3595,7 +4633,16 @@
         "totalTds": 0,
         "catchPct": 0.727,
         "epaPerCarry": 0,
-        "epaPerTarget": 0.226
+        "epaPerTarget": 0.226,
+        "ryoePerAtt": null,
+        "yacoPerCarry": null,
+        "brokenTackles": 0,
+        "snapShare": 0.67,
+        "separation": 4.1,
+        "yacOverExp": -0.2,
+        "adot": 5.7,
+        "airYardsShare": 0.163,
+        "dropPct": 0.045
       }
     },
     {
@@ -3621,7 +4668,16 @@
         "totalTds": 2,
         "catchPct": 1,
         "epaPerCarry": 0,
-        "epaPerTarget": 1.361
+        "epaPerTarget": 1.361,
+        "ryoePerAtt": null,
+        "yacoPerCarry": null,
+        "brokenTackles": 0,
+        "snapShare": 0.395,
+        "separation": null,
+        "yacOverExp": null,
+        "adot": null,
+        "airYardsShare": 0.05,
+        "dropPct": 0
       }
     },
     {
@@ -3647,7 +4703,16 @@
         "totalTds": 0,
         "catchPct": 0.75,
         "epaPerCarry": 0,
-        "epaPerTarget": -0.633
+        "epaPerTarget": -0.633,
+        "ryoePerAtt": null,
+        "yacoPerCarry": null,
+        "brokenTackles": 0,
+        "snapShare": 0.355,
+        "separation": 3.7,
+        "yacOverExp": 1.1,
+        "adot": 5.3,
+        "airYardsShare": 0.098,
+        "dropPct": 0.125
       }
     },
     {
@@ -3673,7 +4738,16 @@
         "totalTds": 1,
         "catchPct": 0.833,
         "epaPerCarry": 0,
-        "epaPerTarget": 0.844
+        "epaPerTarget": 0.844,
+        "ryoePerAtt": null,
+        "yacoPerCarry": null,
+        "brokenTackles": 1,
+        "snapShare": 0.575,
+        "separation": null,
+        "yacOverExp": null,
+        "adot": null,
+        "airYardsShare": 0.097,
+        "dropPct": 0
       }
     },
     {
@@ -3699,7 +4773,16 @@
         "totalTds": 1,
         "catchPct": 0.667,
         "epaPerCarry": 0,
-        "epaPerTarget": 0.021
+        "epaPerTarget": 0.021,
+        "ryoePerAtt": null,
+        "yacoPerCarry": null,
+        "brokenTackles": 2,
+        "snapShare": 0.47,
+        "separation": 3.6,
+        "yacOverExp": -0.3,
+        "adot": 9.8,
+        "airYardsShare": 0.267,
+        "dropPct": 0
       }
     },
     {
@@ -3725,7 +4808,16 @@
         "totalTds": 0,
         "catchPct": 0.857,
         "epaPerCarry": 0,
-        "epaPerTarget": -0.126
+        "epaPerTarget": -0.126,
+        "ryoePerAtt": null,
+        "yacoPerCarry": null,
+        "brokenTackles": 0,
+        "snapShare": 0.815,
+        "separation": null,
+        "yacOverExp": null,
+        "adot": null,
+        "airYardsShare": 0.048,
+        "dropPct": 0
       }
     },
     {
@@ -3751,7 +4843,16 @@
         "totalTds": 0,
         "catchPct": 0.778,
         "epaPerCarry": 0,
-        "epaPerTarget": 0.218
+        "epaPerTarget": 0.218,
+        "ryoePerAtt": null,
+        "yacoPerCarry": null,
+        "brokenTackles": 1,
+        "snapShare": 0.84,
+        "separation": 5.2,
+        "yacOverExp": 2.2,
+        "adot": 3.6,
+        "airYardsShare": 0.101,
+        "dropPct": 0.111
       }
     },
     {
@@ -3777,7 +4878,16 @@
         "totalTds": 0,
         "catchPct": 0.75,
         "epaPerCarry": 0,
-        "epaPerTarget": -0.346
+        "epaPerTarget": -0.346,
+        "ryoePerAtt": null,
+        "yacoPerCarry": null,
+        "brokenTackles": 1,
+        "snapShare": 0.835,
+        "separation": 3.4,
+        "yacOverExp": 0.7,
+        "adot": 8.3,
+        "airYardsShare": 0.165,
+        "dropPct": 0
       }
     },
     {
@@ -3803,7 +4913,16 @@
         "totalTds": 2,
         "catchPct": 0.722,
         "epaPerCarry": 0,
-        "epaPerTarget": 0.592
+        "epaPerTarget": 0.592,
+        "ryoePerAtt": null,
+        "yacoPerCarry": null,
+        "brokenTackles": 0,
+        "snapShare": 0.59,
+        "separation": 2.4,
+        "yacOverExp": 0.1,
+        "adot": 6.5,
+        "airYardsShare": 0.191,
+        "dropPct": 0
       }
     },
     {
@@ -3829,7 +4948,16 @@
         "totalTds": 2,
         "catchPct": 1,
         "epaPerCarry": 0,
-        "epaPerTarget": 1.044
+        "epaPerTarget": 1.044,
+        "ryoePerAtt": null,
+        "yacoPerCarry": null,
+        "brokenTackles": 0,
+        "snapShare": 0.68,
+        "separation": null,
+        "yacOverExp": null,
+        "adot": null,
+        "airYardsShare": 0.063,
+        "dropPct": 0
       }
     },
     {
@@ -3855,7 +4983,16 @@
         "totalTds": 0,
         "catchPct": 0.667,
         "epaPerCarry": 0,
-        "epaPerTarget": 0.065
+        "epaPerTarget": 0.065,
+        "ryoePerAtt": null,
+        "yacoPerCarry": null,
+        "brokenTackles": 0,
+        "snapShare": 0.34,
+        "separation": null,
+        "yacOverExp": null,
+        "adot": null,
+        "airYardsShare": 0.04,
+        "dropPct": 0
       }
     },
     {
@@ -3881,7 +5018,16 @@
         "totalTds": 0,
         "catchPct": 0.6,
         "epaPerCarry": 0,
-        "epaPerTarget": 0.316
+        "epaPerTarget": 0.316,
+        "ryoePerAtt": null,
+        "yacoPerCarry": null,
+        "brokenTackles": 0,
+        "snapShare": 0.625,
+        "separation": null,
+        "yacOverExp": null,
+        "adot": null,
+        "airYardsShare": 0.054,
+        "dropPct": 0
       }
     },
     {
@@ -3907,7 +5053,16 @@
         "totalTds": 1,
         "catchPct": 0.636,
         "epaPerCarry": 0,
-        "epaPerTarget": 0.727
+        "epaPerTarget": 0.727,
+        "ryoePerAtt": null,
+        "yacoPerCarry": null,
+        "brokenTackles": 3,
+        "snapShare": 0.685,
+        "separation": 4,
+        "yacOverExp": 4.7,
+        "adot": 8.1,
+        "airYardsShare": 0.126,
+        "dropPct": 0
       }
     },
     {
@@ -3933,7 +5088,16 @@
         "totalTds": 1,
         "catchPct": 0.833,
         "epaPerCarry": 1.24,
-        "epaPerTarget": -0.001
+        "epaPerTarget": -0.001,
+        "ryoePerAtt": null,
+        "yacoPerCarry": 0,
+        "brokenTackles": 0,
+        "snapShare": 0.39,
+        "separation": null,
+        "yacOverExp": null,
+        "adot": null,
+        "airYardsShare": 0.019,
+        "dropPct": 0
       }
     },
     {
@@ -3959,7 +5123,16 @@
         "totalTds": 0,
         "catchPct": 0.333,
         "epaPerCarry": 0,
-        "epaPerTarget": -1.625
+        "epaPerTarget": -1.625,
+        "ryoePerAtt": null,
+        "yacoPerCarry": null,
+        "brokenTackles": 0,
+        "snapShare": 0.533,
+        "separation": null,
+        "yacOverExp": null,
+        "adot": null,
+        "airYardsShare": 0.156,
+        "dropPct": 0
       }
     },
     {
@@ -3985,7 +5158,16 @@
         "totalTds": 0,
         "catchPct": 0.769,
         "epaPerCarry": 0,
-        "epaPerTarget": 0.465
+        "epaPerTarget": 0.465,
+        "ryoePerAtt": null,
+        "yacoPerCarry": null,
+        "brokenTackles": 0,
+        "snapShare": 0.715,
+        "separation": 2.8,
+        "yacOverExp": 0.5,
+        "adot": 6.6,
+        "airYardsShare": 0.154,
+        "dropPct": 0.154
       }
     },
     {
@@ -4011,7 +5193,16 @@
         "totalTds": 0,
         "catchPct": 0.818,
         "epaPerCarry": 0,
-        "epaPerTarget": 0.122
+        "epaPerTarget": 0.122,
+        "ryoePerAtt": null,
+        "yacoPerCarry": null,
+        "brokenTackles": 1,
+        "snapShare": 0.825,
+        "separation": 2.6,
+        "yacOverExp": 0,
+        "adot": 4,
+        "airYardsShare": 0.09,
+        "dropPct": 0
       }
     },
     {
@@ -4037,7 +5228,16 @@
         "totalTds": 1,
         "catchPct": 0.714,
         "epaPerCarry": 0,
-        "epaPerTarget": 0.98
+        "epaPerTarget": 0.98,
+        "ryoePerAtt": null,
+        "yacoPerCarry": null,
+        "brokenTackles": 0,
+        "snapShare": 0.34,
+        "separation": null,
+        "yacOverExp": null,
+        "adot": null,
+        "airYardsShare": 0.158,
+        "dropPct": 0
       }
     },
     {
@@ -4063,7 +5263,16 @@
         "totalTds": 1,
         "catchPct": 0.5,
         "epaPerCarry": 0,
-        "epaPerTarget": -1.066
+        "epaPerTarget": -1.066,
+        "ryoePerAtt": null,
+        "yacoPerCarry": null,
+        "brokenTackles": 0,
+        "snapShare": 0.425,
+        "separation": 3,
+        "yacOverExp": 0.1,
+        "adot": 5.4,
+        "airYardsShare": 0.069,
+        "dropPct": 0
       }
     },
     {
@@ -4089,7 +5298,16 @@
         "totalTds": 1,
         "catchPct": 0.9,
         "epaPerCarry": 2.127,
-        "epaPerTarget": 0.341
+        "epaPerTarget": 0.341,
+        "ryoePerAtt": null,
+        "yacoPerCarry": 1,
+        "brokenTackles": 1,
+        "snapShare": 0.695,
+        "separation": 3.4,
+        "yacOverExp": 0.9,
+        "adot": 7.1,
+        "airYardsShare": 0.109,
+        "dropPct": 0
       }
     },
     {
@@ -4115,7 +5333,16 @@
         "totalTds": 1,
         "catchPct": 0.733,
         "epaPerCarry": 0,
-        "epaPerTarget": 0.582
+        "epaPerTarget": 0.582,
+        "ryoePerAtt": null,
+        "yacoPerCarry": null,
+        "brokenTackles": 1,
+        "snapShare": 0.895,
+        "separation": 4.4,
+        "yacOverExp": 0,
+        "adot": 3.7,
+        "airYardsShare": 0.055,
+        "dropPct": 0
       }
     },
     {
@@ -4141,7 +5368,16 @@
         "totalTds": 1,
         "catchPct": 0.778,
         "epaPerCarry": 0,
-        "epaPerTarget": 0.716
+        "epaPerTarget": 0.716,
+        "ryoePerAtt": null,
+        "yacoPerCarry": null,
+        "brokenTackles": 0,
+        "snapShare": 0.675,
+        "separation": 3.1,
+        "yacOverExp": -0.5,
+        "adot": 6,
+        "airYardsShare": 0.147,
+        "dropPct": 0
       }
     },
     {
@@ -4167,7 +5403,16 @@
         "totalTds": 1,
         "catchPct": 0.6,
         "epaPerCarry": 0,
-        "epaPerTarget": -0.099
+        "epaPerTarget": -0.099,
+        "ryoePerAtt": null,
+        "yacoPerCarry": null,
+        "brokenTackles": 0,
+        "snapShare": 0.545,
+        "separation": 2.9,
+        "yacOverExp": 1.4,
+        "adot": 7.9,
+        "airYardsShare": 0.133,
+        "dropPct": 0.2
       }
     },
     {
@@ -4193,7 +5438,16 @@
         "totalTds": 0,
         "catchPct": 0.571,
         "epaPerCarry": 0,
-        "epaPerTarget": -0.049
+        "epaPerTarget": -0.049,
+        "ryoePerAtt": null,
+        "yacoPerCarry": null,
+        "brokenTackles": 1,
+        "snapShare": 0.56,
+        "separation": null,
+        "yacOverExp": null,
+        "adot": null,
+        "airYardsShare": 0.062,
+        "dropPct": 0.143
       }
     },
     {
@@ -4219,7 +5473,16 @@
         "totalTds": 1,
         "catchPct": 0.75,
         "epaPerCarry": 0,
-        "epaPerTarget": 0.63
+        "epaPerTarget": 0.63,
+        "ryoePerAtt": null,
+        "yacoPerCarry": null,
+        "brokenTackles": 1,
+        "snapShare": 0.78,
+        "separation": 3.1,
+        "yacOverExp": 3.9,
+        "adot": 5.1,
+        "airYardsShare": 0.215,
+        "dropPct": 0.125
       }
     },
     {
@@ -4245,7 +5508,16 @@
         "totalTds": 2,
         "catchPct": 0.739,
         "epaPerCarry": 0,
-        "epaPerTarget": 0.386
+        "epaPerTarget": 0.386,
+        "ryoePerAtt": null,
+        "yacoPerCarry": null,
+        "brokenTackles": 2,
+        "snapShare": 0.84,
+        "separation": 2.2,
+        "yacOverExp": 0.3,
+        "adot": 6.1,
+        "airYardsShare": 0.319,
+        "dropPct": 0.043
       }
     },
     {
@@ -4271,7 +5543,16 @@
         "totalTds": 0,
         "catchPct": 0.529,
         "epaPerCarry": 0,
-        "epaPerTarget": -0.024
+        "epaPerTarget": -0.024,
+        "ryoePerAtt": null,
+        "yacoPerCarry": null,
+        "brokenTackles": 0,
+        "snapShare": 0.8,
+        "separation": 3.3,
+        "yacOverExp": 0.2,
+        "adot": 6.6,
+        "airYardsShare": 0.119,
+        "dropPct": 0.059
       }
     },
     {
@@ -4297,7 +5578,16 @@
         "totalTds": 2,
         "catchPct": 0.75,
         "epaPerCarry": 0.68,
-        "epaPerTarget": -0.051
+        "epaPerTarget": -0.051,
+        "ryoePerAtt": null,
+        "yacoPerCarry": 3,
+        "brokenTackles": 0,
+        "snapShare": 0.91,
+        "separation": 3.5,
+        "yacOverExp": -1.3,
+        "adot": 1.3,
+        "airYardsShare": 0.028,
+        "dropPct": 0.083
       }
     }
   ],
@@ -4317,6 +5607,7 @@
         "fgLong": 50,
         "patPct": 1,
         "epaPerKick": 0.35,
+        "fgOverExp": 11.4,
         "fantasyStd": 17,
         "receptions": 0
       }
@@ -4336,6 +5627,7 @@
         "fgLong": 50,
         "patPct": 1,
         "epaPerKick": -0.003,
+        "fgOverExp": -5,
         "fantasyStd": 14,
         "receptions": 0
       }
@@ -4355,6 +5647,7 @@
         "fgLong": 60,
         "patPct": 0.857,
         "epaPerKick": 0.348,
+        "fgOverExp": 20.1,
         "fantasyStd": 17,
         "receptions": 0
       }
@@ -4374,6 +5667,7 @@
         "fgLong": 50,
         "patPct": 1,
         "epaPerKick": -0.007,
+        "fgOverExp": -18.1,
         "fantasyStd": 16,
         "receptions": 0
       }
@@ -4393,6 +5687,7 @@
         "fgLong": 47,
         "patPct": 1,
         "epaPerKick": -0.026,
+        "fgOverExp": 0.1,
         "fantasyStd": 19,
         "receptions": 0
       }
@@ -4412,6 +5707,7 @@
         "fgLong": 0,
         "patPct": 1,
         "epaPerKick": -0.535,
+        "fgOverExp": -59.4,
         "fantasyStd": 3,
         "receptions": 0
       }
@@ -4431,6 +5727,7 @@
         "fgLong": 49,
         "patPct": 1,
         "epaPerKick": -0.236,
+        "fgOverExp": -3.7,
         "fantasyStd": 16,
         "receptions": 0
       }
@@ -4450,6 +5747,7 @@
         "fgLong": 59,
         "patPct": 1,
         "epaPerKick": 0.744,
+        "fgOverExp": 20.3,
         "fantasyStd": 27,
         "receptions": 0
       }
@@ -4469,6 +5767,7 @@
         "fgLong": 56,
         "patPct": 1,
         "epaPerKick": -0.439,
+        "fgOverExp": -7.7,
         "fantasyStd": 12,
         "receptions": 0
       }
@@ -4488,6 +5787,7 @@
         "fgLong": 51,
         "patPct": 1,
         "epaPerKick": 0.196,
+        "fgOverExp": 4.7,
         "fantasyStd": 18,
         "receptions": 0
       }
@@ -4507,6 +5807,7 @@
         "fgLong": 52,
         "patPct": 1,
         "epaPerKick": 0.286,
+        "fgOverExp": 13.2,
         "fantasyStd": 12,
         "receptions": 0
       }
@@ -4526,6 +5827,7 @@
         "fgLong": 55,
         "patPct": 0.75,
         "epaPerKick": -0.55,
+        "fgOverExp": -14.1,
         "fantasyStd": 12,
         "receptions": 0
       }
@@ -4545,6 +5847,7 @@
         "fgLong": 56,
         "patPct": 1,
         "epaPerKick": -0.086,
+        "fgOverExp": -12.4,
         "fantasyStd": 15,
         "receptions": 0
       }
@@ -4564,6 +5867,7 @@
         "fgLong": 58,
         "patPct": 1,
         "epaPerKick": 0.889,
+        "fgOverExp": 26.8,
         "fantasyStd": 31,
         "receptions": 0
       }
@@ -4583,6 +5887,7 @@
         "fgLong": 46,
         "patPct": 1,
         "epaPerKick": 0.005,
+        "fgOverExp": -3.2,
         "fantasyStd": 23,
         "receptions": 0
       }
@@ -4602,6 +5907,7 @@
         "fgLong": 0,
         "patPct": 1,
         "epaPerKick": -0.355,
+        "fgOverExp": -79.5,
         "fantasyStd": 4,
         "receptions": 0
       }
@@ -4621,6 +5927,7 @@
         "fgLong": 31,
         "patPct": 1,
         "epaPerKick": 0.066,
+        "fgOverExp": 2.9,
         "fantasyStd": 14,
         "receptions": 0
       }
@@ -4640,6 +5947,7 @@
         "fgLong": 58,
         "patPct": 1,
         "epaPerKick": 0.445,
+        "fgOverExp": 28.3,
         "fantasyStd": 14,
         "receptions": 0
       }
@@ -4659,6 +5967,7 @@
         "fgLong": 33,
         "patPct": 1,
         "epaPerKick": 0.106,
+        "fgOverExp": 4,
         "fantasyStd": 14,
         "receptions": 0
       }
@@ -4678,6 +5987,7 @@
         "fgLong": 52,
         "patPct": 1,
         "epaPerKick": 0.158,
+        "fgOverExp": 3.7,
         "fantasyStd": 19,
         "receptions": 0
       }
@@ -4697,6 +6007,7 @@
         "fgLong": 42,
         "patPct": 1,
         "epaPerKick": 0.263,
+        "fgOverExp": 10.9,
         "fantasyStd": 13,
         "receptions": 0
       }
@@ -4716,6 +6027,7 @@
         "fgLong": 58,
         "patPct": 1,
         "epaPerKick": 0.118,
+        "fgOverExp": 0.9,
         "fantasyStd": 15,
         "receptions": 0
       }
@@ -4735,6 +6047,7 @@
         "fgLong": 59,
         "patPct": 1,
         "epaPerKick": 0.379,
+        "fgOverExp": 24.3,
         "fantasyStd": 18,
         "receptions": 0
       }
@@ -4754,6 +6067,7 @@
         "fgLong": 51,
         "patPct": 1,
         "epaPerKick": -0.48,
+        "fgOverExp": -15.3,
         "fantasyStd": 21,
         "receptions": 0
       }
@@ -4773,6 +6087,7 @@
         "fgLong": 41,
         "patPct": 1,
         "epaPerKick": -0.799,
+        "fgOverExp": -20.4,
         "fantasyStd": 13,
         "receptions": 0
       }
@@ -4792,6 +6107,7 @@
         "fgLong": 44,
         "patPct": 0.889,
         "epaPerKick": 0.093,
+        "fgOverExp": 10.5,
         "fantasyStd": 17,
         "receptions": 0
       }
@@ -4811,6 +6127,7 @@
         "fgLong": 58,
         "patPct": 0.833,
         "epaPerKick": 0.449,
+        "fgOverExp": 23.2,
         "fantasyStd": 20,
         "receptions": 0
       }
@@ -4830,6 +6147,7 @@
         "fgLong": 59,
         "patPct": 0.833,
         "epaPerKick": -0.001,
+        "fgOverExp": -0.6,
         "fantasyStd": 21,
         "receptions": 0
       }
@@ -4849,6 +6167,7 @@
         "fgLong": 46,
         "patPct": 0.889,
         "epaPerKick": 0.096,
+        "fgOverExp": 10.3,
         "fantasyStd": 17,
         "receptions": 0
       }
@@ -4868,6 +6187,7 @@
         "fgLong": 57,
         "patPct": 1,
         "epaPerKick": 0.093,
+        "fgOverExp": 4,
         "fantasyStd": 19,
         "receptions": 0
       }
@@ -4887,6 +6207,7 @@
         "fgLong": 45,
         "patPct": 1,
         "epaPerKick": 0.266,
+        "fgOverExp": 8.8,
         "fantasyStd": 13,
         "receptions": 0
       }
@@ -4906,6 +6227,7 @@
         "fgLong": 49,
         "patPct": 1,
         "epaPerKick": 0.39,
+        "fgOverExp": 15,
         "fantasyStd": 17,
         "receptions": 0
       }
@@ -4925,7 +6247,8 @@
         "inside20": 5,
         "inside20Pct": 0.556,
         "touchbacks": 1,
-        "epaPerPunt": -0.081
+        "epaPerPunt": -0.081,
+        "fairCatchPct": 0.333
       }
     },
     {
@@ -4941,7 +6264,8 @@
         "inside20": 4,
         "inside20Pct": 0.4,
         "touchbacks": 1,
-        "epaPerPunt": -0.173
+        "epaPerPunt": -0.173,
+        "fairCatchPct": 0
       }
     },
     {
@@ -4957,7 +6281,8 @@
         "inside20": 4,
         "inside20Pct": 0.4,
         "touchbacks": 2,
-        "epaPerPunt": -0.707
+        "epaPerPunt": -0.707,
+        "fairCatchPct": 0.4
       }
     },
     {
@@ -4973,7 +6298,8 @@
         "inside20": 6,
         "inside20Pct": 0.667,
         "touchbacks": 0,
-        "epaPerPunt": 0.156
+        "epaPerPunt": 0.156,
+        "fairCatchPct": 0.111
       }
     },
     {
@@ -4989,7 +6315,8 @@
         "inside20": 2,
         "inside20Pct": 0.286,
         "touchbacks": 0,
-        "epaPerPunt": -0.284
+        "epaPerPunt": -0.284,
+        "fairCatchPct": 0.286
       }
     },
     {
@@ -5005,7 +6332,8 @@
         "inside20": 5,
         "inside20Pct": 0.5,
         "touchbacks": 0,
-        "epaPerPunt": -0.216
+        "epaPerPunt": -0.216,
+        "fairCatchPct": 0.4
       }
     },
     {
@@ -5021,7 +6349,8 @@
         "inside20": 2,
         "inside20Pct": 0.667,
         "touchbacks": 0,
-        "epaPerPunt": -0.087
+        "epaPerPunt": -0.087,
+        "fairCatchPct": 0.667
       }
     },
     {
@@ -5037,7 +6366,8 @@
         "inside20": 5,
         "inside20Pct": 0.417,
         "touchbacks": 1,
-        "epaPerPunt": -0.2
+        "epaPerPunt": -0.2,
+        "fairCatchPct": 0.167
       }
     },
     {
@@ -5053,7 +6383,8 @@
         "inside20": 3,
         "inside20Pct": 0.429,
         "touchbacks": 0,
-        "epaPerPunt": 0.059
+        "epaPerPunt": 0.059,
+        "fairCatchPct": 0.429
       }
     },
     {
@@ -5069,7 +6400,8 @@
         "inside20": 2,
         "inside20Pct": 0.5,
         "touchbacks": 1,
-        "epaPerPunt": -0.219
+        "epaPerPunt": -0.219,
+        "fairCatchPct": 0
       }
     },
     {
@@ -5085,7 +6417,8 @@
         "inside20": 9,
         "inside20Pct": 0.643,
         "touchbacks": 1,
-        "epaPerPunt": 0.182
+        "epaPerPunt": 0.182,
+        "fairCatchPct": 0.143
       }
     },
     {
@@ -5101,7 +6434,8 @@
         "inside20": 3,
         "inside20Pct": 0.5,
         "touchbacks": 1,
-        "epaPerPunt": -0.147
+        "epaPerPunt": -0.147,
+        "fairCatchPct": 0.5
       }
     },
     {
@@ -5117,7 +6451,8 @@
         "inside20": 3,
         "inside20Pct": 0.429,
         "touchbacks": 0,
-        "epaPerPunt": -0.607
+        "epaPerPunt": -0.607,
+        "fairCatchPct": 0.571
       }
     },
     {
@@ -5133,7 +6468,8 @@
         "inside20": 4,
         "inside20Pct": 0.364,
         "touchbacks": 1,
-        "epaPerPunt": -0.16
+        "epaPerPunt": -0.16,
+        "fairCatchPct": 0.182
       }
     },
     {
@@ -5149,7 +6485,8 @@
         "inside20": 6,
         "inside20Pct": 0.545,
         "touchbacks": 2,
-        "epaPerPunt": -0.123
+        "epaPerPunt": -0.123,
+        "fairCatchPct": 0.455
       }
     },
     {
@@ -5165,7 +6502,8 @@
         "inside20": 3,
         "inside20Pct": 0.333,
         "touchbacks": 1,
-        "epaPerPunt": 0.09
+        "epaPerPunt": 0.09,
+        "fairCatchPct": 0.222
       }
     },
     {
@@ -5181,7 +6519,8 @@
         "inside20": 4,
         "inside20Pct": 0.571,
         "touchbacks": 1,
-        "epaPerPunt": 0.091
+        "epaPerPunt": 0.091,
+        "fairCatchPct": 0.143
       }
     },
     {
@@ -5197,7 +6536,8 @@
         "inside20": 4,
         "inside20Pct": 0.444,
         "touchbacks": 0,
-        "epaPerPunt": -0.18
+        "epaPerPunt": -0.18,
+        "fairCatchPct": 0.222
       }
     },
     {
@@ -5213,7 +6553,8 @@
         "inside20": 4,
         "inside20Pct": 0.667,
         "touchbacks": 0,
-        "epaPerPunt": 0.279
+        "epaPerPunt": 0.279,
+        "fairCatchPct": 0.167
       }
     },
     {
@@ -5229,7 +6570,8 @@
         "inside20": 4,
         "inside20Pct": 0.667,
         "touchbacks": 0,
-        "epaPerPunt": 0.328
+        "epaPerPunt": 0.328,
+        "fairCatchPct": 0.167
       }
     },
     {
@@ -5245,7 +6587,8 @@
         "inside20": 4,
         "inside20Pct": 0.571,
         "touchbacks": 0,
-        "epaPerPunt": 0.208
+        "epaPerPunt": 0.208,
+        "fairCatchPct": 0.429
       }
     },
     {
@@ -5261,7 +6604,8 @@
         "inside20": 4,
         "inside20Pct": 0.5,
         "touchbacks": 0,
-        "epaPerPunt": -0.089
+        "epaPerPunt": -0.089,
+        "fairCatchPct": 0.5
       }
     },
     {
@@ -5277,7 +6621,8 @@
         "inside20": 2,
         "inside20Pct": 0.286,
         "touchbacks": 0,
-        "epaPerPunt": -0.13
+        "epaPerPunt": -0.13,
+        "fairCatchPct": 0.286
       }
     },
     {
@@ -5293,7 +6638,8 @@
         "inside20": 1,
         "inside20Pct": 0.25,
         "touchbacks": 1,
-        "epaPerPunt": 0.088
+        "epaPerPunt": 0.088,
+        "fairCatchPct": 0.5
       }
     },
     {
@@ -5309,7 +6655,8 @@
         "inside20": 3,
         "inside20Pct": 0.5,
         "touchbacks": 0,
-        "epaPerPunt": -0.306
+        "epaPerPunt": -0.306,
+        "fairCatchPct": 0.5
       }
     },
     {
@@ -5325,7 +6672,8 @@
         "inside20": 4,
         "inside20Pct": 0.444,
         "touchbacks": 0,
-        "epaPerPunt": -0.243
+        "epaPerPunt": -0.243,
+        "fairCatchPct": 0.333
       }
     },
     {
@@ -5341,7 +6689,8 @@
         "inside20": 3,
         "inside20Pct": 0.375,
         "touchbacks": 0,
-        "epaPerPunt": -0.299
+        "epaPerPunt": -0.299,
+        "fairCatchPct": 0.125
       }
     },
     {
@@ -5357,7 +6706,8 @@
         "inside20": 3,
         "inside20Pct": 0.429,
         "touchbacks": 1,
-        "epaPerPunt": -0.246
+        "epaPerPunt": -0.246,
+        "fairCatchPct": 0.429
       }
     },
     {
@@ -5373,7 +6723,8 @@
         "inside20": 2,
         "inside20Pct": 0.5,
         "touchbacks": 0,
-        "epaPerPunt": 0.308
+        "epaPerPunt": 0.308,
+        "fairCatchPct": 0.75
       }
     },
     {
@@ -5389,7 +6740,8 @@
         "inside20": 2,
         "inside20Pct": 0.182,
         "touchbacks": 4,
-        "epaPerPunt": -0.435
+        "epaPerPunt": -0.435,
+        "fairCatchPct": 0.091
       }
     },
     {
@@ -5405,7 +6757,8 @@
         "inside20": 3,
         "inside20Pct": 0.5,
         "touchbacks": 0,
-        "epaPerPunt": 0.981
+        "epaPerPunt": 0.981,
+        "fairCatchPct": 0.333
       }
     },
     {
@@ -5421,7 +6774,8 @@
         "inside20": 0,
         "inside20Pct": 0,
         "touchbacks": 1,
-        "epaPerPunt": -0.212
+        "epaPerPunt": -0.212,
+        "fairCatchPct": 0.143
       }
     }
   ]

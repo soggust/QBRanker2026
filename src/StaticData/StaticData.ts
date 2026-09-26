@@ -23,6 +23,11 @@ interface GameData {
     successRate: number | null;
     fantasyStd: number;
     receptions: number;
+    pressureToSack: number | null;
+    badThrowPct: number | null;
+    timeToThrow: number | null;
+    adot: number | null;
+    aggressiveness: number | null;
   } | null;
 }
 
@@ -68,6 +73,11 @@ export const StaticData: StaticPlayerData[] = games.map((game) => {
     successRate: game.advanced?.successRate ?? null,
     fantasyStd: game.advanced?.fantasyStd ?? null,
     receptions: game.advanced?.receptions ?? 0,
+    pressureToSack: game.advanced?.pressureToSack ?? null,
+    badThrowPct: game.advanced?.badThrowPct ?? null,
+    timeToThrow: game.advanced?.timeToThrow ?? null,
+    adot: game.advanced?.adot ?? null,
+    aggressiveness: game.advanced?.aggressiveness ?? null,
     starts: game.starts,
     injured: injured ?? game.injured ?? false,
     // Placeholder until the Defenses rankings grade the team

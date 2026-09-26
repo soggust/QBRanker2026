@@ -54,11 +54,11 @@
         @if (preset === 'custom') {
         <mat-option value="custom" disabled="disabled">CUSTOM</mat-option>
         }
-        <mat-option value="default">DEFAULTS</mat-option>
-        <mat-option value="stats">STATS ONLY</mat-option>
-        <mat-option value="support">LEAST SUPPORT</mat-option>
-        <mat-option value="mvp">MVP</mat-option>
-        <mat-option value="fantasy">FANTASY</mat-option>
+        @for (option of qbPresets; track option.key) {
+          <mat-option [value]="option.key" [title]="option.description">{{
+            option.label | uppercase
+          }}</mat-option>
+        }
       </mat-select>
     </div>
 
@@ -324,6 +324,71 @@
           />
         </mat-slider>
         <span>{{ successValue }}%</span>
+      </div>
+
+<!-- Pressure To Sack -->
+      <div [ngClass]="{ disabled: pressureToSackValue === 0 || advancedValue === 0 }">
+        <p>Pressure To Sack</p>
+        <mat-slider min="0" max="100" step="5" color="accent">
+          <input
+            matSliderThumb
+            [(ngModel)]="pressureToSackValue"
+            (ngModelChange)="setCustomFilter(); saveFilters()"
+          />
+        </mat-slider>
+        <span>{{ pressureToSackValue }}%</span>
+      </div>
+
+      <!-- Bad Throw % -->
+      <div [ngClass]="{ disabled: badThrowValue === 0 || advancedValue === 0 }">
+        <p>Bad Throw %</p>
+        <mat-slider min="0" max="100" step="5" color="accent">
+          <input
+            matSliderThumb
+            [(ngModel)]="badThrowValue"
+            (ngModelChange)="setCustomFilter(); saveFilters()"
+          />
+        </mat-slider>
+        <span>{{ badThrowValue }}%</span>
+      </div>
+
+      <!-- Time To Throw -->
+      <div [ngClass]="{ disabled: timeToThrowValue === 0 || advancedValue === 0 }">
+        <p>Time To Throw</p>
+        <mat-slider min="0" max="100" step="5" color="accent">
+          <input
+            matSliderThumb
+            [(ngModel)]="timeToThrowValue"
+            (ngModelChange)="setCustomFilter(); saveFilters()"
+          />
+        </mat-slider>
+        <span>{{ timeToThrowValue }}%</span>
+      </div>
+
+      <!-- Avg Depth Of Target -->
+      <div [ngClass]="{ disabled: adotValue === 0 || advancedValue === 0 }">
+        <p>Avg Depth Of Target</p>
+        <mat-slider min="0" max="100" step="5" color="accent">
+          <input
+            matSliderThumb
+            [(ngModel)]="adotValue"
+            (ngModelChange)="setCustomFilter(); saveFilters()"
+          />
+        </mat-slider>
+        <span>{{ adotValue }}%</span>
+      </div>
+
+      <!-- Aggressiveness -->
+      <div [ngClass]="{ disabled: aggressivenessValue === 0 || advancedValue === 0 }">
+        <p>Aggressiveness</p>
+        <mat-slider min="0" max="100" step="5" color="accent">
+          <input
+            matSliderThumb
+            [(ngModel)]="aggressivenessValue"
+            (ngModelChange)="setCustomFilter(); saveFilters()"
+          />
+        </mat-slider>
+        <span>{{ aggressivenessValue }}%</span>
       </div>
 
       <!-- Fantasy Points -->

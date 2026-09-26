@@ -43,6 +43,11 @@ export class RankingsComponent {
     cpoeValue: 50,
     successValue: 50,
     fantasyValue: 50,
+    pressureToSackValue: 50,
+    badThrowValue: 50,
+    timeToThrowValue: 50,
+    adotValue: 50,
+    aggressivenessValue: 50,
     recencyValue: 50,
     supportValue: 50,
     weaponsValue: 50,
@@ -214,12 +219,23 @@ export class RankingsComponent {
     const cpoeWeight = this.filters.cpoeValue;
     const successWeight = this.filters.successValue;
     const fantasyWeight = this.filters.fantasyValue;
-    const advancedMix = epaWeight + cpoeWeight + successWeight + fantasyWeight;
+    // Lower is better for pressure-to-sack, bad throws and time to throw, so those are negated
+    const negate = (v: number | null) => (v === null ? null : -v);
+    const extras: [number, (p: Player) => number | null][] = [
+      [this.filters.pressureToSackValue, (p) => negate(p.pressureToSack)],
+      [this.filters.badThrowValue, (p) => negate(p.badThrowPct)],
+      [this.filters.timeToThrowValue, (p) => negate(p.timeToThrow)],
+      [this.filters.adotValue, (p) => p.adot],
+      [this.filters.aggressivenessValue, (p) => p.aggressiveness],
+    ];
+    const advancedMix =
+      epaWeight + cpoeWeight + successWeight + fantasyWeight + extras.reduce((sum, [w]) => sum + w, 0);
     const advancedWeighted = advancedMix
       ? ((this.rangeScore((p) => p.epaPerPlay, player) * epaWeight +
           this.rangeScore((p) => p.cpoe, player) * cpoeWeight +
           this.rangeScore((p) => p.successRate, player) * successWeight +
-          this.rangeScore((p) => this.fantasyPoints(p), player) * fantasyWeight) /
+          this.rangeScore((p) => this.fantasyPoints(p), player) * fantasyWeight +
+          extras.reduce((sum, [w, stat]) => sum + this.rangeScore(stat, player) * w, 0)) /
           advancedMix) *
         (this.filters.advancedValue / 50)
       : 0;

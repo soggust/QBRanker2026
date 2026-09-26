@@ -3,7 +3,7 @@
 // ---------------------
 @use "theme";
 @use "variables" as v;
-@import url("https://fonts.googleapis.com/css2?family=Zain:wght@400;700;800;900&family=Nunito:wght@400;500;600;700;800;900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Zain:wght@400;700;800;900&family=Nunito:wght@400;500;600;700;800;900&family=Orbitron:wght@600;800;900&display=swap");
 
 html,
 body {
@@ -117,4 +117,167 @@ html .mat-mdc-slide-toggle.mat-accent {
   --mat-slide-toggle-unselected-pressed-state-layer-color: var(--mat-slide-toggle-off-track);
   --mat-slide-toggle-unselected-icon-color: var(--primary-50);
   --mat-slide-toggle-selected-icon-color: var(--primary-50);
+}
+
+// ===========================================================================
+// TURF EXPERIMENT (uncommitted): field turf background, scoreboard panels
+// ===========================================================================
+:root {
+  --scoreboard: #121212;
+  --scoreboard-led: #ffb300;
+  --scoreboard-glow: 0 0 6px rgba(255, 179, 0, 0.55);
+  --scoreboard-dots: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1.3px) 0 0 / 4px 4px;
+}
+
+// Real turf photo texture (CC0, ambientCG Grass005), with a soft vignette for depth
+body {
+  background-color: #3d7a24;
+  background-image:
+    radial-gradient(ellipse at 50% 30%, transparent 40%, rgba(0, 0, 0, 0.35)),
+    url("assets/textures/turf.jpg");
+  background-size: cover, 512px;
+}
+
+// Menus and dropdowns look like scoreboard panels
+.mdc-menu-surface,
+.mat-mdc-menu-panel {
+  background: var(--scoreboard) !important;
+  border-color: #333 !important;
+}
+
+// Real football thumbs: brown leather with white laces
+.mdc-slider__thumb-knob {
+  &::after {
+    background:
+      linear-gradient(#fff, #fff) center / 100% 1.5px no-repeat,
+      repeating-linear-gradient(90deg, #fff 0 1.5px, transparent 1.5px 3px) center / 100% 6px no-repeat;
+  }
+}
+
+.mdc-slider__track--inactive {
+  background-color: rgba(255, 255, 255, 0.14) !important;
+}
+
+// Scoreboard scrollbars (component styles set these too, so they need the extra weight)
+::-webkit-scrollbar-track {
+  background-color: var(--scoreboard) !important;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--scoreboard-led) !important;
+}
+
+// LCD / segment-display fonts (open source, DSEG by keshikan)
+@font-face {
+  font-display: swap;
+  font-family: "DSEG14";
+  font-weight: 700;
+  src: url("https://cdn.jsdelivr.net/npm/dseg@0.46.0/fonts/DSEG14-Classic/DSEG14Classic-Bold.woff2") format("woff2");
+}
+
+@font-face {
+  font-display: swap;
+  font-family: "DSEG7";
+  font-weight: 700;
+  src: url("https://cdn.jsdelivr.net/npm/dseg@0.46.0/fonts/DSEG7-Classic/DSEG7Classic-Bold.woff2") format("woff2");
+}
+
+// Goalpost yellow
+:root {
+  --scoreboard-led: #ffcd00;
+  --scoreboard-glow: 0 0 6px rgba(255, 205, 0, 0.55);
+  --mat-slide-toggle-off-track: rgba(255, 255, 255, 0.22);
+}
+
+// Lombardi trophy icon, colored by currentColor
+.lombardi {
+  background-color: currentColor;
+  display: inline-block;
+  height: 1.1em;
+  mask: url("assets/lombardi.svg") center / contain no-repeat;
+  vertical-align: middle;
+  width: 0.85em;
+}
+
+.visually-hidden {
+  clip: rect(0 0 0 0);
+  height: 1px;
+  overflow: hidden;
+  position: absolute;
+  white-space: nowrap;
+  width: 1px;
+}
+
+// Settings menus get the scoreboard LED texture
+.mdc-menu-surface,
+.mat-mdc-menu-panel {
+  background: var(--scoreboard-dots), var(--scoreboard) !important;
+}
+
+.mat-mdc-menu-panel .lombardi.menu-icon {
+  color: var(--scoreboard-led) !important;
+  font-size: 1.3em;
+  margin-right: 0.6em;
+}
+
+// Round 3: settings toggles match the sliders (football knob, yellow when on, gray when off)
+html .mat-mdc-slide-toggle.mat-accent {
+  --mat-slide-toggle-handle-width: 26px;
+  --mat-slide-toggle-handle-height: 16px;
+  --mat-slide-toggle-track-width: 46px;
+  --mat-slide-toggle-track-height: 8px;
+  --mat-slide-toggle-track-outline-color: transparent;
+  --mat-slide-toggle-selected-track-outline-color: transparent;
+  --mat-slide-toggle-selected-track-color: var(--scoreboard-led);
+  --mat-slide-toggle-selected-hover-track-color: var(--scoreboard-led);
+  --mat-slide-toggle-selected-focus-track-color: var(--scoreboard-led);
+  --mat-slide-toggle-selected-pressed-track-color: var(--scoreboard-led);
+  --mat-slide-toggle-unselected-track-color: rgba(255, 255, 255, 0.22);
+  --mat-slide-toggle-unselected-hover-track-color: rgba(255, 255, 255, 0.22);
+  --mat-slide-toggle-unselected-focus-track-color: rgba(255, 255, 255, 0.22);
+  --mat-slide-toggle-unselected-pressed-track-color: rgba(255, 255, 255, 0.22);
+
+  .mdc-switch__handle {
+    border-radius: 50% !important;
+    height: 16px !important;
+    margin: 0 !important;
+    width: 26px !important;
+
+    &::after {
+      background:
+        linear-gradient(#fff, #fff) center / 10.5px 1.5px no-repeat,
+        repeating-linear-gradient(90deg, #fff 0 1.5px, transparent 1.5px 3px) center / 10.5px 6px no-repeat,
+        #a8602f !important;
+      border: none !important;
+      opacity: 1 !important;
+    }
+  }
+}
+
+// The trophy in the settings menu is white
+.mat-mdc-menu-panel .lombardi.menu-icon {
+  color: #fff !important;
+}
+
+// Settings menu items light up goalpost yellow on hover
+.mat-mdc-menu-panel .mat-mdc-menu-item:hover span {
+  color: var(--scoreboard-led) !important;
+}
+
+// Preset dropdown caret in goalpost yellow
+.sidebar .mat-mdc-select-arrow {
+  color: var(--scoreboard-led) !important;
+}
+
+// Grab cursor on the slider footballs, grabbing while dragging
+.mat-mdc-slider .mdc-slider__input {
+  cursor: grab !important;
+
+  &:active {
+    cursor: grabbing !important;
+  }
+}
+
+.mat-mdc-slider.mdc-slider--disabled .mdc-slider__input {
+  cursor: auto !important;
 }

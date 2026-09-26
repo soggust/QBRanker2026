@@ -4,12 +4,21 @@
     <li class="player header-row" aria-hidden="true">
       <mat-icon fontIcon="drag_indicator" class="drag-indicator" style="visibility: hidden"></mat-icon>
       <div class="player-info"></div>
-      @for (stat of stats; track stat.key) {
+      @for (stat of mainStats; track stat.key) {
         @if (isShown(stat)) {
           <div>
             <p class="stat-label">{{ stat.label }}</p>
           </div>
         }
+      }
+      @if (shownSupportStats.length) {
+        <div class="box support-box" [style.min-width.em]="shownSupportStats.length * 5.5">
+          @for (stat of shownSupportStats; track stat.key) {
+            <div>
+              <p class="stat-label">{{ stat.label }}</p>
+            </div>
+          }
+        </div>
       }
     </li>
     @for (player of playerList; track player.gsisId; let i = $index) {
@@ -22,14 +31,17 @@
           class="drag-indicator"
         ></mat-icon>
         <div class="player-info">
-          <span [ngClass]="getCountClasses(i)">{{ i + 1 }}</span>
+          <span [ngClass]="getCountClasses(i)"
+          >@if (i === 0) {<span class="lombardi" aria-hidden="true"></span
+            ><span class="visually-hidden">1</span>} @else {{{ i + 1 }}}</span
+        >
           <img [src]="player.teamLogo" class="team-logo" />
           <p class="player-name">
             <strong>{{ player.name }}</strong>
           </p>
         </div>
 
-        @for (stat of stats; track stat.key) {
+        @for (stat of mainStats; track stat.key) {
           @if (isShown(stat)) {
             <div [title]="stat.label + ': ' + stat.description">
               <p [style.color]="gradeColor(player, stat)">{{ format(player, stat) }}</p>
@@ -38,6 +50,18 @@
               </p>
             </div>
           }
+        }
+
+        <!-- Support grades (O-Line, QB Play) share a dark box like the QB page -->
+        @if (shownSupportStats.length) {
+          <div class="box support-box" [style.min-width.em]="shownSupportStats.length * 5.5">
+            @for (stat of shownSupportStats; track stat.key) {
+              <div [title]="stat.label + ': ' + stat.description">
+                <p [style.color]="gradeColor(player, stat)">{{ format(player, stat) }}</p>
+                <p class="stat-label">{{ stat.label }}</p>
+              </div>
+            }
+          </div>
         }
       </li>
     }
@@ -95,7 +119,7 @@
         (click)="$event.stopPropagation(); perGame = !perGame; sortPlayers()"
       >
         <!-- Per Game Stats-->
-        <mat-slide-toggle
+        <mat-slide-toggle hideIcon
           color="accent"
           class="slide-toggle"
           [(ngModel)]="perGame"
@@ -109,7 +133,7 @@
         (click)="$event.stopPropagation(); showUnused = !showUnused"
       >
         <!-- Show Unused Stats -->
-        <mat-slide-toggle
+        <mat-slide-toggle hideIcon
           color="accent"
           class="slide-toggle"
           [(ngModel)]="showUnused"
@@ -120,8 +144,8 @@
       @if (hasFantasy) {
       <div mat-menu-item (click)="$event.stopPropagation(); cycleFantasyScoring()">
         <!-- Fantasy Scoring -->
-        <mat-icon fontIcon="emoji_events" class="menu-icon"></mat-icon>
-        <span>Fantasy: {{ scoringLabels[fantasyScoring] }}</span>
+        <span class="lombardi menu-icon" aria-hidden="true"></span>
+        <span>Fantasy Scoring: {{ scoringLabels[fantasyScoring] }}</span>
       </div>
       }
     </mat-menu>

@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { FilterService } from '../services/filter.service';
 import { PositionService } from '../services/position.service';
 import { Filters } from 'app/types';
+import { QB_PRESETS, QB_PRESET_ORDER, QbPresetKey } from 'app/qb-presets';
 import {
   Position,
   SKILL_STATS,
@@ -44,6 +45,11 @@ export class SidebarComponent {
   cpoeValue: number = 50;
   successValue: number = 50;
   fantasyValue: number = 50;
+  pressureToSackValue: number = 50;
+  badThrowValue: number = 50;
+  timeToThrowValue: number = 50;
+  adotValue: number = 50;
+  aggressivenessValue: number = 50;
   recencyValue: number = 50;
   yardsExpanded: boolean = false;
   tdsExpanded: boolean = false;
@@ -51,6 +57,7 @@ export class SidebarComponent {
   advancedExpanded: boolean = false;
   supportExpanded: boolean = false;
   preset: string = 'default';
+  qbPresets = QB_PRESET_ORDER.map((key) => ({ key, ...QB_PRESETS[key] }));
 
   // Current position (switched from the bar above the rankings)
   position: Position = 'QB';
@@ -149,6 +156,11 @@ export class SidebarComponent {
       cpoeValue: this.cpoeValue,
       successValue: this.successValue,
       fantasyValue: this.fantasyValue,
+      pressureToSackValue: this.pressureToSackValue,
+      badThrowValue: this.badThrowValue,
+      timeToThrowValue: this.timeToThrowValue,
+      adotValue: this.adotValue,
+      aggressivenessValue: this.aggressivenessValue,
       recencyValue: this.recencyValue,
       supportValue: this.supportValue,
       weaponsValue: this.weaponsValue,
@@ -162,182 +174,27 @@ export class SidebarComponent {
   }
 
   onPresetChange() {
-    switch (this.preset) {
-      case 'default':
-        this.reset();
-        break;
-
-      case 'stats':
-        this.statsOnly();
-        break;
-
-      case 'mvp':
-        this.mvp();
-        break;
-
-      case 'fantasy':
-        this.fantasyOnly();
-        break;
-
-      case 'support':
-        this.leastSupport();
-        break;
-
-      default:
-        break;
-    }
+    if (this.preset !== 'custom') this.applyPreset(this.preset as QbPresetKey);
   }
 
   setCustomFilter() {
     this.preset = 'custom';
   }
 
-  statsOnly() {
-    this.recordValue = 0;
-    this.compValue = 50;
-    this.yardsValue = 50;
-    this.passYdValue = 50;
-    this.rushYdValue = 50;
-    this.ypaValue = 50;
-    this.touchdownValue = 50;
-    this.passTdValue = 50;
-    this.rushTdValue = 50;
-    this.turnoverValue = 50;
-    this.intValue = 50;
-    this.fumLostValue = 50;
-    this.supportValue = 0;
-    this.weaponsValue = 50;
-    this.coachingValue = 50;
-    this.olineValue = 50;
-    this.defenseValue = 50;
-    this.responsibilityValue = 50;
-    this.ratingValue = 50;
-    this.advancedValue = 50;
-    this.epaValue = 50;
-    this.cpoeValue = 50;
-    this.successValue = 50;
-    this.fantasyValue = 50;
-    this.recencyValue = 0;
-    this.yardsExpanded = false;
-    this.tdsExpanded = false;
-    this.tosExpanded = false;
-    this.advancedExpanded = false;
-    this.supportExpanded = false;
-    this.saveFilters();
-  }
-
-  leastSupport() {
-    this.recordValue = 0;
-    this.compValue = 0;
-    this.yardsValue = 0;
-    this.passYdValue = 0;
-    this.rushYdValue = 0;
-    this.ypaValue = 0;
-    this.touchdownValue = 0;
-    this.passTdValue = 0;
-    this.rushTdValue = 0;
-    this.turnoverValue = 0;
-    this.intValue = 0;
-    this.fumLostValue = 0;
-    this.supportValue = 50;
-    this.weaponsValue = 50;
-    this.coachingValue = 50;
-    this.olineValue = 50;
-    this.defenseValue = 50;
-    this.responsibilityValue = 50;
-    this.ratingValue = 0;
-    this.advancedValue = 0;
-    this.epaValue = 50;
-    this.cpoeValue = 50;
-    this.successValue = 50;
-    this.fantasyValue = 0;
-    this.recencyValue = 0;
-    this.yardsExpanded = false;
-    this.tdsExpanded = false;
-    this.tosExpanded = false;
-    this.advancedExpanded = false;
-    this.supportExpanded = false;
-    this.saveFilters();
-  }
-
-  mvp() {
-    this.recordValue = 75;
-    this.compValue = 15;
-    this.yardsValue = 60;
-    this.passYdValue = 50;
-    this.rushYdValue = 50;
-    this.ypaValue = 35;
-    this.touchdownValue = 75;
-    this.passTdValue = 50;
-    this.rushTdValue = 50;
-    this.turnoverValue = 75;
-    this.intValue = 50;
-    this.fumLostValue = 50;
-    this.supportValue = 35;
-    this.weaponsValue = 25;
-    this.coachingValue = 25;
-    this.olineValue = 25;
-    this.defenseValue = 25;
-    this.responsibilityValue = 75;
-    this.ratingValue = 50;
-    this.advancedValue = 35;
-    this.epaValue = 50;
-    this.cpoeValue = 50;
-    this.successValue = 50;
-    this.fantasyValue = 0;
-    this.recencyValue = 15;
-    this.yardsExpanded = false;
-    this.tdsExpanded = false;
-    this.tosExpanded = false;
-    this.advancedExpanded = false;
-    this.supportExpanded = false;
-    this.saveFilters();
-  }
-
-  // Rank purely on fantasy points (scoring is set in the settings menu)
-  fantasyOnly() {
-    this.clearFilters();
-    this.advancedValue = 100;
-    this.epaValue = 0;
-    this.cpoeValue = 0;
-    this.successValue = 0;
-    this.fantasyValue = 100;
-    this.advancedExpanded = true;
+  // Set every slider from a preset, open the group it focuses on, and rerank
+  applyPreset(key: QbPresetKey) {
+    const { values, expand } = QB_PRESETS[key];
+    Object.assign(this, values);
+    this.yardsExpanded = expand === 'yards';
+    this.tdsExpanded = expand === 'tds';
+    this.tosExpanded = expand === 'tos';
+    this.advancedExpanded = expand === 'advanced';
+    this.supportExpanded = expand === 'support';
     this.saveFilters();
   }
 
   reset() {
-    this.recordValue = 50;
-    this.compValue = 50;
-    this.yardsValue = 50;
-    this.passYdValue = 50;
-    this.rushYdValue = 50;
-    this.ypaValue = 50;
-    this.touchdownValue = 50;
-    this.passTdValue = 50;
-    this.rushTdValue = 50;
-    this.turnoverValue = 50;
-    this.intValue = 50;
-    this.fumLostValue = 50;
-    this.supportValue = 50;
-    this.weaponsValue = 50;
-    this.coachingValue = 50;
-    this.olineValue = 50;
-    this.defenseValue = 50;
-    this.responsibilityValue = 50;
-    this.ratingValue = 50;
-    this.advancedValue = 50;
-    this.epaValue = 50;
-    this.cpoeValue = 50;
-    this.successValue = 50;
-    this.fantasyValue = 50;
-    this.recencyValue = 50;
-    this.yardsExpanded = false;
-    this.tdsExpanded = false;
-    this.tosExpanded = false;
-    this.advancedExpanded = false;
-    this.supportExpanded = false;
-    this.saveFilters();
+    this.applyPreset('default');
   }
 
   clearFilters() {
@@ -364,6 +221,11 @@ export class SidebarComponent {
     this.epaValue = 50;
     this.cpoeValue = 50;
     this.successValue = 50;
+    this.pressureToSackValue = 50;
+    this.badThrowValue = 50;
+    this.timeToThrowValue = 50;
+    this.adotValue = 50;
+    this.aggressivenessValue = 50;
     this.fantasyValue = 0;
     this.recencyValue = 0;
 

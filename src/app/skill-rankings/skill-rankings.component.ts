@@ -104,15 +104,16 @@ export class SkillRankingsComponent implements OnChanges {
   }
 
   // Stat Value, Per Game For Volume Stats When Toggled
-  value(player: SkillPlayer, stat: SkillStat): number {
+  value(player: SkillPlayer, stat: SkillStat): number | null {
     const raw = this.rawValue(player, stat);
+    if (raw === null) return null;
     return this.perGame && stat.kind === 'volume' && player.games ? raw / player.games : raw;
   }
 
-  rawValue(player: SkillPlayer, stat: SkillStat): number {
+  rawValue(player: SkillPlayer, stat: SkillStat): number | null {
     switch (stat.key) {
       case 'fantasy':
-        return fantasyPoints(player.stats.fantasyStd, player.stats.receptions, this.fantasyScoring);
+        return fantasyPoints(player.stats.fantasyStd ?? 0, player.stats.receptions ?? 0, this.fantasyScoring);
       case 'oline':
         return gradesForTeam(player.teamLogo).oline;
       // Teams without a graded QB yet count as average
@@ -123,12 +124,22 @@ export class SkillRankingsComponent implements OnChanges {
     }
   }
 
+  // Regular stat columns, and the support grades that are grouped into a box
+  get mainStats(): SkillStat[] {
+    return this.stats.filter((stat) => !stat.support);
+  }
+
+  get shownSupportStats(): SkillStat[] {
+    return this.stats.filter((stat) => stat.support && this.isShown(stat));
+  }
+
   isShown(stat: SkillStat): boolean {
     return this.showUnused || !!this.weights[stat.key];
   }
 
   format(player: SkillPlayer, stat: SkillStat): string {
     const value = this.value(player, stat);
+    if (value === null) return '-';
     const perGameVolume = this.perGame && stat.kind === 'volume';
     switch (stat.format) {
       case 'grade':
@@ -159,7 +170,7 @@ export class SkillRankingsComponent implements OnChanges {
   gradeColor(player: SkillPlayer, stat: SkillStat): string | null {
     if (stat.format !== 'grade') return null;
     // Brighter at the red end so low grades stay readable on their dark pill
-    const value = this.value(player, stat);
+    const value = this.value(player, stat) ?? 6;
     return `hsl(${Math.round((value / 12) * 120)}, 100%, ${Math.round(50 + (1 - value / 12) * 16)}%)`;
   }
 

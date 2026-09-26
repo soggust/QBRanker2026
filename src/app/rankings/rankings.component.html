@@ -2,7 +2,10 @@
   <!-- One row's cells; also rendered once as the column header row -->
   <ng-template #rowCells let-player let-i="i">
       <div class="player-info">
-        <span [ngClass]="getCountClasses(i)">{{ i + 1 }}</span>
+        <span [ngClass]="getCountClasses(i)"
+          >@if (i === 0) {<span class="lombardi" aria-hidden="true"></span
+            ><span class="visually-hidden">1</span>} @else {{{ i + 1 }}}</span
+        >
         <img [src]="player.teamLogo" class="team-logo" />
         <p class="player-name">
           <strong>{{ player.name }}</strong>
@@ -316,6 +319,51 @@
           >
             Success
           </p>
+        </div>
+      }
+      @if (
+        showUnused || (this.filters.advancedValue && this.filters.pressureToSackValue)
+      ) {
+        <!-- Pressure → Sack -->
+        <div class="pressureToSack">
+          <p>{{ player.pressureToSack === null ? "-" : (player.pressureToSack | percent: "1.0-0") }}</p>
+          <p class="stat-label" title="Share of pressures that became sacks (lower is better)">Pressure → Sack</p>
+        </div>
+      }
+      @if (
+        showUnused || (this.filters.advancedValue && this.filters.badThrowValue)
+      ) {
+        <!-- Bad Throw % -->
+        <div class="badThrowPct">
+          <p>{{ player.badThrowPct === null ? "-" : (player.badThrowPct | percent: "1.0-0") }}</p>
+          <p class="stat-label" title="Bad throws per attempt (lower is better)">Bad Throw %</p>
+        </div>
+      }
+      @if (
+        showUnused || (this.filters.advancedValue && this.filters.timeToThrowValue)
+      ) {
+        <!-- Time To Throw -->
+        <div class="timeToThrow">
+          <p>{{ player.timeToThrow === null ? "-" : (player.timeToThrow | number: "1.2-2") }}</p>
+          <p class="stat-label" title="Average seconds from snap to throw (quicker scores higher)">Time To Throw</p>
+        </div>
+      }
+      @if (
+        showUnused || (this.filters.advancedValue && this.filters.adotValue)
+      ) {
+        <!-- aDOT -->
+        <div class="adot">
+          <p>{{ player.adot === null ? "-" : (player.adot | number: "1.1-1") }}</p>
+          <p class="stat-label" title="Average depth of target in yards">aDOT</p>
+        </div>
+      }
+      @if (
+        showUnused || (this.filters.advancedValue && this.filters.aggressivenessValue)
+      ) {
+        <!-- Aggressive % -->
+        <div class="aggressiveness">
+          <p>{{ player.aggressiveness === null ? "-" : (player.aggressiveness | number: "1.1-1") }}</p>
+          <p class="stat-label" title="Share of throws into tight coverage">Aggressive %</p>
         </div>
       }
       @if (
@@ -641,7 +689,7 @@
         (click)="$event.stopPropagation(); totalStats = !totalStats"
       >
         <!-- Total Stats -->
-        <mat-slide-toggle
+        <mat-slide-toggle hideIcon
           color="accent"
           [(ngModel)]="totalStats"
           class="slide-toggle"
@@ -655,7 +703,7 @@
         (click)="$event.stopPropagation(); perGame = !perGame; sortPlayers()"
       >
         <!-- Per Game Stats-->
-        <mat-slide-toggle
+        <mat-slide-toggle hideIcon
           id="pgs-menu"
           color="accent"
           class="slide-toggle"
@@ -670,7 +718,7 @@
         (click)="$event.stopPropagation(); showUnused = !showUnused"
       >
         <!-- Hide Unused Stats -->
-        <mat-slide-toggle
+        <mat-slide-toggle hideIcon
           color="accent"
           class="slide-toggle"
           [(ngModel)]="showUnused"
@@ -685,7 +733,7 @@
         "
       >
         <!-- Hide Injured -->
-        <mat-slide-toggle
+        <mat-slide-toggle hideIcon
           color="accent"
           class="slide-toggle"
           [(ngModel)]="showInjured"
@@ -696,8 +744,8 @@
       </div>
       <div mat-menu-item (click)="$event.stopPropagation(); cycleFantasyScoring()">
         <!-- Fantasy Scoring -->
-        <mat-icon fontIcon="emoji_events" class="menu-icon"></mat-icon>
-        <span>Fantasy: {{ scoringLabels[fantasyScoring] }}</span>
+        <span class="lombardi menu-icon" aria-hidden="true"></span>
+        <span>Fantasy Scoring: {{ scoringLabels[fantasyScoring] }}</span>
       </div>
     </mat-menu>
   </footer>

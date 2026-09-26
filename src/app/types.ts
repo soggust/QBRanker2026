@@ -18,6 +18,11 @@ export interface Filters {
   cpoeValue: number;
   successValue: number;
   fantasyValue: number;
+  pressureToSackValue: number;
+  badThrowValue: number;
+  timeToThrowValue: number;
+  adotValue: number;
+  aggressivenessValue: number;
   recencyValue: number;
   supportValue: number;
   weaponsValue: number;
@@ -45,6 +50,11 @@ export interface Player {
   successRate: number | null;
   fantasyStd: number | null;
   receptions: number;
+  pressureToSack: number | null;
+  badThrowPct: number | null;
+  timeToThrow: number | null;
+  adot: number | null;
+  aggressiveness: number | null;
   wins: number;
   losses: number;
   ties?: number;
@@ -81,6 +91,11 @@ export interface StaticPlayerData {
   successRate: number | null;
   fantasyStd: number | null;
   receptions: number;
+  pressureToSack: number | null;
+  badThrowPct: number | null;
+  timeToThrow: number | null;
+  adot: number | null;
+  aggressiveness: number | null;
   // Starts per team, keyed by team logo path
   starts: Record<string, number>;
   // Hand-set defense grade from subjective.json; otherwise it comes from the Defenses rankings

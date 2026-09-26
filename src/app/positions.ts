@@ -57,7 +57,25 @@ export type SkillStatKey =
   | 'winsOverExpected'
   | 'atsPct'
   | 'pointDiffPerGame'
-  | 'netEpa';
+  | 'netEpa'
+  // Added: tracking (Next Gen Stats), contact/drop/pressure (Pro Football Reference via nflverse)
+  | 'ryoePerAtt'
+  | 'yacoPerCarry'
+  | 'brokenTackles'
+  | 'snapShare'
+  | 'separation'
+  | 'yacOverExp'
+  | 'adot'
+  | 'airYardsShare'
+  | 'dropPct'
+  | 'pressureRate'
+  | 'missedTacklePct'
+  | 'thirdDownPct'
+  | 'redZoneTdPct'
+  | 'fgOverExp'
+  | 'fairCatchPct'
+  | 'oneScoreWinPct'
+  | 'penaltiesPerGame';
 
 // Columns computed in the app: fantasy points in the chosen scoring, and team support grades
 export type SkillColumnKey = SkillStatKey | 'fantasy' | 'oline' | 'qbPlay';
@@ -82,7 +100,8 @@ export interface SkillPlayer {
   name: string;
   teamLogo: string;
   games: number;
-  stats: Record<SkillStatKey, number>;
+  // null when a data source doesn't cover the player (shown as "-")
+  stats: Record<SkillStatKey, number | null>;
 }
 
 export interface SkillStat {
@@ -134,6 +153,50 @@ const RECEIVING_STATS: SkillStat[] = [
     format: 'dec2',
     signed: true,
   },
+  {
+    key: 'separation',
+    label: 'Separation',
+    description: 'Average yards from the nearest defender at the catch point (Next Gen Stats)',
+    kind: 'efficiency',
+    format: 'dec1',
+  },
+  {
+    key: 'yacOverExp',
+    label: 'YAC Over Exp',
+    description: 'Yards after catch above expected, per reception (Next Gen Stats)',
+    kind: 'efficiency',
+    format: 'dec1',
+    signed: true,
+  },
+  {
+    key: 'adot',
+    label: 'aDOT',
+    description: 'Average depth of target in yards (Next Gen Stats)',
+    kind: 'efficiency',
+    format: 'dec1',
+  },
+  {
+    key: 'airYardsShare',
+    label: 'Air Yds Share',
+    description: "Share of the team's air yards",
+    kind: 'efficiency',
+    format: 'pct',
+  },
+  {
+    key: 'dropPct',
+    label: 'Drop %',
+    description: 'Drops per target (lower is better)',
+    kind: 'efficiency',
+    format: 'pct',
+    negative: true,
+  },
+  {
+    key: 'snapShare',
+    label: 'Snap %',
+    description: 'Average share of offensive snaps played',
+    kind: 'efficiency',
+    format: 'pct',
+  },
   FANTASY_STAT,
   {
     key: 'qbPlay',
@@ -174,6 +237,35 @@ export const SKILL_STATS: Record<SkillPosition, SkillStat[]> = {
       signed: true,
     },
     {
+      key: 'ryoePerAtt',
+      label: 'RYOE / Carry',
+      description: 'Rush yards over expected per carry, given the blocking and defenders (Next Gen Stats)',
+      kind: 'efficiency',
+      format: 'dec2',
+      signed: true,
+    },
+    {
+      key: 'yacoPerCarry',
+      label: 'YAC / Carry',
+      description: 'Rushing yards after first contact per carry',
+      kind: 'efficiency',
+      format: 'dec1',
+    },
+    {
+      key: 'brokenTackles',
+      label: 'Broken Tkl',
+      description: 'Broken tackles on runs and catches',
+      kind: 'volume',
+      format: 'int',
+    },
+    {
+      key: 'snapShare',
+      label: 'Snap %',
+      description: 'Average share of offensive snaps played',
+      kind: 'efficiency',
+      format: 'pct',
+    },
+    {
       key: 'fumbles',
       label: 'Fumbles',
       description: 'Fumbles lost',
@@ -205,6 +297,14 @@ export const SKILL_STATS: Record<SkillPosition, SkillStat[]> = {
       description: 'Expected Points Added per field goal and extra point attempt',
       kind: 'efficiency',
       format: 'dec2',
+      signed: true,
+    },
+    {
+      key: 'fgOverExp',
+      label: 'FG % Over Exp',
+      description: 'Field goal % above what the kick distances predict, in percentage points',
+      kind: 'efficiency',
+      format: 'dec1',
       signed: true,
     },
     {
@@ -245,6 +345,13 @@ export const SKILL_STATS: Record<SkillPosition, SkillStat[]> = {
       kind: 'volume',
       format: 'int',
       negative: true,
+    },
+    {
+      key: 'fairCatchPct',
+      label: 'Fair Catch %',
+      description: 'Share of punts fair caught',
+      kind: 'efficiency',
+      format: 'pct',
     },
   ],
   // Lower is better for everything "allowed", so those count against the defense
@@ -287,6 +394,13 @@ export const SKILL_STATS: Record<SkillPosition, SkillStat[]> = {
     },
     { key: 'sacks', label: 'Sacks', description: 'Sacks', kind: 'volume', format: 'int' },
     {
+      key: 'pressureRate',
+      label: 'Pressure %',
+      description: 'Pressures per opponent dropback',
+      kind: 'efficiency',
+      format: 'pct',
+    },
+    {
       key: 'takeaways',
       label: 'Takeaways',
       description: 'Interceptions + fumbles recovered',
@@ -299,6 +413,33 @@ export const SKILL_STATS: Record<SkillPosition, SkillStat[]> = {
       description: 'Points allowed per game (lower is better)',
       kind: 'efficiency',
       format: 'dec1',
+      signed: true,
+      negative: true,
+    },
+    {
+      key: 'thirdDownPct',
+      label: '3rd Down %',
+      description: 'Opponent third-down conversion rate (lower is better)',
+      kind: 'efficiency',
+      format: 'pct',
+      signed: true,
+      negative: true,
+    },
+    {
+      key: 'redZoneTdPct',
+      label: 'Red Zone TD %',
+      description: 'Share of opponent red-zone drives ending in a touchdown (lower is better)',
+      kind: 'efficiency',
+      format: 'pct',
+      signed: true,
+      negative: true,
+    },
+    {
+      key: 'missedTacklePct',
+      label: 'Missed Tkl %',
+      description: 'Missed tackles per tackle attempt (lower is better)',
+      kind: 'efficiency',
+      format: 'pct',
       signed: true,
       negative: true,
     },
@@ -340,6 +481,22 @@ export const SKILL_STATS: Record<SkillPosition, SkillStat[]> = {
       kind: 'efficiency',
       format: 'dec2',
       signed: true,
+    },
+    {
+      key: 'oneScoreWinPct',
+      label: '1-Score Win %',
+      description: 'Win % in games decided by 8 points or fewer',
+      kind: 'efficiency',
+      format: 'pct',
+    },
+    {
+      key: 'penaltiesPerGame',
+      label: 'Penalties / Game',
+      description: 'Penalties called on the team per game (lower is better)',
+      kind: 'efficiency',
+      format: 'dec1',
+      signed: true,
+      negative: true,
     },
   ],
 };

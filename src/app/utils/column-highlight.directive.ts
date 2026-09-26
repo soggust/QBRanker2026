@@ -22,7 +22,7 @@ export class ColumnHighlightDirective implements OnInit, OnDestroy {
     // Styled inline: component styles don't reach elements created here. Same tint as row hover.
     Object.assign(this.band.style, {
       background: 'rgba(255, 255, 255, 0.08)',
-      borderRadius: '0.6em',
+      borderRadius: '0.3em',
       display: 'none',
       pointerEvents: 'none',
       position: 'absolute',
