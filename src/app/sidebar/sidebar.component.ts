@@ -28,10 +28,15 @@ export class SidebarComponent {
   defenseValue: number = 50;
   responsibilityValue: number = 50;
   ratingValue: number = 50;
+  advancedValue: number = 50;
+  epaValue: number = 50;
+  cpoeValue: number = 50;
+  successValue: number = 50;
   recencyValue: number = 50;
   yardsExpanded: boolean = false;
   tdsExpanded: boolean = false;
   tosExpanded: boolean = false;
+  advancedExpanded: boolean = false;
   supportExpanded: boolean = false;
   preset: string = 'default';
 
@@ -56,6 +61,10 @@ export class SidebarComponent {
       intValue: this.intValue,
       fumLostValue: this.fumLostValue,
       ratingValue: this.ratingValue,
+      advancedValue: this.advancedValue,
+      epaValue: this.epaValue,
+      cpoeValue: this.cpoeValue,
+      successValue: this.successValue,
       recencyValue: this.recencyValue,
       supportValue: this.supportValue,
       weaponsValue: this.weaponsValue,
@@ -115,10 +124,15 @@ export class SidebarComponent {
     this.defenseValue = 50;
     this.responsibilityValue = 50;
     this.ratingValue = 50;
+    this.advancedValue = 50;
+    this.epaValue = 50;
+    this.cpoeValue = 50;
+    this.successValue = 50;
     this.recencyValue = 0;
     this.yardsExpanded = false;
     this.tdsExpanded = false;
     this.tosExpanded = false;
+    this.advancedExpanded = false;
     this.supportExpanded = false;
     this.saveFilters();
   }
@@ -143,10 +157,15 @@ export class SidebarComponent {
     this.defenseValue = 50;
     this.responsibilityValue = 50;
     this.ratingValue = 0;
+    this.advancedValue = 0;
+    this.epaValue = 50;
+    this.cpoeValue = 50;
+    this.successValue = 50;
     this.recencyValue = 0;
     this.yardsExpanded = false;
     this.tdsExpanded = false;
     this.tosExpanded = false;
+    this.advancedExpanded = false;
     this.supportExpanded = false;
     this.saveFilters();
   }
@@ -171,10 +190,15 @@ export class SidebarComponent {
     this.defenseValue = 25;
     this.responsibilityValue = 75;
     this.ratingValue = 50;
+    this.advancedValue = 35;
+    this.epaValue = 50;
+    this.cpoeValue = 50;
+    this.successValue = 50;
     this.recencyValue = 15;
     this.yardsExpanded = false;
     this.tdsExpanded = false;
     this.tosExpanded = false;
+    this.advancedExpanded = false;
     this.supportExpanded = false;
     this.saveFilters();
   }
@@ -199,10 +223,15 @@ export class SidebarComponent {
     this.defenseValue = 50;
     this.responsibilityValue = 50;
     this.ratingValue = 50;
+    this.advancedValue = 50;
+    this.epaValue = 50;
+    this.cpoeValue = 50;
+    this.successValue = 50;
     this.recencyValue = 50;
     this.yardsExpanded = false;
     this.tdsExpanded = false;
     this.tosExpanded = false;
+    this.advancedExpanded = false;
     this.supportExpanded = false;
     this.saveFilters();
   }
@@ -227,6 +256,10 @@ export class SidebarComponent {
     this.defenseValue = 50;
     this.responsibilityValue = 50;
     this.ratingValue = 0;
+    this.advancedValue = 0;
+    this.epaValue = 50;
+    this.cpoeValue = 50;
+    this.successValue = 50;
     this.recencyValue = 0;
 
     this.saveFilters();

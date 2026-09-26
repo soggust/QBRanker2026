@@ -13,7 +13,13 @@
       0,
       0,
       0
-    ]
+    ],
+    "advanced": {
+      "epaPerPlay": -0.272,
+      "cpoe": -2.536,
+      "successRate": 0.409,
+      "plays": 93
+    }
   },
   {
     "id": 3052587,
@@ -29,7 +35,13 @@
       0,
       0,
       0
-    ]
+    ],
+    "advanced": {
+      "epaPerPlay": -0.204,
+      "cpoe": 8.647,
+      "successRate": 0.434,
+      "plays": 83
+    }
   },
   {
     "id": 4426338,
@@ -45,7 +57,13 @@
       0,
       0,
       0
-    ]
+    ],
+    "advanced": {
+      "epaPerPlay": -0.071,
+      "cpoe": 2.192,
+      "successRate": 0.465,
+      "plays": 71
+    }
   },
   {
     "id": 4361741,
@@ -61,7 +79,13 @@
       0,
       0,
       0
-    ]
+    ],
+    "advanced": {
+      "epaPerPlay": 0.526,
+      "cpoe": 11.565,
+      "successRate": 0.667,
+      "plays": 66
+    }
   },
   {
     "id": 4685720,
@@ -77,7 +101,13 @@
       0,
       0,
       0
-    ]
+    ],
+    "advanced": {
+      "epaPerPlay": 0.308,
+      "cpoe": 9.074,
+      "successRate": 0.464,
+      "plays": 84
+    }
   },
   {
     "id": 4432577,
@@ -93,7 +123,13 @@
       0,
       0,
       0
-    ]
+    ],
+    "advanced": {
+      "epaPerPlay": -0.001,
+      "cpoe": -3.501,
+      "successRate": 0.455,
+      "plays": 112
+    }
   },
   {
     "id": 4431611,
@@ -109,7 +145,13 @@
       0,
       0,
       0
-    ]
+    ],
+    "advanced": {
+      "epaPerPlay": 0.318,
+      "cpoe": 6.18,
+      "successRate": 0.487,
+      "plays": 80
+    }
   },
   {
     "id": 4688380,
@@ -125,7 +167,13 @@
       0,
       0,
       0
-    ]
+    ],
+    "advanced": {
+      "epaPerPlay": -0.037,
+      "cpoe": 2.715,
+      "successRate": 0.448,
+      "plays": 67
+    }
   },
   {
     "id": 2573079,
@@ -141,7 +189,13 @@
       0,
       0,
       0
-    ]
+    ],
+    "advanced": {
+      "epaPerPlay": 0.167,
+      "cpoe": -7.791,
+      "successRate": 0.455,
+      "plays": 55
+    }
   },
   {
     "id": 2972515,
@@ -157,7 +211,13 @@
       0,
       0,
       0
-    ]
+    ],
+    "advanced": {
+      "epaPerPlay": -0.69,
+      "cpoe": -13.436,
+      "successRate": 0.327,
+      "plays": 49
+    }
   },
   {
     "id": 2577417,
@@ -173,7 +233,13 @@
       0,
       0,
       0
-    ]
+    ],
+    "advanced": {
+      "epaPerPlay": 0.441,
+      "cpoe": 12.961,
+      "successRate": 0.582,
+      "plays": 79
+    }
   },
   {
     "id": 3917792,
@@ -189,7 +255,13 @@
       0,
       0,
       0
-    ]
+    ],
+    "advanced": {
+      "epaPerPlay": 0.013,
+      "cpoe": -0.483,
+      "successRate": 0.465,
+      "plays": 71
+    }
   },
   {
     "id": 3122840,
@@ -205,7 +277,13 @@
       0,
       0,
       0
-    ]
+    ],
+    "advanced": {
+      "epaPerPlay": 0.145,
+      "cpoe": 8.075,
+      "successRate": 0.521,
+      "plays": 73
+    }
   },
   {
     "id": 4431452,
@@ -221,7 +299,13 @@
       0,
       0,
       0
-    ]
+    ],
+    "advanced": {
+      "epaPerPlay": 0.104,
+      "cpoe": 3.904,
+      "successRate": 0.5,
+      "plays": 74
+    }
   },
   {
     "id": 3924327,
@@ -237,7 +321,13 @@
       0,
       0,
       0
-    ]
+    ],
+    "advanced": {
+      "epaPerPlay": 0.461,
+      "cpoe": 6.884,
+      "successRate": 0.519,
+      "plays": 54
+    }
   },
   {
     "id": 15864,
@@ -253,7 +343,13 @@
       0,
       0,
       0
-    ]
+    ],
+    "advanced": {
+      "epaPerPlay": 0.14,
+      "cpoe": 8.582,
+      "successRate": 0.468,
+      "plays": 79
+    }
   },
   {
     "id": 2578570,
@@ -269,7 +365,13 @@
       0,
       0,
       0
-    ]
+    ],
+    "advanced": {
+      "epaPerPlay": 0.065,
+      "cpoe": 0.407,
+      "successRate": 0.474,
+      "plays": 78
+    }
   },
   {
     "id": 4040715,
@@ -285,7 +387,13 @@
       0,
       0,
       0
-    ]
+    ],
+    "advanced": {
+      "epaPerPlay": 0.191,
+      "cpoe": 10.02,
+      "successRate": 0.432,
+      "plays": 81
+    }
   },
   {
     "id": 2969939,
@@ -301,7 +409,13 @@
       0,
       0,
       0
-    ]
+    ],
+    "advanced": {
+      "epaPerPlay": -0.45,
+      "cpoe": -25.333,
+      "successRate": 0.313,
+      "plays": 32
+    }
   },
   {
     "id": 3046779,
@@ -317,7 +431,13 @@
       0,
       0,
       0
-    ]
+    ],
+    "advanced": {
+      "epaPerPlay": 0.288,
+      "cpoe": 1.486,
+      "successRate": 0.483,
+      "plays": 89
+    }
   },
   {
     "id": 4689114,
@@ -333,7 +453,13 @@
       0,
       0,
       0
-    ]
+    ],
+    "advanced": {
+      "epaPerPlay": 0.619,
+      "cpoe": 10.63,
+      "successRate": 0.705,
+      "plays": 44
+    }
   },
   {
     "id": 4426348,
@@ -349,7 +475,13 @@
       0,
       0,
       0
-    ]
+    ],
+    "advanced": {
+      "epaPerPlay": 0.102,
+      "cpoe": -0.978,
+      "successRate": 0.412,
+      "plays": 68
+    }
   },
   {
     "id": 3915511,
@@ -365,7 +497,13 @@
       0,
       0,
       0
-    ]
+    ],
+    "advanced": {
+      "epaPerPlay": 0.009,
+      "cpoe": 0.218,
+      "successRate": 0.429,
+      "plays": 77
+    }
   },
   {
     "id": 4036378,
@@ -381,7 +519,13 @@
       0,
       0,
       0
-    ]
+    ],
+    "advanced": {
+      "epaPerPlay": -0.001,
+      "cpoe": -10.121,
+      "successRate": 0.387,
+      "plays": 142
+    }
   },
   {
     "id": 3918298,
@@ -397,7 +541,13 @@
       0,
       0,
       0
-    ]
+    ],
+    "advanced": {
+      "epaPerPlay": 0.463,
+      "cpoe": 6.93,
+      "successRate": 0.551,
+      "plays": 89
+    }
   },
   {
     "id": 4038941,
@@ -413,7 +563,13 @@
       0,
       0,
       0
-    ]
+    ],
+    "advanced": {
+      "epaPerPlay": -0.092,
+      "cpoe": -6.242,
+      "successRate": 0.392,
+      "plays": 74
+    }
   },
   {
     "id": 14880,
@@ -429,7 +585,13 @@
       0,
       0,
       0
-    ]
+    ],
+    "advanced": {
+      "epaPerPlay": 0.105,
+      "cpoe": 1.8,
+      "successRate": 0.455,
+      "plays": 66
+    }
   },
   {
     "id": 3916387,
@@ -445,7 +607,13 @@
       0,
       0,
       0
-    ]
+    ],
+    "advanced": {
+      "epaPerPlay": 0.203,
+      "cpoe": 6.473,
+      "successRate": 0.528,
+      "plays": 72
+    }
   },
   {
     "id": 4242512,
@@ -461,7 +629,13 @@
       0,
       0,
       0
-    ]
+    ],
+    "advanced": {
+      "epaPerPlay": 0.02,
+      "cpoe": -8.743,
+      "successRate": 0.378,
+      "plays": 74
+    }
   },
   {
     "id": 12483,
@@ -477,7 +651,13 @@
       0,
       0,
       0
-    ]
+    ],
+    "advanced": {
+      "epaPerPlay": 0.135,
+      "cpoe": 1.957,
+      "successRate": 0.444,
+      "plays": 63
+    }
   },
   {
     "id": 4360423,
@@ -493,7 +673,13 @@
       0,
       0,
       0
-    ]
+    ],
+    "advanced": {
+      "epaPerPlay": 0.398,
+      "cpoe": 8.774,
+      "successRate": 0.655,
+      "plays": 29
+    }
   },
   {
     "id": 3139477,
@@ -509,7 +695,13 @@
       0,
       0,
       0
-    ]
+    ],
+    "advanced": {
+      "epaPerPlay": 0.147,
+      "cpoe": -2.022,
+      "successRate": 0.477,
+      "plays": 86
+    }
   },
   {
     "id": 4360310,
@@ -525,7 +717,13 @@
       0,
       0,
       0
-    ]
+    ],
+    "advanced": {
+      "epaPerPlay": 0.228,
+      "cpoe": 10.091,
+      "successRate": 0.547,
+      "plays": 64
+    }
   },
   {
     "id": 4360689,
@@ -541,6 +739,12 @@
       0,
       0,
       0
-    ]
+    ],
+    "advanced": {
+      "epaPerPlay": 0.123,
+      "cpoe": 4.606,
+      "successRate": 0.474,
+      "plays": 116
+    }
   }
 ]

@@ -13,6 +13,10 @@ export interface Filters {
   intValue: number;
   fumLostValue: number;
   ratingValue: number;
+  advancedValue: number;
+  epaValue: number;
+  cpoeValue: number;
+  successValue: number;
   recencyValue: number;
   supportValue: number;
   weaponsValue: number;
@@ -35,6 +39,9 @@ export interface Player {
   ints: number;
   fumLost: number;
   rating: number;
+  epaPerPlay: number | null;
+  cpoe: number | null;
+  successRate: number | null;
   wins: number;
   losses: number;
   ties?: number;
@@ -65,4 +72,7 @@ export interface StaticPlayerData {
   oline: number;
   defense: number;
   responsibility: number;
+  epaPerPlay: number | null;
+  cpoe: number | null;
+  successRate: number | null;
 }

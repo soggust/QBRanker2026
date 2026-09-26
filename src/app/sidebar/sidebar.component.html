@@ -226,6 +226,69 @@
       <span>{{ ratingValue }}%</span>
     </div>
 
+    <!-- Advanced -->
+    <div [ngClass]="{ disabled: advancedValue === 0 }">
+      <p>
+        <span>Advanced</span>
+        <button
+          mat-button
+          style="border: solid 1px white; min-width: 1px"
+          (click)="advancedExpanded = !advancedExpanded"
+        >
+          <mat-icon>unfold_more</mat-icon>
+        </button>
+      </p>
+      <mat-slider min="0" max="100" step="5" color="accent">
+        <input
+          matSliderThumb
+          [(ngModel)]="advancedValue"
+          (ngModelChange)="setCustomFilter(); saveFilters()"
+        />
+      </mat-slider>
+      <span>{{ advancedValue }}%</span>
+    </div>
+
+    <mat-expansion-panel [expanded]="advancedExpanded" class="expanded-panel">
+      <!-- EPA Per Play -->
+      <div [ngClass]="{ disabled: epaValue === 0 || advancedValue === 0 }">
+        <p>EPA / Play</p>
+        <mat-slider min="0" max="100" step="5" color="accent">
+          <input
+            matSliderThumb
+            [(ngModel)]="epaValue"
+            (ngModelChange)="setCustomFilter(); saveFilters()"
+          />
+        </mat-slider>
+        <span>{{ epaValue }}%</span>
+      </div>
+
+      <!-- CPOE -->
+      <div [ngClass]="{ disabled: cpoeValue === 0 || advancedValue === 0 }">
+        <p>CPOE</p>
+        <mat-slider min="0" max="100" step="5" color="accent">
+          <input
+            matSliderThumb
+            [(ngModel)]="cpoeValue"
+            (ngModelChange)="setCustomFilter(); saveFilters()"
+          />
+        </mat-slider>
+        <span>{{ cpoeValue }}%</span>
+      </div>
+
+      <!-- Success Rate -->
+      <div [ngClass]="{ disabled: successValue === 0 || advancedValue === 0 }">
+        <p>Success Rate</p>
+        <mat-slider min="0" max="100" step="5" color="accent">
+          <input
+            matSliderThumb
+            [(ngModel)]="successValue"
+            (ngModelChange)="setCustomFilter(); saveFilters()"
+          />
+        </mat-slider>
+        <span>{{ successValue }}%</span>
+      </div>
+    </mat-expansion-panel>
+
     <!-- Recency -->
     <div [ngClass]="{ disabled: recencyValue === 0 }">
       <p>Recency Bias</p>

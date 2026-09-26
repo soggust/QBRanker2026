@@ -27,6 +27,10 @@ export class RankingsComponent {
     intValue: 50,
     fumLostValue: 50,
     ratingValue: 50,
+    advancedValue: 50,
+    epaValue: 50,
+    cpoeValue: 50,
+    successValue: 50,
     recencyValue: 50,
     supportValue: 50,
     weaponsValue: 50,
@@ -156,6 +160,20 @@ export class RankingsComponent {
       this.filters.ratingValue,
       this.findMax('rating'),
     );
+    // Advanced stats can be negative, so they're scaled against the league range
+    // instead of the max; sub-sliders set the mix within the group
+    const epaWeight = this.filters.epaValue;
+    const cpoeWeight = this.filters.cpoeValue;
+    const successWeight = this.filters.successValue;
+    const advancedMix = epaWeight + cpoeWeight + successWeight;
+    const advancedWeighted = advancedMix
+      ? ((this.rangeScore('epaPerPlay', player.epaPerPlay) * epaWeight +
+          this.rangeScore('cpoe', player.cpoe) * cpoeWeight +
+          this.rangeScore('successRate', player.successRate) * successWeight) /
+          advancedMix) *
+        (this.filters.advancedValue / 50)
+      : 0;
+
     const recencyWeighted = this.applyWeight(
       this.calculateRecencyBias(player.lastFive),
       this.filters.recencyValue,
@@ -194,6 +212,7 @@ export class RankingsComponent {
       yardsWeighted +
       ypaWeighted +
       ratingWeighted +
+      advancedWeighted +
       touchdownsWeighted -
       turnoverWeighted -
       (weaponsWeighted +
@@ -231,6 +250,18 @@ export class RankingsComponent {
     // Divide by max + min to normalize the numbers
     const weighted = (stat / max) * (weight / 50);
     return weighted;
+  }
+
+  // Scale A Stat Into 0.5-1 Based On The League Min/Max (Missing Data Counts As The Min)
+  rangeScore(attribute: 'epaPerPlay' | 'cpoe' | 'successRate', value: number | null) {
+    const values = this.playerList
+      .map((player) => player[attribute])
+      .filter((v): v is number => v !== null);
+    if (value === null || values.length === 0) return 0.5;
+
+    const min = Math.min(...values);
+    const max = Math.max(...values);
+    return max === min ? 1 : 0.5 + (0.5 * (value - min)) / (max - min);
   }
 
   // Modify Support Stat

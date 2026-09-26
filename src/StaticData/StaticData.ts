@@ -23,6 +23,9 @@ export const StaticData: StaticPlayerData[] = games.map((game) => {
     losses: game.losses,
     ties: game.ties,
     lastFive: game.lastFive,
+    epaPerPlay: game.advanced?.epaPerPlay ?? null,
+    cpoe: game.advanced?.cpoe ?? null,
+    successRate: game.advanced?.successRate ?? null,
     ...playerScores,
   };
 });

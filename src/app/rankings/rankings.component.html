@@ -291,6 +291,45 @@
             </p>
           </div>
         }
+        @if (
+          showUnused || (this.filters.advancedValue && this.filters.epaValue)
+        ) {
+          <!-- EPA Per Play -->
+          <div class="epa">
+            <p>{{ player.epaPerPlay === null ? "-" : (player.epaPerPlay | number: "1.2-2") }}</p>
+            <p
+              class="stat-label"
+              title="Expected Points Added per play (dropbacks and runs)"
+            >
+              EPA / Play
+            </p>
+          </div>
+        }
+        @if (
+          showUnused || (this.filters.advancedValue && this.filters.cpoeValue)
+        ) {
+          <!-- CPOE -->
+          <div class="cpoe">
+            <p>{{ player.cpoe === null ? "-" : (player.cpoe | number: "1.1-1") }}</p>
+            <p class="stat-label" title="Completion % Over Expected">CPOE</p>
+          </div>
+        }
+        @if (
+          showUnused || (this.filters.advancedValue && this.filters.successValue)
+        ) {
+          <!-- Success Rate -->
+          <div class="success-rate">
+            <p>
+              {{ player.successRate === null ? "-" : (player.successRate | percent: "1.0-0") }}
+            </p>
+            <p
+              class="stat-label"
+              title="Share of plays that gained positive EPA"
+            >
+              Success
+            </p>
+          </div>
+        }
         @if (showUnused || this.filters.recencyValue) {
           <!-- Recent-->
           <div class="box support-box">

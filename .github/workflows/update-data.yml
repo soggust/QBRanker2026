@@ -2,8 +2,9 @@ name: Update Game Data
 
 on:
   schedule:
-    # Tuesdays and Fridays at 10:00 UTC, after Monday and Thursday night games
-    - cron: "0 10 * * 2,5"
+    # 10:00 and 16:00 UTC daily: ESPN results are ready by morning, nflverse
+    # advanced stats sometimes land later. Runs with no changes are a no-op.
+    - cron: "0 10,16 * * *"
   workflow_dispatch:
 
 permissions:
