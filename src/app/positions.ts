@@ -133,11 +133,6 @@ const FANTASY_STAT: SkillStat = {
 
 const RECEIVING_STATS: SkillStat[] = [
   { key: 'targets', label: 'Targets', description: 'Times targeted', kind: 'volume', format: 'int' },
-  { key: 'receptions', label: 'Receptions', description: 'Catches', kind: 'volume', format: 'int' },
-  { key: 'recYards', label: 'Rec Yards', description: 'Receiving yards', kind: 'volume', format: 'int' },
-  { key: 'recTds', label: 'Touchdowns', description: 'Receiving touchdowns', kind: 'volume', format: 'int' },
-  { key: 'yac', label: 'YAC', description: 'Yards after the catch', kind: 'volume', format: 'int' },
-  { key: 'catchPct', label: 'Catch %', description: 'Receptions per target', kind: 'efficiency', format: 'pct' },
   {
     key: 'targetShare',
     label: 'Target Share',
@@ -145,6 +140,11 @@ const RECEIVING_STATS: SkillStat[] = [
     kind: 'efficiency',
     format: 'pct',
   },
+  { key: 'receptions', label: 'Receptions', description: 'Catches', kind: 'volume', format: 'int' },
+  { key: 'recYards', label: 'Rec Yards', description: 'Receiving yards', kind: 'volume', format: 'int' },
+  { key: 'recTds', label: 'Touchdowns', description: 'Receiving touchdowns', kind: 'volume', format: 'int' },
+  { key: 'yac', label: 'YAC', description: 'Yards after the catch', kind: 'volume', format: 'int' },
+  { key: 'catchPct', label: 'Catch %', description: 'Receptions per target', kind: 'efficiency', format: 'pct' },
   {
     key: 'epaPerTarget',
     label: 'EPA / Target',
@@ -515,4 +515,69 @@ export function presetWeights(position: SkillPosition, preset: SkillPreset): Ski
     else weights[stat.key] = stat.kind === preset ? 75 : 25;
   }
   return weights;
+}
+
+// ---------------------------------------------------------------------------
+// Stat groups: the same four groups (and colors) the QB page uses
+// ---------------------------------------------------------------------------
+export type StatGroupId = 'results' | 'box' | 'advanced' | 'support';
+
+export const STAT_GROUP_INFO: { id: StatGroupId; title: string; icon: string }[] = [
+  { id: 'results', title: 'Results', icon: 'emoji_events' },
+  { id: 'box', title: 'Basic Stats', icon: 'bar_chart' },
+  { id: 'advanced', title: 'Advanced Stats', icon: 'insights' },
+  { id: 'support', title: 'Support', icon: 'groups' },
+];
+
+const RESULTS_STATS = new Set<SkillColumnKey>(['winPct', 'winsOverExpected', 'atsPct', 'oneScoreWinPct']);
+
+const ADVANCED_STATS = new Set<SkillColumnKey>([
+  'epaPerCarry',
+  'ryoePerAtt',
+  'yacoPerCarry',
+  'brokenTackles',
+  'snapShare',
+  'epaPerTarget',
+  'separation',
+  'yacOverExp',
+  'adot',
+  'airYardsShare',
+  'dropPct',
+  'epaPerKick',
+  'fgOverExp',
+  'epaPerPunt',
+  'epaAllowed',
+  'passEpaAllowed',
+  'rushEpaAllowed',
+  'successAllowed',
+  'pressureRate',
+  'missedTacklePct',
+  'netEpa',
+  // Fantasy points close out each Advanced Stats group
+  'fantasy',
+]);
+
+// Support grades go in Support; everything not listed as results or advanced is a basic stat
+export function statGroup(stat: SkillStat): StatGroupId {
+  if (stat.support) return 'support';
+  if (RESULTS_STATS.has(stat.key)) return 'results';
+  if (ADVANCED_STATS.has(stat.key)) return 'advanced';
+  return 'box';
+}
+
+export interface SkillStatGroup {
+  id: StatGroupId;
+  title: string;
+  icon: string;
+  stats: SkillStat[];
+}
+
+// A position's groups, in the standard order, leaving out groups it has no stats for
+export function skillGroups(position: SkillPosition): SkillStatGroup[] {
+  return STAT_GROUP_INFO.map((info) => {
+    const stats = SKILL_STATS[position].filter((stat) => statGroup(stat) === info.id);
+    // Fantasy points always come last in their group
+    const fantasy = stats.filter((stat) => stat.key === 'fantasy');
+    return { ...info, stats: [...stats.filter((stat) => stat.key !== 'fantasy'), ...fantasy] };
+  }).filter((group) => group.stats.length);
 }

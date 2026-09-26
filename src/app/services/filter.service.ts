@@ -1,5 +1,17 @@
 import { Injectable } from '@angular/core';
 import { Filters } from 'app/types';
+import { QbGroupId } from 'app/qb-filter-groups';
+
+const HIDDEN_KEY = 'qbHiddenGroups';
+
+function readHidden(): Record<QbGroupId, boolean> {
+  const fallback = { results: false, box: false, advanced: false, support: false };
+  try {
+    return { ...fallback, ...JSON.parse(localStorage.getItem(HIDDEN_KEY) ?? '{}') };
+  } catch {
+    return fallback;
+  }
+}
 import { Observable, BehaviorSubject } from 'rxjs';
 
 @Injectable({
@@ -40,6 +52,20 @@ export class FilterService {
       responsibilityValue: 50,
     });
   public filters$: Observable<Filters> = this.filtersSubject.asObservable();
+
+  // Groups switched off with the eye: their columns are hidden and they don't count in the ranking
+  private hiddenSubject = new BehaviorSubject<Record<QbGroupId, boolean>>(readHidden());
+  public hiddenGroups$ = this.hiddenSubject.asObservable();
+
+  setGroupHidden(id: QbGroupId, hidden: boolean): void {
+    const next = { ...this.hiddenSubject.value, [id]: hidden };
+    this.hiddenSubject.next(next);
+    try {
+      localStorage.setItem(HIDDEN_KEY, JSON.stringify(next));
+    } catch {
+      // Storage unavailable; the setting still applies for this visit
+    }
+  }
 
   constructor() {}
 

@@ -6,6 +6,16 @@ import { Filters, Player } from 'app/types';
 import { copyRankingsToClipboard } from 'app/utils/clipboard';
 import { PositionService } from 'app/services/position.service';
 import { defenseGrades } from 'app/utils/unit-scoring';
+
+export type ColumnGroupId = 'results' | 'box' | 'advanced' | 'support';
+
+const COLUMN_GROUPS: { id: ColumnGroupId; label: string }[] = [
+  { id: 'results', label: 'Results' },
+  { id: 'box', label: 'Basic Stats' },
+  { id: 'advanced', label: 'Advanced Stats' },
+  { id: 'support', label: 'Support' },
+];
+
 import {
   FANTASY_SCORING_LABELS,
   FantasyScoring,
@@ -61,6 +71,13 @@ export class RankingsComponent {
   showUnused: boolean = false;
   totalStats: boolean = true;
   isToastVisible: boolean = false;
+
+  // Column groups, switched on / off from the header chips or the sidebar eye
+  columnGroups = COLUMN_GROUPS;
+  // Groups switched off with the sidebar eye: no columns, no weight in the ranking
+  hidden: Record<ColumnGroupId, boolean> = { results: false, box: false, advanced: false, support: false };
+  // Each group's contribution to a player's total
+  private groupScores = new Map<number, Record<ColumnGroupId, number>>();
   fantasyScoring: FantasyScoring = 'ppr';
   scoringLabels = FANTASY_SCORING_LABELS;
   teamDefense = new Map<string, number>();
@@ -93,6 +110,11 @@ export class RankingsComponent {
       this.sortPlayers();
     });
 
+    this.filterService.hiddenGroups$.subscribe((hidden) => {
+      this.hidden = hidden;
+      this.sortPlayers();
+    });
+
     this.filterService.filters$.subscribe((res) => {
       this.filters = res;
       this.sortPlayers();
@@ -111,6 +133,11 @@ export class RankingsComponent {
       this.sortPlayersFunc(a, b),
     );
     this.publishRanks();
+  }
+
+  // Header chips switch a group on / off, same as the sidebar eye
+  toggleColumnGroup(id: ColumnGroupId) {
+    this.filterService.setGroupHidden(id, !this.hidden[id]);
   }
 
   // Set each QB's defense grade (whole number, 0-12) from their team's Defenses ranking
@@ -272,22 +299,20 @@ export class RankingsComponent {
       12,
     );
 
-    const pkg =
-      recordWeighted +
-      compPercentWeighted +
-      yardsWeighted +
-      ypaWeighted +
-      ratingWeighted +
-      advancedWeighted +
-      touchdownsWeighted -
-      turnoverWeighted -
-      (weaponsWeighted +
-        coachingWeighted +
-        olineWeighted +
-        defenseWeighted -
-        responsibilityWeighted) *
-        (this.filters.supportValue / 250) + // Dividing By 250 to reduce the severity of slider (5 * 50)
-      recencyWeighted;
+    const supportWeighted =
+      -(weaponsWeighted + coachingWeighted + olineWeighted + defenseWeighted - responsibilityWeighted) *
+      (this.filters.supportValue / 250);
+    this.groupScores.set(player.id, {
+      results: recordWeighted + recencyWeighted,
+      box:
+        compPercentWeighted + yardsWeighted + ypaWeighted + ratingWeighted + touchdownsWeighted - turnoverWeighted,
+      advanced: advancedWeighted,
+      support: supportWeighted,
+    });
+
+    // Groups switched off with the eye don't count
+    const scores = this.groupScores.get(player.id)!;
+    const pkg = COLUMN_GROUPS.reduce((sum, { id }) => sum + (this.hidden[id] ? 0 : scores[id]), 0);
 
     // console.log(player.name);
     // console.log('record: ' + recordWeighted);

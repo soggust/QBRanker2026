@@ -48,10 +48,17 @@ export function copyRankingsToClipboard(list: HTMLElement): Promise<void> {
   return navigator.clipboard.write([clipboardItem]);
 }
 
+// A row's cells, looking through display: contents column-group wrappers
+function rowCells(row: Element): Element[] {
+  return Array.from(row.children).flatMap((child) =>
+    child.classList.contains('col-group') ? Array.from(child.children) : [child],
+  );
+}
+
 // Header cells after the drag handle and player info; grouped boxes contribute one column per grade
 function readColumns(header: HTMLElement): Column[] {
   const columns: Column[] = [];
-  Array.from(header.children).forEach((cell, i) => {
+  rowCells(header).forEach((cell, i) => {
     if (!(cell instanceof HTMLElement) || i < 2) return;
     const inner = cell.classList.contains('box') ? Array.from(cell.children) : [];
     const grouped = inner.filter((child) => child.querySelector('.stat-label'));
@@ -71,8 +78,8 @@ function labelOf(cell: Element): string {
 }
 
 function cellAt(row: HTMLElement, path: number[]): Element | undefined {
-  let el: Element | undefined = row;
-  for (const i of path) el = el?.children[i];
+  let el: Element | undefined = rowCells(row)[path[0]];
+  for (const i of path.slice(1)) el = el?.children[i];
   return el;
 }
 

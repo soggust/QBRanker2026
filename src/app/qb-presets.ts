@@ -17,7 +17,7 @@ export interface QbPreset {
   description: string;
   values: Filters;
   // Slider group to open when the preset is picked
-  expand?: 'advanced' | 'yards' | 'tds' | 'tos' | 'support';
+  expand?: 'advanced' | 'support';
 }
 
 // Every preset starts from 50% everywhere and only changes what defines it
@@ -56,7 +56,8 @@ const ALL_50: Filters = {
 
 const preset = (overrides: Partial<Filters>): Filters => ({ ...ALL_50, ...overrides });
 
-// Top-level groups at 0 (sub-sliders keep their mix)
+// Top-level groups at 0 (sub-sliders keep their mix). Advanced has no group slider, so its
+// weight stays at 50 and its individual stats are zeroed where a preset wants them off.
 const NO_MAIN_STATS: Partial<Filters> = {
   recordValue: 0,
   compValue: 0,
@@ -65,7 +66,6 @@ const NO_MAIN_STATS: Partial<Filters> = {
   touchdownValue: 0,
   turnoverValue: 0,
   ratingValue: 0,
-  advancedValue: 0,
   recencyValue: 0,
   supportValue: 0,
 };
@@ -242,7 +242,7 @@ export const QB_PRESETS: Record<QbPresetKey, QbPreset> = {
     label: 'Least Support',
     description: 'Ranks only by support: who is doing the most with the least around them',
     expand: 'support',
-    values: preset({ ...NO_MAIN_STATS, supportValue: 50 }),
+    values: preset({ ...NO_MAIN_STATS, ...ADVANCED_OFF, supportValue: 50 }),
   },
   fantasy: {
     label: 'Fantasy',

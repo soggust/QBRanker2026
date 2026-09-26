@@ -28,7 +28,7 @@ main {
     // Let the column shrink below the table's width so the table scrolls instead of overflowing
     min-width: 0;
     padding: 1em 2em;
-    width: calc(100% - 26.75em);
+    width: calc(100% - 28.75em);
     z-index: 1;
   }
 
@@ -228,4 +228,15 @@ main {
   border: 1px solid var(--scoreboard-led);
   margin-right: 0.35em;
 
+}
+
+// Big screens: the sidebar open/close button sits on a soft shaded chip
+.position-bar button.collapse-toggle {
+  background: rgba(0, 0, 0, 0.35);
+  border-radius: 8px;
+  padding: 0.35em 0.5em;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.5);
+  }
 }

@@ -53,7 +53,12 @@ export class ColumnHighlightDirective implements OnInit, OnDestroy {
     // or the grouped Recent / support boxes (the row highlight is enough there).
     let cell: HTMLElement | null = null;
     while (el && el !== list) {
-      const parent = el.parentElement;
+      let parent = el.parentElement;
+      // Column-group wrappers use display: contents, so the row's real cells are their children
+      if (parent?.classList.contains('col-group')) {
+        if (parent.parentElement?.tagName !== 'LI') return this.clear();
+        parent = parent.parentElement;
+      }
       if (parent?.tagName === 'LI') {
         const skip =
           parent.classList.contains('header-row') ||

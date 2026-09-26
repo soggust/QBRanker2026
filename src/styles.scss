@@ -67,8 +67,8 @@ body {
 
 // Slider thumbs shaped like a football, with laces
 .mdc-slider__thumb-knob {
-  --mat-slider-handle-width: 26px;
-  --mat-slider-handle-height: 16px;
+  --mat-slider-handle-width: 30px;
+  --mat-slider-handle-height: 19px;
   border-radius: 50% !important;
 
   &::after {
@@ -76,11 +76,11 @@ body {
       linear-gradient(var(--primary-800), var(--primary-800)) center / 100% 1.5px no-repeat,
       repeating-linear-gradient(90deg, var(--primary-800) 0 1.5px, transparent 1.5px 3px) center / 100% 6px no-repeat;
     content: "";
-    height: 6px;
-    left: -5px;
+    height: 7px;
+    left: -6px;
     position: absolute;
-    top: -3px;
-    width: 10.5px;
+    top: -3.5px;
+    width: 12px;
   }
 }
 
@@ -280,4 +280,38 @@ html .mat-mdc-slide-toggle.mat-accent {
 
 .mat-mdc-slider.mdc-slider--disabled .mdc-slider__input {
   cursor: auto !important;
+}
+
+// Column-group colors, shared by the filter cards, the grid chips and the column markers
+.group-results {
+  --group-color: #66d17a;
+  --group-icon: "emoji_events";
+}
+
+.group-box {
+  --group-color: #4fc3f7;
+  --group-icon: "bar_chart";
+}
+
+.group-advanced {
+  --group-color: #b388ff;
+  --group-icon: "insights";
+}
+
+.group-support {
+  --group-color: #ff8a65;
+  --group-icon: "groups";
+}
+
+// Breakdown sliders (Pass / Rush Yards, etc.) keep the smaller football
+.sub-rows .mdc-slider__thumb-knob {
+  --mat-slider-handle-width: 26px;
+  --mat-slider-handle-height: 16px;
+
+  &::after {
+    height: 6px;
+    left: -5px;
+    top: -3px;
+    width: 10.5px;
+  }
 }

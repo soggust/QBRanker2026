@@ -10,7 +10,11 @@ import {
   SkillStat,
   SkillWeights,
   fantasyPoints,
+  SkillStatGroup,
+  StatGroupId,
   hasFantasy,
+  skillGroups,
+  statGroup,
 } from 'app/positions';
 import { PositionService } from 'app/services/position.service';
 import { copyRankingsToClipboard } from 'app/utils/clipboard';
@@ -52,6 +56,9 @@ export class SkillRankingsComponent implements OnChanges {
   scoringLabels = FANTASY_SCORING_LABELS;
   teamQbPlay = new Map<string, number>();
   hasFantasy: boolean = true;
+  // This position's stat groups, and which are switched off (eye / header chip)
+  groups: SkillStatGroup[] = [];
+  hidden: Partial<Record<StatGroupId, boolean>> = {};
 
   constructor(private positionService: PositionService) {
     this.positionService.weights$.subscribe((weights) => {
@@ -70,6 +77,12 @@ export class SkillRankingsComponent implements OnChanges {
       if (this.position) this.sortPlayers();
     });
 
+    this.positionService.skillHidden$.subscribe((hidden) => {
+      if (!this.position) return;
+      this.hidden = hidden[this.position] ?? {};
+      this.sortPlayers();
+    });
+
     this.positionService.fantasyScoring$.subscribe((scoring) => {
       this.fantasyScoring = scoring;
       if (this.position) this.sortPlayers();
@@ -82,6 +95,8 @@ export class SkillRankingsComponent implements OnChanges {
 
   ngOnChanges(): void {
     this.stats = SKILL_STATS[this.position];
+    this.groups = skillGroups(this.position);
+    this.hidden = this.positionService.skillHiddenGroups(this.position);
     this.hasFantasy = hasFantasy(this.position);
     this.playerList = [...SKILL_UNITS[this.position]];
     this.weights = this.positionService.getWeights(this.position);
@@ -90,7 +105,9 @@ export class SkillRankingsComponent implements OnChanges {
 
   // Sort Players By Weighted Total
   sortPlayers() {
-    const totals = weightedTotals(this.playerList, this.stats, this.weights, (player, stat) =>
+    // Switched-off groups don't count
+    const counted = this.stats.filter((stat) => !this.hidden[statGroup(stat)]);
+    const totals = weightedTotals(this.playerList, counted, this.weights, (player, stat) =>
       this.value(player, stat),
     );
     this.playerList = [...this.playerList].sort(
@@ -124,13 +141,17 @@ export class SkillRankingsComponent implements OnChanges {
     }
   }
 
-  // Regular stat columns, and the support grades that are grouped into a box
-  get mainStats(): SkillStat[] {
-    return this.stats.filter((stat) => !stat.support);
+  // Groups shown in the grid, each with the stats that have a column
+  get visibleGroups(): SkillStatGroup[] {
+    return this.groups
+      .filter((group) => !this.hidden[group.id])
+      .map((group) => ({ ...group, stats: group.stats.filter((stat) => this.isShown(stat)) }))
+      .filter((group) => group.stats.length);
   }
 
-  get shownSupportStats(): SkillStat[] {
-    return this.stats.filter((stat) => stat.support && this.isShown(stat));
+  // Header chips switch a group on / off, same as the sidebar eye
+  toggleGroup(id: StatGroupId) {
+    this.positionService.setSkillGroupHidden(this.position, id, !this.hidden[id]);
   }
 
   isShown(stat: SkillStat): boolean {

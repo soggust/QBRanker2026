@@ -6,8 +6,21 @@ import {
   Position,
   SkillPosition,
   SkillWeights,
+  StatGroupId,
   presetWeights,
 } from 'app/positions';
+
+// Groups switched off with the eye / header chips, per position (remembered per browser)
+export type HiddenGroups = Partial<Record<SkillPosition, Partial<Record<StatGroupId, boolean>>>>;
+const SKILL_HIDDEN_KEY = 'skillHiddenGroups';
+
+function readSkillHidden(): HiddenGroups {
+  try {
+    return JSON.parse(localStorage.getItem(SKILL_HIDDEN_KEY) ?? '{}');
+  } catch {
+    return {};
+  }
+}
 
 // Open the tab from a shared link, e.g. ?pos=WR
 function linkedPosition(): Position {
@@ -56,6 +69,24 @@ export class PositionService {
 
   saveWeights(position: SkillPosition, weights: SkillWeights): void {
     this.weightsSubject.next({ ...this.weightsSubject.value, [position]: { ...weights } });
+  }
+
+  private skillHiddenSubject = new BehaviorSubject<HiddenGroups>(readSkillHidden());
+  public skillHidden$ = this.skillHiddenSubject.asObservable();
+
+  skillHiddenGroups(position: SkillPosition): Partial<Record<StatGroupId, boolean>> {
+    return this.skillHiddenSubject.value[position] ?? {};
+  }
+
+  setSkillGroupHidden(position: SkillPosition, id: StatGroupId, hidden: boolean): void {
+    const current = this.skillHiddenSubject.value;
+    const next = { ...current, [position]: { ...current[position], [id]: hidden } };
+    this.skillHiddenSubject.next(next);
+    try {
+      localStorage.setItem(SKILL_HIDDEN_KEY, JSON.stringify(next));
+    } catch {
+      // Storage unavailable; the setting still applies for this visit
+    }
   }
 
   setQbRanks(ids: number[]): void {
