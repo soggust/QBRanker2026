@@ -1,4 +1,4 @@
-<main [class.menu-open]="menuOpen">
+<main [class.menu-open]="menuOpen" [class.sidebar-collapsed]="sidebarCollapsed">
   <!-- Sidebar -->
   <sidebar class="sidebar"></sidebar>
   <div class="shade" (click)="menuOpen = false"></div>
@@ -7,8 +7,16 @@
   <div class="content">
     <!-- Position Bar -->
     <nav class="position-bar" aria-label="Position">
-      <span class="eyebrow">Rankings</span>
-      <span class="divider" aria-hidden="true">/</span>
+      <!-- Collapse / expand the filters sidebar (large screens) -->
+      <button
+        type="button"
+        class="collapse-toggle"
+        (click)="toggleSidebar()"
+        [attr.aria-label]="sidebarCollapsed ? 'Show filters' : 'Hide filters'"
+        [title]="sidebarCollapsed ? 'Show filters' : 'Hide filters'"
+      >
+        <mat-icon [fontIcon]="sidebarCollapsed ? 'filter_alt' : 'menu_open'"></mat-icon>
+      </button>
       @for (tab of positions; track tab) {
         <button
           type="button"

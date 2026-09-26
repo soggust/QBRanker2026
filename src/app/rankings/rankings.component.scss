@@ -1,6 +1,6 @@
 @use "../../variables.scss" as v;
 
-// Fewer columns (RB/WR/TE): spread the stats across the row instead of widening the name
+// Name column stays a fixed width and the stat columns share the rest of the row
 section.spread ul li.player {
   > div {
     flex: 1 0 6em;
@@ -21,7 +21,8 @@ section {
     border-radius: 0.5em;
     border: solid 1px var(--accent-200);
     box-shadow: 0 0 2em rgba(0, 0, 0, 0.35);
-    height: calc(100dvh - 7em - var(--position-bar-space, 0px));
+    height: calc(100dvh - 5em - var(--position-bar-space, 0px));
+    margin: 0;
     overflow: auto;
     padding-left: 0;
     white-space: nowrap;
@@ -261,6 +262,7 @@ section {
     align-items: center;
     color: var(--primary-900);
     display: flex;
+    padding-top: 0.75em;
     font-weight: bold;
     justify-content: space-between;
 
@@ -605,7 +607,8 @@ section {
     justify-content: center;
 
     ul {
-      height: calc(100dvh - 6em - var(--position-bar-space, 0px));
+      // Leave room for the footer buttons below the table
+      height: calc(100dvh - 6.5em - var(--position-bar-space, 0px));
       width: 100%;
     }
 

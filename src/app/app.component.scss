@@ -31,6 +31,17 @@ main {
     width: calc(100% - 26.75em);
     z-index: 1;
   }
+
+  // Large screens: sidebar hidden via the toggle in the position bar
+  &.sidebar-collapsed {
+    .sidebar {
+      display: none;
+    }
+
+    .content {
+      width: 100%;
+    }
+  }
 }
 
 // Eyebrow-style position switch above the rankings
@@ -41,18 +52,17 @@ main {
   height: 34px;
   margin-bottom: 12px;
 
-  .eyebrow,
-  .divider {
-    color: var(--primary-900);
-    font-size: 0.85em;
-    font-weight: 800;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-  }
+  .collapse-toggle {
+    align-items: center;
+    display: flex;
+    margin-right: 0.5em;
+    padding: 0.3em 0.6em;
 
-  .divider {
-    margin: 0 0.5em;
-    opacity: 0.5;
+    .mat-icon {
+      font-size: 1.6em;
+      height: 1em;
+      width: 1em;
+    }
   }
 
   button {
@@ -100,7 +110,13 @@ main {
     justify-content: center;
 
     .content {
+      --position-bar-space: 48px;
       padding: 0.75em 0 0;
+      width: 90%;
+    }
+
+    // The sidebar is a slide-out menu here, so the collapse setting doesn't apply
+    &.sidebar-collapsed .content {
       width: 90%;
     }
 
@@ -126,7 +142,7 @@ main {
   .menu-toggle {
     background: transparent;
     border: none;
-    bottom: 0.75em;
+    bottom: 2.5em;
     color: var(--primary-900);
     cursor: pointer;
     display: block;
@@ -139,15 +155,18 @@ main {
     }
   }
 
-  // Drop the eyebrow label and use QB/RB/WR/TE so the bar fits
+  // Bigger tap targets, QB/RB/WR/TE labels, and a tighter gap above the table
   .position-bar {
-    .eyebrow,
-    .divider {
+    height: 44px;
+    margin-bottom: 4px;
+
+    .collapse-toggle {
       display: none;
     }
 
     button {
       flex: 1;
+      height: 100%;
 
       .full {
         display: none;
