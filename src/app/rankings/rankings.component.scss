@@ -232,7 +232,7 @@ section {
               color: rgb(80, 207, 80);
             }
             .red {
-              color: hsl(0 80% 30% / 1);
+              color: hsl(350 90% 72% / 1);
             }
           }
         }
@@ -242,10 +242,11 @@ section {
 
   footer {
     align-items: center;
-    color: var(--primary-900);
+    color: var(--primary-50);
     display: flex;
     font-weight: bold;
     justify-content: space-between;
+    text-shadow: var(--text-shadow-small);
 
     .ghost-div {
       display: none;
@@ -507,7 +508,7 @@ section {
         }
 
         .red {
-          color: hsl(0 80% 30% / 1);
+          color: hsl(350 90% 72% / 1);
         }
       }
     }
