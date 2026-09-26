@@ -38,7 +38,7 @@ export class RankingsComponent {
     epaValue: 50,
     cpoeValue: 50,
     successValue: 50,
-    fantasyValue: 0,
+    fantasyValue: 50,
     recencyValue: 50,
     supportValue: 50,
     weaponsValue: 50,

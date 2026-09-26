@@ -115,10 +115,12 @@
       color: var(--accent-50);
       display: flex;
       font-family: v.$font-heading;
-      font-size: 1.7em;
+      font-size: 1.5em;
       font-weight: 900;
+      line-height: 1;
       margin: 0 0 0 0.5em;
       text-shadow: var(--text-shadow-small);
+      text-transform: uppercase;
       white-space: nowrap;
     }
   }

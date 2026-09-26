@@ -43,7 +43,7 @@ export class SidebarComponent {
   epaValue: number = 50;
   cpoeValue: number = 50;
   successValue: number = 50;
-  fantasyValue: number = 0;
+  fantasyValue: number = 50;
   recencyValue: number = 50;
   yardsExpanded: boolean = false;
   tdsExpanded: boolean = false;
@@ -220,7 +220,7 @@ export class SidebarComponent {
     this.epaValue = 50;
     this.cpoeValue = 50;
     this.successValue = 50;
-    this.fantasyValue = 0;
+    this.fantasyValue = 50;
     this.recencyValue = 0;
     this.yardsExpanded = false;
     this.tdsExpanded = false;
@@ -334,7 +334,7 @@ export class SidebarComponent {
     this.epaValue = 50;
     this.cpoeValue = 50;
     this.successValue = 50;
-    this.fantasyValue = 0;
+    this.fantasyValue = 50;
     this.recencyValue = 50;
     this.yardsExpanded = false;
     this.tdsExpanded = false;

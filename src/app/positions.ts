@@ -159,12 +159,11 @@ export const SKILL_STATS: Record<SkillPosition, SkillStat[]> = {
 };
 
 // Default: everything at 50. Volume/Efficiency lean one way; penalties and support stay at 50.
-// Fantasy points already combine yards and TDs, so they're off unless the Fantasy preset is picked.
+// Fantasy ranks purely on fantasy points.
 export function presetWeights(position: SkillPosition, preset: SkillPreset): SkillWeights {
   const weights: SkillWeights = {};
   for (const stat of SKILL_STATS[position]) {
     if (preset === 'fantasy') weights[stat.key] = stat.key === 'fantasy' ? 100 : 0;
-    else if (stat.key === 'fantasy') weights[stat.key] = 0;
     else if (preset === 'default' || stat.negative || stat.support) weights[stat.key] = 50;
     else weights[stat.key] = stat.kind === preset ? 75 : 25;
   }
