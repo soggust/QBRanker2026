@@ -368,7 +368,7 @@ export class RankingsComponent {
 
   // Copy Player Names
   copyPlayerListToClipboard() {
-    const baseURL = 'https://qbranker.firebaseapp.com'; // Base URL
+    const baseURL = 'https://qbranker2026.web.app'; // Base URL
 
     const playerNamesWithNumbersPlain = this.playerList
       .map((player, index) => {
