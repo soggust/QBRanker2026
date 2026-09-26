@@ -185,7 +185,7 @@ export const SKILL_STATS: Record<SkillPosition, SkillStat[]> = {
     {
       key: 'oline',
       label: 'O-Line',
-      description: "Team O-line grade (from the QB support scores), weighted by each QB's starts",
+      description: "Team O-line grade from team-grades.json",
       kind: 'efficiency',
       format: 'grade',
       support: true,

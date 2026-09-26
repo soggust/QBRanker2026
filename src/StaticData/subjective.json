@@ -2,273 +2,171 @@
   "8439": {
     "name": "Aaron Rodgers",
     "injured": false,
-    "weapons": 6,
-    "coaching": 8,
-    "oline": 6,
-    "responsibility": 10
+    "responsibility": 5
   },
   "12483": {
     "name": "Matthew Stafford",
     "injured": false,
-    "weapons": 11,
-    "coaching": 11,
-    "oline": 7,
-    "responsibility": 10
+    "responsibility": 7
   },
   "14880": {
     "name": "Kirk Cousins",
     "injured": false,
-    "weapons": 6,
-    "coaching": 5,
-    "oline": 4,
-    "responsibility": 8
+    "responsibility": 2
   },
   "15864": {
     "name": "Geno Smith",
     "injured": false,
-    "weapons": 7,
-    "coaching": 5,
-    "oline": 5,
-    "responsibility": 7
+    "responsibility": 4
   },
   "2573079": {
     "name": "Carson Wentz",
     "injured": false,
-    "weapons": 11,
-    "coaching": 10,
-    "oline": 9,
-    "responsibility": 6
+    "responsibility": 2
   },
   "2577417": {
     "name": "Dak Prescott",
     "injured": false,
-    "weapons": 10,
-    "coaching": 7,
-    "oline": 10,
-    "responsibility": 9
+    "responsibility": 8
   },
   "2578570": {
     "name": "Jacoby Brissett",
     "injured": false,
-    "weapons": 9,
-    "coaching": 6,
-    "oline": 6,
-    "responsibility": 9
+    "responsibility": 3
   },
   "2969939": {
     "name": "Jameis Winston",
     "injured": false,
-    "weapons": 5,
-    "coaching": 6,
-    "oline": 5,
-    "responsibility": 6
+    "responsibility": 0
   },
   "2972515": {
     "name": "Cooper Rush",
     "injured": false,
-    "weapons": 10,
-    "coaching": 6,
-    "oline": 6,
-    "responsibility": 6
+    "responsibility": 0
   },
   "3046779": {
     "name": "Jared Goff",
     "injured": false,
-    "weapons": 10,
-    "coaching": 10,
-    "oline": 11,
-    "responsibility": 8
+    "responsibility": 1
   },
   "3052587": {
     "name": "Baker Mayfield",
     "injured": false,
-    "weapons": 9,
-    "coaching": 8,
-    "oline": 7,
-    "responsibility": 10
+    "responsibility": 7
   },
   "3122840": {
     "name": "Deshaun Watson",
     "injured": false,
-    "weapons": 5,
-    "coaching": 8,
-    "oline": 7,
-    "responsibility": 6
+    "responsibility": 3
   },
   "3139477": {
     "name": "Patrick Mahomes II",
     "injured": false,
-    "weapons": 8,
-    "coaching": 12,
-    "oline": 10,
     "responsibility": 11
   },
   "3915511": {
     "name": "Joe Burrow",
     "injured": false,
-    "weapons": 11,
-    "coaching": 6,
-    "oline": 4,
-    "responsibility": 10
+    "responsibility": 11
   },
   "3916387": {
     "name": "Lamar Jackson",
     "injured": false,
-    "weapons": 8,
-    "coaching": 11,
-    "oline": 8,
     "responsibility": 12
   },
   "3917792": {
     "name": "Daniel Jones",
     "injured": false,
-    "weapons": 9,
-    "coaching": 9,
-    "oline": 12,
-    "responsibility": 6
+    "responsibility": 4
   },
   "3918298": {
     "name": "Josh Allen",
     "injured": false,
-    "weapons": 6,
-    "coaching": 7,
-    "oline": 9,
     "responsibility": 12
   },
   "3924327": {
     "name": "Drew Lock",
     "injured": false,
-    "weapons": 9,
-    "coaching": 9,
-    "oline": 8,
-    "responsibility": 6
+    "responsibility": 1
   },
   "4036378": {
     "name": "Jordan Love",
     "injured": false,
-    "weapons": 8,
-    "coaching": 10,
-    "oline": 9,
-    "responsibility": 8
+    "responsibility": 7
   },
   "4038941": {
     "name": "Justin Herbert",
     "injured": false,
-    "weapons": 7,
-    "coaching": 10,
-    "oline": 8,
-    "responsibility": 9
+    "responsibility": 11
   },
   "4040715": {
     "name": "Jalen Hurts",
     "injured": false,
-    "weapons": 11,
-    "coaching": 10,
-    "oline": 11,
-    "responsibility": 8
+    "responsibility": 10
   },
   "4242512": {
     "name": "Malik Willis",
     "injured": false,
-    "weapons": 12,
-    "coaching": 9,
-    "oline": 8,
-    "responsibility": 6
+    "responsibility": 3
   },
   "4360310": {
     "name": "Trevor Lawrence",
     "injured": false,
-    "weapons": 6,
-    "coaching": 6,
-    "oline": 4,
-    "responsibility": 9
+    "responsibility": 8
   },
   "4360423": {
     "name": "Michael Penix Jr",
     "injured": false,
-    "weapons": 10,
-    "coaching": 6,
-    "oline": 6,
-    "responsibility": 8
+    "responsibility": 4
   },
   "4360689": {
     "name": "Tyler Shough",
     "injured": false,
-    "weapons": 7,
-    "coaching": 5,
-    "oline": 6,
-    "responsibility": 8
+    "responsibility": 5
   },
   "4361741": {
     "name": "Brock Purdy",
     "injured": false,
-    "weapons": 12,
-    "coaching": 12,
-    "oline": 10,
-    "responsibility": 3
+    "responsibility": 1
   },
   "4426338": {
     "name": "Bo Nix",
     "injured": false,
-    "weapons": 7,
-    "coaching": 10,
-    "oline": 8,
-    "responsibility": 6
+    "responsibility": 8
   },
   "4426348": {
     "name": "Jayden Daniels",
     "injured": false,
-    "weapons": 8,
-    "coaching": 5,
-    "oline": 8,
-    "responsibility": 9
+    "responsibility": 10
   },
   "4431452": {
     "name": "Drake Maye",
     "injured": false,
-    "weapons": 4,
-    "coaching": 9,
-    "oline": 6,
-    "responsibility": 8
+    "responsibility": 9
   },
   "4431611": {
     "name": "Caleb Williams",
     "injured": false,
-    "weapons": 8,
-    "coaching": 10,
-    "oline": 6,
     "responsibility": 9
   },
   "4432577": {
     "name": "C.J. Stroud",
     "injured": false,
-    "weapons": 10,
-    "coaching": 9,
-    "oline": 9,
     "responsibility": 9
   },
   "4685720": {
     "name": "Bryce Young",
     "injured": false,
-    "weapons": 5,
-    "coaching": 6,
-    "oline": 4,
-    "responsibility": 7
+    "responsibility": 6
   },
   "4688380": {
     "name": "Cam Ward",
     "injured": false,
-    "weapons": 3,
-    "coaching": 5,
-    "oline": 3,
-    "responsibility": 4
+    "responsibility": 6
   },
   "4689114": {
     "name": "Jaxson Dart",
     "injured": false,
-    "weapons": 5,
-    "coaching": 6,
-    "oline": 5,
-    "responsibility": 7
+    "responsibility": 5
   }
 }

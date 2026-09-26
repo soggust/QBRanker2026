@@ -1,6 +1,6 @@
 import { Component, Input, OnChanges } from '@angular/core';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
-import { StaticData } from 'StaticData/StaticData';
+import { StaticData, gradesForTeam } from 'StaticData/StaticData';
 import {
   FANTASY_SCORING_LABELS,
   FantasyScoring,
@@ -30,8 +30,6 @@ function teamGrades(valueFor: (qbId: number) => number | undefined): Map<string,
   return new Map([...totals].map(([team, { sum, starts }]) => [team, sum / starts]));
 }
 
-// O-line doesn't depend on the QB rankings, so it's computed once
-const TEAM_OLINE = teamGrades((id) => StaticData.find((qb) => qb.id === id)?.oline);
 
 @Component({
   selector: 'skill-rankings',
@@ -113,9 +111,9 @@ export class SkillRankingsComponent implements OnChanges {
     switch (stat.key) {
       case 'fantasy':
         return fantasyPoints(player.stats.fantasyStd, player.stats.receptions, this.fantasyScoring);
-      // Teams without a graded QB yet count as average
       case 'oline':
-        return TEAM_OLINE.get(player.teamLogo) ?? 6;
+        return gradesForTeam(player.teamLogo).oline;
+      // Teams without a graded QB yet count as average
       case 'qbPlay':
         return this.teamQbPlay.get(player.teamLogo) ?? 6;
       default:

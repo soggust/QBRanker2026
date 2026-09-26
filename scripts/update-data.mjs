@@ -312,6 +312,25 @@ function defenseUnits({ pbp, games }) {
   });
 }
 
+// Current head coach per team (nflverse abbreviation -> name) from ESPN
+async function espnHeadCoaches() {
+  const abbrByName = new Map(Object.entries(TEAM_NAMES).map(([abbr, name]) => [name, abbr]));
+  const teams = (await getJson(`${SITE}/teams`)).sports[0].leagues[0].teams.map((t) => t.team);
+  const coaches = new Map();
+  await mapBatched(teams, 8, async (team) => {
+    const abbr = abbrByName.get(team.displayName);
+    if (!abbr) throw new Error(`Unknown ESPN team "${team.displayName}"`);
+    const list = await getJson(
+      `https://sports.core.api.espn.com/v2/sports/football/leagues/nfl/seasons/${SEASON}/teams/${team.id}/coaches`
+    );
+    const ref = list.items?.[0]?.$ref;
+    if (!ref) return;
+    const coach = await getJson(ref.replace('http:', 'https:'));
+    coaches.set(abbr, `${coach.firstName} ${coach.lastName}`);
+  });
+  return coaches;
+}
+
 // Moneyline -> implied win probability, with the bookmaker margin removed
 function winProbability(game, home) {
   const implied = (ml) => (ml < 0 ? -ml / (-ml + 100) : 100 / (ml + 100));
@@ -330,18 +349,18 @@ function winProbability(game, home) {
 
 // Head coaches: record, wins over what the betting lines expected, record against the spread,
 // how often they go for it on 4th-and-2 or shorter, and their team's net EPA/play
-function coachUnits({ pbp, games }) {
-  const coaches = new Map();
-  for (const team of Object.keys(TEAM_ICONS)) {
-    for (const g of teamGames(games, team)) {
-      const entry = coaches.get(g.coach) ?? { name: g.coach, team, games: [] };
-      entry.team = team;
-      entry.games.push({ ...g, team });
-      coaches.set(g.coach, entry);
-    }
-  }
+// One row per team, named for the team's current head coach from ESPN (nflverse's coach
+// columns can lag offseason hires); a mid-season change credits the season to the current coach
+function coachUnits({ pbp, games, headCoaches }) {
+  const coaches = Object.keys(TEAM_ICONS)
+    .map((team) => {
+      const played = teamGames(games, team);
+      const name = headCoaches.get(team) ?? played.at(-1)?.coach;
+      return { name, team, games: played };
+    })
+    .filter((coach) => coach.name && coach.games.length);
 
-  return [...coaches.values()].map(({ name, team, games: played }) => {
+  return coaches.map(({ name, team, games: played }) => {
     const gameIds = new Set(played.map((g) => g.game.game_id));
     const plays = pbp.filter((play) => gameIds.has(play.game_id));
     const offense = plays.filter((play) => play.posteam === team && EPA_PLAY(play));
@@ -533,6 +552,10 @@ async function main() {
   let skill = null;
   try {
     const nflverse = await loadNflverse();
+    nflverse.headCoaches = await espnHeadCoaches().catch((err) => {
+      console.warn(`Could not load head coaches from ESPN, using nflverse names: ${err.message}`);
+      return new Map();
+    });
     advanced = advancedStats(gameData.map((qb) => qb.id), nflverse);
     skill = skillPlayers(nflverse);
   } catch (err) {
@@ -553,22 +576,13 @@ async function main() {
   await writeFile(GAMES_FILE, JSON.stringify(gameData, null, 2) + '\n');
   console.log(`Wrote ${gameData.length} QBs to games.json`);
 
-  // Add any new QBs to subjective.json, borrowing team-context scores from a teammate
+  // Add any new QBs to subjective.json. Weapons/O-line/coaching come from team-grades.json and
+  // defense from the Defenses rankings, so only the per-QB scores are needed.
   const subjective = JSON.parse(await readFile(SUBJECTIVE_FILE, 'utf8'));
   const added = [];
   for (const qb of gameData) {
     if (subjective[qb.id]) continue;
-    const teammate = gameData.find((other) => other.team === qb.team && subjective[other.id]);
-    const context = teammate ? subjective[teammate.id] : {};
-    subjective[qb.id] = {
-      name: qb.name,
-      injured: false,
-      weapons: context.weapons ?? DEFAULT_SCORE,
-      coaching: context.coaching ?? DEFAULT_SCORE,
-      oline: context.oline ?? DEFAULT_SCORE,
-      // No defense score: it comes from the Defenses rankings unless you add a "defense" override
-      responsibility: DEFAULT_SCORE,
-    };
+    subjective[qb.id] = { name: qb.name, injured: false, responsibility: DEFAULT_SCORE };
     added.push(`${qb.name} (${qb.team})`);
   }
   if (added.length) {

@@ -1,0 +1,162 @@
+{
+  "49ers": {
+    "weapons": 11,
+    "oline": 9,
+    "coaching": 11
+  },
+  "Bears": {
+    "weapons": 7,
+    "oline": 10,
+    "coaching": 10
+  },
+  "Bengals": {
+    "weapons": 12,
+    "oline": 5,
+    "coaching": 5
+  },
+  "Bills": {
+    "weapons": 8,
+    "oline": 8,
+    "coaching": 2
+  },
+  "Broncos": {
+    "weapons": 9,
+    "oline": 11,
+    "coaching": 10
+  },
+  "Browns": {
+    "weapons": 0,
+    "oline": 0,
+    "coaching": 1
+  },
+  "Bucs": {
+    "weapons": 6,
+    "oline": 11,
+    "coaching": 3
+  },
+  "Cardinals": {
+    "weapons": 4,
+    "oline": 4,
+    "coaching": 0
+  },
+  "Chargers": {
+    "weapons": 7,
+    "oline": 10,
+    "coaching": 8
+  },
+  "Chiefs": {
+    "weapons": 8,
+    "oline": 10,
+    "coaching": 12
+  },
+  "Colts": {
+    "weapons": 6,
+    "oline": 8,
+    "coaching": 4
+  },
+  "Commanders": {
+    "weapons": 3,
+    "oline": 7,
+    "coaching": 5
+  },
+  "Cowboys": {
+    "weapons": 12,
+    "oline": 6,
+    "coaching": 4
+  },
+  "Dolphins": {
+    "weapons": 2,
+    "oline": 2,
+    "coaching": 1
+  },
+  "Eagles": {
+    "weapons": 10,
+    "oline": 12,
+    "coaching": 8
+  },
+  "Falcons": {
+    "weapons": 9,
+    "oline": 7,
+    "coaching": 7
+  },
+  "Giants": {
+    "weapons": 5,
+    "oline": 2,
+    "coaching": 9
+  },
+  "Jaguars": {
+    "weapons": 5,
+    "oline": 3,
+    "coaching": 6
+  },
+  "Jets": {
+    "weapons": 2,
+    "oline": 5,
+    "coaching": 2
+  },
+  "Lions": {
+    "weapons": 11,
+    "oline": 12,
+    "coaching": 11
+  },
+  "Packers": {
+    "weapons": 3,
+    "oline": 5,
+    "coaching": 7
+  },
+  "Panthers": {
+    "weapons": 1,
+    "oline": 1,
+    "coaching": 3
+  },
+  "Patriots": {
+    "weapons": 1,
+    "oline": 4,
+    "coaching": 9
+  },
+  "Raiders": {
+    "weapons": 4,
+    "oline": 9,
+    "coaching": 0
+  },
+  "Rams": {
+    "weapons": 10,
+    "oline": 3,
+    "coaching": 12
+  },
+  "Ravens": {
+    "weapons": 5,
+    "oline": 7,
+    "coaching": 2
+  },
+  "Saints": {
+    "weapons": 2,
+    "oline": 6,
+    "coaching": 6
+  },
+  "Seahawks": {
+    "weapons": 9,
+    "oline": 1,
+    "coaching": 9
+  },
+  "Steelers": {
+    "weapons": 7,
+    "oline": 3,
+    "coaching": 5
+  },
+  "Texans": {
+    "weapons": 3,
+    "oline": 2,
+    "coaching": 7
+  },
+  "Titans": {
+    "weapons": 0,
+    "oline": 0,
+    "coaching": 3
+  },
+  "Vikings": {
+    "weapons": 10,
+    "oline": 9,
+    "coaching": 10
+  }
+}

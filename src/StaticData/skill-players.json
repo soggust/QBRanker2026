@@ -767,6 +767,23 @@
     },
     {
       "id": null,
+      "gsisId": "HC-Joe Brady",
+      "name": "Joe Brady",
+      "teamLogo": "../assets/NFL_Icons/Bills.png",
+      "games": 2,
+      "stats": {
+        "wins": 2,
+        "losses": 0,
+        "ties": 0,
+        "winPct": 1,
+        "winsOverExpected": 0.82,
+        "atsPct": 1,
+        "fourthGoRate": 1,
+        "netEpa": 0.202
+      }
+    },
+    {
+      "id": null,
       "gsisId": "HC-John Harbaugh",
       "name": "John Harbaugh",
       "teamLogo": "../assets/NFL_Icons/Giants.png",
@@ -780,23 +797,6 @@
         "atsPct": 0.5,
         "fourthGoRate": 1,
         "netEpa": -0.243
-      }
-    },
-    {
-      "id": null,
-      "gsisId": "HC-Jonathan Gannon",
-      "name": "Jonathan Gannon",
-      "teamLogo": "../assets/NFL_Icons/Cardinals.png",
-      "games": 2,
-      "stats": {
-        "wins": 1,
-        "losses": 1,
-        "ties": 0,
-        "winPct": 0.5,
-        "winsOverExpected": 0.44,
-        "atsPct": 0.5,
-        "fourthGoRate": 0.167,
-        "netEpa": -0.041
       }
     },
     {
@@ -835,8 +835,25 @@
     },
     {
       "id": null,
-      "gsisId": "HC-Klint Kubliak",
-      "name": "Klint Kubliak",
+      "gsisId": "HC-Kevin Stefanski",
+      "name": "Kevin Stefanski",
+      "teamLogo": "../assets/NFL_Icons/Falcons.png",
+      "games": 3,
+      "stats": {
+        "wins": 1,
+        "losses": 2,
+        "ties": 0,
+        "winPct": 0.333,
+        "winsOverExpected": -0.03,
+        "atsPct": 0.333,
+        "fourthGoRate": 0.333,
+        "netEpa": -0.1
+      }
+    },
+    {
+      "id": null,
+      "gsisId": "HC-Klint Kubiak",
+      "name": "Klint Kubiak",
       "teamLogo": "../assets/NFL_Icons/Raiders.png",
       "games": 2,
       "stats": {
@@ -899,6 +916,23 @@
         "atsPct": 0,
         "fourthGoRate": 0.75,
         "netEpa": -0.201
+      }
+    },
+    {
+      "id": null,
+      "gsisId": "HC-Mike LaFleur",
+      "name": "Mike LaFleur",
+      "teamLogo": "../assets/NFL_Icons/Cardinals.png",
+      "games": 2,
+      "stats": {
+        "wins": 1,
+        "losses": 1,
+        "ties": 0,
+        "winPct": 0.5,
+        "winsOverExpected": 0.44,
+        "atsPct": 0.5,
+        "fourthGoRate": 0.167,
+        "netEpa": -0.041
       }
     },
     {
@@ -971,23 +1005,6 @@
     },
     {
       "id": null,
-      "gsisId": "HC-Raheem Morris",
-      "name": "Raheem Morris",
-      "teamLogo": "../assets/NFL_Icons/Falcons.png",
-      "games": 3,
-      "stats": {
-        "wins": 1,
-        "losses": 2,
-        "ties": 0,
-        "winPct": 0.333,
-        "winsOverExpected": -0.03,
-        "atsPct": 0.333,
-        "fourthGoRate": 0.333,
-        "netEpa": -0.1
-      }
-    },
-    {
-      "id": null,
       "gsisId": "HC-Robert Saleh",
       "name": "Robert Saleh",
       "teamLogo": "../assets/NFL_Icons/Titans.png",
@@ -1001,23 +1018,6 @@
         "atsPct": 0.5,
         "fourthGoRate": 1,
         "netEpa": -0.126
-      }
-    },
-    {
-      "id": null,
-      "gsisId": "HC-Sean McDermott",
-      "name": "Sean McDermott",
-      "teamLogo": "../assets/NFL_Icons/Bills.png",
-      "games": 2,
-      "stats": {
-        "wins": 2,
-        "losses": 0,
-        "ties": 0,
-        "winPct": 1,
-        "winsOverExpected": 0.82,
-        "atsPct": 1,
-        "fourthGoRate": 1,
-        "netEpa": 0.202
       }
     },
     {

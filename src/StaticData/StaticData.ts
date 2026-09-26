@@ -1,9 +1,11 @@
 import { StaticPlayerData } from 'app/types';
 import gamesJson from './games.json';
 import subjective from './subjective.json';
+import teamGradesJson from './team-grades.json';
 
 // games.json is generated from ESPN box scores by `npm run update-data` — don't edit it by hand.
-// subjective.json holds the hand-set scores, keyed by ESPN player id.
+// team-grades.json holds hand-set team grades (0 = F ... 12 = A+), keyed by team logo name.
+// subjective.json holds hand-set per-QB scores, keyed by ESPN player id.
 interface GameData {
   id: number;
   name: string;
@@ -22,14 +24,30 @@ interface GameData {
   } | null;
 }
 
-// defense is optional: normally it comes from the Defenses rankings, and a value here overrides it
-type SubjectiveScores = Pick<
-  StaticPlayerData,
-  'injured' | 'weapons' | 'coaching' | 'oline' | 'responsibility'
-> & { name?: string; defense?: number };
+export interface TeamGrades {
+  weapons: number;
+  oline: number;
+  coaching: number;
+}
+
+// Per-QB scores. Team grades and defense can be overridden here for a single QB;
+// defense otherwise comes from the Defenses rankings.
+type SubjectiveScores = Pick<StaticPlayerData, 'injured' | 'responsibility'> &
+  Partial<TeamGrades> & { name?: string; defense?: number };
 
 const games = gamesJson as unknown as GameData[];
 const scores = subjective as Record<string, SubjectiveScores>;
+const teamGrades = teamGradesJson as Record<string, TeamGrades>;
+
+// "../assets/NFL_Icons/Bills.png" -> "Bills"
+export function teamKey(teamLogo: string): string {
+  return teamLogo.split('/').pop()!.replace('.png', '');
+}
+
+// Team grades for a logo; average (C, 6) if the team is missing
+export function gradesForTeam(teamLogo: string): TeamGrades {
+  return teamGrades[teamKey(teamLogo)] ?? { weapons: 6, oline: 6, coaching: 6 };
+}
 
 // Static Data
 export const StaticData: StaticPlayerData[] = games.map((game) => {
@@ -52,6 +70,7 @@ export const StaticData: StaticPlayerData[] = games.map((game) => {
     // Placeholder until the Defenses rankings grade the team
     defense: defense ?? 6,
     defenseOverride: defense,
+    ...gradesForTeam(game.teamLogo),
     ...playerScores,
   };
 });
