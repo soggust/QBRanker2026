@@ -1,7 +1,568 @@
 <section class="rankings-wrapper spread">
-  <ul cdkDropList (cdkDropListDropped)="drop($event)">
+  <!-- One row's cells; also rendered once as the column header row -->
+  <ng-template #rowCells let-player let-i="i">
+      <div class="player-info">
+        <span [ngClass]="getCountClasses(i)">{{ i + 1 }}</span>
+        <img [src]="player.teamLogo" class="team-logo" />
+        <p class="player-name">
+          <strong>{{ player.name }}</strong>
+          @if (player.injured) {
+            <mat-icon
+              aria-hidden="false"
+              aria-label="Injury Icon"
+              fontIcon="local_hospital"
+              class="injury-icon"
+              title="This player is currently injured"
+            ></mat-icon>
+          }
+        </p>
+      </div>
+
+      <!-- Record -->
+      @if (showUnused || this.filters.recordValue) {
+        <div class="record">
+          <p>
+            {{ player.wins }}-{{ player.losses }}
+            @if (player.ties) {
+              <span>-{{ player.ties }}</span>
+            }
+            @if (player.outOfDate) {
+              <mat-icon
+                aria-hidden="false"
+                aria-label="warning icon"
+                fontIcon="warning"
+                title="ESPN player stats are not up-to-date with team record stats"
+                class="out-of-date-indicator"
+              ></mat-icon>
+            }
+          </p>
+
+          <p
+            class="stat-label"
+            [title]="
+              player.wins +
+              '-' +
+              player.losses +
+              (player.ties ? '-' + player.ties : '') +
+              ' Record as Starter'
+            "
+          >
+            Record
+          </p>
+        </div>
+      }
+      @if (showUnused || this.filters.compValue) {
+        <!-- Completion Percent -->
+        <div class="comp-percent">
+          <p>{{ player.compPercent }}</p>
+          <p class="stat-label" [title]="player.compPercent + '% Completion'">
+            Completion %
+          </p>
+        </div>
+      }
+      @if (
+        (showUnused && totalStats) ||
+        (totalStats &&
+          this.filters.yardsValue &&
+          (this.filters.passYdValue || this.filters.rushYdValue))
+      ) {
+        <!-- Total Yards -->
+        <div class="total-yards">
+          <p>
+            @if (perGame) {
+              {{
+                (player.passYards + player.rushYards) / player.games
+                  | number: "1.1-1"
+              }}
+            } @else {
+              {{
+                player.passYards + player.rushYards | number: "1.0" : "en-US"
+              }}
+            }
+          </p>
+          <p
+            class="stat-label"
+            [title]="player.passYards + player.rushYards + ' Total Yards'"
+          >
+            Total Yards
+          </p>
+        </div>
+      }
+      @if (
+        (showUnused && !totalStats) ||
+        (!totalStats && this.filters.yardsValue && this.filters.passYdValue)
+      ) {
+        <!-- Pass Yards  -->
+        <div class="pass-yards">
+          <p>
+            @if (perGame) {
+              {{ player.passYards / player.games | number: "1.1-1" }}
+            } @else {
+              {{ player.passYards | number: "1.0" : "en-US" }}
+            }
+          </p>
+          <p class="stat-label" [title]="player.passYards + ' Pass Yards'">
+            Pass Yards
+          </p>
+        </div>
+      }
+      @if (showUnused || this.filters.ypaValue) {
+        <!-- YPA-->
+        <div class="ypa">
+          <p>
+            {{ player.ypa }}
+          </p>
+
+          <p class="stat-label" [title]="player.ypa + ' Yards Per Attempt'">
+            Per Attempt
+          </p>
+        </div>
+      }
+      @if (
+        (showUnused && !totalStats) ||
+        (!totalStats && this.filters.yardsValue && this.filters.rushYdValue)
+      ) {
+        <!-- Rush Yards  -->
+        <div class="rush-yards">
+          <p>
+            @if (perGame) {
+              {{ player.rushYards / player.games | number: "1.1-1" }}
+            } @else {
+              {{ player.rushYards | number: "1.0" : "en-US" }}
+            }
+          </p>
+          <p class="stat-label" [title]="player.rushYards + ' Rush Yards'">
+            Rush Yards
+          </p>
+        </div>
+      }
+      @if (
+        (showUnused && totalStats) ||
+        (totalStats &&
+          this.filters.touchdownValue &&
+          (this.filters.passTdValue || this.filters.rushTdValue))
+      ) {
+        <!-- Touchdowns  -->
+        <div class="touchdowns">
+          <p>
+            @if (perGame) {
+              {{
+                (player.passTd + player.rushTd) / player.games
+                  | number: "1.2-2"
+              }}
+            } @else {
+              {{ player.passTd + player.rushTd | number: "1.0" : "en-US" }}
+            }
+          </p>
+          <p
+            class="stat-label"
+            [title]="player.passTd + player.rushTd + ' Total Touchdowns'"
+          >
+            Touchdowns
+          </p>
+        </div>
+      }
+      @if (
+        (showUnused && !totalStats) ||
+        (!totalStats &&
+          this.filters.touchdownValue &&
+          this.filters.passTdValue)
+      ) {
+        <!-- Pass Tds  -->
+        <div class="pass-tds">
+          <p>
+            @if (perGame) {
+              {{ player.passTd / player.games | number: "1.1-1" }}
+            } @else {
+              {{ player.passTd | number: "1.0" : "en-US" }}
+            }
+          </p>
+          <p class="stat-label" [title]="player.passTd + ' Pass TDs'">
+            Pass TDs
+          </p>
+        </div>
+      }
+      @if (
+        (showUnused && !totalStats) ||
+        (!totalStats &&
+          this.filters.touchdownValue &&
+          this.filters.rushTdValue)
+      ) {
+        <!-- Rush TDs  -->
+        <div class="rush-tds">
+          <p>
+            @if (perGame) {
+              {{ player.rushTd / player.games | number: "1.1-1" }}
+            } @else {
+              {{ player.rushTd | number: "1.0" : "en-US" }}
+            }
+          </p>
+          <p class="stat-label" [title]="player.rushTd + ' Rush TDs'">
+            Rush TDs
+          </p>
+        </div>
+      }
+      @if (
+        (showUnused && totalStats) ||
+        (totalStats &&
+          this.filters.turnoverValue &&
+          (this.filters.intValue || this.filters.fumLostValue))
+      ) {
+        <!-- Turnovers -->
+        <div class="turnovers">
+          <p>
+            @if (perGame) {
+              {{
+                (player.ints + player.fumLost) / player.games
+                  | number: "1.2-2"
+              }}
+            } @else {
+              {{ player.ints + player.fumLost | number: "1.0" : "en-US" }}
+            }
+          </p>
+
+          <p
+            class="stat-label"
+            [title]="player.ints + player.fumLost + ' Total Turnovers'"
+          >
+            Turnovers
+          </p>
+        </div>
+      }
+      @if (
+        (showUnused && !totalStats) ||
+        (!totalStats && this.filters.turnoverValue && this.filters.intValue)
+      ) {
+        <!-- Pass Tds  -->
+        <div class="interceptions">
+          <p>
+            @if (perGame) {
+              {{ player.ints / player.games | number: "1.1-1" }}
+            } @else {
+              {{ player.ints | number: "1.0" : "en-US" }}
+            }
+          </p>
+          <p class="stat-label" [title]="player.ints + ' Interceptions'">
+            Interceptions
+          </p>
+        </div>
+      }
+      @if (
+        (showUnused && !totalStats) ||
+        (!totalStats &&
+          this.filters.turnoverValue &&
+          this.filters.fumLostValue)
+      ) {
+        <!-- Fumbles Lost  -->
+        <div class="fumbles-lost">
+          <p>
+            @if (perGame) {
+              {{ player.fumLost / player.games | number: "1.1-1" }}
+            } @else {
+              {{ player.fumLost | number: "1.0" : "en-US" }}
+            }
+          </p>
+          <p class="stat-label" [title]="player.fumLost + ' Fumbles Lost'">
+            Fumbles Lost
+          </p>
+        </div>
+      }
+      @if (showUnused || this.filters.ratingValue) {
+        <!-- Rating-->
+        <div class="rating">
+          <p>{{ player.rating | number: "1.1-1" }}</p>
+          <p
+            class="stat-label"
+            [title]="player.rating.toFixed(1) + ' QB Rating'"
+          >
+            Rating
+          </p>
+        </div>
+      }
+      @if (
+        showUnused || (this.filters.advancedValue && this.filters.epaValue)
+      ) {
+        <!-- EPA Per Play -->
+        <div class="epa">
+          <p>{{ player.epaPerPlay === null ? "-" : (player.epaPerPlay | number: "1.2-2") }}</p>
+          <p
+            class="stat-label"
+            title="Expected Points Added per play (dropbacks and runs)"
+          >
+            EPA / Play
+          </p>
+        </div>
+      }
+      @if (
+        showUnused || (this.filters.advancedValue && this.filters.cpoeValue)
+      ) {
+        <!-- CPOE -->
+        <div class="cpoe">
+          <p>{{ player.cpoe === null ? "-" : (player.cpoe | number: "1.1-1") }}</p>
+          <p class="stat-label" title="Completion % Over Expected">CPOE</p>
+        </div>
+      }
+      @if (
+        showUnused || (this.filters.advancedValue && this.filters.successValue)
+      ) {
+        <!-- Success Rate -->
+        <div class="success-rate">
+          <p>
+            {{ player.successRate === null ? "-" : (player.successRate | percent: "1.0-0") }}
+          </p>
+          <p
+            class="stat-label"
+            title="Share of plays that gained positive EPA"
+          >
+            Success
+          </p>
+        </div>
+      }
+      @if (
+        showUnused || (this.filters.advancedValue && this.filters.fantasyValue)
+      ) {
+        <!-- Fantasy Points -->
+        <div class="fantasy">
+          @let points = fantasyPoints(player);
+          <p>{{ points === null ? "-" : (points | number: "1.1-1") }}</p>
+          <p
+            class="stat-label"
+            [title]="scoringLabels[fantasyScoring] + ' fantasy points'"
+          >
+            Fantasy Pts
+          </p>
+        </div>
+      }
+      @if (showUnused || this.filters.recencyValue) {
+        <!-- Recent-->
+        <div class="box support-box">
+          <div class="last-five">
+            <div>
+              @for (result of player.lastFive; track $index) {
+                <p [ngClass]="result === 1 ? 'green' : 'red'">
+                  {{ result | formatRecentGames }}
+                </p>
+              }
+            </div>
+            <p
+              class="stat-label"
+              [title]="
+                getNumberOfRecentWins(player.lastFive) + ' Recent Wins'
+              "
+            >
+              Recent
+            </p>
+          </div>
+        </div>
+      }
+      @if (
+        showUnused ||
+        (this.filters.supportValue &&
+          (this.filters.weaponsValue ||
+            this.filters.coachingValue ||
+            this.filters.olineValue ||
+            this.filters.defenseValue ||
+            this.filters.responsibilityValue))
+      ) {
+        <div
+          class="box support-box"
+          [ngStyle]="{
+            minWidth:
+              getColumnNumbers([
+                'coachingValue',
+                'weaponsValue',
+                'responsibilityValue',
+                'olineValue',
+                'defenseValue',
+              ]) *
+                5.5 +
+              'em',
+          }"
+        >
+          @if (showUnused || this.filters.weaponsValue) {
+            <!-- Weapons -->
+            <div class="weapons">
+              <p>
+                <mat-icon
+                  aria-hidden="false"
+                  aria-label="Weapons Arrow Down Icon"
+                  fontIcon="arrow_drop_down"
+                  class="arrow-drop-down"
+                  (click)="modifyStat(player, 'weapons', 'down')"
+                ></mat-icon
+                ><span [ngStyle]="{ color: getColor(player.weapons) }">{{
+                  player.weapons | letterGrade
+                }}</span>
+                <mat-icon
+                  aria-hidden="false"
+                  aria-label="Weapons Arrow Up Icon"
+                  fontIcon="arrow_drop_up"
+                  class="arrow-drop-up"
+                  (click)="modifyStat(player, 'weapons', 'up')"
+                ></mat-icon>
+              </p>
+              <p
+                class="stat-label"
+                [title]="
+                  'Grade ' + (player.weapons | letterGrade) + ' Weapons'
+                "
+              >
+                Weapons
+              </p>
+            </div>
+          }
+          @if (showUnused || this.filters.coachingValue) {
+            <!-- Coaching -->
+            <div class="coaching">
+              <p>
+                <mat-icon
+                  aria-hidden="false"
+                  aria-label="Coaching Arrow Down Icon"
+                  fontIcon="arrow_drop_down"
+                  class="arrow-drop-down"
+                  (click)="modifyStat(player, 'coaching', 'down')"
+                ></mat-icon
+                ><span [ngStyle]="{ color: getColor(player.coaching) }">{{
+                  player.coaching | letterGrade
+                }}</span>
+                <mat-icon
+                  aria-hidden="false"
+                  aria-label="Arrow Up Icon"
+                  fontIcon="arrow_drop_up"
+                  class="arrow-drop-up"
+                  (click)="modifyStat(player, 'coaching', 'up')"
+                ></mat-icon>
+              </p>
+              <p
+                class="stat-label"
+                [title]="
+                  'Grade ' + (player.coaching | letterGrade) + ' Coaching'
+                "
+              >
+                Coaching
+              </p>
+            </div>
+          }
+          @if (showUnused || this.filters.olineValue) {
+            <!-- O-line -->
+            <div class="o-line">
+              <p>
+                <mat-icon
+                  aria-hidden="false"
+                  aria-label="Oline Arrow Down Icon"
+                  fontIcon="arrow_drop_down"
+                  class="arrow-drop-down"
+                  (click)="modifyStat(player, 'oline', 'down')"
+                ></mat-icon
+                ><span [ngStyle]="{ color: getColor(player.oline) }">{{
+                  player.oline | letterGrade
+                }}</span>
+                <mat-icon
+                  aria-hidden="false"
+                  aria-label="Oline Arrow Up Icon"
+                  fontIcon="arrow_drop_up"
+                  class="arrow-drop-up"
+                  (click)="modifyStat(player, 'oline', 'up')"
+                ></mat-icon>
+              </p>
+              <p
+                class="stat-label"
+                [title]="
+                  'Grade ' + (player.oline | letterGrade) + ' Offensive Line'
+                "
+              >
+                O-Line
+              </p>
+            </div>
+          }
+          @if (showUnused || this.filters.defenseValue) {
+            <!-- Defense -->
+            <div class="defense">
+              <p>
+                <mat-icon
+                  aria-hidden="false"
+                  aria-label="Oline Arrow Down Icon"
+                  fontIcon="arrow_drop_down"
+                  class="arrow-drop-down"
+                  (click)="modifyStat(player, 'defense', 'down')"
+                ></mat-icon
+                ><span [ngStyle]="{ color: getColor(player.defense) }">{{
+                  player.defense | letterGrade
+                }}</span>
+                <mat-icon
+                  aria-hidden="false"
+                  aria-label="Oline Arrow Up Icon"
+                  fontIcon="arrow_drop_up"
+                  class="arrow-drop-up"
+                  (click)="modifyStat(player, 'defense', 'up')"
+                ></mat-icon>
+              </p>
+              <p
+                class="stat-label"
+                [title]="
+                  'Grade ' +
+                  (player.defense | letterGrade) +
+                  ' Defense' +
+                  (player.defenseOverride === undefined
+                    ? ' (from the Defenses rankings)'
+                    : ' (set by hand)')
+                "
+              >
+                Defense
+              </p>
+            </div>
+          }
+          @if (showUnused || this.filters.responsibilityValue) {
+            <!-- Responsibility -->
+            <div class="responsibility">
+              <p>
+                <mat-icon
+                  aria-hidden="false"
+                  aria-label="Oline Arrow Down Icon"
+                  fontIcon="arrow_drop_down"
+                  class="arrow-drop-down"
+                  (click)="modifyStat(player, 'responsibility', 'down')"
+                ></mat-icon
+                ><span
+                  [ngStyle]="{ color: getColor(player.responsibility) }"
+                  >{{ player.responsibility | letterGrade }}</span
+                >
+                <mat-icon
+                  aria-hidden="false"
+                  aria-label="Oline Arrow Up Icon"
+                  fontIcon="arrow_drop_up"
+                  class="arrow-drop-up"
+                  (click)="modifyStat(player, 'responsibility', 'up')"
+                ></mat-icon>
+              </p>
+              <p
+                class="stat-label"
+                [title]="
+                  'Grade ' +
+                  (player.responsibility | letterGrade) +
+                  ' Responsibility To Team'
+                "
+              >
+                Responsibility
+              </p>
+            </div>
+          }
+        </div>
+      }
+  </ng-template>
+
+  <ul cdkDropList (cdkDropListDropped)="drop($event)" columnHighlight>
     @if (playerList.length < 1) {
       <h1 style="margin: 2em">LOADING...</h1>
+    }
+    @if (playerList.length) {
+      <!-- Column headers: the first row's cells with only the labels showing -->
+      <li class="player header-row" aria-hidden="true">
+        <span class="drag-indicator"></span>
+        <ng-container
+          *ngTemplateOutlet="rowCells; context: { $implicit: playerList[0], i: -1 }"
+        ></ng-container>
+      </li>
     }
     @for (player of playerList; track player.id; let i = $index) {
       <!-- Player -->
@@ -13,554 +574,9 @@
           fontIcon="drag_indicator"
           class="drag-indicator"
         ></mat-icon>
-        <div class="player-info">
-          <span [ngClass]="getCountClasses(i)">{{ i + 1 }}</span>
-          <img [src]="player.teamLogo" class="team-logo" />
-          <p class="player-name">
-            <strong>{{ player.name }}</strong>
-            @if (player.injured) {
-              <mat-icon
-                aria-hidden="false"
-                aria-label="Injury Icon"
-                fontIcon="local_hospital"
-                class="injury-icon"
-                title="This player is currently injured"
-              ></mat-icon>
-            }
-          </p>
-        </div>
-
-        <!-- Record -->
-        @if (showUnused || this.filters.recordValue) {
-          <div class="record">
-            <p>
-              {{ player.wins }}-{{ player.losses }}
-              @if (player.ties) {
-                <span>-{{ player.ties }}</span>
-              }
-              @if (player.outOfDate) {
-                <mat-icon
-                  aria-hidden="false"
-                  aria-label="warning icon"
-                  fontIcon="warning"
-                  title="ESPN player stats are not up-to-date with team record stats"
-                  class="out-of-date-indicator"
-                ></mat-icon>
-              }
-            </p>
-
-            <p
-              class="stat-label"
-              [title]="
-                player.wins +
-                '-' +
-                player.losses +
-                (player.ties ? '-' + player.ties : '') +
-                ' Record as Starter'
-              "
-            >
-              Record
-            </p>
-          </div>
-        }
-        @if (showUnused || this.filters.compValue) {
-          <!-- Completion Percent -->
-          <div class="comp-percent">
-            <p>{{ player.compPercent }}</p>
-            <p class="stat-label" [title]="player.compPercent + '% Completion'">
-              Completion %
-            </p>
-          </div>
-        }
-        @if (
-          (showUnused && totalStats) ||
-          (totalStats &&
-            this.filters.yardsValue &&
-            (this.filters.passYdValue || this.filters.rushYdValue))
-        ) {
-          <!-- Total Yards -->
-          <div class="total-yards">
-            <p>
-              @if (perGame) {
-                {{
-                  (player.passYards + player.rushYards) / player.games
-                    | number: "1.1-1"
-                }}
-              } @else {
-                {{
-                  player.passYards + player.rushYards | number: "1.0" : "en-US"
-                }}
-              }
-            </p>
-            <p
-              class="stat-label"
-              [title]="player.passYards + player.rushYards + ' Total Yards'"
-            >
-              Total Yards
-            </p>
-          </div>
-        }
-        @if (
-          (showUnused && !totalStats) ||
-          (!totalStats && this.filters.yardsValue && this.filters.passYdValue)
-        ) {
-          <!-- Pass Yards  -->
-          <div class="pass-yards">
-            <p>
-              @if (perGame) {
-                {{ player.passYards / player.games | number: "1.1-1" }}
-              } @else {
-                {{ player.passYards | number: "1.0" : "en-US" }}
-              }
-            </p>
-            <p class="stat-label" [title]="player.passYards + ' Pass Yards'">
-              Pass Yards
-            </p>
-          </div>
-        }
-        @if (showUnused || this.filters.ypaValue) {
-          <!-- YPA-->
-          <div class="ypa">
-            <p>
-              {{ player.ypa }}
-            </p>
-
-            <p class="stat-label" [title]="player.ypa + ' Yards Per Attempt'">
-              Per Attempt
-            </p>
-          </div>
-        }
-        @if (
-          (showUnused && !totalStats) ||
-          (!totalStats && this.filters.yardsValue && this.filters.rushYdValue)
-        ) {
-          <!-- Rush Yards  -->
-          <div class="rush-yards">
-            <p>
-              @if (perGame) {
-                {{ player.rushYards / player.games | number: "1.1-1" }}
-              } @else {
-                {{ player.rushYards | number: "1.0" : "en-US" }}
-              }
-            </p>
-            <p class="stat-label" [title]="player.rushYards + ' Rush Yards'">
-              Rush Yards
-            </p>
-          </div>
-        }
-        @if (
-          (showUnused && totalStats) ||
-          (totalStats &&
-            this.filters.touchdownValue &&
-            (this.filters.passTdValue || this.filters.rushTdValue))
-        ) {
-          <!-- Touchdowns  -->
-          <div class="touchdowns">
-            <p>
-              @if (perGame) {
-                {{
-                  (player.passTd + player.rushTd) / player.games
-                    | number: "1.2-2"
-                }}
-              } @else {
-                {{ player.passTd + player.rushTd | number: "1.0" : "en-US" }}
-              }
-            </p>
-            <p
-              class="stat-label"
-              [title]="player.passTd + player.rushTd + ' Total Touchdowns'"
-            >
-              Touchdowns
-            </p>
-          </div>
-        }
-        @if (
-          (showUnused && !totalStats) ||
-          (!totalStats &&
-            this.filters.touchdownValue &&
-            this.filters.passTdValue)
-        ) {
-          <!-- Pass Tds  -->
-          <div class="pass-tds">
-            <p>
-              @if (perGame) {
-                {{ player.passTd / player.games | number: "1.1-1" }}
-              } @else {
-                {{ player.passTd | number: "1.0" : "en-US" }}
-              }
-            </p>
-            <p class="stat-label" [title]="player.passTd + ' Pass TDs'">
-              Pass TDs
-            </p>
-          </div>
-        }
-        @if (
-          (showUnused && !totalStats) ||
-          (!totalStats &&
-            this.filters.touchdownValue &&
-            this.filters.rushTdValue)
-        ) {
-          <!-- Rush TDs  -->
-          <div class="rush-tds">
-            <p>
-              @if (perGame) {
-                {{ player.rushTd / player.games | number: "1.1-1" }}
-              } @else {
-                {{ player.rushTd | number: "1.0" : "en-US" }}
-              }
-            </p>
-            <p class="stat-label" [title]="player.rushTd + ' Rush TDs'">
-              Rush TDs
-            </p>
-          </div>
-        }
-        @if (
-          (showUnused && totalStats) ||
-          (totalStats &&
-            this.filters.turnoverValue &&
-            (this.filters.intValue || this.filters.fumLostValue))
-        ) {
-          <!-- Turnovers -->
-          <div class="turnovers">
-            <p>
-              @if (perGame) {
-                {{
-                  (player.ints + player.fumLost) / player.games
-                    | number: "1.2-2"
-                }}
-              } @else {
-                {{ player.ints + player.fumLost | number: "1.0" : "en-US" }}
-              }
-            </p>
-
-            <p
-              class="stat-label"
-              [title]="player.ints + player.fumLost + ' Total Turnovers'"
-            >
-              Turnovers
-            </p>
-          </div>
-        }
-        @if (
-          (showUnused && !totalStats) ||
-          (!totalStats && this.filters.turnoverValue && this.filters.intValue)
-        ) {
-          <!-- Pass Tds  -->
-          <div class="interceptions">
-            <p>
-              @if (perGame) {
-                {{ player.ints / player.games | number: "1.1-1" }}
-              } @else {
-                {{ player.ints | number: "1.0" : "en-US" }}
-              }
-            </p>
-            <p class="stat-label" [title]="player.ints + ' Interceptions'">
-              Interceptions
-            </p>
-          </div>
-        }
-        @if (
-          (showUnused && !totalStats) ||
-          (!totalStats &&
-            this.filters.turnoverValue &&
-            this.filters.fumLostValue)
-        ) {
-          <!-- Fumbles Lost  -->
-          <div class="fumbles-lost">
-            <p>
-              @if (perGame) {
-                {{ player.fumLost / player.games | number: "1.1-1" }}
-              } @else {
-                {{ player.fumLost | number: "1.0" : "en-US" }}
-              }
-            </p>
-            <p class="stat-label" [title]="player.fumLost + ' Fumbles Lost'">
-              Fumbles Lost
-            </p>
-          </div>
-        }
-        @if (showUnused || this.filters.ratingValue) {
-          <!-- Rating-->
-          <div class="rating">
-            <p>{{ player.rating | number: "1.1-1" }}</p>
-            <p
-              class="stat-label"
-              [title]="player.rating.toFixed(1) + ' QB Rating'"
-            >
-              Rating
-            </p>
-          </div>
-        }
-        @if (
-          showUnused || (this.filters.advancedValue && this.filters.epaValue)
-        ) {
-          <!-- EPA Per Play -->
-          <div class="epa">
-            <p>{{ player.epaPerPlay === null ? "-" : (player.epaPerPlay | number: "1.2-2") }}</p>
-            <p
-              class="stat-label"
-              title="Expected Points Added per play (dropbacks and runs)"
-            >
-              EPA / Play
-            </p>
-          </div>
-        }
-        @if (
-          showUnused || (this.filters.advancedValue && this.filters.cpoeValue)
-        ) {
-          <!-- CPOE -->
-          <div class="cpoe">
-            <p>{{ player.cpoe === null ? "-" : (player.cpoe | number: "1.1-1") }}</p>
-            <p class="stat-label" title="Completion % Over Expected">CPOE</p>
-          </div>
-        }
-        @if (
-          showUnused || (this.filters.advancedValue && this.filters.successValue)
-        ) {
-          <!-- Success Rate -->
-          <div class="success-rate">
-            <p>
-              {{ player.successRate === null ? "-" : (player.successRate | percent: "1.0-0") }}
-            </p>
-            <p
-              class="stat-label"
-              title="Share of plays that gained positive EPA"
-            >
-              Success
-            </p>
-          </div>
-        }
-        @if (
-          showUnused || (this.filters.advancedValue && this.filters.fantasyValue)
-        ) {
-          <!-- Fantasy Points -->
-          <div class="fantasy">
-            @let points = fantasyPoints(player);
-            <p>{{ points === null ? "-" : (points | number: "1.1-1") }}</p>
-            <p
-              class="stat-label"
-              [title]="scoringLabels[fantasyScoring] + ' fantasy points'"
-            >
-              Fantasy Pts
-            </p>
-          </div>
-        }
-        @if (showUnused || this.filters.recencyValue) {
-          <!-- Recent-->
-          <div class="box support-box">
-            <div class="last-five">
-              <div>
-                @for (result of player.lastFive; track $index) {
-                  <p [ngClass]="result === 1 ? 'green' : 'red'">
-                    {{ result | formatRecentGames }}
-                  </p>
-                }
-              </div>
-              <p
-                class="stat-label"
-                [title]="
-                  getNumberOfRecentWins(player.lastFive) + ' Recent Wins'
-                "
-              >
-                Recent
-              </p>
-            </div>
-          </div>
-        }
-        @if (
-          showUnused ||
-          (this.filters.supportValue &&
-            (this.filters.weaponsValue ||
-              this.filters.coachingValue ||
-              this.filters.olineValue ||
-              this.filters.defenseValue ||
-              this.filters.responsibilityValue))
-        ) {
-          <div
-            class="box support-box"
-            [ngStyle]="{
-              minWidth:
-                getColumnNumbers([
-                  'coachingValue',
-                  'weaponsValue',
-                  'responsibilityValue',
-                  'olineValue',
-                  'defenseValue',
-                ]) *
-                  5.5 +
-                'em',
-            }"
-          >
-            @if (showUnused || this.filters.weaponsValue) {
-              <!-- Weapons -->
-              <div class="weapons">
-                <p>
-                  <mat-icon
-                    aria-hidden="false"
-                    aria-label="Weapons Arrow Down Icon"
-                    fontIcon="arrow_drop_down"
-                    class="arrow-drop-down"
-                    (click)="modifyStat(player, 'weapons', 'down')"
-                  ></mat-icon
-                  ><span [ngStyle]="{ color: getColor(player.weapons) }">{{
-                    player.weapons | letterGrade
-                  }}</span>
-                  <mat-icon
-                    aria-hidden="false"
-                    aria-label="Weapons Arrow Up Icon"
-                    fontIcon="arrow_drop_up"
-                    class="arrow-drop-up"
-                    (click)="modifyStat(player, 'weapons', 'up')"
-                  ></mat-icon>
-                </p>
-                <p
-                  class="stat-label"
-                  [title]="
-                    'Grade ' + (player.weapons | letterGrade) + ' Weapons'
-                  "
-                >
-                  Weapons
-                </p>
-              </div>
-            }
-            @if (showUnused || this.filters.coachingValue) {
-              <!-- Coaching -->
-              <div class="coaching">
-                <p>
-                  <mat-icon
-                    aria-hidden="false"
-                    aria-label="Coaching Arrow Down Icon"
-                    fontIcon="arrow_drop_down"
-                    class="arrow-drop-down"
-                    (click)="modifyStat(player, 'coaching', 'down')"
-                  ></mat-icon
-                  ><span [ngStyle]="{ color: getColor(player.coaching) }">{{
-                    player.coaching | letterGrade
-                  }}</span>
-                  <mat-icon
-                    aria-hidden="false"
-                    aria-label="Arrow Up Icon"
-                    fontIcon="arrow_drop_up"
-                    class="arrow-drop-up"
-                    (click)="modifyStat(player, 'coaching', 'up')"
-                  ></mat-icon>
-                </p>
-                <p
-                  class="stat-label"
-                  [title]="
-                    'Grade ' + (player.coaching | letterGrade) + ' Coaching'
-                  "
-                >
-                  Coaching
-                </p>
-              </div>
-            }
-            @if (showUnused || this.filters.olineValue) {
-              <!-- O-line -->
-              <div class="o-line">
-                <p>
-                  <mat-icon
-                    aria-hidden="false"
-                    aria-label="Oline Arrow Down Icon"
-                    fontIcon="arrow_drop_down"
-                    class="arrow-drop-down"
-                    (click)="modifyStat(player, 'oline', 'down')"
-                  ></mat-icon
-                  ><span [ngStyle]="{ color: getColor(player.oline) }">{{
-                    player.oline | letterGrade
-                  }}</span>
-                  <mat-icon
-                    aria-hidden="false"
-                    aria-label="Oline Arrow Up Icon"
-                    fontIcon="arrow_drop_up"
-                    class="arrow-drop-up"
-                    (click)="modifyStat(player, 'oline', 'up')"
-                  ></mat-icon>
-                </p>
-                <p
-                  class="stat-label"
-                  [title]="
-                    'Grade ' + (player.oline | letterGrade) + ' Offensive Line'
-                  "
-                >
-                  O-Line
-                </p>
-              </div>
-            }
-            @if (showUnused || this.filters.defenseValue) {
-              <!-- Defense -->
-              <div class="defense">
-                <p>
-                  <mat-icon
-                    aria-hidden="false"
-                    aria-label="Oline Arrow Down Icon"
-                    fontIcon="arrow_drop_down"
-                    class="arrow-drop-down"
-                    (click)="modifyStat(player, 'defense', 'down')"
-                  ></mat-icon
-                  ><span [ngStyle]="{ color: getColor(player.defense) }">{{
-                    player.defense | letterGrade
-                  }}</span>
-                  <mat-icon
-                    aria-hidden="false"
-                    aria-label="Oline Arrow Up Icon"
-                    fontIcon="arrow_drop_up"
-                    class="arrow-drop-up"
-                    (click)="modifyStat(player, 'defense', 'up')"
-                  ></mat-icon>
-                </p>
-                <p
-                  class="stat-label"
-                  [title]="
-                    'Grade ' +
-                    (player.defense | letterGrade) +
-                    ' Defense' +
-                    (player.defenseOverride === undefined
-                      ? ' (from the Defenses rankings)'
-                      : ' (set by hand)')
-                  "
-                >
-                  Defense
-                </p>
-              </div>
-            }
-            @if (showUnused || this.filters.responsibilityValue) {
-              <!-- Responsibility -->
-              <div class="responsibility">
-                <p>
-                  <mat-icon
-                    aria-hidden="false"
-                    aria-label="Oline Arrow Down Icon"
-                    fontIcon="arrow_drop_down"
-                    class="arrow-drop-down"
-                    (click)="modifyStat(player, 'responsibility', 'down')"
-                  ></mat-icon
-                  ><span
-                    [ngStyle]="{ color: getColor(player.responsibility) }"
-                    >{{ player.responsibility | letterGrade }}</span
-                  >
-                  <mat-icon
-                    aria-hidden="false"
-                    aria-label="Oline Arrow Up Icon"
-                    fontIcon="arrow_drop_up"
-                    class="arrow-drop-up"
-                    (click)="modifyStat(player, 'responsibility', 'up')"
-                  ></mat-icon>
-                </p>
-                <p
-                  class="stat-label"
-                  [title]="
-                    'Grade ' +
-                    (player.responsibility | letterGrade) +
-                    ' Responsibility To Team'
-                  "
-                >
-                  Responsibility
-                </p>
-              </div>
-            }
-          </div>
-        }
+        <ng-container
+          *ngTemplateOutlet="rowCells; context: { $implicit: player, i: i }"
+        ></ng-container>
       </li>
     }
   </ul>

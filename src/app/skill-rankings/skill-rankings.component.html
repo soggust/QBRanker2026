@@ -1,5 +1,17 @@
 <section class="rankings-wrapper spread">
-  <ul cdkDropList (cdkDropListDropped)="drop($event)">
+  <ul cdkDropList (cdkDropListDropped)="drop($event)" columnHighlight>
+    <!-- Column headers -->
+    <li class="player header-row" aria-hidden="true">
+      <span class="drag-indicator"></span>
+      <div class="player-info"></div>
+      @for (stat of stats; track stat.key) {
+        @if (isShown(stat)) {
+          <div>
+            <p class="stat-label">{{ stat.label }}</p>
+          </div>
+        }
+      }
+    </li>
     @for (player of playerList; track player.gsisId; let i = $index) {
       <li cdkDrag class="player">
         <mat-icon
@@ -19,7 +31,7 @@
 
         @for (stat of stats; track stat.key) {
           @if (isShown(stat)) {
-            <div>
+            <div [title]="stat.label + ': ' + stat.description">
               <p [style.color]="gradeColor(player, stat)">{{ format(player, stat) }}</p>
               <p class="stat-label" [title]="stat.description">
                 {{ stat.label }}

@@ -655,7 +655,7 @@ section ul {
     background: color-mix(in srgb, var(--primary-800) 72%, transparent);
     border: 1px solid rgba(255, 255, 255, 0.07);
     border-radius: 0.9em;
-    box-shadow: 0 0.35em 1em rgba(0, 0, 0, 0.18);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
     font-variant-numeric: tabular-nums;
     margin-bottom: 0.45em;
     transition: transform 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
@@ -663,7 +663,7 @@ section ul {
 
   li:hover {
     background: color-mix(in srgb, var(--primary-700) 85%, transparent);
-    box-shadow: 0 0.6em 1.4em rgba(0, 0, 0, 0.25);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
     transform: translateY(-1px);
   }
 
@@ -677,11 +677,12 @@ section ul {
       box-shadow: none;
       color: var(--primary-50);
       font-family: v.$font-heading;
-      font-size: 1.9em;
+      font-size: 1.7em;
       font-weight: 900;
       line-height: 1;
       opacity: 0.55;
       text-shadow: var(--text-shadow-small);
+      margin-right: 0.35em;
       width: 1.6em;
     }
 
@@ -731,7 +732,7 @@ section ul {
     div > p[style*='color'] {
       background: color-mix(in srgb, currentColor 20%, rgba(0, 0, 0, 0.45));
       border-radius: 999px;
-      padding: 0.1em 0.65em;
+      padding: 0.25em 0.8em;
       text-shadow: none;
     }
   }
@@ -741,4 +742,75 @@ section ul {
   border: 1px solid var(--accent-200);
   border-radius: 0.9em;
   box-shadow: 0 1em 2.5em rgba(0, 0, 0, 0.4);
+}
+
+// Column headers: a pinned row of labels; in player rows the labels are hidden but still
+// cover each cell (invisibly) so hovering a value shows its definition
+section ul {
+  li.player:not(.header-row) div {
+    position: relative;
+
+    .stat-label {
+      font-size: 0;
+      inset: 0;
+      margin: 0;
+      opacity: 0;
+      position: absolute;
+
+      &:hover {
+        opacity: 0;
+      }
+    }
+  }
+
+  li.header-row,
+  li.header-row:hover {
+    backdrop-filter: blur(6px);
+    background: color-mix(in srgb, var(--primary-900) 88%, transparent);
+    border-color: transparent;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+    padding-bottom: 0.35em;
+    padding-top: 0.35em;
+    position: sticky;
+    top: 0;
+    transform: none;
+    z-index: 5;
+
+    // Only the labels show (player-info keeps its width to line the columns up)
+    .player-info {
+      visibility: hidden;
+    }
+
+    div p:not(.stat-label),
+    div .last-five > div {
+      display: none;
+    }
+
+    .player-info,
+    div.box {
+      background: none;
+      height: auto;
+    }
+
+    div {
+      height: auto;
+    }
+
+    div .stat-label {
+      cursor: default;
+      font-size: 0.6em;
+      font-weight: 800;
+      letter-spacing: 1px;
+      margin: 0;
+      opacity: 0.9;
+      visibility: visible;
+      white-space: nowrap;
+    }
+  }
+}
+
+// Keep the header row short (these cells are 4em tall in player rows)
+section ul li.header-row > div.player-info,
+section ul li.header-row > div.box {
+  height: 1.5em;
 }
