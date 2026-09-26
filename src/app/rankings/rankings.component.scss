@@ -826,3 +826,21 @@ section ul li.header-row > div.player-info,
 section ul li.header-row > div.box {
   height: 1.5em;
 }
+
+// Footer credits: the nflverse hex sticker reads small, so it gets a little more height
+section footer p img {
+  margin-right: 0.4em;
+
+  &.nflverse-logo {
+    margin: 0 0 0 0.4em;
+    max-height: 2.4em;
+  }
+}
+
+// Large screens only: small screens hide this line
+@media (min-width: 1200px) {
+  section footer p {
+    align-items: center;
+    display: flex;
+  }
+}
