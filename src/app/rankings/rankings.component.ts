@@ -6,6 +6,7 @@ import { Filters, Player } from 'app/types';
 import { copyRankingsToClipboard } from 'app/utils/clipboard';
 import { PositionService } from 'app/services/position.service';
 import { defenseGrades } from 'app/utils/unit-scoring';
+import { tintColor } from 'app/utils/value-tint';
 
 export type ColumnGroupId = 'results' | 'box' | 'advanced' | 'support';
 
@@ -87,6 +88,50 @@ export class RankingsComponent {
   set showUnused(value: boolean) {
     this.positionService.updateSettings({ showUnused: value });
   }
+
+  get colorValues(): boolean {
+    return this.positionService.settings.colorValues;
+  }
+  set colorValues(value: boolean) {
+    this.positionService.updateSettings({ colorValues: value });
+  }
+
+  // Tint a value column (settings: color-coded values); keys are the column classes in the template
+  tint(column: string, player: Player): string | null {
+    if (!this.colorValues) return null;
+    const stat = this.tintStats[column];
+    if (!stat) return null;
+    return tintColor(stat.get(player), this.playerList.map(stat.get), stat.lowerIsBetter);
+  }
+
+  private perGameOf(player: Player, total: number): number {
+    return this.perGame && player.games ? total / player.games : total;
+  }
+
+  private readonly tintStats: Record<string, { get: (p: Player) => number | null; lowerIsBetter?: boolean }> = {
+    record: { get: (p) => (p.wins + (p.ties ?? 0) * 0.5) / Math.max(p.wins + p.losses + (p.ties ?? 0), 1) },
+    'comp-percent': { get: (p) => Number(p.compPercent) },
+    'total-yards': { get: (p) => this.perGameOf(p, p.passYards + p.rushYards) },
+    'pass-yards': { get: (p) => this.perGameOf(p, p.passYards) },
+    'rush-yards': { get: (p) => this.perGameOf(p, p.rushYards) },
+    ypa: { get: (p) => Number(p.ypa) },
+    touchdowns: { get: (p) => this.perGameOf(p, p.passTd + p.rushTd) },
+    'pass-tds': { get: (p) => this.perGameOf(p, p.passTd) },
+    'rush-tds': { get: (p) => this.perGameOf(p, p.rushTd) },
+    turnovers: { get: (p) => this.perGameOf(p, p.ints + p.fumLost), lowerIsBetter: true },
+    interceptions: { get: (p) => this.perGameOf(p, p.ints), lowerIsBetter: true },
+    'fumbles-lost': { get: (p) => this.perGameOf(p, p.fumLost), lowerIsBetter: true },
+    rating: { get: (p) => p.rating },
+    epa: { get: (p) => p.epaPerPlay },
+    cpoe: { get: (p) => p.cpoe },
+    'success-rate': { get: (p) => p.successRate },
+    pressureToSack: { get: (p) => p.pressureToSack, lowerIsBetter: true },
+    badThrowPct: { get: (p) => p.badThrowPct, lowerIsBetter: true },
+    timeToThrow: { get: (p) => p.timeToThrow, lowerIsBetter: true },
+    adot: { get: (p) => p.adot },
+    aggressiveness: { get: (p) => p.aggressiveness },
+    fantasy: { get: (p) => this.fantasyPoints(p) },
+  };
 
   get totalStats(): boolean {
     return this.positionService.settings.totalStats;
@@ -176,8 +221,14 @@ export class RankingsComponent {
   }
 
   // Share the QB order with the WR/TE QB Play grade
+  // Uses every QB who started (injured ones included), so each team's QB Play is each starter's
+  // grade weighted by their share of the team's starts; follows manual drag order when all are shown
   publishRanks() {
-    this.positionService.setQbRanks(this.playerList.map((player) => player.id));
+    const everyone =
+      this.playerList.length === this.unfilteredPlayerList.length
+        ? this.playerList
+        : [...this.unfilteredPlayerList].sort((a, b) => this.sortPlayersFunc(a, b));
+    this.positionService.setQbRanks(everyone.map((player) => player.id));
   }
 
   // Reset

@@ -657,7 +657,7 @@ section ul {
     border-radius: 0.7em;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
     font-variant-numeric: tabular-nums;
-    margin-bottom: 0.45em;
+    margin-bottom: 0.1em;
     transition: transform 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
   }
 
@@ -741,7 +741,7 @@ section ul {
 
     // Letter grades as pills tinted by their own grade color
     div.box p > span,
-    div > p[style*='color'] {
+    div.box p[style*='color'] {
       background: color-mix(in srgb, currentColor 20%, rgba(0, 0, 0, 0.45));
       border-radius: 0.4em;
       padding: 0.25em 1em;
@@ -1103,7 +1103,7 @@ section ul li.player:not(.header-row) {
 // from that fixed width: 38px pill + 2 x 16px arrows fits the ~72px cell
 section ul li.player {
   div.box p > span,
-  div > p[style*="color"] {
+  div.box p[style*="color"] {
     box-sizing: border-box;
     display: inline-flex;
     justify-content: center;

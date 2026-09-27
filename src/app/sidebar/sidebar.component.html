@@ -49,7 +49,7 @@
               class="group-eye"
               [attr.aria-pressed]="!skillHidden[group.id]"
               [attr.aria-label]="(skillHidden[group.id] ? 'Show ' : 'Hide ') + group.title"
-              [title]="skillHidden[group.id] ? 'Show ' + group.title + ' (and count it again)' : 'Hide ' + group.title + ' (and stop counting it)'"
+              [title]="(skillHidden[group.id] ? 'Use ' : 'Don\'t use ') + group.title"
               (click)="toggleSkillGroupHidden(group.id)"
             >
               <mat-icon [fontIcon]="skillHidden[group.id] ? 'visibility_off' : 'visibility'"></mat-icon>
@@ -145,7 +145,7 @@
             class="group-eye"
             [attr.aria-pressed]="!hiddenGroups[group.id]"
             [attr.aria-label]="(hiddenGroups[group.id] ? 'Show ' : 'Hide ') + group.title"
-            [title]="hiddenGroups[group.id] ? 'Show ' + group.title + ' (and count it again)' : 'Hide ' + group.title + ' (and stop counting it)'"
+            [title]="(hiddenGroups[group.id] ? 'Use ' : 'Don\'t use ') + group.title"
             (click)="toggleGroupHidden(group.id)"
           >
             <mat-icon [fontIcon]="hiddenGroups[group.id] ? 'visibility_off' : 'visibility'"></mat-icon>

@@ -12,7 +12,7 @@
                 [ngClass]="'group-' + group.id"
                 [class.switched-off]="hidden[group.id]"
                 [attr.aria-pressed]="!hidden[group.id]"
-                [title]="(hidden[group.id] ? 'Show ' : 'Hide ') + group.label + (hidden[group.id] ? ' (and count it again)' : ' (and stop counting it)')"
+                [title]="(hidden[group.id] ? 'Use ' : 'Don\'t use ') + group.label"
                 (click)="toggleColumnGroup(group.id)"
               >
                 {{ group.label }}
@@ -46,7 +46,7 @@
           <!-- Record -->
           @if (showUnused || this.filters.recordValue) {
             <div class="record">
-              <p>
+              <p [style.color]="tint('record', player)">
                 {{ player.wins }}-{{ player.losses }}
                 @if (player.ties) {
                   <span>-{{ player.ties }}</span>
@@ -109,7 +109,7 @@
           @if (showUnused || this.filters.compValue) {
             <!-- Completion Percent -->
             <div class="comp-percent">
-              <p>{{ player.compPercent }}%</p>
+              <p [style.color]="tint('comp-percent', player)">{{ player.compPercent }}%</p>
               <p class="stat-label" [title]="player.compPercent + '% Completion'">
                 Comp %
               </p>
@@ -123,7 +123,7 @@
           ) {
             <!-- Total Yards -->
             <div class="total-yards">
-              <p>
+              <p [style.color]="tint('total-yards', player)">
                 @if (perGame) {
                   {{
                     (player.passYards + player.rushYards) / player.games
@@ -149,7 +149,7 @@
           ) {
             <!-- Pass Yards  -->
             <div class="pass-yards">
-              <p>
+              <p [style.color]="tint('pass-yards', player)">
                 @if (perGame) {
                   {{ player.passYards / player.games | number: "1.1-1" }}
                 } @else {
@@ -164,7 +164,7 @@
           @if (showUnused || this.filters.ypaValue) {
             <!-- YPA-->
             <div class="ypa">
-              <p>
+              <p [style.color]="tint('ypa', player)">
                 {{ player.ypa }}
               </p>
     
@@ -179,7 +179,7 @@
           ) {
             <!-- Rush Yards  -->
             <div class="rush-yards">
-              <p>
+              <p [style.color]="tint('rush-yards', player)">
                 @if (perGame) {
                   {{ player.rushYards / player.games | number: "1.1-1" }}
                 } @else {
@@ -199,7 +199,7 @@
           ) {
             <!-- Touchdowns  -->
             <div class="touchdowns">
-              <p>
+              <p [style.color]="tint('touchdowns', player)">
                 @if (perGame) {
                   {{
                     (player.passTd + player.rushTd) / player.games
@@ -225,7 +225,7 @@
           ) {
             <!-- Pass Tds  -->
             <div class="pass-tds">
-              <p>
+              <p [style.color]="tint('pass-tds', player)">
                 @if (perGame) {
                   {{ player.passTd / player.games | number: "1.1-1" }}
                 } @else {
@@ -245,7 +245,7 @@
           ) {
             <!-- Rush TDs  -->
             <div class="rush-tds">
-              <p>
+              <p [style.color]="tint('rush-tds', player)">
                 @if (perGame) {
                   {{ player.rushTd / player.games | number: "1.1-1" }}
                 } @else {
@@ -265,7 +265,7 @@
           ) {
             <!-- Turnovers -->
             <div class="turnovers">
-              <p>
+              <p [style.color]="tint('turnovers', player)">
                 @if (perGame) {
                   {{
                     (player.ints + player.fumLost) / player.games
@@ -290,7 +290,7 @@
           ) {
             <!-- Pass Tds  -->
             <div class="interceptions">
-              <p>
+              <p [style.color]="tint('interceptions', player)">
                 @if (perGame) {
                   {{ player.ints / player.games | number: "1.1-1" }}
                 } @else {
@@ -310,7 +310,7 @@
           ) {
             <!-- Fumbles Lost  -->
             <div class="fumbles-lost">
-              <p>
+              <p [style.color]="tint('fumbles-lost', player)">
                 @if (perGame) {
                   {{ player.fumLost / player.games | number: "1.1-1" }}
                 } @else {
@@ -325,7 +325,7 @@
           @if (showUnused || this.filters.ratingValue) {
             <!-- Rating-->
             <div class="rating">
-              <p>{{ player.rating | number: "1.1-1" }}</p>
+              <p [style.color]="tint('rating', player)">{{ player.rating | number: "1.1-1" }}</p>
               <p
                 class="stat-label"
                 [title]="player.rating.toFixed(1) + ' QB Rating'"
@@ -344,7 +344,7 @@
           ) {
             <!-- EPA Per Play -->
             <div class="epa">
-              <p>{{ player.epaPerPlay === null ? "-" : (player.epaPerPlay | number: "1.2-2") }}</p>
+              <p [style.color]="tint('epa', player)">{{ player.epaPerPlay === null ? "-" : (player.epaPerPlay | number: "1.2-2") }}</p>
               <p
                 class="stat-label"
                 title="Expected Points Added per play (dropbacks and runs)"
@@ -358,7 +358,7 @@
           ) {
             <!-- CPOE -->
             <div class="cpoe">
-              <p>{{ player.cpoe === null ? "-" : (player.cpoe | number: "1.1-1") + "%" }}</p>
+              <p [style.color]="tint('cpoe', player)">{{ player.cpoe === null ? "-" : (player.cpoe | number: "1.1-1") + "%" }}</p>
               <p class="stat-label" title="Completion % Over Expected">CPOE</p>
             </div>
           }
@@ -367,7 +367,7 @@
           ) {
             <!-- Success Rate -->
             <div class="success-rate">
-              <p>
+              <p [style.color]="tint('success-rate', player)">
                 {{ player.successRate === null ? "-" : (player.successRate | percent: "1.0-0") }}
               </p>
               <p
@@ -383,7 +383,7 @@
           ) {
             <!-- Pressure → Sack -->
             <div class="pressureToSack">
-              <p>{{ player.pressureToSack === null ? "-" : (player.pressureToSack | percent: "1.0-0") }}</p>
+              <p [style.color]="tint('pressureToSack', player)">{{ player.pressureToSack === null ? "-" : (player.pressureToSack | percent: "1.0-0") }}</p>
               <p class="stat-label" title="Share of pressures that became sacks (lower is better)">Pressure → Sack</p>
             </div>
           }
@@ -392,7 +392,7 @@
           ) {
             <!-- Bad Throw % -->
             <div class="badThrowPct">
-              <p>{{ player.badThrowPct === null ? "-" : (player.badThrowPct | percent: "1.0-0") }}</p>
+              <p [style.color]="tint('badThrowPct', player)">{{ player.badThrowPct === null ? "-" : (player.badThrowPct | percent: "1.0-0") }}</p>
               <p class="stat-label" title="Bad throws per attempt (lower is better)">Bad Throw %</p>
             </div>
           }
@@ -401,7 +401,7 @@
           ) {
             <!-- Time To Throw -->
             <div class="timeToThrow">
-              <p>{{ player.timeToThrow === null ? "-" : (player.timeToThrow | number: "1.2-2") }}</p>
+              <p [style.color]="tint('timeToThrow', player)">{{ player.timeToThrow === null ? "-" : (player.timeToThrow | number: "1.2-2") }}</p>
               <p class="stat-label" title="Average seconds from snap to throw (quicker scores higher)">Time To Throw</p>
             </div>
           }
@@ -410,7 +410,7 @@
           ) {
             <!-- aDOT -->
             <div class="adot">
-              <p>{{ player.adot === null ? "-" : (player.adot | number: "1.1-1") }}</p>
+              <p [style.color]="tint('adot', player)">{{ player.adot === null ? "-" : (player.adot | number: "1.1-1") }}</p>
               <p class="stat-label" title="Average depth of target in yards">aDOT</p>
             </div>
           }
@@ -419,7 +419,7 @@
           ) {
             <!-- Aggressive % -->
             <div class="aggressiveness">
-              <p>{{ player.aggressiveness === null ? "-" : (player.aggressiveness | number: "1.0-0") + "%" }}</p>
+              <p [style.color]="tint('aggressiveness', player)">{{ player.aggressiveness === null ? "-" : (player.aggressiveness | number: "1.0-0") + "%" }}</p>
               <p class="stat-label" title="Share of throws into tight coverage">Aggressive %</p>
             </div>
           }
@@ -429,7 +429,7 @@
             <!-- Fantasy Points -->
             <div class="fantasy">
               @let points = fantasyPoints(player);
-              <p>{{ points === null ? "-" : (points | number: "1.1-1") }}</p>
+              <p [style.color]="tint('fantasy', player)">{{ points === null ? "-" : (points | number: "1.1-1") }}</p>
               <p
                 class="stat-label"
                 [title]="scoringLabels[fantasyScoring] + ' fantasy points'"
@@ -780,6 +780,16 @@
           (click)="$event.stopPropagation()"
         ></mat-slide-toggle>
         <span>Show Injured Players</span>
+      </div>
+      <div mat-menu-item (click)="$event.stopPropagation(); colorValues = !colorValues">
+        <!-- Color-coded values -->
+        <mat-slide-toggle hideIcon
+          color="accent"
+          class="slide-toggle"
+          [(ngModel)]="colorValues"
+          (click)="$event.stopPropagation()"
+        ></mat-slide-toggle>
+        <span>Color-Code Values</span>
       </div>
       <div mat-menu-item (click)="$event.stopPropagation(); cycleFantasyScoring()">
         <!-- Fantasy Scoring -->

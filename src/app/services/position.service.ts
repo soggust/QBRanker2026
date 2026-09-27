@@ -28,6 +28,8 @@ export interface RankerSettings {
   showUnused: boolean;
   showInjured: boolean;
   totalStats: boolean;
+  // Tint values green / red by how far above / below the list average they are
+  colorValues: boolean;
   fantasyScoring: FantasyScoring;
 }
 
@@ -37,6 +39,7 @@ const DEFAULT_SETTINGS: RankerSettings = {
   showUnused: false,
   showInjured: true,
   totalStats: true,
+  colorValues: true,
   fantasyScoring: 'ppr',
 };
 

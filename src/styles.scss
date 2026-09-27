@@ -324,3 +324,32 @@ html .mat-mdc-slide-toggle.mat-accent {
 .sidebar .mat-mdc-select:hover .mat-mdc-select-arrow {
   color: var(--scoreboard-led) !important;
 }
+
+// Slim scrollbars: the bar area stays 10px, but the track and thumb draw 6px inside it via a
+// transparent border; hovering the thumb drops the border so it grows to the full 10px
+::-webkit-scrollbar-track {
+  background-clip: padding-box !important;
+  border: 2px solid transparent;
+  border-radius: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  background-clip: padding-box !important;
+  border: 2px solid transparent;
+  border-radius: 8px;
+
+  &:hover {
+    border-width: 0;
+  }
+}
+
+// Standard scrollbar feedback: brighter on hover, deeper while dragging
+::-webkit-scrollbar-thumb:hover {
+  background: color-mix(in srgb, var(--scoreboard-led) 80%, #fff) !important;
+  background-clip: padding-box !important;
+}
+
+::-webkit-scrollbar-thumb:active {
+  background: color-mix(in srgb, var(--scoreboard-led) 80%, #000) !important;
+  background-clip: padding-box !important;
+}

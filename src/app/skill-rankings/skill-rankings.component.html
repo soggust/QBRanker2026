@@ -12,7 +12,7 @@
               [ngClass]="'group-' + group.id"
               [class.switched-off]="hidden[group.id]"
               [attr.aria-pressed]="!hidden[group.id]"
-              [title]="(hidden[group.id] ? 'Show ' : 'Hide ') + group.title + (hidden[group.id] ? ' (and count it again)' : ' (and stop counting it)')"
+              [title]="(hidden[group.id] ? 'Use ' : 'Don\'t use ') + group.title"
               (click)="toggleGroup(group.id)"
             >
               {{ group.title }}
@@ -67,7 +67,7 @@
               <div class="box support-box" [style.min-width.em]="group.stats.length * 5.5">
                 @for (stat of group.stats; track stat.key) {
                   <div [title]="stat.label + ': ' + stat.description">
-                    <p [style.color]="gradeColor(player, stat)">{{ format(player, stat) }}</p>
+                    <p [style.color]="gradeColor(player, stat) ?? valueColor(player, stat)">{{ format(player, stat) }}</p>
                     <p class="stat-label">{{ stat.label }}</p>
                   </div>
                 }
@@ -75,7 +75,7 @@
             } @else {
               @for (stat of group.stats; track stat.key) {
                 <div [title]="stat.label + ': ' + stat.description">
-                  <p [style.color]="gradeColor(player, stat)">{{ format(player, stat) }}</p>
+                  <p [style.color]="gradeColor(player, stat) ?? valueColor(player, stat)">{{ format(player, stat) }}</p>
                   <p class="stat-label" [title]="stat.description">
                     {{ stat.label }}
                   </p>
@@ -137,10 +137,25 @@
     <mat-menu #menu="matMenu" class="settings-menu">
       <div
         mat-menu-item
+        (click)="$event.stopPropagation(); totalStats = !totalStats"
+      >
+        <!-- Total Stats -->
+        <mat-slide-toggle hideIcon
+          color="accent"
+          [(ngModel)]="totalStats"
+          class="slide-toggle"
+          (click)="$event.stopPropagation()"
+        ></mat-slide-toggle>
+        <span>Combine Rush/Pass Stats</span>
+      </div>
+
+      <div
+        mat-menu-item
         (click)="$event.stopPropagation(); perGame = !perGame; sortPlayers()"
       >
         <!-- Per Game Stats-->
         <mat-slide-toggle hideIcon
+          id="pgs-menu"
           color="accent"
           class="slide-toggle"
           [(ngModel)]="perGame"
@@ -153,7 +168,7 @@
         mat-menu-item
         (click)="$event.stopPropagation(); showUnused = !showUnused"
       >
-        <!-- Show Unused Stats -->
+        <!-- Hide Unused Stats -->
         <mat-slide-toggle hideIcon
           color="accent"
           class="slide-toggle"
@@ -162,13 +177,37 @@
         ></mat-slide-toggle>
         <span>Show Unused Stats</span>
       </div>
-      @if (hasFantasy) {
+      <div
+        mat-menu-item
+        (click)="
+          $event.stopPropagation(); showInjured = !showInjured; sortPlayers()
+        "
+      >
+        <!-- Hide Injured -->
+        <mat-slide-toggle hideIcon
+          color="accent"
+          class="slide-toggle"
+          [(ngModel)]="showInjured"
+          (ngModelChange)="sortPlayers()"
+          (click)="$event.stopPropagation()"
+        ></mat-slide-toggle>
+        <span>Show Injured Players</span>
+      </div>
+      <div mat-menu-item (click)="$event.stopPropagation(); colorValues = !colorValues">
+        <!-- Color-coded values -->
+        <mat-slide-toggle hideIcon
+          color="accent"
+          class="slide-toggle"
+          [(ngModel)]="colorValues"
+          (click)="$event.stopPropagation()"
+        ></mat-slide-toggle>
+        <span>Color-Code Values</span>
+      </div>
       <div mat-menu-item (click)="$event.stopPropagation(); cycleFantasyScoring()">
         <!-- Fantasy Scoring -->
         <span class="lombardi menu-icon" aria-hidden="true"></span>
         <span>Fantasy Scoring: {{ scoringLabels[fantasyScoring] }}</span>
       </div>
-      }
     </mat-menu>
   </footer>
 </section>

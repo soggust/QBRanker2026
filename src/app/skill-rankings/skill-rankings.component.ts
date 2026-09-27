@@ -19,6 +19,7 @@ import {
 import { PositionService } from 'app/services/position.service';
 import { copyRankingsToClipboard } from 'app/utils/clipboard';
 import { SKILL_UNITS, weightedTotals } from 'app/utils/unit-scoring';
+import { tintColor } from 'app/utils/value-tint';
 
 // Average a per-QB value (0-12) for each team, weighted by how many games each QB started there
 function teamGrades(valueFor: (qbId: number) => number | undefined): Map<string, number> {
@@ -55,6 +56,38 @@ export class SkillRankingsComponent implements OnChanges {
   }
   set perGame(value: boolean) {
     this.positionService.updateSettings({ perGame: value });
+  }
+
+  // Same settings menu as the QB page; these two only change the QB table but stay in sync
+  get totalStats(): boolean {
+    return this.positionService.settings.totalStats;
+  }
+  set totalStats(value: boolean) {
+    this.positionService.updateSettings({ totalStats: value });
+  }
+
+  get showInjured(): boolean {
+    return this.positionService.settings.showInjured;
+  }
+  set showInjured(value: boolean) {
+    this.positionService.updateSettings({ showInjured: value });
+  }
+
+  get colorValues(): boolean {
+    return this.positionService.settings.colorValues;
+  }
+  set colorValues(value: boolean) {
+    this.positionService.updateSettings({ colorValues: value });
+  }
+
+  // Settings: color-coded values (grades and records keep their own coloring; Games is context only)
+  valueColor(player: SkillPlayer, stat: SkillStat): string | null {
+    if (!this.colorValues || stat.infoOnly || stat.format === 'grade' || stat.format === 'record') return null;
+    return tintColor(
+      this.value(player, stat),
+      this.playerList.map((p) => this.value(p, stat)),
+      !!stat.negative,
+    );
   }
 
   get showUnused(): boolean {
