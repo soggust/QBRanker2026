@@ -1085,3 +1085,9 @@
     color: var(--scoreboard-led);
   }
 }
+
+// A little space between each label and its slider so labels (and breakdown toggles) are easy to hit
+.sidebar .filters .slider-row,
+.sidebar .filters .sub-rows .slider-row {
+  row-gap: 0.45em;
+}

@@ -2,17 +2,6 @@ import { Component } from '@angular/core';
 import { PositionService } from './services/position.service';
 import { POSITIONS, Position } from './positions';
 
-// Remember whether the sidebar is collapsed on large screens
-const COLLAPSED_KEY = 'sidebarCollapsed';
-
-function readCollapsed(): boolean {
-  try {
-    return localStorage.getItem(COLLAPSED_KEY) === 'true';
-  } catch {
-    return false;
-  }
-}
-
 @Component({
     selector: 'app-root',
     templateUrl: './app.component.html',
@@ -34,7 +23,8 @@ export class AppComponent {
     HC: 'Head Coaches',
   };
 
-  sidebarCollapsed: boolean = readCollapsed();
+  // The filter menu always starts open on large screens; the drawer tab hides it for this visit
+  sidebarCollapsed: boolean = false;
 
   constructor(private positionService: PositionService) {}
 
@@ -44,10 +34,5 @@ export class AppComponent {
 
   toggleSidebar() {
     this.sidebarCollapsed = !this.sidebarCollapsed;
-    try {
-      localStorage.setItem(COLLAPSED_KEY, String(this.sidebarCollapsed));
-    } catch {
-      // Storage can be unavailable (private mode); the toggle still works for this visit
-    }
   }
 }
