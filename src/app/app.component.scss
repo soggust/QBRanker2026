@@ -246,15 +246,28 @@ main {
   }
 }
 
-// Big screens: roomier, darker position tabs
-@media (min-width: 1200px) {
-  .position-bar button:not(.collapse-toggle) {
-    background: rgba(0, 0, 0, 0.5);
-    padding: 0.6em 1.5em;
+// Position tabs are little scoreboard panels (LED dots on black) at every size; hover lifts the
+// panel a shade, like the drawer tab
+.position-bar button:not(.collapse-toggle) {
+  background: var(--scoreboard-dots), var(--scoreboard);
 
-    &:hover:not(.active) {
-      background: rgba(0, 0, 0, 0.62);
+  &:hover:not(.active) {
+    background: var(--scoreboard-dots), #1d1d1d;
+  }
+}
+
+// Big screens: roomier position tabs, in a taller bar (the table gives up the extra 6px)
+@media (min-width: 1200px) {
+  .position-bar {
+    height: 40px;
+
+    button:not(.collapse-toggle) {
+      padding: 1em 1.5em;
     }
+  }
+
+  main .content {
+    --position-bar-space: 52px;
   }
 }
 
@@ -375,9 +388,9 @@ main:not(.sidebar-collapsed) .drawer-tab .mat-icon {
   font-weight: 500;
 }
 
-// Unselected position pills: white border
+// Unselected position pills: no border
 .position-bar button:not(.active):not(.collapse-toggle) {
-  border-color: #fff;
+  border: none;
 }
 
 // The X on the drawer tab is white (the collapsed filter icon stays yellow)
@@ -414,4 +427,96 @@ main .drawer-tab:hover .mat-icon {
 // The active pill keeps the same lighter weight (its scoreboard font and color set it apart)
 .position-bar button.active:not(.collapse-toggle) {
   font-weight: 500;
+}
+
+// Phones: the eight position pills don't fit, so they become one dropdown styled like the active
+// pill (scoreboard panel, goalpost-yellow text); md+ keeps the pills
+.position-bar .position-select {
+  display: none;
+}
+
+@media (max-width: 575px) {
+  .position-bar {
+    button:not(.collapse-toggle) {
+      display: none;
+    }
+
+    .position-select {
+      appearance: none;
+      background:
+        linear-gradient(45deg, transparent 50%, var(--scoreboard-led) 50%)
+          calc(100% - 20px) 50% / 6px 6px no-repeat,
+        linear-gradient(135deg, var(--scoreboard-led) 50%, transparent 50%)
+          calc(100% - 14px) 50% / 6px 6px no-repeat,
+        var(--scoreboard-dots),
+        var(--scoreboard);
+      border: 1px solid var(--scoreboard-led);
+      border-radius: 14px;
+      color: var(--scoreboard-led);
+      cursor: pointer;
+      display: block;
+      flex: 1;
+      font-family: "Orbitron", sans-serif;
+      font-size: 0.9em;
+      font-weight: 500;
+      height: 100%;
+      letter-spacing: 1.5px;
+      padding: 0 2.5em 0 1em;
+      text-shadow: var(--scoreboard-glow);
+      text-transform: uppercase;
+
+      option {
+        background: var(--scoreboard);
+        color: #fff;
+        font-family: sans-serif;
+        text-shadow: none;
+      }
+    }
+  }
+}
+
+// Small screens: the same drawer tab opens the slide-out filters. It sits at the very bottom of the
+// left edge (down in the footer), and rides along the menu's right edge when the menu is open.
+@media (max-width: 1199px) {
+  main .drawer-tab {
+    bottom: 0.25em;
+    display: flex;
+    left: 0;
+    position: fixed;
+    top: auto;
+    transition: left 0.3s ease-out;
+    width: calc(3em + 3px);
+    z-index: 4;
+  }
+
+  // Overlaps the slide-out menu's 3px right border: the menu is min(100vw - 43px, max(26em, 50vw))
+  // wide at the sidebar's 13px font (26em = 338px), plus that border; 43px is this tab's width
+  main.menu-open .drawer-tab {
+    left: min(calc(100vw - 43px), max(338px, 50vw));
+    width: calc(3em + 3px);
+  }
+
+  // The X is a bit smaller and white, like the big-screen tab
+  main.menu-open .drawer-tab .mat-icon {
+    font-size: 1.2em;
+  }
+
+  main:not(.menu-open) .drawer-tab .mat-icon {
+    font-size: 1.5em;
+  }
+}
+
+// Position dropdown: white text and caret on the scoreboard panel
+@media (max-width: 575px) {
+  .position-bar .position-select {
+    background:
+      linear-gradient(45deg, transparent 50%, #fff 50%) calc(100% - 20px) 50% /
+        6px 6px no-repeat,
+      linear-gradient(135deg, #fff 50%, transparent 50%) calc(100% - 14px) 50% /
+        6px 6px no-repeat,
+      var(--scoreboard-dots),
+      var(--scoreboard);
+    color: #fff;
+    text-shadow: 0 0 6px rgba(255, 255, 255, 0.35);
+  }
 }

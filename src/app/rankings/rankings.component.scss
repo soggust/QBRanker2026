@@ -612,13 +612,13 @@ section {
 
     ul {
       // Leave room for the footer buttons below the table, plus the vertical margin
-      height: calc(100dvh - 7.5em - var(--position-bar-space, 0px));
+      height: calc(100dvh - 8em - var(--position-bar-space, 0px));
       margin: 1em 0 0;
       width: 100%;
     }
 
     footer {
-      padding-top: 1.25em;
+      padding-top: 1.75em;
       width: 100%;
 
       .ghost-div,
@@ -1430,7 +1430,7 @@ section.category-colors
   li.player:not(.header-row)
   > .col-group.group-advanced
   > div:first-child::before {
-  opacity: 0.85;
+  opacity: 0.7;
 }
 
 // An extra 0.5em between stat groups (Results | Basic | Advanced | Support), in the header and
@@ -1443,4 +1443,13 @@ section ul li.player > .col-group ~ .col-group > div:first-child {
 // right margin made the gap before Basic Stats wider than between the other groups)
 section ul li.player > .col-group > div.box.support-box.recent-box {
   margin-right: 0.5em;
+}
+
+// Small screens: no logo in the footer (the filters drawer tab sits down there instead)
+@media (max-width: 1199px) {
+  section.rankings-wrapper footer .ghost-div,
+  section.rankings-wrapper footer .sports-football,
+  section.rankings-wrapper footer h1 {
+    display: none;
+  }
 }

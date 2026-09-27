@@ -26,7 +26,20 @@ export class AppComponent {
   // The filter menu always starts open on large screens; the drawer tab hides it for this visit
   sidebarCollapsed: boolean = false;
 
+  // Below 1200px the filters are a slide-out menu (menuOpen); above, a sidebar that collapses
+  private readonly smallScreen = window.matchMedia('(max-width: 1199px)');
+
   constructor(private positionService: PositionService) {}
+
+  // The drawer tab opens / closes whichever the filters are on this screen size
+  get drawerOpen(): boolean {
+    return this.smallScreen.matches ? this.menuOpen : !this.sidebarCollapsed;
+  }
+
+  toggleDrawer() {
+    if (this.smallScreen.matches) this.menuOpen = !this.menuOpen;
+    else this.toggleSidebar();
+  }
 
   selectPosition(position: Position) {
     this.positionService.setPosition(position);

@@ -1,16 +1,17 @@
 <main [class.menu-open]="menuOpen" [class.sidebar-collapsed]="sidebarCollapsed">
-  <!-- Sidebar, with a pull tab on its right edge that slides it in and out (large screens) -->
+  <!-- Sidebar, with a pull tab on its right edge that slides it in and out (on small screens the
+       tab sits at the bottom of the left edge and rides along with the slide-out menu) -->
   <div class="sidebar-shell">
     <sidebar class="sidebar"></sidebar>
     <button
       type="button"
       class="drawer-tab"
-      (click)="toggleSidebar()"
-      [attr.aria-expanded]="!sidebarCollapsed"
-      [attr.aria-label]="sidebarCollapsed ? 'Show filters' : 'Hide filters'"
-      [title]="sidebarCollapsed ? 'Show filters' : 'Hide filters'"
+      (click)="toggleDrawer()"
+      [attr.aria-expanded]="drawerOpen"
+      [attr.aria-label]="drawerOpen ? 'Hide filters' : 'Show filters'"
+      [title]="drawerOpen ? 'Hide filters' : 'Show filters'"
     >
-      <mat-icon [fontIcon]="sidebarCollapsed ? 'filter_alt' : 'close'"></mat-icon>
+      <mat-icon [fontIcon]="drawerOpen ? 'close' : 'filter_alt'"></mat-icon>
     </button>
   </div>
   <div class="shade" (click)="menuOpen = false"></div>
@@ -30,6 +31,17 @@
           <span class="short">{{ tab }}</span>
         </button>
       }
+      <!-- Phones: one dropdown instead of eight pills (native, so it opens the phone's own picker) -->
+      <select
+        class="position-select"
+        aria-label="Position"
+        [value]="position"
+        (change)="selectPosition($any($event.target).value)"
+      >
+        @for (tab of positions; track tab) {
+          <option [value]="tab" [selected]="tab === position">{{ positionNames[tab] }}</option>
+        }
+      </select>
     </nav>
 
     <!-- Rankings (QB stays mounted so switching tabs doesn't refetch ESPN stats) -->
@@ -38,13 +50,4 @@
       <skill-rankings class="rankings" [position]="position"></skill-rankings>
     }
   </div>
-
-  <button class="menu-toggle" (click)="menuOpen = !menuOpen">
-    <mat-icon
-      aria-hidden="false"
-      aria-label="menu icon"
-      fontIcon="filter_alt"
-      class="menu"
-    ></mat-icon>
-  </button>
 </main>

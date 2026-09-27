@@ -210,7 +210,8 @@
 @media (max-width: 1199px) {
   .sidebar {
     background: var(--primary-800);
-    width: min(100vw, max(26em, 50vw));
+    // Leaves room on narrow phones for the 43px drawer tab (it overlaps the 3px border)
+    width: min(calc(100vw - 43px), max(26em, 50vw));
   }
 }
 
