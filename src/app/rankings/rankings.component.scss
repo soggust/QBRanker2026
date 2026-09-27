@@ -856,6 +856,8 @@ section ul li.player:not(.header-row) {
 // A little more room around the team logo in each row
 section ul li.player .team-logo {
   margin-right: 1.25em;
+  max-height: 1.75em;
+  width: 1.75em;
 }
 
 // ===========================================================================
@@ -1017,7 +1019,7 @@ section ul li.player:not(.header-row) {
 section ul li.player .count,
 section ul li.player .count.top-5,
 section ul li.player .count.top-10 {
-  margin-right: 1em;
+  margin-right: 1.5em;
 }
 
 // A barely-there pulse on the injury icon
@@ -1361,4 +1363,22 @@ section ul li.player div .player-name {
   flex: 1;
   min-width: 0;
   width: auto;
+}
+
+// Stat values sit 2px under the player name (names stay at 1.15em)
+section ul li.player:not(.header-row) > div:not(.box):not(.player-info) > p:not(.stat-label),
+section ul li.player:not(.header-row) > .col-group > div:not(.box) > p:not(.stat-label) {
+  font-size: 1em;
+}
+
+// Thin divider between the rank and the team logo, with equal space on both sides
+section ul li.player .count,
+section ul li.player .count.top-5,
+section ul li.player .count.top-10 {
+  margin-right: 1.25em;
+}
+
+section ul li.player .team-logo {
+  border-left: 1px solid rgba(255, 255, 255, 0.25);
+  padding-left: 1.25em;
 }
