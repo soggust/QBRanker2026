@@ -33,12 +33,16 @@ main {
   }
 
   // Large screens: sidebar hidden via the toggle in the position bar
+  // Collapsed: the shell slides left by the sidebar's width; only its pull tab stays visible
   &.sidebar-collapsed {
-    .sidebar {
-      display: none;
+    // 24.5em sidebar plus its 3px border
+    .sidebar-shell {
+      margin-left: calc(-24.5em - 3px);
     }
 
+    // Room on the left for the pull tab
     .content {
+      padding-left: 3em;
       width: 100%;
     }
   }
@@ -239,4 +243,124 @@ main {
   &:hover {
     background: rgba(0, 0, 0, 0.5);
   }
+}
+
+// Big screens: roomier, darker position tabs
+@media (min-width: 1200px) {
+  .position-bar button:not(.collapse-toggle) {
+    background: rgba(0, 0, 0, 0.5);
+    padding-left: 1.5em;
+    padding-right: 1.5em;
+
+    &:hover:not(.active) {
+      background: rgba(0, 0, 0, 0.62);
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Sidebar drawer with a pull tab
+// ---------------------------------------------------------------------------
+main .sidebar-shell {
+  flex-shrink: 0;
+  position: relative;
+  transition: margin-left 0.25s ease;
+  z-index: 4;
+}
+
+main .content {
+  transition: width 0.25s ease;
+}
+
+// The tab hangs off the sidebar's right edge, near the top, in the scoreboard style
+main .drawer-tab {
+  align-items: center;
+  background: var(--scoreboard-dots), var(--scoreboard);
+  border: 1px solid #3a3a3a;
+  border-left: none;
+  border-radius: 0 10px 10px 0;
+  box-shadow: 3px 2px 8px rgba(0, 0, 0, 0.35);
+  cursor: pointer;
+  display: flex;
+  height: 3.4em;
+  justify-content: center;
+  left: 100%;
+  padding: 0;
+  position: absolute;
+  top: 1.1em;
+  width: 2em;
+
+  .mat-icon {
+    color: var(--scoreboard-led);
+    font-size: 1.5em;
+    height: 1em;
+    width: 1em;
+  }
+
+  &:hover {
+    background: var(--scoreboard-dots), #1d1d1d;
+
+    .mat-icon {
+      color: #fff;
+    }
+  }
+}
+
+// Small screens use the slide-out menu and the filter button instead
+@media (max-width: 1199px) {
+  main .drawer-tab {
+    display: none;
+  }
+
+  main.sidebar-collapsed .sidebar-shell {
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 1199px) {
+  main.sidebar-collapsed .content {
+    padding-left: 0;
+  }
+}
+
+// The tab lines up with the menu's logo header: flush to the top, same 64px height
+main .drawer-tab {
+  border-radius: 0 0 10px 0;
+  border-top: none;
+  box-sizing: border-box;
+  height: 64px;
+  top: 0;
+}
+
+// A touch wider when it's the only piece showing
+main.sidebar-collapsed .drawer-tab {
+  width: 2.25em;
+}
+
+// Start the tab where the menu body begins (just under the 64px logo header), all corners on the right rounded
+main .drawer-tab {
+  border-radius: 0 10px 10px 0;
+  border-top: 1px solid #3a3a3a;
+  top: 64px;
+}
+
+// Seamless tab: no border, it overlaps the menu's 3px right border, and its LED dot pattern
+// lines up with the menu's (both pinned to the viewport)
+main .drawer-tab {
+  background: var(--scoreboard-dots), var(--scoreboard);
+  background-attachment: fixed;
+  border: none;
+  left: calc(100% - 3px);
+  top: calc(62px - 0.25em);
+  width: calc(2em + 3px);
+}
+
+main.sidebar-collapsed .drawer-tab {
+  width: calc(2.25em + 3px);
+}
+
+// Tab sits 8em down the menu's right edge (both right corners rounded)
+main .drawer-tab {
+  border-radius: 0 10px 10px 0;
+  top: 8em;
 }

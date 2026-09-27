@@ -1382,3 +1382,29 @@ section ul li.player .team-logo {
   border-left: 1px solid rgba(255, 255, 255, 0.25);
   padding-left: 1.25em;
 }
+
+// "Copied!" toast on the scoreboard panel
+.toast {
+  background: var(--scoreboard-dots), var(--scoreboard) !important;
+  border: 1px solid #3a3a3a;
+  color: #fff !important;
+}
+
+// Credit logos get a thin white outline so they lift off the grass
+section footer p img {
+  filter: drop-shadow(1px 0 0 rgba(255, 255, 255, 0.85)) drop-shadow(-1px 0 0 rgba(255, 255, 255, 0.85))
+    drop-shadow(0 1px 0 rgba(255, 255, 255, 0.85)) drop-shadow(0 -1px 0 rgba(255, 255, 255, 0.85));
+}
+
+// Taller header bar so the group outlines have room to breathe
+section ul li.player.header-row,
+section ul li.player.header-row:hover {
+  padding-bottom: 0.6em;
+  padding-top: 0.6em;
+}
+
+// A hair more room between the credit words and the outlined logos
+section footer p img {
+  margin-left: 0.65em;
+  margin-right: 0.65em;
+}

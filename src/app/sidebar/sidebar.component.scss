@@ -201,7 +201,9 @@
 ::-webkit-scrollbar-thumb {
   background: var(--accent-200);
   border-radius: 4px;
-  box-shadow: inset 0 0 0.5em rgba(0, 0, 0, 0.2), 0 0 1em rgba(0, 0, 0, 0.2);
+  box-shadow:
+    inset 0 0 0.5em rgba(0, 0, 0, 0.2),
+    0 0 1em rgba(0, 0, 0, 0.2);
 }
 
 // Small screens: the sidebar slides over the rankings, so make it solid and a bit wider
@@ -729,14 +731,24 @@
 }
 
 // Group titles keep the body font (the sidebar's LCD rule for slider values targets spans)
-.sidebar .filters .filter-group div.group-header button.group-toggle span.group-title {
+.sidebar
+  .filters
+  .filter-group
+  div.group-header
+  button.group-toggle
+  span.group-title {
   font-family: v.$font-base;
   font-size: 1em;
   text-transform: uppercase;
 }
 
 // Card icons take their group's color
-.sidebar .filters .filter-group div.group-header button.group-toggle .group-icon {
+.sidebar
+  .filters
+  .filter-group
+  div.group-header
+  button.group-toggle
+  .group-icon {
   color: var(--group-color);
 }
 
@@ -856,7 +868,6 @@
   }
 }
 
-
 // Dim a switched-off row's label, slider and value, but not its eye
 .sidebar .filters .slider-row.disabled {
   opacity: 1;
@@ -888,7 +899,12 @@
 }
 
 // A switched-off group's eye turns yellow so it stands out
-.sidebar .filters .filter-group.group-hidden div.group-header button.group-eye .mat-icon {
+.sidebar
+  .filters
+  .filter-group.group-hidden
+  div.group-header
+  button.group-eye
+  .mat-icon {
   color: var(--scoreboard-led);
 }
 
@@ -911,5 +927,51 @@
     letter-spacing: 0.5px;
     text-shadow: none;
     text-transform: uppercase;
+  }
+}
+
+// Pin the LED dot pattern to the viewport so the drawer tab's dots line up with it
+.sidebar {
+  background-attachment: fixed;
+}
+
+// Header / footer dividers: thin, long dashes (yard-line style) instead of solid lines
+.sidebar {
+  --yard-dash: repeating-linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.6) 0 14px,
+    transparent 14px 30px
+  );
+
+  .logo,
+  footer {
+    position: relative;
+  }
+
+  .logo {
+    border-bottom: none;
+  }
+
+  footer {
+    border-top: none;
+  }
+
+  .logo::after,
+  footer::before {
+    background: var(--yard-dash);
+    content: "";
+    height: 2px;
+    left: 0;
+    pointer-events: none;
+    position: absolute;
+    right: 0;
+  }
+
+  .logo::after {
+    bottom: 0;
+  }
+
+  footer::before {
+    top: 0;
   }
 }
