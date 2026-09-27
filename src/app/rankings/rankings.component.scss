@@ -1453,3 +1453,15 @@ section ul li.player > .col-group > div.box.support-box.recent-box {
     display: none;
   }
 }
+
+// The header bar and rows stack flush into one grid: the header is rounded only on top, rows are square
+section ul li.player.header-row,
+section ul li.player.header-row:hover {
+  border-radius: 0.7em 0.7em 0 0;
+  margin-bottom: 0;
+}
+
+section ul li.player:not(.header-row) {
+  border-radius: 0;
+  margin-bottom: 0;
+}
