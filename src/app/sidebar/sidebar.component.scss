@@ -216,7 +216,7 @@
 }
 
 // ===========================================================================
-// TURF EXPERIMENT (uncommitted): the sidebar is a scoreboard
+// Turf theme: the sidebar is a scoreboard
 // ===========================================================================
 .sidebar {
   background: var(--scoreboard-dots), var(--scoreboard);
@@ -1118,6 +1118,8 @@
   margin-left: 6.5px;
   margin-right: 0.75em;
   position: relative;
+  // Centered on the capital letters (flex centering sits it on the line box, a touch low)
+  top: -1.25px;
   transform: rotate(-40deg);
   width: 27px;
 
