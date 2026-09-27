@@ -30,6 +30,8 @@ export interface RankerSettings {
   totalStats: boolean;
   // Tint values green / red by how far above / below the list average they are
   colorValues: boolean;
+  // Carry each stat group's color down the rows (a thin bar before each group)
+  categoryColors: boolean;
   fantasyScoring: FantasyScoring;
 }
 
@@ -40,6 +42,7 @@ const DEFAULT_SETTINGS: RankerSettings = {
   showInjured: true,
   totalStats: true,
   colorValues: true,
+  categoryColors: true,
   fantasyScoring: 'ppr',
 };
 

@@ -9,7 +9,7 @@
   font-family: v.$font-base;
   height: 100dvh;
   position: relative;
-  width: 24.5em;
+  width: 26em;
 
   .expanded-panel {
     background: transparent;
@@ -1092,4 +1092,53 @@
 // Hovering a card header turns its title yellow, like the other hover states
 .sidebar .filters .filter-group div.group-header:hover button.group-toggle span.group-title {
   color: var(--scoreboard-led);
+}
+
+// Card headers take a light fill of their group's color, matching the table's header outlines
+.sidebar .filters .filter-group div.group-header {
+  background: color-mix(in srgb, var(--group-color) 16%, transparent);
+
+  &:hover {
+    background: color-mix(in srgb, var(--group-color) 24%, transparent);
+  }
+}
+
+// Logo football: the slider thumb's brown leather and white laces, tilted
+.sidebar .logo h1 .logo-football {
+  background: #a8602f;
+  border-radius: 50%;
+  box-shadow:
+    0 2px 5px rgba(0, 0, 0, 0.75),
+    0 0 0 1.5px rgba(0, 0, 0, 0.35);
+  display: inline-block;
+  flex: 0 0 auto;
+  height: 17px;
+  // Centered over the category card icons below (and clear of the sidebar's generic span margin)
+  margin-left: 6.5px;
+  margin-right: 0.75em;
+  position: relative;
+  transform: rotate(-40deg);
+  width: 27px;
+
+  &::after {
+    background:
+      linear-gradient(#fff, #fff) center / 100% 1.5px no-repeat,
+      repeating-linear-gradient(90deg, #fff 0 1.5px, transparent 1.5px 3px) center / 100% 6px no-repeat;
+    content: "";
+    height: 6px;
+    left: 50%;
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 11px;
+  }
+}
+
+// Slider eyes: a bigger click target with more room after the slider, and above the slider's
+// invisible input (which reaches past the track and used to swallow clicks on the eye)
+.sidebar .filters .slider-row button.slider-eye,
+.sidebar .filters .sub-rows .slider-row button.slider-eye {
+  margin-left: 0.7em;
+  padding: 0.45em;
+  z-index: 10;
 }

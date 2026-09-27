@@ -35,9 +35,9 @@ main {
   // Large screens: sidebar hidden via the toggle in the position bar
   // Collapsed: the shell slides left by the sidebar's width; only its pull tab stays visible
   &.sidebar-collapsed {
-    // 24.5em sidebar plus its 3px border
+    // 26em sidebar plus its 3px border
     .sidebar-shell {
-      margin-left: calc(-24.5em - 3px);
+      margin-left: calc(-26em - 3px);
     }
 
     // Room on the left for the pull tab
@@ -250,8 +250,7 @@ main {
 @media (min-width: 1200px) {
   .position-bar button:not(.collapse-toggle) {
     background: rgba(0, 0, 0, 0.5);
-    padding-left: 1.5em;
-    padding-right: 1.5em;
+    padding: 0.6em 1.5em;
 
     &:hover:not(.active) {
       background: rgba(0, 0, 0, 0.62);
@@ -410,4 +409,9 @@ main .drawer-tab:hover .mat-icon {
   main .content {
     padding-left: 3em;
   }
+}
+
+// The active pill keeps the same lighter weight (its scoreboard font and color set it apart)
+.position-bar button.active:not(.collapse-toggle) {
+  font-weight: 500;
 }

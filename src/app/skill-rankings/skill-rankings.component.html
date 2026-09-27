@@ -1,24 +1,12 @@
-<section class="rankings-wrapper spread">
+<section class="rankings-wrapper spread" [class.category-colors]="categoryColors">
   <ul #rankingsList cdkDropList (cdkDropListDropped)="drop($event)" columnHighlight>
-    <!-- Column headers, with chips that switch each stat group on / off -->
+    <!-- Column headers (stat groups switch on / off with the sidebar eyes) -->
     <li class="player header-row">
       <mat-icon fontIcon="drag_indicator" class="drag-indicator" style="visibility: hidden"></mat-icon>
       <div class="player-info">
-        <div class="group-chips">
-          @for (group of groups; track group.id) {
-            <button
-              type="button"
-              class="group-chip"
-              [ngClass]="'group-' + group.id"
-              [class.switched-off]="hidden[group.id]"
-              [attr.aria-pressed]="!hidden[group.id]"
-              [title]="(hidden[group.id] ? 'Use ' : 'Don\'t use ') + group.title"
-              (click)="toggleGroup(group.id)"
-            >
-              {{ group.title }}
-            </button>
-          }
-        </div>
+        <!-- Plain labels over the rank and name columns -->
+        <p class="stat-label header-rank">Rank</p>
+        <p class="stat-label header-name">{{ position === 'DEF' ? 'Team' : position === 'HC' ? 'Coach' : 'Player' }}</p>
       </div>
       @for (group of visibleGroups; track group.id) {
         <div class="col-group" [ngClass]="'group-' + group.id">
@@ -132,7 +120,7 @@
     </button>
 
     <!-- Toast -->
-    <div class="toast" [class.show]="isToastVisible">Copied!</div>
+    <div class="toast" [class.show]="isToastVisible">List copied to clipboard!</div>
 
     <!-- Settings Icon -->
     <button
@@ -146,6 +134,31 @@
 
     <!-- Menu -->
     <mat-menu #menu="matMenu" class="settings-menu">
+      <div mat-menu-item (click)="$event.stopPropagation(); cycleFantasyScoring()">
+        <!-- Fantasy Scoring -->
+        <span class="lombardi menu-icon" aria-hidden="true"></span>
+        <span>Fantasy Scoring: {{ scoringLabels[fantasyScoring] }}</span>
+      </div>
+      <div mat-menu-item (click)="$event.stopPropagation(); categoryColors = !categoryColors">
+        <!-- Category dividers: a colored bar before each stat group in the rows -->
+        <mat-slide-toggle hideIcon
+          color="accent"
+          class="slide-toggle"
+          [(ngModel)]="categoryColors"
+          (click)="$event.stopPropagation()"
+        ></mat-slide-toggle>
+        <span>Category Dividers</span>
+      </div>
+      <div mat-menu-item (click)="$event.stopPropagation(); colorValues = !colorValues">
+        <!-- Color-coded values -->
+        <mat-slide-toggle hideIcon
+          color="accent"
+          class="slide-toggle"
+          [(ngModel)]="colorValues"
+          (click)="$event.stopPropagation()"
+        ></mat-slide-toggle>
+        <span>Color-Coded Values</span>
+      </div>
       <div
         mat-menu-item
         (click)="$event.stopPropagation(); totalStats = !totalStats"
@@ -157,36 +170,7 @@
           class="slide-toggle"
           (click)="$event.stopPropagation()"
         ></mat-slide-toggle>
-        <span>Combine Rush/Pass Stats</span>
-      </div>
-
-      <div
-        mat-menu-item
-        (click)="$event.stopPropagation(); perGame = !perGame; sortPlayers()"
-      >
-        <!-- Per Game Stats-->
-        <mat-slide-toggle hideIcon
-          id="pgs-menu"
-          color="accent"
-          class="slide-toggle"
-          [(ngModel)]="perGame"
-          (ngModelChange)="sortPlayers()"
-          (click)="$event.stopPropagation()"
-        ></mat-slide-toggle>
-        <span>Use Per Game Stats</span>
-      </div>
-      <div
-        mat-menu-item
-        (click)="$event.stopPropagation(); showUnused = !showUnused"
-      >
-        <!-- Hide Unused Stats -->
-        <mat-slide-toggle hideIcon
-          color="accent"
-          class="slide-toggle"
-          [(ngModel)]="showUnused"
-          (click)="$event.stopPropagation()"
-        ></mat-slide-toggle>
-        <span>Show Unused Stats</span>
+        <span>Combined Rush/Pass Stats</span>
       </div>
       <div
         mat-menu-item
@@ -202,22 +186,35 @@
           (ngModelChange)="sortPlayers()"
           (click)="$event.stopPropagation()"
         ></mat-slide-toggle>
-        <span>Show Injured Players</span>
+        <span>Injured Players</span>
       </div>
-      <div mat-menu-item (click)="$event.stopPropagation(); colorValues = !colorValues">
-        <!-- Color-coded values -->
+      <div
+        mat-menu-item
+        (click)="$event.stopPropagation(); perGame = !perGame; sortPlayers()"
+      >
+        <!-- Per Game Stats-->
+        <mat-slide-toggle hideIcon
+          id="pgs-menu"
+          color="accent"
+          class="slide-toggle"
+          [(ngModel)]="perGame"
+          (ngModelChange)="sortPlayers()"
+          (click)="$event.stopPropagation()"
+        ></mat-slide-toggle>
+        <span>Per-Game Stats</span>
+      </div>
+      <div
+        mat-menu-item
+        (click)="$event.stopPropagation(); showUnused = !showUnused"
+      >
+        <!-- Hide Unused Stats -->
         <mat-slide-toggle hideIcon
           color="accent"
           class="slide-toggle"
-          [(ngModel)]="colorValues"
+          [(ngModel)]="showUnused"
           (click)="$event.stopPropagation()"
         ></mat-slide-toggle>
-        <span>Color-Code Values</span>
-      </div>
-      <div mat-menu-item (click)="$event.stopPropagation(); cycleFantasyScoring()">
-        <!-- Fantasy Scoring -->
-        <span class="lombardi menu-icon" aria-hidden="true"></span>
-        <span>Fantasy Scoring: {{ scoringLabels[fantasyScoring] }}</span>
+        <span>Unused Stats</span>
       </div>
     </mat-menu>
   </footer>

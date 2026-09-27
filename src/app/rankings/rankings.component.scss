@@ -77,7 +77,8 @@ section {
           &.top-10 {
             background: var(--accent-200);
             border-color: var(--primary-800);
-            box-shadow: inset 0 0 2em rgba(0, 0, 0, 0.15),
+            box-shadow:
+              inset 0 0 2em rgba(0, 0, 0, 0.15),
               0 0 1em rgba(0, 0, 0, 0.15);
             color: var(--primary-900);
             font-weight: bolder;
@@ -359,7 +360,8 @@ section {
       &.top-10 {
         background: var(--accent-200);
         border-color: var(--primary-800);
-        box-shadow: inset 0 0 2em rgba(0, 0, 0, 0.15),
+        box-shadow:
+          inset 0 0 2em rgba(0, 0, 0, 0.15),
           0 0 1em rgba(0, 0, 0, 0.15);
         color: var(--primary-900);
         font-weight: bolder;
@@ -591,7 +593,9 @@ section {
 ::-webkit-scrollbar-thumb {
   background: var(--accent-200);
   border-radius: 4px;
-  box-shadow: inset 0 0 0.5em rgba(0, 0, 0, 0.2), 0 0 1em rgba(0, 0, 0, 0.2);
+  box-shadow:
+    inset 0 0 0.5em rgba(0, 0, 0, 0.2),
+    0 0 1em rgba(0, 0, 0, 0.2);
 }
 
 ::-webkit-scrollbar-corner {
@@ -658,7 +662,10 @@ section ul {
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
     font-variant-numeric: tabular-nums;
     margin-bottom: 0.1em;
-    transition: transform 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+    transition:
+      transform 0.15s ease,
+      background 0.15s ease,
+      box-shadow 0.15s ease;
   }
 
   // Row hover and the column band (ColumnHighlightDirective) share one tint
@@ -741,7 +748,7 @@ section ul {
 
     // Letter grades as pills tinted by their own grade color
     div.box p > span,
-    div.box p[style*='color'] {
+    div.box p[style*="color"] {
       background: color-mix(in srgb, currentColor 20%, rgba(0, 0, 0, 0.45));
       border-radius: 0.4em;
       padding: 0.25em 1em;
@@ -868,7 +875,11 @@ section ul li.player {
   // Pebbled leather with a soft sheen and white stitching around the edge
   // Real pebbled leather texture (CC0, ambientCG Leather037) with a soft top sheen
   background:
-    radial-gradient(ellipse at 30% 0%, rgba(255, 255, 255, 0.16), transparent 60%),
+    radial-gradient(
+      ellipse at 30% 0%,
+      rgba(255, 255, 255, 0.16),
+      transparent 60%
+    ),
     linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(0, 0, 0, 0.18)),
     url("../../assets/textures/leather.jpg") 0 0 / 256px;
   border: 1px solid rgba(0, 0, 0, 0.45);
@@ -971,7 +982,6 @@ section ul li.player.header-row div .stat-label:hover {
   text-shadow: var(--text-shadow-small);
 }
 
-
 // Round 4: nothing in the header or grade boxes changes size on hover
 section ul li.header-row:hover > div.player-info,
 section ul li.header-row:hover > div.box {
@@ -1003,7 +1013,8 @@ section ul li.player:not(.header-row) {
       position: absolute;
       top: 50%;
       transform: translateY(-50%);
-      z-index: 2;
+      // Above the cell's invisible hover label (z-index 2), which otherwise swallows the clicks
+      z-index: 3;
     }
 
     &:hover .arrow-drop-down {
@@ -1136,82 +1147,25 @@ section ul li.player.header-row:hover > div.player-info {
   visibility: visible;
 }
 
-section ul li.header-row .group-chips {
-  align-items: center;
-  display: flex;
-  gap: 0.4em;
-  height: 100%;
-  padding-left: 0.2em;
-
-  button.group-chip {
-    align-items: center;
-    background: rgba(255, 205, 0, 0.12);
-    border: 1px solid var(--scoreboard-led);
-    border-radius: 999px;
-    color: var(--scoreboard-led);
-    cursor: pointer;
-    display: inline-flex;
-    font-family: v.$font-base;
-    font-size: 0.62em;
-    font-weight: 800;
-    gap: 0.3em;
-    letter-spacing: 0.5px;
-    padding: 0.25em 0.8em 0.25em 0.5em;
-    text-transform: uppercase;
-    transition: background 0.15s ease, color 0.15s ease;
-    white-space: nowrap;
-
-    .mat-icon {
-      font-size: 1.3em;
-      height: 1em;
-      width: 1em;
-    }
-
-    &:hover {
-      background: rgba(255, 205, 0, 0.25);
-    }
-
-    // Collapsed groups read as "off"
-    &.switched-off {
-      background: transparent;
-      border-color: rgba(255, 255, 255, 0.35);
-      color: rgba(255, 255, 255, 0.7);
-
-      &:hover {
-        border-color: var(--scoreboard-led);
-        color: var(--scoreboard-led);
-      }
-    }
-  }
-}
-
-
-// Chips sit side by side (row cells default to columns), and the header only shows labels
-section ul li.header-row div.group-chips {
-  flex-direction: row;
-  justify-content: flex-start;
-}
-
-
-// Chips start at the left edge of the row, over the drag handles
-section ul li.header-row div.group-chips {
-  margin-left: -42px;
-  padding-left: 0;
-
-  button.group-chip {
-    padding: 0.3em 0.85em;
-  }
-}
-
-
 // Column groups: wrappers don't affect layout; the first header label of each group gets the
 // group's icon in the group's color to mark where its columns start
 section ul li.player .col-group {
   display: contents;
 }
 
-section ul li.player.header-row .col-group > div:first-child > .stat-label::before,
-section ul li.player.header-row .col-group > div.box:first-child > div:first-child .stat-label::before {
+section
+  ul
+  li.player.header-row
+  .col-group
+  > div:first-child
+  > .stat-label::before,
+section
+  ul
+  li.player.header-row
+  .col-group
+  > div.box:first-child
+  > div:first-child
+  .stat-label::before {
   color: var(--group-color);
   content: var(--group-icon);
   direction: ltr;
@@ -1227,28 +1181,6 @@ section ul li.player.header-row .col-group > div.box:first-child > div:first-chi
   text-shadow: none;
   text-transform: none;
   vertical-align: -0.28em;
-}
-
-// Chips in their group's color; switched off = outlined gray
-section ul li.header-row .group-chips button.group-chip {
-  background: color-mix(in srgb, var(--group-color) 16%, transparent);
-  border-color: var(--group-color);
-  color: var(--group-color);
-
-  &:hover {
-    background: color-mix(in srgb, var(--group-color) 30%, transparent);
-  }
-
-  &.switched-off {
-    background: transparent;
-    border-color: rgba(255, 255, 255, 0.35);
-    color: rgba(255, 255, 255, 0.7);
-
-    &:hover {
-      border-color: var(--group-color);
-      color: var(--group-color);
-    }
-  }
 }
 
 // Cells inside a column-group wrapper are the row's real columns, so they get the same rules
@@ -1277,10 +1209,14 @@ section ul li.header-row:hover > .col-group > div.box {
   height: 1.5em;
 }
 
-section ul li.player:not(.header-row) > .col-group > div:not(.box) > p:not(.stat-label) {
+section
+  ul
+  li.player:not(.header-row)
+  > .col-group
+  > div:not(.box)
+  > p:not(.stat-label) {
   font-size: 1.15em;
 }
-
 
 // Recent and grade boxes: plain dark tint
 section ul li.player:not(.header-row) div.box {
@@ -1299,7 +1235,7 @@ section ul li.player.header-row > .col-group > div {
     border-bottom: 1px solid var(--line);
     border-top: 1px solid var(--line);
     bottom: 0;
-    content: '';
+    content: "";
     left: 0;
     pointer-events: none;
     position: absolute;
@@ -1329,24 +1265,14 @@ section ul li.player.header-row:hover > .col-group > div {
   height: 1.9em;
 }
 
-// Group outlines in the header bar take the group's color
+// Group outlines in the header bar take the group's color, with a light fill of it behind the labels
 section ul li.player.header-row > .col-group > div {
   --line: color-mix(in srgb, var(--group-color) 70%, transparent);
-}
 
-// Header chips show their group's icon before the label
-section ul li.header-row .group-chips button.group-chip::before {
-  content: var(--group-icon);
-  direction: ltr;
-  font-family: "Material Icons";
-  font-feature-settings: "liga";
-  font-size: 1.45em;
-  font-style: normal;
-  font-weight: normal;
-  letter-spacing: 0;
-  line-height: 1;
-  margin-right: 0.3em;
-  text-transform: none;
+  &::after {
+    background: color-mix(in srgb, var(--group-color) 16%, transparent);
+    z-index: -1;
+  }
 }
 
 // A little space before each group's first column (every row, so columns stay aligned); the
@@ -1367,8 +1293,17 @@ section ul li.player div .player-name {
 }
 
 // Stat values sit 2px under the player name (names stay at 1.15em)
-section ul li.player:not(.header-row) > div:not(.box):not(.player-info) > p:not(.stat-label),
-section ul li.player:not(.header-row) > .col-group > div:not(.box) > p:not(.stat-label) {
+section
+  ul
+  li.player:not(.header-row)
+  > div:not(.box):not(.player-info)
+  > p:not(.stat-label),
+section
+  ul
+  li.player:not(.header-row)
+  > .col-group
+  > div:not(.box)
+  > p:not(.stat-label) {
   font-size: 1em;
 }
 
@@ -1393,8 +1328,10 @@ section ul li.player .team-logo {
 
 // Credit logos get a thin white outline so they lift off the grass
 section footer p img {
-  filter: drop-shadow(1px 0 0 rgba(255, 255, 255, 0.85)) drop-shadow(-1px 0 0 rgba(255, 255, 255, 0.85))
-    drop-shadow(0 1px 0 rgba(255, 255, 255, 0.85)) drop-shadow(0 -1px 0 rgba(255, 255, 255, 0.85));
+  filter: drop-shadow(1px 0 0 rgba(255, 255, 255, 0.85))
+    drop-shadow(-1px 0 0 rgba(255, 255, 255, 0.85))
+    drop-shadow(0 1px 0 rgba(255, 255, 255, 0.85))
+    drop-shadow(0 -1px 0 rgba(255, 255, 255, 0.85));
 }
 
 // Taller header bar so the group outlines have room to breathe
@@ -1421,4 +1358,89 @@ section ul li.player.cdk-drag-preview:hover {
   cursor: grabbing;
   margin: 0;
   z-index: 10;
+}
+
+// Header: plain Rank / Name labels (no outline or tint), over the rank number and the name
+section ul li.player.header-row > div.player-info {
+  visibility: visible;
+
+  p.stat-label {
+    cursor: default;
+    margin: 0;
+  }
+
+  // Same width as the rank number, centered over it
+  p.header-rank {
+    flex: 0 0 auto;
+    justify-content: center;
+    width: 2.96em;
+  }
+
+  // Lines up with the start of the player name (past the divider and team logo)
+  p.header-name {
+    margin-left: 9.29em;
+  }
+}
+
+// Recent and the grade boxes sit on the plain row; each grade pill gets a border in its own
+// grade color (plus a soft shadow) to lift it off the leather
+section ul li.player:not(.header-row) div.box {
+  background: none;
+  box-shadow: none;
+
+  p > span,
+  p[style*="color"] {
+    border: 1px solid color-mix(in srgb, currentColor 60%, transparent);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+  }
+}
+
+// Category colors (settings menu, on by default): a thin bar in each stat group's color before
+// the group's first cell, carrying the header's group colors down the rows
+section.category-colors
+  ul
+  li.player:not(.header-row)
+  > .col-group
+  > div:first-child::before {
+  background: var(--group-color);
+  border-radius: 2px;
+  content: "";
+  height: 1.75em;
+  left: -0.5em;
+  opacity: 0.5;
+  pointer-events: none;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1px;
+}
+
+// Grade pills are a touch taller (there's room in the row)
+section ul li.player:not(.header-row) div.box {
+  p > span,
+  p[style*="color"] {
+    padding-bottom: 0.45em;
+    padding-top: 0.45em;
+  }
+}
+
+// Purple reads darker than the other group colors on the leather, so its bar is brighter
+section.category-colors
+  ul
+  li.player:not(.header-row)
+  > .col-group.group-advanced
+  > div:first-child::before {
+  opacity: 0.85;
+}
+
+// An extra 0.5em between stat groups (Results | Basic | Advanced | Support), in the header and
+// every row so the columns stay aligned; the space after the name column is unchanged
+section ul li.player > .col-group ~ .col-group > div:first-child {
+  margin-left: 1.1em;
+}
+
+// Recent is the last Results column, so it takes the normal cell spacing (the grade boxes' extra
+// right margin made the gap before Basic Stats wider than between the other groups)
+section ul li.player > .col-group > div.box.support-box.recent-box {
+  margin-right: 0.5em;
 }

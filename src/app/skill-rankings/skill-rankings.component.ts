@@ -75,6 +75,13 @@ export class SkillRankingsComponent implements OnChanges {
     this.positionService.updateSettings({ showInjured: value });
   }
 
+  get categoryColors(): boolean {
+    return this.positionService.settings.categoryColors;
+  }
+  set categoryColors(value: boolean) {
+    this.positionService.updateSettings({ categoryColors: value });
+  }
+
   get colorValues(): boolean {
     return this.positionService.settings.colorValues;
   }
@@ -256,11 +263,6 @@ export class SkillRankingsComponent implements OnChanges {
       .filter((group) => !this.hidden[group.id])
       .map((group) => ({ ...group, stats: this.combineYards(group.stats).filter((stat) => this.isShown(stat)) }))
       .filter((group) => group.stats.length);
-  }
-
-  // Header chips switch a group on / off, same as the sidebar eye
-  toggleGroup(id: StatGroupId) {
-    this.positionService.setSkillGroupHidden(this.position, id, !this.hidden[id]);
   }
 
   // Combine Rush/Pass: RBs show one Total Yards column where Rush Yards was, instead of Rush + Rec Yards

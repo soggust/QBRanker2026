@@ -353,3 +353,39 @@ html .mat-mdc-slide-toggle.mat-accent {
   background: color-mix(in srgb, var(--scoreboard-led) 80%, #000) !important;
   background-clip: padding-box !important;
 }
+
+// Sliders as a football field: 0-100 like the yards, a full line every 10 and a short hash every 5.
+// Drawn over the track (the football thumb still sits on top), a little taller than the track.
+.mat-mdc-slider .mdc-slider__track::after {
+  background:
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.6) 0 1px, transparent 1px 10%),
+    linear-gradient(rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.6)) right / 1px 100% no-repeat,
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.4) 0 1px, transparent 1px 5%) center / 100% 50% no-repeat;
+  bottom: -4px;
+  content: "";
+  left: -0.5px;
+  pointer-events: none;
+  position: absolute;
+  right: -0.5px;
+  top: -4px;
+}
+
+// The football casts a soft shadow so it lifts off the yellow fill
+.mdc-slider__thumb-knob {
+  box-shadow:
+    0 2px 5px rgba(0, 0, 0, 0.75),
+    0 0 0 1.5px rgba(0, 0, 0, 0.35) !important;
+}
+
+// The trophy takes the same width as a settings switch (the mask keeps it centered in that
+// space) so "Fantasy Scoring" lines up with the switch labels below it
+.mat-mdc-menu-panel .lombardi.menu-icon {
+  flex: 0 0 auto;
+  margin-right: 14px;
+  width: 46px;
+}
+
+// A little more room between each settings switch and its label
+.mat-mdc-menu-panel .mat-mdc-menu-item .slide-toggle {
+  margin-right: 7.5px;
+}

@@ -90,6 +90,13 @@ export class RankingsComponent {
     this.positionService.updateSettings({ showUnused: value });
   }
 
+  get categoryColors(): boolean {
+    return this.positionService.settings.categoryColors;
+  }
+  set categoryColors(value: boolean) {
+    this.positionService.updateSettings({ categoryColors: value });
+  }
+
   get colorValues(): boolean {
     return this.positionService.settings.colorValues;
   }
@@ -206,8 +213,6 @@ export class RankingsComponent {
   }
   isToastVisible: boolean = false;
 
-  // Column groups, switched on / off from the header chips or the sidebar eye
-  columnGroups = COLUMN_GROUPS;
   // Groups switched off with the sidebar eye: no columns, no weight in the ranking
   hidden: Record<ColumnGroupId, boolean> = { results: false, box: false, advanced: false, support: false };
   // Each group's contribution to a player's total
@@ -281,11 +286,6 @@ export class RankingsComponent {
       this.sortPlayersFunc(a, b),
     );
     this.publishRanks();
-  }
-
-  // Header chips switch a group on / off, same as the sidebar eye
-  toggleColumnGroup(id: ColumnGroupId) {
-    this.filterService.setGroupHidden(id, !this.hidden[id]);
   }
 
   // Set each QB's defense grade (whole number, 0-12) from their team's Defenses ranking
