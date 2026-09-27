@@ -1932,8 +1932,8 @@
         "airYardsShare": 0.059,
         "dropPct": 0.091
       },
-      "injuryStatus": "Active",
-      "injured": false
+      "injuryStatus": "Out",
+      "injured": true
     },
     {
       "id": 3043078,
@@ -2228,7 +2228,7 @@
         "airYardsShare": -0.027,
         "dropPct": 0
       },
-      "injuryStatus": "Questionable",
+      "injuryStatus": "Active",
       "injured": false
     },
     {
@@ -2598,7 +2598,7 @@
         "airYardsShare": -0.003,
         "dropPct": 0
       },
-      "injuryStatus": "Active",
+      "injuryStatus": "Questionable",
       "injured": false
     },
     {
@@ -2896,8 +2896,8 @@
         "airYardsShare": 0.566,
         "dropPct": 0.133
       },
-      "injuryStatus": "Questionable",
-      "injured": false
+      "injuryStatus": "Out",
+      "injured": true
     },
     {
       "id": 4374302,
@@ -3636,8 +3636,8 @@
         "airYardsShare": 0.254,
         "dropPct": 0
       },
-      "injuryStatus": "Questionable",
-      "injured": false
+      "injuryStatus": "Out",
+      "injured": true
     },
     {
       "id": 4426388,
@@ -4228,7 +4228,7 @@
         "airYardsShare": 0.289,
         "dropPct": 0
       },
-      "injuryStatus": "Questionable",
+      "injuryStatus": "Active",
       "injured": false
     },
     {
