@@ -646,6 +646,28 @@ function winProbability(game, home) {
 // point differential per game, and their team's net EPA/play
 // One row per team, named for the team's current head coach from ESPN (nflverse's coach
 // columns can lag offseason hires); a mid-season change credits the season to the current coach
+const turnover = (play) => play.interception === '1' || play.fumble_lost === '1';
+
+// 4th-down aggressiveness: share of 4th and 1-2 at midfield or beyond where the team went for it
+// (run or pass) instead of punting or kicking. Near-decided games (win probability under 5% or
+// over 95%) and plays wiped out by penalties are left out. null when there were no such spots.
+function fourthDownGoRate(plays, team) {
+  let goes = 0;
+  let spots = 0;
+  for (const play of plays) {
+    if (play.posteam !== team || play.down !== '4') continue;
+    const toGo = num(play.ydstogo);
+    const yardline = num(play.yardline_100);
+    const wp = num(play.wp);
+    if (toGo === null || toGo > 2 || yardline === null || yardline > 50) continue;
+    if (wp !== null && (wp < 0.05 || wp > 0.95)) continue;
+    if (play.play_type === 'run' || play.play_type === 'pass') goes++;
+    else if (play.play_type !== 'punt' && play.play_type !== 'field_goal') continue;
+    spots++;
+  }
+  return spots ? ratio(goes, spots) : null;
+}
+
 function coachUnits({ pbp, games, headCoaches }) {
   const coaches = Object.keys(TEAM_ICONS)
     .map((team) => {
@@ -706,6 +728,14 @@ function coachUnits({ pbp, games, headCoaches }) {
           plays.filter((play) => play.penalty === '1' && play.penalty_team === team).length / played.length,
           1
         ),
+        // Takeaways minus giveaways (interceptions + lost fumbles) per game
+        turnoverDiffPerGame: round(
+          (plays.filter((play) => play.defteam === team && turnover(play)).length -
+            plays.filter((play) => play.posteam === team && turnover(play)).length) /
+            played.length,
+          1
+        ),
+        fourthDownGoPct: fourthDownGoRate(plays, team),
       },
     };
   });

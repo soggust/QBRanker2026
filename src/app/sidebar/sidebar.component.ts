@@ -5,27 +5,6 @@ import { Filters } from 'app/types';
 import { QB_PRESETS, QB_PRESET_ORDER, QbPresetKey } from 'app/qb-presets';
 import { FilterKey, QB_FILTER_GROUPS, QbGroupId } from 'app/qb-filter-groups';
 
-const GROUPS_KEY = 'qbFilterGroups';
-const SKILL_GROUPS_KEY = 'skillFilterGroups';
-
-// Open cards on the other tabs, keyed "WR.advanced" etc. (all collapsed on a first visit)
-function readSkillGroupOpen(): Record<string, boolean> {
-  try {
-    return JSON.parse(localStorage.getItem(SKILL_GROUPS_KEY) ?? '{}');
-  } catch {
-    return {};
-  }
-}
-
-// Every card starts collapsed on a first visit; after that the open / closed state is remembered
-function readGroupOpen(): Record<QbGroupId, boolean> {
-  const fallback = { results: false, box: false, advanced: false, support: false };
-  try {
-    return { ...fallback, ...JSON.parse(localStorage.getItem(GROUPS_KEY) ?? '{}') };
-  } catch {
-    return fallback;
-  }
-}
 import {
   Position,
   SKILL_STATS,
@@ -78,33 +57,37 @@ export class SidebarComponent {
   adotValue: number = 50;
   aggressivenessValue: number = 50;
   recencyValue: number = 50;
-  // Slider groups: which groups and sub-slider rows are open (groups remembered per browser)
+  // Slider groups: which groups and sub-slider rows are open (every card starts collapsed on
+  // each page load; open / closed isn't remembered)
   qbGroups = QB_FILTER_GROUPS;
-  groupOpen: Record<QbGroupId, boolean> = readGroupOpen();
+  groupOpen: Record<QbGroupId, boolean> = { results: false, box: false, advanced: false, support: false };
   rowOpen: Partial<Record<FilterKey, boolean>> = {};
   // Other tabs: this position's stat groups, which are open, and which are switched off
   skillGroupList: SkillStatGroup[] = [];
-  skillGroupOpen: Record<string, boolean> = readSkillGroupOpen();
+  skillGroupOpen: Record<string, boolean> = {};
   skillHidden: Partial<Record<StatGroupId, boolean>> = {};
   private savedSkillValues: Record<string, number> = {};
   // Values sliders had before their eye switched them off
   private savedValues: Partial<Record<FilterKey, number>> = {};
   hiddenGroups: Record<QbGroupId, boolean> = { results: false, box: false, advanced: false, support: false };
-  preset: string = 'default';
-  qbPresets = QB_PRESET_ORDER.map((key) => ({ key, ...QB_PRESETS[key] }));
+  // null: the default weights, shown as the dropdown's "Presets..." placeholder ("Defaults" isn't a
+  // pickable preset; the Defaults button resets to it)
+  preset: string | null = null;
+  qbPresets = QB_PRESET_ORDER.filter((key) => key !== 'default').map((key) => ({ key, ...QB_PRESETS[key] }));
 
   // Current position (switched from the bar above the rankings)
   position: Position = 'QB';
   skillStats: SkillStat[] = [];
   skillWeights: SkillWeights = {};
-  skillPresets: Record<SkillPosition, SkillPreset | 'custom'> = {
-    RB: 'default',
-    WR: 'default',
-    TE: 'default',
-    K: 'default',
-    P: 'default',
-    DEF: 'default',
-    HC: 'default',
+  // Per tab, the same as preset above (null = default weights, shown as "Presets...")
+  skillPresets: Record<SkillPosition, SkillPreset | 'custom' | null> = {
+    RB: null,
+    WR: null,
+    TE: null,
+    K: null,
+    P: null,
+    DEF: null,
+    HC: null,
   };
 
   constructor(
@@ -159,11 +142,6 @@ export class SidebarComponent {
   toggleSkillGroup(id: StatGroupId) {
     const key = `${this.position}.${id}`;
     this.skillGroupOpen = { ...this.skillGroupOpen, [key]: !this.skillGroupOpen[key] };
-    try {
-      localStorage.setItem(SKILL_GROUPS_KEY, JSON.stringify(this.skillGroupOpen));
-    } catch {
-      // Storage unavailable; the cards still open and close for this visit
-    }
   }
 
   toggleSkillGroupHidden(id: StatGroupId) {
@@ -194,12 +172,13 @@ export class SidebarComponent {
   resetDefaults(): void {
     const skill = this.skillPosition;
     if (!skill) {
-      this.preset = 'default';
       this.reset();
+      this.preset = null;
       return;
     }
-    this.skillPresets[skill] = 'default';
-    this.onSkillPresetChange();
+    this.skillPresets[skill] = null;
+    this.skillWeights = presetWeights(skill, 'default');
+    this.saveSkillWeights();
   }
 
   clearAll(): void {
@@ -252,7 +231,7 @@ export class SidebarComponent {
   }
 
   onPresetChange() {
-    if (this.preset !== 'custom') this.applyPreset(this.preset as QbPresetKey);
+    if (this.preset && this.preset !== 'custom') this.applyPreset(this.preset as QbPresetKey);
   }
 
   setCustomFilter() {
@@ -300,11 +279,6 @@ export class SidebarComponent {
 
   setGroupOpen(id: QbGroupId, open: boolean) {
     this.groupOpen = { ...this.groupOpen, [id]: open };
-    try {
-      localStorage.setItem(GROUPS_KEY, JSON.stringify(this.groupOpen));
-    } catch {
-      // Storage unavailable; the groups still open and close for this visit
-    }
   }
 
   reset() {

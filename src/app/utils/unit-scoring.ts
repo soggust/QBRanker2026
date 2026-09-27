@@ -5,7 +5,8 @@ export const SKILL_UNITS = skillData as Record<SkillPosition, SkillPlayer[]>;
 
 // Weighted total for each unit. Stats are scaled against the max, or into 0.5-1 of the league
 // range when signed; negative stats subtract; support grades (0-12) subtract at a fifth strength,
-// matching the QB support bias. A missing value (null) scores as the league's worst.
+// matching the QB support bias. A missing value (null) scores as the league's worst (or the
+// league average for stats flagged missingIsAverage).
 export function weightedTotals<T>(
   units: T[],
   stats: SkillStat[],
@@ -17,8 +18,10 @@ export function weightedTotals<T>(
     const weight = weights[stat.key] ?? 0;
     if (!weight || stat.infoOnly) continue;
 
-    const values = units.map((unit) => value(unit, stat));
-    const known = values.filter((v): v is number => v !== null);
+    const known = units.map((unit) => value(unit, stat)).filter((v): v is number => v !== null);
+    const average = known.length ? known.reduce((a, b) => a + b, 0) / known.length : null;
+    // Stats where "-" just means no chances yet count missing values as the league average
+    const values = units.map((unit) => value(unit, stat) ?? (stat.missingIsAverage ? average : null));
     const max = known.length ? Math.max(...known) : 0;
     const min = known.length ? Math.min(...known) : 0;
     units.forEach((unit, i) => {

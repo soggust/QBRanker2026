@@ -1,5 +1,7 @@
+import { gradesForTeam } from 'StaticData/StaticData';
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, combineLatest, distinctUntilChanged, map, shareReplay } from 'rxjs';
+import { SKILL_UNITS, coachingGrades, defenseGrades, gradesByRank } from 'app/utils/unit-scoring';
 import {
   FantasyScoring,
   POSITIONS,
@@ -10,16 +12,17 @@ import {
   presetWeights,
 } from 'app/positions';
 
-// Groups switched off with the eye / header chips, per position (remembered per browser)
+// Groups switched off with the sidebar eye, per position (every group is on at each page load)
 export type HiddenGroups = Partial<Record<SkillPosition, Partial<Record<StatGroupId, boolean>>>>;
-const SKILL_HIDDEN_KEY = 'skillHiddenGroups';
 
-function readSkillHidden(): HiddenGroups {
-  try {
-    return JSON.parse(localStorage.getItem(SKILL_HIDDEN_KEY) ?? '{}');
-  } catch {
-    return {};
+// Rankings, grades, filters and open cards start fresh on every page load; only the settings menu
+// is remembered. Clear what older versions of the app saved for the rest.
+try {
+  for (const key of ['qbFilterGroups', 'skillFilterGroups', 'qbHiddenGroups', 'skillHiddenGroups']) {
+    localStorage.removeItem(key);
   }
+} catch {
+  // Storage unavailable: nothing to clear
 }
 
 // Settings-menu toggles, shared by every position and remembered per browser
@@ -60,6 +63,11 @@ function linkedPosition(): Position {
   return POSITIONS.find((position) => position === linked) ?? 'QB';
 }
 
+export interface UnitOrder {
+  ids: string[];
+  manual: boolean;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -78,6 +86,58 @@ export class PositionService {
     HC: presetWeights('HC', 'default'),
   });
   public weights$ = this.weightsSubject.asObservable();
+
+  // Each tab's order when it was last shown (unit ids, drags included), so a tab keeps its list
+  // when you switch away and back. manual: the order was dragged by hand, so it stays put until
+  // that tab's own sliders or settings re-sort it.
+  private unitOrdersSubject = new BehaviorSubject<Partial<Record<SkillPosition, UnitOrder>>>({});
+
+  unitOrder(position: SkillPosition): UnitOrder | undefined {
+    return this.unitOrdersSubject.value[position];
+  }
+
+  setUnitOrder(position: SkillPosition, ids: string[], manual: boolean): void {
+    const current = this.unitOrdersSubject.value[position];
+    if (current && current.manual === manual && current.ids.join('|') === ids.join('|')) return;
+    this.unitOrdersSubject.next({ ...this.unitOrdersSubject.value, [position]: { ids, manual } });
+  }
+
+  // Team defense / coaching grades (0-12) from the Defenses / Head Coaches tabs as last shown, drags
+  // included (#1 = A+). Before a tab has been opened, from its default slider ranking. Each tab only
+  // re-sorts while it's on screen, so the two can feed each other without looping.
+  public defenseGrades$ = this.teamGradesFrom('DEF');
+  public coachingGrades$ = this.teamGradesFrom('HC');
+
+  private teamGradesFrom(position: 'DEF' | 'HC'): Observable<Map<string, number>> {
+    return combineLatest([this.weightsSubject, this.unitOrdersSubject]).pipe(
+      map(([weights, orders]) => {
+        const order = orders[position];
+        if (!order) return position === 'DEF' ? defenseGrades(weights.DEF) : coachingGrades(weights.HC);
+        const byId = new Map(SKILL_UNITS[position].map((unit) => [unit.gsisId, unit]));
+        return gradesByRank(order.ids.map((id) => byId.get(id)).filter((unit) => !!unit));
+      }),
+      distinctUntilChanged((a, b) => a.size === b.size && [...a].every(([team, grade]) => b.get(team) === grade)),
+      shareReplay({ bufferSize: 1, refCount: false }),
+    );
+  }
+
+  // O-line grades changed with the +/- arrows, per team (logo path -> 0-12). Shared by the QB and
+  // RB pages, so nudging a team's O-line on either tab moves it for every QB and RB on that team.
+  private olineOverridesSubject = new BehaviorSubject<Record<string, number>>({});
+  public olineOverrides$ = this.olineOverridesSubject.asObservable();
+
+  // A team's O-line grade: the adjusted one if changed, otherwise the blended team grade
+  olineGrade(teamLogo: string): number {
+    return this.olineOverridesSubject.value[teamLogo] ?? gradesForTeam(teamLogo).oline;
+  }
+
+  // One grade step up or down (stays within F-A+)
+  stepOlineGrade(teamLogo: string, direction: 'up' | 'down'): void {
+    const current = this.olineGrade(teamLogo);
+    const next = Math.min(12, Math.max(0, current + (direction === 'up' ? 1 : -1)));
+    if (next === current) return;
+    this.olineOverridesSubject.next({ ...this.olineOverridesSubject.value, [teamLogo]: next });
+  }
 
   // Current QB order (ESPN ids, best first) from the QB page, used for receivers' QB Play grade
   private qbRanksSubject = new BehaviorSubject<number[]>([]);
@@ -120,7 +180,7 @@ export class PositionService {
     this.weightsSubject.next({ ...this.weightsSubject.value, [position]: { ...weights } });
   }
 
-  private skillHiddenSubject = new BehaviorSubject<HiddenGroups>(readSkillHidden());
+  private skillHiddenSubject = new BehaviorSubject<HiddenGroups>({});
   public skillHidden$ = this.skillHiddenSubject.asObservable();
 
   skillHiddenGroups(position: SkillPosition): Partial<Record<StatGroupId, boolean>> {
@@ -131,11 +191,6 @@ export class PositionService {
     const current = this.skillHiddenSubject.value;
     const next = { ...current, [position]: { ...current[position], [id]: hidden } };
     this.skillHiddenSubject.next(next);
-    try {
-      localStorage.setItem(SKILL_HIDDEN_KEY, JSON.stringify(next));
-    } catch {
-      // Storage unavailable; the setting still applies for this visit
-    }
   }
 
   setQbRanks(ids: number[]): void {

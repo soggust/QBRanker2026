@@ -722,7 +722,9 @@
         "pointDiffPerGame": 5,
         "netEpa": 0.155,
         "oneScoreWinPct": 0,
-        "penaltiesPerGame": 10.5
+        "penaltiesPerGame": 10.5,
+        "turnoverDiffPerGame": 1,
+        "fourthDownGoPct": 1
       }
     },
     {
@@ -741,7 +743,9 @@
         "pointDiffPerGame": 12,
         "netEpa": 0.208,
         "oneScoreWinPct": 1,
-        "penaltiesPerGame": 7.5
+        "penaltiesPerGame": 7.5,
+        "turnoverDiffPerGame": 1,
+        "fourthDownGoPct": 1
       }
     },
     {
@@ -760,7 +764,9 @@
         "pointDiffPerGame": 8,
         "netEpa": 0.073,
         "oneScoreWinPct": 0,
-        "penaltiesPerGame": 10
+        "penaltiesPerGame": 10,
+        "turnoverDiffPerGame": -1,
+        "fourthDownGoPct": 1
       }
     },
     {
@@ -779,7 +785,9 @@
         "pointDiffPerGame": 4.5,
         "netEpa": 0.06,
         "oneScoreWinPct": 0,
-        "penaltiesPerGame": 7
+        "penaltiesPerGame": 7,
+        "turnoverDiffPerGame": 0.5,
+        "fourthDownGoPct": null
       }
     },
     {
@@ -798,7 +806,9 @@
         "pointDiffPerGame": -4.5,
         "netEpa": -0.091,
         "oneScoreWinPct": 1,
-        "penaltiesPerGame": 9
+        "penaltiesPerGame": 9,
+        "turnoverDiffPerGame": 1,
+        "fourthDownGoPct": null
       }
     },
     {
@@ -817,7 +827,9 @@
         "pointDiffPerGame": -9.5,
         "netEpa": -0.086,
         "oneScoreWinPct": 0,
-        "penaltiesPerGame": 5.5
+        "penaltiesPerGame": 5.5,
+        "turnoverDiffPerGame": -0.5,
+        "fourthDownGoPct": 1
       }
     },
     {
@@ -836,7 +848,9 @@
         "pointDiffPerGame": 4.5,
         "netEpa": 0.129,
         "oneScoreWinPct": null,
-        "penaltiesPerGame": 10
+        "penaltiesPerGame": 10,
+        "turnoverDiffPerGame": 2.5,
+        "fourthDownGoPct": null
       }
     },
     {
@@ -855,7 +869,9 @@
         "pointDiffPerGame": -9.5,
         "netEpa": -0.165,
         "oneScoreWinPct": 0,
-        "penaltiesPerGame": 8
+        "penaltiesPerGame": 8,
+        "turnoverDiffPerGame": -1,
+        "fourthDownGoPct": 0.667
       }
     },
     {
@@ -874,7 +890,9 @@
         "pointDiffPerGame": -18,
         "netEpa": -0.273,
         "oneScoreWinPct": null,
-        "penaltiesPerGame": 7.5
+        "penaltiesPerGame": 7.5,
+        "turnoverDiffPerGame": 0,
+        "fourthDownGoPct": 0.5
       }
     },
     {
@@ -893,7 +911,9 @@
         "pointDiffPerGame": 5.5,
         "netEpa": 0.182,
         "oneScoreWinPct": 0,
-        "penaltiesPerGame": 8.5
+        "penaltiesPerGame": 8.5,
+        "turnoverDiffPerGame": 0,
+        "fourthDownGoPct": null
       }
     },
     {
@@ -912,7 +932,9 @@
         "pointDiffPerGame": -12,
         "netEpa": -0.272,
         "oneScoreWinPct": null,
-        "penaltiesPerGame": 7.5
+        "penaltiesPerGame": 7.5,
+        "turnoverDiffPerGame": -2,
+        "fourthDownGoPct": null
       }
     },
     {
@@ -931,7 +953,9 @@
         "pointDiffPerGame": 7.5,
         "netEpa": 0.202,
         "oneScoreWinPct": 1,
-        "penaltiesPerGame": 7.5
+        "penaltiesPerGame": 7.5,
+        "turnoverDiffPerGame": 1,
+        "fourthDownGoPct": 1
       }
     },
     {
@@ -950,7 +974,9 @@
         "pointDiffPerGame": -7,
         "netEpa": -0.243,
         "oneScoreWinPct": 1,
-        "penaltiesPerGame": 6.5
+        "penaltiesPerGame": 6.5,
+        "turnoverDiffPerGame": 0.5,
+        "fourthDownGoPct": 1
       }
     },
     {
@@ -969,7 +995,9 @@
         "pointDiffPerGame": 3,
         "netEpa": 0.042,
         "oneScoreWinPct": 0.5,
-        "penaltiesPerGame": 5.5
+        "penaltiesPerGame": 5.5,
+        "turnoverDiffPerGame": -0.5,
+        "fourthDownGoPct": 1
       }
     },
     {
@@ -988,7 +1016,9 @@
         "pointDiffPerGame": 11.5,
         "netEpa": 0.165,
         "oneScoreWinPct": 1,
-        "penaltiesPerGame": 3
+        "penaltiesPerGame": 3,
+        "turnoverDiffPerGame": 1.5,
+        "fourthDownGoPct": 1
       }
     },
     {
@@ -1007,7 +1037,9 @@
         "pointDiffPerGame": -5.7,
         "netEpa": -0.1,
         "oneScoreWinPct": 0,
-        "penaltiesPerGame": 7
+        "penaltiesPerGame": 7,
+        "turnoverDiffPerGame": -2,
+        "fourthDownGoPct": 0.333
       }
     },
     {
@@ -1026,7 +1058,9 @@
         "pointDiffPerGame": 13,
         "netEpa": 0.213,
         "oneScoreWinPct": null,
-        "penaltiesPerGame": 6
+        "penaltiesPerGame": 6,
+        "turnoverDiffPerGame": 1,
+        "fourthDownGoPct": 0.667
       }
     },
     {
@@ -1045,7 +1079,9 @@
         "pointDiffPerGame": 21,
         "netEpa": 0.393,
         "oneScoreWinPct": null,
-        "penaltiesPerGame": 4.5
+        "penaltiesPerGame": 4.5,
+        "turnoverDiffPerGame": 0.5,
+        "fourthDownGoPct": 0
       }
     },
     {
@@ -1064,7 +1100,9 @@
         "pointDiffPerGame": 8.5,
         "netEpa": 0.147,
         "oneScoreWinPct": 0,
-        "penaltiesPerGame": 3.5
+        "penaltiesPerGame": 3.5,
+        "turnoverDiffPerGame": 1,
+        "fourthDownGoPct": 0
       }
     },
     {
@@ -1083,7 +1121,9 @@
         "pointDiffPerGame": -11.7,
         "netEpa": -0.201,
         "oneScoreWinPct": 1,
-        "penaltiesPerGame": 10.7
+        "penaltiesPerGame": 10.7,
+        "turnoverDiffPerGame": -0.7,
+        "fourthDownGoPct": 1
       }
     },
     {
@@ -1102,7 +1142,9 @@
         "pointDiffPerGame": -6,
         "netEpa": -0.041,
         "oneScoreWinPct": null,
-        "penaltiesPerGame": 7
+        "penaltiesPerGame": 7,
+        "turnoverDiffPerGame": 1,
+        "fourthDownGoPct": 0.5
       }
     },
     {
@@ -1121,7 +1163,9 @@
         "pointDiffPerGame": 13.5,
         "netEpa": 0.268,
         "oneScoreWinPct": 1,
-        "penaltiesPerGame": 6.5
+        "penaltiesPerGame": 6.5,
+        "turnoverDiffPerGame": 1.5,
+        "fourthDownGoPct": 1
       }
     },
     {
@@ -1140,7 +1184,9 @@
         "pointDiffPerGame": -5,
         "netEpa": -0.079,
         "oneScoreWinPct": 1,
-        "penaltiesPerGame": 6
+        "penaltiesPerGame": 6,
+        "turnoverDiffPerGame": 0.5,
+        "fourthDownGoPct": null
       }
     },
     {
@@ -1159,7 +1205,9 @@
         "pointDiffPerGame": 7,
         "netEpa": 0.107,
         "oneScoreWinPct": 0,
-        "penaltiesPerGame": 6.5
+        "penaltiesPerGame": 6.5,
+        "turnoverDiffPerGame": -1.5,
+        "fourthDownGoPct": null
       }
     },
     {
@@ -1178,7 +1226,9 @@
         "pointDiffPerGame": 3,
         "netEpa": -0.017,
         "oneScoreWinPct": 1,
-        "penaltiesPerGame": 4.5
+        "penaltiesPerGame": 4.5,
+        "turnoverDiffPerGame": -1,
+        "fourthDownGoPct": 1
       }
     },
     {
@@ -1197,7 +1247,9 @@
         "pointDiffPerGame": -8.5,
         "netEpa": -0.126,
         "oneScoreWinPct": 0,
-        "penaltiesPerGame": 5.5
+        "penaltiesPerGame": 5.5,
+        "turnoverDiffPerGame": 0.5,
+        "fourthDownGoPct": 1
       }
     },
     {
@@ -1216,7 +1268,9 @@
         "pointDiffPerGame": 1,
         "netEpa": 0.084,
         "oneScoreWinPct": null,
-        "penaltiesPerGame": 5
+        "penaltiesPerGame": 5,
+        "turnoverDiffPerGame": -1,
+        "fourthDownGoPct": 1
       }
     },
     {
@@ -1235,7 +1289,9 @@
         "pointDiffPerGame": -7,
         "netEpa": -0.142,
         "oneScoreWinPct": 1,
-        "penaltiesPerGame": 8.5
+        "penaltiesPerGame": 8.5,
+        "turnoverDiffPerGame": -0.5,
+        "fourthDownGoPct": 0
       }
     },
     {
@@ -1254,7 +1310,9 @@
         "pointDiffPerGame": -10.5,
         "netEpa": -0.191,
         "oneScoreWinPct": 0,
-        "penaltiesPerGame": 4.5
+        "penaltiesPerGame": 4.5,
+        "turnoverDiffPerGame": -1,
+        "fourthDownGoPct": 1
       }
     },
     {
@@ -1273,7 +1331,9 @@
         "pointDiffPerGame": -5,
         "netEpa": -0.154,
         "oneScoreWinPct": 0,
-        "penaltiesPerGame": 7
+        "penaltiesPerGame": 7,
+        "turnoverDiffPerGame": -2,
+        "fourthDownGoPct": 0
       }
     },
     {
@@ -1292,7 +1352,9 @@
         "pointDiffPerGame": -10,
         "netEpa": -0.121,
         "oneScoreWinPct": 1,
-        "penaltiesPerGame": 8.5
+        "penaltiesPerGame": 8.5,
+        "turnoverDiffPerGame": -0.5,
+        "fourthDownGoPct": null
       }
     },
     {
@@ -1311,7 +1373,9 @@
         "pointDiffPerGame": 10,
         "netEpa": 0.122,
         "oneScoreWinPct": 1,
-        "penaltiesPerGame": 9.5
+        "penaltiesPerGame": 9.5,
+        "turnoverDiffPerGame": 1.5,
+        "fourthDownGoPct": 0
       }
     }
   ],

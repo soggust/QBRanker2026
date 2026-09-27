@@ -1,11 +1,12 @@
 import { Component, Input, OnChanges, ElementRef, ViewChild } from '@angular/core';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
-import { StaticData, gradesForTeam } from 'StaticData/StaticData';
+import { StaticData, blendGrade, preseasonCoaching, teamGamesPlayed } from 'StaticData/StaticData';
 import {
   FANTASY_SCORING_LABELS,
   FantasyScoring,
   SKILL_STATS,
   STAT_NAMES,
+  PER_GAME_LABELS,
   TOTAL_YARDS_STAT,
   SkillPlayer,
   SkillPosition,
@@ -109,12 +110,25 @@ export class SkillRankingsComponent implements OnChanges {
   fantasyScoring: FantasyScoring = 'ppr';
   scoringLabels = FANTASY_SCORING_LABELS;
   teamQbPlay = new Map<string, number>();
+  // Team grades from the Head Coaches / Defenses tabs' orders (the same grades the QB page uses)
+  teamCoaching = new Map<string, number>();
+  teamDefense = new Map<string, number>();
   hasFantasy: boolean = true;
   // This position's stat groups, and which are switched off (eye / header chip)
   groups: SkillStatGroup[] = [];
   hidden: Partial<Record<StatGroupId, boolean>> = {};
 
   constructor(private positionService: PositionService) {
+    this.positionService.defenseGrades$.subscribe((grades) => {
+      this.teamDefense = grades;
+      this.refresh();
+    });
+
+    this.positionService.coachingGrades$.subscribe((grades) => {
+      this.teamCoaching = grades;
+      this.refresh();
+    });
+
     this.positionService.weights$.subscribe((weights) => {
       if (!this.position) return;
       this.weights = weights[this.position];
@@ -128,7 +142,7 @@ export class SkillRankingsComponent implements OnChanges {
         const rank = ids.indexOf(id);
         return rank === -1 ? undefined : 12 * (1 - rank / last);
       });
-      if (this.position) this.sortPlayers();
+      this.refresh();
     });
 
     this.positionService.skillHidden$.subscribe((hidden) => {
@@ -142,10 +156,17 @@ export class SkillRankingsComponent implements OnChanges {
       if (this.position) this.sortPlayers();
     });
 
+    this.positionService.olineOverrides$.subscribe(() => this.refresh());
+
     this.positionService.fantasyScoring$.subscribe((scoring) => {
       this.fantasyScoring = scoring;
       if (this.position) this.sortPlayers();
     });
+  }
+
+  // O-line +/- arrows: one grade step for the player's team, on this tab and the QB page
+  stepOline(player: SkillPlayer, direction: 'up' | 'down') {
+    this.positionService.stepOlineGrade(player.teamLogo, direction);
   }
 
   cycleFantasyScoring() {
@@ -157,9 +178,31 @@ export class SkillRankingsComponent implements OnChanges {
     this.groups = skillGroups(this.position);
     this.hidden = this.positionService.skillHiddenGroups(this.position);
     this.hasFantasy = hasFantasy(this.position);
-    this.playerList = [...SKILL_UNITS[this.position]];
     this.weights = this.positionService.getWeights(this.position);
-    this.sortPlayers();
+    // A hand-dragged order comes back as it was; otherwise re-sort with the latest grades from the
+    // other tabs (a different Defenses order can move the Head Coaches, and so on)
+    const saved = this.positionService.unitOrder(this.position);
+    if (saved?.manual) this.restoreOrder(saved.ids);
+    else this.sortPlayers();
+  }
+
+  // Changes from other tabs (QB order, defense / coaching grades, O-line tweaks) re-sort this tab
+  // unless its order was dragged by hand; the new values still show either way
+  private refresh() {
+    if (!this.position) return;
+    if (!this.positionService.unitOrder(this.position)?.manual) this.sortPlayers();
+  }
+
+  // Put the list back in a saved order (units that have since appeared go at the end)
+  private restoreOrder(ids: string[]) {
+    const players = SKILL_UNITS[this.position].filter((player) => this.showInjured || !player.injured);
+    const rank = new Map(ids.map((id, i) => [id, i]));
+    this.playerList = [...players].sort((a, b) => (rank.get(a.gsisId) ?? Infinity) - (rank.get(b.gsisId) ?? Infinity));
+  }
+
+  // Remember this tab's order for when you come back, and for the grades other tabs use
+  private publishOrder(manual: boolean) {
+    this.positionService.setUnitOrder(this.position, this.playerList.map((player) => player.gsisId), manual);
   }
 
   // Sort Players By Weighted Total
@@ -174,11 +217,13 @@ export class SkillRankingsComponent implements OnChanges {
     this.playerList = [...players].sort(
       (a, b) => (totals.get(b) ?? 0) - (totals.get(a) ?? 0),
     );
+    this.publishOrder(false);
   }
 
   // Drop Event
   drop(event: CdkDragDrop<string[]>) {
     moveItemInArray(this.playerList, event.previousIndex, event.currentIndex);
+    this.publishOrder(true);
   }
 
   // Per-game value for volume stats, whatever the display setting: what color-coding uses,
@@ -193,7 +238,10 @@ export class SkillRankingsComponent implements OnChanges {
   labelTitle(stat: SkillStat): string {
     const name = this.statName(stat);
     if (stat.format === 'record') return name;
-    const avg = tintAverage(this.playerList.map((p) => this.rateValue(p, stat)));
+    // Matches what the color-coding compares, or what the column shows when it's per game
+    // (display-only columns like FG Att aren't color-coded, so they follow the column)
+    const averaged = (p: SkillPlayer) => (this.showsPerGame(stat) ? this.value(p, stat) : this.rateValue(p, stat));
+    const avg = tintAverage(this.playerList.map(averaged));
     if (avg === null) return name;
     let shown: string;
     switch (stat.format) {
@@ -212,15 +260,28 @@ export class SkillRankingsComponent implements OnChanges {
       default:
         shown = avg.toFixed(1);
     }
-    const perGame = stat.kind === 'volume' && !stat.infoOnly;
+    // Volume stats average per game; the name already says so when the column is per game
+    const perGame = stat.kind === 'volume' && !stat.infoOnly && !this.showsPerGame(stat);
     return `${name} (Avg: ${shown}${perGame ? ' per game' : ''})`;
+  }
+
+  // Volume stats show per-game values when Per-Game Stats is on
+  private showsPerGame(stat: SkillStat): boolean {
+    return this.perGame && stat.kind === 'volume';
+  }
+
+  // Column label, switched to its per-game name when the column shows per-game values
+  statLabel(stat: SkillStat): string {
+    return this.showsPerGame(stat) ? (PER_GAME_LABELS[stat.key] ?? `${stat.label} / Game`) : stat.label;
   }
 
   // The stat written out in full; kickers and defenses have their own fixed fantasy scoring
   statName(stat: SkillStat): string {
-    return stat.key === 'fantasy' && !['K', 'DEF'].includes(this.position)
-      ? `${FANTASY_SCORING_LABELS[this.fantasyScoring]} Fantasy Points`
-      : (STAT_NAMES[stat.key] ?? stat.label);
+    const name =
+      stat.key === 'fantasy' && !['K', 'DEF'].includes(this.position)
+        ? `${FANTASY_SCORING_LABELS[this.fantasyScoring]} Fantasy Points`
+        : (STAT_NAMES[stat.key] ?? stat.label);
+    return this.showsPerGame(stat) ? `${name} per Game` : name;
   }
 
   // Player-row hover (the label invisibly covers its value): "[value] [stat name]"
@@ -247,11 +308,21 @@ export class SkillRankingsComponent implements OnChanges {
       }
       case 'fantasy':
         return fantasyPoints(player.stats.fantasyStd ?? 0, player.stats.receptions ?? 0, this.fantasyScoring);
+      // Shared with the QB page: +/- on either tab moves the team's O-line grade in both
       case 'oline':
-        return gradesForTeam(player.teamLogo).oline;
+        return this.positionService.olineGrade(player.teamLogo);
       // Teams without a graded QB yet count as average
       case 'qbPlay':
         return this.teamQbPlay.get(player.teamLogo) ?? 6;
+      // Same as the QB page: preseason coaching blended with the Head Coaches ranking by games played
+      case 'coaching':
+        return blendGrade(
+          preseasonCoaching(player.teamLogo),
+          this.teamCoaching.get(player.teamLogo),
+          teamGamesPlayed(player.teamLogo),
+        );
+      case 'defense':
+        return Math.round(this.teamDefense.get(player.teamLogo) ?? 6);
       default:
         return player.stats[stat.key];
     }

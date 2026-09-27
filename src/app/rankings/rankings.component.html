@@ -49,7 +49,7 @@
                 }
               </p>
     
-              <p class="stat-label" #label1 [title]="i === -1 ? labelTitle('record') : cellTitle('record', label1, player)">
+              <p class="stat-label" #label1 [attr.title]="i === -1 ? labelTitle('record') : null" (mouseenter)="i !== -1 && (label1.title = cellTitle('record', label1, player))">
                 Record
               </p>
             </div>
@@ -68,7 +68,7 @@
                     <p class="unplayed">-</p>
                   }
                 </div>
-                <p class="stat-label" #label2 [title]="i === -1 ? labelTitle('last-five') : cellTitle('last-five', label2, player)">
+                <p class="stat-label" #label2 [attr.title]="i === -1 ? labelTitle('last-five') : null" (mouseenter)="i !== -1 && (label2.title = cellTitle('last-five', label2, player))">
                   Recent
                 </p>
               </div>
@@ -83,7 +83,7 @@
             <!-- Completion Percent -->
             <div class="comp-percent">
               <p [style.color]="tint('comp-percent', player)">{{ player.compPercent }}%</p>
-              <p class="stat-label" #label3 [title]="i === -1 ? labelTitle('comp-percent') : cellTitle('comp-percent', label3, player)">
+              <p class="stat-label" #label3 [attr.title]="i === -1 ? labelTitle('comp-percent') : null" (mouseenter)="i !== -1 && (label3.title = cellTitle('comp-percent', label3, player))">
                 Comp %
               </p>
             </div>
@@ -108,8 +108,8 @@
                   }}
                 }
               </p>
-              <p class="stat-label" #label4 [title]="i === -1 ? labelTitle('total-yards') : cellTitle('total-yards', label4, player)">
-                Total Yards
+              <p class="stat-label" #label4 [attr.title]="i === -1 ? labelTitle('total-yards') : null" (mouseenter)="i !== -1 && (label4.title = cellTitle('total-yards', label4, player))">
+                {{ columnLabel('total-yards', 'Total Yards') }}
               </p>
             </div>
           }
@@ -126,8 +126,8 @@
                   {{ player.passYards | number: "1.0" : "en-US" }}
                 }
               </p>
-              <p class="stat-label" #label5 [title]="i === -1 ? labelTitle('pass-yards') : cellTitle('pass-yards', label5, player)">
-                Pass Yards
+              <p class="stat-label" #label5 [attr.title]="i === -1 ? labelTitle('pass-yards') : null" (mouseenter)="i !== -1 && (label5.title = cellTitle('pass-yards', label5, player))">
+                {{ columnLabel('pass-yards', 'Pass Yards') }}
               </p>
             </div>
           }
@@ -138,7 +138,7 @@
                 {{ player.ypa }}
               </p>
     
-              <p class="stat-label" #label6 [title]="i === -1 ? labelTitle('ypa') : cellTitle('ypa', label6, player)">
+              <p class="stat-label" #label6 [attr.title]="i === -1 ? labelTitle('ypa') : null" (mouseenter)="i !== -1 && (label6.title = cellTitle('ypa', label6, player))">
                 Per Attempt
               </p>
             </div>
@@ -156,8 +156,8 @@
                   {{ player.rushYards | number: "1.0" : "en-US" }}
                 }
               </p>
-              <p class="stat-label" #label7 [title]="i === -1 ? labelTitle('rush-yards') : cellTitle('rush-yards', label7, player)">
-                Rush Yards
+              <p class="stat-label" #label7 [attr.title]="i === -1 ? labelTitle('rush-yards') : null" (mouseenter)="i !== -1 && (label7.title = cellTitle('rush-yards', label7, player))">
+                {{ columnLabel('rush-yards', 'Rush Yards') }}
               </p>
             </div>
           }
@@ -179,8 +179,8 @@
                   {{ player.passTd + player.rushTd | number: "1.0" : "en-US" }}
                 }
               </p>
-              <p class="stat-label" #label8 [title]="i === -1 ? labelTitle('touchdowns') : cellTitle('touchdowns', label8, player)">
-                Touchdowns
+              <p class="stat-label" #label8 [attr.title]="i === -1 ? labelTitle('touchdowns') : null" (mouseenter)="i !== -1 && (label8.title = cellTitle('touchdowns', label8, player))">
+                {{ columnLabel('touchdowns', 'Touchdowns') }}
               </p>
             </div>
           }
@@ -199,8 +199,8 @@
                   {{ player.passTd | number: "1.0" : "en-US" }}
                 }
               </p>
-              <p class="stat-label" #label9 [title]="i === -1 ? labelTitle('pass-tds') : cellTitle('pass-tds', label9, player)">
-                Pass TDs
+              <p class="stat-label" #label9 [attr.title]="i === -1 ? labelTitle('pass-tds') : null" (mouseenter)="i !== -1 && (label9.title = cellTitle('pass-tds', label9, player))">
+                {{ columnLabel('pass-tds', 'Pass TDs') }}
               </p>
             </div>
           }
@@ -219,8 +219,8 @@
                   {{ player.rushTd | number: "1.0" : "en-US" }}
                 }
               </p>
-              <p class="stat-label" #label10 [title]="i === -1 ? labelTitle('rush-tds') : cellTitle('rush-tds', label10, player)">
-                Rush TDs
+              <p class="stat-label" #label10 [attr.title]="i === -1 ? labelTitle('rush-tds') : null" (mouseenter)="i !== -1 && (label10.title = cellTitle('rush-tds', label10, player))">
+                {{ columnLabel('rush-tds', 'Rush TDs') }}
               </p>
             </div>
           }
@@ -243,8 +243,8 @@
                 }
               </p>
     
-              <p class="stat-label" #label11 [title]="i === -1 ? labelTitle('turnovers') : cellTitle('turnovers', label11, player)">
-                Turnovers
+              <p class="stat-label" #label11 [attr.title]="i === -1 ? labelTitle('turnovers') : null" (mouseenter)="i !== -1 && (label11.title = cellTitle('turnovers', label11, player))">
+                {{ columnLabel('turnovers', 'Turnovers') }}
               </p>
             </div>
           }
@@ -261,8 +261,8 @@
                   {{ player.ints | number: "1.0" : "en-US" }}
                 }
               </p>
-              <p class="stat-label" #label12 [title]="i === -1 ? labelTitle('interceptions') : cellTitle('interceptions', label12, player)">
-                Interceptions
+              <p class="stat-label" #label12 [attr.title]="i === -1 ? labelTitle('interceptions') : null" (mouseenter)="i !== -1 && (label12.title = cellTitle('interceptions', label12, player))">
+                {{ columnLabel('interceptions', 'Interceptions') }}
               </p>
             </div>
           }
@@ -281,8 +281,8 @@
                   {{ player.fumLost | number: "1.0" : "en-US" }}
                 }
               </p>
-              <p class="stat-label" #label13 [title]="i === -1 ? labelTitle('fumbles-lost') : cellTitle('fumbles-lost', label13, player)">
-                Fumbles Lost
+              <p class="stat-label" #label13 [attr.title]="i === -1 ? labelTitle('fumbles-lost') : null" (mouseenter)="i !== -1 && (label13.title = cellTitle('fumbles-lost', label13, player))">
+                {{ columnLabel('fumbles-lost', 'Fumbles Lost') }}
               </p>
             </div>
           }
@@ -290,7 +290,7 @@
             <!-- Rating-->
             <div class="rating">
               <p [style.color]="tint('rating', player)">{{ player.rating | number: "1.1-1" }}</p>
-              <p class="stat-label" #label14 [title]="i === -1 ? labelTitle('rating') : cellTitle('rating', label14, player)">
+              <p class="stat-label" #label14 [attr.title]="i === -1 ? labelTitle('rating') : null" (mouseenter)="i !== -1 && (label14.title = cellTitle('rating', label14, player))">
                 Rating
               </p>
             </div>
@@ -306,7 +306,7 @@
             <!-- EPA Per Play -->
             <div class="epa">
               <p [style.color]="tint('epa', player)">{{ player.epaPerPlay === null ? "-" : (player.epaPerPlay | number: "1.2-2") }}</p>
-              <p class="stat-label" #label15 [title]="i === -1 ? labelTitle('epa') : cellTitle('epa', label15, player)">
+              <p class="stat-label" #label15 [attr.title]="i === -1 ? labelTitle('epa') : null" (mouseenter)="i !== -1 && (label15.title = cellTitle('epa', label15, player))">
                 EPA / Play
               </p>
             </div>
@@ -317,7 +317,7 @@
             <!-- CPOE -->
             <div class="cpoe">
               <p [style.color]="tint('cpoe', player)">{{ player.cpoe === null ? "-" : (player.cpoe | number: "1.1-1") + "%" }}</p>
-              <p class="stat-label" #label16 [title]="i === -1 ? labelTitle('cpoe') : cellTitle('cpoe', label16, player)">CPOE</p>
+              <p class="stat-label" #label16 [attr.title]="i === -1 ? labelTitle('cpoe') : null" (mouseenter)="i !== -1 && (label16.title = cellTitle('cpoe', label16, player))">CPOE</p>
             </div>
           }
           @if (
@@ -328,7 +328,7 @@
               <p [style.color]="tint('success-rate', player)">
                 {{ player.successRate === null ? "-" : (player.successRate | percent: "1.0-0") }}
               </p>
-              <p class="stat-label" #label17 [title]="i === -1 ? labelTitle('success-rate') : cellTitle('success-rate', label17, player)">
+              <p class="stat-label" #label17 [attr.title]="i === -1 ? labelTitle('success-rate') : null" (mouseenter)="i !== -1 && (label17.title = cellTitle('success-rate', label17, player))">
                 Success
               </p>
             </div>
@@ -339,7 +339,7 @@
             <!-- Pressure → Sack -->
             <div class="pressureToSack">
               <p [style.color]="tint('pressureToSack', player)">{{ player.pressureToSack === null ? "-" : (player.pressureToSack | percent: "1.0-0") }}</p>
-              <p class="stat-label" #label18 [title]="i === -1 ? labelTitle('pressureToSack') : cellTitle('pressureToSack', label18, player)">Pressure → Sack</p>
+              <p class="stat-label" #label18 [attr.title]="i === -1 ? labelTitle('pressureToSack') : null" (mouseenter)="i !== -1 && (label18.title = cellTitle('pressureToSack', label18, player))">Pressure → Sack</p>
             </div>
           }
           @if (
@@ -348,7 +348,7 @@
             <!-- Bad Throw % -->
             <div class="badThrowPct">
               <p [style.color]="tint('badThrowPct', player)">{{ player.badThrowPct === null ? "-" : (player.badThrowPct | percent: "1.0-0") }}</p>
-              <p class="stat-label" #label19 [title]="i === -1 ? labelTitle('badThrowPct') : cellTitle('badThrowPct', label19, player)">Bad Throw %</p>
+              <p class="stat-label" #label19 [attr.title]="i === -1 ? labelTitle('badThrowPct') : null" (mouseenter)="i !== -1 && (label19.title = cellTitle('badThrowPct', label19, player))">Bad Throw %</p>
             </div>
           }
           @if (
@@ -357,7 +357,7 @@
             <!-- Time To Throw -->
             <div class="timeToThrow">
               <p [style.color]="tint('timeToThrow', player)">{{ player.timeToThrow === null ? "-" : (player.timeToThrow | number: "1.2-2") }}</p>
-              <p class="stat-label" #label20 [title]="i === -1 ? labelTitle('timeToThrow') : cellTitle('timeToThrow', label20, player)">Time To Throw</p>
+              <p class="stat-label" #label20 [attr.title]="i === -1 ? labelTitle('timeToThrow') : null" (mouseenter)="i !== -1 && (label20.title = cellTitle('timeToThrow', label20, player))">Time To Throw</p>
             </div>
           }
           @if (
@@ -366,7 +366,7 @@
             <!-- aDOT -->
             <div class="adot">
               <p [style.color]="tint('adot', player)">{{ player.adot === null ? "-" : (player.adot | number: "1.1-1") }}</p>
-              <p class="stat-label" #label21 [title]="i === -1 ? labelTitle('adot') : cellTitle('adot', label21, player)">aDOT</p>
+              <p class="stat-label" #label21 [attr.title]="i === -1 ? labelTitle('adot') : null" (mouseenter)="i !== -1 && (label21.title = cellTitle('adot', label21, player))">aDOT</p>
             </div>
           }
           @if (
@@ -375,7 +375,7 @@
             <!-- Aggressive % -->
             <div class="aggressiveness">
               <p [style.color]="tint('aggressiveness', player)">{{ player.aggressiveness === null ? "-" : (player.aggressiveness | number: "1.0-0") + "%" }}</p>
-              <p class="stat-label" #label22 [title]="i === -1 ? labelTitle('aggressiveness') : cellTitle('aggressiveness', label22, player)">Aggressive %</p>
+              <p class="stat-label" #label22 [attr.title]="i === -1 ? labelTitle('aggressiveness') : null" (mouseenter)="i !== -1 && (label22.title = cellTitle('aggressiveness', label22, player))">Aggressive %</p>
             </div>
           }
           @if (
@@ -385,8 +385,8 @@
             <div class="fantasy">
               @let points = fantasyPoints(player);
               <p [style.color]="tint('fantasy', player)">{{ points === null ? "-" : (points | number: "1.1-1") }}</p>
-              <p class="stat-label" #label23 [title]="i === -1 ? labelTitle('fantasy') : cellTitle('fantasy', label23, player)">
-                Fantasy Pts
+              <p class="stat-label" #label23 [attr.title]="i === -1 ? labelTitle('fantasy') : null" (mouseenter)="i !== -1 && (label23.title = cellTitle('fantasy', label23, player))">
+                {{ columnLabel('fantasy', 'Fantasy Pts') }}
               </p>
             </div>
           }
@@ -441,7 +441,7 @@
                       (click)="modifyStat(player, 'weapons', 'up')"
                     ></mat-icon>
                   </p>
-                  <p class="stat-label" #label24 [title]="i === -1 ? labelTitle('weapons') : cellTitle('weapons', label24, player)">
+                  <p class="stat-label" #label24 [attr.title]="i === -1 ? labelTitle('weapons') : null" (mouseenter)="i !== -1 && (label24.title = cellTitle('weapons', label24, player))">
                     Weapons
                   </p>
                 </div>
@@ -468,7 +468,7 @@
                       (click)="modifyStat(player, 'coaching', 'up')"
                     ></mat-icon>
                   </p>
-                  <p class="stat-label" #label25 [title]="i === -1 ? labelTitle('coaching') : cellTitle('coaching', label25, player)">
+                  <p class="stat-label" #label25 [attr.title]="i === -1 ? labelTitle('coaching') : null" (mouseenter)="i !== -1 && (label25.title = cellTitle('coaching', label25, player))">
                     Coaching
                   </p>
                 </div>
@@ -495,7 +495,7 @@
                       (click)="modifyStat(player, 'oline', 'up')"
                     ></mat-icon>
                   </p>
-                  <p class="stat-label" #label26 [title]="i === -1 ? labelTitle('o-line') : cellTitle('o-line', label26, player)">
+                  <p class="stat-label" #label26 [attr.title]="i === -1 ? labelTitle('o-line') : null" (mouseenter)="i !== -1 && (label26.title = cellTitle('o-line', label26, player))">
                     O-Line
                   </p>
                 </div>
@@ -522,7 +522,7 @@
                       (click)="modifyStat(player, 'defense', 'up')"
                     ></mat-icon>
                   </p>
-                  <p class="stat-label" #label27 [title]="i === -1 ? labelTitle('defense') : cellTitle('defense', label27, player)">
+                  <p class="stat-label" #label27 [attr.title]="i === -1 ? labelTitle('defense') : null" (mouseenter)="i !== -1 && (label27.title = cellTitle('defense', label27, player))">
                     Defense
                   </p>
                 </div>
@@ -550,7 +550,7 @@
                       (click)="modifyStat(player, 'responsibility', 'up')"
                     ></mat-icon>
                   </p>
-                  <p class="stat-label" #label28 [title]="i === -1 ? labelTitle('responsibility') : cellTitle('responsibility', label28, player)">
+                  <p class="stat-label" #label28 [attr.title]="i === -1 ? labelTitle('responsibility') : null" (mouseenter)="i !== -1 && (label28.title = cellTitle('responsibility', label28, player))">
                     Responsibility
                   </p>
                 </div>

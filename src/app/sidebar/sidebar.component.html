@@ -11,13 +11,13 @@
     <div class="filters">
       <div>
         <mat-select
+          [placeholder]="position + ' Presets...'"
           [(ngModel)]="skillPresets[skill]"
           (ngModelChange)="onSkillPresetChange()"
         >
           @if (skillPresets[skill] === 'custom') {
             <mat-option value="custom" disabled="disabled">CUSTOM</mat-option>
           }
-          <mat-option value="default">DEFAULTS</mat-option>
           <mat-option value="volume">VOLUME</mat-option>
           <mat-option value="efficiency">EFFICIENCY</mat-option>
           @if (skillHasFantasy) {
@@ -118,7 +118,7 @@
   <!-- QB Filters -->
   <div class="filters" [hidden]="position !== 'QB'">
     <div>
-      <mat-select [(ngModel)]="preset" (ngModelChange)="onPresetChange()">
+      <mat-select placeholder="QB Presets..." [(ngModel)]="preset" (ngModelChange)="onPresetChange()">
         @if (preset === 'custom') {
         <mat-option value="custom" disabled="disabled">CUSTOM</mat-option>
         }

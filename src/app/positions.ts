@@ -75,10 +75,20 @@ export type SkillStatKey =
   | 'fgOverExp'
   | 'fairCatchPct'
   | 'oneScoreWinPct'
-  | 'penaltiesPerGame';
+  | 'penaltiesPerGame'
+  | 'fourthDownGoPct'
+  | 'turnoverDiffPerGame';
 
 // Columns computed in the app: fantasy points in the chosen scoring, and team support grades
-export type SkillColumnKey = SkillStatKey | 'fantasy' | 'oline' | 'qbPlay' | 'games' | 'totalYards';
+export type SkillColumnKey =
+  | SkillStatKey
+  | 'fantasy'
+  | 'oline'
+  | 'qbPlay'
+  | 'coaching'
+  | 'defense'
+  | 'games'
+  | 'totalYards';
 
 export type FantasyScoring = 'std' | 'half' | 'ppr';
 
@@ -124,6 +134,8 @@ export interface SkillStat {
   support?: boolean;
   // Shown for context only: no slider and no weight in the ranking
   infoOnly?: boolean;
+  // A missing value ("-") means no chances yet, so it scores as the league average, not the worst
+  missingIsAverage?: boolean;
 }
 
 // Stat names written out in full (label hover text)
@@ -133,6 +145,8 @@ export const STAT_NAMES: Partial<Record<SkillColumnKey, string>> = {
   fantasy: 'Fantasy Points',
   oline: 'Offensive Line Grade',
   qbPlay: 'Quarterback Play Grade',
+  coaching: 'Coaching Grade',
+  defense: 'Defense Grade',
   targets: 'Targets',
   targetShare: 'Target Share',
   receptions: 'Receptions',
@@ -191,6 +205,33 @@ export const STAT_NAMES: Partial<Record<SkillColumnKey, string>> = {
   netEpa: 'Net Expected Points Added per Play',
   oneScoreWinPct: 'One-Score Game Win Percentage',
   penaltiesPerGame: 'Penalties per Game',
+  fourthDownGoPct: 'Fourth-Down Go-For-It Rate',
+  turnoverDiffPerGame: 'Turnover Differential per Game',
+};
+
+// Short labels for volume stats when Per-Game Stats is on (yards read as YPG, points as PPG)
+export const PER_GAME_LABELS: Partial<Record<SkillColumnKey, string>> = {
+  totalYards: 'Total YPG',
+  rushYards: 'Rush YPG',
+  recYards: 'Rec YPG',
+  fantasy: 'Fantasy PPG',
+  targets: 'Targets / Game',
+  receptions: 'Rec / Game',
+  recTds: 'TDs / Game',
+  totalTds: 'TDs / Game',
+  yac: 'YAC / Game',
+  carries: 'Carries / Game',
+  firstDowns: '1st Dn / Game',
+  brokenTackles: 'Brk Tkl / Game',
+  fumbles: 'Fumbles / Game',
+  fgMade: 'FG Made / Game',
+  fgAtt: 'FG Att / Game',
+  fg50: '50+ Made / Game',
+  punts: 'Punts / Game',
+  inside20: 'Inside 20 / Game',
+  touchbacks: 'Touchbacks / Game',
+  sacks: 'Sacks / Game',
+  takeaways: 'TOs / Game',
 };
 
 export type SkillWeights = Partial<Record<SkillColumnKey, number>>;
@@ -222,6 +263,37 @@ const FANTASY_STAT: SkillStat = {
   description: 'Fantasy points (scoring set in the settings menu)',
   kind: 'volume',
   format: 'dec1',
+};
+
+// Team QB grade from the QB rankings: a support grade for receivers, runners (a good QB keeps
+// defenses honest) and defenses (field position, time of possession)
+const QB_PLAY_STAT: SkillStat = {
+  key: 'qbPlay',
+  label: 'QB Play',
+  description: "Team QB grade from the current QB rankings, weighted by each QB's starts",
+  kind: 'efficiency',
+  format: 'grade',
+  support: true,
+};
+
+// Team coaching grade (preseason blended with the Head Coaches rankings, like the QB page)
+const COACHING_STAT: SkillStat = {
+  key: 'coaching',
+  label: 'Coaching',
+  description: "Team coaching grade (preseason blended with the Head Coaches rankings)",
+  kind: 'efficiency',
+  format: 'grade',
+  support: true,
+};
+
+// Team defense grade from the Defenses rankings (like the QB page)
+const DEFENSE_STAT: SkillStat = {
+  key: 'defense',
+  label: 'Defense',
+  description: 'Team defense grade from the current Defenses rankings',
+  kind: 'efficiency',
+  format: 'grade',
+  support: true,
 };
 
 const RECEIVING_STATS: SkillStat[] = [
@@ -292,14 +364,7 @@ const RECEIVING_STATS: SkillStat[] = [
     format: 'pct',
   },
   FANTASY_STAT,
-  {
-    key: 'qbPlay',
-    label: 'QB Play',
-    description: "Team QB grade from the current QB rankings, weighted by each QB's starts",
-    kind: 'efficiency',
-    format: 'grade',
-    support: true,
-  },
+  QB_PLAY_STAT,
 ];
 
 export const SKILL_STATS: Record<SkillPosition, SkillStat[]> = {
@@ -373,11 +438,12 @@ export const SKILL_STATS: Record<SkillPosition, SkillStat[]> = {
     {
       key: 'oline',
       label: 'O-Line',
-      description: "Team O-line grade from team-grades.json",
+      description: "Team O-line grade (preseason blended with this season's stats; +/- to adjust)",
       kind: 'efficiency',
       format: 'grade',
       support: true,
     },
+    QB_PLAY_STAT,
   ],
   WR: RECEIVING_STATS,
   TE: RECEIVING_STATS,
@@ -549,6 +615,8 @@ export const SKILL_STATS: Record<SkillPosition, SkillStat[]> = {
       description:
         'Standard D/ST scoring: sack 1, takeaway 2, TD 6, safety 2, plus points-allowed tier each game',
     },
+    COACHING_STAT,
+    QB_PLAY_STAT,
   ],
   HC: [
     { key: 'winPct', label: 'Record', description: 'Win-loss record', kind: 'efficiency', format: 'record' },
@@ -591,6 +659,22 @@ export const SKILL_STATS: Record<SkillPosition, SkillStat[]> = {
       format: 'pct',
     },
     {
+      key: 'turnoverDiffPerGame',
+      label: 'TO Diff / Game',
+      description: 'Takeaways minus giveaways per game',
+      kind: 'efficiency',
+      format: 'dec1',
+      signed: true,
+    },
+    {
+      key: 'fourthDownGoPct',
+      label: '4th Down Go %',
+      description: 'How often the team goes for it on 4th and 1-2 at midfield or beyond (outside blowouts)',
+      kind: 'efficiency',
+      format: 'pct',
+      missingIsAverage: true,
+    },
+    {
       key: 'penaltiesPerGame',
       label: 'Penalties / Game',
       description: 'Penalties called on the team per game (lower is better)',
@@ -599,6 +683,8 @@ export const SKILL_STATS: Record<SkillPosition, SkillStat[]> = {
       signed: true,
       negative: true,
     },
+    DEFENSE_STAT,
+    QB_PLAY_STAT,
   ],
 };
 
@@ -634,6 +720,7 @@ export const STAT_GROUP_INFO: { id: StatGroupId; title: string; icon: string }[]
 const RESULTS_STATS = new Set<SkillColumnKey>(['games', 'winPct', 'winsOverExpected', 'atsPct', 'oneScoreWinPct']);
 
 const ADVANCED_STATS = new Set<SkillColumnKey>([
+  'fourthDownGoPct',
   'epaPerCarry',
   'ryoePerAtt',
   'yacoPerCarry',

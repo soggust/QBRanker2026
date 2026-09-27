@@ -389,3 +389,10 @@ html .mat-mdc-slide-toggle.mat-accent {
 .mat-mdc-menu-panel .mat-mdc-menu-item .slide-toggle {
   margin-right: 7.5px;
 }
+
+// Sidebar "Presets..." placeholder reads like a selected preset (Material grays placeholders out;
+// global because the placeholder is inside Material's own select template)
+.sidebar .mat-mdc-select .mat-mdc-select-placeholder {
+  color: inherit;
+  text-transform: uppercase;
+}

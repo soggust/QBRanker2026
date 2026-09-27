@@ -5,9 +5,22 @@ import { EspnApiService } from 'app/services/espn-api.service';
 import { Filters, Player } from 'app/types';
 import { copyRankingsToClipboard } from 'app/utils/clipboard';
 import { PositionService } from 'app/services/position.service';
-import { coachingGrades, defenseGrades } from 'app/utils/unit-scoring';
 import { blendGrade, preseasonCoaching, teamGamesPlayed } from 'StaticData/StaticData';
 import { tintAverage, tintColor } from 'app/utils/value-tint';
+
+// Per-game names for the columns that switch to per-game values (Per-Game Stats setting)
+const PER_GAME_LABELS: Record<string, string> = {
+  'total-yards': 'Total YPG',
+  'pass-yards': 'Pass YPG',
+  'rush-yards': 'Rush YPG',
+  touchdowns: 'TDs / Game',
+  'pass-tds': 'Pass TDs / Game',
+  'rush-tds': 'Rush TDs / Game',
+  turnovers: 'TOs / Game',
+  interceptions: 'INTs / Game',
+  'fumbles-lost': 'Fumbles / Game',
+  fantasy: 'Fantasy PPG',
+};
 
 export type ColumnGroupId = 'results' | 'box' | 'advanced' | 'support';
 
@@ -112,19 +125,34 @@ export class RankingsComponent {
     return tintColor(stat.get(player), this.playerList.map(stat.get), stat.lowerIsBetter);
   }
 
+  // Column label, switched to its per-game name when Per-Game Stats is on
+  columnLabel(column: string, label: string): string {
+    return this.perGame ? (PER_GAME_LABELS[column] ?? label) : label;
+  }
+
+  // The stat written out in full ("... per Game" when the column shows per-game values)
+  private statName(column: string): string {
+    const name = column === 'fantasy' ? `${this.scoringLabels[this.fantasyScoring]} Fantasy Points` : this.labelInfo[column].name;
+    return this.perGame && column in PER_GAME_LABELS ? `${name} per Game` : name;
+  }
+
   // Label hover: the stat written out, plus the list average the color-coding centers on
   labelTitle(column: string): string {
     const label = this.labelInfo[column];
-    const name = column === 'fantasy' ? `${this.scoringLabels[this.fantasyScoring]} Fantasy Points` : label.name;
+    const name = this.statName(column);
     const stat = this.tintStats[column] ?? this.gradeStats[column];
     if (!stat || !label.avg) return name;
     const avg = tintAverage(this.playerList.map(stat.get));
-    return avg === null ? name : `${name} (Avg: ${label.avg(avg)})`;
+    if (avg === null) return name;
+    // Volume stats average per game; the name already says so when the column is per game
+    const shown = this.perGame && column in PER_GAME_LABELS ? avg.toFixed(1) : label.avg(avg);
+    return `${name} (Avg: ${shown})`;
   }
 
-  // Player-row hover (the label invisibly covers its value): "[value] [stat name]"
+  // Player-row hover (the label invisibly covers its value): "[value] [stat name]". Set on
+  // mouseenter, after the value has rendered, rather than bound (which read it mid-render)
   cellTitle(column: string, label: HTMLElement, player: Player): string {
-    const name = column === 'fantasy' ? `${this.scoringLabels[this.fantasyScoring]} Fantasy Points` : this.labelInfo[column].name;
+    const name = this.statName(column);
     if (column === 'last-five') return `${this.getNumberOfRecentWins(player.lastFive)} Wins in the ${name}`;
     const value = (label.previousElementSibling?.textContent ?? '').replace(/\s+/g, '');
     return value && value !== '-' ? `${value} ${name}` : name;
@@ -220,8 +248,9 @@ export class RankingsComponent {
   fantasyScoring: FantasyScoring = 'ppr';
   scoringLabels = FANTASY_SCORING_LABELS;
   teamDefense = new Map<string, number>();
-  defenseWeights?: SkillWeights;
-  coachingWeights?: SkillWeights;
+  // O-line grades adjusted per team (shared with the RB page), and each QB's grade before any change
+  olineOverrides: Record<string, number> = {};
+  private olineBase = new Map<number, number>();
   teamCoaching = new Map<string, number>();
 
   constructor(
@@ -234,21 +263,18 @@ export class RankingsComponent {
       this.sortPlayers();
     });
 
-    // Defense grades follow the Defenses rankings (and their sliders) unless overridden
-    // (only when the Defenses weights change, so manual +/- tweaks survive other tabs' slider moves)
-    // Coaching grades likewise blend the preseason grade with the Head Coaches rankings
-    this.positionService.weights$.subscribe((weights) => {
-      if (weights.DEF === this.defenseWeights && weights.HC === this.coachingWeights) return;
-      if (weights.DEF !== this.defenseWeights) {
-        this.defenseWeights = weights.DEF;
-        this.teamDefense = defenseGrades(weights.DEF);
-        this.applyDefenseGrades();
-      }
-      if (weights.HC !== this.coachingWeights) {
-        this.coachingWeights = weights.HC;
-        this.teamCoaching = coachingGrades(weights.HC);
-        this.applyCoachingGrades();
-      }
+    // Defense grades follow the Defenses tab's order (drags included) unless overridden; they only
+    // change when that order does, so manual +/- tweaks survive other tabs' changes
+    this.positionService.defenseGrades$.subscribe((grades) => {
+      this.teamDefense = grades;
+      this.applyDefenseGrades();
+      this.sortPlayers();
+    });
+
+    // Coaching grades blend the preseason grade with the Head Coaches tab's order the same way
+    this.positionService.coachingGrades$.subscribe((grades) => {
+      this.teamCoaching = grades;
+      this.applyCoachingGrades();
       this.sortPlayers();
     });
 
@@ -257,6 +283,13 @@ export class RankingsComponent {
       this.unfilteredPlayerList = res;
       this.applyDefenseGrades();
       this.applyCoachingGrades();
+      this.applyOlineGrades();
+      this.sortPlayers();
+    });
+
+    this.positionService.olineOverrides$.subscribe((overrides) => {
+      this.olineOverrides = overrides;
+      this.applyOlineGrades();
       this.sortPlayers();
     });
 
@@ -293,6 +326,15 @@ export class RankingsComponent {
     for (const player of this.unfilteredPlayerList) {
       const grade = this.teamDefense.get(player.teamLogo);
       player.defense = player.defenseOverride ?? (grade === undefined ? 6 : Math.round(grade));
+    }
+  }
+
+  // Set each QB's O-line grade: their team's adjusted grade (shared with the RB page) if it was
+  // changed, otherwise the grade they loaded with
+  applyOlineGrades() {
+    for (const player of this.unfilteredPlayerList) {
+      if (!this.olineBase.has(player.id)) this.olineBase.set(player.id, player.oline);
+      player.oline = this.olineOverrides[player.teamLogo] ?? this.olineBase.get(player.id)!;
     }
   }
 
@@ -542,6 +584,11 @@ export class RankingsComponent {
 
   // Modify Support Stat
   modifyStat(player: Player, stat: string, direction: string) {
+    // O-line grades are per team and shared with the RB page (applied through olineOverrides$)
+    if (stat === 'oline') {
+      this.positionService.stepOlineGrade(player.teamLogo, direction === 'up' ? 'up' : 'down');
+      return;
+    }
     const statKeys = [
       'weapons',
       'coaching',
