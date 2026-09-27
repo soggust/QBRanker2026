@@ -66,10 +66,34 @@ export class RankingsComponent {
     defenseValue: 50,
     responsibilityValue: 50,
   };
-  perGame: boolean = false;
-  showInjured: boolean = true;
-  showUnused: boolean = false;
-  totalStats: boolean = true;
+  // Settings-menu toggles live in PositionService so every position shares and remembers them
+  get perGame(): boolean {
+    return this.positionService.settings.perGame;
+  }
+  set perGame(value: boolean) {
+    this.positionService.updateSettings({ perGame: value });
+  }
+
+  get showInjured(): boolean {
+    return this.positionService.settings.showInjured;
+  }
+  set showInjured(value: boolean) {
+    this.positionService.updateSettings({ showInjured: value });
+  }
+
+  get showUnused(): boolean {
+    return this.positionService.settings.showUnused;
+  }
+  set showUnused(value: boolean) {
+    this.positionService.updateSettings({ showUnused: value });
+  }
+
+  get totalStats(): boolean {
+    return this.positionService.settings.totalStats;
+  }
+  set totalStats(value: boolean) {
+    this.positionService.updateSettings({ totalStats: value });
+  }
   isToastVisible: boolean = false;
 
   // Column groups, switched on / off from the header chips or the sidebar eye
@@ -109,6 +133,9 @@ export class RankingsComponent {
       this.applyDefenseGrades();
       this.sortPlayers();
     });
+
+    // Re-rank when another tab's settings menu changes per-game stats or injured players
+    this.positionService.settings$.subscribe(() => this.sortPlayers());
 
     this.filterService.hiddenGroups$.subscribe((hidden) => {
       this.hidden = hidden;

@@ -22,6 +22,32 @@ function readSkillHidden(): HiddenGroups {
   }
 }
 
+// Settings-menu toggles, shared by every position and remembered per browser
+export interface RankerSettings {
+  perGame: boolean;
+  showUnused: boolean;
+  showInjured: boolean;
+  totalStats: boolean;
+  fantasyScoring: FantasyScoring;
+}
+
+const SETTINGS_KEY = 'rankerSettings';
+const DEFAULT_SETTINGS: RankerSettings = {
+  perGame: false,
+  showUnused: false,
+  showInjured: true,
+  totalStats: true,
+  fantasyScoring: 'ppr',
+};
+
+function readSettings(): RankerSettings {
+  try {
+    return { ...DEFAULT_SETTINGS, ...JSON.parse(localStorage.getItem(SETTINGS_KEY) ?? '{}') };
+  } catch {
+    return DEFAULT_SETTINGS;
+  }
+}
+
 // Open the tab from a shared link, e.g. ?pos=WR
 function linkedPosition(): Position {
   const linked = new URLSearchParams(location.search).get('pos')?.toUpperCase();
@@ -51,8 +77,25 @@ export class PositionService {
   private qbRanksSubject = new BehaviorSubject<number[]>([]);
   public qbRanks$ = this.qbRanksSubject.asObservable();
 
-  private fantasyScoringSubject = new BehaviorSubject<FantasyScoring>('ppr');
+  private settingsSubject = new BehaviorSubject<RankerSettings>(readSettings());
+  public settings$ = this.settingsSubject.asObservable();
+
+  private fantasyScoringSubject = new BehaviorSubject<FantasyScoring>(this.settingsSubject.value.fantasyScoring);
   public fantasyScoring$ = this.fantasyScoringSubject.asObservable();
+
+  get settings(): RankerSettings {
+    return this.settingsSubject.value;
+  }
+
+  updateSettings(changes: Partial<RankerSettings>): void {
+    const next = { ...this.settingsSubject.value, ...changes };
+    this.settingsSubject.next(next);
+    try {
+      localStorage.setItem(SETTINGS_KEY, JSON.stringify(next));
+    } catch {
+      // Storage unavailable; the settings still apply for this visit
+    }
+  }
 
   setPosition(position: Position): void {
     this.positionSubject.next(position);
@@ -102,5 +145,6 @@ export class PositionService {
     const order: FantasyScoring[] = ['ppr', 'half', 'std'];
     const next = order[(order.indexOf(this.fantasyScoring) + 1) % order.length];
     this.fantasyScoringSubject.next(next);
+    this.updateSettings({ fantasyScoring: next });
   }
 }

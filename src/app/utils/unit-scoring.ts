@@ -15,7 +15,7 @@ export function weightedTotals<T>(
   const totals = new Map<T, number>(units.map((unit) => [unit, 0]));
   for (const stat of stats) {
     const weight = weights[stat.key] ?? 0;
-    if (!weight) continue;
+    if (!weight || stat.infoOnly) continue;
 
     const values = units.map((unit) => value(unit, stat));
     const known = values.filter((v): v is number => v !== null);

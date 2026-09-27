@@ -897,3 +897,19 @@
 .sidebar .filters .sub-rows .slider-row button.slider-eye.off .mat-icon {
   color: var(--scoreboard-led);
 }
+
+// Display-only rows (e.g. Games): label plus a quiet note, no slider
+.sidebar .filters .slider-row.info-row {
+  grid-template-areas: "label value";
+
+  span.info-note {
+    color: #9a9a9a;
+    font-family: v.$font-base;
+    font-size: 0.62em;
+    font-weight: 700;
+    grid-area: value;
+    letter-spacing: 0.5px;
+    text-shadow: none;
+    text-transform: uppercase;
+  }
+}

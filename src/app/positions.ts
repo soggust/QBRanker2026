@@ -78,7 +78,7 @@ export type SkillStatKey =
   | 'penaltiesPerGame';
 
 // Columns computed in the app: fantasy points in the chosen scoring, and team support grades
-export type SkillColumnKey = SkillStatKey | 'fantasy' | 'oline' | 'qbPlay';
+export type SkillColumnKey = SkillStatKey | 'fantasy' | 'oline' | 'qbPlay' | 'games';
 
 export type FantasyScoring = 'std' | 'half' | 'ppr';
 
@@ -118,10 +118,22 @@ export interface SkillStat {
   negative?: boolean;
   // Team support graded 0-12; like the QB support sliders, better support is a (dampened) penalty
   support?: boolean;
+  // Shown for context only: no slider and no weight in the ranking
+  infoOnly?: boolean;
 }
 
 export type SkillWeights = Partial<Record<SkillColumnKey, number>>;
 export type SkillPreset = 'default' | 'volume' | 'efficiency' | 'fantasy';
+
+// Games played: the first column on every player / unit tab, for sample-size context
+const GAMES_STAT: SkillStat = {
+  key: 'games',
+  label: 'Games',
+  description: 'Games played (for context; not part of the ranking)',
+  kind: 'efficiency',
+  format: 'int',
+  infoOnly: true,
+};
 
 const FANTASY_STAT: SkillStat = {
   key: 'fantasy',
@@ -132,6 +144,7 @@ const FANTASY_STAT: SkillStat = {
 };
 
 const RECEIVING_STATS: SkillStat[] = [
+  GAMES_STAT,
   { key: 'targets', label: 'Targets', description: 'Times targeted', kind: 'volume', format: 'int' },
   {
     key: 'targetShare',
@@ -210,6 +223,8 @@ const RECEIVING_STATS: SkillStat[] = [
 
 export const SKILL_STATS: Record<SkillPosition, SkillStat[]> = {
   RB: [
+    GAMES_STAT,
+    { key: 'carries', label: 'Carries', description: 'Rushing attempts', kind: 'volume', format: 'int' },
     { key: 'rushYards', label: 'Rush Yards', description: 'Rushing yards', kind: 'volume', format: 'int' },
     { key: 'ypc', label: 'Yds / Carry', description: 'Yards per carry', kind: 'efficiency', format: 'dec1' },
     { key: 'recYards', label: 'Rec Yards', description: 'Receiving yards', kind: 'volume', format: 'int' },
@@ -286,6 +301,7 @@ export const SKILL_STATS: Record<SkillPosition, SkillStat[]> = {
   WR: RECEIVING_STATS,
   TE: RECEIVING_STATS,
   K: [
+    GAMES_STAT,
     { key: 'fgMade', label: 'FG Made', description: 'Field goals made', kind: 'volume', format: 'int' },
     { key: 'fgPct', label: 'FG %', description: 'Field goal percentage', kind: 'efficiency', format: 'pct' },
     { key: 'fg50', label: '50+ Made', description: 'Field goals made from 50+ yards', kind: 'volume', format: 'int' },
@@ -313,6 +329,7 @@ export const SKILL_STATS: Record<SkillPosition, SkillStat[]> = {
     },
   ],
   P: [
+    GAMES_STAT,
     { key: 'punts', label: 'Punts', description: 'Punts', kind: 'volume', format: 'int' },
     { key: 'grossAvg', label: 'Gross Avg', description: 'Yards per punt', kind: 'efficiency', format: 'dec1' },
     {
@@ -356,6 +373,7 @@ export const SKILL_STATS: Record<SkillPosition, SkillStat[]> = {
   ],
   // Lower is better for everything "allowed", so those count against the defense
   DEF: [
+    GAMES_STAT,
     {
       key: 'epaAllowed',
       label: 'EPA / Play',
@@ -510,6 +528,7 @@ export function hasFantasy(position: SkillPosition): boolean {
 export function presetWeights(position: SkillPosition, preset: SkillPreset): SkillWeights {
   const weights: SkillWeights = {};
   for (const stat of SKILL_STATS[position]) {
+    if (stat.infoOnly) continue;
     if (preset === 'fantasy') weights[stat.key] = stat.key === 'fantasy' ? 100 : 0;
     else if (preset === 'default' || stat.negative || stat.support) weights[stat.key] = 50;
     else weights[stat.key] = stat.kind === preset ? 75 : 25;
@@ -529,7 +548,7 @@ export const STAT_GROUP_INFO: { id: StatGroupId; title: string; icon: string }[]
   { id: 'support', title: 'Support', icon: 'groups' },
 ];
 
-const RESULTS_STATS = new Set<SkillColumnKey>(['winPct', 'winsOverExpected', 'atsPct', 'oneScoreWinPct']);
+const RESULTS_STATS = new Set<SkillColumnKey>(['games', 'winPct', 'winsOverExpected', 'atsPct', 'oneScoreWinPct']);
 
 const ADVANCED_STATS = new Set<SkillColumnKey>([
   'epaPerCarry',

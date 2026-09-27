@@ -49,8 +49,20 @@ export class SkillRankingsComponent implements OnChanges {
   playerList: SkillPlayer[] = [];
   stats: SkillStat[] = [];
   weights: SkillWeights = {};
-  perGame: boolean = false;
-  showUnused: boolean = false;
+  // Settings-menu toggles are shared with every position (see PositionService)
+  get perGame(): boolean {
+    return this.positionService.settings.perGame;
+  }
+  set perGame(value: boolean) {
+    this.positionService.updateSettings({ perGame: value });
+  }
+
+  get showUnused(): boolean {
+    return this.positionService.settings.showUnused;
+  }
+  set showUnused(value: boolean) {
+    this.positionService.updateSettings({ showUnused: value });
+  }
   isToastVisible: boolean = false;
   fantasyScoring: FantasyScoring = 'ppr';
   scoringLabels = FANTASY_SCORING_LABELS;
@@ -81,6 +93,11 @@ export class SkillRankingsComponent implements OnChanges {
       if (!this.position) return;
       this.hidden = hidden[this.position] ?? {};
       this.sortPlayers();
+    });
+
+    // Re-rank when another tab's settings menu changes per-game stats
+    this.positionService.settings$.subscribe(() => {
+      if (this.position) this.sortPlayers();
     });
 
     this.positionService.fantasyScoring$.subscribe((scoring) => {
@@ -129,6 +146,8 @@ export class SkillRankingsComponent implements OnChanges {
 
   rawValue(player: SkillPlayer, stat: SkillStat): number | null {
     switch (stat.key) {
+      case 'games':
+        return player.games;
       case 'fantasy':
         return fantasyPoints(player.stats.fantasyStd ?? 0, player.stats.receptions ?? 0, this.fantasyScoring);
       case 'oline':
@@ -155,7 +174,7 @@ export class SkillRankingsComponent implements OnChanges {
   }
 
   isShown(stat: SkillStat): boolean {
-    return this.showUnused || !!this.weights[stat.key];
+    return this.showUnused || !!stat.infoOnly || !!this.weights[stat.key];
   }
 
   format(player: SkillPlayer, stat: SkillStat): string {

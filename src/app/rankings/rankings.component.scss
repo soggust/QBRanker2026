@@ -1345,3 +1345,20 @@ section ul li.header-row .group-chips button.group-chip::before {
   margin-right: 0.3em;
   text-transform: none;
 }
+
+// A little space before each group's first column (every row, so columns stay aligned); the
+// header outline reaches into it so the group icon never touches the outline
+section ul li.player > .col-group > div:first-child {
+  margin-left: 0.6em;
+}
+
+section ul li.player.header-row > .col-group > div:first-child::after {
+  left: -0.5em;
+}
+
+// The name fills the rest of the name column (room for the Games tag), truncating only if it must
+section ul li.player div .player-name {
+  flex: 1;
+  min-width: 0;
+  width: auto;
+}

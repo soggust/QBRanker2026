@@ -70,6 +70,13 @@
           @if (skillGroupIsOpen(group.id)) {
             <div class="group-body">
               @for (stat of group.stats; track stat.key) {
+                @if (stat.infoOnly) {
+                  <!-- Shown for context only; the card's eye hides the column -->
+                  <div class="slider-row info-row" [title]="stat.description">
+                    <p class="slider-label">{{ stat.label }}</p>
+                    <span class="info-note">Display only</span>
+                  </div>
+                } @else {
                 <div
                   class="slider-row"
                   [class.disabled]="!skillWeights[stat.key]"
@@ -95,6 +102,7 @@
                     <mat-icon [fontIcon]="skillWeights[stat.key] ? 'visibility' : 'visibility_off'"></mat-icon>
                   </button>
                 </div>
+                }
               }
             </div>
           }
