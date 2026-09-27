@@ -6,6 +6,7 @@ import {
   FantasyScoring,
   SKILL_STATS,
   STAT_NAMES,
+  TOTAL_YARDS_STAT,
   SkillPlayer,
   SkillPosition,
   SkillStat,
@@ -231,6 +232,10 @@ export class SkillRankingsComponent implements OnChanges {
     switch (stat.key) {
       case 'games':
         return player.games;
+      case 'totalYards': {
+        const { rushYards, recYards } = player.stats;
+        return rushYards === null && recYards === null ? null : (rushYards ?? 0) + (recYards ?? 0);
+      }
       case 'fantasy':
         return fantasyPoints(player.stats.fantasyStd ?? 0, player.stats.receptions ?? 0, this.fantasyScoring);
       case 'oline':
@@ -247,7 +252,7 @@ export class SkillRankingsComponent implements OnChanges {
   get visibleGroups(): SkillStatGroup[] {
     return this.groups
       .filter((group) => !this.hidden[group.id])
-      .map((group) => ({ ...group, stats: group.stats.filter((stat) => this.isShown(stat)) }))
+      .map((group) => ({ ...group, stats: this.combineYards(group.stats).filter((stat) => this.isShown(stat)) }))
       .filter((group) => group.stats.length);
   }
 
@@ -256,7 +261,16 @@ export class SkillRankingsComponent implements OnChanges {
     this.positionService.setSkillGroupHidden(this.position, id, !this.hidden[id]);
   }
 
+  // Combine Rush/Pass: RBs show one Total Yards column where Rush Yards was, instead of Rush + Rec Yards
+  private combineYards(stats: SkillStat[]): SkillStat[] {
+    if (!this.totalStats || this.position !== 'RB') return stats;
+    return stats
+      .filter((stat) => stat.key !== 'recYards')
+      .map((stat) => (stat.key === 'rushYards' ? TOTAL_YARDS_STAT : stat));
+  }
+
   isShown(stat: SkillStat): boolean {
+    if (stat.key === 'totalYards') return this.showUnused || !!this.weights.rushYards || !!this.weights.recYards;
     return this.showUnused || !!stat.infoOnly || !!this.weights[stat.key];
   }
 

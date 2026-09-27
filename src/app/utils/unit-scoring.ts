@@ -55,6 +55,13 @@ export function gradesByRank(ranked: { teamLogo: string }[]): Map<string, number
   return new Map(ranked.map((unit, rank) => [unit.teamLogo, 12 * (1 - rank / last)]));
 }
 
+// Team coaching grades from the Head Coaches rankings with the given slider weights
+export function coachingGrades(weights: SkillWeights): Map<string, number> {
+  const units = SKILL_UNITS.HC;
+  const totals = weightedTotals(units, SKILL_STATS.HC, weights, (unit, stat) => unit.stats[stat.key]);
+  return gradesByRank([...units].sort((a, b) => (totals.get(b) ?? 0) - (totals.get(a) ?? 0)));
+}
+
 // Team defense grades from the Defenses rankings with the given slider weights
 export function defenseGrades(weights: SkillWeights): Map<string, number> {
   const units = SKILL_UNITS.DEF;

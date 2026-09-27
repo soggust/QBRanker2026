@@ -5,7 +5,8 @@ import { EspnApiService } from 'app/services/espn-api.service';
 import { Filters, Player } from 'app/types';
 import { copyRankingsToClipboard } from 'app/utils/clipboard';
 import { PositionService } from 'app/services/position.service';
-import { defenseGrades } from 'app/utils/unit-scoring';
+import { coachingGrades, defenseGrades } from 'app/utils/unit-scoring';
+import { blendGrade, preseasonCoaching, teamGamesPlayed } from 'StaticData/StaticData';
 import { tintAverage, tintColor } from 'app/utils/value-tint';
 
 export type ColumnGroupId = 'results' | 'box' | 'advanced' | 'support';
@@ -215,6 +216,8 @@ export class RankingsComponent {
   scoringLabels = FANTASY_SCORING_LABELS;
   teamDefense = new Map<string, number>();
   defenseWeights?: SkillWeights;
+  coachingWeights?: SkillWeights;
+  teamCoaching = new Map<string, number>();
 
   constructor(
     private filterService: FilterService,
@@ -228,11 +231,19 @@ export class RankingsComponent {
 
     // Defense grades follow the Defenses rankings (and their sliders) unless overridden
     // (only when the Defenses weights change, so manual +/- tweaks survive other tabs' slider moves)
+    // Coaching grades likewise blend the preseason grade with the Head Coaches rankings
     this.positionService.weights$.subscribe((weights) => {
-      if (weights.DEF === this.defenseWeights) return;
-      this.defenseWeights = weights.DEF;
-      this.teamDefense = defenseGrades(weights.DEF);
-      this.applyDefenseGrades();
+      if (weights.DEF === this.defenseWeights && weights.HC === this.coachingWeights) return;
+      if (weights.DEF !== this.defenseWeights) {
+        this.defenseWeights = weights.DEF;
+        this.teamDefense = defenseGrades(weights.DEF);
+        this.applyDefenseGrades();
+      }
+      if (weights.HC !== this.coachingWeights) {
+        this.coachingWeights = weights.HC;
+        this.teamCoaching = coachingGrades(weights.HC);
+        this.applyCoachingGrades();
+      }
       this.sortPlayers();
     });
 
@@ -240,6 +251,7 @@ export class RankingsComponent {
       this.playerList = res;
       this.unfilteredPlayerList = res;
       this.applyDefenseGrades();
+      this.applyCoachingGrades();
       this.sortPlayers();
     });
 
@@ -281,6 +293,20 @@ export class RankingsComponent {
     for (const player of this.unfilteredPlayerList) {
       const grade = this.teamDefense.get(player.teamLogo);
       player.defense = player.defenseOverride ?? (grade === undefined ? 6 : Math.round(grade));
+    }
+  }
+
+  // Set each QB's coaching grade (whole number, 0-12): the preseason grade blended with their
+  // team's Head Coaches ranking, leaning on the ranking more with every game played
+  applyCoachingGrades() {
+    for (const player of this.unfilteredPlayerList) {
+      player.coaching =
+        player.coachingOverride ??
+        blendGrade(
+          preseasonCoaching(player.teamLogo),
+          this.teamCoaching.get(player.teamLogo),
+          teamGamesPlayed(player.teamLogo),
+        );
     }
   }
 

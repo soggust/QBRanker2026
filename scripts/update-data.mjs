@@ -24,6 +24,7 @@ const DATA_DIR = new URL('../src/StaticData/', import.meta.url);
 const GAMES_FILE = new URL('games.json', DATA_DIR);
 const SUBJECTIVE_FILE = new URL('subjective.json', DATA_DIR);
 const SKILL_FILE = new URL('skill-players.json', DATA_DIR);
+const DATA_GRADES_FILE = new URL('data-grades.json', DATA_DIR);
 const DEFAULT_SCORE = 6;
 const NFLVERSE = 'https://github.com/nflverse/nflverse-data/releases/download';
 const SCHEDULE_URL = 'https://raw.githubusercontent.com/nflverse/nfldata/master/data/games.csv';
@@ -174,6 +175,10 @@ async function loadNflverse() {
       rush: totalsBy(regular(pfrRush), (r) => r.pfr_player_id, ['rushing_yards_after_contact', 'rushing_broken_tackles']),
       rec: totalsBy(regular(pfrRec), (r) => r.pfr_player_id, ['receiving_drop', 'receiving_broken_tackles']),
       def: totalsBy(regular(pfrDef), (r) => r.team, ['def_pressures', 'def_missed_tackles', 'def_tackles_combined']),
+      // Offense team totals, for the O-line and weapons grades
+      passTeam: totalsBy(regular(pfrPass), (r) => r.team, ['times_pressured', 'passing_drops']),
+      rushTeam: totalsBy(regular(pfrRush), (r) => r.team, ['carries', 'rushing_yards_before_contact', 'rushing_broken_tackles']),
+      recTeam: totalsBy(regular(pfrRec), (r) => r.team, ['receiving_broken_tackles']),
     },
     snapShare,
     // Completed regular-season games, with coaches, scores and betting lines
@@ -418,6 +423,172 @@ function defenseUnits({ pbp, games, pfr }) {
       },
     };
   });
+}
+
+// ---------------------------------------------------------------------------
+// Data grades: O-line and weapons per team, responsibility per QB, from this season's stats.
+// Each is the average z-score of a few stats, ranked into 0-12 like the preseason grades
+// (best 12 = A+, worst 0 = F). The app blends them with the preseason grades by games played.
+// ---------------------------------------------------------------------------
+
+// rows: [{ key, metrics: { name: value | null } }]; lowerIsBetter: metric names to flip
+function gradeByComposite(rows, lowerIsBetter = []) {
+  const names = Object.keys(rows[0]?.metrics ?? {});
+  const score = new Map(rows.map((row) => [row, 0]));
+  for (const name of names) {
+    const known = rows.map((row) => row.metrics[name]).filter((v) => v !== null && !Number.isNaN(v));
+    if (known.length < 2) continue;
+    const avg = known.reduce((a, b) => a + b, 0) / known.length;
+    const sd = Math.sqrt(known.reduce((a, b) => a + (b - avg) ** 2, 0) / known.length);
+    if (!sd) continue;
+    for (const row of rows) {
+      const v = row.metrics[name];
+      // Missing stats count as average
+      if (v === null || Number.isNaN(v)) continue;
+      const z = (v - avg) / sd;
+      score.set(row, score.get(row) + (lowerIsBetter.includes(name) ? -z : z) / names.length);
+    }
+  }
+  const ranked = [...rows].sort((a, b) => score.get(b) - score.get(a));
+  const last = Math.max(ranked.length - 1, 1);
+  return new Map(ranked.map((row, rank) => [row.key, round(12 * (1 - rank / last), 1)]));
+}
+
+// Weighted average of an NGS column over a team's players (weights: attempts, targets...)
+function ngsTeamAverage(rows, team, key, weightKey, filter = () => true) {
+  let sum = 0;
+  let weight = 0;
+  for (const row of rows) {
+    const rowTeam = row.team_abbr === 'LAR' ? 'LA' : row.team_abbr;
+    const v = num(row[key]);
+    const w = num(row[weightKey]) ?? 0;
+    if (rowTeam !== team || v === null || !w || !filter(row)) continue;
+    sum += v * w;
+    weight += w;
+  }
+  return weight ? round(sum / weight, 3) : null;
+}
+
+// O-line: pressure and sack rate allowed, yards before contact and stuffed designed runs.
+// Weapons: receiver separation, YAC over expected, drops, RB rush yards over expected and
+// broken tackles; stats that depend least on how good the QB is.
+function teamDataGrades({ pbp, games, pfr, ngs }) {
+  const teams = Object.keys(TEAM_ICONS).map((team) => {
+    const plays = pbp.filter((play) => play.posteam === team);
+    const count = (test) => plays.filter(test).length;
+    const dropbacks = count((play) => play.qb_dropback === '1');
+    const designedRuns = plays.filter((play) => play.rush === '1' && play.qb_scramble !== '1');
+    const passAttempts = count((play) => play.pass_attempt === '1' && play.sack !== '1');
+    const receptions = count((play) => play.complete_pass === '1');
+    const pass = pfr.passTeam.get(team);
+    const rush = pfr.rushTeam.get(team);
+    const rec = pfr.recTeam.get(team);
+    const rushNgs = [...ngs.rush.values()];
+    const recNgs = [...ngs.rec.values()];
+    return {
+      team,
+      games: teamGames(games, team).length,
+      oline: {
+        key: team,
+        metrics: {
+          pressureRate: pass && dropbacks ? pass.times_pressured / dropbacks : null,
+          sackRate: dropbacks ? count((play) => play.qb_dropback === '1' && play.sack === '1') / dropbacks : null,
+          yardsBeforeContact: rush?.carries ? rush.rushing_yards_before_contact / rush.carries : null,
+          stuffRate: designedRuns.length
+            ? designedRuns.filter((play) => (num(play.yards_gained) ?? 0) <= 0).length / designedRuns.length
+            : null,
+        },
+      },
+      weapons: {
+        key: team,
+        metrics: {
+          separation: ngsTeamAverage(recNgs, team, 'avg_separation', 'targets'),
+          yacOverExpected: ngsTeamAverage(recNgs, team, 'avg_yac_above_expectation', 'receptions'),
+          dropRate: pass && passAttempts ? pass.passing_drops / passAttempts : null,
+          rushOverExpected: ngsTeamAverage(rushNgs, team, 'rush_yards_over_expected_per_att', 'rush_attempts', (row) => row.player_position === 'RB'),
+          brokenTackles:
+            rush || rec
+              ? ((rush?.rushing_broken_tackles ?? 0) + (rec?.receiving_broken_tackles ?? 0)) /
+                Math.max((rush?.carries ?? 0) + receptions, 1)
+              : null,
+        },
+      },
+    };
+  });
+  const oline = gradeByComposite(teams.map((t) => t.oline), ['pressureRate', 'sackRate', 'stuffRate']);
+  const weapons = gradeByComposite(teams.map((t) => t.weapons), ['dropRate']);
+  const rounded = (metrics) =>
+    Object.fromEntries(Object.entries(metrics).map(([name, v]) => [name, round(v, 3)]));
+  return Object.fromEntries(
+    teams.map((t) => [
+      TEAM_ICONS[t.team],
+      {
+        games: t.games,
+        oline: oline.get(t.team),
+        weapons: weapons.get(t.team),
+        metrics: { ...rounded(t.oline.metrics), ...rounded(t.weapons.metrics) },
+      },
+    ])
+  );
+}
+
+// Responsibility: how much the offense runs through the QB in the games he led (most of his
+// team's dropbacks): pass rate over expected, and his share of the team's yards
+function qbDataGrades(espnIds, { pbp, gsisByEspn }) {
+  const scrimmage = pbp.filter((play) => play.pass === '1' || play.rush === '1');
+  // game-team -> the QB with the most dropbacks
+  const dropbacksBy = new Map();
+  for (const play of scrimmage) {
+    if (play.qb_dropback !== '1') continue;
+    const qb = play.passer_player_id !== 'NA' && play.passer_player_id ? play.passer_player_id : play.rusher_player_id;
+    if (!qb || qb === 'NA') continue;
+    const key = `${play.game_id}|${play.posteam}`;
+    const counts = dropbacksBy.get(key) ?? new Map();
+    counts.set(qb, (counts.get(qb) ?? 0) + 1);
+    dropbacksBy.set(key, counts);
+  }
+  const ledBy = new Map();
+  for (const [key, counts] of dropbacksBy) {
+    const [leader] = [...counts.entries()].sort((a, b) => b[1] - a[1])[0];
+    ledBy.set(key, leader);
+  }
+
+  const rows = [];
+  for (const espnId of espnIds) {
+    const gsisId = gsisByEspn.get(espnId);
+    if (!gsisId) continue;
+    const led = new Set([...ledBy].filter(([, qb]) => qb === gsisId).map(([key]) => key));
+    if (!led.size) continue;
+    const plays = scrimmage.filter((play) => led.has(`${play.game_id}|${play.posteam}`));
+    const passOe = plays.map((play) => num(play.pass_oe)).filter((v) => v !== null);
+    const teamYards = plays.reduce((sum, play) => sum + (num(play.yards_gained) ?? 0), 0);
+    const qbYards = plays.reduce(
+      (sum, play) =>
+        sum +
+        (play.passer_player_id === gsisId ? (num(play.passing_yards) ?? 0) : 0) +
+        (play.rusher_player_id === gsisId ? (num(play.rushing_yards) ?? 0) : 0),
+      0
+    );
+    rows.push({
+      key: espnId,
+      games: led.size,
+      metrics: {
+        passRateOverExpected: passOe.length ? passOe.reduce((a, b) => a + b, 0) / passOe.length : null,
+        yardShare: teamYards > 0 ? qbYards / teamYards : null,
+      },
+    });
+  }
+  const grades = gradeByComposite(rows);
+  return Object.fromEntries(
+    rows.map((row) => [
+      row.key,
+      {
+        games: row.games,
+        responsibility: grades.get(row.key),
+        metrics: Object.fromEntries(Object.entries(row.metrics).map(([name, v]) => [name, round(v, 3)])),
+      },
+    ])
+  );
 }
 
 // Current head coach per team (nflverse abbreviation -> name) from ESPN
@@ -701,6 +872,7 @@ async function main() {
   const previous = JSON.parse(await readFile(GAMES_FILE, 'utf8').catch(() => '[]'));
   let advanced = new Map();
   let skill = null;
+  let dataGrades = null;
   try {
     const nflverse = await loadNflverse();
     nflverse.headCoaches = await espnHeadCoaches().catch((err) => {
@@ -709,6 +881,7 @@ async function main() {
     });
     advanced = advancedStats(gameData.map((qb) => qb.id), nflverse);
     skill = skillPlayers(nflverse);
+    dataGrades = { teams: teamDataGrades(nflverse), qbs: qbDataGrades(gameData.map((qb) => qb.id), nflverse) };
   } catch (err) {
     console.warn(`Could not load nflverse data, keeping previous values: ${err.message}`);
   }
@@ -717,6 +890,10 @@ async function main() {
     console.log(
       `Wrote skill players: ${Object.entries(skill).map(([pos, list]) => `${list.length} ${pos}`).join(', ')}`
     );
+  }
+  if (dataGrades) {
+    await writeFile(DATA_GRADES_FILE, JSON.stringify(dataGrades, null, 2) + '\n');
+    console.log(`Wrote data grades: ${Object.keys(dataGrades.teams).length} teams, ${Object.keys(dataGrades.qbs).length} QBs`);
   }
   for (const qb of gameData) {
     qb.advanced = advanced.get(qb.id) ?? previous.find((p) => p.id === qb.id)?.advanced ?? null;

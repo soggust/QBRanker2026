@@ -78,7 +78,7 @@ export type SkillStatKey =
   | 'penaltiesPerGame';
 
 // Columns computed in the app: fantasy points in the chosen scoring, and team support grades
-export type SkillColumnKey = SkillStatKey | 'fantasy' | 'oline' | 'qbPlay' | 'games';
+export type SkillColumnKey = SkillStatKey | 'fantasy' | 'oline' | 'qbPlay' | 'games' | 'totalYards';
 
 export type FantasyScoring = 'std' | 'half' | 'ppr';
 
@@ -126,6 +126,7 @@ export interface SkillStat {
 // Stat names written out in full (label hover text)
 export const STAT_NAMES: Partial<Record<SkillColumnKey, string>> = {
   games: 'Games Played',
+  totalYards: 'Total Rushing + Receiving Yards',
   fantasy: 'Fantasy Points',
   oline: 'Offensive Line Grade',
   qbPlay: 'Quarterback Play Grade',
@@ -199,6 +200,16 @@ const GAMES_STAT: SkillStat = {
   kind: 'efficiency',
   format: 'int',
   infoOnly: true,
+};
+
+// RB column shown in place of Rush Yards + Rec Yards when Combine Rush/Pass is on (display only:
+// ranking still uses the two yardage sliders, like the QB page)
+export const TOTAL_YARDS_STAT: SkillStat = {
+  key: 'totalYards',
+  label: 'Total Yards',
+  description: 'Rushing + receiving yards',
+  kind: 'volume',
+  format: 'int',
 };
 
 const FANTASY_STAT: SkillStat = {

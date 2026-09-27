@@ -68,6 +68,7 @@ export interface Player {
   defense: number;
   responsibility: number;
   defenseOverride?: number;
+  coachingOverride?: number;
   outOfDate: boolean;
 }
 
@@ -100,4 +101,6 @@ export interface StaticPlayerData {
   starts: Record<string, number>;
   // Hand-set defense grade from subjective.json; otherwise it comes from the Defenses rankings
   defenseOverride?: number;
+  // Hand-set coaching grade from subjective.json; otherwise preseason blended with the Head Coaches rankings
+  coachingOverride?: number;
 }
