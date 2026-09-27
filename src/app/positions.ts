@@ -102,6 +102,9 @@ export interface SkillPlayer {
   games: number;
   // null when a data source doesn't cover the player (shown as "-")
   stats: Record<SkillStatKey, number | null>;
+  // From ESPN's injury report (Out, Doubtful or Injured Reserve); players only, not units
+  injured?: boolean;
+  injuryStatus?: string;
 }
 
 export interface SkillStat {
@@ -154,6 +157,7 @@ export const STAT_NAMES: Partial<Record<SkillColumnKey, string>> = {
   yacoPerCarry: 'Yards After Contact per Carry',
   brokenTackles: 'Broken Tackles',
   fumbles: 'Fumbles Lost',
+  fgAtt: 'Field Goal Attempts',
   fgMade: 'Field Goals Made',
   fgPct: 'Field Goal Percentage',
   fg50: '50+ Yard Field Goals Made',
@@ -380,6 +384,8 @@ export const SKILL_STATS: Record<SkillPosition, SkillStat[]> = {
   K: [
     GAMES_STAT,
     { key: 'fgMade', label: 'FG Made', description: 'Field goals made', kind: 'volume', format: 'int' },
+    // Context for FG Made and FG %: shown, but no slider and no weight in the ranking
+    { key: 'fgAtt', label: 'FG Att', description: 'Field goal attempts (for context; not part of the ranking)', kind: 'volume', format: 'int', infoOnly: true },
     { key: 'fgPct', label: 'FG %', description: 'Field goal percentage', kind: 'efficiency', format: 'pct' },
     { key: 'fg50', label: '50+ Made', description: 'Field goals made from 50+ yards', kind: 'volume', format: 'int' },
     { key: 'fgLong', label: 'Long', description: 'Longest field goal', kind: 'efficiency', format: 'int' },

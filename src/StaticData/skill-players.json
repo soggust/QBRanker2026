@@ -1349,7 +1349,9 @@
         "adot": null,
         "airYardsShare": 0.012,
         "dropPct": 1
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4890973,
@@ -1384,7 +1386,9 @@
         "adot": null,
         "airYardsShare": 0.039,
         "dropPct": 0.231
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4882093,
@@ -1419,7 +1423,9 @@
         "adot": null,
         "airYardsShare": -0.024,
         "dropPct": 0
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4430807,
@@ -1454,7 +1460,9 @@
         "adot": null,
         "airYardsShare": -0.073,
         "dropPct": 0
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4429096,
@@ -1489,7 +1497,9 @@
         "adot": null,
         "airYardsShare": -0.01,
         "dropPct": 0
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4427366,
@@ -1524,7 +1534,9 @@
         "adot": null,
         "airYardsShare": 0.005,
         "dropPct": 0
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4241474,
@@ -1559,7 +1571,9 @@
         "adot": null,
         "airYardsShare": 0,
         "dropPct": 0
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4596448,
@@ -1594,7 +1608,9 @@
         "adot": null,
         "airYardsShare": -0.083,
         "dropPct": 0
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4696981,
@@ -1629,7 +1645,9 @@
         "adot": null,
         "airYardsShare": -0.007,
         "dropPct": 0
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4362238,
@@ -1664,7 +1682,9 @@
         "adot": null,
         "airYardsShare": -0.068,
         "dropPct": 0
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 3117251,
@@ -1699,7 +1719,9 @@
         "adot": null,
         "airYardsShare": 0.024,
         "dropPct": 0
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4241416,
@@ -1734,7 +1756,9 @@
         "adot": null,
         "airYardsShare": -0.006,
         "dropPct": 0
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4259545,
@@ -1769,7 +1793,9 @@
         "adot": null,
         "airYardsShare": -0.022,
         "dropPct": 0
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4035538,
@@ -1804,7 +1830,9 @@
         "adot": null,
         "airYardsShare": 0.018,
         "dropPct": 0
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4429160,
@@ -1839,7 +1867,9 @@
         "adot": null,
         "airYardsShare": 0.059,
         "dropPct": 0.091
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 3043078,
@@ -1874,7 +1904,9 @@
         "adot": null,
         "airYardsShare": -0.024,
         "dropPct": 0
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4887558,
@@ -1909,7 +1941,9 @@
         "adot": null,
         "airYardsShare": 0.003,
         "dropPct": 0
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4575131,
@@ -1944,7 +1978,9 @@
         "adot": null,
         "airYardsShare": -0.012,
         "dropPct": 0
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4685512,
@@ -1979,7 +2015,9 @@
         "adot": null,
         "airYardsShare": 0.039,
         "dropPct": 0
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4429795,
@@ -2014,7 +2052,9 @@
         "adot": null,
         "airYardsShare": 0.055,
         "dropPct": 0
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4379399,
@@ -2049,7 +2089,9 @@
         "adot": null,
         "airYardsShare": -0.005,
         "dropPct": 0
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4361579,
@@ -2084,7 +2126,9 @@
         "adot": null,
         "airYardsShare": -0.042,
         "dropPct": 0
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4569987,
@@ -2119,7 +2163,9 @@
         "adot": null,
         "airYardsShare": -0.027,
         "dropPct": 0
-      }
+      },
+      "injuryStatus": "Questionable",
+      "injured": false
     },
     {
       "id": 4870808,
@@ -2154,7 +2200,9 @@
         "adot": null,
         "airYardsShare": 0.013,
         "dropPct": 0.143
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4242335,
@@ -2189,7 +2237,9 @@
         "adot": null,
         "airYardsShare": -0.003,
         "dropPct": 0.125
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4696044,
@@ -2224,7 +2274,9 @@
         "adot": null,
         "airYardsShare": -0.015,
         "dropPct": 0
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4567048,
@@ -2259,7 +2311,9 @@
         "adot": null,
         "airYardsShare": 0.028,
         "dropPct": 0.125
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4608686,
@@ -2294,7 +2348,9 @@
         "adot": null,
         "airYardsShare": 0.02,
         "dropPct": 0
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4430737,
@@ -2329,7 +2385,9 @@
         "adot": null,
         "airYardsShare": 0.02,
         "dropPct": 0
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4429023,
@@ -2364,7 +2422,9 @@
         "adot": null,
         "airYardsShare": 0.002,
         "dropPct": 0
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4685382,
@@ -2399,7 +2459,9 @@
         "adot": null,
         "airYardsShare": -0.015,
         "dropPct": 0
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4685702,
@@ -2434,7 +2496,9 @@
         "adot": null,
         "airYardsShare": -0.021,
         "dropPct": 0
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4697815,
@@ -2469,7 +2533,9 @@
         "adot": null,
         "airYardsShare": -0.003,
         "dropPct": 0
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4569173,
@@ -2504,7 +2570,9 @@
         "adot": null,
         "airYardsShare": -0.007,
         "dropPct": 0.125
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4038815,
@@ -2539,7 +2607,9 @@
         "adot": null,
         "airYardsShare": 0.01,
         "dropPct": 0.143
-      }
+      },
+      "injuryStatus": "Out",
+      "injured": true
     },
     {
       "id": 3929630,
@@ -2574,7 +2644,9 @@
         "adot": null,
         "airYardsShare": 0.006,
         "dropPct": 0.25
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 3916148,
@@ -2609,7 +2681,9 @@
         "adot": null,
         "airYardsShare": 0.052,
         "dropPct": 0
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4239996,
@@ -2644,7 +2718,9 @@
         "adot": null,
         "airYardsShare": -0.013,
         "dropPct": 0
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4373626,
@@ -2679,7 +2755,9 @@
         "adot": null,
         "airYardsShare": -0.02,
         "dropPct": 0
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4429059,
@@ -2714,7 +2792,9 @@
         "adot": null,
         "airYardsShare": 0.011,
         "dropPct": 0
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     }
   ],
   "WR": [
@@ -2751,7 +2831,9 @@
         "adot": 15.8,
         "airYardsShare": 0.566,
         "dropPct": 0.133
-      }
+      },
+      "injuryStatus": "Questionable",
+      "injured": false
     },
     {
       "id": 4374302,
@@ -2786,7 +2868,9 @@
         "adot": 8.1,
         "airYardsShare": 0.401,
         "dropPct": 0
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4432773,
@@ -2821,7 +2905,9 @@
         "adot": 14.3,
         "airYardsShare": 0.232,
         "dropPct": 0.091
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4871023,
@@ -2856,7 +2942,9 @@
         "adot": 9.8,
         "airYardsShare": 0.355,
         "dropPct": 0
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4241389,
@@ -2891,7 +2979,9 @@
         "adot": 14,
         "airYardsShare": 0.409,
         "dropPct": 0
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4361370,
@@ -2926,7 +3016,9 @@
         "adot": 14.4,
         "airYardsShare": 0.486,
         "dropPct": 0.043
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4248528,
@@ -2961,7 +3053,9 @@
         "adot": 10.9,
         "airYardsShare": 0.282,
         "dropPct": 0.069
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 16800,
@@ -2996,7 +3090,9 @@
         "adot": 15.5,
         "airYardsShare": 0.462,
         "dropPct": 0
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 3126486,
@@ -3031,7 +3127,9 @@
         "adot": 3.3,
         "airYardsShare": 0.109,
         "dropPct": 0.182
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4832800,
@@ -3066,7 +3164,9 @@
         "adot": 16.5,
         "airYardsShare": 0.518,
         "dropPct": 0.091
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4569559,
@@ -3101,7 +3201,9 @@
         "adot": 8.1,
         "airYardsShare": 0.19,
         "dropPct": 0.063
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4241478,
@@ -3136,7 +3238,9 @@
         "adot": 14.7,
         "airYardsShare": 0.516,
         "dropPct": 0
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4047650,
@@ -3171,7 +3275,9 @@
         "adot": 12.4,
         "airYardsShare": 0.428,
         "dropPct": 0.105
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4428850,
@@ -3206,7 +3312,9 @@
         "adot": 15.4,
         "airYardsShare": 0.286,
         "dropPct": 0.1
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4426502,
@@ -3241,7 +3349,9 @@
         "adot": 7.8,
         "airYardsShare": 0.369,
         "dropPct": 0
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4567750,
@@ -3276,7 +3386,9 @@
         "adot": 15.1,
         "airYardsShare": 0.282,
         "dropPct": 0
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4569618,
@@ -3311,7 +3423,9 @@
         "adot": 10.8,
         "airYardsShare": 0.363,
         "dropPct": 0.071
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4426354,
@@ -3346,7 +3460,9 @@
         "adot": 12.3,
         "airYardsShare": 0.338,
         "dropPct": 0.143
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4362628,
@@ -3381,7 +3497,9 @@
         "adot": 9.2,
         "airYardsShare": 0.288,
         "dropPct": 0.077
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4361409,
@@ -3416,7 +3534,9 @@
         "adot": 13.4,
         "airYardsShare": 0.374,
         "dropPct": 0
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4695883,
@@ -3451,7 +3571,9 @@
         "adot": 9.8,
         "airYardsShare": 0.254,
         "dropPct": 0
-      }
+      },
+      "injuryStatus": "Questionable",
+      "injured": false
     },
     {
       "id": 4426388,
@@ -3486,7 +3608,9 @@
         "adot": 13.9,
         "airYardsShare": 0.325,
         "dropPct": 0.231
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4430878,
@@ -3521,7 +3645,9 @@
         "adot": 9.5,
         "airYardsShare": 0.517,
         "dropPct": 0.045
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4372016,
@@ -3556,7 +3682,9 @@
         "adot": 12.6,
         "airYardsShare": 0.461,
         "dropPct": 0.077
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4688813,
@@ -3591,7 +3719,9 @@
         "adot": 7.9,
         "airYardsShare": 0.3,
         "dropPct": 0
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4262921,
@@ -3626,7 +3756,9 @@
         "adot": 12,
         "airYardsShare": 0.514,
         "dropPct": 0.2
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 2973405,
@@ -3661,7 +3793,9 @@
         "adot": 4.8,
         "airYardsShare": 0.142,
         "dropPct": 0
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4870653,
@@ -3696,7 +3830,9 @@
         "adot": 7,
         "airYardsShare": 0.223,
         "dropPct": 0
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 15818,
@@ -3731,7 +3867,9 @@
         "adot": 4.8,
         "airYardsShare": 0.146,
         "dropPct": 0
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 3045523,
@@ -3766,7 +3904,9 @@
         "adot": 4.3,
         "airYardsShare": 0.128,
         "dropPct": 0.091
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4373678,
@@ -3801,7 +3941,9 @@
         "adot": 8.2,
         "airYardsShare": 0.181,
         "dropPct": 0.083
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4685278,
@@ -3836,7 +3978,9 @@
         "adot": 9.6,
         "airYardsShare": 0.242,
         "dropPct": 0.083
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4595348,
@@ -3871,7 +4015,9 @@
         "adot": 13.5,
         "airYardsShare": 0.307,
         "dropPct": 0
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4569603,
@@ -3906,7 +4052,9 @@
         "adot": 11.7,
         "airYardsShare": 0.339,
         "dropPct": 0.077
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4701936,
@@ -3941,7 +4089,9 @@
         "adot": 14.7,
         "airYardsShare": 0.386,
         "dropPct": 0.067
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4360761,
@@ -3976,7 +4126,9 @@
         "adot": 9.6,
         "airYardsShare": 0.339,
         "dropPct": 0
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 16737,
@@ -4011,7 +4163,9 @@
         "adot": 10.2,
         "airYardsShare": 0.289,
         "dropPct": 0
-      }
+      },
+      "injuryStatus": "Questionable",
+      "injured": false
     },
     {
       "id": 4258173,
@@ -4046,7 +4200,9 @@
         "adot": 12.6,
         "airYardsShare": 0.151,
         "dropPct": 0
-      }
+      },
+      "injuryStatus": "Out",
+      "injured": true
     },
     {
       "id": 4432620,
@@ -4081,7 +4237,9 @@
         "adot": 14.4,
         "airYardsShare": 0.513,
         "dropPct": 0
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4429025,
@@ -4116,7 +4274,9 @@
         "adot": 10.2,
         "airYardsShare": 0.19,
         "dropPct": 0.091
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4360939,
@@ -4151,7 +4311,9 @@
         "adot": 13.4,
         "airYardsShare": 0.251,
         "dropPct": 0
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4431492,
@@ -4186,7 +4348,9 @@
         "adot": 11.7,
         "airYardsShare": 0.236,
         "dropPct": 0
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4430191,
@@ -4221,7 +4385,9 @@
         "adot": 7.6,
         "airYardsShare": 0.072,
         "dropPct": 0
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 2976212,
@@ -4256,7 +4422,9 @@
         "adot": 10.8,
         "airYardsShare": 0.229,
         "dropPct": 0.2
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4239993,
@@ -4291,7 +4459,9 @@
         "adot": 13.1,
         "airYardsShare": 0.526,
         "dropPct": 0
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 3121422,
@@ -4326,7 +4496,9 @@
         "adot": 14.4,
         "airYardsShare": 0.26,
         "dropPct": 0.154
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4685472,
@@ -4361,7 +4533,9 @@
         "adot": 14.2,
         "airYardsShare": 0.371,
         "dropPct": 0
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4428718,
@@ -4396,7 +4570,9 @@
         "adot": 16.5,
         "airYardsShare": 0.379,
         "dropPct": 0
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4686422,
@@ -4431,7 +4607,9 @@
         "adot": 11.8,
         "airYardsShare": 0.212,
         "dropPct": 0
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4683062,
@@ -4466,7 +4644,9 @@
         "adot": 7.1,
         "airYardsShare": 0.208,
         "dropPct": 0.077
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     }
   ],
   "TE": [
@@ -4503,7 +4683,9 @@
         "adot": null,
         "airYardsShare": 0.06,
         "dropPct": 0
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4243331,
@@ -4538,7 +4720,9 @@
         "adot": 5.9,
         "airYardsShare": 0.137,
         "dropPct": 0.091
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 3121023,
@@ -4573,7 +4757,9 @@
         "adot": 6.6,
         "airYardsShare": 0.108,
         "dropPct": 0
-      }
+      },
+      "injuryStatus": "Out",
+      "injured": true
     },
     {
       "id": 4385690,
@@ -4608,7 +4794,9 @@
         "adot": 12.3,
         "airYardsShare": 0.294,
         "dropPct": 0
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 3117256,
@@ -4643,7 +4831,9 @@
         "adot": 5.7,
         "airYardsShare": 0.163,
         "dropPct": 0.045
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 2576925,
@@ -4678,7 +4868,9 @@
         "adot": null,
         "airYardsShare": 0.05,
         "dropPct": 0
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 3123076,
@@ -4713,7 +4905,9 @@
         "adot": 5.3,
         "airYardsShare": 0.098,
         "dropPct": 0.125
-      }
+      },
+      "injuryStatus": "Injured Reserve",
+      "injured": true
     },
     {
       "id": 3051876,
@@ -4748,7 +4942,9 @@
         "adot": null,
         "airYardsShare": 0.097,
         "dropPct": 0
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 3040151,
@@ -4783,7 +4979,9 @@
         "adot": 9.8,
         "airYardsShare": 0.267,
         "dropPct": 0
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4686728,
@@ -4818,7 +5016,9 @@
         "adot": null,
         "airYardsShare": 0.048,
         "dropPct": 0
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 5083076,
@@ -4853,7 +5053,9 @@
         "adot": 3.6,
         "airYardsShare": 0.101,
         "dropPct": 0.111
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 3046439,
@@ -4888,7 +5090,9 @@
         "adot": 8.3,
         "airYardsShare": 0.165,
         "dropPct": 0
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4361050,
@@ -4923,7 +5127,9 @@
         "adot": 6.5,
         "airYardsShare": 0.191,
         "dropPct": 0
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4242355,
@@ -4958,7 +5164,9 @@
         "adot": null,
         "airYardsShare": 0.063,
         "dropPct": 0
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 3054212,
@@ -4993,7 +5201,9 @@
         "adot": null,
         "airYardsShare": 0.04,
         "dropPct": 0
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 3921690,
@@ -5028,7 +5238,9 @@
         "adot": null,
         "airYardsShare": 0.054,
         "dropPct": 0
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 3929645,
@@ -5063,7 +5275,9 @@
         "adot": 8.1,
         "airYardsShare": 0.126,
         "dropPct": 0
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 5083315,
@@ -5098,7 +5312,9 @@
         "adot": null,
         "airYardsShare": 0.019,
         "dropPct": 0
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4360248,
@@ -5133,7 +5349,9 @@
         "adot": null,
         "airYardsShare": 0.156,
         "dropPct": 0
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 3116365,
@@ -5168,7 +5386,9 @@
         "adot": 6.6,
         "airYardsShare": 0.154,
         "dropPct": 0.154
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4429086,
@@ -5203,7 +5423,9 @@
         "adot": 4,
         "airYardsShare": 0.09,
         "dropPct": 0
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 3116164,
@@ -5238,7 +5460,9 @@
         "adot": null,
         "airYardsShare": 0.158,
         "dropPct": 0
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4036131,
@@ -5273,7 +5497,9 @@
         "adot": 5.4,
         "airYardsShare": 0.069,
         "dropPct": 0
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4361411,
@@ -5308,7 +5534,9 @@
         "adot": 7.1,
         "airYardsShare": 0.109,
         "dropPct": 0
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4430027,
@@ -5343,7 +5571,9 @@
         "adot": 3.7,
         "airYardsShare": 0.055,
         "dropPct": 0
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4036133,
@@ -5378,7 +5608,9 @@
         "adot": 6,
         "airYardsShare": 0.147,
         "dropPct": 0
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4570037,
@@ -5413,7 +5645,9 @@
         "adot": 7.9,
         "airYardsShare": 0.133,
         "dropPct": 0.2
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4372780,
@@ -5448,7 +5682,9 @@
         "adot": null,
         "airYardsShare": 0.062,
         "dropPct": 0.143
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 15847,
@@ -5483,7 +5719,9 @@
         "adot": 5.1,
         "airYardsShare": 0.215,
         "dropPct": 0.125
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4361307,
@@ -5518,7 +5756,9 @@
         "adot": 6.1,
         "airYardsShare": 0.319,
         "dropPct": 0.043
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4572680,
@@ -5553,7 +5793,9 @@
         "adot": 6.6,
         "airYardsShare": 0.119,
         "dropPct": 0.059
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4431459,
@@ -5588,7 +5830,9 @@
         "adot": 1.3,
         "airYardsShare": 0.028,
         "dropPct": 0.083
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     }
   ],
   "K": [
@@ -5610,7 +5854,9 @@
         "fgOverExp": 11.4,
         "fantasyStd": 17,
         "receptions": 0
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4569923,
@@ -5630,7 +5876,9 @@
         "fgOverExp": -5,
         "fantasyStd": 14,
         "receptions": 0
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 3953687,
@@ -5650,7 +5898,9 @@
         "fgOverExp": 20.1,
         "fantasyStd": 17,
         "receptions": 0
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 17427,
@@ -5670,7 +5920,9 @@
         "fgOverExp": -18.1,
         "fantasyStd": 16,
         "receptions": 0
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4686361,
@@ -5690,7 +5942,9 @@
         "fgOverExp": 0.1,
         "fantasyStd": 19,
         "receptions": 0
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4362081,
@@ -5710,7 +5964,9 @@
         "fgOverExp": -59.4,
         "fantasyStd": 3,
         "receptions": 0
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4363538,
@@ -5730,7 +5986,9 @@
         "fgOverExp": -3.7,
         "fantasyStd": 16,
         "receptions": 0
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 3150744,
@@ -5750,7 +6008,9 @@
         "fgOverExp": 20.3,
         "fantasyStd": 27,
         "receptions": 0
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 17372,
@@ -5770,7 +6030,9 @@
         "fgOverExp": -7.7,
         "fantasyStd": 12,
         "receptions": 0
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 3051909,
@@ -5790,7 +6052,9 @@
         "fgOverExp": 4.7,
         "fantasyStd": 18,
         "receptions": 0
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 5082424,
@@ -5810,7 +6074,9 @@
         "fgOverExp": 13.2,
         "fantasyStd": 12,
         "receptions": 0
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 5081335,
@@ -5830,7 +6096,9 @@
         "fgOverExp": -14.1,
         "fantasyStd": 12,
         "receptions": 0
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4034949,
@@ -5850,7 +6118,9 @@
         "fgOverExp": -12.4,
         "fantasyStd": 15,
         "receptions": 0
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4360234,
@@ -5870,7 +6140,9 @@
         "fgOverExp": 26.8,
         "fantasyStd": 31,
         "receptions": 0
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 3055899,
@@ -5890,7 +6162,9 @@
         "fgOverExp": -3.2,
         "fantasyStd": 23,
         "receptions": 0
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4574716,
@@ -5910,7 +6184,9 @@
         "fgOverExp": -79.5,
         "fantasyStd": 4,
         "receptions": 0
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4689936,
@@ -5930,7 +6206,9 @@
         "fgOverExp": 2.9,
         "fantasyStd": 14,
         "receptions": 0
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 3050478,
@@ -5950,7 +6228,9 @@
         "fgOverExp": 28.3,
         "fantasyStd": 14,
         "receptions": 0
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 2473037,
@@ -5970,7 +6250,9 @@
         "fgOverExp": 4,
         "fantasyStd": 14,
         "receptions": 0
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 3124679,
@@ -5990,7 +6272,9 @@
         "fgOverExp": 3.7,
         "fantasyStd": 19,
         "receptions": 0
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 3124084,
@@ -6010,7 +6294,9 @@
         "fgOverExp": 10.9,
         "fantasyStd": 13,
         "receptions": 0
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 2971573,
@@ -6030,7 +6316,9 @@
         "fgOverExp": 0.9,
         "fantasyStd": 15,
         "receptions": 0
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4249087,
@@ -6050,7 +6338,9 @@
         "fgOverExp": 24.3,
         "fantasyStd": 18,
         "receptions": 0
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 10621,
@@ -6070,7 +6360,9 @@
         "fgOverExp": -15.3,
         "fantasyStd": 21,
         "receptions": 0
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4243371,
@@ -6090,7 +6382,9 @@
         "fgOverExp": -20.4,
         "fantasyStd": 13,
         "receptions": 0
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4568263,
@@ -6110,7 +6404,9 @@
         "fgOverExp": 10.5,
         "fantasyStd": 17,
         "receptions": 0
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4571557,
@@ -6130,7 +6426,9 @@
         "fgOverExp": 23.2,
         "fantasyStd": 20,
         "receptions": 0
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4869461,
@@ -6150,7 +6448,9 @@
         "fgOverExp": -0.6,
         "fantasyStd": 21,
         "receptions": 0
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 3917232,
@@ -6170,7 +6470,9 @@
         "fgOverExp": 10.3,
         "fantasyStd": 17,
         "receptions": 0
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4697745,
@@ -6190,7 +6492,9 @@
         "fgOverExp": 4,
         "fantasyStd": 19,
         "receptions": 0
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 2985659,
@@ -6210,7 +6514,9 @@
         "fgOverExp": 8.8,
         "fantasyStd": 13,
         "receptions": 0
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4567104,
@@ -6230,7 +6536,9 @@
         "fgOverExp": 15,
         "fantasyStd": 17,
         "receptions": 0
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     }
   ],
   "P": [
@@ -6249,7 +6557,9 @@
         "touchbacks": 1,
         "epaPerPunt": -0.081,
         "fairCatchPct": 0.333
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4427982,
@@ -6266,7 +6576,9 @@
         "touchbacks": 1,
         "epaPerPunt": -0.173,
         "fairCatchPct": 0
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4045180,
@@ -6283,7 +6595,9 @@
         "touchbacks": 2,
         "epaPerPunt": -0.707,
         "fairCatchPct": 0.4
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4035239,
@@ -6300,7 +6614,9 @@
         "touchbacks": 0,
         "epaPerPunt": 0.156,
         "fairCatchPct": 0.111
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 2977680,
@@ -6317,7 +6633,9 @@
         "touchbacks": 0,
         "epaPerPunt": -0.284,
         "fairCatchPct": 0.286
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4799994,
@@ -6334,7 +6652,9 @@
         "touchbacks": 0,
         "epaPerPunt": -0.216,
         "fairCatchPct": 0.4
-      }
+      },
+      "injuryStatus": "Out",
+      "injured": true
     },
     {
       "id": 14950,
@@ -6351,7 +6671,9 @@
         "touchbacks": 0,
         "epaPerPunt": -0.087,
         "fairCatchPct": 0.667
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 3051397,
@@ -6368,7 +6690,9 @@
         "touchbacks": 1,
         "epaPerPunt": -0.2,
         "fairCatchPct": 0.167
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4039396,
@@ -6385,7 +6709,9 @@
         "touchbacks": 0,
         "epaPerPunt": 0.059,
         "fairCatchPct": 0.429
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 3125280,
@@ -6402,7 +6728,9 @@
         "touchbacks": 1,
         "epaPerPunt": -0.219,
         "fairCatchPct": 0
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4248789,
@@ -6419,7 +6747,9 @@
         "touchbacks": 1,
         "epaPerPunt": 0.182,
         "fairCatchPct": 0.143
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 5125875,
@@ -6436,7 +6766,9 @@
         "touchbacks": 1,
         "epaPerPunt": -0.147,
         "fairCatchPct": 0.5
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 3126368,
@@ -6453,7 +6785,9 @@
         "touchbacks": 0,
         "epaPerPunt": -0.607,
         "fairCatchPct": 0.571
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 3916370,
@@ -6470,7 +6804,9 @@
         "touchbacks": 1,
         "epaPerPunt": -0.16,
         "fairCatchPct": 0.182
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 3931395,
@@ -6487,7 +6823,9 @@
         "touchbacks": 2,
         "epaPerPunt": -0.123,
         "fairCatchPct": 0.455
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4589212,
@@ -6504,7 +6842,9 @@
         "touchbacks": 1,
         "epaPerPunt": 0.09,
         "fairCatchPct": 0.222
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4260224,
@@ -6521,7 +6861,9 @@
         "touchbacks": 1,
         "epaPerPunt": 0.091,
         "fairCatchPct": 0.143
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4570033,
@@ -6538,7 +6880,9 @@
         "touchbacks": 0,
         "epaPerPunt": -0.18,
         "fairCatchPct": 0.222
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 3115480,
@@ -6555,7 +6899,9 @@
         "touchbacks": 0,
         "epaPerPunt": 0.279,
         "fairCatchPct": 0.167
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4361496,
@@ -6572,7 +6918,9 @@
         "touchbacks": 0,
         "epaPerPunt": 0.328,
         "fairCatchPct": 0.167
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 3929851,
@@ -6589,7 +6937,9 @@
         "touchbacks": 0,
         "epaPerPunt": 0.208,
         "fairCatchPct": 0.429
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4035685,
@@ -6606,7 +6956,9 @@
         "touchbacks": 0,
         "epaPerPunt": -0.089,
         "fairCatchPct": 0.5
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 3914922,
@@ -6623,7 +6975,9 @@
         "touchbacks": 0,
         "epaPerPunt": -0.13,
         "fairCatchPct": 0.286
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 2577619,
@@ -6640,7 +6994,9 @@
         "touchbacks": 1,
         "epaPerPunt": 0.088,
         "fairCatchPct": 0.5
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 5084956,
@@ -6657,7 +7013,9 @@
         "touchbacks": 0,
         "epaPerPunt": -0.306,
         "fairCatchPct": 0.5
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4608820,
@@ -6674,7 +7032,9 @@
         "touchbacks": 0,
         "epaPerPunt": -0.243,
         "fairCatchPct": 0.333
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4361823,
@@ -6691,7 +7051,9 @@
         "touchbacks": 0,
         "epaPerPunt": -0.299,
         "fairCatchPct": 0.125
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 15928,
@@ -6708,7 +7070,9 @@
         "touchbacks": 1,
         "epaPerPunt": -0.246,
         "fairCatchPct": 0.429
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4682758,
@@ -6725,7 +7089,9 @@
         "touchbacks": 0,
         "epaPerPunt": 0.308,
         "fairCatchPct": 0.75
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 3915398,
@@ -6742,7 +7108,9 @@
         "touchbacks": 4,
         "epaPerPunt": -0.435,
         "fairCatchPct": 0.091
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4686889,
@@ -6759,7 +7127,9 @@
         "touchbacks": 0,
         "epaPerPunt": 0.981,
         "fairCatchPct": 0.333
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 16166,
@@ -6776,7 +7146,9 @@
         "touchbacks": 1,
         "epaPerPunt": -0.212,
         "fairCatchPct": 0.143
-      }
+      },
+      "injuryStatus": "Active",
+      "injured": false
     }
   ]
 }

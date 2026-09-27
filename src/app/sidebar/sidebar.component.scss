@@ -467,7 +467,7 @@
   }
 
   span.slider-value {
-    font-size: 0.72em;
+    font-size: 0.65em;
     margin: 0;
     text-align: right;
   }
@@ -914,20 +914,12 @@
   color: var(--scoreboard-led);
 }
 
-// Display-only rows (e.g. Games): label plus a quiet note, no slider
+// Display-only rows (e.g. Games): label and eye, no slider
 .sidebar .filters .slider-row.info-row {
-  grid-template-areas: "label value";
-
-  span.info-note {
-    color: #9a9a9a;
-    font-family: v.$font-base;
-    font-size: 0.62em;
-    font-weight: 700;
-    grid-area: value;
-    letter-spacing: 0.5px;
-    text-shadow: none;
-    text-transform: uppercase;
-  }
+  // One line: label and eye (no slider underneath, so leave room before the next row)
+  grid-template-areas: "label eye";
+  grid-template-columns: minmax(0, 1fr) auto;
+  padding-bottom: 0.75em;
 }
 
 // Pin the LED dot pattern to the viewport so the drawer tab's dots line up with it
@@ -1090,4 +1082,14 @@
 .sidebar .filters .slider-row,
 .sidebar .filters .sub-rows .slider-row {
   row-gap: 0.45em;
+}
+
+// Slider rows line up with the group title text (past the header icon); sub-rows keep their own indent
+.sidebar .filters .filter-group .group-body > .slider-row {
+  padding-left: 2.9em;
+}
+
+// Hovering a card header turns its title yellow, like the other hover states
+.sidebar .filters .filter-group div.group-header:hover button.group-toggle span.group-title {
+  color: var(--scoreboard-led);
 }

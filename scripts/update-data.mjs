@@ -885,12 +885,6 @@ async function main() {
   } catch (err) {
     console.warn(`Could not load nflverse data, keeping previous values: ${err.message}`);
   }
-  if (skill) {
-    await writeFile(SKILL_FILE, JSON.stringify(skill, null, 2) + '\n');
-    console.log(
-      `Wrote skill players: ${Object.entries(skill).map(([pos, list]) => `${list.length} ${pos}`).join(', ')}`
-    );
-  }
   if (dataGrades) {
     await writeFile(DATA_GRADES_FILE, JSON.stringify(dataGrades, null, 2) + '\n');
     console.log(`Wrote data grades: ${Object.keys(dataGrades.teams).length} teams, ${Object.keys(dataGrades.qbs).length} QBs`);
@@ -913,6 +907,34 @@ async function main() {
   }
   const hurt = gameData.filter((qb) => qb.injured).map((qb) => `${qb.name} (${qb.injuryStatus})`);
   if (hurt.length) console.log(`Injured QBs: ${hurt.join(', ')}`);
+
+  // Same injury flags for RB/WR/TE/K/P (defenses and coaches have none). If nflverse couldn't be
+  // loaded, yesterday's player list still gets today's injury report
+  const previousSkill = JSON.parse(await readFile(SKILL_FILE, 'utf8').catch(() => 'null'));
+  const skillOut = skill ?? previousSkill;
+  if (skillOut) {
+    const previousStatus = new Map(
+      Object.values(previousSkill ?? {})
+        .flat()
+        .filter((player) => player.id)
+        .map((player) => [Number(player.id), player.injuryStatus])
+    );
+    const hurtSkill = [];
+    for (const pos of ['RB', 'WR', 'TE', 'K', 'P']) {
+      for (const player of skillOut[pos] ?? []) {
+        if (!player.id) continue;
+        const id = Number(player.id);
+        player.injuryStatus = (injuries ? (injuries.get(id) ?? 'Active') : previousStatus.get(id)) ?? 'Active';
+        player.injured = INJURED_STATUSES.includes(player.injuryStatus);
+        if (player.injured) hurtSkill.push(`${player.name} (${pos}, ${player.injuryStatus})`);
+      }
+    }
+    await writeFile(SKILL_FILE, JSON.stringify(skillOut, null, 2) + '\n');
+    console.log(
+      `Wrote skill players: ${Object.entries(skillOut).map(([pos, list]) => `${list.length} ${pos}`).join(', ')}`
+    );
+    if (hurtSkill.length) console.log(`Injured players: ${hurtSkill.join(', ')}`);
+  }
 
   await writeFile(GAMES_FILE, JSON.stringify(gameData, null, 2) + '\n');
   console.log(`Wrote ${gameData.length} QBs to games.json`);

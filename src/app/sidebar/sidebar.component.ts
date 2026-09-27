@@ -183,6 +183,13 @@ export class SidebarComponent {
     this.saveSkillWeights();
   }
 
+  // Display-only columns (e.g. Games) have no weight in the ranking; a weight of 0 just hides them
+  toggleInfoColumn(key: SkillColumnKey) {
+    if (!this.skillPosition) return;
+    this.skillWeights = { ...this.skillWeights, [key]: this.skillWeights[key] === 0 ? 50 : 0 };
+    this.saveSkillWeights();
+  }
+
   // Footer Buttons
   resetDefaults(): void {
     const skill = this.skillPosition;

@@ -130,7 +130,7 @@ export class SkillRankingsComponent implements OnChanges {
       this.sortPlayers();
     });
 
-    // Re-rank when another tab's settings menu changes per-game stats
+    // Re-rank when the settings menu changes per-game stats or injured players
     this.positionService.settings$.subscribe(() => {
       if (this.position) this.sortPlayers();
     });
@@ -157,12 +157,14 @@ export class SkillRankingsComponent implements OnChanges {
 
   // Sort Players By Weighted Total
   sortPlayers() {
+    // Injured players drop out unless the settings menu's Show Injured is on (same as QBs)
+    const players = SKILL_UNITS[this.position].filter((player) => this.showInjured || !player.injured);
     // Switched-off groups don't count
     const counted = this.stats.filter((stat) => !this.hidden[statGroup(stat)]);
-    const totals = weightedTotals(this.playerList, counted, this.weights, (player, stat) =>
+    const totals = weightedTotals(players, counted, this.weights, (player, stat) =>
       this.value(player, stat),
     );
-    this.playerList = [...this.playerList].sort(
+    this.playerList = [...players].sort(
       (a, b) => (totals.get(b) ?? 0) - (totals.get(a) ?? 0),
     );
   }
@@ -271,7 +273,9 @@ export class SkillRankingsComponent implements OnChanges {
 
   isShown(stat: SkillStat): boolean {
     if (stat.key === 'totalYards') return this.showUnused || !!this.weights.rushYards || !!this.weights.recYards;
-    return this.showUnused || !!stat.infoOnly || !!this.weights[stat.key];
+    // Display-only columns show unless their sidebar eye is off (weight 0)
+    if (stat.infoOnly) return this.showUnused || this.weights[stat.key] !== 0;
+    return this.showUnused || !!this.weights[stat.key];
   }
 
   format(player: SkillPlayer, stat: SkillStat): string {

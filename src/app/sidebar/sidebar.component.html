@@ -71,10 +71,19 @@
             <div class="group-body">
               @for (stat of group.stats; track stat.key) {
                 @if (stat.infoOnly) {
-                  <!-- Shown for context only; the card's eye hides the column -->
-                  <div class="slider-row info-row" [title]="stat.description">
+                  <!-- Shown for context only (no slider); its eye hides the column -->
+                  <div class="slider-row info-row" [class.disabled]="skillWeights[stat.key] === 0" [title]="stat.description">
                     <p class="slider-label">{{ stat.label }}</p>
-                    <span class="info-note">Display only</span>
+                    <button
+                      type="button"
+                      class="slider-eye"
+                      [class.off]="skillWeights[stat.key] === 0"
+                      [attr.aria-label]="(skillWeights[stat.key] === 0 ? 'Show ' : 'Hide ') + stat.label"
+                      [title]="(skillWeights[stat.key] === 0 ? 'Show ' : 'Hide ') + stat.label"
+                      (click)="toggleInfoColumn(stat.key)"
+                    >
+                      <mat-icon [fontIcon]="skillWeights[stat.key] === 0 ? 'visibility_off' : 'visibility'"></mat-icon>
+                    </button>
                   </div>
                 } @else {
                 <div

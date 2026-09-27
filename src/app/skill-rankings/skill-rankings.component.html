@@ -57,6 +57,15 @@
           <img [src]="player.teamLogo" class="team-logo" />
           <p class="player-name">
             <strong>{{ player.name }}</strong>
+            @if (player.injured) {
+              <mat-icon
+                aria-hidden="false"
+                aria-label="Injury Icon"
+                fontIcon="healing"
+                class="injury-icon"
+                [title]="'This player is currently injured (' + player.injuryStatus + ')'"
+              ></mat-icon>
+            }
           </p>
         </div>
 
