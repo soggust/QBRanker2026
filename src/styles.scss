@@ -39,8 +39,8 @@ body {
     text-shadow: var(--text-shadow-small);
   }
 
-  .mat-mdc-option:hover span {
-    color: var(--primary-50) !important;
+  .mat-mdc-option:not(.mdc-list-item--disabled):hover span {
+    color: var(--scoreboard-led) !important;
   }
 }
 

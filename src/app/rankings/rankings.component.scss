@@ -757,12 +757,13 @@ section ul {
 }
 
 // Column headers: a pinned row of labels; in player rows the labels are hidden but still
-// cover each cell (invisibly) so hovering a value shows its definition
+// cover each cell (invisibly) so hovering a value shows its name and the list average
 section ul {
   li.player:not(.header-row) div {
     position: relative;
 
     .stat-label {
+      cursor: default;
       font-size: 0;
       inset: 0;
       margin: 0;
@@ -809,7 +810,7 @@ section ul {
     }
 
     div .stat-label {
-      cursor: default;
+      cursor: help;
       font-size: 0.6em;
       font-weight: 800;
       letter-spacing: 1px;
@@ -832,7 +833,7 @@ section footer p img {
   margin-right: 0.4em;
 
   &.nflverse-logo {
-    margin: 0 0 0 0.6em;
+    margin: 0 0 0 1.2em;
     max-height: 2.4em;
   }
 }

@@ -6,7 +6,7 @@ import { Filters, Player } from 'app/types';
 import { copyRankingsToClipboard } from 'app/utils/clipboard';
 import { PositionService } from 'app/services/position.service';
 import { defenseGrades } from 'app/utils/unit-scoring';
-import { tintColor } from 'app/utils/value-tint';
+import { tintAverage, tintColor } from 'app/utils/value-tint';
 
 export type ColumnGroupId = 'results' | 'box' | 'advanced' | 'support';
 
@@ -103,6 +103,69 @@ export class RankingsComponent {
     if (!stat) return null;
     return tintColor(stat.get(player), this.playerList.map(stat.get), stat.lowerIsBetter);
   }
+
+  // Label hover: the stat written out, plus the list average the color-coding centers on
+  labelTitle(column: string): string {
+    const label = this.labelInfo[column];
+    const name = column === 'fantasy' ? `${this.scoringLabels[this.fantasyScoring]} Fantasy Points` : label.name;
+    const stat = this.tintStats[column] ?? this.gradeStats[column];
+    if (!stat || !label.avg) return name;
+    const avg = tintAverage(this.playerList.map(stat.get));
+    return avg === null ? name : `${name} (Avg: ${label.avg(avg)})`;
+  }
+
+  // Player-row hover (the label invisibly covers its value): "[value] [stat name]"
+  cellTitle(column: string, label: HTMLElement, player: Player): string {
+    const name = column === 'fantasy' ? `${this.scoringLabels[this.fantasyScoring]} Fantasy Points` : this.labelInfo[column].name;
+    if (column === 'last-five') return `${this.getNumberOfRecentWins(player.lastFive)} Wins in the ${name}`;
+    const value = (label.previousElementSibling?.textContent ?? '').replace(/\s+/g, '');
+    return value && value !== '-' ? `${value} ${name}` : name;
+  }
+
+  private readonly gradeStats: Record<string, { get: (p: Player) => number | null }> = {
+    weapons: { get: (p) => p.weapons },
+    coaching: { get: (p) => p.coaching },
+    'o-line': { get: (p) => p.oline },
+    defense: { get: (p) => p.defense },
+    responsibility: { get: (p) => p.responsibility },
+  };
+
+  private readonly labelInfo: Record<string, { name: string; avg?: (v: number) => string }> = (() => {
+    const perGame = (v: number) => `${v.toFixed(1)} per game`;
+    const pct = (v: number) => `${Math.round(v * 100)}%`;
+    const grades = ['F', 'D-', 'D', 'D+', 'C-', 'C', 'C+', 'B-', 'B', 'B+', 'A-', 'A', 'A+'];
+    const grade = (v: number) => grades[Math.min(12, Math.max(0, Math.round(v)))];
+    return {
+      record: { name: 'Record as Starter', avg: (v) => `${v.toFixed(3).replace(/^0/, '')} win %` },
+      'last-five': { name: 'Last 5 Games' },
+      'comp-percent': { name: 'Completion Percentage', avg: (v) => `${v.toFixed(1)}%` },
+      'total-yards': { name: 'Total Passing + Rushing Yards', avg: perGame },
+      'pass-yards': { name: 'Passing Yards', avg: perGame },
+      ypa: { name: 'Yards per Pass Attempt', avg: (v) => v.toFixed(1) },
+      'rush-yards': { name: 'Rushing Yards', avg: perGame },
+      touchdowns: { name: 'Total Passing + Rushing Touchdowns', avg: perGame },
+      'pass-tds': { name: 'Passing Touchdowns', avg: perGame },
+      'rush-tds': { name: 'Rushing Touchdowns', avg: perGame },
+      turnovers: { name: 'Total Interceptions + Fumbles Lost', avg: perGame },
+      interceptions: { name: 'Interceptions', avg: perGame },
+      'fumbles-lost': { name: 'Fumbles Lost', avg: perGame },
+      rating: { name: 'Passer Rating', avg: (v) => v.toFixed(1) },
+      epa: { name: 'Expected Points Added per Play', avg: (v) => v.toFixed(2) },
+      cpoe: { name: 'Completion Percentage Over Expected', avg: (v) => `${v.toFixed(1)}%` },
+      'success-rate': { name: 'Success Rate', avg: pct },
+      pressureToSack: { name: 'Pressure-to-Sack Rate', avg: pct },
+      badThrowPct: { name: 'Bad Throw Percentage', avg: pct },
+      timeToThrow: { name: 'Time to Throw', avg: (v) => `${v.toFixed(2)} sec` },
+      adot: { name: 'Average Depth of Target', avg: (v) => `${v.toFixed(1)} yds` },
+      aggressiveness: { name: 'Aggressiveness Percentage', avg: (v) => `${Math.round(v)}%` },
+      fantasy: { name: 'Fantasy Points', avg: perGame },
+      weapons: { name: 'Weapons Grade', avg: grade },
+      coaching: { name: 'Coaching Grade', avg: grade },
+      'o-line': { name: 'Offensive Line Grade', avg: grade },
+      defense: { name: 'Defense Grade', avg: grade },
+      responsibility: { name: 'Responsibility to Team Grade', avg: grade },
+    };
+  })();
 
   // Color-coding compares volume stats per game, whatever the display setting
   private perGameOf(player: Player, total: number): number {

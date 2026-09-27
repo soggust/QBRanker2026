@@ -26,14 +26,14 @@
             <div class="box support-box" [style.min-width.em]="group.stats.length * 5.5">
               @for (stat of group.stats; track stat.key) {
                 <div>
-                  <p class="stat-label">{{ stat.label }}</p>
+                  <p class="stat-label" [title]="labelTitle(stat)">{{ stat.label }}</p>
                 </div>
               }
             </div>
           } @else {
             @for (stat of group.stats; track stat.key) {
               <div>
-                <p class="stat-label">{{ stat.label }}</p>
+                <p class="stat-label" [title]="labelTitle(stat)">{{ stat.label }}</p>
               </div>
             }
           }
@@ -66,17 +66,17 @@
               <!-- Support grades (O-Line, QB Play) share a dark box like the QB page -->
               <div class="box support-box" [style.min-width.em]="group.stats.length * 5.5">
                 @for (stat of group.stats; track stat.key) {
-                  <div [title]="stat.label + ': ' + stat.description">
+                  <div>
                     <p [style.color]="gradeColor(player, stat) ?? valueColor(player, stat)">{{ format(player, stat) }}</p>
-                    <p class="stat-label">{{ stat.label }}</p>
+                    <p class="stat-label" [title]="valueTitle(player, stat)">{{ stat.label }}</p>
                   </div>
                 }
               </div>
             } @else {
               @for (stat of group.stats; track stat.key) {
-                <div [title]="stat.label + ': ' + stat.description">
+                <div>
                   <p [style.color]="gradeColor(player, stat) ?? valueColor(player, stat)">{{ format(player, stat) }}</p>
-                  <p class="stat-label" [title]="stat.description">
+                  <p class="stat-label" [title]="valueTitle(player, stat)">
                     {{ stat.label }}
                   </p>
                 </div>
@@ -112,6 +112,7 @@
     <button
       (click)="copyPlayerListToClipboard()"
       aria-label="Copy To Clipboard Button"
+      title="Copy to Clipboard"
       style="margin-left: auto; margin-right: 1em"
     >
       <mat-icon
@@ -129,6 +130,7 @@
       class="settings-toggle"
       [matMenuTriggerFor]="menu"
       aria-label="Settings menu"
+      title="Settings"
     >
       <mat-icon aria-hidden="false" aria-label="Settings Icon" fontIcon="settings"></mat-icon>
     </button>

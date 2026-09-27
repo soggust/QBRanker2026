@@ -13,3 +13,9 @@ export function tintColor(value: number | null, values: (number | null)[], lower
   const hue = z >= 0 ? '#3ee07a' : '#ff5a4f';
   return `color-mix(in srgb, ${hue} ${strength}%, #fff)`;
 }
+
+// The list average the tint is centered on (null when nothing to compare)
+export function tintAverage(values: (number | null)[]): number | null {
+  const known = values.filter((v): v is number => v !== null && !Number.isNaN(v));
+  return known.length ? known.reduce((a, b) => a + b, 0) / known.length : null;
+}

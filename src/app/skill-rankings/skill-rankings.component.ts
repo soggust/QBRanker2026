@@ -5,6 +5,7 @@ import {
   FANTASY_SCORING_LABELS,
   FantasyScoring,
   SKILL_STATS,
+  STAT_NAMES,
   SkillPlayer,
   SkillPosition,
   SkillStat,
@@ -19,7 +20,7 @@ import {
 import { PositionService } from 'app/services/position.service';
 import { copyRankingsToClipboard } from 'app/utils/clipboard';
 import { SKILL_UNITS, weightedTotals } from 'app/utils/unit-scoring';
-import { tintColor } from 'app/utils/value-tint';
+import { tintAverage, tintColor } from 'app/utils/value-tint';
 
 // Average a per-QB value (0-12) for each team, weighted by how many games each QB started there
 function teamGrades(valueFor: (qbId: number) => number | undefined): Map<string, number> {
@@ -176,6 +177,47 @@ export class SkillRankingsComponent implements OnChanges {
     const raw = this.rawValue(player, stat);
     if (raw === null) return null;
     return stat.kind === 'volume' && !stat.infoOnly && player.games ? raw / player.games : raw;
+  }
+
+  // Label hover: the stat written out, plus the list average the color-coding centers on
+  labelTitle(stat: SkillStat): string {
+    const name = this.statName(stat);
+    if (stat.format === 'record') return name;
+    const avg = tintAverage(this.playerList.map((p) => this.rateValue(p, stat)));
+    if (avg === null) return name;
+    let shown: string;
+    switch (stat.format) {
+      case 'grade':
+        shown = this.grade(avg);
+        break;
+      case 'pct':
+        shown = `${Math.round(avg * 100)}%`;
+        break;
+      case 'pctPoints':
+        shown = `${avg.toFixed(1)}%`;
+        break;
+      case 'dec2':
+        shown = avg.toFixed(2);
+        break;
+      default:
+        shown = avg.toFixed(1);
+    }
+    const perGame = stat.kind === 'volume' && !stat.infoOnly;
+    return `${name} (Avg: ${shown}${perGame ? ' per game' : ''})`;
+  }
+
+  // The stat written out in full; kickers and defenses have their own fixed fantasy scoring
+  statName(stat: SkillStat): string {
+    return stat.key === 'fantasy' && !['K', 'DEF'].includes(this.position)
+      ? `${FANTASY_SCORING_LABELS[this.fantasyScoring]} Fantasy Points`
+      : (STAT_NAMES[stat.key] ?? stat.label);
+  }
+
+  // Player-row hover (the label invisibly covers its value): "[value] [stat name]"
+  valueTitle(player: SkillPlayer, stat: SkillStat): string {
+    const name = this.statName(stat);
+    const value = this.format(player, stat);
+    return value === '-' ? name : `${value} ${name}`;
   }
 
   // Displayed value: per game for volume stats when the setting is on
