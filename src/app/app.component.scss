@@ -374,3 +374,32 @@ main:not(.sidebar-collapsed) .drawer-tab .mat-icon {
 .position-bar button:not(.active):not(.collapse-toggle) {
   font-weight: 500;
 }
+
+// Unselected position pills: white border
+.position-bar button:not(.active):not(.collapse-toggle) {
+  border-color: #fff;
+}
+
+// The X on the drawer tab is white (the collapsed filter icon stays yellow)
+main:not(.sidebar-collapsed) .drawer-tab .mat-icon {
+  color: #fff;
+}
+
+// Yellow on hover: unselected pills and the drawer X
+.position-bar button:not(.active):not(.collapse-toggle):hover {
+  border-color: var(--scoreboard-led);
+  color: var(--scoreboard-led);
+}
+
+main:not(.sidebar-collapsed) .drawer-tab:hover .mat-icon {
+  color: var(--scoreboard-led);
+}
+
+// Drawer tab icon is white in both states, yellow on hover
+main .drawer-tab .mat-icon {
+  color: #fff;
+}
+
+main .drawer-tab:hover .mat-icon {
+  color: var(--scoreboard-led);
+}

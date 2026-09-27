@@ -315,3 +315,12 @@ html .mat-mdc-slide-toggle.mat-accent {
     width: 10.5px;
   }
 }
+
+// Preset dropdown caret in white
+.sidebar .mat-mdc-select-arrow {
+  color: #fff !important;
+}
+
+.sidebar .mat-mdc-select:hover .mat-mdc-select-arrow {
+  color: var(--scoreboard-led) !important;
+}

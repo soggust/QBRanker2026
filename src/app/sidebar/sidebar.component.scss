@@ -1034,3 +1034,54 @@
 .sidebar .filters .slider-row.master {
   box-shadow: none;
 }
+
+// White footer buttons: Defaults solid, Clear outlined
+.sidebar footer button {
+  background: #fff;
+  border-color: #fff;
+  color: #111;
+
+  &.negative {
+    background: transparent;
+    color: #fff;
+  }
+}
+
+// Preset dropdown text in white
+.sidebar .mat-mdc-select,
+.sidebar .mat-mdc-select .mat-mdc-select-value,
+.sidebar .mat-mdc-select .mat-mdc-select-value-text {
+  color: #fff;
+}
+
+// Yellow on hover for the white controls
+.sidebar footer button:hover {
+  background: var(--scoreboard-led);
+  border-color: var(--scoreboard-led);
+  color: #111;
+
+  &.negative {
+    background: transparent;
+    color: var(--scoreboard-led);
+  }
+}
+
+.sidebar .mat-mdc-select:hover,
+.sidebar .mat-mdc-select:hover .mat-mdc-select-value,
+.sidebar .mat-mdc-select:hover .mat-mdc-select-value-text {
+  color: var(--scoreboard-led);
+}
+
+// Both footer buttons are white outlines, yellow on hover
+.sidebar footer button,
+.sidebar footer button.negative {
+  background: transparent;
+  border: 1px solid #fff;
+  color: #fff;
+
+  &:hover {
+    background: transparent;
+    border-color: var(--scoreboard-led);
+    color: var(--scoreboard-led);
+  }
+}
