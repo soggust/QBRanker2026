@@ -68,7 +68,13 @@ export class ColumnHighlightDirective implements OnInit, OnDestroy {
       }
       el = parent;
     }
-    if (!cell) return this.clear();
+    if (!cell) {
+      // Crossing the gap between rows (or other non-cell space) inside the same column keeps the band
+      const x = (event as MouseEvent).clientX;
+      const current = this.cell?.getBoundingClientRect();
+      if (current && x >= current.left && x <= current.right) return;
+      return this.clear();
+    }
 
     // Only move the band when the column changes; measure the scroll height with the band
     // hidden so it can't grow the scroll area (which made the scrollbar flicker)
