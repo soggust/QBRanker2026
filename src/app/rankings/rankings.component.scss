@@ -1408,3 +1408,16 @@ section footer p img {
   margin-left: 0.65em;
   margin-right: 0.65em;
 }
+
+// Drag preview renders inside the list (cdkDragPreviewContainer="parent"), so it keeps every row
+// style; while dragging, the leather is a bit darker and the row lifts with a deeper shadow
+section ul li.player.cdk-drag-preview,
+section ul li.player.cdk-drag-preview:hover {
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  box-shadow:
+    inset 0 0 0 100vmax rgba(0, 0, 0, 0.18),
+    0 1em 2.5em rgba(0, 0, 0, 0.45);
+  cursor: grabbing;
+  margin: 0;
+  z-index: 10;
+}

@@ -359,8 +359,18 @@ main.sidebar-collapsed .drawer-tab {
   width: calc(2.25em + 3px);
 }
 
-// Tab sits 8em down the menu's right edge (both right corners rounded)
+// Tab sits 6em down the menu's right edge (both right corners rounded)
 main .drawer-tab {
   border-radius: 0 10px 10px 0;
-  top: 8em;
+  top: 6em;
+}
+
+// The X (menu open) is a bit smaller than the filter icon
+main:not(.sidebar-collapsed) .drawer-tab .mat-icon {
+  font-size: 1.2em;
+}
+
+// Inactive position pills are lighter weight so the active one stands out
+.position-bar button:not(.active):not(.collapse-toggle) {
+  font-weight: 500;
 }

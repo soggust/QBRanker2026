@@ -656,7 +656,7 @@
     }
     @for (player of playerList; track player.id; let i = $index) {
       <!-- Player -->
-      <li cdkDrag class="player">
+      <li cdkDrag cdkDragPreviewContainer="parent" class="player">
         <mat-icon
           cdkDragHandle
           aria-hidden="false"
