@@ -727,8 +727,8 @@
       "../assets/NFL_Icons/Packers.png": 3
     },
     "advanced": {
-      "pressureToSack": 0.259,
-      "badThrowPct": 0.153,
+      "pressureToSack": 0.216,
+      "badThrowPct": 0.234,
       "timeToThrow": 2.49,
       "adot": 9.1,
       "aggressiveness": 15.3,
@@ -943,8 +943,8 @@
       "../assets/NFL_Icons/Falcons.png": 1
     },
     "advanced": {
-      "pressureToSack": null,
-      "badThrowPct": null,
+      "pressureToSack": 0,
+      "badThrowPct": 0.08,
       "timeToThrow": 2.27,
       "adot": 7,
       "aggressiveness": 4,

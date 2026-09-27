@@ -38,8 +38,8 @@
         "ptsAllowedPerGame": 22.7,
         "fantasyStd": 10,
         "receptions": 0,
-        "pressureRate": 0.191,
-        "missedTacklePct": 0.078,
+        "pressureRate": 0.265,
+        "missedTacklePct": 0.075,
         "thirdDownPct": 0.357,
         "redZoneTdPct": 0.5
       }
@@ -258,8 +258,8 @@
         "ptsAllowedPerGame": 30.3,
         "fantasyStd": 4,
         "receptions": 0,
-        "pressureRate": 0.267,
-        "missedTacklePct": 0.081,
+        "pressureRate": 0.286,
+        "missedTacklePct": 0.085,
         "thirdDownPct": 0.5,
         "redZoneTdPct": 0.833
       }
@@ -1516,8 +1516,8 @@
         "epaPerCarry": 0.072,
         "epaPerTarget": -0.336,
         "ryoePerAtt": 1.03,
-        "yacoPerCarry": 1.15,
-        "brokenTackles": 9,
+        "yacoPerCarry": 2.53,
+        "brokenTackles": 10,
         "snapShare": 0.667,
         "separation": null,
         "yacOverExp": null,
@@ -1627,7 +1627,7 @@
         "epaPerCarry": 0.103,
         "epaPerTarget": 0.602,
         "ryoePerAtt": -0.05,
-        "yacoPerCarry": 1.33,
+        "yacoPerCarry": 2.6,
         "brokenTackles": 2,
         "snapShare": 0.333,
         "separation": null,
@@ -2478,7 +2478,7 @@
         "epaPerCarry": -0.422,
         "epaPerTarget": 0.109,
         "ryoePerAtt": -1.44,
-        "yacoPerCarry": 0.87,
+        "yacoPerCarry": 1,
         "brokenTackles": 1,
         "snapShare": 0.313,
         "separation": null,
@@ -3597,7 +3597,7 @@
         "yacOverExp": -1.7,
         "adot": 13.4,
         "airYardsShare": 0.374,
-        "dropPct": 0
+        "dropPct": 0.1
       },
       "injuryStatus": "Active",
       "injured": false
@@ -4152,7 +4152,7 @@
         "yacOverExp": 1.3,
         "adot": 14.7,
         "airYardsShare": 0.386,
-        "dropPct": 0.067
+        "dropPct": 0.1
       },
       "injuryStatus": "Active",
       "injured": false
@@ -4442,7 +4442,7 @@
         "epaPerTarget": -0.211,
         "ryoePerAtt": null,
         "yacoPerCarry": null,
-        "brokenTackles": 0,
+        "brokenTackles": 1,
         "snapShare": 0.313,
         "separation": 3.8,
         "yacOverExp": 1,
@@ -5856,7 +5856,7 @@
         "yacOverExp": 0.2,
         "adot": 6.6,
         "airYardsShare": 0.119,
-        "dropPct": 0.059
+        "dropPct": 0.235
       },
       "injuryStatus": "Active",
       "injured": false

@@ -19,17 +19,17 @@
     "Falcons": {
       "games": 3,
       "oline": 9.3,
-      "weapons": 11.6,
+      "weapons": 10.8,
       "metrics": {
-        "pressureRate": 0.165,
+        "pressureRate": 0.187,
         "sackRate": 0.077,
-        "yardsBeforeContact": 2.492,
+        "yardsBeforeContact": 2.596,
         "stuffRate": 0.17,
         "separation": 3.035,
         "yacOverExpected": 1.1,
-        "dropRate": 0.013,
+        "dropRate": 0.025,
         "rushOverExpected": 0.692,
-        "brokenTackles": 0.108
+        "brokenTackles": 0.086
       }
     },
     "Ravens": {
@@ -51,7 +51,7 @@
     "Bills": {
       "games": 2,
       "oline": 10.8,
-      "weapons": 11.2,
+      "weapons": 11.6,
       "metrics": {
         "pressureRate": 0.239,
         "sackRate": 0.056,
@@ -66,7 +66,7 @@
     },
     "Panthers": {
       "games": 2,
-      "oline": 1.9,
+      "oline": 2.3,
       "weapons": 9.7,
       "metrics": {
         "pressureRate": 0.402,
@@ -83,7 +83,7 @@
     "Bears": {
       "games": 2,
       "oline": 4.6,
-      "weapons": 10.8,
+      "weapons": 11.2,
       "metrics": {
         "pressureRate": 0.342,
         "sackRate": 0.076,
@@ -99,7 +99,7 @@
     "Bengals": {
       "games": 2,
       "oline": 5.4,
-      "weapons": 7,
+      "weapons": 7.4,
       "metrics": {
         "pressureRate": 0.274,
         "sackRate": 0.082,
@@ -147,7 +147,7 @@
     "Broncos": {
       "games": 2,
       "oline": 7,
-      "weapons": 7.7,
+      "weapons": 7,
       "metrics": {
         "pressureRate": 0.219,
         "sackRate": 0.063,
@@ -178,23 +178,23 @@
     },
     "Packers": {
       "games": 3,
-      "oline": 2.7,
-      "weapons": 1.9,
+      "oline": 1.2,
+      "weapons": 1.2,
       "metrics": {
-        "pressureRate": 0.205,
+        "pressureRate": 0.28,
         "sackRate": 0.061,
-        "yardsBeforeContact": 1.923,
+        "yardsBeforeContact": 1.75,
         "stuffRate": 0.283,
         "separation": 2.914,
         "yacOverExpected": 1.724,
-        "dropRate": 0.056,
+        "dropRate": 0.089,
         "rushOverExpected": -1.443,
-        "brokenTackles": 0.029
+        "brokenTackles": 0.044
       }
     },
     "Texans": {
       "games": 2,
-      "oline": 2.3,
+      "oline": 2.7,
       "weapons": 3.9,
       "metrics": {
         "pressureRate": 0.233,
@@ -274,7 +274,7 @@
     },
     "Chargers": {
       "games": 2,
-      "oline": 1.5,
+      "oline": 1.9,
       "weapons": 5,
       "metrics": {
         "pressureRate": 0.288,
@@ -291,7 +291,7 @@
     "Raiders": {
       "games": 2,
       "oline": 3.5,
-      "weapons": 1.5,
+      "weapons": 1.9,
       "metrics": {
         "pressureRate": 0.206,
         "sackRate": 0.032,
@@ -307,7 +307,7 @@
     "Dolphins": {
       "games": 2,
       "oline": 0,
-      "weapons": 6.6,
+      "weapons": 7.7,
       "metrics": {
         "pressureRate": 0.385,
         "sackRate": 0.138,
@@ -355,7 +355,7 @@
     "Saints": {
       "games": 2,
       "oline": 4.3,
-      "weapons": 6.2,
+      "weapons": 6.6,
       "metrics": {
         "pressureRate": 0.186,
         "sackRate": 0.078,
@@ -402,7 +402,7 @@
     },
     "Eagles": {
       "games": 2,
-      "oline": 1.2,
+      "oline": 1.5,
       "weapons": 9.3,
       "metrics": {
         "pressureRate": 0.24,
@@ -419,7 +419,7 @@
     "Steelers": {
       "games": 2,
       "oline": 6.2,
-      "weapons": 8.1,
+      "weapons": 8.5,
       "metrics": {
         "pressureRate": 0.236,
         "sackRate": 0.067,
@@ -435,7 +435,7 @@
     "Seahawks": {
       "games": 2,
       "oline": 9.7,
-      "weapons": 7.4,
+      "weapons": 6.2,
       "metrics": {
         "pressureRate": 0.185,
         "sackRate": 0.056,
@@ -451,7 +451,7 @@
     "49ers": {
       "games": 2,
       "oline": 12,
-      "weapons": 8.5,
+      "weapons": 8.1,
       "metrics": {
         "pressureRate": 0.098,
         "sackRate": 0,
@@ -499,7 +499,7 @@
     "Commanders": {
       "games": 2,
       "oline": 11.2,
-      "weapons": 1.2,
+      "weapons": 1.5,
       "metrics": {
         "pressureRate": 0.198,
         "sackRate": 0.012,
