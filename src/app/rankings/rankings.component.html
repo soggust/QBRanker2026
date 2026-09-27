@@ -109,7 +109,7 @@
           @if (showUnused || this.filters.compValue) {
             <!-- Completion Percent -->
             <div class="comp-percent">
-              <p>{{ player.compPercent }}</p>
+              <p>{{ player.compPercent }}%</p>
               <p class="stat-label" [title]="player.compPercent + '% Completion'">
                 Comp %
               </p>
@@ -358,7 +358,7 @@
           ) {
             <!-- CPOE -->
             <div class="cpoe">
-              <p>{{ player.cpoe === null ? "-" : (player.cpoe | number: "1.1-1") }}</p>
+              <p>{{ player.cpoe === null ? "-" : (player.cpoe | number: "1.1-1") + "%" }}</p>
               <p class="stat-label" title="Completion % Over Expected">CPOE</p>
             </div>
           }
@@ -419,7 +419,7 @@
           ) {
             <!-- Aggressive % -->
             <div class="aggressiveness">
-              <p>{{ player.aggressiveness === null ? "-" : (player.aggressiveness | number: "1.1-1") }}</p>
+              <p>{{ player.aggressiveness === null ? "-" : (player.aggressiveness | number: "1.0-0") + "%" }}</p>
               <p class="stat-label" title="Share of throws into tight coverage">Aggressive %</p>
             </div>
           }

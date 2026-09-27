@@ -111,7 +111,8 @@ export interface SkillStat {
   // Volume stats scale with games played (and can be shown per game); efficiency stats are rates
   kind: 'volume' | 'efficiency';
   // 'record' shows W-L(-T) from the wins/losses/ties stats while ranking on the stat's value
-  format: 'int' | 'dec1' | 'dec2' | 'pct' | 'grade' | 'record';
+  // pct: a 0-1 share shown as a whole percent; pctPoints: already in percentage points (1 decimal)
+  format: 'int' | 'dec1' | 'dec2' | 'pct' | 'pctPoints' | 'grade' | 'record';
   // Scaled against the league range instead of the max (stats that can go negative, or bunch up)
   signed?: boolean;
   // Counts against the player (e.g. fumbles)
@@ -320,7 +321,7 @@ export const SKILL_STATS: Record<SkillPosition, SkillStat[]> = {
       label: 'FG % Over Exp',
       description: 'Field goal % above what the kick distances predict, in percentage points',
       kind: 'efficiency',
-      format: 'dec1',
+      format: 'pctPoints',
       signed: true,
     },
     {

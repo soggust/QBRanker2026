@@ -188,6 +188,8 @@ export class SkillRankingsComponent implements OnChanges {
         const { wins, losses, ties } = player.stats;
         return ties ? `${wins}-${losses}-${ties}` : `${wins}-${losses}`;
       }
+      case 'pctPoints':
+        return `${(Number(value.toFixed(1)) + 0).toFixed(1)}%`;
       case 'pct':
         return `${Math.round(value * 100)}%`;
       // + 0 turns -0 into 0 so tiny negatives don't show as "-0.00"
