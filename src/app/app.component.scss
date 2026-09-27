@@ -81,7 +81,9 @@ main {
     letter-spacing: 1.5px;
     padding: 0.45em 1.1em;
     text-transform: uppercase;
-    transition: background 0.15s ease, color 0.15s ease;
+    transition:
+      background 0.15s ease,
+      color 0.15s ease;
 
     &:hover:not(.active) {
       background: rgba(0, 0, 0, 0.1);
@@ -231,7 +233,6 @@ main {
   background: rgba(0, 0, 0, 0.35);
   border: 1px solid var(--scoreboard-led);
   margin-right: 0.35em;
-
 }
 
 // Big screens: the sidebar open/close button sits on a soft shaded chip
@@ -359,10 +360,10 @@ main.sidebar-collapsed .drawer-tab {
   width: calc(2.25em + 3px);
 }
 
-// Tab sits 6em down the menu's right edge (both right corners rounded)
+// Tab sits 4.5em down the menu's right edge (both right corners rounded)
 main .drawer-tab {
   border-radius: 0 10px 10px 0;
-  top: 6em;
+  top: calc(4.5em - 1px);
 }
 
 // The X (menu open) is a bit smaller than the filter icon
@@ -402,4 +403,11 @@ main .drawer-tab .mat-icon {
 
 main .drawer-tab:hover .mat-icon {
   color: var(--scoreboard-led);
+}
+
+// Large screens: room on the left for the drawer tab whether the menu is open or collapsed
+@media (min-width: 1200px) {
+  main .content {
+    padding-left: 3em;
+  }
 }
