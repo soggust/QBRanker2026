@@ -104,8 +104,9 @@ export class RankingsComponent {
     return tintColor(stat.get(player), this.playerList.map(stat.get), stat.lowerIsBetter);
   }
 
+  // Color-coding compares volume stats per game, whatever the display setting
   private perGameOf(player: Player, total: number): number {
-    return this.perGame && player.games ? total / player.games : total;
+    return player.games ? total / player.games : total;
   }
 
   private readonly tintStats: Record<string, { get: (p: Player) => number | null; lowerIsBetter?: boolean }> = {
@@ -130,7 +131,7 @@ export class RankingsComponent {
     timeToThrow: { get: (p) => p.timeToThrow, lowerIsBetter: true },
     adot: { get: (p) => p.adot },
     aggressiveness: { get: (p) => p.aggressiveness },
-    fantasy: { get: (p) => this.fantasyPoints(p) },
+    fantasy: { get: (p) => this.fantasyPerGame(p) },
   };
 
   get totalStats(): boolean {
@@ -432,11 +433,18 @@ export class RankingsComponent {
     return max === min ? 1 : 0.5 + (0.5 * (value - min)) / (max - min);
   }
 
-  // Fantasy Points In The Chosen Scoring, Per Game When Toggled
+  // Fantasy Points In The Chosen Scoring, Per Game When Toggled (display)
   fantasyPoints(player: Player): number | null {
+    const perGame = this.fantasyPerGame(player);
+    if (perGame === null) return null;
+    return this.perGame ? perGame : perGame * (player.games || 1);
+  }
+
+  // Fantasy points per game: what color-coding uses
+  fantasyPerGame(player: Player): number | null {
     if (player.fantasyStd === null) return null;
     const points = fantasyPoints(player.fantasyStd, player.receptions, this.fantasyScoring);
-    return this.perGame && player.games ? points / player.games : points;
+    return player.games ? points / player.games : points;
   }
 
   cycleFantasyScoring() {

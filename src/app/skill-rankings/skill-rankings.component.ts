@@ -84,8 +84,8 @@ export class SkillRankingsComponent implements OnChanges {
   valueColor(player: SkillPlayer, stat: SkillStat): string | null {
     if (!this.colorValues || stat.infoOnly || stat.format === 'grade' || stat.format === 'record') return null;
     return tintColor(
-      this.value(player, stat),
-      this.playerList.map((p) => this.value(p, stat)),
+      this.rateValue(player, stat),
+      this.playerList.map((p) => this.rateValue(p, stat)),
       !!stat.negative,
     );
   }
@@ -170,7 +170,15 @@ export class SkillRankingsComponent implements OnChanges {
     moveItemInArray(this.playerList, event.previousIndex, event.currentIndex);
   }
 
-  // Stat Value, Per Game For Volume Stats When Toggled
+  // Per-game value for volume stats, whatever the display setting: what color-coding uses,
+  // so 100 yards in 1 game tints greener than 100 yards in 10 (ranking and display unchanged)
+  rateValue(player: SkillPlayer, stat: SkillStat): number | null {
+    const raw = this.rawValue(player, stat);
+    if (raw === null) return null;
+    return stat.kind === 'volume' && !stat.infoOnly && player.games ? raw / player.games : raw;
+  }
+
+  // Displayed value: per game for volume stats when the setting is on
   value(player: SkillPlayer, stat: SkillStat): number | null {
     const raw = this.rawValue(player, stat);
     if (raw === null) return null;
