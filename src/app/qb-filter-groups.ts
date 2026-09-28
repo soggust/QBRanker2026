@@ -63,7 +63,6 @@ export const QB_FILTER_GROUPS: FilterGroup[] = [
     title: 'Basic Stats',
     icon: 'bar_chart',
     rows: [
-      { key: 'compValue', label: 'Comp %', hint: 'Completion percentage' },
       {
         key: 'yardsValue',
         label: 'Total Yds',
@@ -73,6 +72,7 @@ export const QB_FILTER_GROUPS: FilterGroup[] = [
         ],
       },
       { key: 'ypaValue', label: 'Per Attempt', hint: 'Yards per pass attempt' },
+      { key: 'compValue', label: 'Comp %', hint: 'Completion percentage' },
       {
         key: 'touchdownValue',
         label: 'Total TDs',
@@ -98,8 +98,8 @@ export const QB_FILTER_GROUPS: FilterGroup[] = [
     icon: 'insights',
     rows: [
       { key: 'epaValue', label: 'EPA / Play', hint: 'Expected Points Added per play' },
-      { key: 'cpoeValue', label: 'CPOE', hint: 'Completion % over expected' },
       { key: 'successValue', label: 'Success', hint: 'Share of plays gaining positive EPA' },
+      { key: 'cpoeValue', label: 'CPOE', hint: 'Completion % over expected' },
       { key: 'pressureToSackValue', label: 'Pressure → Sack', hint: 'Lower is better' },
       { key: 'badThrowValue', label: 'Bad Throw %', hint: 'Lower is better' },
       { key: 'timeToThrowValue', label: 'Time To Throw', hint: 'Quicker is better' },

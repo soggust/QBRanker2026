@@ -45,6 +45,7 @@ export class AboutComponent implements AfterViewInit {
     ['Air Yds Share', "Share of the team's air yards (how far passes travel in the air) aimed at the player."],
     ['Separation', 'Average yards between the receiver and the nearest defender when the ball arrives.'],
     ['YAC Over Exp', 'Yards after catch above what was expected for the catch.'],
+    ['Drops / Drop %', 'Catchable passes dropped, as charted by Pro Football Reference: the count, and drops per target.'],
     ['Snap %', "Share of the team's offensive snaps the player was on the field for."],
     ['Stuff %', 'Share of designed runs stopped at or behind the line. Lower is better for an O-line.'],
     ['YBC / Carry', 'Yards before first contact per carry: the room the blocking created.'],

@@ -1270,3 +1270,9 @@
 .sidebar .filters .slider-row.master p.slider-label {
   font-size: 10px;
 }
+
+// A slider's filled track takes its card's category color (green results, blue basic stats, purple
+// advanced stats, orange support), like the card icons and the grid's group headers
+.sidebar .filters .filter-group .mat-mdc-slider {
+  --mat-slider-active-track-color: var(--group-color);
+}

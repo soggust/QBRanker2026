@@ -70,6 +70,7 @@ export type SkillStatKey =
   | 'adot'
   | 'airYardsShare'
   | 'dropPct'
+  | 'drops'
   | 'pressureRate'
   | 'missedTacklePct'
   | 'thirdDownPct'
@@ -187,6 +188,7 @@ export const STAT_NAMES: Partial<Record<SkillColumnKey, string>> = {
   adot: 'Average Depth of Target',
   airYardsShare: 'Air Yards Share',
   dropPct: 'Drop Percentage',
+  drops: 'Dropped Passes',
   snapShare: 'Snap Percentage',
   carries: 'Carries',
   rushYards: 'Rushing Yards',
@@ -262,6 +264,7 @@ export const PER_GAME_LABELS: Partial<Record<SkillColumnKey, string>> = {
   firstDowns: '1st Dn / Game',
   brokenTackles: 'Brk Tkl / Game',
   fumbles: 'Fum Lost / Game',
+  drops: 'Drops / Game',
   fgMade: 'FG Made / Game',
   fgAtt: 'FG Att / Game',
   fg50: '50+ Made / Game',
@@ -400,6 +403,18 @@ const FUMBLES_STAT: SkillStat = {
   negative: true,
 };
 
+// Charted drops (Pro Football Reference): counts against RBs, WRs and TEs. Players with no targets
+// yet, or that PFR doesn't chart, score as average rather than best or worst.
+const DROPS_STAT: SkillStat = {
+  key: 'drops',
+  label: 'Drops',
+  description: 'Catchable passes dropped, as charted by Pro Football Reference (lower is better)',
+  kind: 'volume',
+  format: 'int',
+  negative: true,
+  missingIsAverage: true,
+};
+
 // Passing-game role and efficiency: WR/TE, and RBs' receiving side
 const TARGETS_STAT: SkillStat = { key: 'targets', label: 'Targets', description: 'Times targeted', kind: 'volume', format: 'int' };
 
@@ -422,17 +437,18 @@ const EPA_PER_TARGET_STAT: SkillStat = {
 
 const RECEIVING_STATS: SkillStat[] = [
   GAMES_STAT,
+  { key: 'receptions', label: 'Receptions', description: 'Catches', kind: 'volume', format: 'int' },
   TARGETS_STAT,
   TARGET_SHARE_STAT,
-  { key: 'receptions', label: 'Receptions', description: 'Catches', kind: 'volume', format: 'int' },
   { key: 'recYards', label: 'Rec Yards', description: 'Receiving yards', kind: 'volume', format: 'int' },
   { key: 'rushYards', label: 'Rush Yards', description: 'Rushing yards', kind: 'volume', format: 'int' },
   { key: 'yac', label: 'YAC', description: 'Yards after the catch', kind: 'volume', format: 'int' },
   { key: 'recTds', label: 'Rec TDs', description: 'Receiving touchdowns', kind: 'volume', format: 'int' },
   { key: 'rushTds', label: 'Rush TDs', description: 'Rushing touchdowns', kind: 'volume', format: 'int' },
   FUMBLES_STAT,
-  { key: 'catchPct', label: 'Catch %', description: 'Receptions per target', kind: 'efficiency', format: 'pct' },
+  DROPS_STAT,
   EPA_PER_TARGET_STAT,
+  { key: 'catchPct', label: 'Catch %', description: 'Receptions per target', kind: 'efficiency', format: 'pct' },
   {
     key: 'separation',
     label: 'Separation',
@@ -449,6 +465,14 @@ const RECEIVING_STATS: SkillStat[] = [
     signed: true,
   },
   {
+    key: 'dropPct',
+    label: 'Drop %',
+    description: 'Drops per target (lower is better)',
+    kind: 'efficiency',
+    format: 'pct',
+    negative: true,
+  },
+  {
     key: 'adot',
     label: 'aDOT',
     description: 'Average depth of target in yards (Next Gen Stats)',
@@ -461,14 +485,6 @@ const RECEIVING_STATS: SkillStat[] = [
     description: "Share of the team's air yards",
     kind: 'efficiency',
     format: 'pct',
-  },
-  {
-    key: 'dropPct',
-    label: 'Drop %',
-    description: 'Drops per target (lower is better)',
-    kind: 'efficiency',
-    format: 'pct',
-    negative: true,
   },
   {
     key: 'snapShare',
@@ -487,13 +503,22 @@ export const SKILL_STATS: Record<SkillPosition, SkillStat[]> = {
     { key: 'carries', label: 'Carries', description: 'Rushing attempts', kind: 'volume', format: 'int' },
     { key: 'rushYards', label: 'Rush Yards', description: 'Rushing yards', kind: 'volume', format: 'int' },
     { key: 'ypc', label: 'Yds / Carry', description: 'Yards per carry', kind: 'efficiency', format: 'dec1' },
-    { key: 'recYards', label: 'Rec Yards', description: 'Receiving yards', kind: 'volume', format: 'int' },
     { key: 'receptions', label: 'Receptions', description: 'Catches', kind: 'volume', format: 'int' },
     // Receiving role, so pass-catching backs get their due (EPA / Target sits in Advanced)
     TARGETS_STAT,
     TARGET_SHARE_STAT,
+    { key: 'recYards', label: 'Rec Yards', description: 'Receiving yards', kind: 'volume', format: 'int' },
     { key: 'rushTds', label: 'Rush TDs', description: 'Rushing touchdowns', kind: 'volume', format: 'int' },
     { key: 'recTds', label: 'Rec TDs', description: 'Receiving touchdowns', kind: 'volume', format: 'int' },
+    FUMBLES_STAT,
+    DROPS_STAT,
+    {
+      key: 'firstDowns',
+      label: '1st Downs',
+      description: 'Rushing + receiving first downs',
+      kind: 'volume',
+      format: 'int',
+    },
     {
       key: 'epaPerCarry',
       label: 'EPA / Carry',
@@ -531,14 +556,6 @@ export const SKILL_STATS: Record<SkillPosition, SkillStat[]> = {
       description: 'Average share of offensive snaps played',
       kind: 'efficiency',
       format: 'pct',
-    },
-    FUMBLES_STAT,
-    {
-      key: 'firstDowns',
-      label: '1st Downs',
-      description: 'Rushing + receiving first downs',
-      kind: 'volume',
-      format: 'int',
     },
     FANTASY_STAT,
     QB_PLAY_STAT,
@@ -765,6 +782,22 @@ export const SKILL_STATS: Record<SkillPosition, SkillStat[]> = {
       negative: true,
     },
     {
+      key: 'runEpa',
+      label: 'Run EPA',
+      description: 'Expected Points Added per designed run',
+      kind: 'efficiency',
+      format: 'dec2',
+      signed: true,
+    },
+    {
+      key: 'runSuccess',
+      label: 'Run Success %',
+      description: 'Share of designed runs with positive EPA',
+      kind: 'efficiency',
+      format: 'pct',
+      signed: true,
+    },
+    {
       key: 'pressureRate',
       label: 'Pressure %',
       description: 'Pressures allowed per dropback (lower is better)',
@@ -788,22 +821,6 @@ export const SKILL_STATS: Record<SkillPosition, SkillStat[]> = {
       description: 'Yards before first contact per carry',
       kind: 'efficiency',
       format: 'dec2',
-      signed: true,
-    },
-    {
-      key: 'runEpa',
-      label: 'Run EPA',
-      description: 'Expected Points Added per designed run',
-      kind: 'efficiency',
-      format: 'dec2',
-      signed: true,
-    },
-    {
-      key: 'runSuccess',
-      label: 'Run Success %',
-      description: 'Share of designed runs with positive EPA',
-      kind: 'efficiency',
-      format: 'pct',
       signed: true,
     },
     {
@@ -933,6 +950,7 @@ const ADVANCED_STATS = new Set<SkillColumnKey>([
   'brokenTackles',
   'snapShare',
   'epaPerTarget',
+  'catchPct',
   'separation',
   'yacOverExp',
   'adot',

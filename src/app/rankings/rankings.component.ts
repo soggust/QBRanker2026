@@ -382,11 +382,13 @@ export class RankingsComponent {
       'record',
       'last-five'
     ],
+    // Every tab's order: volume, its rate beside it, touchdowns, mistakes, then summary stats (passing
+    // stays together when rush and pass yards show separately)
     'box': [
-      'comp-percent',
       'total-yards',
       'pass-yards',
       'ypa',
+      'comp-percent',
       'rush-yards',
       'touchdowns',
       'pass-tds',
@@ -398,8 +400,8 @@ export class RankingsComponent {
     ],
     'advanced': [
       'epa',
-      'cpoe',
       'success-rate',
+      'cpoe',
       'pressureToSack',
       'badThrowPct',
       'timeToThrow',

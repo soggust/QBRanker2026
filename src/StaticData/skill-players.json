@@ -2854,7 +2854,8 @@
         "yacOverExp": null,
         "adot": null,
         "airYardsShare": -0.012,
-        "dropPct": 0.143
+        "dropPct": 0.143,
+        "drops": 1
       },
       "competitive": {
         "epaPerCarry": -0.074,
@@ -2895,7 +2896,8 @@
         "yacOverExp": null,
         "adot": null,
         "airYardsShare": -0.006,
-        "dropPct": null
+        "dropPct": null,
+        "drops": null
       },
       "competitive": {
         "epaPerCarry": -0.027,
@@ -2936,7 +2938,8 @@
         "yacOverExp": null,
         "adot": null,
         "airYardsShare": -0.007,
-        "dropPct": 0.143
+        "dropPct": 0.143,
+        "drops": 1
       },
       "competitive": {
         "epaPerCarry": -0.28,
@@ -2977,7 +2980,8 @@
         "yacOverExp": null,
         "adot": null,
         "airYardsShare": -0.017,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
         "epaPerCarry": 0.187,
@@ -3018,7 +3022,8 @@
         "yacOverExp": null,
         "adot": null,
         "airYardsShare": 0.042,
-        "dropPct": 0.188
+        "dropPct": 0.188,
+        "drops": 3
       },
       "competitive": {
         "epaPerCarry": -0.275,
@@ -3059,7 +3064,8 @@
         "yacOverExp": null,
         "adot": null,
         "airYardsShare": -0.028,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
         "epaPerCarry": 0.14,
@@ -3100,7 +3106,8 @@
         "yacOverExp": null,
         "adot": null,
         "airYardsShare": -0.073,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
         "epaPerCarry": 0.032,
@@ -3141,7 +3148,8 @@
         "yacOverExp": null,
         "adot": null,
         "airYardsShare": -0.006,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
         "epaPerCarry": -0.017,
@@ -3182,10 +3190,11 @@
         "yacOverExp": null,
         "adot": null,
         "airYardsShare": 0.028,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": 0.993
       },
       "injuryStatus": "Active",
@@ -3223,7 +3232,8 @@
         "yacOverExp": null,
         "adot": null,
         "airYardsShare": -0.003,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
         "epaPerCarry": -0.074,
@@ -3264,7 +3274,8 @@
         "yacOverExp": null,
         "adot": null,
         "airYardsShare": 0,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
         "epaPerCarry": -0.21,
@@ -3305,11 +3316,12 @@
         "yacOverExp": null,
         "adot": null,
         "airYardsShare": 0,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
         "epaPerCarry": 0.133,
-        "epaPerTarget": null
+        "epaPerTarget": 0
       },
       "injuryStatus": "Active",
       "injured": false
@@ -3346,7 +3358,8 @@
         "yacOverExp": null,
         "adot": null,
         "airYardsShare": -0.034,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
         "epaPerCarry": 0.031,
@@ -3387,7 +3400,8 @@
         "yacOverExp": null,
         "adot": null,
         "airYardsShare": 0.042,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
         "epaPerCarry": -0.216,
@@ -3428,7 +3442,8 @@
         "yacOverExp": null,
         "adot": null,
         "airYardsShare": -0.043,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
         "epaPerCarry": -0.017,
@@ -3469,7 +3484,8 @@
         "yacOverExp": null,
         "adot": null,
         "airYardsShare": -0.008,
-        "dropPct": 0.25
+        "dropPct": 0.25,
+        "drops": 1
       },
       "competitive": {
         "epaPerCarry": -0.168,
@@ -3510,11 +3526,12 @@
         "yacOverExp": null,
         "adot": null,
         "airYardsShare": 0,
-        "dropPct": null
+        "dropPct": null,
+        "drops": null
       },
       "competitive": {
         "epaPerCarry": 0.07,
-        "epaPerTarget": null
+        "epaPerTarget": 0
       },
       "injuryStatus": "Active",
       "injured": false
@@ -3551,7 +3568,8 @@
         "yacOverExp": null,
         "adot": null,
         "airYardsShare": 0.064,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
         "epaPerCarry": 0.208,
@@ -3592,7 +3610,8 @@
         "yacOverExp": null,
         "adot": null,
         "airYardsShare": -0.016,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
         "epaPerCarry": -0.074,
@@ -3633,7 +3652,8 @@
         "yacOverExp": null,
         "adot": null,
         "airYardsShare": -0.022,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
         "epaPerCarry": -0.117,
@@ -3674,7 +3694,8 @@
         "yacOverExp": null,
         "adot": null,
         "airYardsShare": 0.022,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
         "epaPerCarry": -0.338,
@@ -3715,7 +3736,8 @@
         "yacOverExp": null,
         "adot": null,
         "airYardsShare": 0.044,
-        "dropPct": 0.083
+        "dropPct": 0.083,
+        "drops": 1
       },
       "competitive": {
         "epaPerCarry": -0.092,
@@ -3756,7 +3778,8 @@
         "yacOverExp": null,
         "adot": null,
         "airYardsShare": -0.005,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
         "epaPerCarry": 0.011,
@@ -3797,7 +3820,8 @@
         "yacOverExp": null,
         "adot": null,
         "airYardsShare": -0.025,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
         "epaPerCarry": -0.161,
@@ -3838,7 +3862,8 @@
         "yacOverExp": null,
         "adot": null,
         "airYardsShare": -0.024,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
         "epaPerCarry": -0.276,
@@ -3879,10 +3904,11 @@
         "yacOverExp": null,
         "adot": null,
         "airYardsShare": 0.041,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": 0.479
       },
       "injuryStatus": "Active",
@@ -3920,11 +3946,12 @@
         "yacOverExp": null,
         "adot": null,
         "airYardsShare": 0.001,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
         "epaPerCarry": -0.532,
-        "epaPerTarget": null
+        "epaPerTarget": 0
       },
       "injuryStatus": "Active",
       "injured": false
@@ -3961,7 +3988,8 @@
         "yacOverExp": null,
         "adot": null,
         "airYardsShare": -0.022,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
         "epaPerCarry": 0.103,
@@ -4002,7 +4030,8 @@
         "yacOverExp": null,
         "adot": null,
         "airYardsShare": -0.012,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
         "epaPerCarry": -0.218,
@@ -4043,7 +4072,8 @@
         "yacOverExp": null,
         "adot": null,
         "airYardsShare": -0.006,
-        "dropPct": null
+        "dropPct": null,
+        "drops": null
       },
       "competitive": {
         "epaPerCarry": -0.18,
@@ -4084,7 +4114,8 @@
         "yacOverExp": null,
         "adot": null,
         "airYardsShare": -0.003,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
         "epaPerCarry": -0.151,
@@ -4125,7 +4156,8 @@
         "yacOverExp": null,
         "adot": null,
         "airYardsShare": 0.061,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
         "epaPerCarry": -0.445,
@@ -4166,7 +4198,8 @@
         "yacOverExp": null,
         "adot": null,
         "airYardsShare": 0.046,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
         "epaPerCarry": 0.076,
@@ -4207,7 +4240,8 @@
         "yacOverExp": null,
         "adot": null,
         "airYardsShare": -0.006,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
         "epaPerCarry": 0.035,
@@ -4248,7 +4282,8 @@
         "yacOverExp": null,
         "adot": null,
         "airYardsShare": -0.039,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
         "epaPerCarry": -0.081,
@@ -4289,7 +4324,8 @@
         "yacOverExp": null,
         "adot": null,
         "airYardsShare": -0.019,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
         "epaPerCarry": -0.062,
@@ -4330,7 +4366,8 @@
         "yacOverExp": null,
         "adot": null,
         "airYardsShare": 0.02,
-        "dropPct": 0.083
+        "dropPct": 0.083,
+        "drops": 1
       },
       "competitive": {
         "epaPerCarry": -0.057,
@@ -4371,7 +4408,8 @@
         "yacOverExp": null,
         "adot": null,
         "airYardsShare": 0,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
         "epaPerCarry": -0.122,
@@ -4412,7 +4450,8 @@
         "yacOverExp": null,
         "adot": null,
         "airYardsShare": -0.022,
-        "dropPct": 0.091
+        "dropPct": 0.091,
+        "drops": 1
       },
       "competitive": {
         "epaPerCarry": -0.05,
@@ -4453,7 +4492,8 @@
         "yacOverExp": null,
         "adot": null,
         "airYardsShare": 0.021,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
         "epaPerCarry": -0.372,
@@ -4494,11 +4534,12 @@
         "yacOverExp": null,
         "adot": null,
         "airYardsShare": 0,
-        "dropPct": null
+        "dropPct": null,
+        "drops": null
       },
       "competitive": {
         "epaPerCarry": -0.205,
-        "epaPerTarget": null
+        "epaPerTarget": 0
       },
       "injuryStatus": "Active",
       "injured": false
@@ -4535,7 +4576,8 @@
         "yacOverExp": null,
         "adot": null,
         "airYardsShare": -0.013,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
         "epaPerCarry": 0.243,
@@ -4576,7 +4618,8 @@
         "yacOverExp": null,
         "adot": null,
         "airYardsShare": -0.016,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
         "epaPerCarry": -0.024,
@@ -4617,11 +4660,12 @@
         "yacOverExp": null,
         "adot": null,
         "airYardsShare": -0.001,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
         "epaPerCarry": -0.283,
-        "epaPerTarget": null
+        "epaPerTarget": 0
       },
       "injuryStatus": "Active",
       "injured": false
@@ -4658,11 +4702,12 @@
         "yacOverExp": null,
         "adot": null,
         "airYardsShare": 0,
-        "dropPct": null
+        "dropPct": null,
+        "drops": null
       },
       "competitive": {
         "epaPerCarry": 0.042,
-        "epaPerTarget": null
+        "epaPerTarget": 0
       },
       "injuryStatus": "Active",
       "injured": false
@@ -4699,7 +4744,8 @@
         "yacOverExp": null,
         "adot": null,
         "airYardsShare": -0.01,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
         "epaPerCarry": -0.116,
@@ -4740,7 +4786,8 @@
         "yacOverExp": null,
         "adot": null,
         "airYardsShare": -0.005,
-        "dropPct": null
+        "dropPct": null,
+        "drops": null
       },
       "competitive": {
         "epaPerCarry": -0.081,
@@ -4781,7 +4828,8 @@
         "yacOverExp": null,
         "adot": null,
         "airYardsShare": 0.007,
-        "dropPct": 0.111
+        "dropPct": 0.111,
+        "drops": 2
       },
       "competitive": {
         "epaPerCarry": 0.138,
@@ -4822,7 +4870,8 @@
         "yacOverExp": null,
         "adot": null,
         "airYardsShare": -0.005,
-        "dropPct": 0.1
+        "dropPct": 0.1,
+        "drops": 1
       },
       "competitive": {
         "epaPerCarry": -0.121,
@@ -4863,7 +4912,8 @@
         "yacOverExp": null,
         "adot": null,
         "airYardsShare": 0.023,
-        "dropPct": null
+        "dropPct": null,
+        "drops": null
       },
       "competitive": {
         "epaPerCarry": 0.591,
@@ -4904,7 +4954,8 @@
         "yacOverExp": null,
         "adot": null,
         "airYardsShare": 0.02,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
         "epaPerCarry": 0.253,
@@ -4945,7 +4996,8 @@
         "yacOverExp": null,
         "adot": null,
         "airYardsShare": 0.051,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
         "epaPerCarry": 0.093,
@@ -4986,7 +5038,8 @@
         "yacOverExp": null,
         "adot": null,
         "airYardsShare": 0.002,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
         "epaPerCarry": -0.41,
@@ -5027,7 +5080,8 @@
         "yacOverExp": null,
         "adot": null,
         "airYardsShare": 0.013,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
         "epaPerCarry": 0.373,
@@ -5068,11 +5122,12 @@
         "yacOverExp": null,
         "adot": null,
         "airYardsShare": 0,
-        "dropPct": null
+        "dropPct": null,
+        "drops": null
       },
       "competitive": {
         "epaPerCarry": -0.147,
-        "epaPerTarget": null
+        "epaPerTarget": 0
       },
       "injuryStatus": "Active",
       "injured": false
@@ -5109,7 +5164,8 @@
         "yacOverExp": null,
         "adot": null,
         "airYardsShare": -0.005,
-        "dropPct": null
+        "dropPct": null,
+        "drops": null
       },
       "competitive": {
         "epaPerCarry": -0.296,
@@ -5150,7 +5206,8 @@
         "yacOverExp": null,
         "adot": null,
         "airYardsShare": -0.02,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
         "epaPerCarry": -0.321,
@@ -5191,7 +5248,8 @@
         "yacOverExp": null,
         "adot": null,
         "airYardsShare": -0.026,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
         "epaPerCarry": -0.355,
@@ -5232,7 +5290,8 @@
         "yacOverExp": null,
         "adot": null,
         "airYardsShare": 0.004,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
         "epaPerCarry": 0.057,
@@ -5273,7 +5332,8 @@
         "yacOverExp": null,
         "adot": null,
         "airYardsShare": -0.012,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
         "epaPerCarry": 0.235,
@@ -5314,7 +5374,8 @@
         "yacOverExp": null,
         "adot": null,
         "airYardsShare": -0.004,
-        "dropPct": 0.091
+        "dropPct": 0.091,
+        "drops": 1
       },
       "competitive": {
         "epaPerCarry": -0.063,
@@ -5355,7 +5416,8 @@
         "yacOverExp": null,
         "adot": null,
         "airYardsShare": 0.006,
-        "dropPct": 0.143
+        "dropPct": 0.143,
+        "drops": 1
       },
       "competitive": {
         "epaPerCarry": -0.366,
@@ -5396,7 +5458,8 @@
         "yacOverExp": null,
         "adot": null,
         "airYardsShare": -0.061,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
         "epaPerCarry": 0.071,
@@ -5437,7 +5500,8 @@
         "yacOverExp": null,
         "adot": null,
         "airYardsShare": 0.024,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
         "epaPerCarry": -0.291,
@@ -5478,7 +5542,8 @@
         "yacOverExp": null,
         "adot": null,
         "airYardsShare": 0.006,
-        "dropPct": 0.25
+        "dropPct": 0.25,
+        "drops": 1
       },
       "competitive": {
         "epaPerCarry": -0.109,
@@ -5519,7 +5584,8 @@
         "yacOverExp": null,
         "adot": null,
         "airYardsShare": 0.011,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
         "epaPerCarry": 0.1,
@@ -5560,7 +5626,8 @@
         "yacOverExp": null,
         "adot": null,
         "airYardsShare": -0.015,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
         "epaPerCarry": -0.147,
@@ -5601,7 +5668,8 @@
         "yacOverExp": null,
         "adot": null,
         "airYardsShare": 0.034,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
         "epaPerCarry": -0.083,
@@ -5642,7 +5710,8 @@
         "yacOverExp": null,
         "adot": null,
         "airYardsShare": -0.009,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
         "epaPerCarry": 0.006,
@@ -5683,7 +5752,8 @@
         "yacOverExp": null,
         "adot": null,
         "airYardsShare": 0.005,
-        "dropPct": null
+        "dropPct": null,
+        "drops": null
       },
       "competitive": {
         "epaPerCarry": -0.063,
@@ -5724,10 +5794,11 @@
         "yacOverExp": null,
         "adot": null,
         "airYardsShare": 0,
-        "dropPct": null
+        "dropPct": null,
+        "drops": null
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": 1.443
       },
       "injuryStatus": "Active",
@@ -5765,7 +5836,8 @@
         "yacOverExp": null,
         "adot": null,
         "airYardsShare": -0.02,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
         "epaPerCarry": -0.016,
@@ -5806,7 +5878,8 @@
         "yacOverExp": null,
         "adot": null,
         "airYardsShare": -0.042,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
         "epaPerCarry": -0.334,
@@ -5847,7 +5920,8 @@
         "yacOverExp": null,
         "adot": null,
         "airYardsShare": -0.006,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
         "epaPerCarry": -0.044,
@@ -5888,7 +5962,8 @@
         "yacOverExp": null,
         "adot": null,
         "airYardsShare": 0.012,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
         "epaPerCarry": -0.263,
@@ -5929,7 +6004,8 @@
         "yacOverExp": null,
         "adot": null,
         "airYardsShare": 0.004,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
         "epaPerCarry": -0.125,
@@ -5972,10 +6048,11 @@
         "yacOverExp": -0.9,
         "adot": 15.8,
         "airYardsShare": 0.32,
-        "dropPct": 0.133
+        "dropPct": 0.133,
+        "drops": 2
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": 0.576
       },
       "injuryStatus": "Out",
@@ -6013,10 +6090,11 @@
         "yacOverExp": 0.2,
         "adot": 7.9,
         "airYardsShare": 0.373,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": -0.054
       },
       "injuryStatus": "Active",
@@ -6054,10 +6132,11 @@
         "yacOverExp": 0.7,
         "adot": 11,
         "airYardsShare": 0.133,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": 0.901
       },
       "injuryStatus": "Active",
@@ -6095,10 +6174,11 @@
         "yacOverExp": -1.1,
         "adot": 13.5,
         "airYardsShare": 0.18,
-        "dropPct": 0.083
+        "dropPct": 0.083,
+        "drops": 1
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": 0.19
       },
       "injuryStatus": "Active",
@@ -6136,10 +6216,11 @@
         "yacOverExp": null,
         "adot": null,
         "airYardsShare": 0.096,
-        "dropPct": null
+        "dropPct": null,
+        "drops": null
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": 0.829
       },
       "injuryStatus": "Active",
@@ -6177,10 +6258,11 @@
         "yacOverExp": 1.1,
         "adot": 13.3,
         "airYardsShare": 0.131,
-        "dropPct": 0.1
+        "dropPct": 0.1,
+        "drops": 1
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": 0.359
       },
       "injuryStatus": "Out",
@@ -6218,10 +6300,11 @@
         "yacOverExp": -0.9,
         "adot": 10.2,
         "airYardsShare": 0.392,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": -0.12
       },
       "injuryStatus": "Active",
@@ -6259,7 +6342,8 @@
         "yacOverExp": 0.8,
         "adot": 12.8,
         "airYardsShare": 0.377,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
         "epaPerCarry": -0.838,
@@ -6300,10 +6384,11 @@
         "yacOverExp": 3.8,
         "adot": 16.9,
         "airYardsShare": 0.207,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": 0.552
       },
       "injuryStatus": "Active",
@@ -6341,7 +6426,8 @@
         "yacOverExp": 2,
         "adot": 4.5,
         "airYardsShare": 0.054,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
         "epaPerCarry": 0.173,
@@ -6382,10 +6468,11 @@
         "yacOverExp": -0.4,
         "adot": 12.4,
         "airYardsShare": 0.469,
-        "dropPct": 0.028
+        "dropPct": 0.028,
+        "drops": 1
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": 0.616
       },
       "injuryStatus": "Active",
@@ -6423,10 +6510,11 @@
         "yacOverExp": 3.5,
         "adot": 10.9,
         "airYardsShare": 0.282,
-        "dropPct": 0.069
+        "dropPct": 0.069,
+        "drops": 2
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": 0.202
       },
       "injuryStatus": "Active",
@@ -6464,10 +6552,11 @@
         "yacOverExp": 0.3,
         "adot": 9.6,
         "airYardsShare": 0.146,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": 0.558
       },
       "injuryStatus": "Active",
@@ -6505,10 +6594,11 @@
         "yacOverExp": 0.8,
         "adot": 11.2,
         "airYardsShare": 0.283,
-        "dropPct": 0.063
+        "dropPct": 0.063,
+        "drops": 1
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": -0.567
       },
       "injuryStatus": "Active",
@@ -6546,7 +6636,8 @@
         "yacOverExp": -0.8,
         "adot": 11.7,
         "airYardsShare": 0.126,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
         "epaPerCarry": 1.148,
@@ -6587,10 +6678,11 @@
         "yacOverExp": 2.3,
         "adot": 15.8,
         "airYardsShare": 0.455,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": 0.642
       },
       "injuryStatus": "Active",
@@ -6628,7 +6720,8 @@
         "yacOverExp": -0.6,
         "adot": 3.3,
         "airYardsShare": 0.058,
-        "dropPct": 0.182
+        "dropPct": 0.182,
+        "drops": 2
       },
       "competitive": {
         "epaPerCarry": -0.003,
@@ -6669,10 +6762,11 @@
         "yacOverExp": null,
         "adot": null,
         "airYardsShare": 0.116,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": 1.052
       },
       "injuryStatus": "Injured Reserve",
@@ -6710,10 +6804,11 @@
         "yacOverExp": -0.2,
         "adot": 12.5,
         "airYardsShare": 0.19,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": 0.187
       },
       "injuryStatus": "Active",
@@ -6751,10 +6846,11 @@
         "yacOverExp": 5.7,
         "adot": 16.2,
         "airYardsShare": 0.443,
-        "dropPct": 0.067
+        "dropPct": 0.067,
+        "drops": 1
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": 0.714
       },
       "injuryStatus": "Active",
@@ -6792,10 +6888,11 @@
         "yacOverExp": -0.2,
         "adot": 10.6,
         "airYardsShare": 0.224,
-        "dropPct": 0.045
+        "dropPct": 0.045,
+        "drops": 1
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": 0.461
       },
       "injuryStatus": "Active",
@@ -6833,10 +6930,11 @@
         "yacOverExp": -0.1,
         "adot": 14.7,
         "airYardsShare": 0.516,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": 0.11
       },
       "injuryStatus": "Active",
@@ -6874,7 +6972,8 @@
         "yacOverExp": 1.3,
         "adot": 15.8,
         "airYardsShare": 0.322,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
         "epaPerCarry": -0.936,
@@ -6915,10 +7014,11 @@
         "yacOverExp": 0.4,
         "adot": 13,
         "airYardsShare": 0.334,
-        "dropPct": 0.083
+        "dropPct": 0.083,
+        "drops": 2
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": -0.367
       },
       "injuryStatus": "Active",
@@ -6956,10 +7056,11 @@
         "yacOverExp": 1.5,
         "adot": 15.4,
         "airYardsShare": 0.286,
-        "dropPct": 0.1
+        "dropPct": 0.1,
+        "drops": 1
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": 1.481
       },
       "injuryStatus": "Active",
@@ -6997,7 +7098,8 @@
         "yacOverExp": 1.8,
         "adot": 7.8,
         "airYardsShare": 0.369,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
         "epaPerCarry": -1.751,
@@ -7038,10 +7140,11 @@
         "yacOverExp": -0.4,
         "adot": 15.1,
         "airYardsShare": 0.145,
-        "dropPct": 0.111
+        "dropPct": 0.111,
+        "drops": 1
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": -1.598
       },
       "injuryStatus": "Active",
@@ -7079,10 +7182,11 @@
         "yacOverExp": 4,
         "adot": 11.9,
         "airYardsShare": 0.174,
-        "dropPct": 0.111
+        "dropPct": 0.111,
+        "drops": 1
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": -0.296
       },
       "injuryStatus": "Active",
@@ -7120,7 +7224,8 @@
         "yacOverExp": 0.8,
         "adot": 12.8,
         "airYardsShare": 0.261,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
         "epaPerCarry": -1.623,
@@ -7161,10 +7266,11 @@
         "yacOverExp": -0.7,
         "adot": 10.4,
         "airYardsShare": 0.383,
-        "dropPct": 0.037
+        "dropPct": 0.037,
+        "drops": 1
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": 0.556
       },
       "injuryStatus": "Active",
@@ -7202,10 +7308,11 @@
         "yacOverExp": -0.2,
         "adot": 10.4,
         "airYardsShare": 0.324,
-        "dropPct": 0.08
+        "dropPct": 0.08,
+        "drops": 2
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": 0.23
       },
       "injuryStatus": "Active",
@@ -7243,10 +7350,11 @@
         "yacOverExp": 2.2,
         "adot": 12.3,
         "airYardsShare": 0.151,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": 1.431
       },
       "injuryStatus": "Active",
@@ -7284,7 +7392,8 @@
         "yacOverExp": -0.7,
         "adot": 3.9,
         "airYardsShare": 0.05,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
         "epaPerCarry": 0.843,
@@ -7325,10 +7434,11 @@
         "yacOverExp": 0.7,
         "adot": 9,
         "airYardsShare": 0.325,
-        "dropPct": 0.04
+        "dropPct": 0.04,
+        "drops": 1
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": 0.519
       },
       "injuryStatus": "Active",
@@ -7366,10 +7476,11 @@
         "yacOverExp": -1.7,
         "adot": 13.4,
         "airYardsShare": 0.374,
-        "dropPct": 0.1
+        "dropPct": 0.1,
+        "drops": 1
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": -1.142
       },
       "injuryStatus": "Active",
@@ -7407,7 +7518,8 @@
         "yacOverExp": 0.7,
         "adot": 11.7,
         "airYardsShare": 0.157,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
         "epaPerCarry": 0.404,
@@ -7448,10 +7560,11 @@
         "yacOverExp": -0.4,
         "adot": 11.5,
         "airYardsShare": 0.225,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": 0.602
       },
       "injuryStatus": "Questionable",
@@ -7489,10 +7602,11 @@
         "yacOverExp": -0.6,
         "adot": 12.3,
         "airYardsShare": 0.173,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": 0.555
       },
       "injuryStatus": "Active",
@@ -7530,10 +7644,11 @@
         "yacOverExp": -0.8,
         "adot": 13.5,
         "airYardsShare": 0.305,
-        "dropPct": 0.176
+        "dropPct": 0.176,
+        "drops": 3
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": 0.5
       },
       "injuryStatus": "Active",
@@ -7571,10 +7686,11 @@
         "yacOverExp": 3.9,
         "adot": 15.1,
         "airYardsShare": 0.163,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": -0.32
       },
       "injuryStatus": "Active",
@@ -7612,10 +7728,11 @@
         "yacOverExp": 1.1,
         "adot": 10.4,
         "airYardsShare": 0.519,
-        "dropPct": 0.028
+        "dropPct": 0.028,
+        "drops": 1
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": 0.694
       },
       "injuryStatus": "Active",
@@ -7653,7 +7770,8 @@
         "yacOverExp": -0.9,
         "adot": 12,
         "airYardsShare": 0.453,
-        "dropPct": 0.05
+        "dropPct": 0.05,
+        "drops": 1
       },
       "competitive": {
         "epaPerCarry": 0.982,
@@ -7694,7 +7812,8 @@
         "yacOverExp": 0.9,
         "adot": 9.4,
         "airYardsShare": 0.072,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
         "epaPerCarry": 1.128,
@@ -7735,10 +7854,11 @@
         "yacOverExp": 1.2,
         "adot": 14.8,
         "airYardsShare": 0.378,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": -0.209
       },
       "injuryStatus": "Active",
@@ -7776,10 +7896,11 @@
         "yacOverExp": 1.6,
         "adot": 11.2,
         "airYardsShare": 0.436,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": 0.585
       },
       "injuryStatus": "Active",
@@ -7817,10 +7938,11 @@
         "yacOverExp": null,
         "adot": null,
         "airYardsShare": 0.114,
-        "dropPct": 0.2
+        "dropPct": 0.2,
+        "drops": 1
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": 3.193
       },
       "injuryStatus": "Active",
@@ -7858,10 +7980,11 @@
         "yacOverExp": 1.4,
         "adot": 11.6,
         "airYardsShare": 0.323,
-        "dropPct": 0.176
+        "dropPct": 0.176,
+        "drops": 3
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": 0.752
       },
       "injuryStatus": "Questionable",
@@ -7899,10 +8022,11 @@
         "yacOverExp": 0.4,
         "adot": 4.8,
         "airYardsShare": 0.142,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": 0.828
       },
       "injuryStatus": "Active",
@@ -7940,10 +8064,11 @@
         "yacOverExp": -1.8,
         "adot": 12.9,
         "airYardsShare": 0.1,
-        "dropPct": 0.111
+        "dropPct": 0.111,
+        "drops": 1
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": 0.561
       },
       "injuryStatus": "Active",
@@ -7981,7 +8106,8 @@
         "yacOverExp": -1.6,
         "adot": 5.8,
         "airYardsShare": 0.219,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
         "epaPerCarry": -1.919,
@@ -8022,10 +8148,11 @@
         "yacOverExp": 0.3,
         "adot": 6.2,
         "airYardsShare": 0.193,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": -0.129
       },
       "injuryStatus": "Active",
@@ -8063,10 +8190,11 @@
         "yacOverExp": 1,
         "adot": 3.9,
         "airYardsShare": 0.079,
-        "dropPct": 0.071
+        "dropPct": 0.071,
+        "drops": 1
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": 0.303
       },
       "injuryStatus": "Active",
@@ -8104,10 +8232,11 @@
         "yacOverExp": -1.2,
         "adot": 11.7,
         "airYardsShare": 0.13,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": 0.898
       },
       "injuryStatus": "Active",
@@ -8145,10 +8274,11 @@
         "yacOverExp": -1.3,
         "adot": 7.2,
         "airYardsShare": 0.139,
-        "dropPct": 0.067
+        "dropPct": 0.067,
+        "drops": 1
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": 0.125
       },
       "injuryStatus": "Active",
@@ -8186,10 +8316,11 @@
         "yacOverExp": 2.6,
         "adot": 15.4,
         "airYardsShare": 0.164,
-        "dropPct": 0.091
+        "dropPct": 0.091,
+        "drops": 1
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": 0.612
       },
       "injuryStatus": "Active",
@@ -8227,10 +8358,11 @@
         "yacOverExp": 0.3,
         "adot": 13.9,
         "airYardsShare": 0.249,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": 1.174
       },
       "injuryStatus": "Active",
@@ -8268,10 +8400,11 @@
         "yacOverExp": null,
         "adot": null,
         "airYardsShare": 0.118,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": 0.047
       },
       "injuryStatus": "Active",
@@ -8309,7 +8442,8 @@
         "yacOverExp": 1.2,
         "adot": 9.6,
         "airYardsShare": 0.242,
-        "dropPct": 0.083
+        "dropPct": 0.083,
+        "drops": 1
       },
       "competitive": {
         "epaPerCarry": -0.357,
@@ -8350,10 +8484,11 @@
         "yacOverExp": 1,
         "adot": 12.6,
         "airYardsShare": 0.249,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": 0.626
       },
       "injuryStatus": "Active",
@@ -8391,10 +8526,11 @@
         "yacOverExp": -0.1,
         "adot": 16.5,
         "airYardsShare": 0.295,
-        "dropPct": 0.083
+        "dropPct": 0.083,
+        "drops": 1
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": 0.081
       },
       "injuryStatus": "Active",
@@ -8432,10 +8568,11 @@
         "yacOverExp": -0.4,
         "adot": 9.5,
         "airYardsShare": 0.256,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": -0.251
       },
       "injuryStatus": "Active",
@@ -8473,7 +8610,8 @@
         "yacOverExp": 0.7,
         "adot": 10.8,
         "airYardsShare": 0.316,
-        "dropPct": 0.043
+        "dropPct": 0.043,
+        "drops": 1
       },
       "competitive": {
         "epaPerCarry": -0.29,
@@ -8514,10 +8652,11 @@
         "yacOverExp": 1.3,
         "adot": 17,
         "airYardsShare": 0.224,
-        "dropPct": 0.111
+        "dropPct": 0.111,
+        "drops": 1
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": -0.11
       },
       "injuryStatus": "Active",
@@ -8555,10 +8694,11 @@
         "yacOverExp": 1.3,
         "adot": 14.7,
         "airYardsShare": 0.386,
-        "dropPct": 0.1
+        "dropPct": 0.1,
+        "drops": 3
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": 0.244
       },
       "injuryStatus": "Active",
@@ -8596,10 +8736,11 @@
         "yacOverExp": 1.6,
         "adot": 8.5,
         "airYardsShare": 0.072,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": 0.375
       },
       "injuryStatus": "Active",
@@ -8637,10 +8778,11 @@
         "yacOverExp": -0.6,
         "adot": 9.5,
         "airYardsShare": 0.415,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": -0.045
       },
       "injuryStatus": "Active",
@@ -8678,10 +8820,11 @@
         "yacOverExp": -0.7,
         "adot": 11.4,
         "airYardsShare": 0.281,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": 1.514
       },
       "injuryStatus": "Questionable",
@@ -8719,7 +8862,8 @@
         "yacOverExp": 0.3,
         "adot": 12.6,
         "airYardsShare": 0.106,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
         "epaPerCarry": 0.907,
@@ -8760,10 +8904,11 @@
         "yacOverExp": -1.6,
         "adot": 13.9,
         "airYardsShare": 0.454,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": 0.515
       },
       "injuryStatus": "Active",
@@ -8801,7 +8946,8 @@
         "yacOverExp": 0.3,
         "adot": 6.2,
         "airYardsShare": 0.09,
-        "dropPct": 0.111
+        "dropPct": 0.111,
+        "drops": 1
       },
       "competitive": {
         "epaPerCarry": 0.991,
@@ -8842,10 +8988,11 @@
         "yacOverExp": 4.9,
         "adot": 12,
         "airYardsShare": 0.105,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": -0.13
       },
       "injuryStatus": "Out",
@@ -8883,7 +9030,8 @@
         "yacOverExp": -0.7,
         "adot": 10.6,
         "airYardsShare": 0.205,
-        "dropPct": 0.059
+        "dropPct": 0.059,
+        "drops": 1
       },
       "competitive": {
         "epaPerCarry": 0.318,
@@ -8924,10 +9072,11 @@
         "yacOverExp": 1.9,
         "adot": 6.9,
         "airYardsShare": 0.227,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": 0.18
       },
       "injuryStatus": "Active",
@@ -8965,10 +9114,11 @@
         "yacOverExp": -1.7,
         "adot": 8.3,
         "airYardsShare": 0.151,
-        "dropPct": 0.083
+        "dropPct": 0.083,
+        "drops": 1
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": -0.557
       },
       "injuryStatus": "Active",
@@ -9006,10 +9156,11 @@
         "yacOverExp": 0.3,
         "adot": 13.1,
         "airYardsShare": 0.227,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": 0.932
       },
       "injuryStatus": "Active",
@@ -9047,10 +9198,11 @@
         "yacOverExp": -0.3,
         "adot": 12.6,
         "airYardsShare": 0.243,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": 0.081
       },
       "injuryStatus": "Active",
@@ -9088,10 +9240,11 @@
         "yacOverExp": null,
         "adot": null,
         "airYardsShare": 0.27,
-        "dropPct": 0.143
+        "dropPct": 0.143,
+        "drops": 1
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": 0.796
       },
       "injuryStatus": "Active",
@@ -9129,10 +9282,11 @@
         "yacOverExp": 1.4,
         "adot": 17,
         "airYardsShare": 0.259,
-        "dropPct": 0.182
+        "dropPct": 0.182,
+        "drops": 2
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": 0.06
       },
       "injuryStatus": "Active",
@@ -9170,10 +9324,11 @@
         "yacOverExp": -0.4,
         "adot": 7.5,
         "airYardsShare": 0.143,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": -0.227
       },
       "injuryStatus": "Active",
@@ -9211,10 +9366,11 @@
         "yacOverExp": null,
         "adot": null,
         "airYardsShare": 0.049,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": 1.582
       },
       "injuryStatus": "Active",
@@ -9252,10 +9408,11 @@
         "yacOverExp": 1,
         "adot": 7.6,
         "airYardsShare": 0.072,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": -0.143
       },
       "injuryStatus": "Active",
@@ -9293,10 +9450,11 @@
         "yacOverExp": 0.4,
         "adot": 8.9,
         "airYardsShare": 0.203,
-        "dropPct": 0.136
+        "dropPct": 0.136,
+        "drops": 3
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": 0.261
       },
       "injuryStatus": "Active",
@@ -9334,10 +9492,11 @@
         "yacOverExp": -1.1,
         "adot": 19.8,
         "airYardsShare": 0.261,
-        "dropPct": 0.077
+        "dropPct": 0.077,
+        "drops": 1
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": -0.425
       },
       "injuryStatus": "Active",
@@ -9375,10 +9534,11 @@
         "yacOverExp": 1.5,
         "adot": 13.2,
         "airYardsShare": 0.459,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": 0.801
       },
       "injuryStatus": "Active",
@@ -9416,10 +9576,11 @@
         "yacOverExp": 0.6,
         "adot": 13.1,
         "airYardsShare": 0.31,
-        "dropPct": 0.091
+        "dropPct": 0.091,
+        "drops": 2
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": 0.447
       },
       "injuryStatus": "Active",
@@ -9457,10 +9618,11 @@
         "yacOverExp": -0.1,
         "adot": 13.5,
         "airYardsShare": 0.263,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": 0.01
       },
       "injuryStatus": "Active",
@@ -9498,10 +9660,11 @@
         "yacOverExp": 0.1,
         "adot": 9.9,
         "airYardsShare": 0.194,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": 0.337
       },
       "injuryStatus": "Active",
@@ -9539,10 +9702,11 @@
         "yacOverExp": -0.3,
         "adot": 14.3,
         "airYardsShare": 0.292,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": 0.727
       },
       "injuryStatus": "Active",
@@ -9580,10 +9744,11 @@
         "yacOverExp": null,
         "adot": null,
         "airYardsShare": 0.254,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": 1.418
       },
       "injuryStatus": "Active",
@@ -9621,10 +9786,11 @@
         "yacOverExp": 0.4,
         "adot": 5.1,
         "airYardsShare": 0.163,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": -0.157
       },
       "injuryStatus": "Active",
@@ -9662,7 +9828,8 @@
         "yacOverExp": -0.9,
         "adot": 13.9,
         "airYardsShare": 0.256,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
         "epaPerCarry": -0.253,
@@ -9703,10 +9870,11 @@
         "yacOverExp": -0.6,
         "adot": 6.9,
         "airYardsShare": 0.171,
-        "dropPct": 0.067
+        "dropPct": 0.067,
+        "drops": 1
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": -0.095
       },
       "injuryStatus": "Active",
@@ -9744,7 +9912,8 @@
         "yacOverExp": 6,
         "adot": 11,
         "airYardsShare": 0.189,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
         "epaPerCarry": 1.649,
@@ -9787,10 +9956,11 @@
         "yacOverExp": 2.2,
         "adot": 1.7,
         "airYardsShare": 0.025,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": -0.63
       },
       "injuryStatus": "Active",
@@ -9828,10 +9998,11 @@
         "yacOverExp": null,
         "adot": null,
         "airYardsShare": 0.06,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": 2.092
       },
       "injuryStatus": "Active",
@@ -9869,10 +10040,11 @@
         "yacOverExp": 1.3,
         "adot": 8,
         "airYardsShare": 0.115,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": -0.394
       },
       "injuryStatus": "Active",
@@ -9910,10 +10082,11 @@
         "yacOverExp": null,
         "adot": null,
         "airYardsShare": 0.01,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": 0.585
       },
       "injuryStatus": "Active",
@@ -9951,10 +10124,11 @@
         "yacOverExp": 0.7,
         "adot": 8.6,
         "airYardsShare": 0.136,
-        "dropPct": null
+        "dropPct": null,
+        "drops": null
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": 0.661
       },
       "injuryStatus": "Active",
@@ -9992,10 +10166,11 @@
         "yacOverExp": 0.1,
         "adot": 6.9,
         "airYardsShare": 0.144,
-        "dropPct": 0.059
+        "dropPct": 0.059,
+        "drops": 1
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": 0.153
       },
       "injuryStatus": "Active",
@@ -10033,10 +10208,11 @@
         "yacOverExp": null,
         "adot": null,
         "airYardsShare": 0.008,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": -0.133
       },
       "injuryStatus": "Active",
@@ -10074,10 +10250,11 @@
         "yacOverExp": null,
         "adot": null,
         "airYardsShare": 0.11,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": 0.26
       },
       "injuryStatus": "Active",
@@ -10115,10 +10292,11 @@
         "yacOverExp": 2.7,
         "adot": 6.6,
         "airYardsShare": 0.108,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": 1.097
       },
       "injuryStatus": "Out",
@@ -10156,10 +10334,11 @@
         "yacOverExp": 2.7,
         "adot": 12.1,
         "airYardsShare": 0.247,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": 0.797
       },
       "injuryStatus": "Active",
@@ -10197,10 +10376,11 @@
         "yacOverExp": -0.2,
         "adot": 6,
         "airYardsShare": 0.139,
-        "dropPct": 0.04
+        "dropPct": 0.04,
+        "drops": 1
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": 0.051
       },
       "injuryStatus": "Active",
@@ -10238,10 +10418,11 @@
         "yacOverExp": 8,
         "adot": 3,
         "airYardsShare": 0.026,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": 0.497
       },
       "injuryStatus": "Active",
@@ -10279,10 +10460,11 @@
         "yacOverExp": 0.4,
         "adot": 7.8,
         "airYardsShare": 0.08,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": 0.249
       },
       "injuryStatus": "Active",
@@ -10320,10 +10502,11 @@
         "yacOverExp": 1.1,
         "adot": 5.3,
         "airYardsShare": 0.064,
-        "dropPct": 0.125
+        "dropPct": 0.125,
+        "drops": 1
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": -0.517
       },
       "injuryStatus": "Injured Reserve",
@@ -10361,10 +10544,11 @@
         "yacOverExp": null,
         "adot": null,
         "airYardsShare": 0.021,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": 0.45
       },
       "injuryStatus": "Active",
@@ -10402,10 +10586,11 @@
         "yacOverExp": null,
         "adot": null,
         "airYardsShare": 0.005,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": -0.512
       },
       "injuryStatus": "Active",
@@ -10443,10 +10628,11 @@
         "yacOverExp": null,
         "adot": null,
         "airYardsShare": 0.035,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": 1.507
       },
       "injuryStatus": "Out",
@@ -10484,10 +10670,11 @@
         "yacOverExp": -2.4,
         "adot": 6.3,
         "airYardsShare": 0.066,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": 0.175
       },
       "injuryStatus": "Active",
@@ -10525,10 +10712,11 @@
         "yacOverExp": 1.2,
         "adot": 6,
         "airYardsShare": 0.03,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": 0.35
       },
       "injuryStatus": "Active",
@@ -10566,10 +10754,11 @@
         "yacOverExp": 0.5,
         "adot": 8.7,
         "airYardsShare": 0.228,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": 0.113
       },
       "injuryStatus": "Active",
@@ -10607,10 +10796,11 @@
         "yacOverExp": -0.7,
         "adot": 6.1,
         "airYardsShare": 0.078,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": 0.201
       },
       "injuryStatus": "Active",
@@ -10648,10 +10838,11 @@
         "yacOverExp": -0.8,
         "adot": 5.4,
         "airYardsShare": 0.081,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": -1.094
       },
       "injuryStatus": "Active",
@@ -10689,10 +10880,11 @@
         "yacOverExp": 0.9,
         "adot": 6.3,
         "airYardsShare": 0.215,
-        "dropPct": 0.056
+        "dropPct": 0.056,
+        "drops": 1
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": 0.503
       },
       "injuryStatus": "Active",
@@ -10730,10 +10922,11 @@
         "yacOverExp": 0.4,
         "adot": 8.1,
         "airYardsShare": 0.108,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": -0.416
       },
       "injuryStatus": "Active",
@@ -10771,10 +10964,11 @@
         "yacOverExp": -0.1,
         "adot": 6,
         "airYardsShare": 0.184,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": 0.718
       },
       "injuryStatus": "Active",
@@ -10812,10 +11006,11 @@
         "yacOverExp": -0.8,
         "adot": 4.5,
         "airYardsShare": 0.057,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": 0.13
       },
       "injuryStatus": "Active",
@@ -10853,10 +11048,11 @@
         "yacOverExp": -0.2,
         "adot": 0.9,
         "airYardsShare": 0.008,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": 0.192
       },
       "injuryStatus": "Active",
@@ -10894,10 +11090,11 @@
         "yacOverExp": null,
         "adot": null,
         "airYardsShare": 0.04,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": 1.06
       },
       "injuryStatus": "Active",
@@ -10935,13 +11132,14 @@
         "yacOverExp": null,
         "adot": null,
         "airYardsShare": 0.031,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": 0.316
       },
-      "injuryStatus": "Doubtful",
+      "injuryStatus": "Out",
       "injured": true
     },
     {
@@ -10976,10 +11174,11 @@
         "yacOverExp": 2.1,
         "adot": 5.7,
         "airYardsShare": 0.102,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": 1.033
       },
       "injuryStatus": "Active",
@@ -11017,7 +11216,8 @@
         "yacOverExp": 0,
         "adot": 6.4,
         "airYardsShare": 0.116,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
         "epaPerCarry": 1.24,
@@ -11058,10 +11258,11 @@
         "yacOverExp": null,
         "adot": null,
         "airYardsShare": 0.156,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": -0.34
       },
       "injuryStatus": "Active",
@@ -11099,10 +11300,11 @@
         "yacOverExp": 0.1,
         "adot": 6.5,
         "airYardsShare": 0.171,
-        "dropPct": 0.111
+        "dropPct": 0.111,
+        "drops": 2
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": 0.301
       },
       "injuryStatus": "Active",
@@ -11140,10 +11342,11 @@
         "yacOverExp": null,
         "adot": null,
         "airYardsShare": 0.008,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": 1.383
       },
       "injuryStatus": "Active",
@@ -11181,10 +11384,11 @@
         "yacOverExp": 0.2,
         "adot": 4.2,
         "airYardsShare": 0.074,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": 0.328
       },
       "injuryStatus": "Active",
@@ -11222,10 +11426,11 @@
         "yacOverExp": 0,
         "adot": 10.1,
         "airYardsShare": 0.144,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": 1.738
       },
       "injuryStatus": "Active",
@@ -11263,10 +11468,11 @@
         "yacOverExp": null,
         "adot": null,
         "airYardsShare": 0.022,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": 0.395
       },
       "injuryStatus": "Active",
@@ -11304,7 +11510,8 @@
         "yacOverExp": null,
         "adot": null,
         "airYardsShare": 0.055,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
         "epaPerCarry": 0.32,
@@ -11345,10 +11552,11 @@
         "yacOverExp": -0.4,
         "adot": 4.9,
         "airYardsShare": 0.061,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": -0.425
       },
       "injuryStatus": "Active",
@@ -11386,10 +11594,11 @@
         "yacOverExp": null,
         "adot": null,
         "airYardsShare": 0.068,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": 0.393
       },
       "injuryStatus": "Active",
@@ -11427,10 +11636,11 @@
         "yacOverExp": null,
         "adot": null,
         "airYardsShare": 0.064,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": 0.309
       },
       "injuryStatus": "Active",
@@ -11468,7 +11678,8 @@
         "yacOverExp": 1.6,
         "adot": 8.5,
         "airYardsShare": 0.116,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
         "epaPerCarry": 1.256,
@@ -11509,10 +11720,11 @@
         "yacOverExp": 0,
         "adot": 5.5,
         "airYardsShare": 0.094,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": 0.297
       },
       "injuryStatus": "Active",
@@ -11550,10 +11762,11 @@
         "yacOverExp": -1.4,
         "adot": 6.9,
         "airYardsShare": 0.159,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": 0.366
       },
       "injuryStatus": "Active",
@@ -11591,10 +11804,11 @@
         "yacOverExp": 1.4,
         "adot": 6.6,
         "airYardsShare": 0.072,
-        "dropPct": 0.167
+        "dropPct": 0.167,
+        "drops": 2
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": 0.427
       },
       "injuryStatus": "Active",
@@ -11632,10 +11846,11 @@
         "yacOverExp": null,
         "adot": null,
         "airYardsShare": 0.079,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": -0.512
       },
       "injuryStatus": "Active",
@@ -11673,10 +11888,11 @@
         "yacOverExp": 2.2,
         "adot": 6,
         "airYardsShare": 0.06,
-        "dropPct": 0.091
+        "dropPct": 0.091,
+        "drops": 1
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": 0.038
       },
       "injuryStatus": "Active",
@@ -11714,10 +11930,11 @@
         "yacOverExp": 4.1,
         "adot": 6.6,
         "airYardsShare": 0.212,
-        "dropPct": 0.111
+        "dropPct": 0.111,
+        "drops": 2
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": 0.873
       },
       "injuryStatus": "Active",
@@ -11755,10 +11972,11 @@
         "yacOverExp": 0.1,
         "adot": 6.2,
         "airYardsShare": 0.256,
-        "dropPct": 0.029
+        "dropPct": 0.029,
+        "drops": 1
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": 0.399
       },
       "injuryStatus": "Active",
@@ -11796,10 +12014,11 @@
         "yacOverExp": 0.2,
         "adot": 6.6,
         "airYardsShare": 0.119,
-        "dropPct": 0.235
+        "dropPct": 0.235,
+        "drops": 4
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": 0.079
       },
       "injuryStatus": "Active",
@@ -11837,10 +12056,11 @@
         "yacOverExp": -0.8,
         "adot": 6.5,
         "airYardsShare": 0.079,
-        "dropPct": 0
+        "dropPct": 0,
+        "drops": 0
       },
       "competitive": {
-        "epaPerCarry": null,
+        "epaPerCarry": 0,
         "epaPerTarget": 0.258
       },
       "injuryStatus": "Active",
@@ -11878,7 +12098,8 @@
         "yacOverExp": -1,
         "adot": 1.9,
         "airYardsShare": 0.059,
-        "dropPct": 0.045
+        "dropPct": 0.045,
+        "drops": 1
       },
       "competitive": {
         "epaPerCarry": 0.532,

@@ -278,6 +278,9 @@ function offenseStats(n, ctx) {
     adot: ngsValue(ctx.ngsRec, 'avg_intended_air_yards', 1),
     airYardsShare: round(n('air_yards_share'), 3),
     dropPct: ctx.pfrRec && stats.targets ? ratio(ctx.pfrRec.receiving_drop, stats.targets) : null,
+    // Charted drops (Pro Football Reference); null (scored as average) with no targets yet, or when
+    // PFR has no receiving line for the player
+    drops: ctx.pfrRec && stats.targets ? ctx.pfrRec.receiving_drop : null,
   };
 }
 
