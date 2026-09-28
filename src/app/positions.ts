@@ -97,6 +97,7 @@ export type SkillColumnKey =
   | SkillStatKey
   | 'fantasy'
   | 'oline'
+  | 'weapons'
   | 'qbPlay'
   | 'rbPlay'
   | 'coaching'
@@ -167,6 +168,7 @@ export const STAT_NAMES: Partial<Record<SkillColumnKey, string>> = {
   totalYards: 'Total Rushing + Receiving Yards',
   fantasy: 'Fantasy Points',
   oline: 'Offensive Line Grade',
+  weapons: 'Weapons Grade',
   qbPlay: 'Quarterback Play Grade',
   rbPlay: 'Running Back Play Grade',
   coaching: 'Coaching Grade',
@@ -332,6 +334,26 @@ const QB_PLAY_STAT: SkillStat = {
   key: 'qbPlay',
   label: 'QB Play',
   description: "Team QB grade from the current QB rankings, weighted by each QB's starts",
+  kind: 'efficiency',
+  format: 'grade',
+  support: true,
+};
+
+// Team O-line grade (preseason blended with the Offensive Lines rankings)
+const OLINE_STAT: SkillStat = {
+  key: 'oline',
+  label: 'O-Line',
+  description: 'Team O-line grade (preseason blended with the Offensive Lines rankings)',
+  kind: 'efficiency',
+  format: 'grade',
+  support: true,
+};
+
+// Team weapons grade (preseason blended with the RB, WR and TE rankings)
+const WEAPONS_STAT: SkillStat = {
+  key: 'weapons',
+  label: 'Weapons',
+  description: 'Team weapons grade (preseason blended with the RB, WR and TE rankings)',
   kind: 'efficiency',
   format: 'grade',
   support: true,
@@ -519,15 +541,8 @@ export const SKILL_STATS: Record<SkillPosition, SkillStat[]> = {
       format: 'int',
     },
     FANTASY_STAT,
-    {
-      key: 'oline',
-      label: 'O-Line',
-      description: "Team O-line grade (preseason blended with this season's stats; +/- to adjust)",
-      kind: 'efficiency',
-      format: 'grade',
-      support: true,
-    },
     QB_PLAY_STAT,
+    OLINE_STAT,
   ],
   WR: RECEIVING_STATS,
   TE: RECEIVING_STATS,
@@ -699,8 +714,8 @@ export const SKILL_STATS: Record<SkillPosition, SkillStat[]> = {
       description:
         'Standard D/ST scoring: sack 1, takeaway 2, TD 6, safety 2, plus points-allowed tier each game',
     },
-    COACHING_STAT,
     QB_PLAY_STAT,
+    COACHING_STAT,
   ],
   // Lower is better for everything "allowed", and for stuffs and penalties
   OL: [
@@ -799,8 +814,8 @@ export const SKILL_STATS: Record<SkillPosition, SkillStat[]> = {
       format: 'dec2',
       infoOnly: true,
     },
-    RB_PLAY_STAT,
     QB_PLAY_STAT,
+    RB_PLAY_STAT,
     COACHING_STAT,
   ],
   HC: [
@@ -868,8 +883,10 @@ export const SKILL_STATS: Record<SkillPosition, SkillStat[]> = {
       signed: true,
       negative: true,
     },
-    DEFENSE_STAT,
     QB_PLAY_STAT,
+    WEAPONS_STAT,
+    OLINE_STAT,
+    DEFENSE_STAT,
   ],
 };
 

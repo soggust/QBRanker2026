@@ -67,32 +67,11 @@
         @for (group of groups; track group.id) {
           <div class="col-group" [ngClass]="'group-' + group.id">
             @if (group.id === 'support') {
-              <!-- Support grades (O-Line, QB Play) share a dark box like the QB page -->
+              <!-- Support grades share a dark box like the QB page -->
               <div class="box support-box" [style.min-width.em]="group.stats.length * 7">
                 @for (stat of group.stats; track stat.key) {
-                  <div [class.o-line]="stat.key === 'oline'">
-                    @if (stat.key === 'oline') {
-                      <!-- O-line grade with +/- arrows, shared with the QB page -->
-                      <p>
-                        <mat-icon
-                          aria-hidden="false"
-                          aria-label="O-Line grade down"
-                          fontIcon="arrow_drop_down"
-                          class="arrow-drop-down"
-                          (click)="stepOline(player, 'down')"
-                        ></mat-icon
-                        ><span [style.color]="gradeColor(player, stat)">{{ format(player, stat) }}</span>
-                        <mat-icon
-                          aria-hidden="false"
-                          aria-label="O-Line grade up"
-                          fontIcon="arrow_drop_up"
-                          class="arrow-drop-up"
-                          (click)="stepOline(player, 'up')"
-                        ></mat-icon>
-                      </p>
-                    } @else {
-                      <p [style.color]="gradeColor(player, stat) ?? valueColor(player, stat)">{{ format(player, stat) }}</p>
-                    }
+                  <div>
+                    <p [style.color]="gradeColor(player, stat) ?? valueColor(player, stat)">{{ format(player, stat) }}</p>
                     <p class="stat-label" [title]="valueTitle(player, stat)">{{ statLabel(stat) }}</p>
                   </div>
                 }

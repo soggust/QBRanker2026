@@ -1,4 +1,4 @@
-import { blendGrade, preseasonOline, teamGamesPlayed } from 'StaticData/StaticData';
+import { blendGrade, preseasonOline, preseasonWeapons, teamGamesPlayed } from 'StaticData/StaticData';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, combineLatest, distinctUntilChanged, map, shareReplay } from 'rxjs';
 import { SKILL_UNITS, defaultRanking, gradesByRank } from 'app/utils/unit-scoring';
@@ -78,6 +78,28 @@ function distinctGrades() {
     );
 }
 
+// A team grade for one position from its ranked list: each player graded by his spot (#1 = 12,
+// last = 0), averaged per team weighted by usage (carries, targets...)
+function teamGradesByUsage(ranked: SkillPlayer[], usage: (player: SkillPlayer) => number): Map<string, number> {
+  const last = Math.max(ranked.length - 1, 1);
+  const totals = new Map<string, { sum: number; usage: number }>();
+  ranked.forEach((player, rank) => {
+    const weight = usage(player);
+    if (!weight) return;
+    const total = totals.get(player.teamLogo) ?? { sum: 0, usage: 0 };
+    totals.set(player.teamLogo, { sum: total.sum + 12 * (1 - rank / last) * weight, usage: total.usage + weight });
+  });
+  return new Map([...totals].map(([team, { sum, usage }]) => [team, sum / usage]));
+}
+
+// How much each position counts toward a team's weapons grade (receivers lead: it's mostly about
+// who the QB throws to). A team missing a position splits its share among the others.
+const WEAPONS_SHARES: [SkillPosition, number, (player: SkillPlayer) => number][] = [
+  ['WR', 0.5, (p) => p.stats.targets ?? 0],
+  ['RB', 0.3, (p) => (p.stats.carries ?? 0) + (p.stats.targets ?? 0)],
+  ['TE', 0.2, (p) => p.stats.targets ?? 0],
+];
+
 export interface UnitOrder {
   ids: string[];
   manual: boolean;
@@ -152,16 +174,29 @@ export class PositionService {
   // RB Play: each back graded by his spot in the RB rankings (#1 = A+, last = F), averaged per team
   // weighted by carries, so the lead back counts most
   public rbPlayGrades$ = this.rankedUnits('RB').pipe(
-    map((ranked) => {
-      const last = Math.max(ranked.length - 1, 1);
-      const totals = new Map<string, { sum: number; carries: number }>();
-      ranked.forEach((rb, rank) => {
-        const carries = rb.stats.carries ?? 0;
-        if (!carries) return;
-        const total = totals.get(rb.teamLogo) ?? { sum: 0, carries: 0 };
-        totals.set(rb.teamLogo, { sum: total.sum + 12 * (1 - rank / last) * carries, carries: total.carries + carries });
-      });
-      return new Map([...totals].map(([team, { sum, carries }]) => [team, sum / carries]));
+    map((ranked) => teamGradesByUsage(ranked, (rb) => rb.stats.carries ?? 0)),
+    distinctGrades(),
+  );
+
+  // Weapons from this season: the team's RBs, WRs and TEs graded by the RB / WR / TE tabs' orders
+  // (by usage within each position), combined by WEAPONS_SHARES. Blended with preseason in weaponsGrade.
+  public weaponsGrades$ = combineLatest(WEAPONS_SHARES.map(([position]) => this.rankedUnits(position))).pipe(
+    map((lists) => {
+      const byPosition = lists.map((ranked, i) => teamGradesByUsage(ranked, WEAPONS_SHARES[i][2]));
+      const teams = new Set(byPosition.flatMap((grades) => [...grades.keys()]));
+      return new Map(
+        [...teams].map((team) => {
+          let sum = 0;
+          let shares = 0;
+          byPosition.forEach((grades, i) => {
+            const grade = grades.get(team);
+            if (grade === undefined) return;
+            sum += grade * WEAPONS_SHARES[i][1];
+            shares += WEAPONS_SHARES[i][1];
+          });
+          return [team, sum / shares];
+        }),
+      );
     }),
     distinctGrades(),
   );
@@ -225,34 +260,26 @@ export class PositionService {
     this.columnOrders = { ...this.columnOrders, [list]: order };
   }
 
-  // O-line grades changed with the +/- arrows, per team (logo path -> 0-12). Shared by the QB and
-  // RB pages, so nudging a team's O-line on either tab moves it for every QB and RB on that team.
-  private olineOverridesSubject = new BehaviorSubject<Record<string, number>>({});
-  public olineOverrides$ = this.olineOverridesSubject.asObservable();
-
-  // Latest grades from the Offensive Lines tab (kept for olineGrade)
+  // Latest grades from the Offensive Lines tab and the RB / WR / TE tabs (kept for olineGrade and
+  // weaponsGrade)
   private olineTabGrades = new Map<string, number>();
+  private weaponsTabGrades = new Map<string, number>();
 
   constructor() {
-    // Subscribed before any page, so olineGrade is current when the pages hear about a change
+    // Subscribed before any page, so the grades are current when the pages hear about a change
     this.olineGrades$.subscribe((grades) => (this.olineTabGrades = grades));
+    this.weaponsGrades$.subscribe((grades) => (this.weaponsTabGrades = grades));
   }
 
-  // A team's O-line grade: the adjusted one if changed, otherwise the preseason grade blended with
-  // the Offensive Lines tab's order, leaning on the ranking more with every game played (like coaching)
+  // A team's O-line grade: the preseason grade blended with the Offensive Lines tab's order, leaning
+  // on the ranking more with every game played (like coaching)
   olineGrade(teamLogo: string): number {
-    return (
-      this.olineOverridesSubject.value[teamLogo] ??
-      blendGrade(preseasonOline(teamLogo), this.olineTabGrades.get(teamLogo), teamGamesPlayed(teamLogo))
-    );
+    return blendGrade(preseasonOline(teamLogo), this.olineTabGrades.get(teamLogo), teamGamesPlayed(teamLogo));
   }
 
-  // One grade step up or down (stays within F-A+)
-  stepOlineGrade(teamLogo: string, direction: 'up' | 'down'): void {
-    const current = this.olineGrade(teamLogo);
-    const next = Math.min(12, Math.max(0, current + (direction === 'up' ? 1 : -1)));
-    if (next === current) return;
-    this.olineOverridesSubject.next({ ...this.olineOverridesSubject.value, [teamLogo]: next });
+  // A team's weapons grade: the preseason grade blended the same way with the RB / WR / TE rankings
+  weaponsGrade(teamLogo: string): number {
+    return blendGrade(preseasonWeapons(teamLogo), this.weaponsTabGrades.get(teamLogo), teamGamesPlayed(teamLogo));
   }
 
   // The About / FAQ panel (the footer's info button opens it on every tab)

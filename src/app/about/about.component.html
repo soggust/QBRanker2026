@@ -98,29 +98,30 @@
           <p>
             The exception is the QB page's <b>Responsibility</b> grade: how much the offense runs through the
             QB (pass rate over expected, share of the team's yards). Carrying the offense counts <em>for</em> him.
+            It's the one grade you set by hand: use the arrows beside it to raise or lower it for any QB.
           </p>
           <h4>The tabs grade each other</h4>
           <ul>
-            <li><b>Defense</b> comes from the Defenses tab.</li>
-            <li><b>Coaching</b> comes from the Head Coaches tab.</li>
-            <li><b>O-Line</b> comes from the Offensive Lines tab.</li>
             <li><b>QB Play</b> comes from the QB tab, weighted by each QB's starts for the team.</li>
             <li><b>RB Play</b> comes from the RB tab, weighted by each back's carries.</li>
+            <li>
+              <b>Weapons</b> comes from the RB, WR and TE tabs: each player's spot weighted by his targets (and
+              carries for backs), with receivers counting 50%, backs 30% and tight ends 20%.
+            </li>
+            <li><b>O-Line</b> comes from the Offensive Lines tab.</li>
+            <li><b>Defense</b> comes from the Defenses tab.</li>
+            <li><b>Coaching</b> comes from the Head Coaches tab.</li>
           </ul>
           <p>
             Grades follow each tab's current order, including your drags: move the Packers' line to #1 on the
-            Offensive Lines tab and every Packers QB and RB gets a better O-Line grade.
+            Offensive Lines tab and every Packers QB and RB gets a better O-Line grade. Disagree with a team
+            grade? Re-rank the tab it comes from.
           </p>
           <h4>Preseason vs. this season</h4>
           <p>
-            Early on, a few games isn't much to go on, so O-Line, Coaching and Weapons grades blend a preseason
+            Early on, a few games isn't much to go on, so Weapons, O-Line and Coaching grades blend a preseason
             grade with this season's results. The season counts for about 17% after 1 game, 35% after 3, 56%
             after 6, 80% after 10, and completely from game 14 on.
-          </p>
-          <h4>Adjusting grades yourself</h4>
-          <p>
-            Disagree with a grade? On the QB page, the arrows beside the support grades nudge it up or down.
-            O-Line changes are shared by team, so they apply on the RB page too (and vice versa).
           </p>
         }
 
@@ -193,6 +194,26 @@
             <p>
               It's credit for doing more with less (see Grades &amp; Support). It's a small effect and you can
               switch it off with the Support card's eye.
+            </p>
+          </details>
+          <details>
+            <summary>How is the Weapons grade worked out?</summary>
+            <p>
+              From the RB, WR and TE tabs. Each player gets a grade from his spot in his own tab (#1 is an A+,
+              last is an F), and a team's grade at each position averages its players by how much they're used:
+              targets for receivers and tight ends, carries plus targets for backs. The three positions are then
+              combined, with receivers counting 50%, running backs 30% and tight ends 20%, since it's mostly
+              about who the QB is throwing to. Like the other team grades, it starts from a preseason grade and
+              leans on this season's rankings more with every game played.
+            </p>
+          </details>
+          <details>
+            <summary>How do I change a grade I disagree with?</summary>
+            <p>
+              Team grades (QB Play, RB Play, Weapons, O-Line, Defense, Coaching) come from the other tabs'
+              rankings, so re-rank the tab they come from: drag a team's line up the Offensive Lines tab, or a
+              receiver up the WR tab, and their grades follow everywhere. The QB page's Responsibility grade is
+              set per quarterback, so it has arrows beside it to raise or lower it directly.
             </p>
           </details>
           <details>

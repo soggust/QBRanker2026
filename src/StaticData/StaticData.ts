@@ -81,6 +81,11 @@ export function preseasonCoaching(teamLogo: string): number {
   return (teamGrades[teamKey(teamLogo)] ?? { coaching: 6 }).coaching;
 }
 
+// Preseason weapons grade per team; the app blends it with the RB, WR and TE rankings
+export function preseasonWeapons(teamLogo: string): number {
+  return (teamGrades[teamKey(teamLogo)] ?? { weapons: 6 }).weapons;
+}
+
 // Preseason O-line grade per team; the app blends it with the Offensive Lines rankings
 export function preseasonOline(teamLogo: string): number {
   return (teamGrades[teamKey(teamLogo)] ?? { oline: 6 }).oline;

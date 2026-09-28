@@ -290,18 +290,19 @@ export class RankingsComponent {
       this.applyDefenseGrades();
       this.applyCoachingGrades();
       this.applyOlineGrades();
+      this.applyWeaponsGrades();
       this.applyGarbageTime();
       this.sortPlayers();
     });
 
-    // O-line grades follow the Offensive Lines tab's order (blended with preseason), and +/- tweaks
-    // made on this page or the RB page
+    // O-line and weapons grades follow the Offensive Lines / RB, WR and TE tabs' orders (blended
+    // with preseason)
     this.positionService.olineGrades$.subscribe(() => {
       this.applyOlineGrades();
       this.sortPlayers();
     });
-    this.positionService.olineOverrides$.subscribe(() => {
-      this.applyOlineGrades();
+    this.positionService.weaponsGrades$.subscribe(() => {
+      this.applyWeaponsGrades();
       this.sortPlayers();
     });
 
@@ -353,11 +354,17 @@ export class RankingsComponent {
     }
   }
 
-  // Set each QB's O-line grade: their team's grade (preseason blended with the Offensive Lines
-  // rankings, or as adjusted with +/- here or on the RB page)
+  // Set each QB's O-line grade: their team's grade (preseason blended with the Offensive Lines rankings)
   applyOlineGrades() {
     for (const player of this.unfilteredPlayerList) {
       player.oline = this.positionService.olineGrade(player.teamLogo);
+    }
+  }
+
+  // Set each QB's weapons grade: their team's grade (preseason blended with the RB, WR and TE rankings)
+  applyWeaponsGrades() {
+    for (const player of this.unfilteredPlayerList) {
+      player.weapons = this.positionService.weaponsGrade(player.teamLogo);
     }
   }
 
@@ -407,11 +414,13 @@ export class RankingsComponent {
       'aggressiveness',
       'fantasy'
     ],
+    // Same order as every tab's support grades (QB Play, RB Play, Weapons, O-Line, Defense, Coaching),
+    // then the QB's own Responsibility
     'support': [
       'weapons',
-      'coaching',
       'o-line',
       'defense',
+      'coaching',
       'responsibility'
     ]
   };
@@ -682,37 +691,13 @@ export class RankingsComponent {
     this.positionService.cycleFantasyScoring();
   }
 
-  // Modify Support Stat
-  modifyStat(player: Player, stat: string, direction: string) {
-    // O-line grades are per team and shared with the RB page (applied through olineOverrides$)
-    if (stat === 'oline') {
-      this.positionService.stepOlineGrade(player.teamLogo, direction === 'up' ? 'up' : 'down');
-      return;
-    }
-    const statKeys = [
-      'weapons',
-      'coaching',
-      'oline',
-      'defense',
-      'responsibility',
-    ];
-    if (statKeys.includes(stat)) {
-      const currentValue =
-        this.playerList[this.playerList.indexOf(player)][stat];
-      const maxLimit = 12;
-      const minLimit = 0;
-
-      if (
-        (direction === 'down' && currentValue === minLimit) ||
-        (direction === 'up' && currentValue === maxLimit)
-      ) {
-        return;
-      }
-
-      this.playerList[this.playerList.indexOf(player)][stat] =
-        direction === 'up' ? currentValue + 1 : currentValue - 1;
-      this.sortPlayers();
-    }
+  // Responsibility arrows: one grade step for this QB (stays within F-A+). The other support grades
+  // come from the other tabs' rankings, so they're changed by re-ranking those tabs instead.
+  stepResponsibility(player: Player, step: 1 | -1) {
+    const next = Math.min(12, Math.max(0, player.responsibility + step));
+    if (next === player.responsibility) return;
+    player.responsibility = next;
+    this.sortPlayers();
   }
 
   // Find Max Attribute

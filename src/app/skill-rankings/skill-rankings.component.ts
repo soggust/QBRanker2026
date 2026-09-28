@@ -126,7 +126,7 @@ export class SkillRankingsComponent implements OnChanges {
     return this.scales.get(key)!;
   }
 
-  // Bumped when grades from other tabs change (QB order, defense / coaching, O-line tweaks)
+  // Bumped when grades from other tabs change (QB order, defense / coaching / O-line / weapons)
   private dataVersion = 0;
 
   get showUnused(): boolean {
@@ -187,8 +187,8 @@ export class SkillRankingsComponent implements OnChanges {
       if (this.position) this.sortPlayers();
     });
 
-    this.positionService.olineOverrides$.subscribe(() => this.refresh());
     this.positionService.olineGrades$.subscribe(() => this.refresh());
+    this.positionService.weaponsGrades$.subscribe(() => this.refresh());
 
     this.positionService.rbPlayGrades$.subscribe((grades) => {
       this.teamRbPlay = grades;
@@ -204,11 +204,6 @@ export class SkillRankingsComponent implements OnChanges {
       this.fantasyScoring = scoring;
       if (this.position) this.sortPlayers();
     });
-  }
-
-  // O-line +/- arrows: one grade step for the player's team, on this tab and the QB page
-  stepOline(player: SkillPlayer, direction: 'up' | 'down') {
-    this.positionService.stepOlineGrade(player.teamLogo, direction);
   }
 
   cycleFantasyScoring() {
@@ -228,7 +223,7 @@ export class SkillRankingsComponent implements OnChanges {
     else this.sortPlayers();
   }
 
-  // Changes from other tabs (QB order, defense / coaching grades, O-line tweaks) re-sort this tab
+  // Changes from other tabs (QB order, defense / coaching / O-line / weapons grades) re-sort this tab
   // unless its order was dragged by hand; the new values still show either way
   private refresh() {
     this.dataVersion++;
@@ -350,10 +345,11 @@ export class SkillRankingsComponent implements OnChanges {
       }
       case 'fantasy':
         return fantasyPoints(player.stats.fantasyStd ?? 0, player.stats.receptions ?? 0, this.fantasyScoring);
-      // Preseason blended with the Offensive Lines ranking; shared with the QB page, so +/- on either
-      // tab moves the team's O-line grade in both
+      // Preseason blended with the Offensive Lines / RB, WR and TE rankings (the same grades as the QB page)
       case 'oline':
         return this.positionService.olineGrade(player.teamLogo);
+      case 'weapons':
+        return this.positionService.weaponsGrade(player.teamLogo);
       // Teams without a graded QB yet count as average
       case 'qbPlay':
         return this.teamQbPlay.get(player.teamLogo) ?? 6;

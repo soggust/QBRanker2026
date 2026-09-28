@@ -499,23 +499,9 @@
                               <!-- Weapons -->
                               <div class="weapons" [columnDrag]="i === -1 ? { list: 'QB.support', id: 'weapons' } : null">
                                 <p>
-                                  <mat-icon
-                                    aria-hidden="false"
-                                    aria-label="Weapons Arrow Down Icon"
-                                    fontIcon="arrow_drop_down"
-                                    class="arrow-drop-down"
-                                    (click)="modifyStat(player, 'weapons', 'down')"
-                                  ></mat-icon
-                                  ><span [ngStyle]="{ color: getColor(player.weapons) }">{{
+                                  <span [ngStyle]="{ color: getColor(player.weapons) }">{{
                                     player.weapons | letterGrade
                                   }}</span>
-                                  <mat-icon
-                                    aria-hidden="false"
-                                    aria-label="Weapons Arrow Up Icon"
-                                    fontIcon="arrow_drop_up"
-                                    class="arrow-drop-up"
-                                    (click)="modifyStat(player, 'weapons', 'up')"
-                                  ></mat-icon>
                                 </p>
                                 <p class="stat-label" #label24 [attr.title]="i === -1 ? labelTitle('weapons') : null" (mouseenter)="i !== -1 && (label24.title = cellTitle('weapons', label24, player))">
                                   Weapons
@@ -528,23 +514,9 @@
                               <!-- Coaching -->
                               <div class="coaching" [columnDrag]="i === -1 ? { list: 'QB.support', id: 'coaching' } : null">
                                 <p>
-                                  <mat-icon
-                                    aria-hidden="false"
-                                    aria-label="Coaching Arrow Down Icon"
-                                    fontIcon="arrow_drop_down"
-                                    class="arrow-drop-down"
-                                    (click)="modifyStat(player, 'coaching', 'down')"
-                                  ></mat-icon
-                                  ><span [ngStyle]="{ color: getColor(player.coaching) }">{{
+                                  <span [ngStyle]="{ color: getColor(player.coaching) }">{{
                                     player.coaching | letterGrade
                                   }}</span>
-                                  <mat-icon
-                                    aria-hidden="false"
-                                    aria-label="Arrow Up Icon"
-                                    fontIcon="arrow_drop_up"
-                                    class="arrow-drop-up"
-                                    (click)="modifyStat(player, 'coaching', 'up')"
-                                  ></mat-icon>
                                 </p>
                                 <p class="stat-label" #label25 [attr.title]="i === -1 ? labelTitle('coaching') : null" (mouseenter)="i !== -1 && (label25.title = cellTitle('coaching', label25, player))">
                                   Coaching
@@ -557,23 +529,9 @@
                               <!-- O-line -->
                               <div class="o-line" [columnDrag]="i === -1 ? { list: 'QB.support', id: 'o-line' } : null">
                                 <p>
-                                  <mat-icon
-                                    aria-hidden="false"
-                                    aria-label="Oline Arrow Down Icon"
-                                    fontIcon="arrow_drop_down"
-                                    class="arrow-drop-down"
-                                    (click)="modifyStat(player, 'oline', 'down')"
-                                  ></mat-icon
-                                  ><span [ngStyle]="{ color: getColor(player.oline) }">{{
+                                  <span [ngStyle]="{ color: getColor(player.oline) }">{{
                                     player.oline | letterGrade
                                   }}</span>
-                                  <mat-icon
-                                    aria-hidden="false"
-                                    aria-label="Oline Arrow Up Icon"
-                                    fontIcon="arrow_drop_up"
-                                    class="arrow-drop-up"
-                                    (click)="modifyStat(player, 'oline', 'up')"
-                                  ></mat-icon>
                                 </p>
                                 <p class="stat-label" #label26 [attr.title]="i === -1 ? labelTitle('o-line') : null" (mouseenter)="i !== -1 && (label26.title = cellTitle('o-line', label26, player))">
                                   O-Line
@@ -586,23 +544,9 @@
                               <!-- Defense -->
                               <div class="defense" [columnDrag]="i === -1 ? { list: 'QB.support', id: 'defense' } : null">
                                 <p>
-                                  <mat-icon
-                                    aria-hidden="false"
-                                    aria-label="Oline Arrow Down Icon"
-                                    fontIcon="arrow_drop_down"
-                                    class="arrow-drop-down"
-                                    (click)="modifyStat(player, 'defense', 'down')"
-                                  ></mat-icon
-                                  ><span [ngStyle]="{ color: getColor(player.defense) }">{{
+                                  <span [ngStyle]="{ color: getColor(player.defense) }">{{
                                     player.defense | letterGrade
                                   }}</span>
-                                  <mat-icon
-                                    aria-hidden="false"
-                                    aria-label="Oline Arrow Up Icon"
-                                    fontIcon="arrow_drop_up"
-                                    class="arrow-drop-up"
-                                    (click)="modifyStat(player, 'defense', 'up')"
-                                  ></mat-icon>
                                 </p>
                                 <p class="stat-label" #label27 [attr.title]="i === -1 ? labelTitle('defense') : null" (mouseenter)="i !== -1 && (label27.title = cellTitle('defense', label27, player))">
                                   Defense
@@ -612,26 +556,27 @@
                           }
                           @case ('responsibility') {
                             @if (showUnused || this.filters.responsibilityValue) {
-                              <!-- Responsibility -->
+                              <!-- Responsibility: the one grade you set by hand (per QB), so it keeps its arrows -->
                               <div class="responsibility" [columnDrag]="i === -1 ? { list: 'QB.support', id: 'responsibility' } : null">
                                 <p>
                                   <mat-icon
                                     aria-hidden="false"
-                                    aria-label="Oline Arrow Down Icon"
+                                    aria-label="Lower responsibility grade"
+                                    title="Lower this QB's responsibility grade"
                                     fontIcon="arrow_drop_down"
                                     class="arrow-drop-down"
-                                    (click)="modifyStat(player, 'responsibility', 'down')"
+                                    (click)="stepResponsibility(player, -1)"
                                   ></mat-icon
-                                  ><span
-                                    [ngStyle]="{ color: getColor(player.responsibility) }"
-                                    >{{ player.responsibility | letterGrade }}</span
-                                  >
+                                  ><span [ngStyle]="{ color: getColor(player.responsibility) }">{{
+                                    player.responsibility | letterGrade
+                                  }}</span>
                                   <mat-icon
                                     aria-hidden="false"
-                                    aria-label="Oline Arrow Up Icon"
+                                    aria-label="Raise responsibility grade"
+                                    title="Raise this QB's responsibility grade"
                                     fontIcon="arrow_drop_up"
                                     class="arrow-drop-up"
-                                    (click)="modifyStat(player, 'responsibility', 'up')"
+                                    (click)="stepResponsibility(player, 1)"
                                   ></mat-icon>
                                 </p>
                                 <p class="stat-label" #label28 [attr.title]="i === -1 ? labelTitle('responsibility') : null" (mouseenter)="i !== -1 && (label28.title = cellTitle('responsibility', label28, player))">

@@ -115,9 +115,9 @@ export const QB_FILTER_GROUPS: FilterGroup[] = [
     master: 'supportValue',
     rows: [
       { key: 'weaponsValue', label: 'Weapons', hint: 'Better weapons count against the QB' },
-      { key: 'coachingValue', label: 'Coaching', hint: 'Better coaching counts against the QB' },
       { key: 'olineValue', label: 'O-Line', hint: 'Better O-line counts against the QB' },
       { key: 'defenseValue', label: 'Defense', hint: 'Better defense counts against the QB' },
+      { key: 'coachingValue', label: 'Coaching', hint: 'Better coaching counts against the QB' },
       { key: 'responsibilityValue', label: 'Responsibility', hint: 'Carrying the offense counts for the QB' },
     ],
   },
