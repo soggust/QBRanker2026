@@ -1116,10 +1116,10 @@
   height: 17px;
   // Centered over the category card icons below (and clear of the sidebar's generic span margin)
   margin-left: 6.5px;
-  margin-right: 0.75em;
+  margin-right: calc(0.75em + 4px);
   position: relative;
   // Centered on the capital letters (flex centering sits it on the line box, a touch low)
-  top: -1.25px;
+  top: -0.25px;
   transform: rotate(-40deg);
   width: 27px;
 
@@ -1255,4 +1255,10 @@
 
 .sidebar .filters .sub-rows .slider-row {
   padding-left: calc(0.7em + 24px);
+}
+
+// Logo title in the scoreboard font
+.sidebar .logo h1 {
+  font-family: "Orbitron", sans-serif;
+  font-weight: 500;
 }

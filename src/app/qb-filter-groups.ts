@@ -47,7 +47,7 @@ export const QB_ROW_COLUMNS: Partial<Record<FilterKey, string[]>> = {
   responsibilityValue: ['responsibility'],
 };
 
-// How the QB sliders are organized in the sidebar
+// How the QB sliders are organized in the sidebar (labels match the grid's column labels)
 export const QB_FILTER_GROUPS: FilterGroup[] = [
   {
     id: 'results',
@@ -55,7 +55,7 @@ export const QB_FILTER_GROUPS: FilterGroup[] = [
     icon: 'emoji_events',
     rows: [
       { key: 'recordValue', label: 'Record', hint: 'Win % as a starter' },
-      { key: 'recencyValue', label: 'Recent Form', hint: 'Last five starts, newest counts most' },
+      { key: 'recencyValue', label: 'Recent', hint: 'Last five starts, newest counts most' },
     ],
   },
   {
@@ -63,19 +63,19 @@ export const QB_FILTER_GROUPS: FilterGroup[] = [
     title: 'Basic Stats',
     icon: 'bar_chart',
     rows: [
-      { key: 'compValue', label: 'Completion %' },
+      { key: 'compValue', label: 'Comp %', hint: 'Completion percentage' },
       {
         key: 'yardsValue',
-        label: 'Yards',
+        label: 'Total Yds',
         children: [
           { key: 'passYdValue', label: 'Pass Yards' },
           { key: 'rushYdValue', label: 'Rush Yards' },
         ],
       },
-      { key: 'ypaValue', label: 'Yards / Attempt' },
+      { key: 'ypaValue', label: 'Per Attempt', hint: 'Yards per pass attempt' },
       {
         key: 'touchdownValue',
-        label: 'Touchdowns',
+        label: 'Total TDs',
         children: [
           { key: 'passTdValue', label: 'Pass TDs' },
           { key: 'rushTdValue', label: 'Rush TDs' },
@@ -89,7 +89,7 @@ export const QB_FILTER_GROUPS: FilterGroup[] = [
           { key: 'fumLostValue', label: 'Fumbles Lost' },
         ],
       },
-      { key: 'ratingValue', label: 'Passer Rating' },
+      { key: 'ratingValue', label: 'Rating', hint: 'Passer rating' },
     ],
   },
   {
@@ -99,12 +99,12 @@ export const QB_FILTER_GROUPS: FilterGroup[] = [
     rows: [
       { key: 'epaValue', label: 'EPA / Play', hint: 'Expected Points Added per play' },
       { key: 'cpoeValue', label: 'CPOE', hint: 'Completion % over expected' },
-      { key: 'successValue', label: 'Success Rate', hint: 'Share of plays gaining positive EPA' },
+      { key: 'successValue', label: 'Success', hint: 'Share of plays gaining positive EPA' },
       { key: 'pressureToSackValue', label: 'Pressure → Sack', hint: 'Lower is better' },
       { key: 'badThrowValue', label: 'Bad Throw %', hint: 'Lower is better' },
       { key: 'timeToThrowValue', label: 'Time To Throw', hint: 'Quicker is better' },
-      { key: 'adotValue', label: 'Avg Depth Of Target' },
-      { key: 'aggressivenessValue', label: 'Aggressiveness', hint: 'Throws into tight coverage' },
+      { key: 'adotValue', label: 'aDOT', hint: 'Average depth of target' },
+      { key: 'aggressivenessValue', label: 'Aggressive %', hint: 'Throws into tight coverage' },
       { key: 'fantasyValue', label: 'Fantasy Pts' },
     ],
   },

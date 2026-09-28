@@ -19,7 +19,18 @@ import {
   SkillWeights,
   hasFantasy,
   presetWeights,
+  combinedFor,
 } from 'app/positions';
+
+// A sidebar row on the other tabs: one stat, or a rush / rec pair shown as a parent slider with the
+// two as its expandable breakdown
+export interface SkillRow {
+  key: SkillColumnKey;
+  label: string;
+  description: string;
+  stat?: SkillStat;
+  children?: SkillStat[];
+}
 
 @Component({
     selector: 'sidebar',
@@ -172,10 +183,50 @@ export class SidebarComponent {
     return [...group.stats].sort((a, b) => order.indexOf(a.key) - order.indexOf(b.key));
   }
 
+  // A card's rows: rush / rec pairs become one parent row where the first of the two sits
+  skillRows(group: SkillStatGroup): SkillRow[] {
+    const stats = this.orderedStats(group);
+    const pairs = this.skillPosition ? combinedFor(this.skillPosition) : [];
+    const rows: SkillRow[] = [];
+    const used = new Set<string>();
+    for (const stat of stats) {
+      if (used.has(stat.key)) continue;
+      const pair = pairs.find(({ parts }) => parts.includes(stat.key) && parts.every((p) => stats.some((s) => s.key === p)));
+      if (pair) {
+        const children = stats.filter((s) => pair.parts.includes(s.key));
+        children.forEach((child) => used.add(child.key));
+        rows.push({ key: pair.stat.key, label: pair.stat.label, description: pair.stat.description, children });
+      } else {
+        rows.push({ key: stat.key, label: stat.label, description: stat.description, stat });
+      }
+    }
+    return rows;
+  }
+
+  // Moving a parent row moves its breakdown's columns together
   dropSkillStat(group: SkillStatGroup, event: CdkDragDrop<unknown>) {
-    const keys = this.orderedStats(group).map((stat) => stat.key as string);
-    moveItemInArray(keys, event.previousIndex, event.currentIndex);
+    const rows = this.skillRows(group);
+    moveItemInArray(rows, event.previousIndex, event.currentIndex);
+    const keys = rows.flatMap((row) => (row.children ? row.children.map((child) => child.key) : [row.key]));
     this.positionService.setColumnOrder(`${this.position}.${group.id}`, keys);
+  }
+
+  // Which parent rows have their breakdown open (per tab)
+  private skillRowOpen: Record<string, boolean> = {};
+
+  skillRowIsOpen(key: string): boolean {
+    return !!this.skillRowOpen[`${this.position}.${key}`];
+  }
+
+  toggleSkillRow(key: string) {
+    const id = `${this.position}.${key}`;
+    this.skillRowOpen = { ...this.skillRowOpen, [id]: !this.skillRowOpen[id] };
+  }
+
+  // A breakdown slider dims when it or its parent is at 0 or switched off
+  skillRowOff(key: SkillColumnKey, parent?: SkillColumnKey): boolean {
+    const off = (k: SkillColumnKey) => !this.skillWeights[k] || this.skillStatHidden(k);
+    return off(key) || (!!parent && off(parent));
   }
 
   get skillPosition(): SkillPosition | null {

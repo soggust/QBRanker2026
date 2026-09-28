@@ -267,11 +267,19 @@ export const TOTAL_TDS_STAT: SkillStat = {
   format: 'int',
 };
 
-// Each combined column and the two stats it stands in for (it takes the first one's spot)
+// Each combined column and the two stats it stands in for (it takes the first one's spot). In the
+// sidebar the pair is one parent slider (labeled like the combined column) with the two as its
+// breakdown, like the QB page:
+// the parent's weight scales both parts (50 = as set), and its eye hides all three columns.
 export const COMBINED_STATS: { stat: SkillStat; parts: [SkillColumnKey, SkillColumnKey] }[] = [
   { stat: TOTAL_YARDS_STAT, parts: ['rushYards', 'recYards'] },
   { stat: TOTAL_TDS_STAT, parts: ['rushTds', 'recTds'] },
 ];
+
+// The combined pairs a position has both parts of
+export function combinedFor(position: SkillPosition) {
+  return COMBINED_STATS.filter(({ parts }) => parts.every((part) => SKILL_STATS[position].some((s) => s.key === part)));
+}
 
 const FANTASY_STAT: SkillStat = {
   key: 'fantasy',
@@ -334,6 +342,7 @@ const RECEIVING_STATS: SkillStat[] = [
   },
   { key: 'receptions', label: 'Receptions', description: 'Catches', kind: 'volume', format: 'int' },
   { key: 'recYards', label: 'Rec Yards', description: 'Receiving yards', kind: 'volume', format: 'int' },
+  { key: 'rushYards', label: 'Rush Yards', description: 'Rushing yards', kind: 'volume', format: 'int' },
   { key: 'recTds', label: 'Rec TDs', description: 'Receiving touchdowns', kind: 'volume', format: 'int' },
   { key: 'rushTds', label: 'Rush TDs', description: 'Rushing touchdowns', kind: 'volume', format: 'int' },
   { key: 'yac', label: 'YAC', description: 'Yards after the catch', kind: 'volume', format: 'int' },
@@ -718,6 +727,8 @@ export function presetWeights(position: SkillPosition, preset: SkillPreset): Ski
     else if (preset === 'default' || stat.negative || stat.support) weights[stat.key] = 50;
     else weights[stat.key] = stat.kind === preset ? 75 : 25;
   }
+  // Parent sliders for rush / rec pairs start neutral (the parts carry the preset's lean)
+  for (const { stat } of combinedFor(position)) weights[stat.key] = preset === 'fantasy' ? 0 : 50;
   return weights;
 }
 

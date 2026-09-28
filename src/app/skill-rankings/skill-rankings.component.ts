@@ -8,6 +8,7 @@ import {
   STAT_NAMES,
   PER_GAME_LABELS,
   COMBINED_STATS,
+  combinedFor,
   SkillPlayer,
   SkillPosition,
   SkillStat,
@@ -217,7 +218,7 @@ export class SkillRankingsComponent implements OnChanges {
     const players = SKILL_UNITS[this.position].filter((player) => this.showInjured || !player.injured);
     // Switched-off groups don't count
     const counted = this.stats.filter((stat) => !this.hidden[statGroup(stat)] && !this.statHidden(stat.key));
-    const totals = weightedTotals(players, counted, this.weights, (player, stat) =>
+    const totals = weightedTotals(players, counted, this.effectiveWeights(), (player, stat) =>
       this.value(player, stat),
     );
     this.playerList = [...players].sort(
@@ -380,23 +381,39 @@ export class SkillRankingsComponent implements OnChanges {
     return out;
   }
 
-  // Switched off with its sidebar eye: hidden and out of the ranking, whatever Unweighted Stats says
+  // Switched off with its sidebar eye (or its parent Yards / Touchdowns slider's eye): hidden and out
+  // of the ranking, whatever Unweighted Stats says
   private statHidden(key: string): boolean {
-    return this.positionService.isStatHidden(this.position, key);
+    const parent = combinedFor(this.position).find(({ parts }) => parts.includes(key as never));
+    return (
+      this.positionService.isStatHidden(this.position, key) ||
+      (!!parent && this.positionService.isStatHidden(this.position, parent.stat.key))
+    );
+  }
+
+  // Slider weights with each rush / rec part scaled by its parent slider (50 = as set, 0 = off)
+  private effectiveWeights(): SkillWeights {
+    const weights = { ...this.weights };
+    for (const { stat, parts } of combinedFor(this.position)) {
+      const parent = this.weights[stat.key] ?? 50;
+      for (const part of parts) weights[part] = ((weights[part] ?? 0) * parent) / 50;
+    }
+    return weights;
   }
 
   // The eye decides first; Unweighted Stats only decides whether a 0% stat shows
   isShown(stat: SkillStat): boolean {
     // A combined column shows if either of its stats would
+    const weights = this.effectiveWeights();
     const combined = COMBINED_STATS.find((c) => c.stat.key === stat.key);
     if (combined) {
       const parts = combined.parts.filter((key) => !this.statHidden(key));
-      return parts.length > 0 && (this.showUnused || parts.some((key) => !!this.weights[key]));
+      return parts.length > 0 && (this.showUnused || parts.some((key) => !!weights[key]));
     }
     if (this.statHidden(stat.key)) return false;
     // Display-only columns (Games, FG Att) have no weight, so they show unless their eye is off
     if (stat.infoOnly) return true;
-    return this.showUnused || !!this.weights[stat.key];
+    return this.showUnused || !!weights[stat.key];
   }
 
   format(player: SkillPlayer, stat: SkillStat): string {
