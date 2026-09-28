@@ -23,6 +23,7 @@ import { PositionService } from 'app/services/position.service';
 import { copyRankingsToClipboard } from 'app/utils/clipboard';
 import { SKILL_UNITS, weightedTotals } from 'app/utils/unit-scoring';
 import { tintAverage, tintColor } from 'app/utils/value-tint';
+import { badgeColor, whiteLogo } from 'app/utils/team-colors';
 
 // Average a per-QB value (0-12) for each team, weighted by how many games each QB started there
 function teamGrades(valueFor: (qbId: number) => number | undefined): Map<string, number> {
@@ -408,9 +409,21 @@ export class SkillRankingsComponent implements OnChanges {
     return `hsl(${Math.round((value / 12) * 120)}, 100%, ${Math.round(50 + (1 - value / 12) * 16)}%)`;
   }
 
+  // Color of the badge behind the team logo (the team's primary, or secondary for logos drawn in it)
+  teamBadge(unit: { teamLogo: string }): string {
+    return badgeColor(unit.teamLogo);
+  }
+
+  // Logos drawn in white on their badge (e.g. the Giants)
+  teamLogoWhite(unit: { teamLogo: string }): boolean {
+    return whiteLogo(unit.teamLogo);
+  }
+
   // Get Count Classes
   getCountClasses(i: number): string {
     if (i < 5) return 'count top-5';
+    // Bottom 5 in red (the top 5 keep their gold if the list is ever that short)
+    if (i >= this.playerList.length - 5) return 'count bottom-5';
     if (i < 10) return 'count top-10';
     if (i < 15) return 'count top-15';
     return 'count';

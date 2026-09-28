@@ -1504,3 +1504,56 @@ section ul li.player.header-row .column-draggable {
     right: -0.35em;
   }
 }
+
+// ===========================================================================
+// Team badges: each row's team logo sits on a disc of the team's color (primary, or
+// secondary for logos drawn in their primary). The badge wraps the logo and takes over the rank
+// divider from it, so a white-logo team (Giants) can filter just the image.
+// ===========================================================================
+section ul li.player:not(.header-row) .team-badge {
+  --logo: 1.55em;
+  --badge-pad: 6px;
+  align-items: center;
+  // Solid disc with a 2px ring around its edge: the same color lightened (35% white), at half opacity
+  background: radial-gradient(
+      circle closest-side,
+      var(--team-badge) calc(100% - 2.5px),
+      color-mix(in srgb, color-mix(in srgb, var(--team-badge) 65%, #fff) 50%, transparent) calc(100% - 2px)
+        calc(100% - 0.5px),
+      transparent 100%
+    )
+    content-box no-repeat;
+  border-left: 1px solid rgba(255, 255, 255, 0.25);
+  display: inline-flex;
+  flex: 0 0 auto;
+  justify-content: center;
+  // The old 1.75em logo + 1.25em gap, less the disc, plus 0.5em more room before the name
+  margin-right: calc(3.5em - var(--logo) - 2 * var(--badge-pad));
+  padding-left: 1.25em;
+
+  .team-logo {
+    border: none;
+    height: var(--logo);
+    margin: var(--badge-pad);
+    max-height: none;
+    object-fit: contain;
+    padding: 0;
+    width: var(--logo);
+  }
+
+  // White logos read a touch bigger, so they're drawn ~12% smaller in the same size disc
+  &.white-logo .team-logo {
+    filter: brightness(0) invert(1);
+    height: calc(var(--logo) * 0.88);
+    margin: calc(var(--badge-pad) + var(--logo) * 0.06);
+    width: calc(var(--logo) * 0.88);
+  }
+}
+
+// Bottom 5 ranks in a bright red with a red glow (a lighter take on the low color-coded values' red,
+// so it lifts off the leather), mirroring the gold top 5
+section ul li.player .count.bottom-5 {
+  color: #ff7468;
+  opacity: 1;
+  text-shadow: 0 0 8px rgba(255, 116, 104, 0.7);
+}

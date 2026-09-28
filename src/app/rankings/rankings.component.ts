@@ -7,6 +7,7 @@ import { copyRankingsToClipboard } from 'app/utils/clipboard';
 import { PositionService } from 'app/services/position.service';
 import { blendGrade, preseasonCoaching, teamGamesPlayed } from 'StaticData/StaticData';
 import { tintAverage, tintColor } from 'app/utils/value-tint';
+import { badgeColor, whiteLogo } from 'app/utils/team-colors';
 
 // Per-game names for the columns that switch to per-game values (Per-Game Stats setting)
 const PER_GAME_LABELS: Record<string, string> = {
@@ -397,6 +398,16 @@ export class RankingsComponent {
     return this.positionService.columnOrder(`QB.${group}`, this.defaultColumns[group]);
   }
 
+  // Color of the badge behind the team logo (the team's primary, or secondary for logos drawn in it)
+  teamBadge(unit: { teamLogo: string }): string {
+    return badgeColor(unit.teamLogo);
+  }
+
+  // Logos drawn in white on their badge (e.g. the Giants)
+  teamLogoWhite(unit: { teamLogo: string }): boolean {
+    return whiteLogo(unit.teamLogo);
+  }
+
   // Share the QB order with the WR/TE QB Play grade
   // Uses every QB who started (injured ones included), so each team's QB Play is each starter's
   // grade weighted by their share of the team's starts; follows manual drag order when all are shown
@@ -740,8 +751,11 @@ export class RankingsComponent {
   getCountClasses(i: number): string {
     let classes = 'count';
 
+    // Bottom 5 in red (the top 5 keep their gold if the list is ever that short)
     if (i < 5) {
       classes += ' top-5';
+    } else if (i >= this.playerList.length - 5) {
+      classes += ' bottom-5';
     } else if (i >= 5 && i < 10) {
       classes += ' top-10';
     } else if (i >= 10 && i < 15) {

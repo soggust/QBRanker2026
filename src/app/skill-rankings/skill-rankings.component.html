@@ -37,12 +37,17 @@
           fontIcon="drag_indicator"
           class="drag-indicator"
         ></mat-icon>
-        <div class="player-info">
+        <div
+          class="player-info"
+          [style.--team-badge]="teamBadge(player)"
+        >
           <span [ngClass]="getCountClasses(i)"
           >@if (i === 0) {<span class="lombardi" aria-hidden="true"></span
             ><span class="visually-hidden">1</span>} @else {{{ i + 1 }}}</span
         >
-          <img [src]="player.teamLogo" class="team-logo" />
+          <span class="team-badge" [class.white-logo]="teamLogoWhite(player)"
+            ><img [src]="player.teamLogo" class="team-logo"
+          /></span>
           <p class="player-name">
             <strong>{{ player.name }}</strong>
             @if (player.injured) {

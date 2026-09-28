@@ -1,7 +1,10 @@
 <section class="rankings-wrapper spread" [class.category-colors]="categoryColors">
   <!-- One row's cells; also rendered once as the column header row -->
   <ng-template #rowCells let-player let-i="i">
-      <div class="player-info">
+      <div
+        class="player-info"
+        [style.--team-badge]="i === -1 ? null : teamBadge(player)"
+      >
         @if (i === -1) {
           <!-- Header row: plain labels over the rank and name columns -->
           <p class="stat-label header-rank">Rank</p>
@@ -11,7 +14,9 @@
           >@if (i === 0) {<span class="lombardi" aria-hidden="true"></span
             ><span class="visually-hidden">1</span>} @else {{{ i + 1 }}}</span
         >
-        <img [src]="player.teamLogo" class="team-logo" />
+        <span class="team-badge" [class.white-logo]="teamLogoWhite(player)"
+          ><img [src]="player.teamLogo" class="team-logo"
+        /></span>
         <p class="player-name">
           <strong>{{ player.name }}</strong>
           @if (player.injured) {
