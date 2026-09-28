@@ -30,365 +30,423 @@
       <!-- results columns (display: contents, so they stay in the row's flex layout) -->
       <div class="col-group group-results">
         @if (!hidden.results) {
-          <!-- Record -->
-          @if (showUnused || this.filters.recordValue) {
-            <div class="record">
-              <p [style.color]="tint('record', player)">
-                {{ player.wins }}-{{ player.losses }}
-                @if (player.ties) {
-                  <span>-{{ player.ties }}</span>
-                }
-                @if (player.outOfDate) {
-                  <mat-icon
-                    aria-hidden="false"
-                    aria-label="warning icon"
-                    fontIcon="warning"
-                    title="ESPN player stats are not up-to-date with team record stats"
-                    class="out-of-date-indicator"
-                  ></mat-icon>
-                }
-              </p>
-    
-              <p class="stat-label" #label1 [attr.title]="i === -1 ? labelTitle('record') : null" (mouseenter)="i !== -1 && (label1.title = cellTitle('record', label1, player))">
-                Record
-              </p>
-            </div>
-          }
-          @if (showUnused || this.filters.recencyValue) {
-            <!-- Recent-->
-            <div class="box support-box recent-box">
-              <div class="last-five">
-                <div>
-                  @for (result of player.lastFive; track $index) {
-                    <p [ngClass]="result === 1 ? 'green' : result === 0.5 ? 'tie' : 'red'">
-                      {{ result | formatRecentGames }}
+          @for (col of columnOrder('results'); track col) {
+            @switch (col) {
+              @case ('record') {
+                <!-- Record -->
+                @if (showUnused || this.filters.recordValue) {
+                  <div class="record" [columnDrag]="i === -1 ? { list: 'QB.results', id: 'record' } : null">
+                    <p [style.color]="tint('record', player)">
+                      {{ player.wins }}-{{ player.losses }}
+                      @if (player.ties) {
+                        <span>-{{ player.ties }}</span>
+                      }
+                      @if (player.outOfDate) {
+                        <mat-icon
+                          aria-hidden="false"
+                          aria-label="warning icon"
+                          fontIcon="warning"
+                          title="ESPN player stats are not up-to-date with team record stats"
+                          class="out-of-date-indicator"
+                        ></mat-icon>
+                      }
                     </p>
-                  }
-                  @for (slot of unplayedGames(player.lastFive); track $index) {
-                    <p class="unplayed">-</p>
-                  }
-                </div>
-                <p class="stat-label" #label2 [attr.title]="i === -1 ? labelTitle('last-five') : null" (mouseenter)="i !== -1 && (label2.title = cellTitle('last-five', label2, player))">
-                  Recent
-                </p>
-              </div>
-            </div>
+          
+                    <p class="stat-label" #label1 [attr.title]="i === -1 ? labelTitle('record') : null" (mouseenter)="i !== -1 && (label1.title = cellTitle('record', label1, player))">
+                      Record
+                    </p>
+                  </div>
+                }
+              }
+              @case ('last-five') {
+                @if (showUnused || this.filters.recencyValue) {
+                  <!-- Recent-->
+                  <div class="box support-box recent-box" [columnDrag]="i === -1 ? { list: 'QB.results', id: 'last-five' } : null">
+                    <div class="last-five">
+                      <div>
+                        @for (result of player.lastFive; track $index) {
+                          <p [ngClass]="result === 1 ? 'green' : result === 0.5 ? 'tie' : 'red'">
+                            {{ result | formatRecentGames }}
+                          </p>
+                        }
+                        @for (slot of unplayedGames(player.lastFive); track $index) {
+                          <p class="unplayed">-</p>
+                        }
+                      </div>
+                      <p class="stat-label" #label2 [attr.title]="i === -1 ? labelTitle('last-five') : null" (mouseenter)="i !== -1 && (label2.title = cellTitle('last-five', label2, player))">
+                        Recent
+                      </p>
+                    </div>
+                  </div>
+                }
+              }
+            }
           }
           }
       </div>
       <!-- box columns (display: contents, so they stay in the row's flex layout) -->
       <div class="col-group group-box">
         @if (!hidden.box) {
-          @if (showUnused || this.filters.compValue) {
-            <!-- Completion Percent -->
-            <div class="comp-percent">
-              <p [style.color]="tint('comp-percent', player)">{{ player.compPercent | number: "1.1-1" }}%</p>
-              <p class="stat-label" #label3 [attr.title]="i === -1 ? labelTitle('comp-percent') : null" (mouseenter)="i !== -1 && (label3.title = cellTitle('comp-percent', label3, player))">
-                Comp %
-              </p>
-            </div>
-          }
-          @if (
-            (showUnused && totalStats) ||
-            (totalStats &&
-              this.filters.yardsValue &&
-              (this.filters.passYdValue || this.filters.rushYdValue))
-          ) {
-            <!-- Total Yards -->
-            <div class="total-yards">
-              <p [style.color]="tint('total-yards', player)">
-                @if (perGame) {
-                  {{
-                    (player.passYards + player.rushYards) / player.games
-                      | number: "1.1-1"
-                  }}
-                } @else {
-                  {{
-                    player.passYards + player.rushYards | number: "1.0" : "en-US"
-                  }}
+          @for (col of columnOrder('box'); track col) {
+            @switch (col) {
+              @case ('comp-percent') {
+                @if (showUnused || this.filters.compValue) {
+                  <!-- Completion Percent -->
+                  <div class="comp-percent" [columnDrag]="i === -1 ? { list: 'QB.box', id: 'comp-percent' } : null">
+                    <p [style.color]="tint('comp-percent', player)">{{ player.compPercent | number: "1.1-1" }}%</p>
+                    <p class="stat-label" #label3 [attr.title]="i === -1 ? labelTitle('comp-percent') : null" (mouseenter)="i !== -1 && (label3.title = cellTitle('comp-percent', label3, player))">
+                      Comp %
+                    </p>
+                  </div>
                 }
-              </p>
-              <p class="stat-label" #label4 [attr.title]="i === -1 ? labelTitle('total-yards') : null" (mouseenter)="i !== -1 && (label4.title = cellTitle('total-yards', label4, player))">
-                {{ columnLabel('total-yards', 'Total Yards') }}
-              </p>
-            </div>
-          }
-          @if (
-            (showUnused && !totalStats) ||
-            (!totalStats && this.filters.yardsValue && this.filters.passYdValue)
-          ) {
-            <!-- Pass Yards  -->
-            <div class="pass-yards">
-              <p [style.color]="tint('pass-yards', player)">
-                @if (perGame) {
-                  {{ player.passYards / player.games | number: "1.1-1" }}
-                } @else {
-                  {{ player.passYards | number: "1.0" : "en-US" }}
+              }
+              @case ('total-yards') {
+                @if (
+                  (showUnused && totalStats) ||
+                  (totalStats &&
+                    this.filters.yardsValue &&
+                    (this.filters.passYdValue || this.filters.rushYdValue))
+                ) {
+                  <!-- Total Yards -->
+                  <div class="total-yards" [columnDrag]="i === -1 ? { list: 'QB.box', id: 'total-yards' } : null">
+                    <p [style.color]="tint('total-yards', player)">
+                      @if (perGame) {
+                        {{
+                          (player.passYards + player.rushYards) / player.games
+                            | number: "1.1-1"
+                        }}
+                      } @else {
+                        {{
+                          player.passYards + player.rushYards | number: "1.0" : "en-US"
+                        }}
+                      }
+                    </p>
+                    <p class="stat-label" #label4 [attr.title]="i === -1 ? labelTitle('total-yards') : null" (mouseenter)="i !== -1 && (label4.title = cellTitle('total-yards', label4, player))">
+                      {{ columnLabel('total-yards', 'Total Yards') }}
+                    </p>
+                  </div>
                 }
-              </p>
-              <p class="stat-label" #label5 [attr.title]="i === -1 ? labelTitle('pass-yards') : null" (mouseenter)="i !== -1 && (label5.title = cellTitle('pass-yards', label5, player))">
-                {{ columnLabel('pass-yards', 'Pass Yards') }}
-              </p>
-            </div>
-          }
-          @if (showUnused || this.filters.ypaValue) {
-            <!-- YPA-->
-            <div class="ypa">
-              <p [style.color]="tint('ypa', player)">
-                {{ player.ypa | number: "1.1-1" }}
-              </p>
-    
-              <p class="stat-label" #label6 [attr.title]="i === -1 ? labelTitle('ypa') : null" (mouseenter)="i !== -1 && (label6.title = cellTitle('ypa', label6, player))">
-                Per Attempt
-              </p>
-            </div>
-          }
-          @if (
-            (showUnused && !totalStats) ||
-            (!totalStats && this.filters.yardsValue && this.filters.rushYdValue)
-          ) {
-            <!-- Rush Yards  -->
-            <div class="rush-yards">
-              <p [style.color]="tint('rush-yards', player)">
-                @if (perGame) {
-                  {{ player.rushYards / player.games | number: "1.1-1" }}
-                } @else {
-                  {{ player.rushYards | number: "1.0" : "en-US" }}
+              }
+              @case ('pass-yards') {
+                @if (
+                  (showUnused && !totalStats) ||
+                  (!totalStats && this.filters.yardsValue && this.filters.passYdValue)
+                ) {
+                  <!-- Pass Yards  -->
+                  <div class="pass-yards" [columnDrag]="i === -1 ? { list: 'QB.box', id: 'pass-yards' } : null">
+                    <p [style.color]="tint('pass-yards', player)">
+                      @if (perGame) {
+                        {{ player.passYards / player.games | number: "1.1-1" }}
+                      } @else {
+                        {{ player.passYards | number: "1.0" : "en-US" }}
+                      }
+                    </p>
+                    <p class="stat-label" #label5 [attr.title]="i === -1 ? labelTitle('pass-yards') : null" (mouseenter)="i !== -1 && (label5.title = cellTitle('pass-yards', label5, player))">
+                      {{ columnLabel('pass-yards', 'Pass Yards') }}
+                    </p>
+                  </div>
                 }
-              </p>
-              <p class="stat-label" #label7 [attr.title]="i === -1 ? labelTitle('rush-yards') : null" (mouseenter)="i !== -1 && (label7.title = cellTitle('rush-yards', label7, player))">
-                {{ columnLabel('rush-yards', 'Rush Yards') }}
-              </p>
-            </div>
-          }
-          @if (
-            (showUnused && totalStats) ||
-            (totalStats &&
-              this.filters.touchdownValue &&
-              (this.filters.passTdValue || this.filters.rushTdValue))
-          ) {
-            <!-- Touchdowns  -->
-            <div class="touchdowns">
-              <p [style.color]="tint('touchdowns', player)">
-                @if (perGame) {
-                  {{
-                    (player.passTd + player.rushTd) / player.games
-                      | number: "1.2-2"
-                  }}
-                } @else {
-                  {{ player.passTd + player.rushTd | number: "1.0" : "en-US" }}
+              }
+              @case ('ypa') {
+                @if (showUnused || this.filters.ypaValue) {
+                  <!-- YPA-->
+                  <div class="ypa" [columnDrag]="i === -1 ? { list: 'QB.box', id: 'ypa' } : null">
+                    <p [style.color]="tint('ypa', player)">
+                      {{ player.ypa | number: "1.1-1" }}
+                    </p>
+          
+                    <p class="stat-label" #label6 [attr.title]="i === -1 ? labelTitle('ypa') : null" (mouseenter)="i !== -1 && (label6.title = cellTitle('ypa', label6, player))">
+                      Per Attempt
+                    </p>
+                  </div>
                 }
-              </p>
-              <p class="stat-label" #label8 [attr.title]="i === -1 ? labelTitle('touchdowns') : null" (mouseenter)="i !== -1 && (label8.title = cellTitle('touchdowns', label8, player))">
-                {{ columnLabel('touchdowns', 'Touchdowns') }}
-              </p>
-            </div>
-          }
-          @if (
-            (showUnused && !totalStats) ||
-            (!totalStats &&
-              this.filters.touchdownValue &&
-              this.filters.passTdValue)
-          ) {
-            <!-- Pass Tds  -->
-            <div class="pass-tds">
-              <p [style.color]="tint('pass-tds', player)">
-                @if (perGame) {
-                  {{ player.passTd / player.games | number: "1.1-1" }}
-                } @else {
-                  {{ player.passTd | number: "1.0" : "en-US" }}
+              }
+              @case ('rush-yards') {
+                @if (
+                  (showUnused && !totalStats) ||
+                  (!totalStats && this.filters.yardsValue && this.filters.rushYdValue)
+                ) {
+                  <!-- Rush Yards  -->
+                  <div class="rush-yards" [columnDrag]="i === -1 ? { list: 'QB.box', id: 'rush-yards' } : null">
+                    <p [style.color]="tint('rush-yards', player)">
+                      @if (perGame) {
+                        {{ player.rushYards / player.games | number: "1.1-1" }}
+                      } @else {
+                        {{ player.rushYards | number: "1.0" : "en-US" }}
+                      }
+                    </p>
+                    <p class="stat-label" #label7 [attr.title]="i === -1 ? labelTitle('rush-yards') : null" (mouseenter)="i !== -1 && (label7.title = cellTitle('rush-yards', label7, player))">
+                      {{ columnLabel('rush-yards', 'Rush Yards') }}
+                    </p>
+                  </div>
                 }
-              </p>
-              <p class="stat-label" #label9 [attr.title]="i === -1 ? labelTitle('pass-tds') : null" (mouseenter)="i !== -1 && (label9.title = cellTitle('pass-tds', label9, player))">
-                {{ columnLabel('pass-tds', 'Pass TDs') }}
-              </p>
-            </div>
-          }
-          @if (
-            (showUnused && !totalStats) ||
-            (!totalStats &&
-              this.filters.touchdownValue &&
-              this.filters.rushTdValue)
-          ) {
-            <!-- Rush TDs  -->
-            <div class="rush-tds">
-              <p [style.color]="tint('rush-tds', player)">
-                @if (perGame) {
-                  {{ player.rushTd / player.games | number: "1.1-1" }}
-                } @else {
-                  {{ player.rushTd | number: "1.0" : "en-US" }}
+              }
+              @case ('touchdowns') {
+                @if (
+                  (showUnused && totalStats) ||
+                  (totalStats &&
+                    this.filters.touchdownValue &&
+                    (this.filters.passTdValue || this.filters.rushTdValue))
+                ) {
+                  <!-- Touchdowns  -->
+                  <div class="touchdowns" [columnDrag]="i === -1 ? { list: 'QB.box', id: 'touchdowns' } : null">
+                    <p [style.color]="tint('touchdowns', player)">
+                      @if (perGame) {
+                        {{
+                          (player.passTd + player.rushTd) / player.games
+                            | number: "1.2-2"
+                        }}
+                      } @else {
+                        {{ player.passTd + player.rushTd | number: "1.0" : "en-US" }}
+                      }
+                    </p>
+                    <p class="stat-label" #label8 [attr.title]="i === -1 ? labelTitle('touchdowns') : null" (mouseenter)="i !== -1 && (label8.title = cellTitle('touchdowns', label8, player))">
+                      {{ columnLabel('touchdowns', 'Touchdowns') }}
+                    </p>
+                  </div>
                 }
-              </p>
-              <p class="stat-label" #label10 [attr.title]="i === -1 ? labelTitle('rush-tds') : null" (mouseenter)="i !== -1 && (label10.title = cellTitle('rush-tds', label10, player))">
-                {{ columnLabel('rush-tds', 'Rush TDs') }}
-              </p>
-            </div>
-          }
-          @if (
-            (showUnused && totalStats) ||
-            (totalStats &&
-              this.filters.turnoverValue &&
-              (this.filters.intValue || this.filters.fumLostValue))
-          ) {
-            <!-- Turnovers -->
-            <div class="turnovers">
-              <p [style.color]="tint('turnovers', player)">
-                @if (perGame) {
-                  {{
-                    (player.ints + player.fumLost) / player.games
-                      | number: "1.2-2"
-                  }}
-                } @else {
-                  {{ player.ints + player.fumLost | number: "1.0" : "en-US" }}
+              }
+              @case ('pass-tds') {
+                @if (
+                  (showUnused && !totalStats) ||
+                  (!totalStats &&
+                    this.filters.touchdownValue &&
+                    this.filters.passTdValue)
+                ) {
+                  <!-- Pass Tds  -->
+                  <div class="pass-tds" [columnDrag]="i === -1 ? { list: 'QB.box', id: 'pass-tds' } : null">
+                    <p [style.color]="tint('pass-tds', player)">
+                      @if (perGame) {
+                        {{ player.passTd / player.games | number: "1.1-1" }}
+                      } @else {
+                        {{ player.passTd | number: "1.0" : "en-US" }}
+                      }
+                    </p>
+                    <p class="stat-label" #label9 [attr.title]="i === -1 ? labelTitle('pass-tds') : null" (mouseenter)="i !== -1 && (label9.title = cellTitle('pass-tds', label9, player))">
+                      {{ columnLabel('pass-tds', 'Pass TDs') }}
+                    </p>
+                  </div>
                 }
-              </p>
-    
-              <p class="stat-label" #label11 [attr.title]="i === -1 ? labelTitle('turnovers') : null" (mouseenter)="i !== -1 && (label11.title = cellTitle('turnovers', label11, player))">
-                {{ columnLabel('turnovers', 'Turnovers') }}
-              </p>
-            </div>
-          }
-          @if (
-            (showUnused && !totalStats) ||
-            (!totalStats && this.filters.turnoverValue && this.filters.intValue)
-          ) {
-            <!-- Pass Tds  -->
-            <div class="interceptions">
-              <p [style.color]="tint('interceptions', player)">
-                @if (perGame) {
-                  {{ player.ints / player.games | number: "1.1-1" }}
-                } @else {
-                  {{ player.ints | number: "1.0" : "en-US" }}
+              }
+              @case ('rush-tds') {
+                @if (
+                  (showUnused && !totalStats) ||
+                  (!totalStats &&
+                    this.filters.touchdownValue &&
+                    this.filters.rushTdValue)
+                ) {
+                  <!-- Rush TDs  -->
+                  <div class="rush-tds" [columnDrag]="i === -1 ? { list: 'QB.box', id: 'rush-tds' } : null">
+                    <p [style.color]="tint('rush-tds', player)">
+                      @if (perGame) {
+                        {{ player.rushTd / player.games | number: "1.1-1" }}
+                      } @else {
+                        {{ player.rushTd | number: "1.0" : "en-US" }}
+                      }
+                    </p>
+                    <p class="stat-label" #label10 [attr.title]="i === -1 ? labelTitle('rush-tds') : null" (mouseenter)="i !== -1 && (label10.title = cellTitle('rush-tds', label10, player))">
+                      {{ columnLabel('rush-tds', 'Rush TDs') }}
+                    </p>
+                  </div>
                 }
-              </p>
-              <p class="stat-label" #label12 [attr.title]="i === -1 ? labelTitle('interceptions') : null" (mouseenter)="i !== -1 && (label12.title = cellTitle('interceptions', label12, player))">
-                {{ columnLabel('interceptions', 'Interceptions') }}
-              </p>
-            </div>
-          }
-          @if (
-            (showUnused && !totalStats) ||
-            (!totalStats &&
-              this.filters.turnoverValue &&
-              this.filters.fumLostValue)
-          ) {
-            <!-- Fumbles Lost  -->
-            <div class="fumbles-lost">
-              <p [style.color]="tint('fumbles-lost', player)">
-                @if (perGame) {
-                  {{ player.fumLost / player.games | number: "1.1-1" }}
-                } @else {
-                  {{ player.fumLost | number: "1.0" : "en-US" }}
+              }
+              @case ('turnovers') {
+                @if (
+                  (showUnused && totalStats) ||
+                  (totalStats &&
+                    this.filters.turnoverValue &&
+                    (this.filters.intValue || this.filters.fumLostValue))
+                ) {
+                  <!-- Turnovers -->
+                  <div class="turnovers" [columnDrag]="i === -1 ? { list: 'QB.box', id: 'turnovers' } : null">
+                    <p [style.color]="tint('turnovers', player)">
+                      @if (perGame) {
+                        {{
+                          (player.ints + player.fumLost) / player.games
+                            | number: "1.2-2"
+                        }}
+                      } @else {
+                        {{ player.ints + player.fumLost | number: "1.0" : "en-US" }}
+                      }
+                    </p>
+          
+                    <p class="stat-label" #label11 [attr.title]="i === -1 ? labelTitle('turnovers') : null" (mouseenter)="i !== -1 && (label11.title = cellTitle('turnovers', label11, player))">
+                      {{ columnLabel('turnovers', 'Turnovers') }}
+                    </p>
+                  </div>
                 }
-              </p>
-              <p class="stat-label" #label13 [attr.title]="i === -1 ? labelTitle('fumbles-lost') : null" (mouseenter)="i !== -1 && (label13.title = cellTitle('fumbles-lost', label13, player))">
-                {{ columnLabel('fumbles-lost', 'Fumbles Lost') }}
-              </p>
-            </div>
-          }
-          @if (showUnused || this.filters.ratingValue) {
-            <!-- Rating-->
-            <div class="rating">
-              <p [style.color]="tint('rating', player)">{{ player.rating | number: "1.1-1" }}</p>
-              <p class="stat-label" #label14 [attr.title]="i === -1 ? labelTitle('rating') : null" (mouseenter)="i !== -1 && (label14.title = cellTitle('rating', label14, player))">
-                Rating
-              </p>
-            </div>
+              }
+              @case ('interceptions') {
+                @if (
+                  (showUnused && !totalStats) ||
+                  (!totalStats && this.filters.turnoverValue && this.filters.intValue)
+                ) {
+                  <!-- Pass Tds  -->
+                  <div class="interceptions" [columnDrag]="i === -1 ? { list: 'QB.box', id: 'interceptions' } : null">
+                    <p [style.color]="tint('interceptions', player)">
+                      @if (perGame) {
+                        {{ player.ints / player.games | number: "1.1-1" }}
+                      } @else {
+                        {{ player.ints | number: "1.0" : "en-US" }}
+                      }
+                    </p>
+                    <p class="stat-label" #label12 [attr.title]="i === -1 ? labelTitle('interceptions') : null" (mouseenter)="i !== -1 && (label12.title = cellTitle('interceptions', label12, player))">
+                      {{ columnLabel('interceptions', 'Interceptions') }}
+                    </p>
+                  </div>
+                }
+              }
+              @case ('fumbles-lost') {
+                @if (
+                  (showUnused && !totalStats) ||
+                  (!totalStats &&
+                    this.filters.turnoverValue &&
+                    this.filters.fumLostValue)
+                ) {
+                  <!-- Fumbles Lost  -->
+                  <div class="fumbles-lost" [columnDrag]="i === -1 ? { list: 'QB.box', id: 'fumbles-lost' } : null">
+                    <p [style.color]="tint('fumbles-lost', player)">
+                      @if (perGame) {
+                        {{ player.fumLost / player.games | number: "1.1-1" }}
+                      } @else {
+                        {{ player.fumLost | number: "1.0" : "en-US" }}
+                      }
+                    </p>
+                    <p class="stat-label" #label13 [attr.title]="i === -1 ? labelTitle('fumbles-lost') : null" (mouseenter)="i !== -1 && (label13.title = cellTitle('fumbles-lost', label13, player))">
+                      {{ columnLabel('fumbles-lost', 'Fumbles Lost') }}
+                    </p>
+                  </div>
+                }
+              }
+              @case ('rating') {
+                @if (showUnused || this.filters.ratingValue) {
+                  <!-- Rating-->
+                  <div class="rating" [columnDrag]="i === -1 ? { list: 'QB.box', id: 'rating' } : null">
+                    <p [style.color]="tint('rating', player)">{{ player.rating | number: "1.1-1" }}</p>
+                    <p class="stat-label" #label14 [attr.title]="i === -1 ? labelTitle('rating') : null" (mouseenter)="i !== -1 && (label14.title = cellTitle('rating', label14, player))">
+                      Rating
+                    </p>
+                  </div>
+                }
+              }
+            }
           }
           }
       </div>
       <!-- advanced columns (display: contents, so they stay in the row's flex layout) -->
       <div class="col-group group-advanced">
         @if (!hidden.advanced) {
-          @if (
-            showUnused || (this.filters.advancedValue && this.filters.epaValue)
-          ) {
-            <!-- EPA Per Play -->
-            <div class="epa">
-              <p [style.color]="tint('epa', player)">{{ player.epaPerPlay === null ? "-" : (player.epaPerPlay | number: "1.2-2") }}</p>
-              <p class="stat-label" #label15 [attr.title]="i === -1 ? labelTitle('epa') : null" (mouseenter)="i !== -1 && (label15.title = cellTitle('epa', label15, player))">
-                EPA / Play
-              </p>
-            </div>
-          }
-          @if (
-            showUnused || (this.filters.advancedValue && this.filters.cpoeValue)
-          ) {
-            <!-- CPOE -->
-            <div class="cpoe">
-              <p [style.color]="tint('cpoe', player)">{{ player.cpoe === null ? "-" : (player.cpoe | number: "1.1-1") + "%" }}</p>
-              <p class="stat-label" #label16 [attr.title]="i === -1 ? labelTitle('cpoe') : null" (mouseenter)="i !== -1 && (label16.title = cellTitle('cpoe', label16, player))">CPOE</p>
-            </div>
-          }
-          @if (
-            showUnused || (this.filters.advancedValue && this.filters.successValue)
-          ) {
-            <!-- Success Rate -->
-            <div class="success-rate">
-              <p [style.color]="tint('success-rate', player)">
-                {{ player.successRate === null ? "-" : (player.successRate | percent: "1.0-0") }}
-              </p>
-              <p class="stat-label" #label17 [attr.title]="i === -1 ? labelTitle('success-rate') : null" (mouseenter)="i !== -1 && (label17.title = cellTitle('success-rate', label17, player))">
-                Success
-              </p>
-            </div>
-          }
-          @if (
-            showUnused || (this.filters.advancedValue && this.filters.pressureToSackValue)
-          ) {
-            <!-- Pressure → Sack -->
-            <div class="pressureToSack">
-              <p [style.color]="tint('pressureToSack', player)">{{ player.pressureToSack === null ? "-" : (player.pressureToSack | percent: "1.0-0") }}</p>
-              <p class="stat-label" #label18 [attr.title]="i === -1 ? labelTitle('pressureToSack') : null" (mouseenter)="i !== -1 && (label18.title = cellTitle('pressureToSack', label18, player))">Pressure → Sack</p>
-            </div>
-          }
-          @if (
-            showUnused || (this.filters.advancedValue && this.filters.badThrowValue)
-          ) {
-            <!-- Bad Throw % -->
-            <div class="badThrowPct">
-              <p [style.color]="tint('badThrowPct', player)">{{ player.badThrowPct === null ? "-" : (player.badThrowPct | percent: "1.0-0") }}</p>
-              <p class="stat-label" #label19 [attr.title]="i === -1 ? labelTitle('badThrowPct') : null" (mouseenter)="i !== -1 && (label19.title = cellTitle('badThrowPct', label19, player))">Bad Throw %</p>
-            </div>
-          }
-          @if (
-            showUnused || (this.filters.advancedValue && this.filters.timeToThrowValue)
-          ) {
-            <!-- Time To Throw -->
-            <div class="timeToThrow">
-              <p [style.color]="tint('timeToThrow', player)">{{ player.timeToThrow === null ? "-" : (player.timeToThrow | number: "1.2-2") }}</p>
-              <p class="stat-label" #label20 [attr.title]="i === -1 ? labelTitle('timeToThrow') : null" (mouseenter)="i !== -1 && (label20.title = cellTitle('timeToThrow', label20, player))">Time To Throw</p>
-            </div>
-          }
-          @if (
-            showUnused || (this.filters.advancedValue && this.filters.adotValue)
-          ) {
-            <!-- aDOT -->
-            <div class="adot">
-              <p [style.color]="tint('adot', player)">{{ player.adot === null ? "-" : (player.adot | number: "1.1-1") }}</p>
-              <p class="stat-label" #label21 [attr.title]="i === -1 ? labelTitle('adot') : null" (mouseenter)="i !== -1 && (label21.title = cellTitle('adot', label21, player))">aDOT</p>
-            </div>
-          }
-          @if (
-            showUnused || (this.filters.advancedValue && this.filters.aggressivenessValue)
-          ) {
-            <!-- Aggressive % -->
-            <div class="aggressiveness">
-              <p [style.color]="tint('aggressiveness', player)">{{ player.aggressiveness === null ? "-" : (player.aggressiveness | number: "1.0-0") + "%" }}</p>
-              <p class="stat-label" #label22 [attr.title]="i === -1 ? labelTitle('aggressiveness') : null" (mouseenter)="i !== -1 && (label22.title = cellTitle('aggressiveness', label22, player))">Aggressive %</p>
-            </div>
-          }
-          @if (
-            showUnused || (this.filters.advancedValue && this.filters.fantasyValue)
-          ) {
-            <!-- Fantasy Points -->
-            <div class="fantasy">
-              @let points = fantasyPoints(player);
-              <p [style.color]="tint('fantasy', player)">{{ points === null ? "-" : (points | number: "1.1-1") }}</p>
-              <p class="stat-label" #label23 [attr.title]="i === -1 ? labelTitle('fantasy') : null" (mouseenter)="i !== -1 && (label23.title = cellTitle('fantasy', label23, player))">
-                {{ columnLabel('fantasy', 'Fantasy Pts') }}
-              </p>
-            </div>
+          @for (col of columnOrder('advanced'); track col) {
+            @switch (col) {
+              @case ('epa') {
+                @if (
+                  showUnused || (this.filters.advancedValue && this.filters.epaValue)
+                ) {
+                  <!-- EPA Per Play -->
+                  <div class="epa" [columnDrag]="i === -1 ? { list: 'QB.advanced', id: 'epa' } : null">
+                    <p [style.color]="tint('epa', player)">{{ player.epaPerPlay === null ? "-" : (player.epaPerPlay | number: "1.2-2") }}</p>
+                    <p class="stat-label" #label15 [attr.title]="i === -1 ? labelTitle('epa') : null" (mouseenter)="i !== -1 && (label15.title = cellTitle('epa', label15, player))">
+                      EPA / Play
+                    </p>
+                  </div>
+                }
+              }
+              @case ('cpoe') {
+                @if (
+                  showUnused || (this.filters.advancedValue && this.filters.cpoeValue)
+                ) {
+                  <!-- CPOE -->
+                  <div class="cpoe" [columnDrag]="i === -1 ? { list: 'QB.advanced', id: 'cpoe' } : null">
+                    <p [style.color]="tint('cpoe', player)">{{ player.cpoe === null ? "-" : (player.cpoe | number: "1.1-1") + "%" }}</p>
+                    <p class="stat-label" #label16 [attr.title]="i === -1 ? labelTitle('cpoe') : null" (mouseenter)="i !== -1 && (label16.title = cellTitle('cpoe', label16, player))">CPOE</p>
+                  </div>
+                }
+              }
+              @case ('success-rate') {
+                @if (
+                  showUnused || (this.filters.advancedValue && this.filters.successValue)
+                ) {
+                  <!-- Success Rate -->
+                  <div class="success-rate" [columnDrag]="i === -1 ? { list: 'QB.advanced', id: 'success-rate' } : null">
+                    <p [style.color]="tint('success-rate', player)">
+                      {{ player.successRate === null ? "-" : (player.successRate | percent: "1.0-0") }}
+                    </p>
+                    <p class="stat-label" #label17 [attr.title]="i === -1 ? labelTitle('success-rate') : null" (mouseenter)="i !== -1 && (label17.title = cellTitle('success-rate', label17, player))">
+                      Success
+                    </p>
+                  </div>
+                }
+              }
+              @case ('pressureToSack') {
+                @if (
+                  showUnused || (this.filters.advancedValue && this.filters.pressureToSackValue)
+                ) {
+                  <!-- Pressure → Sack -->
+                  <div class="pressureToSack" [columnDrag]="i === -1 ? { list: 'QB.advanced', id: 'pressureToSack' } : null">
+                    <p [style.color]="tint('pressureToSack', player)">{{ player.pressureToSack === null ? "-" : (player.pressureToSack | percent: "1.0-0") }}</p>
+                    <p class="stat-label" #label18 [attr.title]="i === -1 ? labelTitle('pressureToSack') : null" (mouseenter)="i !== -1 && (label18.title = cellTitle('pressureToSack', label18, player))">Pressure → Sack</p>
+                  </div>
+                }
+              }
+              @case ('badThrowPct') {
+                @if (
+                  showUnused || (this.filters.advancedValue && this.filters.badThrowValue)
+                ) {
+                  <!-- Bad Throw % -->
+                  <div class="badThrowPct" [columnDrag]="i === -1 ? { list: 'QB.advanced', id: 'badThrowPct' } : null">
+                    <p [style.color]="tint('badThrowPct', player)">{{ player.badThrowPct === null ? "-" : (player.badThrowPct | percent: "1.0-0") }}</p>
+                    <p class="stat-label" #label19 [attr.title]="i === -1 ? labelTitle('badThrowPct') : null" (mouseenter)="i !== -1 && (label19.title = cellTitle('badThrowPct', label19, player))">Bad Throw %</p>
+                  </div>
+                }
+              }
+              @case ('timeToThrow') {
+                @if (
+                  showUnused || (this.filters.advancedValue && this.filters.timeToThrowValue)
+                ) {
+                  <!-- Time To Throw -->
+                  <div class="timeToThrow" [columnDrag]="i === -1 ? { list: 'QB.advanced', id: 'timeToThrow' } : null">
+                    <p [style.color]="tint('timeToThrow', player)">{{ player.timeToThrow === null ? "-" : (player.timeToThrow | number: "1.2-2") }}</p>
+                    <p class="stat-label" #label20 [attr.title]="i === -1 ? labelTitle('timeToThrow') : null" (mouseenter)="i !== -1 && (label20.title = cellTitle('timeToThrow', label20, player))">Time To Throw</p>
+                  </div>
+                }
+              }
+              @case ('adot') {
+                @if (
+                  showUnused || (this.filters.advancedValue && this.filters.adotValue)
+                ) {
+                  <!-- aDOT -->
+                  <div class="adot" [columnDrag]="i === -1 ? { list: 'QB.advanced', id: 'adot' } : null">
+                    <p [style.color]="tint('adot', player)">{{ player.adot === null ? "-" : (player.adot | number: "1.1-1") }}</p>
+                    <p class="stat-label" #label21 [attr.title]="i === -1 ? labelTitle('adot') : null" (mouseenter)="i !== -1 && (label21.title = cellTitle('adot', label21, player))">aDOT</p>
+                  </div>
+                }
+              }
+              @case ('aggressiveness') {
+                @if (
+                  showUnused || (this.filters.advancedValue && this.filters.aggressivenessValue)
+                ) {
+                  <!-- Aggressive % -->
+                  <div class="aggressiveness" [columnDrag]="i === -1 ? { list: 'QB.advanced', id: 'aggressiveness' } : null">
+                    <p [style.color]="tint('aggressiveness', player)">{{ player.aggressiveness === null ? "-" : (player.aggressiveness | number: "1.0-0") + "%" }}</p>
+                    <p class="stat-label" #label22 [attr.title]="i === -1 ? labelTitle('aggressiveness') : null" (mouseenter)="i !== -1 && (label22.title = cellTitle('aggressiveness', label22, player))">Aggressive %</p>
+                  </div>
+                }
+              }
+              @case ('fantasy') {
+                @if (
+                  showUnused || (this.filters.advancedValue && this.filters.fantasyValue)
+                ) {
+                  <!-- Fantasy Points -->
+                  <div class="fantasy" [columnDrag]="i === -1 ? { list: 'QB.advanced', id: 'fantasy' } : null">
+                    @let points = fantasyPoints(player);
+                    <p [style.color]="tint('fantasy', player)">{{ points === null ? "-" : (points | number: "1.1-1") }}</p>
+                    <p class="stat-label" #label23 [attr.title]="i === -1 ? labelTitle('fantasy') : null" (mouseenter)="i !== -1 && (label23.title = cellTitle('fantasy', label23, player))">
+                      {{ columnLabel('fantasy', 'Fantasy Pts') }}
+                    </p>
+                  </div>
+                }
+              }
+            }
           }
           }
       </div>
@@ -419,141 +477,155 @@
                   'em',
               }"
             >
-              @if (showUnused || this.filters.weaponsValue) {
-                <!-- Weapons -->
-                <div class="weapons">
-                  <p>
-                    <mat-icon
-                      aria-hidden="false"
-                      aria-label="Weapons Arrow Down Icon"
-                      fontIcon="arrow_drop_down"
-                      class="arrow-drop-down"
-                      (click)="modifyStat(player, 'weapons', 'down')"
-                    ></mat-icon
-                    ><span [ngStyle]="{ color: getColor(player.weapons) }">{{
-                      player.weapons | letterGrade
-                    }}</span>
-                    <mat-icon
-                      aria-hidden="false"
-                      aria-label="Weapons Arrow Up Icon"
-                      fontIcon="arrow_drop_up"
-                      class="arrow-drop-up"
-                      (click)="modifyStat(player, 'weapons', 'up')"
-                    ></mat-icon>
-                  </p>
-                  <p class="stat-label" #label24 [attr.title]="i === -1 ? labelTitle('weapons') : null" (mouseenter)="i !== -1 && (label24.title = cellTitle('weapons', label24, player))">
-                    Weapons
-                  </p>
-                </div>
-              }
-              @if (showUnused || this.filters.coachingValue) {
-                <!-- Coaching -->
-                <div class="coaching">
-                  <p>
-                    <mat-icon
-                      aria-hidden="false"
-                      aria-label="Coaching Arrow Down Icon"
-                      fontIcon="arrow_drop_down"
-                      class="arrow-drop-down"
-                      (click)="modifyStat(player, 'coaching', 'down')"
-                    ></mat-icon
-                    ><span [ngStyle]="{ color: getColor(player.coaching) }">{{
-                      player.coaching | letterGrade
-                    }}</span>
-                    <mat-icon
-                      aria-hidden="false"
-                      aria-label="Arrow Up Icon"
-                      fontIcon="arrow_drop_up"
-                      class="arrow-drop-up"
-                      (click)="modifyStat(player, 'coaching', 'up')"
-                    ></mat-icon>
-                  </p>
-                  <p class="stat-label" #label25 [attr.title]="i === -1 ? labelTitle('coaching') : null" (mouseenter)="i !== -1 && (label25.title = cellTitle('coaching', label25, player))">
-                    Coaching
-                  </p>
-                </div>
-              }
-              @if (showUnused || this.filters.olineValue) {
-                <!-- O-line -->
-                <div class="o-line">
-                  <p>
-                    <mat-icon
-                      aria-hidden="false"
-                      aria-label="Oline Arrow Down Icon"
-                      fontIcon="arrow_drop_down"
-                      class="arrow-drop-down"
-                      (click)="modifyStat(player, 'oline', 'down')"
-                    ></mat-icon
-                    ><span [ngStyle]="{ color: getColor(player.oline) }">{{
-                      player.oline | letterGrade
-                    }}</span>
-                    <mat-icon
-                      aria-hidden="false"
-                      aria-label="Oline Arrow Up Icon"
-                      fontIcon="arrow_drop_up"
-                      class="arrow-drop-up"
-                      (click)="modifyStat(player, 'oline', 'up')"
-                    ></mat-icon>
-                  </p>
-                  <p class="stat-label" #label26 [attr.title]="i === -1 ? labelTitle('o-line') : null" (mouseenter)="i !== -1 && (label26.title = cellTitle('o-line', label26, player))">
-                    O-Line
-                  </p>
-                </div>
-              }
-              @if (showUnused || this.filters.defenseValue) {
-                <!-- Defense -->
-                <div class="defense">
-                  <p>
-                    <mat-icon
-                      aria-hidden="false"
-                      aria-label="Oline Arrow Down Icon"
-                      fontIcon="arrow_drop_down"
-                      class="arrow-drop-down"
-                      (click)="modifyStat(player, 'defense', 'down')"
-                    ></mat-icon
-                    ><span [ngStyle]="{ color: getColor(player.defense) }">{{
-                      player.defense | letterGrade
-                    }}</span>
-                    <mat-icon
-                      aria-hidden="false"
-                      aria-label="Oline Arrow Up Icon"
-                      fontIcon="arrow_drop_up"
-                      class="arrow-drop-up"
-                      (click)="modifyStat(player, 'defense', 'up')"
-                    ></mat-icon>
-                  </p>
-                  <p class="stat-label" #label27 [attr.title]="i === -1 ? labelTitle('defense') : null" (mouseenter)="i !== -1 && (label27.title = cellTitle('defense', label27, player))">
-                    Defense
-                  </p>
-                </div>
-              }
-              @if (showUnused || this.filters.responsibilityValue) {
-                <!-- Responsibility -->
-                <div class="responsibility">
-                  <p>
-                    <mat-icon
-                      aria-hidden="false"
-                      aria-label="Oline Arrow Down Icon"
-                      fontIcon="arrow_drop_down"
-                      class="arrow-drop-down"
-                      (click)="modifyStat(player, 'responsibility', 'down')"
-                    ></mat-icon
-                    ><span
-                      [ngStyle]="{ color: getColor(player.responsibility) }"
-                      >{{ player.responsibility | letterGrade }}</span
-                    >
-                    <mat-icon
-                      aria-hidden="false"
-                      aria-label="Oline Arrow Up Icon"
-                      fontIcon="arrow_drop_up"
-                      class="arrow-drop-up"
-                      (click)="modifyStat(player, 'responsibility', 'up')"
-                    ></mat-icon>
-                  </p>
-                  <p class="stat-label" #label28 [attr.title]="i === -1 ? labelTitle('responsibility') : null" (mouseenter)="i !== -1 && (label28.title = cellTitle('responsibility', label28, player))">
-                    Responsibility
-                  </p>
-                </div>
+              @for (col of columnOrder('support'); track col) {
+                @switch (col) {
+                  @case ('weapons') {
+                    @if (showUnused || this.filters.weaponsValue) {
+                      <!-- Weapons -->
+                      <div class="weapons" [columnDrag]="i === -1 ? { list: 'QB.support', id: 'weapons' } : null">
+                        <p>
+                          <mat-icon
+                            aria-hidden="false"
+                            aria-label="Weapons Arrow Down Icon"
+                            fontIcon="arrow_drop_down"
+                            class="arrow-drop-down"
+                            (click)="modifyStat(player, 'weapons', 'down')"
+                          ></mat-icon
+                          ><span [ngStyle]="{ color: getColor(player.weapons) }">{{
+                            player.weapons | letterGrade
+                          }}</span>
+                          <mat-icon
+                            aria-hidden="false"
+                            aria-label="Weapons Arrow Up Icon"
+                            fontIcon="arrow_drop_up"
+                            class="arrow-drop-up"
+                            (click)="modifyStat(player, 'weapons', 'up')"
+                          ></mat-icon>
+                        </p>
+                        <p class="stat-label" #label24 [attr.title]="i === -1 ? labelTitle('weapons') : null" (mouseenter)="i !== -1 && (label24.title = cellTitle('weapons', label24, player))">
+                          Weapons
+                        </p>
+                      </div>
+                    }
+                  }
+                  @case ('coaching') {
+                    @if (showUnused || this.filters.coachingValue) {
+                      <!-- Coaching -->
+                      <div class="coaching" [columnDrag]="i === -1 ? { list: 'QB.support', id: 'coaching' } : null">
+                        <p>
+                          <mat-icon
+                            aria-hidden="false"
+                            aria-label="Coaching Arrow Down Icon"
+                            fontIcon="arrow_drop_down"
+                            class="arrow-drop-down"
+                            (click)="modifyStat(player, 'coaching', 'down')"
+                          ></mat-icon
+                          ><span [ngStyle]="{ color: getColor(player.coaching) }">{{
+                            player.coaching | letterGrade
+                          }}</span>
+                          <mat-icon
+                            aria-hidden="false"
+                            aria-label="Arrow Up Icon"
+                            fontIcon="arrow_drop_up"
+                            class="arrow-drop-up"
+                            (click)="modifyStat(player, 'coaching', 'up')"
+                          ></mat-icon>
+                        </p>
+                        <p class="stat-label" #label25 [attr.title]="i === -1 ? labelTitle('coaching') : null" (mouseenter)="i !== -1 && (label25.title = cellTitle('coaching', label25, player))">
+                          Coaching
+                        </p>
+                      </div>
+                    }
+                  }
+                  @case ('o-line') {
+                    @if (showUnused || this.filters.olineValue) {
+                      <!-- O-line -->
+                      <div class="o-line" [columnDrag]="i === -1 ? { list: 'QB.support', id: 'o-line' } : null">
+                        <p>
+                          <mat-icon
+                            aria-hidden="false"
+                            aria-label="Oline Arrow Down Icon"
+                            fontIcon="arrow_drop_down"
+                            class="arrow-drop-down"
+                            (click)="modifyStat(player, 'oline', 'down')"
+                          ></mat-icon
+                          ><span [ngStyle]="{ color: getColor(player.oline) }">{{
+                            player.oline | letterGrade
+                          }}</span>
+                          <mat-icon
+                            aria-hidden="false"
+                            aria-label="Oline Arrow Up Icon"
+                            fontIcon="arrow_drop_up"
+                            class="arrow-drop-up"
+                            (click)="modifyStat(player, 'oline', 'up')"
+                          ></mat-icon>
+                        </p>
+                        <p class="stat-label" #label26 [attr.title]="i === -1 ? labelTitle('o-line') : null" (mouseenter)="i !== -1 && (label26.title = cellTitle('o-line', label26, player))">
+                          O-Line
+                        </p>
+                      </div>
+                    }
+                  }
+                  @case ('defense') {
+                    @if (showUnused || this.filters.defenseValue) {
+                      <!-- Defense -->
+                      <div class="defense" [columnDrag]="i === -1 ? { list: 'QB.support', id: 'defense' } : null">
+                        <p>
+                          <mat-icon
+                            aria-hidden="false"
+                            aria-label="Oline Arrow Down Icon"
+                            fontIcon="arrow_drop_down"
+                            class="arrow-drop-down"
+                            (click)="modifyStat(player, 'defense', 'down')"
+                          ></mat-icon
+                          ><span [ngStyle]="{ color: getColor(player.defense) }">{{
+                            player.defense | letterGrade
+                          }}</span>
+                          <mat-icon
+                            aria-hidden="false"
+                            aria-label="Oline Arrow Up Icon"
+                            fontIcon="arrow_drop_up"
+                            class="arrow-drop-up"
+                            (click)="modifyStat(player, 'defense', 'up')"
+                          ></mat-icon>
+                        </p>
+                        <p class="stat-label" #label27 [attr.title]="i === -1 ? labelTitle('defense') : null" (mouseenter)="i !== -1 && (label27.title = cellTitle('defense', label27, player))">
+                          Defense
+                        </p>
+                      </div>
+                    }
+                  }
+                  @case ('responsibility') {
+                    @if (showUnused || this.filters.responsibilityValue) {
+                      <!-- Responsibility -->
+                      <div class="responsibility" [columnDrag]="i === -1 ? { list: 'QB.support', id: 'responsibility' } : null">
+                        <p>
+                          <mat-icon
+                            aria-hidden="false"
+                            aria-label="Oline Arrow Down Icon"
+                            fontIcon="arrow_drop_down"
+                            class="arrow-drop-down"
+                            (click)="modifyStat(player, 'responsibility', 'down')"
+                          ></mat-icon
+                          ><span
+                            [ngStyle]="{ color: getColor(player.responsibility) }"
+                            >{{ player.responsibility | letterGrade }}</span
+                          >
+                          <mat-icon
+                            aria-hidden="false"
+                            aria-label="Oline Arrow Up Icon"
+                            fontIcon="arrow_drop_up"
+                            class="arrow-drop-up"
+                            (click)="modifyStat(player, 'responsibility', 'up')"
+                          ></mat-icon>
+                        </p>
+                        <p class="stat-label" #label28 [attr.title]="i === -1 ? labelTitle('responsibility') : null" (mouseenter)="i !== -1 && (label28.title = cellTitle('responsibility', label28, player))">
+                          Responsibility
+                        </p>
+                      </div>
+                    }
+                  }
+                }
               }
             </div>
           }

@@ -121,6 +121,26 @@ export class PositionService {
     );
   }
 
+  // Column order within each stat group, per tab ("QB.box", "RB.advanced"...), changed by dragging
+  // a column header. Starts at each table's default order on every page load.
+  private columnOrders: Record<string, string[]> = {};
+  private columnDefaults: Record<string, string[]> = {};
+
+  // A group's current column order; the table passes its default order (kept for moveColumn)
+  columnOrder(list: string, defaults: string[]): string[] {
+    this.columnDefaults[list] = defaults;
+    return this.columnOrders[list] ?? defaults;
+  }
+
+  // Move a column to just before / after another column in the same group
+  moveColumn(list: string, id: string, targetId: string, after: boolean): void {
+    const order = [...(this.columnOrders[list] ?? this.columnDefaults[list] ?? [])].filter((col) => col !== id);
+    const at = order.indexOf(targetId);
+    if (at === -1) return;
+    order.splice(after ? at + 1 : at, 0, id);
+    this.columnOrders = { ...this.columnOrders, [list]: order };
+  }
+
   // O-line grades changed with the +/- arrows, per team (logo path -> 0-12). Shared by the QB and
   // RB pages, so nudging a team's O-line on either tab moves it for every QB and RB on that team.
   private olineOverridesSubject = new BehaviorSubject<Record<string, number>>({});

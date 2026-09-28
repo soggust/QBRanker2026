@@ -352,6 +352,51 @@ export class RankingsComponent {
     }
   }
 
+  // Columns in each stat group, in their default order; dragging a header reorders them
+  // (the order lives in PositionService, so it's kept while switching tabs)
+  private readonly defaultColumns: Record<ColumnGroupId, string[]> = {
+    'results': [
+      'record',
+      'last-five'
+    ],
+    'box': [
+      'comp-percent',
+      'total-yards',
+      'pass-yards',
+      'ypa',
+      'rush-yards',
+      'touchdowns',
+      'pass-tds',
+      'rush-tds',
+      'turnovers',
+      'interceptions',
+      'fumbles-lost',
+      'rating'
+    ],
+    'advanced': [
+      'epa',
+      'cpoe',
+      'success-rate',
+      'pressureToSack',
+      'badThrowPct',
+      'timeToThrow',
+      'adot',
+      'aggressiveness',
+      'fantasy'
+    ],
+    'support': [
+      'weapons',
+      'coaching',
+      'o-line',
+      'defense',
+      'responsibility'
+    ]
+  };
+
+  columnOrder(group: ColumnGroupId): string[] {
+    return this.positionService.columnOrder(`QB.${group}`, this.defaultColumns[group]);
+  }
+
   // Share the QB order with the WR/TE QB Play grade
   // Uses every QB who started (injured ones included), so each team's QB Play is each starter's
   // grade weighted by their share of the team's starts; follows manual drag order when all are shown

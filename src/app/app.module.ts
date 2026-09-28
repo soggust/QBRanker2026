@@ -17,6 +17,7 @@ import { FormatRecentGamesPipe } from './pipes/format-recent-games.pipe';
 import { RankingsComponent } from './rankings/rankings.component';
 import { SkillRankingsComponent } from './skill-rankings/skill-rankings.component';
 import { ColumnHighlightDirective } from './utils/column-highlight.directive';
+import { ColumnDragDirective } from './utils/column-drag.directive';
 import {
   provideHttpClient,
   withInterceptorsFromDi,
@@ -47,6 +48,7 @@ const analytics = getAnalytics(app);
     RankingsComponent,
     SkillRankingsComponent,
     ColumnHighlightDirective,
+    ColumnDragDirective,
   ],
   bootstrap: [AppComponent],
   imports: [

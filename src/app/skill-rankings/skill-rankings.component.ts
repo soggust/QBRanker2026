@@ -332,8 +332,26 @@ export class SkillRankingsComponent implements OnChanges {
   get visibleGroups(): SkillStatGroup[] {
     return this.groups
       .filter((group) => !this.hidden[group.id])
-      .map((group) => ({ ...group, stats: this.combineYards(group.stats).filter((stat) => this.isShown(stat)) }))
+      .map((group) => ({
+        ...group,
+        stats: this.combineYards(this.ordered(group)).filter((stat) => this.isShown(stat)),
+      }))
       .filter((group) => group.stats.length);
+  }
+
+  // A group's stats in their current column order (dragging a header reorders them; kept in
+  // PositionService so the order survives switching tabs)
+  private ordered(group: SkillStatGroup): SkillStat[] {
+    const order = this.positionService.columnOrder(
+      `${this.position}.${group.id}`,
+      group.stats.map((stat) => stat.key),
+    );
+    return [...group.stats].sort((a, b) => order.indexOf(a.key) - order.indexOf(b.key));
+  }
+
+  // Column id for header dragging: Total Yards stands in for Rush Yards (it takes that column's spot)
+  columnId(stat: SkillStat): string {
+    return stat.key === 'totalYards' ? 'rushYards' : stat.key;
   }
 
   // Combine Rush/Pass: RBs show one Total Yards column where Rush Yards was, instead of Rush + Rec Yards

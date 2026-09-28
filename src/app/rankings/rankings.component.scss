@@ -1465,3 +1465,42 @@ section ul li.player:not(.header-row) {
   border-radius: 0;
   margin-bottom: 0;
 }
+
+// Draggable column headers (reorder within a stat group): grab cursor, yellow on hover, the
+// dragged column fades, and a yellow bar marks the side the drop lands on
+section ul li.player.header-row .column-draggable {
+  cursor: grab;
+
+  .stat-label {
+    cursor: grab;
+  }
+
+  &:hover .stat-label {
+    color: var(--scoreboard-led);
+  }
+
+  &.column-dragging {
+    opacity: 0.4;
+  }
+
+  &.column-drop-before::before,
+  &.column-drop-after::before {
+    background: var(--scoreboard-led);
+    border-radius: 1px;
+    bottom: 15%;
+    content: "";
+    pointer-events: none;
+    position: absolute;
+    top: 15%;
+    width: 2px;
+    z-index: 3;
+  }
+
+  &.column-drop-before::before {
+    left: -0.35em;
+  }
+
+  &.column-drop-after::before {
+    right: -0.35em;
+  }
+}
