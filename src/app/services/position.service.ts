@@ -258,7 +258,7 @@ export class PositionService {
     this.statHiddenSubject.next({ ...this.statHiddenSubject.value, [`${position}.${key}`]: hidden });
   }
 
-  // Every stat on this tab back on (the Defaults button)
+  // Every stat on this tab back on (the Reset button)
   showAllStats(position: Position): void {
     const next = Object.fromEntries(
       Object.entries(this.statHiddenSubject.value).filter(([key]) => !key.startsWith(`${position}.`)),

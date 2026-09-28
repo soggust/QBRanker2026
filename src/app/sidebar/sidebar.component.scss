@@ -1264,11 +1264,10 @@
   font-weight: 500;
 }
 
-// Slider labels at 10px (regular, breakdown and Group Weight rows)
+// Slider labels at 11px (regular and breakdown rows)
 .sidebar .filters .slider-row p.slider-label,
-.sidebar .filters .slider-row button.slider-label.expandable,
-.sidebar .filters .slider-row.master p.slider-label {
-  font-size: 10px;
+.sidebar .filters .slider-row button.slider-label.expandable {
+  font-size: 11px;
 }
 
 // A slider's filled track takes its card's category color (green results, blue basic stats, purple

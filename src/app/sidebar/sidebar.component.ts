@@ -46,7 +46,7 @@ export class SidebarComponent {
   skillStats: SkillStat[] = [];
   skillWeights: SkillWeights = {};
   // Each tab's preset (null = default weights, shown as the dropdown's "Presets..." placeholder;
-  // "Defaults" isn't a pickable preset, the Defaults button resets to it)
+  // "Defaults" isn't a pickable preset, the Reset button goes back to it)
   skillPresets = Object.fromEntries(POSITIONS.map((position) => [position, null])) as Record<
     Position,
     SkillPreset | 'custom' | null

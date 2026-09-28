@@ -13,7 +13,7 @@
       @for (group of groups; track group.id) {
         <div class="col-group" [ngClass]="'group-' + group.id">
           @if (group.id === 'support') {
-            <div class="box support-box" [style.min-width.em]="group.stats.length * 7">
+            <div class="box support-box" [style.min-width.em]="group.stats.length * 7.5">
               @for (stat of group.stats; track stat.key) {
                 <div [columnDrag]="{ list: position + '.' + group.id, id: columnId(stat) }">
                   <p class="stat-label" [title]="labelTitle(stat)">{{ statLabel(stat) }}</p>
@@ -77,7 +77,7 @@
           <div class="col-group" [ngClass]="'group-' + group.id">
             @if (group.id === 'support') {
               <!-- Support grades share a dark box -->
-              <div class="box support-box" [style.min-width.em]="group.stats.length * 7">
+              <div class="box support-box" [style.min-width.em]="group.stats.length * 7.5">
                 @for (stat of group.stats; track stat.key) {
                   @if (stat.adjustable) {
                     <!-- Set by hand: arrows on hover raise or lower it for this player -->
@@ -254,6 +254,24 @@
 
       <!-- Display: what the table shows -->
       <div class="menu-section section-display" (click)="$event.stopPropagation()">Display</div>
+      <div mat-menu-item title="A colored bar before each stat group in the rows, in the same color as its filter card" (click)="$event.stopPropagation(); categoryColors = !categoryColors">
+        <mat-slide-toggle hideIcon
+          color="accent"
+          class="slide-toggle"
+          [(ngModel)]="categoryColors"
+          (click)="$event.stopPropagation()"
+        ></mat-slide-toggle>
+        <span>Category Dividers</span>
+      </div>
+      <div mat-menu-item title="Tint each value green above the list average and red below it, stronger the further out (flipped for lower-is-better stats like sacks allowed)" (click)="$event.stopPropagation(); colorValues = !colorValues">
+        <mat-slide-toggle hideIcon
+          color="accent"
+          class="slide-toggle"
+          [(ngModel)]="colorValues"
+          (click)="$event.stopPropagation()"
+        ></mat-slide-toggle>
+        <span>Color-Coded Values</span>
+      </div>
       <div
         mat-menu-item
         title="Show rushing + passing / receiving yards and touchdowns (and a QB's turnovers) as one total column each (display only: the ranking still uses both sliders)"
@@ -279,24 +297,6 @@
           (click)="$event.stopPropagation()"
         ></mat-slide-toggle>
         <span>Unweighted Stats</span>
-      </div>
-      <div mat-menu-item title="Tint each value green above the list average and red below it, stronger the further out (flipped for lower-is-better stats like sacks allowed)" (click)="$event.stopPropagation(); colorValues = !colorValues">
-        <mat-slide-toggle hideIcon
-          color="accent"
-          class="slide-toggle"
-          [(ngModel)]="colorValues"
-          (click)="$event.stopPropagation()"
-        ></mat-slide-toggle>
-        <span>Color-Coded Values</span>
-      </div>
-      <div mat-menu-item title="A colored bar before each stat group in the rows, in the same color as its filter card" (click)="$event.stopPropagation(); categoryColors = !categoryColors">
-        <mat-slide-toggle hideIcon
-          color="accent"
-          class="slide-toggle"
-          [(ngModel)]="categoryColors"
-          (click)="$event.stopPropagation()"
-        ></mat-slide-toggle>
-        <span>Category Dividers</span>
       </div>
 
       <!-- Players: who's in the list -->

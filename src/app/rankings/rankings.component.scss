@@ -1191,13 +1191,14 @@ section ul li.player > .col-group > div {
   width: 6em;
 }
 
+// Wide enough for the longest 11px header labels (e.g. "Pressure → Sack", "Total TDs / Game")
 section.spread ul li.player > .col-group {
   > div {
-    flex: 1 0 8em;
+    flex: 1 0 8.5em;
   }
 
   > div:not(.box) {
-    max-width: 8.5em;
+    max-width: 9em;
   }
 
   > div.box {
@@ -1612,12 +1613,12 @@ section ul li.player.header-row > div.player-info {
   }
 }
 
-// Header labels at 10px (they were ~8px); same selectors as the older header-label rules so this
+// Header labels at 11px (they were ~8px); same selectors as the older header-label rules so this
 // one (coming last) wins
 section ul li.player.header-row div .stat-label,
 section ul li.player.header-row:hover div .stat-label,
 section ul li.player.header-row div .stat-label:hover {
-  font-size: 10px;
+  font-size: 11px;
 }
 
 // Footer: settings on the far left with copy and info right after it, credits pushed to the right
