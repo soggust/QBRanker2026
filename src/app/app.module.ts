@@ -10,9 +10,6 @@ import { FormsModule } from '@angular/forms';
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
-import { LetterGradePipe } from './pipes/letter-grade.pipe';
-import { FormatRecentGamesPipe } from './pipes/format-recent-games.pipe';
-import { RankingsComponent } from './rankings/rankings.component';
 import { SkillRankingsComponent } from './skill-rankings/skill-rankings.component';
 import { ColumnHighlightDirective } from './utils/column-highlight.directive';
 import { ColumnDragDirective } from './utils/column-drag.directive';
@@ -23,9 +20,6 @@ import { AboutComponent } from './about/about.component';
   declarations: [
     AppComponent,
     SidebarComponent,
-    LetterGradePipe,
-    FormatRecentGamesPipe,
-    RankingsComponent,
     SkillRankingsComponent,
     ColumnHighlightDirective,
     ColumnDragDirective,

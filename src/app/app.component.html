@@ -44,9 +44,8 @@
       </select>
     </nav>
 
-    <!-- Rankings (QB stays mounted so switching tabs doesn't refetch ESPN stats) -->
-    <rankings class="rankings" [hidden]="position !== 'QB'"></rankings>
-    @if (position && position !== 'QB') {
+    <!-- Rankings: every tab is the same config-driven table (see positions.ts) -->
+    @if (position) {
       <skill-rankings class="rankings" [position]="position"></skill-rankings>
     }
   </div>

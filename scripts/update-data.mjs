@@ -724,6 +724,28 @@ function fourthDownGoRate(plays, team) {
   return spots ? ratio(goes, spots) : null;
 }
 
+// Yards gained on runs and passes (sacks included) by the side of the ball named ('posteam': the
+// team's offense, 'defteam': allowed by its defense)
+function scrimmageYards(plays, side, team) {
+  return plays
+    .filter((play) => play[side] === team && (play.pass === '1' || play.rush === '1'))
+    .reduce((sum, play) => sum + (num(play.yards_gained) ?? 0), 0);
+}
+
+// Special teams EPA from the team's side: kicks and punts it made, minus what opponents' kicks,
+// punts and returns gained against it
+const SPECIAL_TEAMS = ['punt', 'kickoff', 'field_goal', 'extra_point'];
+function specialTeamsNet(plays, team) {
+  let total = 0;
+  for (const play of plays) {
+    const epa = num(play.epa);
+    if (!SPECIAL_TEAMS.includes(play.play_type) || epa === null) continue;
+    if (play.posteam === team) total += epa;
+    else if (play.defteam === team) total -= epa;
+  }
+  return total;
+}
+
 function coachUnits({ pbp, games, headCoaches }) {
   const coaches = Object.keys(TEAM_ICONS)
     .map((team) => {
@@ -779,6 +801,14 @@ function coachUnits({ pbp, games, headCoaches }) {
         atsPct: ratio(covers, atsGames),
         pointDiffPerGame: round(played.reduce((sum, g) => sum + g.pointsFor - g.pointsAgainst, 0) / played.length, 1),
         netEpa: round(epa(offense) - epa(defense), 3),
+        // Unit ranks in the app (offense, defense, special teams), by EPA, points or yards
+        offEpa: round(epa(offense), 3),
+        defEpaAllowed: round(epa(defense), 3),
+        ptsPerGame: round(played.reduce((sum, g) => sum + g.pointsFor, 0) / played.length, 1),
+        ptsAllowedPerGame: round(played.reduce((sum, g) => sum + g.pointsAgainst, 0) / played.length, 1),
+        yardsPerGame: round(scrimmageYards(plays, 'posteam', team) / played.length, 1),
+        yardsAllowedPerGame: round(scrimmageYards(plays, 'defteam', team) / played.length, 1),
+        stEpaPerGame: round(specialTeamsNet(plays, team) / played.length, 2),
         oneScoreWinPct: oneScore ? ratio(oneScoreWins, oneScore) : null,
         penaltiesPerGame: round(
           plays.filter((play) => play.penalty === '1' && play.penalty_team === team).length / played.length,
@@ -849,7 +879,7 @@ const competitivePlay = (play) => {
 
 const COMPETITIVE_KEYS = {
   DEF: ['epaAllowed', 'passEpaAllowed', 'rushEpaAllowed', 'successAllowed', 'sacks', 'takeaways', 'thirdDownPct', 'redZoneTdPct'],
-  HC: ['netEpa'],
+  HC: ['netEpa', 'offEpa', 'defEpaAllowed'],
   OL: ['sacksAllowed', 'qbHitsAllowed', 'sackRate', 'ypc', 'stuffRate', 'runEpa', 'runSuccess', 'shortYardagePct', 'linePenaltiesPerGame'],
   QB: ['epaPerPlay', 'cpoe', 'successRate'],
 };

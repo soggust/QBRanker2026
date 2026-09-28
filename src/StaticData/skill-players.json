@@ -1041,13 +1041,22 @@
         "atsPct": 1,
         "pointDiffPerGame": 1,
         "netEpa": 0.061,
+        "offEpa": 0.043,
+        "defEpaAllowed": -0.018,
+        "ptsPerGame": 21.3,
+        "ptsAllowedPerGame": 20.3,
+        "yardsPerGame": 330.7,
+        "yardsAllowedPerGame": 259,
+        "stEpaPerGame": -0.38,
         "oneScoreWinPct": 0,
         "penaltiesPerGame": 8.3,
         "turnoverDiffPerGame": 0.3,
         "fourthDownGoPct": 1
       },
       "competitive": {
-        "netEpa": 0.049
+        "netEpa": 0.049,
+        "offEpa": 0.021,
+        "defEpaAllowed": -0.028
       }
     },
     {
@@ -1065,13 +1074,22 @@
         "atsPct": 0.667,
         "pointDiffPerGame": 12.7,
         "netEpa": 0.243,
+        "offEpa": 0.166,
+        "defEpaAllowed": -0.077,
+        "ptsPerGame": 29.3,
+        "ptsAllowedPerGame": 16.7,
+        "yardsPerGame": 417.7,
+        "yardsAllowedPerGame": 278.3,
+        "stEpaPerGame": -1.25,
         "oneScoreWinPct": 1,
         "penaltiesPerGame": 7.7,
         "turnoverDiffPerGame": 1,
         "fourthDownGoPct": 1
       },
       "competitive": {
-        "netEpa": 0.218
+        "netEpa": 0.218,
+        "offEpa": 0.231,
+        "defEpaAllowed": 0.013
       }
     },
     {
@@ -1089,13 +1107,22 @@
         "atsPct": 0.5,
         "pointDiffPerGame": 8,
         "netEpa": 0.073,
+        "offEpa": 0.115,
+        "defEpaAllowed": 0.042,
+        "ptsPerGame": 31,
+        "ptsAllowedPerGame": 23,
+        "yardsPerGame": 424.5,
+        "yardsAllowedPerGame": 362,
+        "stEpaPerGame": 2.45,
         "oneScoreWinPct": 0,
         "penaltiesPerGame": 10,
         "turnoverDiffPerGame": -1,
         "fourthDownGoPct": 1
       },
       "competitive": {
-        "netEpa": 0.042
+        "netEpa": 0.042,
+        "offEpa": 0.063,
+        "defEpaAllowed": 0.021
       }
     },
     {
@@ -1113,13 +1140,22 @@
         "atsPct": 0.5,
         "pointDiffPerGame": 2,
         "netEpa": 0.005,
+        "offEpa": 0.198,
+        "defEpaAllowed": 0.193,
+        "ptsPerGame": 29.3,
+        "ptsAllowedPerGame": 27.3,
+        "yardsPerGame": 331,
+        "yardsAllowedPerGame": 388.7,
+        "stEpaPerGame": 1.22,
         "oneScoreWinPct": 0,
         "penaltiesPerGame": 7,
         "turnoverDiffPerGame": 0,
         "fourthDownGoPct": null
       },
       "competitive": {
-        "netEpa": -0.015
+        "netEpa": -0.015,
+        "offEpa": 0.154,
+        "defEpaAllowed": 0.169
       }
     },
     {
@@ -1137,13 +1173,22 @@
         "atsPct": 0,
         "pointDiffPerGame": -0.7,
         "netEpa": -0.036,
+        "offEpa": 0.141,
+        "defEpaAllowed": 0.177,
+        "ptsPerGame": 31,
+        "ptsAllowedPerGame": 31.7,
+        "yardsPerGame": 369,
+        "yardsAllowedPerGame": 418.3,
+        "stEpaPerGame": 1.89,
         "oneScoreWinPct": 1,
         "penaltiesPerGame": 7.3,
         "turnoverDiffPerGame": 1,
         "fourthDownGoPct": 1
       },
       "competitive": {
-        "netEpa": 0.026
+        "netEpa": 0.026,
+        "offEpa": 0.084,
+        "defEpaAllowed": 0.058
       }
     },
     {
@@ -1161,13 +1206,22 @@
         "atsPct": 0.667,
         "pointDiffPerGame": -5.7,
         "netEpa": -0.048,
+        "offEpa": 0.023,
+        "defEpaAllowed": 0.071,
+        "ptsPerGame": 25,
+        "ptsAllowedPerGame": 30.7,
+        "yardsPerGame": 314.7,
+        "yardsAllowedPerGame": 363,
+        "stEpaPerGame": -2.37,
         "oneScoreWinPct": 0.5,
         "penaltiesPerGame": 6.7,
         "turnoverDiffPerGame": 0.7,
         "fourthDownGoPct": 0.75
       },
       "competitive": {
-        "netEpa": -0.05
+        "netEpa": -0.05,
+        "offEpa": -0.015,
+        "defEpaAllowed": 0.035
       }
     },
     {
@@ -1185,13 +1239,22 @@
         "atsPct": 0.333,
         "pointDiffPerGame": 2,
         "netEpa": 0.046,
+        "offEpa": 0.016,
+        "defEpaAllowed": -0.03,
+        "ptsPerGame": 29.7,
+        "ptsAllowedPerGame": 27.7,
+        "yardsPerGame": 394,
+        "yardsAllowedPerGame": 367,
+        "stEpaPerGame": 1.53,
         "oneScoreWinPct": 0,
         "penaltiesPerGame": 9,
         "turnoverDiffPerGame": 1.7,
         "fourthDownGoPct": 0
       },
       "competitive": {
-        "netEpa": -0.012
+        "netEpa": -0.012,
+        "offEpa": 0.044,
+        "defEpaAllowed": 0.056
       }
     },
     {
@@ -1209,13 +1272,22 @@
         "atsPct": 0,
         "pointDiffPerGame": -7,
         "netEpa": -0.089,
+        "offEpa": -0.083,
+        "defEpaAllowed": 0.006,
+        "ptsPerGame": 18,
+        "ptsAllowedPerGame": 25,
+        "yardsPerGame": 326,
+        "yardsAllowedPerGame": 326,
+        "stEpaPerGame": -4.54,
         "oneScoreWinPct": 0,
         "penaltiesPerGame": 6,
         "turnoverDiffPerGame": 0.3,
         "fourthDownGoPct": 0.75
       },
       "competitive": {
-        "netEpa": -0.134
+        "netEpa": -0.134,
+        "offEpa": -0.046,
+        "defEpaAllowed": 0.088
       }
     },
     {
@@ -1233,13 +1305,22 @@
         "atsPct": 0,
         "pointDiffPerGame": -16.7,
         "netEpa": -0.282,
+        "offEpa": -0.124,
+        "defEpaAllowed": 0.158,
+        "ptsPerGame": 12,
+        "ptsAllowedPerGame": 28.7,
+        "yardsPerGame": 290.7,
+        "yardsAllowedPerGame": 338,
+        "stEpaPerGame": -2.79,
         "oneScoreWinPct": null,
         "penaltiesPerGame": 7.7,
         "turnoverDiffPerGame": -0.3,
         "fourthDownGoPct": 0.5
       },
       "competitive": {
-        "netEpa": -0.333
+        "netEpa": -0.333,
+        "offEpa": -0.013,
+        "defEpaAllowed": 0.32
       }
     },
     {
@@ -1257,13 +1338,22 @@
         "atsPct": 0.5,
         "pointDiffPerGame": 4.7,
         "netEpa": 0.142,
+        "offEpa": 0.171,
+        "defEpaAllowed": 0.029,
+        "ptsPerGame": 30.7,
+        "ptsAllowedPerGame": 26,
+        "yardsPerGame": 399.7,
+        "yardsAllowedPerGame": 323,
+        "stEpaPerGame": -1.8,
         "oneScoreWinPct": 0.5,
         "penaltiesPerGame": 8.7,
         "turnoverDiffPerGame": 0.3,
         "fourthDownGoPct": 1
       },
       "competitive": {
-        "netEpa": 0.178
+        "netEpa": 0.178,
+        "offEpa": 0.212,
+        "defEpaAllowed": 0.034
       }
     },
     {
@@ -1281,13 +1371,22 @@
         "atsPct": 0,
         "pointDiffPerGame": -10.7,
         "netEpa": -0.177,
+        "offEpa": -0.177,
+        "defEpaAllowed": 0,
+        "ptsPerGame": 14.7,
+        "ptsAllowedPerGame": 25.3,
+        "yardsPerGame": 308.7,
+        "yardsAllowedPerGame": 351.7,
+        "stEpaPerGame": -3.84,
         "oneScoreWinPct": 0,
         "penaltiesPerGame": 7.3,
         "turnoverDiffPerGame": 0,
         "fourthDownGoPct": null
       },
       "competitive": {
-        "netEpa": -0.147
+        "netEpa": -0.147,
+        "offEpa": -0.133,
+        "defEpaAllowed": 0.014
       }
     },
     {
@@ -1305,13 +1404,22 @@
         "atsPct": 1,
         "pointDiffPerGame": 7.7,
         "netEpa": 0.13,
+        "offEpa": 0.221,
+        "defEpaAllowed": 0.091,
+        "ptsPerGame": 33.7,
+        "ptsAllowedPerGame": 26,
+        "yardsPerGame": 403.3,
+        "yardsAllowedPerGame": 361.3,
+        "stEpaPerGame": 2.07,
         "oneScoreWinPct": 1,
         "penaltiesPerGame": 8.3,
         "turnoverDiffPerGame": -0.7,
         "fourthDownGoPct": 1
       },
       "competitive": {
-        "netEpa": 0.207
+        "netEpa": 0.207,
+        "offEpa": 0.184,
+        "defEpaAllowed": -0.023
       }
     },
     {
@@ -1329,13 +1437,22 @@
         "atsPct": 0.667,
         "pointDiffPerGame": -3,
         "netEpa": -0.16,
+        "offEpa": -0.04,
+        "defEpaAllowed": 0.12,
+        "ptsPerGame": 15.3,
+        "ptsAllowedPerGame": 18.3,
+        "yardsPerGame": 273.3,
+        "yardsAllowedPerGame": 330,
+        "stEpaPerGame": 6.42,
         "oneScoreWinPct": 1,
         "penaltiesPerGame": 7.7,
         "turnoverDiffPerGame": 1,
         "fourthDownGoPct": 1
       },
       "competitive": {
-        "netEpa": -0.025
+        "netEpa": -0.025,
+        "offEpa": -0.021,
+        "defEpaAllowed": 0.004
       }
     },
     {
@@ -1353,13 +1470,22 @@
         "atsPct": 0.667,
         "pointDiffPerGame": -0.7,
         "netEpa": -0.043,
+        "offEpa": 0.024,
+        "defEpaAllowed": 0.067,
+        "ptsPerGame": 27,
+        "ptsAllowedPerGame": 27.7,
+        "yardsPerGame": 383.7,
+        "yardsAllowedPerGame": 341,
+        "stEpaPerGame": 1.94,
         "oneScoreWinPct": 0.333,
         "penaltiesPerGame": 6.3,
         "turnoverDiffPerGame": -1.3,
         "fourthDownGoPct": 1
       },
       "competitive": {
-        "netEpa": -0.069
+        "netEpa": -0.069,
+        "offEpa": 0.024,
+        "defEpaAllowed": 0.093
       }
     },
     {
@@ -1377,13 +1503,22 @@
         "atsPct": 1,
         "pointDiffPerGame": 10,
         "netEpa": 0.107,
+        "offEpa": -0.097,
+        "defEpaAllowed": -0.204,
+        "ptsPerGame": 23.7,
+        "ptsAllowedPerGame": 13.7,
+        "yardsPerGame": 240,
+        "yardsAllowedPerGame": 319.7,
+        "stEpaPerGame": 3.03,
         "oneScoreWinPct": 1,
         "penaltiesPerGame": 5,
         "turnoverDiffPerGame": 1.3,
         "fourthDownGoPct": 1
       },
       "competitive": {
-        "netEpa": 0.055
+        "netEpa": 0.055,
+        "offEpa": -0.117,
+        "defEpaAllowed": -0.172
       }
     },
     {
@@ -1401,13 +1536,22 @@
         "atsPct": 0.333,
         "pointDiffPerGame": -5.7,
         "netEpa": -0.1,
+        "offEpa": -0.162,
+        "defEpaAllowed": -0.062,
+        "ptsPerGame": 17,
+        "ptsAllowedPerGame": 22.7,
+        "yardsPerGame": 342,
+        "yardsAllowedPerGame": 313,
+        "stEpaPerGame": -2.18,
         "oneScoreWinPct": 0,
         "penaltiesPerGame": 7,
         "turnoverDiffPerGame": -2,
         "fourthDownGoPct": 0.333
       },
       "competitive": {
-        "netEpa": -0.112
+        "netEpa": -0.112,
+        "offEpa": -0.169,
+        "defEpaAllowed": -0.057
       }
     },
     {
@@ -1425,13 +1569,22 @@
         "atsPct": 1,
         "pointDiffPerGame": 11.3,
         "netEpa": 0.209,
+        "offEpa": 0.011,
+        "defEpaAllowed": -0.198,
+        "ptsPerGame": 29.3,
+        "ptsAllowedPerGame": 18,
+        "yardsPerGame": 315.3,
+        "yardsAllowedPerGame": 316.7,
+        "stEpaPerGame": 3.36,
         "oneScoreWinPct": 1,
         "penaltiesPerGame": 5.7,
         "turnoverDiffPerGame": 1.7,
         "fourthDownGoPct": 0.667
       },
       "competitive": {
-        "netEpa": 0.22
+        "netEpa": 0.22,
+        "offEpa": 0.128,
+        "defEpaAllowed": -0.092
       }
     },
     {
@@ -1449,13 +1602,22 @@
         "atsPct": 0.667,
         "pointDiffPerGame": 16,
         "netEpa": 0.339,
+        "offEpa": 0.33,
+        "defEpaAllowed": -0.009,
+        "ptsPerGame": 32.7,
+        "ptsAllowedPerGame": 16.7,
+        "yardsPerGame": 400.3,
+        "yardsAllowedPerGame": 313.3,
+        "stEpaPerGame": -1.92,
         "oneScoreWinPct": 1,
         "penaltiesPerGame": 5.3,
         "turnoverDiffPerGame": 0.7,
         "fourthDownGoPct": 0
       },
       "competitive": {
-        "netEpa": 0.335
+        "netEpa": 0.335,
+        "offEpa": 0.368,
+        "defEpaAllowed": 0.033
       }
     },
     {
@@ -1473,13 +1635,22 @@
         "atsPct": 0.667,
         "pointDiffPerGame": 15.3,
         "netEpa": 0.255,
+        "offEpa": 0.146,
+        "defEpaAllowed": -0.109,
+        "ptsPerGame": 27.3,
+        "ptsAllowedPerGame": 12,
+        "yardsPerGame": 315.3,
+        "yardsAllowedPerGame": 328,
+        "stEpaPerGame": -0.55,
         "oneScoreWinPct": 0,
         "penaltiesPerGame": 4.7,
         "turnoverDiffPerGame": 1.3,
         "fourthDownGoPct": 0
       },
       "competitive": {
-        "netEpa": 0.22
+        "netEpa": 0.22,
+        "offEpa": 0.096,
+        "defEpaAllowed": -0.124
       }
     },
     {
@@ -1497,13 +1668,22 @@
         "atsPct": 0,
         "pointDiffPerGame": -11.7,
         "netEpa": -0.201,
+        "offEpa": -0.099,
+        "defEpaAllowed": 0.102,
+        "ptsPerGame": 18.7,
+        "ptsAllowedPerGame": 30.3,
+        "yardsPerGame": 315.3,
+        "yardsAllowedPerGame": 343.7,
+        "stEpaPerGame": 1.45,
         "oneScoreWinPct": 1,
         "penaltiesPerGame": 10.7,
         "turnoverDiffPerGame": -0.7,
         "fourthDownGoPct": 1
       },
       "competitive": {
-        "netEpa": -0.15
+        "netEpa": -0.15,
+        "offEpa": -0.104,
+        "defEpaAllowed": 0.046
       }
     },
     {
@@ -1521,13 +1701,22 @@
         "atsPct": 0.667,
         "pointDiffPerGame": -6,
         "netEpa": -0.1,
+        "offEpa": 0.041,
+        "defEpaAllowed": 0.141,
+        "ptsPerGame": 21,
+        "ptsAllowedPerGame": 27,
+        "yardsPerGame": 304,
+        "yardsAllowedPerGame": 362.3,
+        "stEpaPerGame": 0.5,
         "oneScoreWinPct": 0,
         "penaltiesPerGame": 8,
         "turnoverDiffPerGame": 0.3,
         "fourthDownGoPct": 0.75
       },
       "competitive": {
-        "netEpa": -0.091
+        "netEpa": -0.091,
+        "offEpa": 0.023,
+        "defEpaAllowed": 0.114
       }
     },
     {
@@ -1545,13 +1734,22 @@
         "atsPct": 0.5,
         "pointDiffPerGame": 8.3,
         "netEpa": 0.171,
+        "offEpa": 0.053,
+        "defEpaAllowed": -0.118,
+        "ptsPerGame": 25,
+        "ptsAllowedPerGame": 16.7,
+        "yardsPerGame": 368,
+        "yardsAllowedPerGame": 229.3,
+        "stEpaPerGame": 1.97,
         "oneScoreWinPct": 0.5,
         "penaltiesPerGame": 7,
         "turnoverDiffPerGame": 0,
         "fourthDownGoPct": 1
       },
       "competitive": {
-        "netEpa": 0.077
+        "netEpa": 0.077,
+        "offEpa": -0.021,
+        "defEpaAllowed": -0.098
       }
     },
     {
@@ -1569,13 +1767,22 @@
         "atsPct": 0.667,
         "pointDiffPerGame": -2.3,
         "netEpa": -0.091,
+        "offEpa": -0.141,
+        "defEpaAllowed": -0.05,
+        "ptsPerGame": 17.7,
+        "ptsAllowedPerGame": 20,
+        "yardsPerGame": 305,
+        "yardsAllowedPerGame": 306.7,
+        "stEpaPerGame": 1.27,
         "oneScoreWinPct": 1,
         "penaltiesPerGame": 5.7,
         "turnoverDiffPerGame": 0,
         "fourthDownGoPct": null
       },
       "competitive": {
-        "netEpa": -0.096
+        "netEpa": -0.096,
+        "offEpa": -0.12,
+        "defEpaAllowed": -0.024
       }
     },
     {
@@ -1593,13 +1800,22 @@
         "atsPct": 0.5,
         "pointDiffPerGame": -5,
         "netEpa": -0.08,
+        "offEpa": -0.13,
+        "defEpaAllowed": -0.05,
+        "ptsPerGame": 12,
+        "ptsAllowedPerGame": 17,
+        "yardsPerGame": 308,
+        "yardsAllowedPerGame": 278.7,
+        "stEpaPerGame": -0.55,
         "oneScoreWinPct": 0,
         "penaltiesPerGame": 7.3,
         "turnoverDiffPerGame": -1.7,
         "fourthDownGoPct": null
       },
       "competitive": {
-        "netEpa": 0.007
+        "netEpa": 0.007,
+        "offEpa": -0.079,
+        "defEpaAllowed": -0.086
       }
     },
     {
@@ -1617,13 +1833,22 @@
         "atsPct": 0,
         "pointDiffPerGame": 3,
         "netEpa": -0.017,
+        "offEpa": 0.035,
+        "defEpaAllowed": 0.052,
+        "ptsPerGame": 24,
+        "ptsAllowedPerGame": 21,
+        "yardsPerGame": 330.5,
+        "yardsAllowedPerGame": 293,
+        "stEpaPerGame": 2.89,
         "oneScoreWinPct": 1,
         "penaltiesPerGame": 4.5,
         "turnoverDiffPerGame": -1,
         "fourthDownGoPct": 1
       },
       "competitive": {
-        "netEpa": 0.007
+        "netEpa": 0.007,
+        "offEpa": 0.035,
+        "defEpaAllowed": 0.028
       }
     },
     {
@@ -1641,13 +1866,22 @@
         "atsPct": 0.333,
         "pointDiffPerGame": -7.3,
         "netEpa": -0.092,
+        "offEpa": -0.082,
+        "defEpaAllowed": 0.01,
+        "ptsPerGame": 12.3,
+        "ptsAllowedPerGame": 19.7,
+        "yardsPerGame": 249.3,
+        "yardsAllowedPerGame": 316.7,
+        "stEpaPerGame": -7.63,
         "oneScoreWinPct": 0,
         "penaltiesPerGame": 6,
         "turnoverDiffPerGame": -0.3,
         "fourthDownGoPct": 1
       },
       "competitive": {
-        "netEpa": -0.22
+        "netEpa": -0.22,
+        "offEpa": -0.17,
+        "defEpaAllowed": 0.05
       }
     },
     {
@@ -1665,13 +1899,22 @@
         "atsPct": 0.333,
         "pointDiffPerGame": -0.7,
         "netEpa": 0.041,
+        "offEpa": 0.002,
+        "defEpaAllowed": -0.039,
+        "ptsPerGame": 20.3,
+        "ptsAllowedPerGame": 21,
+        "yardsPerGame": 419,
+        "yardsAllowedPerGame": 274,
+        "stEpaPerGame": -1.72,
         "oneScoreWinPct": 0,
         "penaltiesPerGame": 7.7,
         "turnoverDiffPerGame": -1,
         "fourthDownGoPct": 1
       },
       "competitive": {
-        "netEpa": 0.054
+        "netEpa": 0.054,
+        "offEpa": 0.049,
+        "defEpaAllowed": -0.005
       }
     },
     {
@@ -1689,13 +1932,22 @@
         "atsPct": 0.667,
         "pointDiffPerGame": -3.3,
         "netEpa": -0.073,
+        "offEpa": -0.05,
+        "defEpaAllowed": 0.023,
+        "ptsPerGame": 20,
+        "ptsAllowedPerGame": 23.3,
+        "yardsPerGame": 277.7,
+        "yardsAllowedPerGame": 382,
+        "stEpaPerGame": -0.04,
         "oneScoreWinPct": 1,
         "penaltiesPerGame": 7.3,
         "turnoverDiffPerGame": 0,
         "fourthDownGoPct": 0
       },
       "competitive": {
-        "netEpa": -0.064
+        "netEpa": -0.064,
+        "offEpa": -0.003,
+        "defEpaAllowed": 0.061
       }
     },
     {
@@ -1713,13 +1965,22 @@
         "atsPct": 0.667,
         "pointDiffPerGame": -6.3,
         "netEpa": -0.16,
+        "offEpa": -0.036,
+        "defEpaAllowed": 0.124,
+        "ptsPerGame": 24,
+        "ptsAllowedPerGame": 30.3,
+        "yardsPerGame": 293.3,
+        "yardsAllowedPerGame": 418.3,
+        "stEpaPerGame": 3.09,
         "oneScoreWinPct": 0.5,
         "penaltiesPerGame": 5,
         "turnoverDiffPerGame": -1.7,
         "fourthDownGoPct": 0.8
       },
       "competitive": {
-        "netEpa": -0.151
+        "netEpa": -0.151,
+        "offEpa": -0.009,
+        "defEpaAllowed": 0.142
       }
     },
     {
@@ -1737,13 +1998,22 @@
         "atsPct": 0,
         "pointDiffPerGame": -5.7,
         "netEpa": -0.108,
+        "offEpa": -0.2,
+        "defEpaAllowed": -0.092,
+        "ptsPerGame": 20.7,
+        "ptsAllowedPerGame": 26.3,
+        "yardsPerGame": 279.7,
+        "yardsAllowedPerGame": 283.7,
+        "stEpaPerGame": -1.15,
         "oneScoreWinPct": 0,
         "penaltiesPerGame": 7.3,
         "turnoverDiffPerGame": -1.7,
         "fourthDownGoPct": 0
       },
       "competitive": {
-        "netEpa": -0.203
+        "netEpa": -0.203,
+        "offEpa": -0.284,
+        "defEpaAllowed": -0.081
       }
     },
     {
@@ -1761,13 +2031,22 @@
         "atsPct": 0.667,
         "pointDiffPerGame": -5.7,
         "netEpa": -0.034,
+        "offEpa": -0.054,
+        "defEpaAllowed": -0.02,
+        "ptsPerGame": 18,
+        "ptsAllowedPerGame": 23.7,
+        "yardsPerGame": 268,
+        "yardsAllowedPerGame": 345.3,
+        "stEpaPerGame": -2.08,
         "oneScoreWinPct": 1,
         "penaltiesPerGame": 9.7,
         "turnoverDiffPerGame": -0.3,
         "fourthDownGoPct": 1
       },
       "competitive": {
-        "netEpa": 0.032
+        "netEpa": 0.032,
+        "offEpa": -0.034,
+        "defEpaAllowed": -0.066
       }
     },
     {
@@ -1785,13 +2064,22 @@
         "atsPct": 0.667,
         "pointDiffPerGame": 5.7,
         "netEpa": 0.111,
+        "offEpa": 0.048,
+        "defEpaAllowed": -0.063,
+        "ptsPerGame": 26.7,
+        "ptsAllowedPerGame": 21,
+        "yardsPerGame": 324,
+        "yardsAllowedPerGame": 356.7,
+        "stEpaPerGame": 1.48,
         "oneScoreWinPct": 0.5,
         "penaltiesPerGame": 8.3,
         "turnoverDiffPerGame": 1.3,
         "fourthDownGoPct": 0.5
       },
       "competitive": {
-        "netEpa": 0.251
+        "netEpa": 0.251,
+        "offEpa": 0.17,
+        "defEpaAllowed": -0.081
       }
     }
   ],
@@ -3869,8 +4157,8 @@
         "epaPerCarry": -0.276,
         "epaPerTarget": -1.498
       },
-      "injuryStatus": "Out",
-      "injured": true
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4685116,
@@ -5717,8 +6005,8 @@
         "epaPerCarry": 0.006,
         "epaPerTarget": -0.286
       },
-      "injuryStatus": "Questionable",
-      "injured": false
+      "injuryStatus": "Out",
+      "injured": true
     },
     {
       "id": 4432710,

@@ -1,13 +1,14 @@
 import { Component, Input, OnChanges, ElementRef, ViewChild } from '@angular/core';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
-import { StaticData } from 'StaticData/StaticData';
 import {
   FANTASY_SCORING_LABELS,
+  RANK_BASIS_LABELS,
+  RANK_METRICS,
+  RankBasis,
   FantasyScoring,
   SKILL_STATS,
   STAT_NAMES,
   PER_GAME_LABELS,
-  COMBINED_STATS,
   combinedFor,
   SkillPlayer,
   SkillPosition,
@@ -15,6 +16,7 @@ import {
   SkillWeights,
   fantasyPoints,
   SkillStatGroup,
+  SkillStatKey,
   StatGroupId,
   unitStat,
   hasFantasy,
@@ -23,23 +25,9 @@ import {
 } from 'app/positions';
 import { PositionService } from 'app/services/position.service';
 import { copyRankingsToClipboard } from 'app/utils/clipboard';
-import { SKILL_UNITS, curveGrades, weightedTotals } from 'app/utils/unit-scoring';
+import { SKILL_UNITS, UnitRankKey, recencyScore, unitRanks, weightedTotals } from 'app/utils/unit-scoring';
 import { TintScale, tintFrom, tintScale } from 'app/utils/value-tint';
 import { badgeColor, whiteLogo } from 'app/utils/team-colors';
-
-// Average a per-QB value (0-12) for each team, weighted by how many games each QB started there
-function teamGrades(valueFor: (qbId: number) => number | undefined): Map<string, number> {
-  const totals = new Map<string, { sum: number; starts: number }>();
-  for (const qb of StaticData) {
-    const value = valueFor(qb.id);
-    if (value === undefined) continue;
-    for (const [team, starts] of Object.entries(qb.starts)) {
-      const total = totals.get(team) ?? { sum: 0, starts: 0 };
-      totals.set(team, { sum: total.sum + value * starts, starts: total.starts + starts });
-    }
-  }
-  return new Map([...totals].map(([team, { sum, starts }]) => [team, sum / starts]));
-}
 
 
 @Component({
@@ -72,6 +60,36 @@ export class SkillRankingsComponent implements OnChanges {
     this.positionService.updateSettings({ totalStats: value });
   }
 
+  // Settings menu: what the head coaches' Off / Def Rank columns rank on
+  get rankBasis(): RankBasis {
+    return this.positionService.settings.rankBasis;
+  }
+  rankBasisLabels = RANK_BASIS_LABELS;
+
+  cycleRankBasis() {
+    this.positionService.cycleRankBasis();
+  }
+
+  // Each head coach's unit ranks, worked out once per setting (not once per cell)
+  private rankCache?: { key: string; ranks: Map<SkillPlayer, Record<UnitRankKey, number | null>> };
+
+  private unitRank(player: SkillPlayer, key: UnitRankKey): number | null {
+    const cacheKey = `${this.rankBasis}.${this.garbageTime}`;
+    if (this.rankCache?.key !== cacheKey) {
+      this.rankCache = { key: cacheKey, ranks: unitRanks(SKILL_UNITS.HC, this.rankBasis, this.garbageTime) };
+    }
+    return this.rankCache.ranks.get(player)?.[key] ?? null;
+  }
+
+  // Another team shares this rank (a small "(t)" in the cell, "#7 (tied)" in hover and copy text)
+  rankTied(player: SkillPlayer, stat: SkillStat): boolean {
+    if (stat.format !== 'rank') return false;
+    const key = stat.key as UnitRankKey;
+    const rank = this.unitRank(player, key);
+    if (rank === null) return false;
+    return [...this.rankCache!.ranks].some(([other, ranks]) => other !== player && ranks[key] === rank);
+  }
+
   get garbageTime(): boolean {
     return this.positionService.settings.garbageTime;
   }
@@ -102,7 +120,7 @@ export class SkillRankingsComponent implements OnChanges {
 
   // Settings: color-coded values (grades and records keep their own coloring; Games is context only)
   valueColor(player: SkillPlayer, stat: SkillStat): string | null {
-    if (!this.colorValues || stat.infoOnly || stat.format === 'grade' || stat.format === 'record') return null;
+    if (!this.colorValues || stat.infoOnly || ['grade', 'record', 'recent'].includes(stat.format)) return null;
     return tintFrom(this.rateValue(player, stat), this.columnScale(stat, 'rate'), !!stat.negative);
   }
 
@@ -113,7 +131,7 @@ export class SkillRankingsComponent implements OnChanges {
   private scalesFor?: unknown[];
 
   private columnScale(stat: SkillStat, basis: 'rate' | 'shown'): TintScale | null {
-    const inputs = [this.playerList, this.dataVersion, this.perGame, this.fantasyScoring, this.garbageTime];
+    const inputs = [this.playerList, this.dataVersion, this.perGame, this.fantasyScoring, this.garbageTime, this.rankBasis];
     if (!this.scalesFor || inputs.some((v, i) => v !== this.scalesFor![i])) {
       this.scales.clear();
       this.scalesFor = inputs;
@@ -166,18 +184,14 @@ export class SkillRankingsComponent implements OnChanges {
       this.sortPlayers();
     });
 
-    // QB Play: each QB graded by his spot in the QB rankings (#1 = 12, last = 0), averaged per team by
-    // starts, then curved so the best team is an A+ and the worst an F
-    this.positionService.qbRanks$.subscribe((ids) => {
-      const last = Math.max(ids.length - 1, 1);
-      this.teamQbPlay = curveGrades(
-        teamGrades((id) => {
-          const rank = ids.indexOf(id);
-          return rank === -1 ? undefined : 12 * (1 - rank / last);
-        }),
-      );
+    // QB Play from the QB tab's order (see PositionService)
+    this.positionService.qbPlayGrades$.subscribe((grades) => {
+      this.teamQbPlay = grades;
       this.refresh();
     });
+
+    // Responsibility arrows
+    this.positionService.gradeAdjustments$.subscribe(() => this.refresh());
 
     this.positionService.skillHidden$.subscribe((hidden) => {
       if (!this.position) return;
@@ -207,6 +221,16 @@ export class SkillRankingsComponent implements OnChanges {
       this.fantasyScoring = scoring;
       if (this.position) this.sortPlayers();
     });
+  }
+
+  // Empty Recent slots for games not played yet (up to five)
+  unplayed(player: SkillPlayer): null[] {
+    return Array(Math.max(0, 5 - (player.lastFive?.length ?? 0))).fill(null);
+  }
+
+  // Responsibility arrows: one grade step for this QB
+  stepGrade(player: SkillPlayer, step: 1 | -1) {
+    this.positionService.stepGrade(player, player.stats.responsibility ?? 6, step);
   }
 
   cycleFantasyScoring() {
@@ -278,7 +302,7 @@ export class SkillRankingsComponent implements OnChanges {
   // Label hover: the stat written out, plus the list average the color-coding centers on
   labelTitle(stat: SkillStat): string {
     const name = this.statName(stat);
-    if (stat.format === 'record') return name;
+    if (stat.format === 'record' || stat.format === 'recent' || stat.format === 'rank') return name;
     // Matches what the color-coding compares, or what the column shows when it's per game
     // (display-only columns like FG Att aren't color-coded, so they follow the column)
     const avg = this.columnScale(stat, this.showsPerGame(stat) ? 'shown' : 'rate')?.mean ?? null;
@@ -320,7 +344,11 @@ export class SkillRankingsComponent implements OnChanges {
     const name =
       stat.key === 'fantasy' && !['K', 'DEF'].includes(this.position)
         ? `${FANTASY_SCORING_LABELS[this.fantasyScoring]} Fantasy Points`
-        : (STAT_NAMES[stat.key] ?? stat.label);
+        : (stat.name ?? STAT_NAMES[stat.key] ?? stat.label);
+    // Unit ranks say what they're ranked on
+    if (stat.key in RANK_METRICS) {
+      return `${name} (by ${RANK_BASIS_LABELS[this.rankBasis]})`;
+    }
     return this.showsPerGame(stat) ? `${name} per Game` : name;
   }
 
@@ -342,9 +370,22 @@ export class SkillRankingsComponent implements OnChanges {
     switch (stat.key) {
       case 'games':
         return player.games;
-      case 'totalYards': {
-        const { rushYards, recYards } = player.stats;
-        return rushYards === null && recYards === null ? null : (rushYards ?? 0) + (recYards ?? 0);
+      case 'recent':
+        return recencyScore(player.lastFive);
+      case 'offRank':
+      case 'defRank':
+        return this.unitRank(player, stat.key);
+      // Set by hand with the arrows, otherwise the data grade
+      case 'responsibility':
+        return this.positionService.adjustedGrade(player, player.stats.responsibility ?? 6);
+      // Combined columns (Total Yds, Total TDs, Turnovers): the sum of their two stats
+      case 'totalYards':
+      case 'totalTds':
+      case 'turnovers': {
+        const pair = combinedFor(this.position).find(({ stat: total }) => total.key === stat.key);
+        if (!pair) return player.stats[stat.key as 'totalTds'] ?? null;
+        const values = pair.parts.map((part) => unitStat(player, part as SkillStatKey, this.garbageTime));
+        return values.every((v) => v === null) ? null : values.reduce<number>((sum, v) => sum + (v ?? 0), 0);
       }
       case 'fantasy':
         return fantasyPoints(player.stats.fantasyStd ?? 0, player.stats.receptions ?? 0, this.fantasyScoring);
@@ -405,7 +446,7 @@ export class SkillRankingsComponent implements OnChanges {
   private combine(stats: SkillStat[]): SkillStat[] {
     if (!this.totalStats) return stats;
     let out = stats;
-    for (const { stat: total, parts } of COMBINED_STATS) {
+    for (const { stat: total, parts } of combinedFor(this.position)) {
       const at = out.findIndex((stat) => parts.includes(stat.key));
       if (at === -1 || !parts.every((part) => out.some((stat) => stat.key === part))) continue;
       this.combinedSpot[total.key] = out[at].key;
@@ -438,7 +479,7 @@ export class SkillRankingsComponent implements OnChanges {
   isShown(stat: SkillStat): boolean {
     // A combined column shows if either of its stats would
     const weights = this.effectiveWeights();
-    const combined = COMBINED_STATS.find((c) => c.stat.key === stat.key);
+    const combined = combinedFor(this.position).find((c) => c.stat.key === stat.key);
     if (combined) {
       const parts = combined.parts.filter((key) => !this.statHidden(key));
       return parts.length > 0 && (this.showUnused || parts.some((key) => !!weights[key]));
@@ -456,6 +497,8 @@ export class SkillRankingsComponent implements OnChanges {
     switch (stat.format) {
       case 'grade':
         return this.grade(value);
+      case 'rank':
+        return this.rankTied(player, stat) ? `#${value} (tied)` : `#${value}`;
       case 'record': {
         const { wins, losses, ties } = player.stats;
         return ties ? `${wins}-${losses}-${ties}` : `${wins}-${losses}`;

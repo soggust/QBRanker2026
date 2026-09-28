@@ -1,9 +1,9 @@
 import type { SkillPosition, SkillWeights } from 'app/positions';
 
-// Presets for the non-QB tabs, one set per position, each built around a real player / unit type.
+// Presets for every tab, one set per position, each built around a real player / unit type.
 // A preset sets the stats it's named for (75-100); every other stat stays in at 25 as a tiebreaker,
 // and support grades and the Total Yds / Total TDs parent sliders stay neutral at 50.
-// Fantasy ranks purely on fantasy points. (The QB page's presets live in qb-presets.ts.)
+// Fantasy ranks purely on fantasy points.
 export interface SkillPresetDef {
   key: string;
   label: string;
@@ -26,6 +26,107 @@ const WR_TE_EFFICIENCY: SkillPresetDef = {
 };
 
 export const SKILL_PRESETS: Record<SkillPosition, SkillPresetDef[]> = {
+  // Carried over from the original QB page: each group weight (Support, Advanced) is folded into the
+  // sliders it scaled; every slider is listed, so a preset fully sets the tab
+  QB: [
+    {
+      key: 'mvp',
+      label: 'MVP',
+      description: 'How voters tend to think: winning, touchdowns, big numbers, and carrying the team',
+      weights: {
+        winPct: 80, recent: 40, compPct: 30, totalYards: 60, passYards: 50, rushYards: 50,
+        ypa: 40, totalTds: 75, passTds: 50, rushTds: 50, turnovers: 60, ints: 50,
+        fumbles: 50, rating: 60, epaPerPlay: 60, cpoe: 40, successRate: 40, fantasy: 0,
+        pressureToSack: 20, badThrowPct: 20, timeToThrow: 0, adot: 0, aggressiveness: 0, weapons: 20,
+        coaching: 20, oline: 20, defense: 30, responsibility: 55,
+      },
+    },
+    {
+      key: 'stats',
+      label: 'Stats Only',
+      description: 'Just the numbers: no record, recent form, or support adjustments',
+      weights: {
+        winPct: 0, recent: 0, compPct: 50, totalYards: 50, passYards: 50, rushYards: 50,
+        ypa: 50, totalTds: 50, passTds: 50, rushTds: 50, turnovers: 50, ints: 50,
+        fumbles: 50, rating: 50, epaPerPlay: 50, cpoe: 50, successRate: 50, fantasy: 50,
+        pressureToSack: 50, badThrowPct: 50, timeToThrow: 50, adot: 50, aggressiveness: 50, weapons: 0,
+        coaching: 0, oline: 0, defense: 0, responsibility: 0,
+      },
+    },
+    {
+      key: 'analytics',
+      label: 'Analytics',
+      description: 'Efficiency first: EPA, CPOE and success rate lead, box-score totals take a back seat',
+      weights: {
+        winPct: 0, recent: 25, compPct: 0, totalYards: 20, passYards: 50, rushYards: 50,
+        ypa: 50, totalTds: 20, passTds: 50, rushTds: 50, turnovers: 40, ints: 50,
+        fumbles: 50, rating: 0, epaPerPlay: 100, cpoe: 100, successRate: 100, fantasy: 0,
+        pressureToSack: 100, badThrowPct: 100, timeToThrow: 50, adot: 50, aggressiveness: 50, weapons: 50,
+        coaching: 50, oline: 50, defense: 50, responsibility: 50,
+      },
+    },
+    {
+      key: 'gunslinger',
+      label: 'Gunslinger',
+      description: 'Pushes the ball downfield: passing yards, TDs, depth of target and aggressiveness',
+      weights: {
+        winPct: 30, recent: 30, compPct: 20, totalYards: 80, passYards: 100, rushYards: 0,
+        ypa: 80, totalTds: 80, passTds: 100, rushTds: 0, turnovers: 20, ints: 50,
+        fumbles: 50, rating: 40, epaPerPlay: 60, cpoe: 30, successRate: 30, fantasy: 0,
+        pressureToSack: 30, badThrowPct: 0, timeToThrow: 0, adot: 100, aggressiveness: 100, weapons: 25,
+        coaching: 25, oline: 25, defense: 25, responsibility: 25,
+      },
+    },
+    {
+      key: 'dualThreat',
+      label: 'Dual Threat',
+      description: 'Rewards QBs who hurt you with their legs as well as their arm',
+      weights: {
+        winPct: 40, recent: 40, compPct: 30, totalYards: 80, passYards: 40, rushYards: 100,
+        ypa: 40, totalTds: 70, passTds: 50, rushTds: 100, turnovers: 50, ints: 50,
+        fumbles: 50, rating: 40, epaPerPlay: 75, cpoe: 25, successRate: 50, fantasy: 50,
+        pressureToSack: 50, badThrowPct: 25, timeToThrow: 0, adot: 25, aggressiveness: 25, weapons: 50,
+        coaching: 50, oline: 50, defense: 50, responsibility: 50,
+      },
+    },
+    {
+      key: 'gameManager',
+      label: 'Game Manager',
+      description: 'Accurate, careful, on time: completions and ball security over big plays',
+      weights: {
+        winPct: 70, recent: 30, compPct: 90, totalYards: 25, passYards: 50, rushYards: 50,
+        ypa: 40, totalTds: 30, passTds: 50, rushTds: 50, turnovers: 100, ints: 75,
+        fumbles: 75, rating: 70, epaPerPlay: 60, cpoe: 100, successRate: 90, fantasy: 0,
+        pressureToSack: 90, badThrowPct: 100, timeToThrow: 90, adot: 0, aggressiveness: 0, weapons: 50,
+        coaching: 50, oline: 50, defense: 50, responsibility: 50,
+      },
+    },
+    {
+      key: 'winner',
+      label: 'Winner',
+      description: 'Wins and recent form above all; stats are just a tiebreaker',
+      weights: {
+        winPct: 100, recent: 100, compPct: 25, totalYards: 25, passYards: 50, rushYards: 50,
+        ypa: 25, totalTds: 25, passTds: 50, rushTds: 50, turnovers: 25, ints: 50,
+        fumbles: 50, rating: 25, epaPerPlay: 25, cpoe: 25, successRate: 25, fantasy: 25,
+        pressureToSack: 25, badThrowPct: 25, timeToThrow: 25, adot: 25, aggressiveness: 25, weapons: 25,
+        coaching: 25, oline: 25, defense: 25, responsibility: 25,
+      },
+    },
+    {
+      key: 'support',
+      label: 'Least Support',
+      description: 'Ranks only by support: who is doing the most with the least around them',
+      weights: {
+        winPct: 0, recent: 0, compPct: 0, totalYards: 0, passYards: 50, rushYards: 50,
+        ypa: 0, totalTds: 0, passTds: 50, rushTds: 50, turnovers: 0, ints: 50,
+        fumbles: 50, rating: 0, epaPerPlay: 0, cpoe: 0, successRate: 0, fantasy: 0,
+        pressureToSack: 0, badThrowPct: 0, timeToThrow: 0, adot: 0, aggressiveness: 0, weapons: 50,
+        coaching: 50, oline: 50, defense: 50, responsibility: 50,
+      },
+    },
+    FANTASY,
+  ],
   RB: [
     {
       key: 'workhorse',

@@ -6,6 +6,7 @@ import {
   FantasyScoring,
   POSITIONS,
   Position,
+  RankBasis,
   SkillPlayer,
   SkillPosition,
   SkillWeights,
@@ -37,6 +38,8 @@ export interface RankerSettings {
   // Carry each stat group's color down the rows (a thin bar before each group)
   categoryColors: boolean;
   fantasyScoring: FantasyScoring;
+  // What the head coaches' Off / Def Rank columns rank on
+  rankBasis: RankBasis;
   // Off: play-by-play stats leave out garbage time (plays with the game already decided)
   garbageTime: boolean;
 }
@@ -50,12 +53,16 @@ const DEFAULT_SETTINGS: RankerSettings = {
   colorValues: true,
   categoryColors: true,
   fantasyScoring: 'ppr',
+  rankBasis: 'points',
   garbageTime: true,
 };
 
 function readSettings(): RankerSettings {
   try {
-    return { ...DEFAULT_SETTINGS, ...JSON.parse(localStorage.getItem(SETTINGS_KEY) ?? '{}') };
+    const saved = { ...DEFAULT_SETTINGS, ...JSON.parse(localStorage.getItem(SETTINGS_KEY) ?? '{}') };
+    // Unit ranks used to offer EPA (now its own columns)
+    if (!['points', 'yards'].includes(saved.rankBasis)) saved.rankBasis = DEFAULT_SETTINGS.rankBasis;
+    return saved;
   } catch {
     return DEFAULT_SETTINGS;
   }
@@ -135,6 +142,7 @@ export class PositionService {
 
   // Slider weights per skill position, kept when switching tabs
   private weightsSubject = new BehaviorSubject<Record<SkillPosition, SkillWeights>>({
+    QB: presetWeights('QB', 'default'),
     RB: presetWeights('RB', 'default'),
     WR: presetWeights('WR', 'default'),
     TE: presetWeights('TE', 'default'),
@@ -170,14 +178,15 @@ export class PositionService {
 
   // A tab's list as last shown (or its default slider ranking before it's been opened), best first
   private rankedUnits(position: SkillPosition): Observable<SkillPlayer[]> {
-    const garbageTime$ = this.settingsSubject.pipe(
-      map((settings) => settings.garbageTime),
-      distinctUntilChanged(),
+    // Only the settings that change a default ranking
+    const rankingSettings$ = this.settingsSubject.pipe(
+      map(({ garbageTime, rankBasis }) => ({ garbageTime, rankBasis })),
+      distinctUntilChanged((a, b) => a.garbageTime === b.garbageTime && a.rankBasis === b.rankBasis),
     );
-    return combineLatest([this.weightsSubject, this.unitOrdersSubject, garbageTime$]).pipe(
-      map(([weights, orders, garbageTime]) => {
+    return combineLatest([this.weightsSubject, this.unitOrdersSubject, rankingSettings$]).pipe(
+      map(([weights, orders, { garbageTime, rankBasis }]) => {
         const order = orders[position];
-        if (!order) return defaultRanking(position, weights[position], garbageTime);
+        if (!order) return defaultRanking(position, weights[position], garbageTime, rankBasis);
         const byId = new Map(SKILL_UNITS[position].map((unit) => [unit.gsisId, unit]));
         return order.ids.map((id) => byId.get(id)).filter((unit) => !!unit);
       }),
@@ -190,6 +199,23 @@ export class PositionService {
 
   // RB Play: each back graded by his spot in the RB rankings (#1 = A+, last = F), averaged per team
   // weighted by carries, so the lead back counts most
+  // QB Play: each QB graded by his spot in the QB rankings (#1 = 12, last = 0), averaged per team by
+  // his starts there, then curved
+  public qbPlayGrades$ = this.rankedUnits('QB').pipe(
+    map((ranked) => {
+      const last = Math.max(ranked.length - 1, 1);
+      const totals = new Map<string, { sum: number; starts: number }>();
+      ranked.forEach((qb, rank) => {
+        for (const [team, starts] of Object.entries(qb.starts ?? {})) {
+          const total = totals.get(team) ?? { sum: 0, starts: 0 };
+          totals.set(team, { sum: total.sum + 12 * (1 - rank / last) * starts, starts: total.starts + starts });
+        }
+      });
+      return curveGrades(new Map([...totals].map(([team, { sum, starts }]) => [team, sum / starts])));
+    }),
+    distinctGrades(),
+  );
+
   public rbPlayGrades$ = this.rankedUnits('RB').pipe(
     map((ranked) => curveGrades(teamGradesByUsage(ranked, (rb) => rb.stats.carries ?? 0))),
     distinctGrades(),
@@ -311,9 +337,21 @@ export class PositionService {
     this.aboutOpenSubject.next(open);
   }
 
-  // Current QB order (ESPN ids, best first) from the QB page, used for receivers' QB Play grade
-  private qbRanksSubject = new BehaviorSubject<number[]>([]);
-  public qbRanks$ = this.qbRanksSubject.asObservable();
+  // Responsibility grades raised or lowered with the arrows, per QB (unit id -> 0-12). Every grade is
+  // back to its data value on each page load.
+  private gradeAdjustmentsSubject = new BehaviorSubject<Record<string, number>>({});
+  public gradeAdjustments$ = this.gradeAdjustmentsSubject.asObservable();
+
+  adjustedGrade(unit: SkillPlayer, base: number): number {
+    return this.gradeAdjustmentsSubject.value[unit.gsisId] ?? base;
+  }
+
+  // One grade step up or down (stays within F-A+)
+  stepGrade(unit: SkillPlayer, base: number, step: 1 | -1): void {
+    const current = this.adjustedGrade(unit, base);
+    const next = Math.min(12, Math.max(0, current + step));
+    if (next !== current) this.gradeAdjustmentsSubject.next({ ...this.gradeAdjustmentsSubject.value, [unit.gsisId]: next });
+  }
 
 
   private fantasyScoringSubject = new BehaviorSubject<FantasyScoring>(this.settingsSubject.value.fantasyScoring);
@@ -363,12 +401,15 @@ export class PositionService {
     this.skillHiddenSubject.next(next);
   }
 
-  setQbRanks(ids: number[]): void {
-    this.qbRanksSubject.next(ids);
-  }
 
   get fantasyScoring(): FantasyScoring {
     return this.fantasyScoringSubject.value;
+  }
+
+  // Switch Points <-> Yards
+  cycleRankBasis(): void {
+    const order: RankBasis[] = ['points', 'yards'];
+    this.updateSettings({ rankBasis: order[(order.indexOf(this.settings.rankBasis) + 1) % order.length] });
   }
 
   // Cycle PPR -> Half -> Standard

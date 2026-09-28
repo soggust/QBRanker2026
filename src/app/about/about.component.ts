@@ -51,6 +51,8 @@ export class AboutComponent implements AfterViewInit {
     ['YBC / Carry', 'Yards before first contact per carry: the room the blocking created.'],
     ['Short Yd %', 'Conversion rate on 3rd and 4th and 1-2 runs.'],
     ['Pressure % / Sack %', 'Pressures or sacks per dropback: allowed (O-lines) or created (defenses).'],
+    ['Off / Def Rank', "Where a head coach's offense and defense rank in the league (1 = best), by points or yards per game (Unit Ranks setting)."],
+    ['ST EPA / Game', 'Expected Points Added per game on kicks, punts and returns, net of what opponents gain on them.'],
     ['Wins Over Exp', 'Wins minus the wins the betting lines expected before each game.'],
     ['ATS %', 'Share of games covering the point spread.'],
     ['1-Score Win %', 'Win % in games decided by 8 points or fewer.'],

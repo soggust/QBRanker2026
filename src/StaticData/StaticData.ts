@@ -1,3 +1,4 @@
+import type { SkillPlayer } from 'app/positions';
 import { QbBoxStats, QbPlayByPlay, StaticPlayerData } from 'app/types';
 import { DATA } from './data';
 
@@ -47,10 +48,9 @@ export interface TeamGrades {
   coaching: number;
 }
 
-// Per-QB scores. Team grades, defense (normally from the Defenses rankings) and injured
-// (normally from ESPN's injury report) can be overridden here for a single QB.
-type SubjectiveScores = Pick<StaticPlayerData, 'responsibility'> &
-  Partial<TeamGrades> & { name?: string; defense?: number; injured?: boolean };
+// Per-QB preseason scores: Responsibility (blended with this season's stats below), plus an optional
+// display name and injured flag (normally from ESPN's injury report) for a single QB
+type SubjectiveScores = Pick<StaticPlayerData, 'responsibility'> & { name?: string; injured?: boolean };
 
 const games = gamesJson as unknown as GameData[];
 const scores = subjective as Record<string, SubjectiveScores>;
@@ -70,16 +70,10 @@ export function dataWeight(games: number): number {
   return games > 0 ? Math.min(1, (games / FULL_WEIGHT_GAMES) ** 0.68) : 0;
 }
 
-// Preseason grade blended with the stats grade, before rounding (for grades that are curved next)
+// Preseason grade blended with the stats grade, before rounding (it's curved next)
 function blendScore(preseason: number, fromData: number | undefined, games: number): number {
   if (fromData === undefined || fromData === null) return preseason;
   return preseason + (fromData - preseason) * dataWeight(games);
-}
-
-// Preseason grade blended with the stats grade, as a whole grade (0-12)
-export function blendGrade(preseason: number, fromData: number | undefined, games: number): number {
-  if (fromData === undefined || fromData === null) return preseason;
-  return Math.round(preseason + (fromData - preseason) * dataWeight(games));
 }
 
 // Preseason coaching grade per team; the app blends it with the Head Coaches rankings
@@ -107,22 +101,9 @@ export function teamKey(teamLogo: string): string {
   return teamLogo.split('/').pop()!.replace('.png', '');
 }
 
-// Team grades for a logo; average (C, 6) if the team is missing. Weapons and O-line are
-// blended with this season's stats; coaching is the preseason grade (see preseasonCoaching)
-export function gradesForTeam(teamLogo: string): TeamGrades {
-  const preseason = teamGrades[teamKey(teamLogo)] ?? { weapons: 6, oline: 6, coaching: 6 };
-  const stats = dataGrades.teams[teamKey(teamLogo)];
-  const games = stats?.games ?? 0;
-  return {
-    weapons: blendGrade(preseason.weapons, stats?.weapons, games),
-    oline: blendGrade(preseason.oline, stats?.oline, games),
-    coaching: preseason.coaching,
-  };
-}
-
 // Static Data
 export const StaticData: StaticPlayerData[] = games.map((game) => {
-  const { name, defense, injured, coaching, ...playerScores } = scores[game.id];
+  const { name, injured, ...playerScores } = scores[game.id];
   const qbStats = dataGrades.qbs[game.id];
 
   return {
@@ -147,12 +128,6 @@ export const StaticData: StaticPlayerData[] = games.map((game) => {
     starts: game.starts,
     box: game.box ?? null,
     injured: injured ?? game.injured ?? false,
-    // Placeholder until the Defenses rankings grade the team
-    defense: defense ?? 6,
-    defenseOverride: defense,
-    ...gradesForTeam(game.teamLogo),
-    // Placeholder until the Head Coaches rankings grade the team
-    coachingOverride: coaching,
     ...playerScores,
     responsibility: blendScore(playerScores.responsibility, qbStats?.responsibility, qbStats?.games ?? 0),
   };
@@ -164,3 +139,49 @@ export const StaticData: StaticPlayerData[] = games.map((game) => {
   const last = Math.max(ranked.length - 1, 1);
   ranked.forEach((qb, rank) => (qb.responsibility = Math.round(12 * (1 - rank / last))));
 }
+
+// The QBs as rows of the shared rankings table (the same shape as every other tab's units): ESPN box
+// stats, record and recent results, the nflverse play-by-play stats (plus their no-garbage-time copy),
+// and the blended, curved Responsibility grade. QBs with no ESPN stats this season yet are left out.
+export const QB_UNITS: SkillPlayer[] = StaticData.filter((qb) => !!qb.box).map((qb) => {
+  const box = qb.box!;
+  const ties = qb.ties ?? 0;
+  const starts = qb.wins + qb.losses + ties;
+  return {
+    id: qb.id,
+    gsisId: `QB-${qb.id}`,
+    name: qb.name,
+    teamLogo: qb.teamLogo,
+    games: box.games,
+    injured: qb.injured,
+    lastFive: qb.lastFive,
+    starts: qb.starts,
+    competitive: qb.competitive ?? undefined,
+    stats: {
+      wins: qb.wins,
+      losses: qb.losses,
+      ties,
+      winPct: starts ? (qb.wins + ties * 0.5) / starts : null,
+      compPct: box.compPercent,
+      passYards: box.passYards,
+      rushYards: box.rushYards,
+      passTds: box.passTd,
+      rushTds: box.rushTd,
+      ints: box.ints,
+      fumbles: box.fumLost,
+      ypa: box.ypa,
+      rating: box.rating,
+      epaPerPlay: qb.epaPerPlay,
+      successRate: qb.successRate,
+      cpoe: qb.cpoe,
+      pressureToSack: qb.pressureToSack,
+      badThrowPct: qb.badThrowPct,
+      timeToThrow: qb.timeToThrow,
+      adot: qb.adot,
+      aggressiveness: qb.aggressiveness,
+      fantasyStd: qb.fantasyStd,
+      receptions: qb.receptions,
+      responsibility: qb.responsibility,
+    } as SkillPlayer['stats'],
+  };
+});

@@ -1,9 +1,9 @@
 import { SKILL_PRESETS } from 'app/skill-presets';
 
 export type Position = 'QB' | 'RB' | 'WR' | 'TE' | 'OL' | 'K' | 'P' | 'DEF' | 'HC';
-// Everything except QB, which has its own page; all use the config-driven table below
-// (OL rows are team offensive lines, DEF rows team defenses and HC rows head coaches)
-export type SkillPosition = Exclude<Position, 'QB'>;
+// Every tab uses the same config-driven table, sidebar and scoring below (OL rows are team offensive
+// lines, DEF rows team defenses and HC rows head coaches)
+export type SkillPosition = Position;
 
 export const POSITIONS: Position[] = ['QB', 'RB', 'WR', 'TE', 'OL', 'K', 'P', 'DEF', 'HC'];
 
@@ -91,7 +91,28 @@ export type SkillStatKey =
   | 'runSuccess'
   | 'shortYardagePct'
   | 'linePenaltiesPerGame'
-  | 'timeToThrow';
+  | 'timeToThrow'
+  // Quarterbacks
+  | 'compPct'
+  | 'passYards'
+  | 'passTds'
+  | 'ints'
+  | 'ypa'
+  | 'rating'
+  | 'epaPerPlay'
+  | 'successRate'
+  | 'cpoe'
+  | 'pressureToSack'
+  | 'badThrowPct'
+  | 'aggressiveness'
+  | 'responsibility'
+  // Head coaches' units (ranked in the app by the Unit Ranks setting)
+  | 'offEpa'
+  | 'defEpaAllowed'
+  | 'ptsPerGame'
+  | 'yardsPerGame'
+  | 'yardsAllowedPerGame'
+  | 'stEpaPerGame';
 
 // Columns computed in the app: fantasy points in the chosen scoring, and team support grades
 export type SkillColumnKey =
@@ -104,7 +125,11 @@ export type SkillColumnKey =
   | 'coaching'
   | 'defense'
   | 'games'
-  | 'totalYards';
+  | 'totalYards'
+  | 'turnovers'
+  | 'recent'
+  | 'offRank'
+  | 'defRank';
 
 export type FantasyScoring = 'std' | 'half' | 'ppr';
 
@@ -112,6 +137,21 @@ export const FANTASY_SCORING_LABELS: Record<FantasyScoring, string> = {
   std: 'Standard',
   half: 'Half PPR',
   ppr: 'PPR',
+};
+
+// What the head coaches' Off / Def Rank columns rank on (their EPA per play has its own Advanced
+// columns, like special teams' EPA)
+export type RankBasis = 'points' | 'yards';
+
+export const RANK_BASIS_LABELS: Record<RankBasis, string> = {
+  points: 'Points',
+  yards: 'Yards',
+};
+
+// The stat each rank uses, and whether higher is better
+export const RANK_METRICS: Record<'offRank' | 'defRank', Record<RankBasis, [SkillStatKey, boolean]>> = {
+  offRank: { points: ['ptsPerGame', true], yards: ['yardsPerGame', true] },
+  defRank: { points: ['ptsAllowedPerGame', false], yards: ['yardsAllowedPerGame', false] },
 };
 
 // nflverse fantasy_points is standard scoring; PPR adds 1 per reception (verified against fantasy_points_ppr)
@@ -133,6 +173,10 @@ export interface SkillPlayer {
   // From ESPN's injury report (Out, Doubtful or Injured Reserve); players only, not units
   injured?: boolean;
   injuryStatus?: string;
+  // QBs: up to the last five results as a starter, newest first (1 win, 0.5 tie, 0 loss), and starts
+  // per team (keyed by logo path, for the team QB Play grade)
+  lastFive?: number[];
+  starts?: Record<string, number>;
 }
 
 // A unit's stat, without garbage time when the Garbage Time Stats setting is off (stats that aren't
@@ -148,15 +192,23 @@ export interface SkillStat {
   description: string;
   // Volume stats scale with games played (and can be shown per game); efficiency stats are rates
   kind: 'volume' | 'efficiency';
-  // 'record' shows W-L(-T) from the wins/losses/ties stats while ranking on the stat's value
+  // 'record' shows W-L(-T) from the wins/losses/ties stats while ranking on the stat's value;
+  // 'recent' shows the last five results as dots while ranking on the recency-weighted win rate
   // pct: a 0-1 share shown as a whole percent; pctPoints: already in percentage points (1 decimal)
-  format: 'int' | 'dec1' | 'dec2' | 'pct' | 'pctPoints' | 'grade' | 'record';
+  // 'rank' shows #1-#32 (lower is better)
+  format: 'int' | 'dec1' | 'dec2' | 'pct' | 'pctPoints' | 'grade' | 'record' | 'recent' | 'rank';
+  // Full name for hover text, when STAT_NAMES' name for the key doesn't fit this tab
+  name?: string;
   // Scaled against the league range instead of the max (stats that can go negative, or bunch up)
   signed?: boolean;
   // Counts against the player (e.g. fumbles)
   negative?: boolean;
-  // Team support graded 0-12; like the QB support sliders, better support is a (dampened) penalty
+  // Team support graded 0-12: better support is a (dampened) penalty, credit for doing more with less
   support?: boolean;
+  // A support grade that counts for the player instead (QB Responsibility: carrying the offense)
+  supportHelps?: boolean;
+  // A grade the user can raise or lower per player with arrows (QB Responsibility)
+  adjustable?: boolean;
   // Shown for context only: no slider and no weight in the ranking
   infoOnly?: boolean;
   // A missing value ("-") means no chances yet, so it scores as the league average, not the worst
@@ -165,6 +217,20 @@ export interface SkillStat {
 
 // Stat names written out in full (label hover text)
 export const STAT_NAMES: Partial<Record<SkillColumnKey, string>> = {
+  recent: 'Last 5 Games',
+  compPct: 'Completion Percentage',
+  passYards: 'Passing Yards',
+  passTds: 'Passing Touchdowns',
+  ints: 'Interceptions',
+  ypa: 'Yards per Pass Attempt',
+  rating: 'Passer Rating',
+  epaPerPlay: 'Expected Points Added per Play',
+  successRate: 'Success Rate',
+  cpoe: 'Completion Percentage Over Expected',
+  pressureToSack: 'Pressure-to-Sack Rate',
+  badThrowPct: 'Bad Throw Percentage',
+  aggressiveness: 'Aggressiveness Percentage',
+  responsibility: 'Responsibility to Team Grade',
   games: 'Games Played',
   totalYards: 'Total Rushing + Receiving Yards',
   fantasy: 'Fantasy Points',
@@ -250,6 +316,10 @@ export const STAT_NAMES: Partial<Record<SkillColumnKey, string>> = {
 
 // Short labels for volume stats when Per-Game Stats is on (yards read as YPG, points as PPG)
 export const PER_GAME_LABELS: Partial<Record<SkillColumnKey, string>> = {
+  passYards: 'Pass YPG',
+  passTds: 'Pass TDs / Game',
+  ints: 'INTs / Game',
+  turnovers: 'TOs / Game',
   totalYards: 'Total YPG',
   rushYards: 'Rush YPG',
   recYards: 'Rec YPG',
@@ -309,13 +379,32 @@ export const TOTAL_TDS_STAT: SkillStat = {
   format: 'int',
 };
 
+export const TURNOVERS_STAT: SkillStat = {
+  key: 'turnovers',
+  label: 'Turnovers',
+  name: 'Total Interceptions + Fumbles Lost',
+  description: 'Interceptions + fumbles lost (lower is better)',
+  kind: 'volume',
+  format: 'int',
+  negative: true,
+};
+
 // Each combined column and the two stats it stands in for (it takes the first one's spot). In the
 // sidebar the pair is one parent slider (labeled like the combined column) with the two as its
-// breakdown, like the QB page:
-// the parent's weight scales both parts (50 = as set), and its eye hides all three columns.
+// breakdown: the parent's weight scales both parts (50 = as set), and its eye hides all three columns.
+// A tab gets the pairs it has both parts of.
 export const COMBINED_STATS: { stat: SkillStat; parts: [SkillColumnKey, SkillColumnKey] }[] = [
   { stat: TOTAL_YARDS_STAT, parts: ['rushYards', 'recYards'] },
   { stat: TOTAL_TDS_STAT, parts: ['rushTds', 'recTds'] },
+  {
+    stat: { ...TOTAL_YARDS_STAT, name: 'Total Passing + Rushing Yards', description: 'Passing + rushing yards' },
+    parts: ['passYards', 'rushYards'],
+  },
+  {
+    stat: { ...TOTAL_TDS_STAT, name: 'Total Passing + Rushing Touchdowns', description: 'Passing + rushing touchdowns' },
+    parts: ['passTds', 'rushTds'],
+  },
+  { stat: TURNOVERS_STAT, parts: ['ints', 'fumbles'] },
 ];
 
 // The combined pairs a position has both parts of
@@ -360,6 +449,19 @@ const WEAPONS_STAT: SkillStat = {
   kind: 'efficiency',
   format: 'grade',
   support: true,
+};
+
+// How much the offense runs through the QB (pass rate over expected, his share of the team's yards):
+// carrying the offense counts for him, and it's the one grade set by hand (arrows, per QB)
+const RESPONSIBILITY_STAT: SkillStat = {
+  key: 'responsibility',
+  label: 'Responsibility',
+  description: 'How much the offense runs through the QB: carrying it counts for him (arrows to adjust)',
+  kind: 'efficiency',
+  format: 'grade',
+  support: true,
+  supportHelps: true,
+  adjustable: true,
 };
 
 // Team RB grade from the RB rankings: a support grade for offensive lines (a good back makes the
@@ -498,6 +600,94 @@ const RECEIVING_STATS: SkillStat[] = [
 ];
 
 export const SKILL_STATS: Record<SkillPosition, SkillStat[]> = {
+  // Record, Recent and ESPN box stats; play-by-play and charting stats (nflverse) in Advanced
+  QB: [
+    { key: 'winPct', label: 'Record', name: 'Record as Starter', description: 'Win % as a starter', kind: 'efficiency', format: 'record' },
+    { key: 'recent', label: 'Recent', description: 'Last five starts, newest counts most', kind: 'efficiency', format: 'recent' },
+    { key: 'passYards', label: 'Pass Yards', description: 'Passing yards', kind: 'volume', format: 'int' },
+    { key: 'ypa', label: 'Per Attempt', description: 'Yards per pass attempt', kind: 'efficiency', format: 'dec1' },
+    { key: 'compPct', label: 'Comp %', description: 'Completion percentage', kind: 'efficiency', format: 'pctPoints' },
+    { key: 'rushYards', label: 'Rush Yards', description: 'Rushing yards', kind: 'volume', format: 'int' },
+    { key: 'passTds', label: 'Pass TDs', description: 'Passing touchdowns', kind: 'volume', format: 'int' },
+    { key: 'rushTds', label: 'Rush TDs', description: 'Rushing touchdowns', kind: 'volume', format: 'int' },
+    {
+      key: 'ints',
+      label: 'Interceptions',
+      description: 'Interceptions thrown (lower is better)',
+      kind: 'volume',
+      format: 'int',
+      negative: true,
+    },
+    FUMBLES_STAT,
+    { key: 'rating', label: 'Rating', description: 'Passer rating', kind: 'efficiency', format: 'dec1' },
+    {
+      key: 'epaPerPlay',
+      label: 'EPA / Play',
+      description: 'Expected Points Added per play (dropbacks and runs)',
+      kind: 'efficiency',
+      format: 'dec2',
+      signed: true,
+    },
+    {
+      key: 'successRate',
+      label: 'Success',
+      description: 'Share of plays gaining positive EPA',
+      kind: 'efficiency',
+      format: 'pct',
+      signed: true,
+    },
+    {
+      key: 'cpoe',
+      label: 'CPOE',
+      description: 'Completion % over expected',
+      kind: 'efficiency',
+      format: 'pctPoints',
+      signed: true,
+    },
+    {
+      key: 'pressureToSack',
+      label: 'Pressure → Sack',
+      description: 'Share of pressures that turn into sacks (lower is better)',
+      kind: 'efficiency',
+      format: 'pct',
+      signed: true,
+      negative: true,
+    },
+    {
+      key: 'badThrowPct',
+      label: 'Bad Throw %',
+      description: 'Share of attempts charted as inaccurate (lower is better)',
+      kind: 'efficiency',
+      format: 'pct',
+      signed: true,
+      negative: true,
+    },
+    {
+      key: 'timeToThrow',
+      label: 'Time to Throw',
+      name: 'Time to Throw',
+      description: 'Seconds from snap to throw (quicker is better)',
+      kind: 'efficiency',
+      format: 'dec2',
+      signed: true,
+      negative: true,
+    },
+    { key: 'adot', label: 'aDOT', description: 'Average depth of target', kind: 'efficiency', format: 'dec1', signed: true },
+    {
+      key: 'aggressiveness',
+      label: 'Aggressive %',
+      description: 'Throws into tight coverage',
+      kind: 'efficiency',
+      format: 'pctPoints',
+      signed: true,
+    },
+    FANTASY_STAT,
+    WEAPONS_STAT,
+    OLINE_STAT,
+    DEFENSE_STAT,
+    COACHING_STAT,
+    RESPONSIBILITY_STAT,
+  ],
   RB: [
     GAMES_STAT,
     { key: 'carries', label: 'Carries', description: 'Rushing attempts', kind: 'volume', format: 'int' },
@@ -852,6 +1042,25 @@ export const SKILL_STATS: Record<SkillPosition, SkillStat[]> = {
       kind: 'efficiency',
       format: 'pct',
     },
+    // Where the coach's units rank in the league (1 = best), by the Unit Ranks setting
+    {
+      key: 'offRank',
+      label: 'Off Rank',
+      name: 'Offense Rank',
+      description: "The offense's league rank (by points or yards per game: Unit Ranks setting)",
+      kind: 'efficiency',
+      format: 'rank',
+      negative: true,
+    },
+    {
+      key: 'defRank',
+      label: 'Def Rank',
+      name: 'Defense Rank',
+      description: "The defense's league rank (by points or yards allowed per game: Unit Ranks setting)",
+      kind: 'efficiency',
+      format: 'rank',
+      negative: true,
+    },
     {
       key: 'pointDiffPerGame',
       label: 'Pt Diff / Game',
@@ -861,9 +1070,54 @@ export const SKILL_STATS: Record<SkillPosition, SkillStat[]> = {
       signed: true,
     },
     {
+      key: 'turnoverDiffPerGame',
+      label: 'TO Diff / Game',
+      description: 'Takeaways minus giveaways per game',
+      kind: 'efficiency',
+      format: 'dec1',
+      signed: true,
+    },
+    {
+      key: 'penaltiesPerGame',
+      label: 'Penalties / Game',
+      description: 'Penalties called on the team per game (lower is better)',
+      kind: 'efficiency',
+      format: 'dec1',
+      signed: true,
+      negative: true,
+    },
+    {
       key: 'netEpa',
       label: 'Net EPA / Play',
       description: "Team offense EPA/play minus defense EPA/play allowed in the coach's games",
+      kind: 'efficiency',
+      format: 'dec2',
+      signed: true,
+    },
+    {
+      key: 'offEpa',
+      label: 'Off EPA / Play',
+      name: 'Offense Expected Points Added per Play',
+      description: "The offense's EPA per play",
+      kind: 'efficiency',
+      format: 'dec2',
+      signed: true,
+    },
+    {
+      key: 'defEpaAllowed',
+      label: 'Def EPA / Play',
+      name: 'Defense Expected Points Added per Play Allowed',
+      description: 'EPA per play allowed by the defense (lower is better)',
+      kind: 'efficiency',
+      format: 'dec2',
+      signed: true,
+      negative: true,
+    },
+    {
+      key: 'stEpaPerGame',
+      label: 'ST EPA / Game',
+      name: 'Special Teams EPA per Game',
+      description: 'Expected Points Added per game on kicks, punts and returns (net of opponents)',
       kind: 'efficiency',
       format: 'dec2',
       signed: true,
@@ -876,29 +1130,12 @@ export const SKILL_STATS: Record<SkillPosition, SkillStat[]> = {
       format: 'pct',
     },
     {
-      key: 'turnoverDiffPerGame',
-      label: 'TO Diff / Game',
-      description: 'Takeaways minus giveaways per game',
-      kind: 'efficiency',
-      format: 'dec1',
-      signed: true,
-    },
-    {
       key: 'fourthDownGoPct',
       label: '4th Down Go %',
       description: 'How often the team goes for it on 4th and 1-2 at midfield or beyond (outside blowouts)',
       kind: 'efficiency',
       format: 'pct',
       missingIsAverage: true,
-    },
-    {
-      key: 'penaltiesPerGame',
-      label: 'Penalties / Game',
-      description: 'Penalties called on the team per game (lower is better)',
-      kind: 'efficiency',
-      format: 'dec1',
-      signed: true,
-      negative: true,
     },
     QB_PLAY_STAT,
     WEAPONS_STAT,
@@ -940,9 +1177,27 @@ export const STAT_GROUP_INFO: { id: StatGroupId; title: string; icon: string }[]
   { id: 'support', title: 'Support', icon: 'groups' },
 ];
 
-const RESULTS_STATS = new Set<SkillColumnKey>(['games', 'winPct', 'winsOverExpected', 'atsPct', 'oneScoreWinPct']);
+const RESULTS_STATS = new Set<SkillColumnKey>([
+  'games',
+  'winPct',
+  'recent',
+  'winsOverExpected',
+  'atsPct',
+  'offRank',
+  'defRank',
+]);
 
 const ADVANCED_STATS = new Set<SkillColumnKey>([
+  'offEpa',
+  'defEpaAllowed',
+  'stEpaPerGame',
+  'oneScoreWinPct',
+  'epaPerPlay',
+  'successRate',
+  'cpoe',
+  'pressureToSack',
+  'badThrowPct',
+  'aggressiveness',
   'fourthDownGoPct',
   'epaPerCarry',
   'ryoePerAtt',

@@ -1673,3 +1673,18 @@ section ul li.player:not(.header-row) > .col-group > div:not(.box) > p:not(.stat
     margin-left: 2em;
   }
 }
+
+// League ranks (#7, #7 (t) for ties): the "#" and tie mark are small and dimmed so the number reads first
+section ul li.player .rank-value {
+  .rank-hash {
+    font-size: 0.7em;
+    margin-right: 2px;
+    opacity: 0.55;
+  }
+
+  .rank-tie {
+    font-size: 0.7em;
+    margin-left: 3px;
+    opacity: 0.75;
+  }
+}
