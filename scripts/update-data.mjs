@@ -834,6 +834,53 @@ function fieldGoalsOverExpected(pbp) {
 // Season stats for non-QB positions from nflverse, plus team defenses and head coaches
 // The players who make a position's list: the top `count` by usage, and the top `count` at each
 // leader stat (strict cuts, players with 0 left out)
+// ---------------------------------------------------------------------------
+// Garbage time: the app's "Garbage Time Stats" setting can leave out plays run when the game was
+// already decided (offense's win probability under 10% or over 90%, as rbsdm.com does). Only stats
+// built from play-by-play can be filtered, so each unit carries a "competitive" copy of just those.
+// ---------------------------------------------------------------------------
+const competitivePlay = (play) => {
+  const wp = num(play.wp);
+  return wp === null || (wp >= 0.1 && wp <= 0.9);
+};
+
+const COMPETITIVE_KEYS = {
+  DEF: ['epaAllowed', 'passEpaAllowed', 'rushEpaAllowed', 'successAllowed', 'sacks', 'takeaways', 'thirdDownPct', 'redZoneTdPct'],
+  HC: ['netEpa'],
+  OL: ['sacksAllowed', 'qbHitsAllowed', 'sackRate', 'ypc', 'stuffRate', 'runEpa', 'runSuccess', 'shortYardagePct', 'linePenaltiesPerGame'],
+  QB: ['epaPerPlay', 'cpoe', 'successRate'],
+};
+
+const pick = (stats, keys) => Object.fromEntries(keys.map((key) => [key, stats?.[key] ?? null]));
+
+// The same units rebuilt from competitive plays, keeping only the play-by-play stats
+function withCompetitive(units, rebuilt, keys) {
+  const byId = new Map(rebuilt.map((unit) => [unit.gsisId, unit]));
+  return units.map((unit) => ({ ...unit, competitive: pick(byId.get(unit.gsisId)?.stats, keys) }));
+}
+
+// EPA per carry / per target for RBs, WRs and TEs from competitive plays, keyed by nflverse id
+function competitivePlayerEpa(pbp) {
+  const add = (map, id, epa) => {
+    if (!id || id === 'NA' || epa === null) return;
+    const total = map.get(id) ?? { sum: 0, plays: 0 };
+    map.set(id, { sum: total.sum + epa, plays: total.plays + 1 });
+  };
+  const carries = new Map();
+  const targets = new Map();
+  for (const play of pbp) {
+    if (!competitivePlay(play)) continue;
+    const epa = num(play.epa);
+    if (play.rush === '1') add(carries, play.rusher_player_id, epa);
+    else if (play.pass_attempt === '1' && play.sack !== '1') add(targets, play.receiver_player_id, epa);
+  }
+  const per = (map, id) => {
+    const total = map.get(id);
+    return total?.plays ? round(total.sum / total.plays, 3) : 0;
+  };
+  return (id) => ({ epaPerCarry: per(carries, id), epaPerTarget: per(targets, id) });
+}
+
 function listedPlayers(all, { count, usage, leaders = [] }) {
   const top = (value) =>
     all
@@ -847,11 +894,15 @@ function skillPlayers(nflverse) {
   const { playerStats, pbp, espnByGsis, pfrByGsis, ngs, pfr, snapShare } = nflverse;
   const stEpa = specialTeamsEpa(pbp);
   const fgOverExp = fieldGoalsOverExpected(pbp);
+  const competitive = { ...nflverse, pbp: pbp.filter(competitivePlay) };
+  const units = (build, keys) =>
+    withCompetitive(build(nflverse), build(competitive), keys).sort((a, b) => a.name.localeCompare(b.name));
   const result = {
-    DEF: defenseUnits(nflverse).sort((a, b) => a.name.localeCompare(b.name)),
-    HC: coachUnits(nflverse).sort((a, b) => a.name.localeCompare(b.name)),
-    OL: olineUnits(nflverse).sort((a, b) => a.name.localeCompare(b.name)),
+    DEF: units(defenseUnits, COMPETITIVE_KEYS.DEF),
+    HC: units(coachUnits, COMPETITIVE_KEYS.HC),
+    OL: units(olineUnits, COMPETITIVE_KEYS.OL),
   };
+  const competitiveEpa = competitivePlayerEpa(pbp);
   for (const [position, config] of Object.entries(SKILL_POSITIONS)) {
     const players = playerStats
       .filter((row) => row.position === position)
@@ -876,6 +927,7 @@ function skillPlayers(nflverse) {
           teamLogo: `../assets/NFL_Icons/${icon}.png`,
           games: n('games'),
           stats: config.stats(n, ctx),
+          ...(config.stats === offenseStats ? { competitive: competitiveEpa(row.player_id) } : {}),
         };
       });
     const listed = listedPlayers(players, config);
@@ -998,6 +1050,9 @@ async function main() {
       return new Map();
     });
     advanced = advancedStats(gameData.map((qb) => qb.id), nflverse);
+    // The play-by-play stats again without garbage time, for the Garbage Time Stats setting
+    const competitive = advancedStats(gameData.map((qb) => qb.id), { ...nflverse, pbp: nflverse.pbp.filter(competitivePlay) });
+    for (const [id, stats] of advanced) stats.competitive = pick(competitive.get(id), COMPETITIVE_KEYS.QB);
     skill = skillPlayers(nflverse);
     dataGrades = { teams: teamDataGrades(nflverse), qbs: qbDataGrades(gameData.map((qb) => qb.id), nflverse) };
   } catch (err) {

@@ -732,12 +732,12 @@
 
     <!-- Menu -->
     <mat-menu #menu="matMenu" class="settings-menu">
-      <div mat-menu-item (click)="$event.stopPropagation(); cycleFantasyScoring()">
+      <div mat-menu-item title="Click to switch the scoring behind Fantasy Pts: PPR, Half PPR or Standard (kickers and defenses keep their own fixed scoring)" (click)="$event.stopPropagation(); cycleFantasyScoring()">
         <!-- Fantasy Scoring -->
         <span class="lombardi menu-icon" aria-hidden="true"></span>
         <span>Fantasy Scoring: {{ scoringLabels[fantasyScoring] }}</span>
       </div>
-      <div mat-menu-item (click)="$event.stopPropagation(); categoryColors = !categoryColors">
+      <div mat-menu-item title="A colored bar before each stat group in the rows, in the same color as its filter card" (click)="$event.stopPropagation(); categoryColors = !categoryColors">
         <!-- Category dividers: a colored bar before each stat group in the rows -->
         <mat-slide-toggle hideIcon
           color="accent"
@@ -747,7 +747,7 @@
         ></mat-slide-toggle>
         <span>Category Dividers</span>
       </div>
-      <div mat-menu-item (click)="$event.stopPropagation(); colorValues = !colorValues">
+      <div mat-menu-item title="Tint each value green above the list average and red below it, stronger the further out (flipped for lower-is-better stats like sacks allowed)" (click)="$event.stopPropagation(); colorValues = !colorValues">
         <!-- Color-coded values -->
         <mat-slide-toggle hideIcon
           color="accent"
@@ -759,6 +759,7 @@
       </div>
       <div
         mat-menu-item
+        title="Show rushing + passing / receiving yards and touchdowns as one Total Yds and one Total TDs column (display only: the ranking still uses both sliders)"
         (click)="$event.stopPropagation(); totalStats = !totalStats"
       >
         <!-- Total Stats -->
@@ -768,10 +769,11 @@
           class="slide-toggle"
           (click)="$event.stopPropagation()"
         ></mat-slide-toggle>
-        <span>Combined Rush/Pass Stats</span>
+        <span>Combine Rush/Pass Stats</span>
       </div>
       <div
         mat-menu-item
+        title="Off: hide players listed Out, Doubtful or on Injured Reserve in ESPN's injury report, and leave them out of the rankings"
         (click)="
           $event.stopPropagation(); showInjured = !showInjured; sortPlayers()
         "
@@ -788,6 +790,21 @@
       </div>
       <div
         mat-menu-item
+        title="Off: EPA, success rate, CPOE and other play-by-play stats leave out plays run with the game already decided (win probability under 10% or over 90%). Season totals aren't affected"
+        (click)="$event.stopPropagation(); garbageTime = !garbageTime"
+      >
+        <!-- Garbage Time Stats -->
+        <mat-slide-toggle hideIcon
+          color="accent"
+          class="slide-toggle"
+          [(ngModel)]="garbageTime"
+          (click)="$event.stopPropagation()"
+        ></mat-slide-toggle>
+        <span>Garbage Time Stats</span>
+      </div>
+      <div
+        mat-menu-item
+        title="Show counting stats (yards, touchdowns, sacks...) per game instead of season totals, and rank on them that way"
         (click)="$event.stopPropagation(); perGame = !perGame; sortPlayers()"
       >
         <!-- Per Game Stats-->
@@ -803,6 +820,7 @@
       </div>
       <div
         mat-menu-item
+        title="Show columns for stats whose slider is at 0% (they still don't count in the ranking). Stats switched off with their eye stay hidden"
         (click)="$event.stopPropagation(); showUnused = !showUnused"
       >
         <!-- Unweighted (0%) stats -->

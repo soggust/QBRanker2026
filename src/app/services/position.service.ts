@@ -37,6 +37,8 @@ export interface RankerSettings {
   // Carry each stat group's color down the rows (a thin bar before each group)
   categoryColors: boolean;
   fantasyScoring: FantasyScoring;
+  // Off: play-by-play stats leave out garbage time (plays with the game already decided)
+  garbageTime: boolean;
 }
 
 const SETTINGS_KEY = 'rankerSettings';
@@ -48,6 +50,7 @@ const DEFAULT_SETTINGS: RankerSettings = {
   colorValues: true,
   categoryColors: true,
   fantasyScoring: 'ppr',
+  garbageTime: true,
 };
 
 function readSettings(): RankerSettings {
@@ -84,6 +87,10 @@ export interface UnitOrder {
   providedIn: 'root',
 })
 export class PositionService {
+  // First, since the grade streams below read the settings
+  private settingsSubject = new BehaviorSubject<RankerSettings>(readSettings());
+  public settings$ = this.settingsSubject.asObservable();
+
   private positionSubject = new BehaviorSubject<Position>(linkedPosition());
   public position$: Observable<Position> = this.positionSubject.asObservable();
 
@@ -124,10 +131,14 @@ export class PositionService {
 
   // A tab's list as last shown (or its default slider ranking before it's been opened), best first
   private rankedUnits(position: SkillPosition): Observable<SkillPlayer[]> {
-    return combineLatest([this.weightsSubject, this.unitOrdersSubject]).pipe(
-      map(([weights, orders]) => {
+    const garbageTime$ = this.settingsSubject.pipe(
+      map((settings) => settings.garbageTime),
+      distinctUntilChanged(),
+    );
+    return combineLatest([this.weightsSubject, this.unitOrdersSubject, garbageTime$]).pipe(
+      map(([weights, orders, garbageTime]) => {
         const order = orders[position];
-        if (!order) return defaultRanking(position, weights[position]);
+        if (!order) return defaultRanking(position, weights[position], garbageTime);
         const byId = new Map(SKILL_UNITS[position].map((unit) => [unit.gsisId, unit]));
         return order.ids.map((id) => byId.get(id)).filter((unit) => !!unit);
       }),
@@ -248,8 +259,6 @@ export class PositionService {
   private qbRanksSubject = new BehaviorSubject<number[]>([]);
   public qbRanks$ = this.qbRanksSubject.asObservable();
 
-  private settingsSubject = new BehaviorSubject<RankerSettings>(readSettings());
-  public settings$ = this.settingsSubject.asObservable();
 
   private fantasyScoringSubject = new BehaviorSubject<FantasyScoring>(this.settingsSubject.value.fantasyScoring);
   public fantasyScoring$ = this.fantasyScoringSubject.asObservable();

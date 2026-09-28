@@ -1082,7 +1082,7 @@
 // A little space between each label and its slider so labels (and breakdown toggles) are easy to hit
 .sidebar .filters .slider-row,
 .sidebar .filters .sub-rows .slider-row {
-  row-gap: 0.45em;
+  row-gap: 0.7em;
 }
 
 // Slider rows line up with the group title text (past the header icon); sub-rows keep their own indent
@@ -1236,14 +1236,15 @@
   }
 
   .row-handle {
-    left: calc(1.1em + 10px);
+    // Between the card edge and the slider (its touch area starts about 31px in)
+    left: 16px;
     top: 50%;
     transform: translateY(-50%);
   }
 
-  // A QB row with its breakdown open: center on the row itself (54px tall), not row + breakdown
+  // A row with its breakdown open: center on the row itself (60px tall), not row + breakdown
   .row-drag:has(> .sub-rows) .row-handle {
-    top: 27px;
+    top: 30px;
   }
 }
 
@@ -1261,4 +1262,11 @@
 .sidebar .logo h1 {
   font-family: "Orbitron", sans-serif;
   font-weight: 500;
+}
+
+// Slider labels at 10px (regular, breakdown and Group Weight rows)
+.sidebar .filters .slider-row p.slider-label,
+.sidebar .filters .slider-row button.slider-label.expandable,
+.sidebar .filters .slider-row.master p.slider-label {
+  font-size: 10px;
 }

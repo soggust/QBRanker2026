@@ -32,6 +32,13 @@ export interface Filters {
   responsibilityValue: number;
 }
 
+// A QB's play-by-play stats (the ones the Garbage Time Stats setting can filter)
+export interface QbPlayByPlay {
+  epaPerPlay: number | null;
+  cpoe: number | null;
+  successRate: number | null;
+}
+
 // Players
 export interface Player {
   name: string;
@@ -70,6 +77,9 @@ export interface Player {
   defenseOverride?: number;
   coachingOverride?: number;
   outOfDate: boolean;
+  // Play-by-play stats over every play, and without garbage time (the shown values are one of the two)
+  allPlays: QbPlayByPlay;
+  competitive: QbPlayByPlay | null;
 }
 
 // A QB's ESPN season box stats (the update script fetches them each night with the results)
@@ -111,6 +121,8 @@ export interface StaticPlayerData {
   timeToThrow: number | null;
   adot: number | null;
   aggressiveness: number | null;
+  // EPA / CPOE / success without garbage time (null: not in the data yet)
+  competitive: QbPlayByPlay | null;
   // Starts per team, keyed by team logo path
   starts: Record<string, number>;
   // ESPN season box stats from the nightly update (null: no stats this season yet)

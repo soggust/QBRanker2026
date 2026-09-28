@@ -8,6 +8,7 @@ import {
   SkillWeights,
   combinedFor,
   fantasyPoints,
+  unitStat,
 } from 'app/positions';
 
 export const SKILL_UNITS = DATA.skillPlayers as Record<SkillPosition, SkillPlayer[]>;
@@ -70,7 +71,7 @@ export function gradesByRank(ranked: { teamLogo: string }[]): Map<string, number
 // A tab's default ranking (its sliders, before it's been opened), best first. Rush / rec parts are
 // scaled by their parent Total Yds / Total TDs sliders, fantasy is PPR, and support grades from
 // other tabs count as average (C).
-export function defaultRanking(position: SkillPosition, weights: SkillWeights): SkillPlayer[] {
+export function defaultRanking(position: SkillPosition, weights: SkillWeights, garbageTime = true): SkillPlayer[] {
   const units = SKILL_UNITS[position];
   const effective = { ...weights };
   for (const { stat, parts } of combinedFor(position)) {
@@ -84,7 +85,7 @@ export function defaultRanking(position: SkillPosition, weights: SkillWeights): 
       case 'totalYards':
         return (unit.stats.rushYards ?? 0) + (unit.stats.recYards ?? 0);
       default:
-        return stat.support ? null : unit.stats[stat.key as SkillStatKey];
+        return stat.support ? null : unitStat(unit, stat.key as SkillStatKey, garbageTime);
     }
   });
   return [...units].sort((a, b) => (totals.get(b) ?? 0) - (totals.get(a) ?? 0));

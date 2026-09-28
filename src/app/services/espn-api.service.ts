@@ -34,6 +34,8 @@ export class EspnApiService {
       epaPerPlay: data.epaPerPlay,
       cpoe: data.cpoe,
       successRate: data.successRate,
+      allPlays: { epaPerPlay: data.epaPerPlay, cpoe: data.cpoe, successRate: data.successRate },
+      competitive: data.competitive,
       fantasyStd: data.fantasyStd,
       receptions: data.receptions,
       pressureToSack: data.pressureToSack,

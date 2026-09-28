@@ -12,6 +12,7 @@
       <div>
         <mat-select
           [placeholder]="position + ' Presets...'"
+          title="Ready-made slider settings, each built around a style of play (hover an option to see what it weighs)"
           [(ngModel)]="skillPresets[skill]"
           (ngModelChange)="onSkillPresetChange()"
         >
@@ -44,7 +45,12 @@
               aria-label="Drag to reorder"
               title="Drag to reorder"
             ></mat-icon>
-            <button type="button" class="group-toggle" (click)="toggleSkillGroup(group.id)">
+            <button
+              type="button"
+              class="group-toggle"
+              [title]="(skillGroupIsOpen(group.id) ? 'Hide ' : 'Show ') + group.title + ' sliders'"
+              (click)="toggleSkillGroup(group.id)"
+            >
               <mat-icon class="group-icon" [fontIcon]="group.icon"></mat-icon>
               <span class="group-title">{{ group.title }}</span>
             </button>
@@ -62,6 +68,7 @@
               type="button"
               class="group-chevron-button"
               [attr.aria-label]="(skillGroupIsOpen(group.id) ? 'Collapse ' : 'Expand ') + group.title"
+              [title]="(skillGroupIsOpen(group.id) ? 'Hide ' : 'Show ') + group.title + ' sliders'"
               (click)="toggleSkillGroup(group.id)"
             >
               <mat-icon
@@ -197,7 +204,7 @@
   <!-- QB Filters -->
   <div class="filters" [hidden]="position !== 'QB'">
     <div>
-      <mat-select placeholder="QB Presets..." [(ngModel)]="preset" (ngModelChange)="onPresetChange()">
+      <mat-select placeholder="QB Presets..." title="Ready-made slider settings, each built around a style of play (hover an option to see what it weighs)" [(ngModel)]="preset" (ngModelChange)="onPresetChange()">
         @if (preset === 'custom') {
         <mat-option value="custom" disabled="disabled">CUSTOM</mat-option>
         }
@@ -229,7 +236,12 @@
             aria-label="Drag to reorder"
             title="Drag to reorder"
           ></mat-icon>
-          <button type="button" class="group-toggle" (click)="toggleGroup(group.id)">
+          <button
+            type="button"
+            class="group-toggle"
+            [title]="(groupOpen[group.id] ? 'Hide ' : 'Show ') + group.title + ' sliders'"
+            (click)="toggleGroup(group.id)"
+          >
             <mat-icon class="group-icon" [fontIcon]="group.icon"></mat-icon>
             <span class="group-title">{{ group.title }}</span>
           </button>
@@ -248,6 +260,7 @@
             type="button"
             class="group-chevron-button"
             [attr.aria-label]="(groupOpen[group.id] ? 'Collapse ' : 'Expand ') + group.title"
+            [title]="(groupOpen[group.id] ? 'Hide ' : 'Show ') + group.title + ' sliders'"
             (click)="toggleGroup(group.id)"
           >
             <mat-icon
@@ -343,8 +356,19 @@
     </div>
   </ng-template>
   <footer>
-    <button mat-raised-button (click)="resetDefaults()">Defaults</button>
-    <button mat-raised-button (click)="clearAll()" class="negative">
+    <button
+      mat-raised-button
+      title="Put every slider on this tab back to its default and switch every stat back on"
+      (click)="resetDefaults()"
+    >
+      Defaults
+    </button>
+    <button
+      mat-raised-button
+      title="Turn every stat on this tab down to 0%, to build a ranking from scratch"
+      (click)="clearAll()"
+      class="negative"
+    >
       Clear
     </button>
   </footer>

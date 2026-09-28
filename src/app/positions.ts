@@ -126,9 +126,18 @@ export interface SkillPlayer {
   games: number;
   // null when a data source doesn't cover the player (shown as "-")
   stats: Record<SkillStatKey, number | null>;
+  // The play-by-play stats without garbage time (win probability under 10% or over 90%)
+  competitive?: Partial<Record<SkillStatKey, number | null>>;
   // From ESPN's injury report (Out, Doubtful or Injured Reserve); players only, not units
   injured?: boolean;
   injuryStatus?: string;
+}
+
+// A unit's stat, without garbage time when the Garbage Time Stats setting is off (stats that aren't
+// built from play-by-play have no filtered copy and stay the same)
+export function unitStat(unit: SkillPlayer, key: SkillStatKey, garbageTime: boolean): number | null {
+  if (!garbageTime && unit.competitive && key in unit.competitive) return unit.competitive[key] ?? null;
+  return unit.stats[key];
 }
 
 export interface SkillStat {

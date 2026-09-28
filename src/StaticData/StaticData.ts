@@ -1,4 +1,4 @@
-import { QbBoxStats, StaticPlayerData } from 'app/types';
+import { QbBoxStats, QbPlayByPlay, StaticPlayerData } from 'app/types';
 import { DATA } from './data';
 
 // Loaded by main.ts before the app starts (see data.ts)
@@ -36,6 +36,8 @@ interface GameData {
     timeToThrow: number | null;
     adot: number | null;
     aggressiveness: number | null;
+    // The play-by-play stats without garbage time (win probability under 10% or over 90%)
+    competitive?: QbPlayByPlay;
   } | null;
 }
 
@@ -130,6 +132,7 @@ export const StaticData: StaticPlayerData[] = games.map((game) => {
     timeToThrow: game.advanced?.timeToThrow ?? null,
     adot: game.advanced?.adot ?? null,
     aggressiveness: game.advanced?.aggressiveness ?? null,
+    competitive: game.advanced?.competitive ?? null,
     starts: game.starts,
     box: game.box ?? null,
     injured: injured ?? game.injured ?? false,

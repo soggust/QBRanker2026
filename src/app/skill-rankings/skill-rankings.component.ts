@@ -16,6 +16,7 @@ import {
   fantasyPoints,
   SkillStatGroup,
   StatGroupId,
+  unitStat,
   hasFantasy,
   skillGroups,
   statGroup,
@@ -71,6 +72,13 @@ export class SkillRankingsComponent implements OnChanges {
     this.positionService.updateSettings({ totalStats: value });
   }
 
+  get garbageTime(): boolean {
+    return this.positionService.settings.garbageTime;
+  }
+  set garbageTime(value: boolean) {
+    this.positionService.updateSettings({ garbageTime: value });
+  }
+
   get showInjured(): boolean {
     return this.positionService.settings.showInjured;
   }
@@ -105,7 +113,7 @@ export class SkillRankingsComponent implements OnChanges {
   private scalesFor?: unknown[];
 
   private columnScale(stat: SkillStat, basis: 'rate' | 'shown'): TintScale | null {
-    const inputs = [this.playerList, this.dataVersion, this.perGame, this.fantasyScoring];
+    const inputs = [this.playerList, this.dataVersion, this.perGame, this.fantasyScoring, this.garbageTime];
     if (!this.scalesFor || inputs.some((v, i) => v !== this.scalesFor![i])) {
       this.scales.clear();
       this.scalesFor = inputs;
@@ -361,7 +369,7 @@ export class SkillRankingsComponent implements OnChanges {
       case 'defense':
         return Math.round(this.teamDefense.get(player.teamLogo) ?? 6);
       default:
-        return player.stats[stat.key];
+        return unitStat(player, stat.key, this.garbageTime);
     }
   }
 

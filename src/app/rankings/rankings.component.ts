@@ -91,6 +91,13 @@ export class RankingsComponent {
     this.positionService.updateSettings({ perGame: value });
   }
 
+  get garbageTime(): boolean {
+    return this.positionService.settings.garbageTime;
+  }
+  set garbageTime(value: boolean) {
+    this.positionService.updateSettings({ garbageTime: value });
+  }
+
   get showInjured(): boolean {
     return this.positionService.settings.showInjured;
   }
@@ -283,6 +290,7 @@ export class RankingsComponent {
       this.applyDefenseGrades();
       this.applyCoachingGrades();
       this.applyOlineGrades();
+      this.applyGarbageTime();
       this.sortPlayers();
     });
 
@@ -298,7 +306,10 @@ export class RankingsComponent {
     });
 
     // Re-rank when another tab's settings menu changes per-game stats or injured players
-    this.positionService.settings$.subscribe(() => this.sortPlayers());
+    this.positionService.settings$.subscribe(() => {
+      this.applyGarbageTime();
+      this.sortPlayers();
+    });
 
     this.filterService.hiddenGroups$.subscribe((hidden) => {
       this.hidden = hidden;
@@ -332,6 +343,13 @@ export class RankingsComponent {
     for (const player of this.unfilteredPlayerList) {
       const grade = this.teamDefense.get(player.teamLogo);
       player.defense = player.defenseOverride ?? (grade === undefined ? 6 : Math.round(grade));
+    }
+  }
+
+  // EPA, CPOE and success rate over every play, or without garbage time when the setting is off
+  applyGarbageTime() {
+    for (const player of this.unfilteredPlayerList) {
+      Object.assign(player, (!this.garbageTime && player.competitive) || player.allPlays);
     }
   }
 
