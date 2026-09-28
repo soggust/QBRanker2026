@@ -233,14 +233,14 @@
         mat-menu-item
         (click)="$event.stopPropagation(); showUnused = !showUnused"
       >
-        <!-- Hide Unused Stats -->
+        <!-- Unweighted (0%) stats -->
         <mat-slide-toggle hideIcon
           color="accent"
           class="slide-toggle"
           [(ngModel)]="showUnused"
           (click)="$event.stopPropagation()"
         ></mat-slide-toggle>
-        <span>Unused Stats</span>
+        <span>Unweighted Stats</span>
       </div>
     </mat-menu>
   </footer>

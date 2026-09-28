@@ -8,6 +8,7 @@ import { PositionService } from 'app/services/position.service';
 import { blendGrade, preseasonCoaching, teamGamesPlayed } from 'StaticData/StaticData';
 import { tintAverage, tintColor } from 'app/utils/value-tint';
 import { badgeColor, whiteLogo } from 'app/utils/team-colors';
+import { FilterKey, QB_COLUMN_KEYS } from 'app/qb-filter-groups';
 
 // Per-game names for the columns that switch to per-game values (Per-Game Stats setting)
 const PER_GAME_LABELS: Record<string, string> = {
@@ -303,9 +304,11 @@ export class RankingsComponent {
     });
 
     this.filterService.filters$.subscribe((res) => {
-      this.filters = res;
-      this.sortPlayers();
+      this.sliderValues = res;
+      this.applyHiddenStats();
     });
+
+    this.positionService.statHidden$.subscribe(() => this.applyHiddenStats());
   }
 
   // Sort Players
@@ -394,8 +397,30 @@ export class RankingsComponent {
     ]
   };
 
+  // The four stat groups in the order set by dragging the sidebar cards
+  groupOrder(): ColumnGroupId[] {
+    return this.positionService.groupOrder('QB');
+  }
+
+  // Columns switched off with a sidebar eye (their own slider, their breakdown's, or their group's
+  // total weight) are left out, whatever the Unweighted Stats setting says
   columnOrder(group: ColumnGroupId): string[] {
-    return this.positionService.columnOrder(`QB.${group}`, this.defaultColumns[group]);
+    return this.positionService
+      .columnOrder(`QB.${group}`, this.defaultColumns[group])
+      .filter((column) => !(QB_COLUMN_KEYS[column] ?? []).some((key) => this.positionService.isStatHidden('QB', key)));
+  }
+
+  // The sidebar's slider values; the ranking uses them with eye-hidden stats counted as 0
+  private sliderValues?: Filters;
+
+  private applyHiddenStats() {
+    if (!this.sliderValues) return;
+    const filters = { ...this.sliderValues };
+    for (const key of Object.keys(filters) as FilterKey[]) {
+      if (this.positionService.isStatHidden('QB', key)) filters[key] = 0;
+    }
+    this.filters = filters;
+    this.sortPlayers();
   }
 
   // Color of the badge behind the team logo (the team's primary, or secondary for logos drawn in it)

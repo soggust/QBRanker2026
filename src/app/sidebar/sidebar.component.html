@@ -26,15 +26,26 @@
         </mat-select>
       </div>
 
-      <!-- Stat groups, same cards as the QB filters -->
-      @for (group of skillGroupList; track group.id) {
+      <!-- Stat groups, same cards as the QB filters; drag a card's handle to reorder the grid's groups -->
+      <div class="group-list" cdkDropList cdkDropListLockAxis="y" (cdkDropListDropped)="dropSkillGroup($event)">
+      @for (group of orderedSkillGroups; track group.id) {
         <div
+          cdkDrag
+          cdkDragPreviewContainer="parent"
           class="filter-group"
           [ngClass]="'group-' + group.id"
           [class.open]="skillGroupIsOpen(group.id)"
           [class.group-hidden]="skillHidden[group.id]"
         >
           <div class="group-header">
+            <mat-icon
+              cdkDragHandle
+              class="group-handle"
+              fontIcon="drag_indicator"
+              aria-hidden="false"
+              aria-label="Drag to reorder"
+              title="Drag to reorder"
+            ></mat-icon>
             <button type="button" class="group-toggle" (click)="toggleSkillGroup(group.id)">
               <mat-icon class="group-icon" [fontIcon]="group.icon"></mat-icon>
               <span class="group-title">{{ group.title }}</span>
@@ -63,55 +74,66 @@
           </div>
 
           @if (skillGroupIsOpen(group.id)) {
-            <div class="group-body">
-              @for (stat of group.stats; track stat.key) {
-                @if (stat.infoOnly) {
-                  <!-- Shown for context only (no slider); its eye hides the column -->
-                  <div class="slider-row info-row" [class.disabled]="skillWeights[stat.key] === 0" [title]="stat.description">
+            <div class="group-body" cdkDropList cdkDropListLockAxis="y" (cdkDropListDropped)="dropSkillStat(group, $event)">
+              @for (stat of orderedStats(group); track stat.key) {
+                <div class="row-drag" cdkDrag cdkDragPreviewContainer="parent">
+                  <mat-icon
+                    cdkDragHandle
+                    class="row-handle"
+                    fontIcon="drag_indicator"
+                    aria-hidden="false"
+                    aria-label="Drag to reorder"
+                    title="Drag to reorder"
+                  ></mat-icon>
+                  @if (stat.infoOnly) {
+                    <!-- Shown for context only (no slider); its eye hides the column -->
+                    <div class="slider-row info-row" [class.disabled]="skillStatHidden(stat.key)" [title]="stat.description">
+                      <p class="slider-label">{{ stat.label }}</p>
+                      <button
+                        type="button"
+                        class="slider-eye"
+                        [class.off]="skillStatHidden(stat.key)"
+                        [attr.aria-label]="(skillStatHidden(stat.key) ? 'Show ' : 'Hide ') + stat.label"
+                        [title]="(skillStatHidden(stat.key) ? 'Show ' : 'Hide ') + stat.label"
+                        (click)="toggleSkillSlider(stat.key)"
+                      >
+                        <mat-icon [fontIcon]="skillStatHidden(stat.key) ? 'visibility_off' : 'visibility'"></mat-icon>
+                      </button>
+                    </div>
+                  } @else {
+                  <div
+                    class="slider-row"
+                    [class.disabled]="!skillWeights[stat.key] || skillStatHidden(stat.key)"
+                    [title]="stat.description"
+                  >
                     <p class="slider-label">{{ stat.label }}</p>
+                    <mat-slider min="0" max="100" step="5" color="accent">
+                      <input
+                        matSliderThumb
+                        [(ngModel)]="skillWeights[stat.key]"
+                        (ngModelChange)="skillPresets[skill] = 'custom'; saveSkillWeights()"
+                      />
+                    </mat-slider>
+                    <span class="slider-value">{{ skillWeights[stat.key] }}%</span>
                     <button
                       type="button"
                       class="slider-eye"
-                      [class.off]="skillWeights[stat.key] === 0"
-                      [attr.aria-label]="(skillWeights[stat.key] === 0 ? 'Show ' : 'Hide ') + stat.label"
-                      [title]="(skillWeights[stat.key] === 0 ? 'Show ' : 'Hide ') + stat.label"
-                      (click)="toggleInfoColumn(stat.key)"
+                      [class.off]="skillStatHidden(stat.key)"
+                      [attr.aria-label]="(skillStatHidden(stat.key) ? 'Show ' : 'Hide ') + stat.label"
+                      [title]="(skillStatHidden(stat.key) ? 'Show ' : 'Hide ') + stat.label"
+                      (click)="toggleSkillSlider(stat.key)"
                     >
-                      <mat-icon [fontIcon]="skillWeights[stat.key] === 0 ? 'visibility_off' : 'visibility'"></mat-icon>
+                      <mat-icon [fontIcon]="skillStatHidden(stat.key) ? 'visibility_off' : 'visibility'"></mat-icon>
                     </button>
                   </div>
-                } @else {
-                <div
-                  class="slider-row"
-                  [class.disabled]="!skillWeights[stat.key]"
-                  [title]="stat.description"
-                >
-                  <p class="slider-label">{{ stat.label }}</p>
-                  <mat-slider min="0" max="100" step="5" color="accent">
-                    <input
-                      matSliderThumb
-                      [(ngModel)]="skillWeights[stat.key]"
-                      (ngModelChange)="skillPresets[skill] = 'custom'; saveSkillWeights()"
-                    />
-                  </mat-slider>
-                  <span class="slider-value">{{ skillWeights[stat.key] }}%</span>
-                  <button
-                    type="button"
-                    class="slider-eye"
-                    [class.off]="!skillWeights[stat.key]"
-                    [attr.aria-label]="(skillWeights[stat.key] ? 'Turn off ' : 'Turn on ') + stat.label"
-                    [title]="(skillWeights[stat.key] ? 'Turn off ' : 'Turn back on ') + stat.label"
-                    (click)="toggleSkillSlider(stat.key)"
-                  >
-                    <mat-icon [fontIcon]="skillWeights[stat.key] ? 'visibility' : 'visibility_off'"></mat-icon>
-                  </button>
+                  }
                 </div>
-                }
               }
             </div>
           }
         </div>
       }
+      </div>
     </div>
   }
 
@@ -130,15 +152,26 @@
       </mat-select>
     </div>
 
-    <!-- Slider groups (defined in qb-filter-groups.ts) -->
-    @for (group of qbGroups; track group.id) {
+    <!-- Slider groups (defined in qb-filter-groups.ts); drag a card's handle to reorder the grid's groups -->
+    <div class="group-list" cdkDropList cdkDropListLockAxis="y" (cdkDropListDropped)="dropQbGroup($event)">
+    @for (group of orderedQbGroups; track group.id) {
       <div
+        cdkDrag
+        cdkDragPreviewContainer="parent"
         class="filter-group"
         [ngClass]="'group-' + group.id"
         [class.open]="groupOpen[group.id]"
         [class.group-hidden]="hiddenGroups[group.id]"
       >
         <div class="group-header">
+          <mat-icon
+            cdkDragHandle
+            class="group-handle"
+            fontIcon="drag_indicator"
+            aria-hidden="false"
+            aria-label="Drag to reorder"
+            title="Drag to reorder"
+          ></mat-icon>
           <button type="button" class="group-toggle" (click)="toggleGroup(group.id)">
             <mat-icon class="group-icon" [fontIcon]="group.icon"></mat-icon>
             <span class="group-title">{{ group.title }}</span>
@@ -176,25 +209,36 @@
               "
             ></ng-container>
           }
-          <div class="group-body">
-            @for (row of group.rows; track row.key) {
-              <ng-container
-                *ngTemplateOutlet="sliderRow; context: { $implicit: row, parent: group.master }"
-              ></ng-container>
-              @if (row.children && rowOpen[row.key]) {
-                <div class="sub-rows">
-                  @for (child of row.children; track child.key) {
-                    <ng-container
-                      *ngTemplateOutlet="sliderRow; context: { $implicit: child, parent: row.key }"
-                    ></ng-container>
-                  }
-                </div>
-              }
+          <div class="group-body" cdkDropList cdkDropListLockAxis="y" (cdkDropListDropped)="dropQbRow(group, $event)">
+            @for (row of orderedRows(group); track row.key) {
+              <div class="row-drag" cdkDrag cdkDragPreviewContainer="parent">
+                <mat-icon
+                  cdkDragHandle
+                  class="row-handle"
+                  fontIcon="drag_indicator"
+                  aria-hidden="false"
+                  aria-label="Drag to reorder"
+                  title="Drag to reorder"
+                ></mat-icon>
+                <ng-container
+                  *ngTemplateOutlet="sliderRow; context: { $implicit: row, parent: group.master }"
+                ></ng-container>
+                @if (row.children && rowOpen[row.key]) {
+                  <div class="sub-rows">
+                    @for (child of row.children; track child.key) {
+                      <ng-container
+                        *ngTemplateOutlet="sliderRow; context: { $implicit: child, parent: row.key }"
+                      ></ng-container>
+                    }
+                  </div>
+                }
+              </div>
             }
           </div>
         }
       </div>
     }
+    </div>
   </div>
 
   <!-- One slider: label, slider, value. Labels of rows with sub-sliders toggle the breakdown. -->
@@ -228,16 +272,16 @@
         />
       </mat-slider>
       <span class="slider-value">{{ valueOf(row.key) }}%</span>
-      <!-- Eye: switch this one slider off (0%) or back to where it was -->
+      <!-- Eye: hide this stat's columns and drop it from the ranking (the slider keeps its value) -->
       <button
         type="button"
         class="slider-eye"
-        [class.off]="!valueOf(row.key)"
-        [attr.aria-label]="(valueOf(row.key) ? 'Turn off ' : 'Turn on ') + row.label"
-        [title]="(valueOf(row.key) ? 'Turn off ' : 'Turn back on ') + row.label"
+        [class.off]="isHidden(row.key)"
+        [attr.aria-label]="(isHidden(row.key) ? 'Show ' : 'Hide ') + row.label"
+        [title]="(isHidden(row.key) ? 'Show ' : 'Hide ') + row.label"
         (click)="toggleSlider(row.key)"
       >
-        <mat-icon [fontIcon]="valueOf(row.key) ? 'visibility' : 'visibility_off'"></mat-icon>
+        <mat-icon [fontIcon]="isHidden(row.key) ? 'visibility_off' : 'visibility'"></mat-icon>
       </button>
     </div>
   </ng-template>

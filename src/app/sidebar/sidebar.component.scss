@@ -1145,3 +1145,104 @@
   padding: 0.45em;
   z-index: 10;
 }
+
+// Drag to reorder: a small grip in each card header (before the group icon) and before each
+// slider row, sitting in the existing left padding so titles and labels don't move
+.sidebar .filters {
+  .filter-group div.group-header,
+  .row-drag {
+    position: relative;
+  }
+
+  .group-handle,
+  .row-handle {
+    color: rgba(255, 255, 255, 0.35);
+    cursor: grab;
+    font-size: 1em;
+    height: 1em;
+    position: absolute;
+    width: 1em;
+    z-index: 4;
+
+    &:hover {
+      color: var(--scoreboard-led);
+    }
+  }
+
+  // A touch smaller so it fits the padding before the group icon
+  .group-handle {
+    font-size: 0.85em;
+    height: 1em;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 1em;
+  }
+
+  // Level with the row's label (the first line of the row)
+  .row-handle {
+    left: 1.1em;
+    top: 0.7em;
+  }
+
+  // The spot the dragged card / row came from, and a smooth settle into place
+  .cdk-drag-placeholder {
+    opacity: 0.3;
+  }
+
+  .cdk-drag-animating,
+  .group-list.cdk-drop-list-dragging .filter-group:not(.cdk-drag-placeholder),
+  .group-body.cdk-drop-list-dragging .row-drag:not(.cdk-drag-placeholder) {
+    transition: transform 200ms ease;
+  }
+
+  .cdk-drag-preview {
+    box-shadow: 0 0.5em 1.5em rgba(0, 0, 0, 0.5);
+    cursor: grabbing;
+  }
+
+  .row-drag.cdk-drag-preview {
+    background: var(--scoreboard-dots), #1d1d1d;
+    border-radius: 6px;
+  }
+}
+
+// The drag wrappers (card list, slider rows) skip the old ".filters div" side padding, and rows
+// inside them keep the indent that lines their labels up with the card titles
+.sidebar .filters .group-list,
+.sidebar .filters .row-drag {
+  padding: 0;
+}
+
+.sidebar .filters .filter-group .group-body > .row-drag > .slider-row {
+  padding-left: 2.9em;
+}
+
+// More room for the drag grips: card icons and titles move 21px right and slider labels 15px (a bit
+// more space after the header grip), and each row's grip sits centered on its label + slider
+.sidebar .filters .filter-group div.group-header button.group-toggle {
+  // Same 12px between icon and title as between the grip and the icon
+  gap: 12px;
+  padding-left: calc(1em + 21px);
+}
+
+.sidebar .filters .filter-group .group-body > .row-drag > .slider-row {
+  padding-left: calc(2.9em + 15px);
+}
+
+.sidebar .filters {
+  .group-handle {
+    left: 10px;
+  }
+
+  .row-handle {
+    left: calc(1.1em + 10px);
+    top: 50%;
+    transform: translateY(-50%);
+  }
+
+  // A QB row with its breakdown open: center on the row itself (54px tall), not row + breakdown
+  .row-drag:has(> .sub-rows) .row-handle {
+    top: 27px;
+  }
+}

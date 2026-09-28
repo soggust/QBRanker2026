@@ -20,6 +20,33 @@ export interface FilterGroup {
   rows: FilterRow[];
 }
 
+// The QB grid columns each sidebar row controls (a row with a breakdown covers the combined column
+// and its parts), so dragging a row in the sidebar moves its columns together
+export const QB_ROW_COLUMNS: Partial<Record<FilterKey, string[]>> = {
+  recordValue: ['record'],
+  recencyValue: ['last-five'],
+  compValue: ['comp-percent'],
+  yardsValue: ['total-yards', 'pass-yards', 'rush-yards'],
+  ypaValue: ['ypa'],
+  touchdownValue: ['touchdowns', 'pass-tds', 'rush-tds'],
+  turnoverValue: ['turnovers', 'interceptions', 'fumbles-lost'],
+  ratingValue: ['rating'],
+  epaValue: ['epa'],
+  cpoeValue: ['cpoe'],
+  successValue: ['success-rate'],
+  pressureToSackValue: ['pressureToSack'],
+  badThrowValue: ['badThrowPct'],
+  timeToThrowValue: ['timeToThrow'],
+  adotValue: ['adot'],
+  aggressivenessValue: ['aggressiveness'],
+  fantasyValue: ['fantasy'],
+  weaponsValue: ['weapons'],
+  coachingValue: ['coaching'],
+  olineValue: ['o-line'],
+  defenseValue: ['defense'],
+  responsibilityValue: ['responsibility'],
+};
+
 // How the QB sliders are organized in the sidebar
 export const QB_FILTER_GROUPS: FilterGroup[] = [
   {
@@ -95,3 +122,30 @@ export const QB_FILTER_GROUPS: FilterGroup[] = [
     ],
   },
 ];
+
+// Breakdown sliders and the column each one controls
+const QB_CHILD_COLUMNS: Partial<Record<FilterKey, string[]>> = {
+  passYdValue: ['pass-yards'],
+  rushYdValue: ['rush-yards'],
+  passTdValue: ['pass-tds'],
+  rushTdValue: ['rush-tds'],
+  intValue: ['interceptions'],
+  fumLostValue: ['fumbles-lost'],
+};
+
+// Every slider that controls a QB column (its row, the row's group-wide weight, and a breakdown
+// slider); switching any of them off with its eye hides the column
+export const QB_COLUMN_KEYS: Record<string, FilterKey[]> = (() => {
+  const keys: Record<string, FilterKey[]> = {};
+  for (const group of QB_FILTER_GROUPS) {
+    for (const row of group.rows) {
+      for (const column of QB_ROW_COLUMNS[row.key] ?? []) {
+        keys[column] = [row.key, ...(group.master ? [group.master] : [])];
+      }
+      for (const child of row.children ?? []) {
+        for (const column of QB_CHILD_COLUMNS[child.key] ?? []) keys[column].push(child.key);
+      }
+    }
+  }
+  return keys;
+})();

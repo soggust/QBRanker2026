@@ -1,9 +1,10 @@
 import { Component } from '@angular/core';
+import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { FilterService } from '../services/filter.service';
 import { PositionService } from '../services/position.service';
 import { Filters } from 'app/types';
 import { QB_PRESETS, QB_PRESET_ORDER, QbPresetKey } from 'app/qb-presets';
-import { FilterKey, QB_FILTER_GROUPS, QbGroupId } from 'app/qb-filter-groups';
+import { FilterGroup, FilterKey, FilterRow, QB_FILTER_GROUPS, QB_ROW_COLUMNS, QbGroupId } from 'app/qb-filter-groups';
 
 import {
   Position,
@@ -66,9 +67,6 @@ export class SidebarComponent {
   skillGroupList: SkillStatGroup[] = [];
   skillGroupOpen: Record<string, boolean> = {};
   skillHidden: Partial<Record<StatGroupId, boolean>> = {};
-  private savedSkillValues: Record<string, number> = {};
-  // Values sliders had before their eye switched them off
-  private savedValues: Partial<Record<FilterKey, number>> = {};
   hiddenGroups: Record<QbGroupId, boolean> = { results: false, box: false, advanced: false, support: false };
   // null: the default weights, shown as the dropdown's "Presets..." placeholder ("Defaults" isn't a
   // pickable preset; the Defaults button resets to it)
@@ -113,6 +111,73 @@ export class SidebarComponent {
     });
   }
 
+  // ---------------------------------------------------------------------------
+  // Drag to reorder: the category cards set the grid's group order, and the rows inside a card set
+  // its column order (the same order the grid's header drag changes). Both reset on refresh.
+  // ---------------------------------------------------------------------------
+  get orderedQbGroups(): FilterGroup[] {
+    const order = this.positionService.groupOrder('QB');
+    return [...this.qbGroups].sort((a, b) => order.indexOf(a.id) - order.indexOf(b.id));
+  }
+
+  get orderedSkillGroups(): SkillStatGroup[] {
+    const order = this.positionService.groupOrder(this.position);
+    return [...this.skillGroupList].sort((a, b) => order.indexOf(a.id) - order.indexOf(b.id));
+  }
+
+  dropQbGroup(event: CdkDragDrop<unknown>) {
+    this.moveGroup('QB', this.orderedQbGroups.map((group) => group.id), event);
+  }
+
+  dropSkillGroup(event: CdkDragDrop<unknown>) {
+    this.moveGroup(this.position, this.orderedSkillGroups.map((group) => group.id), event);
+  }
+
+  // Groups a tab doesn't have keep their place at the end of its order
+  private moveGroup(position: Position, shown: StatGroupId[], event: CdkDragDrop<unknown>) {
+    moveItemInArray(shown, event.previousIndex, event.currentIndex);
+    const rest = this.positionService.groupOrder(position).filter((id) => !shown.includes(id));
+    this.positionService.setGroupOrder(position, [...shown, ...rest]);
+  }
+
+  // QB rows, ordered by where their columns sit in the grid
+  private qbColumnOrder(group: FilterGroup): string[] {
+    const defaults = group.rows.flatMap((row) => QB_ROW_COLUMNS[row.key] ?? []);
+    return this.positionService.columnOrder(`QB.${group.id}`, defaults);
+  }
+
+  orderedRows(group: FilterGroup): FilterRow[] {
+    const order = this.qbColumnOrder(group);
+    const at = (row: FilterRow) => Math.min(...(QB_ROW_COLUMNS[row.key] ?? []).map((col) => order.indexOf(col)));
+    return [...group.rows].sort((a, b) => at(a) - at(b));
+  }
+
+  // Moving a row moves its columns together, keeping their order among themselves
+  dropQbRow(group: FilterGroup, event: CdkDragDrop<unknown>) {
+    const rows = this.orderedRows(group);
+    moveItemInArray(rows, event.previousIndex, event.currentIndex);
+    const current = this.qbColumnOrder(group);
+    const columns = rows.flatMap((row) =>
+      [...(QB_ROW_COLUMNS[row.key] ?? [])].sort((a, b) => current.indexOf(a) - current.indexOf(b)),
+    );
+    this.positionService.setColumnOrder(`QB.${group.id}`, columns);
+  }
+
+  // Other tabs: a card's stats in the grid's column order
+  orderedStats(group: SkillStatGroup): SkillStat[] {
+    const order = this.positionService.columnOrder(
+      `${this.position}.${group.id}`,
+      group.stats.map((stat) => stat.key),
+    );
+    return [...group.stats].sort((a, b) => order.indexOf(a.key) - order.indexOf(b.key));
+  }
+
+  dropSkillStat(group: SkillStatGroup, event: CdkDragDrop<unknown>) {
+    const keys = this.orderedStats(group).map((stat) => stat.key as string);
+    moveItemInArray(keys, event.previousIndex, event.currentIndex);
+    this.positionService.setColumnOrder(`${this.position}.${group.id}`, keys);
+  }
+
   get skillPosition(): SkillPosition | null {
     return this.position === 'QB' ? null : this.position;
   }
@@ -149,27 +214,19 @@ export class SidebarComponent {
     if (skill) this.positionService.setSkillGroupHidden(skill, id, !this.skillHidden[id]);
   }
 
-  // Eye on a slider: off saves the value and sets 0; on restores it (or 50 if none was saved)
-  toggleSkillSlider(key: SkillColumnKey) {
-    const skill = this.skillPosition;
-    if (!skill) return;
-    const saveKey = `${skill}.${key}`;
-    const current = this.skillWeights[key] ?? 0;
-    if (current) this.savedSkillValues[saveKey] = current;
-    this.skillWeights = { ...this.skillWeights, [key]: current ? 0 : (this.savedSkillValues[saveKey] ?? 50) };
-    this.skillPresets[skill] = 'custom';
-    this.saveSkillWeights();
+  // Eye on a slider: hides the stat's column and drops it from the ranking, whatever Unweighted Stats
+  // says; the slider keeps its value for when it's switched back on
+  skillStatHidden(key: SkillColumnKey): boolean {
+    return this.positionService.isStatHidden(this.position, key);
   }
 
-  // Display-only columns (e.g. Games) have no weight in the ranking; a weight of 0 just hides them
-  toggleInfoColumn(key: SkillColumnKey) {
-    if (!this.skillPosition) return;
-    this.skillWeights = { ...this.skillWeights, [key]: this.skillWeights[key] === 0 ? 50 : 0 };
-    this.saveSkillWeights();
+  toggleSkillSlider(key: SkillColumnKey) {
+    this.positionService.setStatHidden(this.position, key, !this.skillStatHidden(key));
   }
 
   // Footer Buttons
   resetDefaults(): void {
+    this.positionService.showAllStats(this.position);
     const skill = this.skillPosition;
     if (!skill) {
       this.reset();
@@ -257,16 +314,19 @@ export class SidebarComponent {
     this.saveFilters();
   }
 
-  // Eye on a slider: off saves the value and sets 0; on restores it (or 50 if none was saved)
-  toggleSlider(key: FilterKey) {
-    const current = this.valueOf(key);
-    if (current) this.savedValues[key] = current;
-    this.setValue(key, current ? 0 : (this.savedValues[key] ?? 50));
+  // Eye on a slider: hides its columns and drops it from the ranking, whatever Unweighted Stats says
+  isHidden(key: FilterKey): boolean {
+    return this.positionService.isStatHidden('QB', key);
   }
 
-  // Dimmed when the slider or the group/row it belongs to is at 0
+  toggleSlider(key: FilterKey) {
+    this.positionService.setStatHidden('QB', key, !this.isHidden(key));
+  }
+
+  // Dimmed when the slider (or the group / row it belongs to) is at 0 or switched off
   isOff(key: FilterKey, parent?: FilterKey): boolean {
-    return this.valueOf(key) === 0 || (!!parent && this.valueOf(parent) === 0);
+    const off = (k: FilterKey) => this.valueOf(k) === 0 || this.isHidden(k);
+    return off(key) || (!!parent && off(parent));
   }
 
   toggleGroupHidden(id: QbGroupId) {

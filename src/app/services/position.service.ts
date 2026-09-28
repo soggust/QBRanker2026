@@ -121,6 +121,40 @@ export class PositionService {
     );
   }
 
+  // Stats switched off with their sidebar eye, keyed "QB.compValue", "RB.carries"...: the column is
+  // hidden whatever the Unweighted Stats setting says, and the stat drops out of the ranking (its slider
+  // keeps its value). Every stat is on at each page load.
+  private statHiddenSubject = new BehaviorSubject<Record<string, boolean>>({});
+  public statHidden$ = this.statHiddenSubject.asObservable();
+
+  isStatHidden(position: Position, key: string): boolean {
+    return !!this.statHiddenSubject.value[`${position}.${key}`];
+  }
+
+  setStatHidden(position: Position, key: string, hidden: boolean): void {
+    this.statHiddenSubject.next({ ...this.statHiddenSubject.value, [`${position}.${key}`]: hidden });
+  }
+
+  // Every stat on this tab back on (the Defaults button)
+  showAllStats(position: Position): void {
+    const next = Object.fromEntries(
+      Object.entries(this.statHiddenSubject.value).filter(([key]) => !key.startsWith(`${position}.`)),
+    );
+    this.statHiddenSubject.next(next);
+  }
+
+  // Order of the stat groups (categories) per tab, changed by dragging the sidebar cards. Starts in
+  // the standard order on every page load and is kept while switching tabs.
+  private groupOrders: Partial<Record<Position, StatGroupId[]>> = {};
+
+  groupOrder(position: Position): StatGroupId[] {
+    return this.groupOrders[position] ?? ['results', 'box', 'advanced', 'support'];
+  }
+
+  setGroupOrder(position: Position, order: StatGroupId[]): void {
+    this.groupOrders = { ...this.groupOrders, [position]: order };
+  }
+
   // Column order within each stat group, per tab ("QB.box", "RB.advanced"...), changed by dragging
   // a column header. Starts at each table's default order on every page load.
   private columnOrders: Record<string, string[]> = {};
@@ -130,6 +164,11 @@ export class PositionService {
   columnOrder(list: string, defaults: string[]): string[] {
     this.columnDefaults[list] = defaults;
     return this.columnOrders[list] ?? defaults;
+  }
+
+  // Replace a group's whole column order (the sidebar's row drag)
+  setColumnOrder(list: string, order: string[]): void {
+    this.columnOrders = { ...this.columnOrders, [list]: order };
   }
 
   // Move a column to just before / after another column in the same group

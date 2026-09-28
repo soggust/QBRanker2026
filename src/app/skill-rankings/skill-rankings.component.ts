@@ -159,6 +159,11 @@ export class SkillRankingsComponent implements OnChanges {
 
     this.positionService.olineOverrides$.subscribe(() => this.refresh());
 
+    // Eyes switch stats off: re-sort without them (the columns hide on their own)
+    this.positionService.statHidden$.subscribe(() => {
+      if (this.position) this.sortPlayers();
+    });
+
     this.positionService.fantasyScoring$.subscribe((scoring) => {
       this.fantasyScoring = scoring;
       if (this.position) this.sortPlayers();
@@ -211,7 +216,7 @@ export class SkillRankingsComponent implements OnChanges {
     // Injured players drop out unless the settings menu's Show Injured is on (same as QBs)
     const players = SKILL_UNITS[this.position].filter((player) => this.showInjured || !player.injured);
     // Switched-off groups don't count
-    const counted = this.stats.filter((stat) => !this.hidden[statGroup(stat)]);
+    const counted = this.stats.filter((stat) => !this.hidden[statGroup(stat)] && !this.statHidden(stat.key));
     const totals = weightedTotals(players, counted, this.weights, (player, stat) =>
       this.value(player, stat),
     );
@@ -331,7 +336,10 @@ export class SkillRankingsComponent implements OnChanges {
 
   // Groups shown in the grid, each with the stats that have a column
   get visibleGroups(): SkillStatGroup[] {
-    return this.groups
+    // In the order set by dragging the sidebar cards
+    const order = this.positionService.groupOrder(this.position);
+    return [...this.groups]
+      .sort((a, b) => order.indexOf(a.id) - order.indexOf(b.id))
       .filter((group) => !this.hidden[group.id])
       .map((group) => ({
         ...group,
@@ -363,10 +371,20 @@ export class SkillRankingsComponent implements OnChanges {
       .map((stat) => (stat.key === 'rushYards' ? TOTAL_YARDS_STAT : stat));
   }
 
+  // Switched off with its sidebar eye: hidden and out of the ranking, whatever Unweighted Stats says
+  private statHidden(key: string): boolean {
+    return this.positionService.isStatHidden(this.position, key);
+  }
+
+  // The eye decides first; Unweighted Stats only decides whether a 0% stat shows
   isShown(stat: SkillStat): boolean {
-    if (stat.key === 'totalYards') return this.showUnused || !!this.weights.rushYards || !!this.weights.recYards;
-    // Display-only columns show unless their sidebar eye is off (weight 0)
-    if (stat.infoOnly) return this.showUnused || this.weights[stat.key] !== 0;
+    if (stat.key === 'totalYards') {
+      const parts = (['rushYards', 'recYards'] as const).filter((key) => !this.statHidden(key));
+      return parts.length > 0 && (this.showUnused || parts.some((key) => !!this.weights[key]));
+    }
+    if (this.statHidden(stat.key)) return false;
+    // Display-only columns (Games, FG Att) have no weight, so they show unless their eye is off
+    if (stat.infoOnly) return true;
     return this.showUnused || !!this.weights[stat.key];
   }
 
