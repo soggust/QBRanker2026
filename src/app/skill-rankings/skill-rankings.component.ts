@@ -7,7 +7,7 @@ import {
   SKILL_STATS,
   STAT_NAMES,
   PER_GAME_LABELS,
-  TOTAL_YARDS_STAT,
+  COMBINED_STATS,
   SkillPlayer,
   SkillPosition,
   SkillStat,
@@ -343,7 +343,7 @@ export class SkillRankingsComponent implements OnChanges {
       .filter((group) => !this.hidden[group.id])
       .map((group) => ({
         ...group,
-        stats: this.combineYards(this.ordered(group)).filter((stat) => this.isShown(stat)),
+        stats: this.combine(this.ordered(group)).filter((stat) => this.isShown(stat)),
       }))
       .filter((group) => group.stats.length);
   }
@@ -358,17 +358,26 @@ export class SkillRankingsComponent implements OnChanges {
     return [...group.stats].sort((a, b) => order.indexOf(a.key) - order.indexOf(b.key));
   }
 
-  // Column id for header dragging: Total Yards stands in for Rush Yards (it takes that column's spot)
+  // Column id for header dragging: a combined column stands in for the stat whose spot it took
   columnId(stat: SkillStat): string {
-    return stat.key === 'totalYards' ? 'rushYards' : stat.key;
+    return this.combinedSpot[stat.key] ?? stat.key;
   }
 
-  // Combine Rush/Pass: RBs show one Total Yards column where Rush Yards was, instead of Rush + Rec Yards
-  private combineYards(stats: SkillStat[]): SkillStat[] {
-    if (!this.totalStats || this.position !== 'RB') return stats;
-    return stats
-      .filter((stat) => stat.key !== 'recYards')
-      .map((stat) => (stat.key === 'rushYards' ? TOTAL_YARDS_STAT : stat));
+  // Which stat's spot each combined column took (the pair's first one in the current order)
+  private combinedSpot: Partial<Record<string, string>> = {};
+
+  // Combined Rush/Pass: a rushing + receiving pair (yards, touchdowns) shows as one total column
+  // where the first of the two sits, when the tab has both
+  private combine(stats: SkillStat[]): SkillStat[] {
+    if (!this.totalStats) return stats;
+    let out = stats;
+    for (const { stat: total, parts } of COMBINED_STATS) {
+      const at = out.findIndex((stat) => parts.includes(stat.key));
+      if (at === -1 || !parts.every((part) => out.some((stat) => stat.key === part))) continue;
+      this.combinedSpot[total.key] = out[at].key;
+      out = out.flatMap((stat, i) => (i === at ? [total] : parts.includes(stat.key) ? [] : [stat]));
+    }
+    return out;
   }
 
   // Switched off with its sidebar eye: hidden and out of the ranking, whatever Unweighted Stats says
@@ -378,8 +387,10 @@ export class SkillRankingsComponent implements OnChanges {
 
   // The eye decides first; Unweighted Stats only decides whether a 0% stat shows
   isShown(stat: SkillStat): boolean {
-    if (stat.key === 'totalYards') {
-      const parts = (['rushYards', 'recYards'] as const).filter((key) => !this.statHidden(key));
+    // A combined column shows if either of its stats would
+    const combined = COMBINED_STATS.find((c) => c.stat.key === stat.key);
+    if (combined) {
+      const parts = combined.parts.filter((key) => !this.statHidden(key));
       return parts.length > 0 && (this.showUnused || parts.some((key) => !!this.weights[key]));
     }
     if (this.statHidden(stat.key)) return false;

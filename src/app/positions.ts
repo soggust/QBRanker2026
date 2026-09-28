@@ -152,6 +152,7 @@ export const STAT_NAMES: Partial<Record<SkillColumnKey, string>> = {
   receptions: 'Receptions',
   recYards: 'Receiving Yards',
   recTds: 'Receiving Touchdowns',
+  rushTds: 'Rushing Touchdowns',
   yac: 'Yards After Catch',
   catchPct: 'Catch Percentage',
   epaPerTarget: 'Expected Points Added per Target',
@@ -217,13 +218,14 @@ export const PER_GAME_LABELS: Partial<Record<SkillColumnKey, string>> = {
   fantasy: 'Fantasy PPG',
   targets: 'Targets / Game',
   receptions: 'Rec / Game',
-  recTds: 'TDs / Game',
-  totalTds: 'TDs / Game',
+  recTds: 'Rec TDs / Game',
+  rushTds: 'Rush TDs / Game',
+  totalTds: 'Total TDs / Game',
   yac: 'YAC / Game',
   carries: 'Carries / Game',
   firstDowns: '1st Dn / Game',
   brokenTackles: 'Brk Tkl / Game',
-  fumbles: 'Fumbles / Game',
+  fumbles: 'Fum Lost / Game',
   fgMade: 'FG Made / Game',
   fgAtt: 'FG Att / Game',
   fg50: '50+ Made / Game',
@@ -247,15 +249,29 @@ const GAMES_STAT: SkillStat = {
   infoOnly: true,
 };
 
-// RB column shown in place of Rush Yards + Rec Yards when Combine Rush/Pass is on (display only:
-// ranking still uses the two yardage sliders, like the QB page)
+// Columns shown in place of a rushing + receiving pair when Combined Rush/Pass is on (display only:
+// ranking still uses the two sliders, like the QB page)
 export const TOTAL_YARDS_STAT: SkillStat = {
   key: 'totalYards',
-  label: 'Total Yards',
+  label: 'Total Yds',
   description: 'Rushing + receiving yards',
   kind: 'volume',
   format: 'int',
 };
+
+export const TOTAL_TDS_STAT: SkillStat = {
+  key: 'totalTds',
+  label: 'Total TDs',
+  description: 'Rushing + receiving touchdowns',
+  kind: 'volume',
+  format: 'int',
+};
+
+// Each combined column and the two stats it stands in for (it takes the first one's spot)
+export const COMBINED_STATS: { stat: SkillStat; parts: [SkillColumnKey, SkillColumnKey] }[] = [
+  { stat: TOTAL_YARDS_STAT, parts: ['rushYards', 'recYards'] },
+  { stat: TOTAL_TDS_STAT, parts: ['rushTds', 'recTds'] },
+];
 
 const FANTASY_STAT: SkillStat = {
   key: 'fantasy',
@@ -296,6 +312,16 @@ const DEFENSE_STAT: SkillStat = {
   support: true,
 };
 
+// Fumbles lost (rushing + receiving): counts against RBs, WRs and TEs
+const FUMBLES_STAT: SkillStat = {
+  key: 'fumbles',
+  label: 'Fumbles Lost',
+  description: 'Fumbles lost',
+  kind: 'volume',
+  format: 'int',
+  negative: true,
+};
+
 const RECEIVING_STATS: SkillStat[] = [
   GAMES_STAT,
   { key: 'targets', label: 'Targets', description: 'Times targeted', kind: 'volume', format: 'int' },
@@ -308,9 +334,11 @@ const RECEIVING_STATS: SkillStat[] = [
   },
   { key: 'receptions', label: 'Receptions', description: 'Catches', kind: 'volume', format: 'int' },
   { key: 'recYards', label: 'Rec Yards', description: 'Receiving yards', kind: 'volume', format: 'int' },
-  { key: 'recTds', label: 'Touchdowns', description: 'Receiving touchdowns', kind: 'volume', format: 'int' },
+  { key: 'recTds', label: 'Rec TDs', description: 'Receiving touchdowns', kind: 'volume', format: 'int' },
+  { key: 'rushTds', label: 'Rush TDs', description: 'Rushing touchdowns', kind: 'volume', format: 'int' },
   { key: 'yac', label: 'YAC', description: 'Yards after the catch', kind: 'volume', format: 'int' },
   { key: 'catchPct', label: 'Catch %', description: 'Receptions per target', kind: 'efficiency', format: 'pct' },
+  FUMBLES_STAT,
   {
     key: 'epaPerTarget',
     label: 'EPA / Target',
@@ -375,13 +403,8 @@ export const SKILL_STATS: Record<SkillPosition, SkillStat[]> = {
     { key: 'ypc', label: 'Yds / Carry', description: 'Yards per carry', kind: 'efficiency', format: 'dec1' },
     { key: 'recYards', label: 'Rec Yards', description: 'Receiving yards', kind: 'volume', format: 'int' },
     { key: 'receptions', label: 'Receptions', description: 'Catches', kind: 'volume', format: 'int' },
-    {
-      key: 'totalTds',
-      label: 'Touchdowns',
-      description: 'Rushing + receiving touchdowns',
-      kind: 'volume',
-      format: 'int',
-    },
+    { key: 'rushTds', label: 'Rush TDs', description: 'Rushing touchdowns', kind: 'volume', format: 'int' },
+    { key: 'recTds', label: 'Rec TDs', description: 'Receiving touchdowns', kind: 'volume', format: 'int' },
     {
       key: 'firstDowns',
       label: '1st Downs',
@@ -426,14 +449,7 @@ export const SKILL_STATS: Record<SkillPosition, SkillStat[]> = {
       kind: 'efficiency',
       format: 'pct',
     },
-    {
-      key: 'fumbles',
-      label: 'Fumbles',
-      description: 'Fumbles lost',
-      kind: 'volume',
-      format: 'int',
-      negative: true,
-    },
+    FUMBLES_STAT,
     FANTASY_STAT,
     {
       key: 'oline',

@@ -1246,3 +1246,13 @@
     top: 27px;
   }
 }
+
+// Breakdown sliders (e.g. Pass / Rush Yards under Yards): their eyes line up with every other eye
+// (no right padding on the breakdown box), and their labels sit indented past the parent row's
+.sidebar .filters .sub-rows {
+  padding-right: 0;
+}
+
+.sidebar .filters .sub-rows .slider-row {
+  padding-left: calc(0.7em + 24px);
+}

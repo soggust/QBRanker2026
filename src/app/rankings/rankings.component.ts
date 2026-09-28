@@ -15,12 +15,12 @@ const PER_GAME_LABELS: Record<string, string> = {
   'total-yards': 'Total YPG',
   'pass-yards': 'Pass YPG',
   'rush-yards': 'Rush YPG',
-  touchdowns: 'TDs / Game',
+  touchdowns: 'Total TDs / Game',
   'pass-tds': 'Pass TDs / Game',
   'rush-tds': 'Rush TDs / Game',
   turnovers: 'TOs / Game',
   interceptions: 'INTs / Game',
-  'fumbles-lost': 'Fumbles / Game',
+  'fumbles-lost': 'Fum Lost / Game',
   fantasy: 'Fantasy PPG',
 };
 
