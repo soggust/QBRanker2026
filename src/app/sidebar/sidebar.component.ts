@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
+import { SKILL_PRESETS, SkillPresetDef } from 'app/skill-presets';
 import { FilterService } from '../services/filter.service';
 import { PositionService } from '../services/position.service';
 import { Filters } from 'app/types';
@@ -17,7 +18,6 @@ import {
   skillGroups,
   SkillStat,
   SkillWeights,
-  hasFantasy,
   presetWeights,
   combinedFor,
 } from 'app/positions';
@@ -233,9 +233,9 @@ export class SidebarComponent {
     return this.position === 'QB' ? null : this.position;
   }
 
-  // Punters have no fantasy points, so no Fantasy preset
-  get skillHasFantasy(): boolean {
-    return !!this.skillPosition && hasFantasy(this.skillPosition);
+  // This position's presets (skill-presets.ts)
+  get skillPresetOptions(): SkillPresetDef[] {
+    return this.skillPosition ? SKILL_PRESETS[this.skillPosition] : [];
   }
 
   onSkillPresetChange(): void {

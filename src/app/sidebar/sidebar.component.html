@@ -18,10 +18,8 @@
           @if (skillPresets[skill] === 'custom') {
             <mat-option value="custom" disabled="disabled">CUSTOM</mat-option>
           }
-          <mat-option value="volume">VOLUME</mat-option>
-          <mat-option value="efficiency">EFFICIENCY</mat-option>
-          @if (skillHasFantasy) {
-            <mat-option value="fantasy">FANTASY</mat-option>
+          @for (option of skillPresetOptions; track option.key) {
+            <mat-option [value]="option.key" [title]="option.description">{{ option.label | uppercase }}</mat-option>
           }
         </mat-select>
       </div>

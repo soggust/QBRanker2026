@@ -1,3 +1,5 @@
+import { SKILL_PRESETS } from 'app/skill-presets';
+
 export type Position = 'QB' | 'RB' | 'WR' | 'TE' | 'K' | 'P' | 'DEF' | 'HC';
 // Everything except QB, which has its own page; all use the config-driven table below
 // (DEF rows are team defenses and HC rows are head coaches)
@@ -237,7 +239,8 @@ export const PER_GAME_LABELS: Partial<Record<SkillColumnKey, string>> = {
 };
 
 export type SkillWeights = Partial<Record<SkillColumnKey, number>>;
-export type SkillPreset = 'default' | 'volume' | 'efficiency' | 'fantasy';
+// 'default' (everything at 50), or a preset key from SKILL_PRESETS for the position
+export type SkillPreset = string;
 
 // Games played: the first column on every player / unit tab, for sample-size context
 const GAMES_STAT: SkillStat = {
@@ -330,32 +333,39 @@ const FUMBLES_STAT: SkillStat = {
   negative: true,
 };
 
+// Passing-game role and efficiency: WR/TE, and RBs' receiving side
+const TARGETS_STAT: SkillStat = { key: 'targets', label: 'Targets', description: 'Times targeted', kind: 'volume', format: 'int' };
+
+const TARGET_SHARE_STAT: SkillStat = {
+  key: 'targetShare',
+  label: 'Target Share',
+  description: "Share of the team's targets",
+  kind: 'efficiency',
+  format: 'pct',
+};
+
+const EPA_PER_TARGET_STAT: SkillStat = {
+  key: 'epaPerTarget',
+  label: 'EPA / Target',
+  description: 'Expected Points Added per target',
+  kind: 'efficiency',
+  format: 'dec2',
+  signed: true,
+};
+
 const RECEIVING_STATS: SkillStat[] = [
   GAMES_STAT,
-  { key: 'targets', label: 'Targets', description: 'Times targeted', kind: 'volume', format: 'int' },
-  {
-    key: 'targetShare',
-    label: 'Target Share',
-    description: "Share of the team's targets",
-    kind: 'efficiency',
-    format: 'pct',
-  },
+  TARGETS_STAT,
+  TARGET_SHARE_STAT,
   { key: 'receptions', label: 'Receptions', description: 'Catches', kind: 'volume', format: 'int' },
   { key: 'recYards', label: 'Rec Yards', description: 'Receiving yards', kind: 'volume', format: 'int' },
   { key: 'rushYards', label: 'Rush Yards', description: 'Rushing yards', kind: 'volume', format: 'int' },
+  { key: 'yac', label: 'YAC', description: 'Yards after the catch', kind: 'volume', format: 'int' },
   { key: 'recTds', label: 'Rec TDs', description: 'Receiving touchdowns', kind: 'volume', format: 'int' },
   { key: 'rushTds', label: 'Rush TDs', description: 'Rushing touchdowns', kind: 'volume', format: 'int' },
-  { key: 'yac', label: 'YAC', description: 'Yards after the catch', kind: 'volume', format: 'int' },
-  { key: 'catchPct', label: 'Catch %', description: 'Receptions per target', kind: 'efficiency', format: 'pct' },
   FUMBLES_STAT,
-  {
-    key: 'epaPerTarget',
-    label: 'EPA / Target',
-    description: 'Expected Points Added per target',
-    kind: 'efficiency',
-    format: 'dec2',
-    signed: true,
-  },
+  { key: 'catchPct', label: 'Catch %', description: 'Receptions per target', kind: 'efficiency', format: 'pct' },
+  EPA_PER_TARGET_STAT,
   {
     key: 'separation',
     label: 'Separation',
@@ -412,15 +422,11 @@ export const SKILL_STATS: Record<SkillPosition, SkillStat[]> = {
     { key: 'ypc', label: 'Yds / Carry', description: 'Yards per carry', kind: 'efficiency', format: 'dec1' },
     { key: 'recYards', label: 'Rec Yards', description: 'Receiving yards', kind: 'volume', format: 'int' },
     { key: 'receptions', label: 'Receptions', description: 'Catches', kind: 'volume', format: 'int' },
+    // Receiving role, so pass-catching backs get their due (EPA / Target sits in Advanced)
+    TARGETS_STAT,
+    TARGET_SHARE_STAT,
     { key: 'rushTds', label: 'Rush TDs', description: 'Rushing touchdowns', kind: 'volume', format: 'int' },
     { key: 'recTds', label: 'Rec TDs', description: 'Receiving touchdowns', kind: 'volume', format: 'int' },
-    {
-      key: 'firstDowns',
-      label: '1st Downs',
-      description: 'Rushing + receiving first downs',
-      kind: 'volume',
-      format: 'int',
-    },
     {
       key: 'epaPerCarry',
       label: 'EPA / Carry',
@@ -429,6 +435,7 @@ export const SKILL_STATS: Record<SkillPosition, SkillStat[]> = {
       format: 'dec2',
       signed: true,
     },
+    EPA_PER_TARGET_STAT,
     {
       key: 'ryoePerAtt',
       label: 'RYOE / Carry',
@@ -459,6 +466,13 @@ export const SKILL_STATS: Record<SkillPosition, SkillStat[]> = {
       format: 'pct',
     },
     FUMBLES_STAT,
+    {
+      key: 'firstDowns',
+      label: '1st Downs',
+      description: 'Rushing + receiving first downs',
+      kind: 'volume',
+      format: 'int',
+    },
     FANTASY_STAT,
     {
       key: 'oline',
@@ -717,19 +731,21 @@ export function hasFantasy(position: SkillPosition): boolean {
   return SKILL_STATS[position].some((stat) => stat.key === 'fantasy');
 }
 
-// Default: everything at 50. Volume/Efficiency lean one way; penalties and support stay at 50.
+// Default: everything at 50. A preset (skill-presets.ts) sets the stats it's named for, keeps every
+// other stat at 25, and leaves support grades and the parent Total Yds / Total TDs sliders at 50.
 // Fantasy ranks purely on fantasy points.
 export function presetWeights(position: SkillPosition, preset: SkillPreset): SkillWeights {
+  const def = SKILL_PRESETS[position].find((p) => p.key === preset);
+  const fantasyOnly = preset === 'fantasy';
   const weights: SkillWeights = {};
   for (const stat of SKILL_STATS[position]) {
     if (stat.infoOnly) continue;
-    if (preset === 'fantasy') weights[stat.key] = stat.key === 'fantasy' ? 100 : 0;
-    else if (preset === 'default' || stat.negative || stat.support) weights[stat.key] = 50;
-    else weights[stat.key] = stat.kind === preset ? 75 : 25;
+    if (fantasyOnly) weights[stat.key] = 0;
+    else if (!def || stat.support) weights[stat.key] = 50;
+    else weights[stat.key] = 25;
   }
-  // Parent sliders for rush / rec pairs start neutral (the parts carry the preset's lean)
-  for (const { stat } of combinedFor(position)) weights[stat.key] = preset === 'fantasy' ? 0 : 50;
-  return weights;
+  for (const { stat } of combinedFor(position)) weights[stat.key] = fantasyOnly ? 0 : 50;
+  return { ...weights, ...(def?.weights ?? {}) };
 }
 
 // ---------------------------------------------------------------------------
