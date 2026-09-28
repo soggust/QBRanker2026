@@ -513,6 +513,11 @@ export class SkillRankingsComponent implements OnChanges {
     return 'count';
   }
 
+  // Footer info button: the About / FAQ panel
+  openAbout() {
+    this.positionService.setAboutOpen(true);
+  }
+
   // Copy Player Names
   copyPlayerListToClipboard() {
     copyRankingsToClipboard(this.rankingsList.nativeElement)

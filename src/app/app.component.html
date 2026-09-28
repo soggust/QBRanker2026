@@ -51,3 +51,8 @@
     }
   </div>
 </main>
+
+<!-- About / FAQ, opened from the info button in the footer -->
+@if (aboutOpen$ | async) {
+  <about-panel (closed)="closeAbout()"></about-panel>
+}

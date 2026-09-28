@@ -11,6 +11,7 @@ import { POSITIONS, Position } from './positions';
 export class AppComponent {
   menuOpen: boolean = false;
   position$ = this.positionService.position$;
+  aboutOpen$ = this.positionService.aboutOpen$;
   positions = POSITIONS;
   positionNames: Record<Position, string> = {
     QB: 'Quarterbacks',
@@ -48,5 +49,9 @@ export class AppComponent {
 
   toggleSidebar() {
     this.sidebarCollapsed = !this.sidebarCollapsed;
+  }
+
+  closeAbout() {
+    this.positionService.setAboutOpen(false);
   }
 }

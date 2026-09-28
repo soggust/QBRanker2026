@@ -17,6 +17,7 @@ import { SkillRankingsComponent } from './skill-rankings/skill-rankings.componen
 import { ColumnHighlightDirective } from './utils/column-highlight.directive';
 import { ColumnDragDirective } from './utils/column-drag.directive';
 import { MatMenuModule } from '@angular/material/menu';
+import { AboutComponent } from './about/about.component';
 
 @NgModule({
   declarations: [
@@ -28,6 +29,7 @@ import { MatMenuModule } from '@angular/material/menu';
     SkillRankingsComponent,
     ColumnHighlightDirective,
     ColumnDragDirective,
+    AboutComponent,
   ],
   bootstrap: [AppComponent],
   imports: [

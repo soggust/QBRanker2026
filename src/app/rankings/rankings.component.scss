@@ -1620,13 +1620,14 @@ section ul li.player.header-row div .stat-label:hover {
   font-size: 10px;
 }
 
-// Footer: settings on the far left with copy right after it, credits pushed to the right
+// Footer: settings on the far left with copy and info right after it, credits pushed to the right
 section footer {
   .settings-toggle {
     order: -2;
   }
 
-  .copy-toggle {
+  .copy-toggle,
+  .info-toggle {
     margin-left: 1em;
     margin-right: 0;
     order: -1;
@@ -1667,7 +1668,8 @@ section ul li.player:not(.header-row) > .col-group > div:not(.box) > p:not(.stat
 
 // Small screens: a bit more room between the two centered buttons
 @media (max-width: 1199px) {
-  section footer .copy-toggle {
+  section footer .copy-toggle,
+  section footer .info-toggle {
     margin-left: 2em;
   }
 }

@@ -255,6 +255,14 @@ export class PositionService {
     this.olineOverridesSubject.next({ ...this.olineOverridesSubject.value, [teamLogo]: next });
   }
 
+  // The About / FAQ panel (the footer's info button opens it on every tab)
+  private aboutOpenSubject = new BehaviorSubject<boolean>(false);
+  public aboutOpen$ = this.aboutOpenSubject.asObservable();
+
+  setAboutOpen(open: boolean): void {
+    this.aboutOpenSubject.next(open);
+  }
+
   // Current QB order (ESPN ids, best first) from the QB page, used for receivers' QB Play grade
   private qbRanksSubject = new BehaviorSubject<number[]>([]);
   public qbRanks$ = this.qbRanksSubject.asObservable();

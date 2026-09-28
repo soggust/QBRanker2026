@@ -147,6 +147,16 @@
       ></mat-icon>
     </button>
 
+    <!-- About / FAQ -->
+    <button
+      (click)="openAbout()"
+      aria-label="About and FAQ"
+      title="About, how it works and FAQ"
+      class="info-toggle"
+    >
+      <mat-icon aria-hidden="true" fontIcon="info_outline" class="arrow-drop-up"></mat-icon>
+    </button>
+
     <!-- Toast -->
     <div class="toast" [class.show]="isToastVisible">List copied to clipboard!</div>
 

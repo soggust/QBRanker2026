@@ -814,6 +814,11 @@ export class RankingsComponent {
     return numberOfWins;
   }
 
+  // Footer info button: the About / FAQ panel
+  openAbout() {
+    this.positionService.setAboutOpen(true);
+  }
+
   // Copy Player Names
   copyPlayerListToClipboard() {
     copyRankingsToClipboard(this.rankingsList.nativeElement)
