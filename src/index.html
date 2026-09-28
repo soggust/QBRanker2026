@@ -5,14 +5,101 @@
     <title>2026 NFL Ranker</title>
     <base href="/" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="icon" type="image/x-icon" href="favicon.ico" />
+    <!-- The app's football: SVG for browsers that support it (sharp at any size), ICO as fallback -->
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+    <link rel="icon" type="image/x-icon" href="favicon.ico" sizes="16x16 32x32 48x48" />
     <link rel="preconnect" href="https://fonts.gstatic.com" />
     <link
       href="https://fonts.googleapis.com/icon?family=Material+Icons"
       rel="stylesheet"
     />
+    <!-- Loading screen, shown while the ranking data and app load (Angular replaces it when the
+         app starts; main.ts swaps in an error message if the data can't be loaded) -->
+    <style>
+      .app-loading {
+        align-items: center;
+        display: flex;
+        inset: 0;
+        justify-content: center;
+        position: fixed;
+      }
+
+      .app-loading-panel {
+        align-items: center;
+        background: var(--scoreboard-dots, none), #121212;
+        border: 1px solid #3a3a3a;
+        border-radius: 12px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
+        color: #fff;
+        display: flex;
+        font-family: "Orbitron", sans-serif;
+        font-size: 14px;
+        font-weight: 500;
+        gap: 16px;
+        letter-spacing: 1.5px;
+        max-width: calc(100vw - 48px);
+        padding: 18px 26px;
+        text-transform: uppercase;
+      }
+
+      /* The same leather football as the logo and the slider thumbs */
+      .app-loading-ball {
+        animation: app-loading-spin 1.1s linear infinite;
+        background: #a8602f;
+        border-radius: 50%;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.75);
+        flex: 0 0 auto;
+        height: 17px;
+        position: relative;
+        width: 27px;
+      }
+
+      .app-loading-ball::after {
+        background:
+          linear-gradient(#fff, #fff) center / 100% 1.5px no-repeat,
+          repeating-linear-gradient(90deg, #fff 0 1.5px, transparent 1.5px 3px) center / 100% 6px no-repeat;
+        content: "";
+        height: 6px;
+        left: 50%;
+        position: absolute;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        width: 11px;
+      }
+
+      .app-loading.failed .app-loading-ball {
+        animation: none;
+        transform: rotate(-40deg);
+      }
+
+      .app-loading.failed .app-loading-text {
+        color: #ff7468;
+        letter-spacing: 0.5px;
+        text-transform: none;
+      }
+
+      @keyframes app-loading-spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .app-loading-ball {
+          animation: none;
+          transform: rotate(-40deg);
+        }
+      }
+    </style>
   </head>
   <body>
-    <app-root></app-root>
+    <app-root>
+      <div class="app-loading" role="status" aria-live="polite">
+        <div class="app-loading-panel">
+          <span class="app-loading-ball" aria-hidden="true"></span>
+          <span class="app-loading-text">Loading rankings…</span>
+        </div>
+      </div>
+    </app-root>
   </body>
 </html>

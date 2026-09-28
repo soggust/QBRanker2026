@@ -233,7 +233,7 @@ export const PER_GAME_LABELS: Partial<Record<SkillColumnKey, string>> = {
   fg50: '50+ Made / Game',
   punts: 'Punts / Game',
   inside20: 'Inside 20 / Game',
-  touchbacks: 'Touchbacks / Game',
+  touchbacks: 'TBs / Game',
   sacks: 'Sacks / Game',
   takeaways: 'TOs / Game',
 };

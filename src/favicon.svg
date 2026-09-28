@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- The app's football (logo, slider thumbs): brown leather, white laces, tilted like the logo -->
+  <g transform="translate(32 32) scale(1.15) rotate(-40) translate(-32 -32)">
+    <ellipse cx="32" cy="32" rx="30" ry="19" fill="#a8602f" stroke="#5a3016" stroke-width="2.5" />
+    <rect x="19" y="30.25" width="26" height="3.5" rx="1" fill="#fff" />
+    <rect x="22" y="25.5" width="3" height="13" rx="1" fill="#fff" />
+    <rect x="28" y="25.5" width="3" height="13" rx="1" fill="#fff" />
+    <rect x="34" y="25.5" width="3" height="13" rx="1" fill="#fff" />
+    <rect x="40" y="25.5" width="3" height="13" rx="1" fill="#fff" />
+  </g>
+</svg>

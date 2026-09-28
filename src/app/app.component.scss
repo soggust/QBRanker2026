@@ -568,3 +568,32 @@ main .drawer-tab:hover .mat-icon {
     }
   }
 }
+
+// Desktop: the position tabs are a full-width eyebrow bar, flush to the top of the window and
+// running from the filter menu's edge (or the window's, when the menu is collapsed) to the right
+// edge: pulled out through the content area's padding (1em top, 2em right, 3em left)
+@media (min-width: 1200px) {
+  .position-bar {
+    border-radius: 0;
+    border-width: 0 0 1px;
+    height: 50px;
+    margin: -1em -2em 12px -3em;
+
+    button:not(.collapse-toggle) {
+      font-size: 1em;
+    }
+  }
+
+  // The bar no longer sits inside the top padding: 50px bar + 12px gap, less the 13px padding
+  main .content {
+    --position-bar-space: 49px;
+  }
+}
+
+// The divider rule (a tab after another tab) outranks the active underline, so an active tab past
+// the first lost its gold line; it takes precedence here (no divider on the active tab)
+@media (min-width: 576px) {
+  .position-bar button:not(.collapse-toggle) + button.active {
+    box-shadow: inset 0 -3px 0 var(--scoreboard-led);
+  }
+}

@@ -1,4 +1,4 @@
-import { Directive, ElementRef, HostBinding, HostListener, Input } from '@angular/core';
+import { Directive, ElementRef, HostBinding, Input, NgZone, OnDestroy, OnInit } from '@angular/core';
 import { PositionService } from 'app/services/position.service';
 
 // Which list (tab + stat group, e.g. "QB.box") a header cell belongs to, and its column id
@@ -9,19 +9,32 @@ export interface ColumnDragTarget {
 
 // Drag a column header to reorder the columns within its stat group (native drag and drop).
 // Only header cells get a target; cells in other groups don't accept the drop.
+//
+// The drag events are handled outside Angular: dragover fires dozens of times a second and only
+// moves the drop marker (a CSS class), so letting each one re-check the whole table made dragging
+// sluggish. Only the drop, which actually reorders the columns, goes back into Angular.
 @Directive({
   selector: '[columnDrag]',
   standalone: false,
 })
-export class ColumnDragDirective {
+export class ColumnDragDirective implements OnInit, OnDestroy {
   @Input() columnDrag: ColumnDragTarget | null = null;
 
   // The header cell being dragged (one drag at a time across the page)
   private static dragging: ColumnDragTarget | null = null;
 
+  private readonly listeners: [string, (event: DragEvent) => void][] = [
+    ['dragstart', (e) => this.onDragStart(e)],
+    ['dragover', (e) => this.onDragOver(e)],
+    ['dragleave', (e) => this.onDragLeave(e)],
+    ['drop', (e) => this.onDrop(e)],
+    ['dragend', () => this.onDragEnd()],
+  ];
+
   constructor(
     private element: ElementRef<HTMLElement>,
     private positionService: PositionService,
+    private zone: NgZone,
   ) {}
 
   @HostBinding('attr.draggable')
@@ -34,8 +47,21 @@ export class ColumnDragDirective {
     return !!this.columnDrag;
   }
 
-  @HostListener('dragstart', ['$event'])
-  onDragStart(event: DragEvent) {
+  ngOnInit() {
+    this.zone.runOutsideAngular(() => {
+      for (const [type, handler] of this.listeners) {
+        this.element.nativeElement.addEventListener(type, handler as EventListener);
+      }
+    });
+  }
+
+  ngOnDestroy() {
+    for (const [type, handler] of this.listeners) {
+      this.element.nativeElement.removeEventListener(type, handler as EventListener);
+    }
+  }
+
+  private onDragStart(event: DragEvent) {
     if (!this.columnDrag) return;
     ColumnDragDirective.dragging = this.columnDrag;
     event.dataTransfer?.setData('text/plain', this.columnDrag.id);
@@ -43,8 +69,7 @@ export class ColumnDragDirective {
     this.element.nativeElement.classList.add('column-dragging');
   }
 
-  @HostListener('dragover', ['$event'])
-  onDragOver(event: DragEvent) {
+  private onDragOver(event: DragEvent) {
     const dragging = ColumnDragDirective.dragging;
     if (!this.columnDrag || !dragging || dragging.list !== this.columnDrag.list || dragging.id === this.columnDrag.id) {
       return;
@@ -57,24 +82,24 @@ export class ColumnDragDirective {
     this.element.nativeElement.classList.toggle('column-drop-before', !after);
   }
 
-  @HostListener('dragleave', ['$event'])
-  onDragLeave(event: DragEvent) {
+  private onDragLeave(event: DragEvent) {
     // Ignore moving between this cell's own children
     if (this.element.nativeElement.contains(event.relatedTarget as Node | null)) return;
     this.clearDropMarker();
   }
 
-  @HostListener('drop', ['$event'])
-  onDrop(event: DragEvent) {
+  private onDrop(event: DragEvent) {
     const dragging = ColumnDragDirective.dragging;
-    if (!this.columnDrag || !dragging || dragging.list !== this.columnDrag.list) return;
+    const target = this.columnDrag;
+    if (!target || !dragging || dragging.list !== target.list) return;
     event.preventDefault();
-    this.positionService.moveColumn(this.columnDrag.list, dragging.id, this.columnDrag.id, this.dropsAfter(event));
+    const after = this.dropsAfter(event);
     this.clearDropMarker();
+    // Back into Angular so the table re-renders in the new order
+    this.zone.run(() => this.positionService.moveColumn(target.list, dragging.id, target.id, after));
   }
 
-  @HostListener('dragend')
-  onDragEnd() {
+  private onDragEnd() {
     ColumnDragDirective.dragging = null;
     this.element.nativeElement.classList.remove('column-dragging');
     document.querySelectorAll('.column-drop-before, .column-drop-after').forEach((cell) => {

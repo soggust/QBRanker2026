@@ -1,4 +1,6 @@
 <section class="rankings-wrapper spread" [class.category-colors]="categoryColors">
+  <!-- Columns to show, worked out once per render (not once per row) -->
+  @let groups = visibleGroups;
   <ul #rankingsList cdkDropList (cdkDropListDropped)="drop($event)" columnHighlight>
     <!-- Column headers (stat groups switch on / off with the sidebar eyes) -->
     <li class="player header-row">
@@ -8,10 +10,10 @@
         <p class="stat-label header-rank">Rank</p>
         <p class="stat-label header-name">{{ position === 'DEF' ? 'Team' : position === 'HC' ? 'Coach' : 'Player' }}</p>
       </div>
-      @for (group of visibleGroups; track group.id) {
+      @for (group of groups; track group.id) {
         <div class="col-group" [ngClass]="'group-' + group.id">
           @if (group.id === 'support') {
-            <div class="box support-box" [style.min-width.em]="group.stats.length * 5.5">
+            <div class="box support-box" [style.min-width.em]="group.stats.length * 7">
               @for (stat of group.stats; track stat.key) {
                 <div [columnDrag]="{ list: position + '.' + group.id, id: columnId(stat) }">
                   <p class="stat-label" [title]="labelTitle(stat)">{{ statLabel(stat) }}</p>
@@ -62,11 +64,11 @@
           </p>
         </div>
 
-        @for (group of visibleGroups; track group.id) {
+        @for (group of groups; track group.id) {
           <div class="col-group" [ngClass]="'group-' + group.id">
             @if (group.id === 'support') {
               <!-- Support grades (O-Line, QB Play) share a dark box like the QB page -->
-              <div class="box support-box" [style.min-width.em]="group.stats.length * 5.5">
+              <div class="box support-box" [style.min-width.em]="group.stats.length * 7">
                 @for (stat of group.stats; track stat.key) {
                   <div [class.o-line]="stat.key === 'oline'">
                     @if (stat.key === 'oline') {
@@ -136,7 +138,7 @@
       (click)="copyPlayerListToClipboard()"
       aria-label="Copy To Clipboard Button"
       title="Copy to Clipboard"
-      style="margin-left: auto; margin-right: 1em"
+      class="copy-toggle"
     >
       <mat-icon
         aria-hidden="false"

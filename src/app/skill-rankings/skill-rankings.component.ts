@@ -23,7 +23,7 @@ import {
 import { PositionService } from 'app/services/position.service';
 import { copyRankingsToClipboard } from 'app/utils/clipboard';
 import { SKILL_UNITS, weightedTotals } from 'app/utils/unit-scoring';
-import { tintAverage, tintColor } from 'app/utils/value-tint';
+import { TintScale, tintFrom, tintScale } from 'app/utils/value-tint';
 import { badgeColor, whiteLogo } from 'app/utils/team-colors';
 
 // Average a per-QB value (0-12) for each team, weighted by how many games each QB started there
@@ -95,12 +95,31 @@ export class SkillRankingsComponent implements OnChanges {
   // Settings: color-coded values (grades and records keep their own coloring; Games is context only)
   valueColor(player: SkillPlayer, stat: SkillStat): string | null {
     if (!this.colorValues || stat.infoOnly || stat.format === 'grade' || stat.format === 'record') return null;
-    return tintColor(
-      this.rateValue(player, stat),
-      this.playerList.map((p) => this.rateValue(p, stat)),
-      !!stat.negative,
-    );
+    return tintFrom(this.rateValue(player, stat), this.columnScale(stat, 'rate'), !!stat.negative);
   }
+
+  // Each column's average and spread over the list, computed once and reused by every cell and the
+  // header hover (recomputing it per cell made the table slow to update, e.g. during column drags).
+  // Cleared whenever the list or anything feeding the values changes.
+  private scales = new Map<string, TintScale | null>();
+  private scalesFor?: unknown[];
+
+  private columnScale(stat: SkillStat, basis: 'rate' | 'shown'): TintScale | null {
+    const inputs = [this.playerList, this.dataVersion, this.perGame, this.fantasyScoring];
+    if (!this.scalesFor || inputs.some((v, i) => v !== this.scalesFor![i])) {
+      this.scales.clear();
+      this.scalesFor = inputs;
+    }
+    const key = `${basis}.${stat.key}`;
+    if (!this.scales.has(key)) {
+      const value = (p: SkillPlayer) => (basis === 'shown' ? this.value(p, stat) : this.rateValue(p, stat));
+      this.scales.set(key, tintScale(this.playerList.map(value)));
+    }
+    return this.scales.get(key)!;
+  }
+
+  // Bumped when grades from other tabs change (QB order, defense / coaching, O-line tweaks)
+  private dataVersion = 0;
 
   get showUnused(): boolean {
     return this.positionService.settings.showUnused;
@@ -196,6 +215,7 @@ export class SkillRankingsComponent implements OnChanges {
   // Changes from other tabs (QB order, defense / coaching grades, O-line tweaks) re-sort this tab
   // unless its order was dragged by hand; the new values still show either way
   private refresh() {
+    this.dataVersion++;
     if (!this.position) return;
     if (!this.positionService.unitOrder(this.position)?.manual) this.sortPlayers();
   }
@@ -247,8 +267,7 @@ export class SkillRankingsComponent implements OnChanges {
     if (stat.format === 'record') return name;
     // Matches what the color-coding compares, or what the column shows when it's per game
     // (display-only columns like FG Att aren't color-coded, so they follow the column)
-    const averaged = (p: SkillPlayer) => (this.showsPerGame(stat) ? this.value(p, stat) : this.rateValue(p, stat));
-    const avg = tintAverage(this.playerList.map(averaged));
+    const avg = this.columnScale(stat, this.showsPerGame(stat) ? 'shown' : 'rate')?.mean ?? null;
     if (avg === null) return name;
     let shown: string;
     switch (stat.format) {

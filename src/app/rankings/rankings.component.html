@@ -488,7 +488,7 @@
                             'olineValue',
                             'defenseValue',
                           ]) *
-                            5.5 +
+                            7 +
                           'em',
                       }"
                     >
@@ -652,9 +652,6 @@
   </ng-template>
 
   <ul #rankingsList cdkDropList (cdkDropListDropped)="drop($event)" columnHighlight>
-    @if (playerList.length < 1) {
-      <h1 style="margin: 2em">LOADING...</h1>
-    }
     @if (playerList.length) {
       <!-- Column headers: the first row's cells with only the labels showing -->
       <li class="player header-row">
@@ -705,7 +702,7 @@
       (click)="copyPlayerListToClipboard()"
       aria-label="Copy To Clipboard Button"
       title="Copy to Clipboard"
-      style="margin-left: auto; margin-right: 1em"
+      class="copy-toggle"
     >
       <mat-icon
         aria-hidden="false"
