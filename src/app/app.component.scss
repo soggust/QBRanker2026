@@ -581,12 +581,22 @@ main .drawer-tab:hover .mat-icon {
 
     button:not(.collapse-toggle) {
       font-size: 1em;
+      white-space: nowrap;
     }
   }
 
   // The bar no longer sits inside the top padding: 50px bar + 12px gap, less the 13px padding
   main .content {
     --position-bar-space: 49px;
+  }
+}
+
+// Full names on the narrower big screens: nine tabs only fit on one line with smaller, tighter text
+@media (min-width: 1750px) and (max-width: 2099px) {
+  .position-bar button:not(.collapse-toggle) {
+    font-size: 0.9em;
+    letter-spacing: 1px;
+    padding-inline: 0.5em;
   }
 }
 

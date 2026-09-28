@@ -131,6 +131,8 @@ export class SkillRankingsComponent implements OnChanges {
   fantasyScoring: FantasyScoring = 'ppr';
   scoringLabels = FANTASY_SCORING_LABELS;
   teamQbPlay = new Map<string, number>();
+  // Team RB grades from the RB tab's order, weighted by carries
+  teamRbPlay = new Map<string, number>();
   // Team grades from the Head Coaches / Defenses tabs' orders (the same grades the QB page uses)
   teamCoaching = new Map<string, number>();
   teamDefense = new Map<string, number>();
@@ -178,6 +180,12 @@ export class SkillRankingsComponent implements OnChanges {
     });
 
     this.positionService.olineOverrides$.subscribe(() => this.refresh());
+    this.positionService.olineGrades$.subscribe(() => this.refresh());
+
+    this.positionService.rbPlayGrades$.subscribe((grades) => {
+      this.teamRbPlay = grades;
+      this.refresh();
+    });
 
     // Eyes switch stats off: re-sort without them (the columns hide on their own)
     this.positionService.statHidden$.subscribe(() => {
@@ -334,12 +342,15 @@ export class SkillRankingsComponent implements OnChanges {
       }
       case 'fantasy':
         return fantasyPoints(player.stats.fantasyStd ?? 0, player.stats.receptions ?? 0, this.fantasyScoring);
-      // Shared with the QB page: +/- on either tab moves the team's O-line grade in both
+      // Preseason blended with the Offensive Lines ranking; shared with the QB page, so +/- on either
+      // tab moves the team's O-line grade in both
       case 'oline':
         return this.positionService.olineGrade(player.teamLogo);
       // Teams without a graded QB yet count as average
       case 'qbPlay':
         return this.teamQbPlay.get(player.teamLogo) ?? 6;
+      case 'rbPlay':
+        return this.teamRbPlay.get(player.teamLogo) ?? 6;
       // Same as the QB page: preseason coaching blended with the Head Coaches ranking by games played
       case 'coaching':
         return blendGrade(

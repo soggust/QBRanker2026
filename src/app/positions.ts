@@ -1,11 +1,11 @@
 import { SKILL_PRESETS } from 'app/skill-presets';
 
-export type Position = 'QB' | 'RB' | 'WR' | 'TE' | 'K' | 'P' | 'DEF' | 'HC';
+export type Position = 'QB' | 'RB' | 'WR' | 'TE' | 'OL' | 'K' | 'P' | 'DEF' | 'HC';
 // Everything except QB, which has its own page; all use the config-driven table below
-// (DEF rows are team defenses and HC rows are head coaches)
+// (OL rows are team offensive lines, DEF rows team defenses and HC rows head coaches)
 export type SkillPosition = Exclude<Position, 'QB'>;
 
-export const POSITIONS: Position[] = ['QB', 'RB', 'WR', 'TE', 'K', 'P', 'DEF', 'HC'];
+export const POSITIONS: Position[] = ['QB', 'RB', 'WR', 'TE', 'OL', 'K', 'P', 'DEF', 'HC'];
 
 // Keys of the stats object in skill-players.json
 export type SkillStatKey =
@@ -79,7 +79,18 @@ export type SkillStatKey =
   | 'oneScoreWinPct'
   | 'penaltiesPerGame'
   | 'fourthDownGoPct'
-  | 'turnoverDiffPerGame';
+  | 'turnoverDiffPerGame'
+  // Offensive lines
+  | 'sacksAllowed'
+  | 'qbHitsAllowed'
+  | 'sackRate'
+  | 'stuffRate'
+  | 'yardsBeforeContact'
+  | 'runEpa'
+  | 'runSuccess'
+  | 'shortYardagePct'
+  | 'linePenaltiesPerGame'
+  | 'timeToThrow';
 
 // Columns computed in the app: fantasy points in the chosen scoring, and team support grades
 export type SkillColumnKey =
@@ -87,6 +98,7 @@ export type SkillColumnKey =
   | 'fantasy'
   | 'oline'
   | 'qbPlay'
+  | 'rbPlay'
   | 'coaching'
   | 'defense'
   | 'games'
@@ -147,6 +159,7 @@ export const STAT_NAMES: Partial<Record<SkillColumnKey, string>> = {
   fantasy: 'Fantasy Points',
   oline: 'Offensive Line Grade',
   qbPlay: 'Quarterback Play Grade',
+  rbPlay: 'Running Back Play Grade',
   coaching: 'Coaching Grade',
   defense: 'Defense Grade',
   targets: 'Targets',
@@ -210,6 +223,16 @@ export const STAT_NAMES: Partial<Record<SkillColumnKey, string>> = {
   penaltiesPerGame: 'Penalties per Game',
   fourthDownGoPct: 'Fourth-Down Go-For-It Rate',
   turnoverDiffPerGame: 'Turnover Differential per Game',
+  sacksAllowed: 'Sacks Allowed',
+  qbHitsAllowed: 'QB Hits Allowed',
+  sackRate: 'Sack Rate Allowed',
+  stuffRate: 'Stuffed Run Rate',
+  yardsBeforeContact: 'Yards Before Contact per Carry',
+  runEpa: 'Expected Points Added per Designed Run',
+  runSuccess: 'Designed Run Success Rate',
+  shortYardagePct: 'Short-Yardage Run Conversion Rate',
+  linePenaltiesPerGame: 'Blocking Penalties per Game',
+  timeToThrow: 'QB Time to Throw (Seconds)',
 };
 
 // Short labels for volume stats when Per-Game Stats is on (yards read as YPG, points as PPG)
@@ -236,6 +259,8 @@ export const PER_GAME_LABELS: Partial<Record<SkillColumnKey, string>> = {
   touchbacks: 'TBs / Game',
   sacks: 'Sacks / Game',
   takeaways: 'TOs / Game',
+  sacksAllowed: 'Sacks / Game',
+  qbHitsAllowed: 'QB Hits / Game',
 };
 
 export type SkillWeights = Partial<Record<SkillColumnKey, number>>;
@@ -298,6 +323,17 @@ const QB_PLAY_STAT: SkillStat = {
   key: 'qbPlay',
   label: 'QB Play',
   description: "Team QB grade from the current QB rankings, weighted by each QB's starts",
+  kind: 'efficiency',
+  format: 'grade',
+  support: true,
+};
+
+// Team RB grade from the RB rankings: a support grade for offensive lines (a good back makes the
+// run blocking look better)
+const RB_PLAY_STAT: SkillStat = {
+  key: 'rbPlay',
+  label: 'RB Play',
+  description: "Team RB grade from the current RB rankings, weighted by each back's carries",
   kind: 'efficiency',
   format: 'grade',
   support: true,
@@ -657,6 +693,107 @@ export const SKILL_STATS: Record<SkillPosition, SkillStat[]> = {
     COACHING_STAT,
     QB_PLAY_STAT,
   ],
+  // Lower is better for everything "allowed", and for stuffs and penalties
+  OL: [
+    GAMES_STAT,
+    {
+      key: 'sacksAllowed',
+      label: 'Sacks',
+      description: 'Sacks allowed (lower is better)',
+      kind: 'volume',
+      format: 'int',
+      negative: true,
+    },
+    {
+      key: 'qbHitsAllowed',
+      label: 'QB Hits',
+      description: 'QB hits allowed, sacks included (lower is better)',
+      kind: 'volume',
+      format: 'int',
+      negative: true,
+    },
+    { key: 'ypc', label: 'Yds / Carry', description: 'Yards per designed run', kind: 'efficiency', format: 'dec1', signed: true },
+    {
+      key: 'stuffRate',
+      label: 'Stuff %',
+      description: 'Share of designed runs stopped at or behind the line (lower is better)',
+      kind: 'efficiency',
+      format: 'pct',
+      signed: true,
+      negative: true,
+    },
+    {
+      key: 'shortYardagePct',
+      label: 'Short Yd %',
+      description: 'Conversion rate on 3rd and 4th and 1-2 runs',
+      kind: 'efficiency',
+      format: 'pct',
+      signed: true,
+      missingIsAverage: true,
+    },
+    {
+      key: 'linePenaltiesPerGame',
+      label: 'Penalties / Game',
+      description: 'Holding, false starts and other blocking penalties per game (lower is better)',
+      kind: 'efficiency',
+      format: 'dec1',
+      signed: true,
+      negative: true,
+    },
+    {
+      key: 'pressureRate',
+      label: 'Pressure %',
+      description: 'Pressures allowed per dropback (lower is better)',
+      kind: 'efficiency',
+      format: 'pct',
+      signed: true,
+      negative: true,
+    },
+    {
+      key: 'sackRate',
+      label: 'Sack %',
+      description: 'Sacks allowed per dropback (lower is better)',
+      kind: 'efficiency',
+      format: 'pct',
+      signed: true,
+      negative: true,
+    },
+    {
+      key: 'yardsBeforeContact',
+      label: 'YBC / Carry',
+      description: 'Yards before first contact per carry',
+      kind: 'efficiency',
+      format: 'dec2',
+      signed: true,
+    },
+    {
+      key: 'runEpa',
+      label: 'Run EPA',
+      description: 'Expected Points Added per designed run',
+      kind: 'efficiency',
+      format: 'dec2',
+      signed: true,
+    },
+    {
+      key: 'runSuccess',
+      label: 'Run Success %',
+      description: 'Share of designed runs with positive EPA',
+      kind: 'efficiency',
+      format: 'pct',
+      signed: true,
+    },
+    {
+      key: 'timeToThrow',
+      label: 'Time to Throw',
+      description: 'QB seconds from snap to throw: quick passers make a line look better (for context; not part of the ranking)',
+      kind: 'efficiency',
+      format: 'dec2',
+      infoOnly: true,
+    },
+    RB_PLAY_STAT,
+    QB_PLAY_STAT,
+    COACHING_STAT,
+  ],
   HC: [
     { key: 'winPct', label: 'Record', description: 'Win-loss record', kind: 'efficiency', format: 'record' },
     {
@@ -784,6 +921,11 @@ const ADVANCED_STATS = new Set<SkillColumnKey>([
   'successAllowed',
   'pressureRate',
   'missedTacklePct',
+  'sackRate',
+  'yardsBeforeContact',
+  'runEpa',
+  'runSuccess',
+  'timeToThrow',
   'netEpa',
   // Fantasy points close out each Advanced Stats group
   'fantasy',

@@ -79,6 +79,11 @@ export function preseasonCoaching(teamLogo: string): number {
   return (teamGrades[teamKey(teamLogo)] ?? { coaching: 6 }).coaching;
 }
 
+// Preseason O-line grade per team; the app blends it with the Offensive Lines rankings
+export function preseasonOline(teamLogo: string): number {
+  return (teamGrades[teamKey(teamLogo)] ?? { oline: 6 }).oline;
+}
+
 // Team games played this season (from the stats grades)
 export function teamGamesPlayed(teamLogo: string): number {
   return dataGrades.teams[teamKey(teamLogo)]?.games ?? 0;

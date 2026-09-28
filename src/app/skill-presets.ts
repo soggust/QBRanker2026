@@ -177,6 +177,38 @@ export const SKILL_PRESETS: Record<SkillPosition, SkillPresetDef[]> = {
     },
     FANTASY,
   ],
+  OL: [
+    {
+      key: 'passPro',
+      label: 'Pass Pro',
+      description: 'Keeps the QB clean: pressure rate, sack rate, sacks and hits allowed',
+      weights: { pressureRate: 100, sackRate: 100, sacksAllowed: 75, qbHitsAllowed: 75 },
+    },
+    {
+      key: 'maulers',
+      label: 'Maulers',
+      description: 'Moves people in the run game: yards before contact, stuffs, yards per carry',
+      weights: { yardsBeforeContact: 100, stuffRate: 90, ypc: 80, shortYardagePct: 60 },
+    },
+    {
+      key: 'shortYardage',
+      label: 'Short Yardage',
+      description: 'Wins the must-have yards: 3rd / 4th and short conversions and stuff rate',
+      weights: { shortYardagePct: 100, stuffRate: 80, runSuccess: 60 },
+    },
+    {
+      key: 'analytics',
+      label: 'Analytics',
+      description: 'Play-by-play efficiency: run EPA and success rate, pressure and sack rate',
+      weights: { runEpa: 100, runSuccess: 90, pressureRate: 75, sackRate: 75 },
+    },
+    {
+      key: 'discipline',
+      label: 'Discipline',
+      description: 'Clean blocking: few holding and false-start penalties, few sacks',
+      weights: { linePenaltiesPerGame: 100, sacksAllowed: 60 },
+    },
+  ],
   HC: [
     {
       key: 'winner',

@@ -1,11 +1,12 @@
-import { gradesForTeam } from 'StaticData/StaticData';
+import { blendGrade, preseasonOline, teamGamesPlayed } from 'StaticData/StaticData';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, combineLatest, distinctUntilChanged, map, shareReplay } from 'rxjs';
-import { SKILL_UNITS, coachingGrades, defenseGrades, gradesByRank } from 'app/utils/unit-scoring';
+import { SKILL_UNITS, defaultRanking, gradesByRank } from 'app/utils/unit-scoring';
 import {
   FantasyScoring,
   POSITIONS,
   Position,
+  SkillPlayer,
   SkillPosition,
   SkillWeights,
   StatGroupId,
@@ -63,6 +64,17 @@ function linkedPosition(): Position {
   return POSITIONS.find((position) => position === linked) ?? 'QB';
 }
 
+// Only emit when some team's grade actually changed; shared so every tab sees the same grades
+function distinctGrades() {
+  return (source: Observable<Map<string, number>>) =>
+    source.pipe(
+      distinctUntilChanged<Map<string, number>>(
+        (a, b) => a.size === b.size && [...a].every(([team, grade]) => b.get(team) === grade),
+      ),
+      shareReplay({ bufferSize: 1, refCount: false }),
+    );
+}
+
 export interface UnitOrder {
   ids: string[];
   manual: boolean;
@@ -80,6 +92,7 @@ export class PositionService {
     RB: presetWeights('RB', 'default'),
     WR: presetWeights('WR', 'default'),
     TE: presetWeights('TE', 'default'),
+    OL: presetWeights('OL', 'default'),
     K: presetWeights('K', 'default'),
     P: presetWeights('P', 'default'),
     DEF: presetWeights('DEF', 'default'),
@@ -102,24 +115,45 @@ export class PositionService {
     this.unitOrdersSubject.next({ ...this.unitOrdersSubject.value, [position]: { ids, manual } });
   }
 
-  // Team defense / coaching grades (0-12) from the Defenses / Head Coaches tabs as last shown, drags
-  // included (#1 = A+). Before a tab has been opened, from its default slider ranking. Each tab only
-  // re-sorts while it's on screen, so the two can feed each other without looping.
+  // Team defense / coaching / O-line grades (0-12) from the Defenses / Head Coaches / Offensive Lines
+  // tabs as last shown, drags included (#1 = A+). Before a tab has been opened, from its default slider
+  // ranking. Each tab only re-sorts while it's on screen, so they can feed each other without looping.
   public defenseGrades$ = this.teamGradesFrom('DEF');
   public coachingGrades$ = this.teamGradesFrom('HC');
+  public olineGrades$ = this.teamGradesFrom('OL');
 
-  private teamGradesFrom(position: 'DEF' | 'HC'): Observable<Map<string, number>> {
+  // A tab's list as last shown (or its default slider ranking before it's been opened), best first
+  private rankedUnits(position: SkillPosition): Observable<SkillPlayer[]> {
     return combineLatest([this.weightsSubject, this.unitOrdersSubject]).pipe(
       map(([weights, orders]) => {
         const order = orders[position];
-        if (!order) return position === 'DEF' ? defenseGrades(weights.DEF) : coachingGrades(weights.HC);
+        if (!order) return defaultRanking(position, weights[position]);
         const byId = new Map(SKILL_UNITS[position].map((unit) => [unit.gsisId, unit]));
-        return gradesByRank(order.ids.map((id) => byId.get(id)).filter((unit) => !!unit));
+        return order.ids.map((id) => byId.get(id)).filter((unit) => !!unit);
       }),
-      distinctUntilChanged((a, b) => a.size === b.size && [...a].every(([team, grade]) => b.get(team) === grade)),
-      shareReplay({ bufferSize: 1, refCount: false }),
     );
   }
+
+  private teamGradesFrom(position: 'DEF' | 'HC' | 'OL'): Observable<Map<string, number>> {
+    return this.rankedUnits(position).pipe(map(gradesByRank), distinctGrades());
+  }
+
+  // RB Play: each back graded by his spot in the RB rankings (#1 = A+, last = F), averaged per team
+  // weighted by carries, so the lead back counts most
+  public rbPlayGrades$ = this.rankedUnits('RB').pipe(
+    map((ranked) => {
+      const last = Math.max(ranked.length - 1, 1);
+      const totals = new Map<string, { sum: number; carries: number }>();
+      ranked.forEach((rb, rank) => {
+        const carries = rb.stats.carries ?? 0;
+        if (!carries) return;
+        const total = totals.get(rb.teamLogo) ?? { sum: 0, carries: 0 };
+        totals.set(rb.teamLogo, { sum: total.sum + 12 * (1 - rank / last) * carries, carries: total.carries + carries });
+      });
+      return new Map([...totals].map(([team, { sum, carries }]) => [team, sum / carries]));
+    }),
+    distinctGrades(),
+  );
 
   // Stats switched off with their sidebar eye, keyed "QB.compValue", "RB.carries"...: the column is
   // hidden whatever the Unweighted Stats setting says, and the stat drops out of the ranking (its slider
@@ -185,9 +219,21 @@ export class PositionService {
   private olineOverridesSubject = new BehaviorSubject<Record<string, number>>({});
   public olineOverrides$ = this.olineOverridesSubject.asObservable();
 
-  // A team's O-line grade: the adjusted one if changed, otherwise the blended team grade
+  // Latest grades from the Offensive Lines tab (kept for olineGrade)
+  private olineTabGrades = new Map<string, number>();
+
+  constructor() {
+    // Subscribed before any page, so olineGrade is current when the pages hear about a change
+    this.olineGrades$.subscribe((grades) => (this.olineTabGrades = grades));
+  }
+
+  // A team's O-line grade: the adjusted one if changed, otherwise the preseason grade blended with
+  // the Offensive Lines tab's order, leaning on the ranking more with every game played (like coaching)
   olineGrade(teamLogo: string): number {
-    return this.olineOverridesSubject.value[teamLogo] ?? gradesForTeam(teamLogo).oline;
+    return (
+      this.olineOverridesSubject.value[teamLogo] ??
+      blendGrade(preseasonOline(teamLogo), this.olineTabGrades.get(teamLogo), teamGamesPlayed(teamLogo))
+    );
   }
 
   // One grade step up or down (stays within F-A+)

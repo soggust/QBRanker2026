@@ -93,6 +93,7 @@ export class SidebarComponent {
     RB: null,
     WR: null,
     TE: null,
+    OL: null,
     K: null,
     P: null,
     DEF: null,

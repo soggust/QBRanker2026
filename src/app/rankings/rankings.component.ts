@@ -250,9 +250,6 @@ export class RankingsComponent {
   fantasyScoring: FantasyScoring = 'ppr';
   scoringLabels = FANTASY_SCORING_LABELS;
   teamDefense = new Map<string, number>();
-  // O-line grades adjusted per team (shared with the RB page), and each QB's grade before any change
-  olineOverrides: Record<string, number> = {};
-  private olineBase = new Map<number, number>();
   teamCoaching = new Map<string, number>();
 
   constructor(
@@ -289,8 +286,13 @@ export class RankingsComponent {
       this.sortPlayers();
     });
 
-    this.positionService.olineOverrides$.subscribe((overrides) => {
-      this.olineOverrides = overrides;
+    // O-line grades follow the Offensive Lines tab's order (blended with preseason), and +/- tweaks
+    // made on this page or the RB page
+    this.positionService.olineGrades$.subscribe(() => {
+      this.applyOlineGrades();
+      this.sortPlayers();
+    });
+    this.positionService.olineOverrides$.subscribe(() => {
       this.applyOlineGrades();
       this.sortPlayers();
     });
@@ -333,12 +335,11 @@ export class RankingsComponent {
     }
   }
 
-  // Set each QB's O-line grade: their team's adjusted grade (shared with the RB page) if it was
-  // changed, otherwise the grade they loaded with
+  // Set each QB's O-line grade: their team's grade (preseason blended with the Offensive Lines
+  // rankings, or as adjusted with +/- here or on the RB page)
   applyOlineGrades() {
     for (const player of this.unfilteredPlayerList) {
-      if (!this.olineBase.has(player.id)) this.olineBase.set(player.id, player.oline);
-      player.oline = this.olineOverrides[player.teamLogo] ?? this.olineBase.get(player.id)!;
+      player.oline = this.positionService.olineGrade(player.teamLogo);
     }
   }
 

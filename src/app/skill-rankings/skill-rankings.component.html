@@ -8,7 +8,7 @@
       <div class="player-info">
         <!-- Plain labels over the rank and name columns -->
         <p class="stat-label header-rank">Rank</p>
-        <p class="stat-label header-name">{{ position === 'DEF' ? 'Team' : position === 'HC' ? 'Coach' : 'Player' }}</p>
+        <p class="stat-label header-name">{{ position === 'DEF' || position === 'OL' ? 'Team' : position === 'HC' ? 'Coach' : 'Player' }}</p>
       </div>
       @for (group of groups; track group.id) {
         <div class="col-group" [ngClass]="'group-' + group.id">

@@ -428,6 +428,56 @@ function defenseUnits({ pbp, games, pfr }) {
   });
 }
 
+// Team offensive lines: pass protection (sacks, hits, pressure, sack rate), run blocking on designed
+// runs (yards per carry, stuffs, yards before contact, EPA, success, short-yardage conversions) and
+// the line's own penalties. QB time to throw is context (a quick passer makes a line look better).
+const OLINE_PENALTIES = ['Offensive Holding', 'False Start', 'Illegal Formation', 'Illegal Use of Hands', 'Chop Block'];
+
+function olineUnits({ pbp, games, pfr, ngs }) {
+  return Object.keys(TEAM_ICONS).map((team) => {
+    const plays = pbp.filter((play) => play.posteam === team);
+    const dropbacks = plays.filter((play) => play.qb_dropback === '1');
+    const sacks = dropbacks.filter((play) => play.sack === '1').length;
+    // Designed runs: no scrambles or kneel-downs
+    const runs = plays.filter((play) => play.rush === '1' && play.qb_scramble !== '1' && play.qb_kneel !== '1');
+    const epaRuns = runs.filter((play) => num(play.epa) !== null);
+    const yards = runs.reduce((sum, play) => sum + (num(play.yards_gained) ?? 0), 0);
+    // 3rd / 4th and 1-2 runs: converted when they gain a first down or score
+    const shortYardage = runs.filter(
+      (play) => ['3', '4'].includes(play.down) && (num(play.ydstogo) ?? 99) <= 2
+    );
+    const penalties = pbp.filter(
+      (play) => play.penalty === '1' && play.penalty_team === team && OLINE_PENALTIES.includes(play.penalty_type)
+    ).length;
+    const played = teamGames(games, team).length;
+    const pass = pfr.passTeam.get(team);
+    const rush = pfr.rushTeam.get(team);
+    return {
+      id: null,
+      gsisId: `OL-${team}`,
+      name: TEAM_NAMES[team],
+      teamLogo: teamIcon(team),
+      games: played,
+      stats: {
+        sacksAllowed: sacks,
+        qbHitsAllowed: dropbacks.filter((play) => play.qb_hit === '1' || play.sack === '1').length,
+        pressureRate: pass && dropbacks.length ? ratio(pass.times_pressured, dropbacks.length) : null,
+        sackRate: ratio(sacks, dropbacks.length),
+        ypc: runs.length ? round(yards / runs.length, 2) : null,
+        stuffRate: ratio(runs.filter((play) => (num(play.yards_gained) ?? 0) <= 0).length, runs.length),
+        yardsBeforeContact: rush?.carries ? round(rush.rushing_yards_before_contact / rush.carries, 2) : null,
+        runEpa: epaRuns.length ? round(mean(epaRuns.map((play) => num(play.epa))), 3) : null,
+        runSuccess: epaRuns.length ? ratio(epaRuns.filter((play) => play.success === '1').length, epaRuns.length) : null,
+        shortYardagePct: shortYardage.length
+          ? ratio(shortYardage.filter((play) => play.first_down === '1' || play.touchdown === '1').length, shortYardage.length)
+          : null,
+        linePenaltiesPerGame: played ? round(penalties / played, 1) : null,
+        timeToThrow: ngsTeamAverage([...ngs.pass.values()], team, 'avg_time_to_throw', 'attempts'),
+      },
+    };
+  });
+}
+
 // ---------------------------------------------------------------------------
 // Data grades: O-line and weapons per team, responsibility per QB, from this season's stats.
 // Each is the average z-score of a few stats, ranked into 0-12 like the preseason grades
@@ -800,6 +850,7 @@ function skillPlayers(nflverse) {
   const result = {
     DEF: defenseUnits(nflverse).sort((a, b) => a.name.localeCompare(b.name)),
     HC: coachUnits(nflverse).sort((a, b) => a.name.localeCompare(b.name)),
+    OL: olineUnits(nflverse).sort((a, b) => a.name.localeCompare(b.name)),
   };
   for (const [position, config] of Object.entries(SKILL_POSITIONS)) {
     const players = playerStats

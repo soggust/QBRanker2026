@@ -1,5 +1,14 @@
 import { DATA } from 'StaticData/data';
-import { SKILL_STATS, SkillPlayer, SkillPosition, SkillStat, SkillWeights } from 'app/positions';
+import {
+  SKILL_STATS,
+  SkillPlayer,
+  SkillPosition,
+  SkillStat,
+  SkillStatKey,
+  SkillWeights,
+  combinedFor,
+  fantasyPoints,
+} from 'app/positions';
 
 export const SKILL_UNITS = DATA.skillPlayers as Record<SkillPosition, SkillPlayer[]>;
 
@@ -58,18 +67,25 @@ export function gradesByRank(ranked: { teamLogo: string }[]): Map<string, number
   return new Map(ranked.map((unit, rank) => [unit.teamLogo, 12 * (1 - rank / last)]));
 }
 
-// Team coaching grades from the Head Coaches rankings with the given slider weights
-export function coachingGrades(weights: SkillWeights): Map<string, number> {
-  const units = SKILL_UNITS.HC;
-  const totals = weightedTotals(units, SKILL_STATS.HC, weights, (unit, stat) => unit.stats[stat.key]);
-  return gradesByRank([...units].sort((a, b) => (totals.get(b) ?? 0) - (totals.get(a) ?? 0)));
-}
-
-// Team defense grades from the Defenses rankings with the given slider weights
-export function defenseGrades(weights: SkillWeights): Map<string, number> {
-  const units = SKILL_UNITS.DEF;
-  const totals = weightedTotals(units, SKILL_STATS.DEF, weights, (unit, stat) =>
-    stat.key === 'fantasy' ? unit.stats.fantasyStd : unit.stats[stat.key],
-  );
-  return gradesByRank([...units].sort((a, b) => (totals.get(b) ?? 0) - (totals.get(a) ?? 0)));
+// A tab's default ranking (its sliders, before it's been opened), best first. Rush / rec parts are
+// scaled by their parent Total Yds / Total TDs sliders, fantasy is PPR, and support grades from
+// other tabs count as average (C).
+export function defaultRanking(position: SkillPosition, weights: SkillWeights): SkillPlayer[] {
+  const units = SKILL_UNITS[position];
+  const effective = { ...weights };
+  for (const { stat, parts } of combinedFor(position)) {
+    const parent = weights[stat.key] ?? 50;
+    for (const part of parts) effective[part] = ((effective[part] ?? 0) * parent) / 50;
+  }
+  const totals = weightedTotals(units, SKILL_STATS[position], effective, (unit, stat) => {
+    switch (stat.key) {
+      case 'fantasy':
+        return fantasyPoints(unit.stats.fantasyStd ?? 0, unit.stats.receptions ?? 0, 'ppr');
+      case 'totalYards':
+        return (unit.stats.rushYards ?? 0) + (unit.stats.recYards ?? 0);
+      default:
+        return stat.support ? null : unit.stats[stat.key as SkillStatKey];
+    }
+  });
+  return [...units].sort((a, b) => (totals.get(b) ?? 0) - (totals.get(a) ?? 0));
 }

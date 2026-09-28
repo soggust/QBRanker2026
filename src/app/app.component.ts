@@ -17,6 +17,7 @@ export class AppComponent {
     RB: 'Running Backs',
     WR: 'Wide Receivers',
     TE: 'Tight Ends',
+    OL: 'Offensive Lines',
     K: 'Kickers',
     P: 'Punters',
     DEF: 'Defenses',
