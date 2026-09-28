@@ -1,6 +1,6 @@
 import { Component, Input, OnChanges, ElementRef, ViewChild } from '@angular/core';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
-import { StaticData, blendGrade, preseasonCoaching, teamGamesPlayed } from 'StaticData/StaticData';
+import { StaticData } from 'StaticData/StaticData';
 import {
   FANTASY_SCORING_LABELS,
   FantasyScoring,
@@ -23,7 +23,7 @@ import {
 } from 'app/positions';
 import { PositionService } from 'app/services/position.service';
 import { copyRankingsToClipboard } from 'app/utils/clipboard';
-import { SKILL_UNITS, weightedTotals } from 'app/utils/unit-scoring';
+import { SKILL_UNITS, curveGrades, weightedTotals } from 'app/utils/unit-scoring';
 import { TintScale, tintFrom, tintScale } from 'app/utils/value-tint';
 import { badgeColor, whiteLogo } from 'app/utils/team-colors';
 
@@ -166,13 +166,16 @@ export class SkillRankingsComponent implements OnChanges {
       this.sortPlayers();
     });
 
-    // QB Play: #1 QB grades 12 (A+), the last-ranked grades 0 (F)
+    // QB Play: each QB graded by his spot in the QB rankings (#1 = 12, last = 0), averaged per team by
+    // starts, then curved so the best team is an A+ and the worst an F
     this.positionService.qbRanks$.subscribe((ids) => {
       const last = Math.max(ids.length - 1, 1);
-      this.teamQbPlay = teamGrades((id) => {
-        const rank = ids.indexOf(id);
-        return rank === -1 ? undefined : 12 * (1 - rank / last);
-      });
+      this.teamQbPlay = curveGrades(
+        teamGrades((id) => {
+          const rank = ids.indexOf(id);
+          return rank === -1 ? undefined : 12 * (1 - rank / last);
+        }),
+      );
       this.refresh();
     });
 
@@ -355,13 +358,9 @@ export class SkillRankingsComponent implements OnChanges {
         return this.teamQbPlay.get(player.teamLogo) ?? 6;
       case 'rbPlay':
         return this.teamRbPlay.get(player.teamLogo) ?? 6;
-      // Same as the QB page: preseason coaching blended with the Head Coaches ranking by games played
+      // Same as the QB page: preseason coaching blended with the Head Coaches ranking, curved
       case 'coaching':
-        return blendGrade(
-          preseasonCoaching(player.teamLogo),
-          this.teamCoaching.get(player.teamLogo),
-          teamGamesPlayed(player.teamLogo),
-        );
+        return this.positionService.coachingGrade(player.teamLogo);
       case 'defense':
         return Math.round(this.teamDefense.get(player.teamLogo) ?? 6);
       default:

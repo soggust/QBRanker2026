@@ -1,7 +1,7 @@
-import { blendGrade, preseasonOline, preseasonWeapons, teamGamesPlayed } from 'StaticData/StaticData';
+import { dataWeight, preseasonCoaching, preseasonOline, preseasonWeapons, teamGamesPlayed } from 'StaticData/StaticData';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, combineLatest, distinctUntilChanged, map, shareReplay } from 'rxjs';
-import { SKILL_UNITS, defaultRanking, gradesByRank } from 'app/utils/unit-scoring';
+import { SKILL_UNITS, curveGrades, defaultRanking, gradesByRank } from 'app/utils/unit-scoring';
 import {
   FantasyScoring,
   POSITIONS,
@@ -100,6 +100,23 @@ const WEAPONS_SHARES: [SkillPosition, number, (player: SkillPlayer) => number][]
   ['TE', 0.2, (p) => p.stats.targets ?? 0],
 ];
 
+// Every team (logo path), for grades that cover the whole league
+const ALL_TEAMS = SKILL_UNITS.DEF.map((unit) => unit.teamLogo);
+
+// A team grade that starts from preseason: each team's preseason grade blended with this season's
+// grade (leaning on this season more with every game played), then curved so the best team is an
+// A+ and the worst an F
+function blendedCurve(preseason: (team: string) => number, season: Map<string, number>): Map<string, number> {
+  const scores = new Map(
+    ALL_TEAMS.map((team) => {
+      const start = preseason(team);
+      const now = season.get(team);
+      return [team, now === undefined ? start : start + (now - start) * dataWeight(teamGamesPlayed(team))];
+    }),
+  );
+  return curveGrades(scores);
+}
+
 export interface UnitOrder {
   ids: string[];
   manual: boolean;
@@ -174,7 +191,7 @@ export class PositionService {
   // RB Play: each back graded by his spot in the RB rankings (#1 = A+, last = F), averaged per team
   // weighted by carries, so the lead back counts most
   public rbPlayGrades$ = this.rankedUnits('RB').pipe(
-    map((ranked) => teamGradesByUsage(ranked, (rb) => rb.stats.carries ?? 0)),
+    map((ranked) => curveGrades(teamGradesByUsage(ranked, (rb) => rb.stats.carries ?? 0))),
     distinctGrades(),
   );
 
@@ -260,26 +277,30 @@ export class PositionService {
     this.columnOrders = { ...this.columnOrders, [list]: order };
   }
 
-  // Latest grades from the Offensive Lines tab and the RB / WR / TE tabs (kept for olineGrade and
-  // weaponsGrade)
-  private olineTabGrades = new Map<string, number>();
-  private weaponsTabGrades = new Map<string, number>();
+  // The O-line, weapons and coaching grades every page shows: preseason blended with the Offensive
+  // Lines / RB, WR and TE / Head Coaches rankings, then curved (see blendedCurve)
+  private olineCurve = new Map<string, number>();
+  private weaponsCurve = new Map<string, number>();
+  private coachingCurve = new Map<string, number>();
 
   constructor() {
     // Subscribed before any page, so the grades are current when the pages hear about a change
-    this.olineGrades$.subscribe((grades) => (this.olineTabGrades = grades));
-    this.weaponsGrades$.subscribe((grades) => (this.weaponsTabGrades = grades));
+    this.olineGrades$.subscribe((grades) => (this.olineCurve = blendedCurve(preseasonOline, grades)));
+    this.weaponsGrades$.subscribe((grades) => (this.weaponsCurve = blendedCurve(preseasonWeapons, grades)));
+    this.coachingGrades$.subscribe((grades) => (this.coachingCurve = blendedCurve(preseasonCoaching, grades)));
   }
 
-  // A team's O-line grade: the preseason grade blended with the Offensive Lines tab's order, leaning
-  // on the ranking more with every game played (like coaching)
+  // A team's grade, as a whole grade (0 = F ... 12 = A+)
   olineGrade(teamLogo: string): number {
-    return blendGrade(preseasonOline(teamLogo), this.olineTabGrades.get(teamLogo), teamGamesPlayed(teamLogo));
+    return Math.round(this.olineCurve.get(teamLogo) ?? 6);
   }
 
-  // A team's weapons grade: the preseason grade blended the same way with the RB / WR / TE rankings
   weaponsGrade(teamLogo: string): number {
-    return blendGrade(preseasonWeapons(teamLogo), this.weaponsTabGrades.get(teamLogo), teamGamesPlayed(teamLogo));
+    return Math.round(this.weaponsCurve.get(teamLogo) ?? 6);
+  }
+
+  coachingGrade(teamLogo: string): number {
+    return Math.round(this.coachingCurve.get(teamLogo) ?? 6);
   }
 
   // The About / FAQ panel (the footer's info button opens it on every tab)

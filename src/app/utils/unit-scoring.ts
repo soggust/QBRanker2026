@@ -68,6 +68,14 @@ export function gradesByRank(ranked: { teamLogo: string }[]): Map<string, number
   return new Map(ranked.map((unit, rank) => [unit.teamLogo, 12 * (1 - rank / last)]));
 }
 
+// Grades on a curve: highest score grades 12 (A+), lowest 0 (F), the rest spread evenly by rank.
+// Used for every support grade, so each always runs the full F to A+ range.
+export function curveGrades<K>(scores: Map<K, number>): Map<K, number> {
+  const ranked = [...scores].sort((a, b) => b[1] - a[1]);
+  const last = Math.max(ranked.length - 1, 1);
+  return new Map(ranked.map(([key], rank) => [key, 12 * (1 - rank / last)]));
+}
+
 // A tab's default ranking (its sliders, before it's been opened), best first. Rush / rec parts are
 // scaled by their parent Total Yds / Total TDs sliders, fantasy is PPR, and support grades from
 // other tabs count as average (C).

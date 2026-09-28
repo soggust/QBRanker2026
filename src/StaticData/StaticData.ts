@@ -70,6 +70,12 @@ export function dataWeight(games: number): number {
   return games > 0 ? Math.min(1, (games / FULL_WEIGHT_GAMES) ** 0.68) : 0;
 }
 
+// Preseason grade blended with the stats grade, before rounding (for grades that are curved next)
+function blendScore(preseason: number, fromData: number | undefined, games: number): number {
+  if (fromData === undefined || fromData === null) return preseason;
+  return preseason + (fromData - preseason) * dataWeight(games);
+}
+
 // Preseason grade blended with the stats grade, as a whole grade (0-12)
 export function blendGrade(preseason: number, fromData: number | undefined, games: number): number {
   if (fromData === undefined || fromData === null) return preseason;
@@ -148,6 +154,13 @@ export const StaticData: StaticPlayerData[] = games.map((game) => {
     // Placeholder until the Head Coaches rankings grade the team
     coachingOverride: coaching,
     ...playerScores,
-    responsibility: blendGrade(playerScores.responsibility, qbStats?.responsibility, qbStats?.games ?? 0),
+    responsibility: blendScore(playerScores.responsibility, qbStats?.responsibility, qbStats?.games ?? 0),
   };
 });
+
+// Responsibility on a curve across the QBs: the highest blended score grades A+, the lowest F
+{
+  const ranked = [...StaticData].sort((a, b) => b.responsibility - a.responsibility);
+  const last = Math.max(ranked.length - 1, 1);
+  ranked.forEach((qb, rank) => (qb.responsibility = Math.round(12 * (1 - rank / last))));
+}

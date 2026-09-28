@@ -5,7 +5,6 @@ import { EspnApiService } from 'app/services/espn-api.service';
 import { Filters, Player } from 'app/types';
 import { copyRankingsToClipboard } from 'app/utils/clipboard';
 import { PositionService } from 'app/services/position.service';
-import { blendGrade, preseasonCoaching, teamGamesPlayed } from 'StaticData/StaticData';
 import { tintAverage, tintColor } from 'app/utils/value-tint';
 import { badgeColor, whiteLogo } from 'app/utils/team-colors';
 import { FilterKey, QB_COLUMN_KEYS } from 'app/qb-filter-groups';
@@ -369,16 +368,10 @@ export class RankingsComponent {
   }
 
   // Set each QB's coaching grade (whole number, 0-12): the preseason grade blended with their
-  // team's Head Coaches ranking, leaning on the ranking more with every game played
+  // team's Head Coaches ranking, leaning on the ranking more with every game played, then curved
   applyCoachingGrades() {
     for (const player of this.unfilteredPlayerList) {
-      player.coaching =
-        player.coachingOverride ??
-        blendGrade(
-          preseasonCoaching(player.teamLogo),
-          this.teamCoaching.get(player.teamLogo),
-          teamGamesPlayed(player.teamLogo),
-        );
+      player.coaching = this.positionService.coachingGrade(player.teamLogo);
     }
   }
 
