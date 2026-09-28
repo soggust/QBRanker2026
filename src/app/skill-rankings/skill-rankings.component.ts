@@ -533,12 +533,13 @@ export class SkillRankingsComponent implements OnChanges {
   }
 
   // Get Count Classes
+  // Gold for #1 (the top-5 class, with the trophy), green for 2-10 (top-10), red for the bottom 10
+  // (bottom-5), white for the rest
   getCountClasses(i: number): string {
-    if (i < 5) return 'count top-5';
-    // Bottom 5 in red (the top 5 keep their gold if the list is ever that short)
-    if (i >= this.playerList.length - 5) return 'count bottom-5';
+    if (i === 0) return 'count top-5';
+    // The top 10 keep their green if the list is ever that short
     if (i < 10) return 'count top-10';
-    if (i < 15) return 'count top-15';
+    if (i >= this.playerList.length - 10) return 'count bottom-5';
     return 'count';
   }
 

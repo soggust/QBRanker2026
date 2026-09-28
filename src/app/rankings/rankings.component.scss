@@ -1573,7 +1573,8 @@ section
 
 
 // Rank as a small scoreboard tile (the header bar's LED panel), so it anchors each row. Every
-// rank sits on the same solid tile: gold top 5, white 6-15, grey digits after that, red bottom 5.
+// rank sits on the same solid tile: a green trophy for #1, green 2-10, red bottom 10, white digits for
+// everyone between.
 section ul li.player:not(.header-row) .count,
 section ul li.player:not(.header-row) .count.top-5,
 section ul li.player:not(.header-row) .count.top-10,
@@ -1592,14 +1593,15 @@ section ul li.player:not(.header-row) .count.top-15 {
   width: 46px;
 }
 
-section ul li.player:not(.header-row) .count.top-10,
-section ul li.player:not(.header-row) .count.top-15 {
-  color: #fff;
+// 2-10: green digits with a soft glow (like the red bottom 10)
+section ul li.player:not(.header-row) .count.top-10 {
+  color: var(--tint-good, #3ee07a);
+  text-shadow: 0 0 8px rgba(62, 224, 122, 0.6);
 }
 
-// #16 on: grey digits (the tile itself stays solid)
+// Between the top and bottom 10: white digits
 section ul li.player:not(.header-row) .count:not(.top-5):not(.top-10):not(.top-15):not(.bottom-5) {
-  color: rgba(255, 245, 230, 0.5);
+  color: #fff;
 }
 
 // Header Rank / Player labels over the rank tiles and names
@@ -1924,18 +1926,26 @@ section ul li.player.cdk-drag-preview {
   overflow: hidden !important;
 }
 
-// Rank tiles get a thin white border
+// Rank tiles get a thin border in their digits' color (half strength): green 1-10, white mid, red
+// bottom 10. #1's digit color is still gold, so its tile takes the trophy's green.
 section ul li.player:not(.header-row) .count,
 section ul li.player:not(.header-row) .count.top-5,
 section ul li.player:not(.header-row) .count.top-10,
 section ul li.player:not(.header-row) .count.top-15 {
-  border: 1px solid rgba(255, 255, 255, 0.5);
+  border: 1px solid color-mix(in srgb, currentColor 50%, transparent);
+}
+
+section ul li.player:not(.header-row) .count.top-5 {
+  border-color: color-mix(in srgb, var(--tint-good, #3ee07a) 50%, transparent);
 }
 
 // The #1 trophy catches the light now and then: a soft diagonal glint sweeps across it (inside the
 // trophy's mask, so only the trophy shines), then it rests for a few seconds
 section ul li.player:not(.header-row) .count .lombardi {
-  animation: trophy-shine 6s ease-in-out infinite;
+  animation: trophy-shine 4s ease-in-out infinite;
+  // Green like the 2-10 digits
+  background-color: var(--tint-good, #3ee07a);
+  filter: drop-shadow(0 0 4px rgba(62, 224, 122, 0.55));
   background-image: linear-gradient(
     105deg,
     transparent 40%,
@@ -1947,13 +1957,13 @@ section ul li.player:not(.header-row) .count .lombardi {
   background-size: 300% 100%;
 }
 
+// A slow 1.6s sweep, then a 2.4s rest (every 4s)
 @keyframes trophy-shine {
-  0%,
-  78% {
+  0% {
     background-position: 150% 0;
   }
 
-  96%,
+  40%,
   100% {
     background-position: -50% 0;
   }

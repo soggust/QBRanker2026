@@ -158,13 +158,18 @@ body {
   background-color: rgba(255, 255, 255, 0.14) !important;
 }
 
-// Scoreboard scrollbars (component styles set these too, so they need the extra weight)
+// Scrollbars: chalk-white thumbs on the scoreboard track (component styles set these too, so they
+// need the extra weight). --chalk is the off-white of the chalk values on the board.
+:root {
+  --chalk: #f1efe6;
+}
+
 ::-webkit-scrollbar-track {
   background-color: var(--scoreboard) !important;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--scoreboard-led) !important;
+  background: var(--chalk) !important;
 }
 
 // LCD / segment-display fonts (open source, DSEG by keshikan)
@@ -359,12 +364,12 @@ about-panel ::-webkit-scrollbar-track {
 
 // Standard scrollbar feedback: brighter on hover, deeper while dragging
 ::-webkit-scrollbar-thumb:hover {
-  background: color-mix(in srgb, var(--scoreboard-led) 80%, #fff) !important;
+  background: #fff !important;
   background-clip: padding-box !important;
 }
 
 ::-webkit-scrollbar-thumb:active {
-  background: color-mix(in srgb, var(--scoreboard-led) 80%, #000) !important;
+  background: color-mix(in srgb, var(--chalk) 80%, #000) !important;
   background-clip: padding-box !important;
 }
 
