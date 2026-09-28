@@ -1,7 +1,7 @@
-import skillData from 'StaticData/skill-players.json';
+import { DATA } from 'StaticData/data';
 import { SKILL_STATS, SkillPlayer, SkillPosition, SkillStat, SkillWeights } from 'app/positions';
 
-export const SKILL_UNITS = skillData as Record<SkillPosition, SkillPlayer[]>;
+export const SKILL_UNITS = DATA.skillPlayers as Record<SkillPosition, SkillPlayer[]>;
 
 // Weighted total for each unit. Stats are scaled against the max, or into 0.5-1 of the league
 // range when signed; negative stats subtract; support grades (0-12) subtract at a fifth strength,

@@ -1,8 +1,11 @@
 import { QbBoxStats, StaticPlayerData } from 'app/types';
-import gamesJson from './games.json';
-import subjective from './subjective.json';
-import teamGradesJson from './team-grades.json';
-import dataGradesJson from './data-grades.json';
+import { DATA } from './data';
+
+// Loaded by main.ts before the app starts (see data.ts)
+const gamesJson = DATA.games;
+const subjective = DATA.subjective;
+const teamGradesJson = DATA.teamGrades;
+const dataGradesJson = DATA.dataGrades;
 
 // games.json is generated from ESPN box scores by `npm run update-data` — don't edit it by hand.
 // team-grades.json holds the preseason team grades (0 = F ... 12 = A+), keyed by team logo name.

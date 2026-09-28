@@ -1195,8 +1195,8 @@
     "advanced": {
       "pressureToSack": 0,
       "badThrowPct": 0,
-      "timeToThrow": 2.84,
-      "adot": 9.9,
+      "timeToThrow": 2.8,
+      "adot": 9.5,
       "aggressiveness": 14.7,
       "epaPerPlay": -0.318,
       "cpoe": -2.505,

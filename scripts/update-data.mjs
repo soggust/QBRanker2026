@@ -320,11 +320,14 @@ function punterStats(n, ctx) {
   };
 }
 
-// Players listed per position (top N by usage) and how their stats are built
+// Players listed per position and how their stats are built. Each list is the top `count` by usage,
+// plus anyone in the top `count` at one of the position's leader stats, so a low-usage big-play
+// player still shows up when sorting by yards. (Touchdowns aren't a leader stat: early in the
+// season too many players tie at one or two.)
 const SKILL_POSITIONS = {
-  RB: { count: 40, usage: (s) => s.carries + s.targets, stats: offenseStats },
-  WR: { count: 50, usage: (s) => s.targets, stats: offenseStats },
-  TE: { count: 32, usage: (s) => s.targets, stats: offenseStats },
+  RB: { count: 60, usage: (s) => s.carries + s.targets, leaders: ['rushYards', 'recYards'], stats: offenseStats },
+  WR: { count: 80, usage: (s) => s.targets, leaders: ['recYards'], stats: offenseStats },
+  TE: { count: 48, usage: (s) => s.targets, leaders: ['recYards'], stats: offenseStats },
   K: { count: 32, usage: (s) => s.fgAtt + s.patAtt, stats: kickerStats, epa: 'kicks' },
   P: { count: 32, usage: (s) => s.punts, stats: punterStats, epa: 'punts' },
 };
@@ -779,6 +782,17 @@ function fieldGoalsOverExpected(pbp) {
 }
 
 // Season stats for non-QB positions from nflverse, plus team defenses and head coaches
+// The players who make a position's list: the top `count` by usage, and the top `count` at each
+// leader stat (strict cuts, players with 0 left out)
+function listedPlayers(all, { count, usage, leaders = [] }) {
+  const top = (value) =>
+    all
+      .filter((player) => value(player.stats) > 0)
+      .sort((a, b) => value(b.stats) - value(a.stats))
+      .slice(0, count);
+  return new Set([top(usage), ...leaders.map((key) => top((s) => s[key] ?? 0))].flat());
+}
+
 function skillPlayers(nflverse) {
   const { playerStats, pbp, espnByGsis, pfrByGsis, ngs, pfr, snapShare } = nflverse;
   const stEpa = specialTeamsEpa(pbp);
@@ -788,7 +802,7 @@ function skillPlayers(nflverse) {
     HC: coachUnits(nflverse).sort((a, b) => a.name.localeCompare(b.name)),
   };
   for (const [position, config] of Object.entries(SKILL_POSITIONS)) {
-    result[position] = playerStats
+    const players = playerStats
       .filter((row) => row.position === position)
       .map((row) => {
         const n = (key) => num(row[key]) ?? 0;
@@ -812,10 +826,9 @@ function skillPlayers(nflverse) {
           games: n('games'),
           stats: config.stats(n, ctx),
         };
-      })
-      .sort((a, b) => config.usage(b.stats) - config.usage(a.stats))
-      .slice(0, config.count)
-      .sort((a, b) => a.name.localeCompare(b.name));
+      });
+    const listed = listedPlayers(players, config);
+    result[position] = players.filter((player) => listed.has(player)).sort((a, b) => a.name.localeCompare(b.name));
   }
   return result;
 }

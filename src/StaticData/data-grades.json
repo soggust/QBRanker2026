@@ -44,7 +44,7 @@
         "separation": 3.251,
         "yacOverExpected": 1.992,
         "dropRate": 0.026,
-        "rushOverExpected": 0.389,
+        "rushOverExpected": 0.521,
         "brokenTackles": 0.071
       }
     },
@@ -329,8 +329,8 @@
         "sackRate": 0.101,
         "yardsBeforeContact": 2.161,
         "stuffRate": 0.195,
-        "separation": 2.791,
-        "yacOverExpected": 0.248,
+        "separation": 2.889,
+        "yacOverExpected": 0.47,
         "dropRate": 0.068,
         "rushOverExpected": -0.316,
         "brokenTackles": 0.019
