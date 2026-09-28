@@ -1,4 +1,4 @@
-import { StaticPlayerData } from 'app/types';
+import { QbBoxStats, StaticPlayerData } from 'app/types';
 import gamesJson from './games.json';
 import subjective from './subjective.json';
 import teamGradesJson from './team-grades.json';
@@ -20,6 +20,8 @@ interface GameData {
   starts: Record<string, number>;
   // From ESPN's injury report: Out, Doubtful or Injured Reserve
   injured: boolean;
+  // ESPN season box stats, fetched in the same nightly run as the results (null: no stats yet)
+  box?: QbBoxStats | null;
   advanced: {
     epaPerPlay: number | null;
     cpoe: number | null;
@@ -119,6 +121,7 @@ export const StaticData: StaticPlayerData[] = games.map((game) => {
     adot: game.advanced?.adot ?? null,
     aggressiveness: game.advanced?.aggressiveness ?? null,
     starts: game.starts,
+    box: game.box ?? null,
     injured: injured ?? game.injured ?? false,
     // Placeholder until the Defenses rankings grade the team
     defense: defense ?? 6,

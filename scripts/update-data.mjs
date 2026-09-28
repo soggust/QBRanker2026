@@ -833,6 +833,30 @@ async function completedGames() {
     .sort((a, b) => a.date.localeCompare(b.date));
 }
 
+// A QB's season box stats from ESPN (what the app used to fetch live on every page load).
+// null when ESPN has no stats for them this season (404); throws on other failures.
+async function qbBoxStats(id) {
+  const url = `https://sports.core.api.espn.com/v2/sports/football/leagues/nfl/seasons/${SEASON}/types/2/athletes/${id}/statistics`;
+  const res = await fetch(url);
+  if (res.status === 404) return null;
+  if (!res.ok) throw new Error(`${res.status} ${res.statusText} for ${url}`);
+  const data = await res.json();
+  const stat = (category, name) =>
+    data.splits.categories.find((c) => c.name === category)?.stats.find((s) => s.name === name)?.value ?? 0;
+  return {
+    games: stat('general', 'gamesPlayed'),
+    fumLost: stat('general', 'fumblesLost'),
+    passYards: stat('passing', 'passingYards'),
+    passTd: stat('passing', 'passingTouchdowns'),
+    ints: stat('passing', 'interceptions'),
+    compPercent: round(stat('passing', 'completionPct'), 1),
+    ypa: round(stat('passing', 'yardsPerPassAttempt'), 2),
+    rating: round(stat('passing', 'QBRating'), 1),
+    rushYards: stat('rushing', 'rushingYards'),
+    rushTd: stat('rushing', 'rushingTouchdowns'),
+  };
+}
+
 // Returns [{ athlete, team, result }] for both teams in a game
 async function gameStarters(game) {
   const summary = await getJson(`${SITE}/summary?event=${game.id}`);
@@ -924,6 +948,15 @@ async function main() {
   }
   const missing = gameData.filter((qb) => !qb.advanced).map((qb) => qb.name);
   if (missing.length) console.warn(`No advanced stats for: ${missing.join(', ')}`);
+
+  // Box stats (games, passing, rushing, rating) from ESPN in the same run as the results, so a
+  // QB's stats and record always change together; keep yesterday's if ESPN can't be reached
+  const boxes = await mapBatched(gameData, 8, (qb) => qbBoxStats(qb.id).catch(() => undefined));
+  gameData.forEach((qb, i) => {
+    qb.box = boxes[i] === undefined ? (previous.find((p) => p.id === qb.id)?.box ?? null) : boxes[i];
+  });
+  const noBox = gameData.filter((qb) => !qb.box).map((qb) => qb.name);
+  if (noBox.length) console.warn(`No ESPN box stats for: ${noBox.join(', ')}`);
 
   // Injury flags from ESPN's report; keep yesterday's if the report can't be loaded
   const injuries = await espnInjuries().catch((err) => {

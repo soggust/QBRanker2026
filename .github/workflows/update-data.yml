@@ -2,10 +2,16 @@ name: Update Game Data
 
 on:
   schedule:
-    # 10:00 and 16:00 UTC daily: ESPN results are ready by morning, nflverse
-    # advanced stats sometimes land later. Runs with no changes are a no-op.
-    - cron: "0 10,16 * * *"
+    # Once a day at 08:00 UTC (3 AM CDT / 2 AM CST): hours after the last night game
+    # ends, so a day's results and stats land together in one update. Runs with no
+    # changes are a no-op.
+    - cron: "0 8 * * *"
   workflow_dispatch:
+
+# One update at a time: a run that starts while another is still going waits for it
+concurrency:
+  group: update-data
+  cancel-in-progress: false
 
 permissions:
   contents: write

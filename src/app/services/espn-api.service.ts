@@ -1,133 +1,63 @@
 // espn-api.service.ts
 
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable, catchError, forkJoin, map, of } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { StaticData } from 'StaticData/StaticData';
-import { Player } from 'app/types';
+import { Player, StaticPlayerData } from 'app/types';
 
+// QB stats come from the nightly data update (games.json), which fetches ESPN's box stats in the
+// same run as the game results, so a QB's stats and record always change together. QBs with no
+// ESPN stats this season yet are left out, as before.
 @Injectable({
   providedIn: 'root',
 })
 export class EspnApiService {
-  private apiUrl =
-    'https://sports.core.api.espn.com/v2/sports/football/leagues/nfl/seasons/2026/types/2/athletes';
-  playerIds: number[] = StaticData.map((player) => player.id);
-  playerStats$: Observable<Player[]>;
+  playerStats$: Observable<Player[]> = of(
+    StaticData.filter((data) => !!data.box).map((data) => this.toPlayer(data)),
+  );
 
-  constructor(private http: HttpClient) {
-    // Bundle API Calls
-    // Skip players with no stats this season (ESPN returns 404) so one miss doesn't fail the whole list
-    const observables = this.playerIds.map((playerId) =>
-      this.http.get(`${this.apiUrl}/${playerId}/statistics`).pipe(
-        map((response) => this.mapPlayerStats(response, playerId)),
-        catchError(() => {
-          console.log('No stats found for player id: ' + playerId);
-          return of(null);
-        })
-      )
-    );
-    this.playerStats$ = forkJoin(observables).pipe(
-      map((players) => players.filter((player): player is Player => !!player))
-    );
-  }
-
-  // Map Player Stats To Usable Object
-  mapPlayerStats(rawStats: any, id: number): Player {
-    const generalStats = rawStats.splits.categories.find(
-      (category) => category.name === 'general'
-    );
-    const passingStats = rawStats.splits.categories.find(
-      (category) => category.name === 'passing'
-    );
-    const rushingStats = rawStats.splits.categories.find(
-      (category) => category.name === 'rushing'
-    );
-
-    const games = generalStats.stats.find(
-      (stat) => stat.name === 'gamesPlayed'
-    ).value;
-    const fumbles = generalStats.stats.find(
-      (stat) => stat.name === 'fumblesLost'
-    ).value;
-
-    const passTouchdowns = passingStats.stats.find(
-      (stat) => stat.name === 'passingTouchdowns'
-    ).value;
-    const passYards = passingStats.stats.find(
-      (stat) => stat.name === 'passingYards'
-    ).value;
-    const ypa = passingStats.stats.find(
-      (stat) => stat.name === 'yardsPerPassAttempt'
-    ).value;
-    const compPercent = passingStats.stats.find(
-      (stat) => stat.name === 'completionPct'
-    ).value;
-    const interceptions = passingStats.stats.find(
-      (stat) => stat.name === 'interceptions'
-    ).value;
-    const rating = passingStats.stats.find(
-      (stat) => stat.name === 'QBRating'
-    ).value;
-
-    const rushingYards = rushingStats.stats.find(
-      (stat) => stat.name === 'rushingYards'
-    ).value;
-    const rushingTds = rushingStats.stats.find(
-      (stat) => stat.name === 'rushingTouchdowns'
-    ).value;
-
-    const staticData = StaticData.find((data) => {
-      return data.id === id;
-    });
-
-    if (staticData && games != staticData.wins + staticData.losses) {
-      console.log(
-        'More games than games started for player: ' + staticData.name
-      );
-    }
-
+  // Map the stored stats to the QB table's player object
+  private toPlayer(data: StaticPlayerData): Player {
+    const box = data.box!;
     return {
-      name: staticData ? staticData.name : '',
-      teamLogo: staticData ? staticData.teamLogo : '',
-      compPercent: compPercent.toFixed(1),
-      passYards: passYards,
-      rushYards: rushingYards,
-      passTd: passTouchdowns,
-      rushTd: rushingTds,
-      ypa: ypa.toFixed(1),
-      ints: interceptions,
-      fumLost: fumbles,
-      rating: rating,
-      epaPerPlay: staticData ? staticData.epaPerPlay : null,
-      cpoe: staticData ? staticData.cpoe : null,
-      successRate: staticData ? staticData.successRate : null,
-      fantasyStd: staticData ? staticData.fantasyStd : null,
-      receptions: staticData ? staticData.receptions : 0,
-      pressureToSack: staticData ? staticData.pressureToSack : null,
-      badThrowPct: staticData ? staticData.badThrowPct : null,
-      timeToThrow: staticData ? staticData.timeToThrow : null,
-      adot: staticData ? staticData.adot : null,
-      aggressiveness: staticData ? staticData.aggressiveness : null,
-      wins: staticData ? staticData.wins : 0,
-      losses: staticData ? staticData.losses : 0,
-      ties: staticData ? staticData.ties : 0,
-      games: games,
-      id: id,
-      lastFive: staticData ? staticData.lastFive : [],
-      injured: staticData ? staticData.injured : false,
-      weapons: staticData ? staticData.weapons : 0,
-      coaching: staticData ? staticData.coaching : 0,
-      oline: staticData ? staticData.oline : 0,
-      defense: staticData ? staticData.defense : 6,
-      defenseOverride: staticData?.defenseOverride,
-      coachingOverride: staticData?.coachingOverride,
-      responsibility: staticData ? staticData.responsibility : 0,
-      outOfDate:
-        staticData &&
-        games < staticData.wins + staticData.losses + (staticData.ties ?? 0)
-          ? true
-          : false,
+      name: data.name,
+      teamLogo: data.teamLogo,
+      compPercent: Number(box.compPercent.toFixed(1)),
+      passYards: box.passYards,
+      rushYards: box.rushYards,
+      passTd: box.passTd,
+      rushTd: box.rushTd,
+      ypa: Number(box.ypa.toFixed(1)),
+      ints: box.ints,
+      fumLost: box.fumLost,
+      rating: box.rating,
+      epaPerPlay: data.epaPerPlay,
+      cpoe: data.cpoe,
+      successRate: data.successRate,
+      fantasyStd: data.fantasyStd,
+      receptions: data.receptions,
+      pressureToSack: data.pressureToSack,
+      badThrowPct: data.badThrowPct,
+      timeToThrow: data.timeToThrow,
+      adot: data.adot,
+      aggressiveness: data.aggressiveness,
+      wins: data.wins,
+      losses: data.losses,
+      ties: data.ties,
+      games: box.games,
+      id: data.id,
+      lastFive: data.lastFive,
+      injured: data.injured,
+      weapons: data.weapons,
+      coaching: data.coaching,
+      oline: data.oline,
+      defense: data.defense,
+      defenseOverride: data.defenseOverride,
+      coachingOverride: data.coachingOverride,
+      responsibility: data.responsibility,
+      // Box stats and results come from the same run now, so this only flags a QB whose ESPN
+      // games count trails his starts (an ESPN stat correction still in progress)
+      outOfDate: box.games < data.wins + data.losses + (data.ties ?? 0),
     };
   }
 }

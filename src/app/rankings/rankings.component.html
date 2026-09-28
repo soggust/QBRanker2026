@@ -82,7 +82,7 @@
           @if (showUnused || this.filters.compValue) {
             <!-- Completion Percent -->
             <div class="comp-percent">
-              <p [style.color]="tint('comp-percent', player)">{{ player.compPercent }}%</p>
+              <p [style.color]="tint('comp-percent', player)">{{ player.compPercent | number: "1.1-1" }}%</p>
               <p class="stat-label" #label3 [attr.title]="i === -1 ? labelTitle('comp-percent') : null" (mouseenter)="i !== -1 && (label3.title = cellTitle('comp-percent', label3, player))">
                 Comp %
               </p>
@@ -135,7 +135,7 @@
             <!-- YPA-->
             <div class="ypa">
               <p [style.color]="tint('ypa', player)">
-                {{ player.ypa }}
+                {{ player.ypa | number: "1.1-1" }}
               </p>
     
               <p class="stat-label" #label6 [attr.title]="i === -1 ? labelTitle('ypa') : null" (mouseenter)="i !== -1 && (label6.title = cellTitle('ypa', label6, player))">

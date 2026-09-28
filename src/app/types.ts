@@ -72,6 +72,20 @@ export interface Player {
   outOfDate: boolean;
 }
 
+// A QB's ESPN season box stats (the update script fetches them each night with the results)
+export interface QbBoxStats {
+  games: number;
+  fumLost: number;
+  passYards: number;
+  passTd: number;
+  ints: number;
+  compPercent: number;
+  ypa: number;
+  rating: number;
+  rushYards: number;
+  rushTd: number;
+}
+
 // Static Player Data
 export interface StaticPlayerData {
   name: string;
@@ -99,6 +113,8 @@ export interface StaticPlayerData {
   aggressiveness: number | null;
   // Starts per team, keyed by team logo path
   starts: Record<string, number>;
+  // ESPN season box stats from the nightly update (null: no stats this season yet)
+  box: QbBoxStats | null;
   // Hand-set defense grade from subjective.json; otherwise it comes from the Defenses rankings
   defenseOverride?: number;
   // Hand-set coaching grade from subjective.json; otherwise preseason blended with the Head Coaches rankings
