@@ -232,6 +232,8 @@ export class SkillRankingsComponent implements OnChanges {
   }
 
   ngOnChanges(): void {
+    // A new tab starts scrolled to the top-left of its list
+    this.rankingsList?.nativeElement.scrollTo({ top: 0, left: 0 });
     this.stats = SKILL_STATS[this.position];
     this.groups = skillGroups(this.position);
     this.hidden = this.positionService.skillHiddenGroups(this.position);

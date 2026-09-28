@@ -1395,24 +1395,29 @@ section ul li.player:not(.header-row) div.box {
   }
 }
 
-// Category colors (settings menu, on by default): a thin bar in each stat group's color before
-// the group's first cell, carrying the header's group colors down the rows
+// Category colors (settings menu, on by default): a sideline in each stat group's color before the
+// group's first cell, the full row tall, carrying the header's group lines down the rows. The rows'
+// bottom borders are the yard lines, so the sideline carries four short hash marks off its right side,
+// evenly spaced between one yard line and the next
 section.category-colors
   ul
   li.player:not(.header-row)
   > .col-group
   > div:first-child::before {
-  background: var(--group-color);
-  border-radius: 2px;
+  background:
+    linear-gradient(var(--group-color), var(--group-color)) left / 3px 100% no-repeat,
+    repeating-linear-gradient(180deg, transparent 0 calc(var(--hash-gap) - 0.5px), var(--group-color) calc(var(--hash-gap) - 0.5px) var(--hash-gap)) left top / 8px calc(4 * var(--hash-gap) + 0.5px) no-repeat;
+  // Space between hash marks: the room between two yard lines (a row less its 0.5px line) split in five
+  --hash-gap: calc((59px - 0.5px) / 5);
   content: "";
-  height: 4.5em;
+  height: 59px;
   left: -0.5em;
-  opacity: 0.2;
+  opacity: 0.4;
   pointer-events: none;
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  width: 1px;
+  width: 8px;
 }
 
 // Grade pills are a touch taller (there's room in the row)
@@ -1581,10 +1586,10 @@ section ul li.player:not(.header-row) .count.top-15 {
   box-sizing: border-box;
   display: flex;
   flex: 0 0 auto;
-  height: 30px;
+  height: 36px;
   justify-content: center;
   opacity: 1;
-  width: 40px;
+  width: 46px;
 }
 
 section ul li.player:not(.header-row) .count.top-10,
@@ -1600,7 +1605,7 @@ section ul li.player:not(.header-row) .count:not(.top-5):not(.top-10):not(.top-1
 // Header Rank / Player labels over the rank tiles and names
 section ul li.player.header-row > div.player-info {
   p.header-rank {
-    width: 40px;
+    width: 46px;
   }
 
   p.header-name {
@@ -1722,6 +1727,12 @@ section ul li.player.cdk-drag-preview {
   box-sizing: border-box;
 }
 
+// While a row is being dragged the table's horizontal scrollbar is hidden (it flashed along the
+// bottom of the list); it comes back on drop
+section ul.cdk-drop-list-dragging {
+  overflow-x: hidden !important;
+}
+
 // Each group's icon sits in a fixed slot at the start of the group (just after its colored line),
 // not inside the first column's label, so reordering columns never squeezes a long label against it.
 // Every row reserves the same slot, so the columns stay aligned under their headers.
@@ -1758,4 +1769,242 @@ section ul li.player.header-row > .col-group > div > .group-icon {
   transform: translateY(-50%);
   width: 17px;
   z-index: 1;
+}
+
+// A little space on the right of each group's last column, to balance the icon's slot on the left
+section ul li.player > .col-group > div:last-child {
+  padding-right: 0.9em;
+}
+
+// ===========================================================================
+// Experiment: one playbook chalkboard behind the whole grid (the header stays the scoreboard). Dark
+// green-gray slate with chalk dust, smudges and half-erased X's, O's and routes scattered across it,
+// scrolling with the rows: two coach-drawn plays (a pass and a sweep) in faint chalk. Rows are just a faint wash with a chalk line between them, so they read
+// as one board; a grabbed row becomes a solid piece of board. Names (bold) and values in Cabin Sketch.
+// ===========================================================================
+section.rankings-wrapper ul.cdk-drop-list {
+  background:
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='1400' height='720' fill='none' stroke='white' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round' opacity='0.03'><filter id='c'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' seed='4' result='t'/><feDisplacementMap in='SourceGraphic' in2='t' scale='2.6'/></filter><g filter='url(%23c)'><path d='M60 230H700' stroke-dasharray='10 9'/><circle cx='300' cy='252' r='10'/><circle cx='340' cy='252' r='10'/><circle cx='420' cy='252' r='10'/><circle cx='460' cy='252' r='10'/><rect x='370' y='242' width='20' height='20'/><circle cx='510' cy='252' r='10'/><circle cx='380' cy='292' r='10'/><circle cx='380' cy='342' r='10'/><circle cx='120' cy='252' r='10'/><circle cx='640' cy='252' r='10'/><path d='M300 240 V190 M292 220 H268'/><path d='M340 240 V190 M332 220 H308'/><path d='M380 240 V190 M372 220 H348'/><path d='M420 240 V190 M412 220 H388'/><path d='M460 240 V190 M452 220 H428'/><path d='M120 240 V50'/><path d='M112 92 L120 78 L128 92'/><path d='M640 240 V178 L540 138'/><path d='M546 152 L536 134 L556 134'/><path d='M510 240 V150 H580'/><path d='M606 172 L622 180 L606 188'/><path d='M380 354 C290 360 230 330 210 280'/><path d='M204 296 L208 276 L224 288'/><path d='M312 197l16 16M328 197l-16 16'/><path d='M352 197l16 16M368 197l-16 16'/><path d='M392 197l16 16M408 197l-16 16'/><path d='M432 197l16 16M448 197l-16 16'/><path d='M282 150l16 16M298 150l-16 16'/><path d='M372 150l16 16M388 150l-16 16'/><path d='M462 150l16 16M478 150l-16 16'/><path d='M112 172l16 16M128 172l-16 16'/><path d='M632 172l16 16M648 172l-16 16'/><path d='M272 82l16 16M288 82l-16 16'/><path d='M472 82l16 16M488 82l-16 16'/><path d='M780 540H1360' stroke-dasharray='10 9'/><circle cx='960' cy='562' r='10'/><circle cx='1000' cy='562' r='10'/><circle cx='1080' cy='562' r='10'/><circle cx='1120' cy='562' r='10'/><rect x='1030' y='552' width='20' height='20'/><circle cx='1170' cy='562' r='10'/><circle cx='1040' cy='604' r='10'/><circle cx='1040' cy='656' r='10'/><circle cx='1320' cy='562' r='10'/><path d='M1000 574 C1020 620 1140 616 1210 570 L1230 530'/><path d='M1222 540 L1232 524 L1240 542'/><path d='M1040 668 C1160 680 1260 640 1280 570 L1290 480'/><path d='M1282 494 L1291 476 L1298 496'/><path d='M1080 550 L1062 528 M1054 534 L1070 522'/><path d='M1120 550 L1102 528 M1094 534 L1110 522'/><path d='M1170 550 L1152 528 M1144 534 L1160 522'/><path d='M972 508l16 16M988 508l-16 16'/><path d='M1012 508l16 16M1028 508l-16 16'/><path d='M1052 508l16 16M1068 508l-16 16'/><path d='M1092 508l16 16M1108 508l-16 16'/><path d='M1132 508l16 16M1148 508l-16 16'/><path d='M1002 460l16 16M1018 460l-16 16'/><path d='M1082 460l16 16M1098 460l-16 16'/><path d='M1172 470l16 16M1188 470l-16 16'/><path d='M1312 492l16 16M1328 492l-16 16'/></g></svg>") -1150px -420px / 2800px 1440px,
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='2' seed='7'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.07 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>") 0 0 / 300px 300px,
+    radial-gradient(ellipse at 20% 15%, rgba(255, 255, 255, 0.05), transparent 40%),
+    radial-gradient(ellipse at 75% 60%, rgba(255, 255, 255, 0.04), transparent 45%),
+    #1f2824;
+  background-attachment: local;
+  border: 1px solid #1d2520;
+  border-radius: 9.1px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.45);
+}
+
+section ul li.player:not(.header-row) {
+  background: rgba(0, 0, 0, 0.1);
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  outline: none;
+
+  // The chalk hand runs small: names 19px, values 16px. It has a single weight, so no faked bold on
+  // the names (the browser would thicken it) and a lighter glow
+  .player-name strong {
+    color: #fff !important;
+    font-family: "Cabin Sketch", cursive !important;
+    font-size: 17px !important;
+    font-synthesis: none;
+    // Cabin Sketch has a real bold
+    font-weight: 700 !important;
+    text-shadow:
+      0 1px 2px rgba(0, 0, 0, 0.95),
+      0 0 6px rgba(0, 0, 0, 0.7),
+      0 0 2px rgba(255, 255, 255, 0.3) !important;
+  }
+
+  // Row hover: the same light wash as the column band, so the crosshair still shows
+  &:hover {
+    box-shadow: inset 0 0 0 100vmax rgba(255, 255, 255, 0.07);
+  }
+
+  .player-name strong,
+  > .col-group > div > p:not(.stat-label),
+  > .col-group > div:not(.box) > p:not(.stat-label) {
+    color: #f1efe6;
+    font-family: "Cabin Sketch", cursive;
+    font-size: 16px;
+    font-weight: 400;
+    // A dark drop shadow and halo lift the chalk off the board; a faint glow keeps it powdery
+    text-shadow:
+      0 1px 2px rgba(0, 0, 0, 0.9),
+      0 0 5px rgba(0, 0, 0, 0.55),
+      0 0 1px rgba(255, 255, 255, 0.3);
+  }
+}
+
+// The row you're dragging: a solid piece of board, lifted
+section ul li.player.cdk-drag-preview,
+section ul li.player.cdk-drag-preview:hover {
+  background:
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='1400' height='720' fill='none' stroke='white' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round' opacity='0.03'><filter id='c'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' seed='4' result='t'/><feDisplacementMap in='SourceGraphic' in2='t' scale='2.6'/></filter><g filter='url(%23c)'><path d='M60 230H700' stroke-dasharray='10 9'/><circle cx='300' cy='252' r='10'/><circle cx='340' cy='252' r='10'/><circle cx='420' cy='252' r='10'/><circle cx='460' cy='252' r='10'/><rect x='370' y='242' width='20' height='20'/><circle cx='510' cy='252' r='10'/><circle cx='380' cy='292' r='10'/><circle cx='380' cy='342' r='10'/><circle cx='120' cy='252' r='10'/><circle cx='640' cy='252' r='10'/><path d='M300 240 V190 M292 220 H268'/><path d='M340 240 V190 M332 220 H308'/><path d='M380 240 V190 M372 220 H348'/><path d='M420 240 V190 M412 220 H388'/><path d='M460 240 V190 M452 220 H428'/><path d='M120 240 V50'/><path d='M112 92 L120 78 L128 92'/><path d='M640 240 V178 L540 138'/><path d='M546 152 L536 134 L556 134'/><path d='M510 240 V150 H580'/><path d='M606 172 L622 180 L606 188'/><path d='M380 354 C290 360 230 330 210 280'/><path d='M204 296 L208 276 L224 288'/><path d='M312 197l16 16M328 197l-16 16'/><path d='M352 197l16 16M368 197l-16 16'/><path d='M392 197l16 16M408 197l-16 16'/><path d='M432 197l16 16M448 197l-16 16'/><path d='M282 150l16 16M298 150l-16 16'/><path d='M372 150l16 16M388 150l-16 16'/><path d='M462 150l16 16M478 150l-16 16'/><path d='M112 172l16 16M128 172l-16 16'/><path d='M632 172l16 16M648 172l-16 16'/><path d='M272 82l16 16M288 82l-16 16'/><path d='M472 82l16 16M488 82l-16 16'/><path d='M780 540H1360' stroke-dasharray='10 9'/><circle cx='960' cy='562' r='10'/><circle cx='1000' cy='562' r='10'/><circle cx='1080' cy='562' r='10'/><circle cx='1120' cy='562' r='10'/><rect x='1030' y='552' width='20' height='20'/><circle cx='1170' cy='562' r='10'/><circle cx='1040' cy='604' r='10'/><circle cx='1040' cy='656' r='10'/><circle cx='1320' cy='562' r='10'/><path d='M1000 574 C1020 620 1140 616 1210 570 L1230 530'/><path d='M1222 540 L1232 524 L1240 542'/><path d='M1040 668 C1160 680 1260 640 1280 570 L1290 480'/><path d='M1282 494 L1291 476 L1298 496'/><path d='M1080 550 L1062 528 M1054 534 L1070 522'/><path d='M1120 550 L1102 528 M1094 534 L1110 522'/><path d='M1170 550 L1152 528 M1144 534 L1160 522'/><path d='M972 508l16 16M988 508l-16 16'/><path d='M1012 508l16 16M1028 508l-16 16'/><path d='M1052 508l16 16M1068 508l-16 16'/><path d='M1092 508l16 16M1108 508l-16 16'/><path d='M1132 508l16 16M1148 508l-16 16'/><path d='M1002 460l16 16M1018 460l-16 16'/><path d='M1082 460l16 16M1098 460l-16 16'/><path d='M1172 470l16 16M1188 470l-16 16'/><path d='M1312 492l16 16M1328 492l-16 16'/></g></svg>") -1150px -420px / 2800px 1440px,
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='2' seed='7'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.07 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>") 0 0 / 300px 300px,
+    radial-gradient(ellipse at 20% 15%, rgba(255, 255, 255, 0.05), transparent 40%),
+    radial-gradient(ellipse at 75% 60%, rgba(255, 255, 255, 0.04), transparent 45%),
+    #1f2824;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 9.1px;
+  box-shadow: 0 1em 2.5em rgba(0, 0, 0, 0.55);
+}
+
+// ===========================================================================
+// Experiment: leather footer buttons. Settings, copy and info become solid leather tiles (the rows'
+// texture and sheen) with their white icons on top, instead of bare outline icons.
+// ===========================================================================
+section footer .settings-toggle,
+section footer .copy-toggle,
+section footer .info-toggle {
+  align-items: center;
+  background:
+    radial-gradient(ellipse at 35% 20%, rgba(255, 255, 255, 0.2), transparent 60%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(0, 0, 0, 0.18)),
+    url("../../assets/textures/leather.jpg") center / 96px,
+    var(--leather);
+  background-blend-mode: normal, normal, soft-light, normal;
+  border: 1px solid rgba(0, 0, 0, 0.55);
+  border-radius: 8px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    1px 1px 1px rgba(0, 0, 0, 0.6);
+  display: inline-flex;
+  height: 42px;
+  justify-content: center;
+  padding: 0;
+  width: 42px;
+
+  .mat-icon {
+    color: #fff;
+    font-size: 20px;
+    height: 20px;
+    margin: 0;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+    width: 20px;
+  }
+
+  &:hover {
+    filter: brightness(1.15);
+  }
+}
+
+// The gear lines up with the rows' edge (no negative pull now that it has a tile). The desktop grid
+// gives up a little height so the taller buttons fit, and the footer's contents (buttons and the
+// credits line) sit vertically centered in the space below the grid on every screen size.
+@media (min-width: 1200px) {
+  section footer .settings-toggle {
+    margin-left: 0;
+  }
+
+  section ul {
+    height: calc(100dvh - 6em - var(--position-bar-space, 0px));
+  }
+}
+
+// The footer fills the whole space under the grid (a fixed amount at each layout), so centering its
+// contents centers them in that space
+section footer {
+  align-items: center;
+  box-sizing: border-box;
+  height: 63px;
+  padding-top: 0 !important;
+}
+
+@media (max-width: 1199px) {
+  section footer {
+    height: 79px;
+  }
+}
+
+// The row you're dragging never shows its own scrollbar (an older style gave it overflow: auto)
+section ul li.player.cdk-drag-preview {
+  overflow: hidden !important;
+}
+
+// Rank tiles get a thin white border
+section ul li.player:not(.header-row) .count,
+section ul li.player:not(.header-row) .count.top-5,
+section ul li.player:not(.header-row) .count.top-10,
+section ul li.player:not(.header-row) .count.top-15 {
+  border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+// The #1 trophy catches the light now and then: a soft diagonal glint sweeps across it (inside the
+// trophy's mask, so only the trophy shines), then it rests for a few seconds
+section ul li.player:not(.header-row) .count .lombardi {
+  animation: trophy-shine 6s ease-in-out infinite;
+  background-image: linear-gradient(
+    105deg,
+    transparent 40%,
+    rgba(255, 255, 255, 0.85) 50%,
+    transparent 60%
+  );
+  background-position: 150% 0;
+  background-repeat: no-repeat;
+  background-size: 300% 100%;
+}
+
+@keyframes trophy-shine {
+  0%,
+  78% {
+    background-position: 150% 0;
+  }
+
+  96%,
+  100% {
+    background-position: -50% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  section ul li.player:not(.header-row) .count .lombardi {
+    animation: none;
+  }
+}
+
+// Yard lines: every row ends in a hairline (0.5px), faint white, and in each stat group's color across that
+// group's columns (category colors on). The group's line runs through the gaps to the next group, like
+// the header's tints.
+// Rows are a whole 59px tall (they came out at 58.5px), so every yard line lands on the same pixel
+// boundary and they all look the same thickness (on half-pixel rows a 1px line smeared over two)
+section ul li.player:not(.header-row) {
+  box-sizing: border-box;
+  height: 59px;
+}
+
+// The header bar too (it was 42.28px), so the rows under it start on a whole pixel
+section ul li.player.header-row {
+  box-sizing: border-box;
+  height: 42px;
+}
+
+section ul li.player:not(.header-row):not(.cdk-drag-preview) {
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.12)) left bottom / 100% 0.5px no-repeat,
+    rgba(0, 0, 0, 0.1);
+}
+
+section.category-colors ul li.player:not(.header-row):not(.cdk-drag-preview) > .col-group > div {
+  position: relative;
+
+  &::after {
+    background: color-mix(in srgb, var(--group-color) 25%, transparent);
+    bottom: calc(50% - 29.5px);
+    content: "";
+    height: 0.5px;
+    left: 0;
+    pointer-events: none;
+    position: absolute;
+    right: -0.5em;
+  }
+
+  &:first-child::after {
+    left: -0.5em;
+  }
+
+  &:last-child::after {
+    right: -1.1em;
+  }
 }

@@ -21,8 +21,10 @@ export function tintFrom(value: number | null, scale: TintScale | null, lowerIsB
   let z = (value - scale.mean) / scale.sd;
   if (lowerIsBetter) z = -z;
   const strength = Math.round((Math.min(Math.abs(z), 2) / 2) * 85);
-  const hue = z >= 0 ? '#3ee07a' : '#ff5a4f';
-  return `color-mix(in srgb, ${hue} ${strength}%, #fff)`;
+  // The row's surface can set its own good / bad colors and the neutral the tint fades toward (light
+  // text on dark rows by default; a light surface would fade toward dark instead)
+  const hue = z >= 0 ? 'var(--tint-good, #3ee07a)' : 'var(--tint-bad, #ff5a4f)';
+  return `color-mix(in srgb, ${hue} ${strength}%, var(--tint-base, #fff))`;
 }
 
 export function tintColor(value: number | null, values: (number | null)[], lowerIsBetter = false): string | null {

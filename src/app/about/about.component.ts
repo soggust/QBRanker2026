@@ -1,6 +1,6 @@
 import { AfterViewInit, Component, ElementRef, EventEmitter, HostListener, Output, ViewChild } from '@angular/core';
 
-type SectionId = 'about' | 'ranking' | 'grades' | 'tabs' | 'tips' | 'glossary' | 'faq' | 'data';
+type SectionId = 'about' | 'ranking' | 'grades' | 'tips' | 'glossary' | 'faq' | 'data';
 
 // About / FAQ panel, opened from the info button in every table's footer
 @Component({
@@ -18,7 +18,6 @@ export class AboutComponent implements AfterViewInit {
     { id: 'about', title: 'About', icon: 'sports_football' },
     { id: 'ranking', title: 'How Rankings Work', icon: 'tune' },
     { id: 'grades', title: 'Grades & Support', icon: 'groups' },
-    { id: 'tabs', title: 'The Tabs', icon: 'view_week' },
     { id: 'tips', title: 'Tips & Tricks', icon: 'lightbulb' },
     { id: 'glossary', title: 'Stat Glossary', icon: 'menu_book' },
     { id: 'faq', title: 'FAQ', icon: 'help_outline' },

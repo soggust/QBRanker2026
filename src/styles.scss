@@ -3,7 +3,7 @@
 // ---------------------
 @use "theme";
 @use "variables" as v;
-@import url("https://fonts.googleapis.com/css2?family=Zain:wght@400;700;800;900&family=Nunito:wght@400;500;600;700;800;900&family=Orbitron:wght@400;500;600;800;900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Zain:wght@400;700;800;900&family=Nunito:wght@400;500;600;700;800;900&family=Orbitron:wght@400;500;600;800;900&family=Architects+Daughter&family=Gochi+Hand&family=Cabin+Sketch:wght@400;700&display=swap");
 
 html,
 body {
@@ -247,7 +247,10 @@ html .mat-mdc-slide-toggle.mat-accent {
       background:
         linear-gradient(#fff, #fff) center / 10.5px 1.5px no-repeat,
         repeating-linear-gradient(90deg, #fff 0 1.5px, transparent 1.5px 3px) center / 10.5px 6px no-repeat,
+        radial-gradient(ellipse at 40% 25%, rgba(255, 255, 255, 0.25), transparent 65%),
+        url("assets/textures/leather.jpg") center / 40px,
         #a8602f !important;
+      background-blend-mode: normal, normal, normal, soft-light, normal !important;
       border: none !important;
       opacity: 1 !important;
     }
@@ -325,22 +328,33 @@ html .mat-mdc-slide-toggle.mat-accent {
   color: var(--scoreboard-led) !important;
 }
 
-// Slim scrollbars: the bar area stays 10px, but the track and thumb draw 6px inside it via a
-// transparent border; hovering the thumb drops the border so it grows to the full 10px
+// Scrollbars: the track fills the whole 10px bar (scoreboard black on the page, dark gray inside the
+// menus so it shows against their dark panels), and the thumb draws 6px inside it (a transparent
+// border); hovering the thumb drops the border so it grows to exactly the track's width. No shadow,
+// so nothing spills past the track.
 ::-webkit-scrollbar-track {
-  background-clip: padding-box !important;
-  border: 2px solid transparent;
-  border-radius: 8px;
+  background-color: var(--scoreboard) !important;
+  border: none !important;
+  border-radius: 8px !important;
 }
 
 ::-webkit-scrollbar-thumb {
   background-clip: padding-box !important;
-  border: 2px solid transparent;
-  border-radius: 8px;
+  border: 2px solid transparent !important;
+  border-radius: 8px !important;
+  box-shadow: none !important;
+}
 
-  &:hover {
-    border-width: 0;
-  }
+::-webkit-scrollbar-thumb:hover,
+::-webkit-scrollbar-thumb:active {
+  border-width: 0 !important;
+}
+
+// Menus: the filter menu, the settings menu and the About panel
+.sidebar ::-webkit-scrollbar-track,
+.mat-mdc-menu-panel::-webkit-scrollbar-track,
+about-panel ::-webkit-scrollbar-track {
+  background-color: #2e2e2e !important;
 }
 
 // Standard scrollbar feedback: brighter on hover, deeper while dragging
@@ -444,4 +458,25 @@ html .mat-mdc-slide-toggle.mat-accent {
   --mat-slide-toggle-selected-hover-track-color: var(--section-track);
   --mat-slide-toggle-selected-focus-track-color: var(--section-track);
   --mat-slide-toggle-selected-pressed-track-color: var(--section-track);
+}
+
+// Slider footballs in real leather: the rows' pebbled texture over the football brown, with a soft
+// sheen on top (the laces are drawn over it by the ::after above). Material paints the knob with a
+// solid border, so that goes transparent and the background (leather) fills the whole football.
+.mdc-slider__thumb-knob {
+  background-color: #a8602f !important;
+  background-clip: border-box !important;
+  border-color: transparent !important;
+  background-blend-mode: normal, soft-light !important;
+  background-image:
+    radial-gradient(ellipse at 40% 25%, rgba(255, 255, 255, 0.25), transparent 65%),
+    url("assets/textures/leather.jpg") !important;
+  background-position: center !important;
+  background-size: auto, 40px !important;
+}
+
+// Leather for buttons: a muted brown (lower saturation than a game ball) so it sits with the
+// gray-green chalkboard; the texture adds grain on top of this color rather than its own orange
+:root {
+  --leather: #6b4e38;
 }
