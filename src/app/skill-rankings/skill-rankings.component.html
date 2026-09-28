@@ -12,8 +12,10 @@
       </div>
       @for (group of groups; track group.id) {
         <div class="col-group" [ngClass]="'group-' + group.id">
+          <!-- Each group's icon sits in the slot at the start of its first cell; hover shows the group's name -->
           @if (group.id === 'support') {
             <div class="box support-box" [style.min-width.em]="group.stats.length * 7.5">
+              <mat-icon class="group-icon" [fontIcon]="group.icon" [title]="group.title"></mat-icon>
               @for (stat of group.stats; track stat.key) {
                 <div [columnDrag]="{ list: position + '.' + group.id, id: columnId(stat) }">
                   <p class="stat-label" [title]="labelTitle(stat)">{{ statLabel(stat) }}</p>
@@ -21,9 +23,12 @@
               }
             </div>
           } @else {
-            @for (stat of group.stats; track stat.key) {
+            @for (stat of group.stats; track stat.key; let first = $first) {
               @if (stat.format === 'recent') {
                 <div class="box support-box recent-box" [columnDrag]="{ list: position + '.' + group.id, id: columnId(stat) }">
+                  @if (first) {
+                    <mat-icon class="group-icon" [fontIcon]="group.icon" [title]="group.title"></mat-icon>
+                  }
                   <div class="last-five">
                     <div></div>
                     <p class="stat-label" [title]="labelTitle(stat)">{{ statLabel(stat) }}</p>
@@ -31,6 +36,9 @@
                 </div>
               } @else {
                 <div [columnDrag]="{ list: position + '.' + group.id, id: columnId(stat) }">
+                  @if (first) {
+                    <mat-icon class="group-icon" [fontIcon]="group.icon" [title]="group.title"></mat-icon>
+                  }
                   <p class="stat-label" [title]="labelTitle(stat)">{{ statLabel(stat) }}</p>
                 </div>
               }
@@ -79,36 +87,10 @@
               <!-- Support grades share a dark box -->
               <div class="box support-box" [style.min-width.em]="group.stats.length * 7.5">
                 @for (stat of group.stats; track stat.key) {
-                  @if (stat.adjustable) {
-                    <!-- Set by hand: arrows on hover raise or lower it for this player -->
-                    <div class="responsibility">
-                      <p>
-                        <mat-icon
-                          aria-hidden="false"
-                          [attr.aria-label]="'Lower ' + statLabel(stat)"
-                          [title]="'Lower this grade'"
-                          fontIcon="arrow_drop_down"
-                          class="arrow-drop-down"
-                          (click)="stepGrade(player, -1)"
-                        ></mat-icon
-                        ><span [style.color]="gradeColor(player, stat)">{{ format(player, stat) }}</span>
-                        <mat-icon
-                          aria-hidden="false"
-                          [attr.aria-label]="'Raise ' + statLabel(stat)"
-                          [title]="'Raise this grade'"
-                          fontIcon="arrow_drop_up"
-                          class="arrow-drop-up"
-                          (click)="stepGrade(player, 1)"
-                        ></mat-icon>
-                      </p>
-                      <p class="stat-label" [title]="valueTitle(player, stat)">{{ statLabel(stat) }}</p>
-                    </div>
-                  } @else {
-                    <div>
-                      <p [style.color]="gradeColor(player, stat) ?? valueColor(player, stat)">{{ format(player, stat) }}</p>
-                      <p class="stat-label" [title]="valueTitle(player, stat)">{{ statLabel(stat) }}</p>
-                    </div>
-                  }
+                  <div>
+                    <p [style.color]="gradeColor(player, stat) ?? valueColor(player, stat)">{{ format(player, stat) }}</p>
+                    <p class="stat-label" [title]="valueTitle(player, stat)">{{ statLabel(stat) }}</p>
+                  </div>
                 }
               </div>
             } @else {

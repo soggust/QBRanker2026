@@ -16,6 +16,7 @@ import {
   SkillWeights,
   presetWeights,
   combinedFor,
+  statLabelFor,
 } from 'app/positions';
 
 // A sidebar row: one stat, or a pair (e.g. rushing + receiving yards) shown as a parent slider with
@@ -109,7 +110,8 @@ export class SidebarComponent {
         children.forEach((child) => used.add(child.key));
         rows.push({ key: pair.stat.key, label: pair.stat.label, description: pair.stat.description, children });
       } else {
-        rows.push({ key: stat.key, label: stat.label, description: stat.description, stat });
+        const label = statLabelFor(stat, this.positionService.settings.rankBasis);
+        rows.push({ key: stat.key, label, description: stat.description, stat });
       }
     }
     return rows;

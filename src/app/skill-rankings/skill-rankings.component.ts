@@ -5,6 +5,7 @@ import {
   RANK_BASIS_LABELS,
   RANK_METRICS,
   RankBasis,
+  statLabelFor,
   FantasyScoring,
   SKILL_STATS,
   STAT_NAMES,
@@ -190,8 +191,6 @@ export class SkillRankingsComponent implements OnChanges {
       this.refresh();
     });
 
-    // Responsibility arrows
-    this.positionService.gradeAdjustments$.subscribe(() => this.refresh());
 
     this.positionService.skillHidden$.subscribe((hidden) => {
       if (!this.position) return;
@@ -226,11 +225,6 @@ export class SkillRankingsComponent implements OnChanges {
   // Empty Recent slots for games not played yet (up to five)
   unplayed(player: SkillPlayer): null[] {
     return Array(Math.max(0, 5 - (player.lastFive?.length ?? 0))).fill(null);
-  }
-
-  // Responsibility arrows: one grade step for this QB
-  stepGrade(player: SkillPlayer, step: 1 | -1) {
-    this.positionService.stepGrade(player, player.stats.responsibility ?? 6, step);
   }
 
   cycleFantasyScoring() {
@@ -299,13 +293,12 @@ export class SkillRankingsComponent implements OnChanges {
     return stat.kind === 'volume' && !stat.infoOnly && player.games ? raw / player.games : raw;
   }
 
-  // Label hover: the stat written out, plus the list average the color-coding centers on
+  // Label hover: the stat written out, plus the list average of what the column shows (season totals,
+  // or per game when Per-Game Stats is on)
   labelTitle(stat: SkillStat): string {
     const name = this.statName(stat);
     if (stat.format === 'record' || stat.format === 'recent' || stat.format === 'rank') return name;
-    // Matches what the color-coding compares, or what the column shows when it's per game
-    // (display-only columns like FG Att aren't color-coded, so they follow the column)
-    const avg = this.columnScale(stat, this.showsPerGame(stat) ? 'shown' : 'rate')?.mean ?? null;
+    const avg = this.columnScale(stat, 'shown')?.mean ?? null;
     if (avg === null) return name;
     let shown: string;
     switch (stat.format) {
@@ -324,9 +317,7 @@ export class SkillRankingsComponent implements OnChanges {
       default:
         shown = avg.toFixed(1);
     }
-    // Volume stats average per game; the name already says so when the column is per game
-    const perGame = stat.kind === 'volume' && !stat.infoOnly && !this.showsPerGame(stat);
-    return `${name} (Avg: ${shown}${perGame ? ' per game' : ''})`;
+    return `${name} (Avg: ${shown})`;
   }
 
   // Volume stats show per-game values when Per-Game Stats is on
@@ -336,7 +327,8 @@ export class SkillRankingsComponent implements OnChanges {
 
   // Column label, switched to its per-game name when the column shows per-game values
   statLabel(stat: SkillStat): string {
-    return this.showsPerGame(stat) ? (PER_GAME_LABELS[stat.key] ?? `${stat.label} / Game`) : stat.label;
+    const label = statLabelFor(stat, this.rankBasis);
+    return this.showsPerGame(stat) ? (PER_GAME_LABELS[stat.key] ?? `${label} / Game`) : label;
   }
 
   // The stat written out in full; kickers and defenses have their own fixed fantasy scoring
@@ -375,9 +367,6 @@ export class SkillRankingsComponent implements OnChanges {
       case 'offRank':
       case 'defRank':
         return this.unitRank(player, stat.key);
-      // Set by hand with the arrows, otherwise the data grade
-      case 'responsibility':
-        return this.positionService.adjustedGrade(player, player.stats.responsibility ?? 6);
       // Combined columns (Total Yds, Total TDs, Turnovers): the sum of their two stats
       case 'totalYards':
       case 'totalTds':

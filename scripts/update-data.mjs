@@ -181,6 +181,10 @@ async function loadNflverse() {
       recTeam: totalsBy(regular(pfrRec), (r) => r.team, ['receiving_broken_tackles']),
     },
     snapShare,
+    // Everyone who was a head coach in an earlier season (a coach not in here is in his first year)
+    pastCoaches: new Set(
+      schedule.filter((game) => Number(game.season) < SEASON).flatMap((game) => [game.home_coach, game.away_coach])
+    ),
     // Completed regular-season games, with coaches, scores and betting lines
     games: schedule.filter(
       (game) => game.season === String(SEASON) && game.game_type === 'REG' && num(game.result) !== null
@@ -528,7 +532,7 @@ function ngsTeamAverage(rows, team, key, weightKey, filter = () => true) {
 // O-line: pressure and sack rate allowed, yards before contact and stuffed designed runs.
 // Weapons: receiver separation, YAC over expected, drops, RB rush yards over expected and
 // broken tackles; stats that depend least on how good the QB is.
-function teamDataGrades({ pbp, games, pfr, ngs }) {
+function teamDataGrades({ pbp, games, pfr, ngs, pastCoaches, headCoaches }) {
   const teams = Object.keys(TEAM_ICONS).map((team) => {
     const plays = pbp.filter((play) => play.posteam === team);
     const count = (test) => plays.filter(test).length;
@@ -541,9 +545,11 @@ function teamDataGrades({ pbp, games, pfr, ngs }) {
     const rec = pfr.recTeam.get(team);
     const rushNgs = [...ngs.rush.values()];
     const recNgs = [...ngs.rec.values()];
+    const played = teamGames(games, team);
     return {
       team,
-      games: teamGames(games, team).length,
+      games: played.length,
+      coach: headCoaches?.get(team) ?? played.at(-1)?.coach ?? null,
       oline: {
         key: team,
         metrics: {
@@ -580,6 +586,10 @@ function teamDataGrades({ pbp, games, pfr, ngs }) {
       TEAM_ICONS[t.team],
       {
         games: t.games,
+        // First-year head coach (never coached an NFL game before this season): the app starts him at a
+        // neutral C instead of a preseason grade, since there's no track record to grade
+        newCoach: t.coach ? !pastCoaches.has(t.coach) : false,
+        coach: t.coach,
         oline: oline.get(t.team),
         weapons: weapons.get(t.team),
         metrics: { ...rounded(t.oline.metrics), ...rounded(t.weapons.metrics) },
@@ -589,7 +599,8 @@ function teamDataGrades({ pbp, games, pfr, ngs }) {
 }
 
 // Responsibility: how much the offense runs through the QB in the games he led (most of his
-// team's dropbacks): pass rate over expected, and his share of the team's yards
+// team's dropbacks): his share of the team's plays (dropbacks and designed runs; kneels and spikes
+// left out) and his share of the team's yards (passing plus his own rushing)
 function qbDataGrades(espnIds, { pbp, gsisByEspn }) {
   const scrimmage = pbp.filter((play) => play.pass === '1' || play.rush === '1');
   // game-team -> the QB with the most dropbacks
@@ -616,7 +627,12 @@ function qbDataGrades(espnIds, { pbp, gsisByEspn }) {
     const led = new Set([...ledBy].filter(([, qb]) => qb === gsisId).map(([key]) => key));
     if (!led.size) continue;
     const plays = scrimmage.filter((play) => led.has(`${play.game_id}|${play.posteam}`));
-    const passOe = plays.map((play) => num(play.pass_oe)).filter((v) => v !== null);
+    const counted = plays.filter((play) => play.qb_kneel !== '1' && play.qb_spike !== '1');
+    const qbPlays = counted.filter(
+      (play) =>
+        (play.qb_dropback === '1' && (play.passer_player_id === gsisId || play.rusher_player_id === gsisId)) ||
+        (play.rush === '1' && play.qb_scramble !== '1' && play.rusher_player_id === gsisId)
+    ).length;
     const teamYards = plays.reduce((sum, play) => sum + (num(play.yards_gained) ?? 0), 0);
     const qbYards = plays.reduce(
       (sum, play) =>
@@ -629,7 +645,7 @@ function qbDataGrades(espnIds, { pbp, gsisByEspn }) {
       key: espnId,
       games: led.size,
       metrics: {
-        passRateOverExpected: passOe.length ? passOe.reduce((a, b) => a + b, 0) / passOe.length : null,
+        playShare: counted.length ? qbPlays / counted.length : null,
         yardShare: teamYards > 0 ? qbYards / teamYards : null,
       },
     });

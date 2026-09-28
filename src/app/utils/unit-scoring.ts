@@ -54,10 +54,16 @@ export function unitRanks(
   return ranks;
 }
 
-// Weighted total for each unit. Stats are scaled against the max, or into 0.5-1 of the league
-// range when signed; negative stats subtract; support grades (0-12) subtract at a fifth strength
-// (credit for doing more with less), or add for the one that helps (QB Responsibility). A missing
-// value (null) scores as the league's worst (or the league average for stats flagged missingIsAverage).
+// Standard scores are capped here, so one extreme value (e.g. 100% on two chances) can't swamp a list
+const MAX_Z = 2.5;
+
+// Weighted total for each unit. Every stat is put on the same scale first: its standard score (how
+// many standard deviations above or below the list's average), capped at +/-2.5 and flipped for
+// lower-is-better stats, so at the same slider every stat moves the ranking by the same amount and
+// the sliders alone decide what matters. The slider multiplies it (50 = 1x, 100 = 2x). Support
+// grades count at a fifth of that strength, against the unit (credit for doing more with less) or
+// for it (QB Responsibility). A missing value (null) scores as the list's worst, or as average for
+// stats flagged missingIsAverage and for support grades.
 export function weightedTotals<T>(
   units: T[],
   stats: SkillStat[],
@@ -69,35 +75,23 @@ export function weightedTotals<T>(
     const weight = weights[stat.key] ?? 0;
     if (!weight || stat.infoOnly) continue;
 
-    const known = units.map((unit) => value(unit, stat)).filter((v): v is number => v !== null);
-    const average = known.length ? known.reduce((a, b) => a + b, 0) / known.length : null;
-    // Stats where "-" just means no chances yet count missing values as the league average
-    const values = units.map((unit) => value(unit, stat) ?? (stat.missingIsAverage ? average : null));
-    const max = known.length ? Math.max(...known) : 0;
-    const min = known.length ? Math.min(...known) : 0;
+    const raw = units.map((unit) => value(unit, stat));
+    const known = raw.filter((v): v is number => v !== null);
+    if (known.length < 2) continue;
+    const mean = known.reduce((a, b) => a + b, 0) / known.length;
+    const sd = Math.sqrt(known.reduce((a, b) => a + (b - mean) ** 2, 0) / known.length);
+    if (!sd) continue;
+
+    // Standard score, pointed so higher is always better for the unit
+    const better = stat.support ? (stat.supportHelps ? 1 : -1) : stat.negative ? -1 : 1;
+    const score = (v: number) => better * Math.max(-MAX_Z, Math.min(MAX_Z, (v - mean) / sd));
+    const worst = Math.min(...known.map(score));
+    const strength = (weight / 50) * (stat.support ? 0.2 : 1);
+
     units.forEach((unit, i) => {
-      const v = values[i];
-      let score: number;
-      if (stat.support) {
-        score = ((v ?? 6) / 12) * (weight / 250) * (stat.supportHelps ? 1 : -1);
-      } else {
-        const scaled =
-          v === null
-            ? stat.negative
-              ? 1
-              : stat.signed
-                ? 0.5
-                : 0
-            : stat.signed
-              ? max === min
-                ? 1
-                : 0.5 + (0.5 * (v - min)) / (max - min)
-              : max
-                ? v / max
-                : 0;
-        score = scaled * (weight / 50) * (stat.negative ? -1 : 1);
-      }
-      totals.set(unit, (totals.get(unit) ?? 0) + score);
+      const v = raw[i];
+      const scored = v !== null ? score(v) : stat.missingIsAverage || stat.support ? 0 : worst;
+      totals.set(unit, (totals.get(unit) ?? 0) + scored * strength);
     });
   }
   return totals;

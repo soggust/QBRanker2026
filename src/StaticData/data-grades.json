@@ -2,6 +2,8 @@
   "teams": {
     "Cardinals": {
       "games": 3,
+      "newCoach": true,
+      "coach": "Mike LaFleur",
       "oline": 9.3,
       "weapons": 1.9,
       "metrics": {
@@ -18,6 +20,8 @@
     },
     "Falcons": {
       "games": 3,
+      "newCoach": false,
+      "coach": "Kevin Stefanski",
       "oline": 6.6,
       "weapons": 11.2,
       "metrics": {
@@ -34,6 +38,8 @@
     },
     "Ravens": {
       "games": 3,
+      "newCoach": true,
+      "coach": "Jesse Minter",
       "oline": 8.9,
       "weapons": 11.6,
       "metrics": {
@@ -50,6 +56,8 @@
     },
     "Bills": {
       "games": 3,
+      "newCoach": true,
+      "coach": "Joe Brady",
       "oline": 11.2,
       "weapons": 9.3,
       "metrics": {
@@ -66,6 +74,8 @@
     },
     "Panthers": {
       "games": 3,
+      "newCoach": false,
+      "coach": "Dave Canales",
       "oline": 5.4,
       "weapons": 8.9,
       "metrics": {
@@ -82,6 +92,8 @@
     },
     "Bears": {
       "games": 2,
+      "newCoach": false,
+      "coach": "Ben Johnson",
       "oline": 1.5,
       "weapons": 10.8,
       "metrics": {
@@ -98,6 +110,8 @@
     },
     "Bengals": {
       "games": 3,
+      "newCoach": false,
+      "coach": "Zac Taylor",
       "oline": 7,
       "weapons": 6.2,
       "metrics": {
@@ -114,6 +128,8 @@
     },
     "Browns": {
       "games": 3,
+      "newCoach": true,
+      "coach": "Todd Monken",
       "oline": 0.8,
       "weapons": 10.1,
       "metrics": {
@@ -130,6 +146,8 @@
     },
     "Cowboys": {
       "games": 3,
+      "newCoach": false,
+      "coach": "Brian Schottenheimer",
       "oline": 8.1,
       "weapons": 4.6,
       "metrics": {
@@ -146,6 +164,8 @@
     },
     "Broncos": {
       "games": 3,
+      "newCoach": false,
+      "coach": "Sean Payton",
       "oline": 8.5,
       "weapons": 3.1,
       "metrics": {
@@ -162,6 +182,8 @@
     },
     "Lions": {
       "games": 3,
+      "newCoach": false,
+      "coach": "Dan Campbell",
       "oline": 6.2,
       "weapons": 9.7,
       "metrics": {
@@ -178,6 +200,8 @@
     },
     "Packers": {
       "games": 3,
+      "newCoach": false,
+      "coach": "Matt LaFleur",
       "oline": 0.4,
       "weapons": 0.4,
       "metrics": {
@@ -194,6 +218,8 @@
     },
     "Texans": {
       "games": 3,
+      "newCoach": false,
+      "coach": "DeMeco Ryans",
       "oline": 2.3,
       "weapons": 2.3,
       "metrics": {
@@ -210,6 +236,8 @@
     },
     "Colts": {
       "games": 3,
+      "newCoach": false,
+      "coach": "Shane Steichen",
       "oline": 7.4,
       "weapons": 1.2,
       "metrics": {
@@ -226,6 +254,8 @@
     },
     "Jaguars": {
       "games": 3,
+      "newCoach": false,
+      "coach": "Liam Coen",
       "oline": 7.7,
       "weapons": 1.5,
       "metrics": {
@@ -242,6 +272,8 @@
     },
     "Chiefs": {
       "games": 3,
+      "newCoach": false,
+      "coach": "Andy Reid",
       "oline": 9.7,
       "weapons": 12,
       "metrics": {
@@ -258,6 +290,8 @@
     },
     "Rams": {
       "games": 3,
+      "newCoach": false,
+      "coach": "Sean McVay",
       "oline": 11.6,
       "weapons": 8.5,
       "metrics": {
@@ -274,6 +308,8 @@
     },
     "Chargers": {
       "games": 3,
+      "newCoach": false,
+      "coach": "Jim Harbaugh",
       "oline": 4.3,
       "weapons": 7.4,
       "metrics": {
@@ -290,6 +326,8 @@
     },
     "Raiders": {
       "games": 3,
+      "newCoach": true,
+      "coach": "Klint Kubiak",
       "oline": 3.1,
       "weapons": 3.9,
       "metrics": {
@@ -306,6 +344,8 @@
     },
     "Dolphins": {
       "games": 3,
+      "newCoach": true,
+      "coach": "Jeff Hafley",
       "oline": 1.2,
       "weapons": 5,
       "metrics": {
@@ -322,6 +362,8 @@
     },
     "Vikings": {
       "games": 3,
+      "newCoach": false,
+      "coach": "Kevin O'Connell",
       "oline": 3.5,
       "weapons": 0,
       "metrics": {
@@ -338,6 +380,8 @@
     },
     "Patriots": {
       "games": 3,
+      "newCoach": false,
+      "coach": "Mike Vrabel",
       "oline": 2.7,
       "weapons": 6.6,
       "metrics": {
@@ -354,6 +398,8 @@
     },
     "Saints": {
       "games": 3,
+      "newCoach": false,
+      "coach": "Kellen Moore",
       "oline": 5.8,
       "weapons": 5.8,
       "metrics": {
@@ -370,6 +416,8 @@
     },
     "Giants": {
       "games": 3,
+      "newCoach": false,
+      "coach": "John Harbaugh",
       "oline": 3.9,
       "weapons": 2.7,
       "metrics": {
@@ -386,6 +434,8 @@
     },
     "Jets": {
       "games": 3,
+      "newCoach": false,
+      "coach": "Aaron Glenn",
       "oline": 1.9,
       "weapons": 7,
       "metrics": {
@@ -402,6 +452,8 @@
     },
     "Eagles": {
       "games": 2,
+      "newCoach": false,
+      "coach": "Nick Sirianni",
       "oline": 0,
       "weapons": 8.1,
       "metrics": {
@@ -418,6 +470,8 @@
     },
     "Steelers": {
       "games": 3,
+      "newCoach": false,
+      "coach": "Mike McCarthy",
       "oline": 5,
       "weapons": 10.5,
       "metrics": {
@@ -434,6 +488,8 @@
     },
     "Seahawks": {
       "games": 3,
+      "newCoach": false,
+      "coach": "Mike Macdonald",
       "oline": 10.5,
       "weapons": 3.5,
       "metrics": {
@@ -450,6 +506,8 @@
     },
     "49ers": {
       "games": 3,
+      "newCoach": false,
+      "coach": "Kyle Shanahan",
       "oline": 12,
       "weapons": 4.3,
       "metrics": {
@@ -466,6 +524,8 @@
     },
     "Bucs": {
       "games": 3,
+      "newCoach": false,
+      "coach": "Todd Bowles",
       "oline": 4.6,
       "weapons": 5.4,
       "metrics": {
@@ -482,6 +542,8 @@
     },
     "Titans": {
       "games": 3,
+      "newCoach": false,
+      "coach": "Robert Saleh",
       "oline": 10.1,
       "weapons": 7.7,
       "metrics": {
@@ -498,6 +560,8 @@
     },
     "Commanders": {
       "games": 3,
+      "newCoach": false,
+      "coach": "Dan Quinn",
       "oline": 10.8,
       "weapons": 0.8,
       "metrics": {
@@ -516,33 +580,33 @@
   "qbs": {
     "8439": {
       "games": 3,
-      "responsibility": 10.3,
+      "responsibility": 8.3,
       "metrics": {
-        "passRateOverExpected": 5.214,
+        "playShare": 0.629,
         "yardShare": 0.784
       }
     },
     "12483": {
       "games": 3,
-      "responsibility": 5.7,
+      "responsibility": 4.7,
       "metrics": {
-        "passRateOverExpected": -0.301,
+        "playShare": 0.579,
         "yardShare": 0.706
       }
     },
     "14880": {
       "games": 3,
-      "responsibility": 4.7,
+      "responsibility": 3.3,
       "metrics": {
-        "passRateOverExpected": -2.852,
+        "playShare": 0.534,
         "yardShare": 0.708
       }
     },
     "15864": {
       "games": 3,
-      "responsibility": 8.7,
+      "responsibility": 9,
       "metrics": {
-        "passRateOverExpected": -0.716,
+        "playShare": 0.601,
         "yardShare": 0.829
       }
     },
@@ -550,23 +614,23 @@
       "games": 2,
       "responsibility": 1,
       "metrics": {
-        "passRateOverExpected": -7.383,
+        "playShare": 0.447,
         "yardShare": 0.58
       }
     },
     "2576980": {
       "games": 1,
-      "responsibility": 7,
+      "responsibility": 4.3,
       "metrics": {
-        "passRateOverExpected": 0.301,
+        "playShare": 0.537,
         "yardShare": 0.754
       }
     },
     "2577417": {
       "games": 3,
-      "responsibility": 11,
+      "responsibility": 9.7,
       "metrics": {
-        "passRateOverExpected": 5.137,
+        "playShare": 0.636,
         "yardShare": 0.795
       }
     },
@@ -574,15 +638,15 @@
       "games": 3,
       "responsibility": 7.7,
       "metrics": {
-        "passRateOverExpected": 0.999,
+        "playShare": 0.623,
         "yardShare": 0.746
       }
     },
     "2969939": {
       "games": 2,
-      "responsibility": 0.3,
+      "responsibility": 1.3,
       "metrics": {
-        "passRateOverExpected": -13.59,
+        "playShare": 0.471,
         "yardShare": 0.582
       }
     },
@@ -590,87 +654,87 @@
       "games": 2,
       "responsibility": 0,
       "metrics": {
-        "passRateOverExpected": -13.942,
+        "playShare": 0.357,
         "yardShare": 0.475
       }
     },
     "3046779": {
       "games": 3,
-      "responsibility": 6.3,
+      "responsibility": 6,
       "metrics": {
-        "passRateOverExpected": -0.074,
+        "playShare": 0.6,
         "yardShare": 0.74
       }
     },
     "3052587": {
       "games": 3,
-      "responsibility": 8.3,
+      "responsibility": 10,
       "metrics": {
-        "passRateOverExpected": -0.029,
+        "playShare": 0.626,
         "yardShare": 0.812
       }
     },
     "3122840": {
       "games": 3,
-      "responsibility": 10,
+      "responsibility": 11,
       "metrics": {
-        "passRateOverExpected": -0.07,
+        "playShare": 0.64,
         "yardShare": 0.866
       }
     },
     "3139477": {
       "games": 3,
-      "responsibility": 7.3,
+      "responsibility": 3,
       "metrics": {
-        "passRateOverExpected": 3.928,
+        "playShare": 0.551,
         "yardShare": 0.684
       }
     },
     "3912547": {
       "games": 1,
-      "responsibility": 12,
+      "responsibility": 11.7,
       "metrics": {
-        "passRateOverExpected": 10.371,
+        "playShare": 0.687,
         "yardShare": 0.879
       }
     },
     "3915511": {
       "games": 3,
-      "responsibility": 10.7,
+      "responsibility": 10.3,
       "metrics": {
-        "passRateOverExpected": 4.433,
+        "playShare": 0.648,
         "yardShare": 0.799
       }
     },
     "3916387": {
       "games": 3,
-      "responsibility": 3,
+      "responsibility": 2.7,
       "metrics": {
-        "passRateOverExpected": -5.465,
+        "playShare": 0.503,
         "yardShare": 0.727
       }
     },
     "3917315": {
       "games": 1,
-      "responsibility": 8,
+      "responsibility": 7.3,
       "metrics": {
-        "passRateOverExpected": -1.562,
+        "playShare": 0.576,
         "yardShare": 0.804
       }
     },
     "3917792": {
       "games": 3,
-      "responsibility": 4,
+      "responsibility": 5.3,
       "metrics": {
-        "passRateOverExpected": -4,
+        "playShare": 0.584,
         "yardShare": 0.716
       }
     },
     "3918298": {
       "games": 3,
-      "responsibility": 6.7,
+      "responsibility": 7,
       "metrics": {
-        "passRateOverExpected": 0.377,
+        "playShare": 0.615,
         "yardShare": 0.748
       }
     },
@@ -678,55 +742,55 @@
       "games": 2,
       "responsibility": 1.7,
       "metrics": {
-        "passRateOverExpected": -8.179,
+        "playShare": 0.429,
         "yardShare": 0.654
       }
     },
     "4036378": {
       "games": 3,
-      "responsibility": 11.7,
+      "responsibility": 12,
       "metrics": {
-        "passRateOverExpected": 2.215,
+        "playShare": 0.694,
         "yardShare": 0.892
       }
     },
     "4038941": {
       "games": 3,
-      "responsibility": 2.7,
+      "responsibility": 5,
       "metrics": {
-        "passRateOverExpected": -7.103,
+        "playShare": 0.565,
         "yardShare": 0.729
       }
     },
     "4040715": {
       "games": 2,
-      "responsibility": 3.7,
+      "responsibility": 8,
       "metrics": {
-        "passRateOverExpected": -8.859,
+        "playShare": 0.605,
         "yardShare": 0.803
       }
     },
     "4242512": {
       "games": 3,
-      "responsibility": 5,
+      "responsibility": 8.7,
       "metrics": {
-        "passRateOverExpected": -8.257,
+        "playShare": 0.596,
         "yardShare": 0.835
       }
     },
     "4360310": {
       "games": 3,
-      "responsibility": 3.3,
+      "responsibility": 2.3,
       "metrics": {
-        "passRateOverExpected": -3.319,
+        "playShare": 0.52,
         "yardShare": 0.687
       }
     },
     "4360423": {
       "games": 1,
-      "responsibility": 0.7,
+      "responsibility": 0.3,
       "metrics": {
-        "passRateOverExpected": -5.321,
+        "playShare": 0.377,
         "yardShare": 0.51
       }
     },
@@ -734,39 +798,39 @@
       "games": 3,
       "responsibility": 11.3,
       "metrics": {
-        "passRateOverExpected": 2.319,
+        "playShare": 0.674,
         "yardShare": 0.856
       }
     },
     "4361741": {
       "games": 3,
-      "responsibility": 9,
+      "responsibility": 4,
       "metrics": {
-        "passRateOverExpected": 4.784,
+        "playShare": 0.548,
         "yardShare": 0.735
       }
     },
     "4426338": {
       "games": 3,
-      "responsibility": 6,
+      "responsibility": 6.7,
       "metrics": {
-        "passRateOverExpected": -1.203,
+        "playShare": 0.614,
         "yardShare": 0.749
       }
     },
     "4426348": {
       "games": 2,
-      "responsibility": 1.3,
+      "responsibility": 0.7,
       "metrics": {
-        "passRateOverExpected": -3.667,
+        "playShare": 0.461,
         "yardShare": 0.526
       }
     },
     "4431452": {
       "games": 3,
-      "responsibility": 5.3,
+      "responsibility": 3.7,
       "metrics": {
-        "passRateOverExpected": -1.659,
+        "playShare": 0.545,
         "yardShare": 0.725
       }
     },
@@ -774,15 +838,15 @@
       "games": 2,
       "responsibility": 2,
       "metrics": {
-        "passRateOverExpected": -5.376,
+        "playShare": 0.507,
         "yardShare": 0.605
       }
     },
     "4432577": {
       "games": 3,
-      "responsibility": 9.7,
+      "responsibility": 10.7,
       "metrics": {
-        "passRateOverExpected": -0.777,
+        "playShare": 0.637,
         "yardShare": 0.867
       }
     },
@@ -790,23 +854,23 @@
       "games": 3,
       "responsibility": 9.3,
       "metrics": {
-        "passRateOverExpected": 1.934,
+        "playShare": 0.622,
         "yardShare": 0.808
       }
     },
     "4688380": {
       "games": 3,
-      "responsibility": 2.3,
+      "responsibility": 6.3,
       "metrics": {
-        "passRateOverExpected": -9.1,
+        "playShare": 0.626,
         "yardShare": 0.714
       }
     },
     "4689114": {
       "games": 1,
-      "responsibility": 4.3,
+      "responsibility": 5.7,
       "metrics": {
-        "passRateOverExpected": -4.335,
+        "playShare": 0.591,
         "yardShare": 0.724
       }
     }

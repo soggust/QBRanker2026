@@ -57,7 +57,8 @@ const scores = subjective as Record<string, SubjectiveScores>;
 const teamGrades = teamGradesJson as Record<string, TeamGrades>;
 
 interface DataGrades {
-  teams: Record<string, { games: number; oline: number; weapons: number }>;
+  // newCoach: a first-year head coach (no NFL head-coaching games before this season)
+  teams: Record<string, { games: number; oline: number; weapons: number; newCoach?: boolean }>;
   qbs: Record<string, { games: number; responsibility: number }>;
 }
 const dataGrades = dataGradesJson as unknown as DataGrades;
@@ -76,8 +77,10 @@ function blendScore(preseason: number, fromData: number | undefined, games: numb
   return preseason + (fromData - preseason) * dataWeight(games);
 }
 
-// Preseason coaching grade per team; the app blends it with the Head Coaches rankings
+// Preseason coaching grade per team; the app blends it with the Head Coaches rankings. A first-year
+// head coach has no track record, so he starts at a neutral C (6) whatever the team's grade says.
 export function preseasonCoaching(teamLogo: string): number {
+  if (dataGrades.teams[teamKey(teamLogo)]?.newCoach) return 6;
   return (teamGrades[teamKey(teamLogo)] ?? { coaching: 6 }).coaching;
 }
 

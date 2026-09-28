@@ -59,15 +59,19 @@
           </p>
           <h4>Sliders and weights</h4>
           <p>
-            Each stat is compared with the rest of the league and turned into a score, then multiplied by its
-            slider. At 50% a stat counts normally, at 100% twice as much, and at 0% not at all. A stat's
+            Every stat is first put on the same scale: how far above or below the list's average a player is,
+            measured in standard deviations (so 72% vs. 65% completion counts as much as 10 vs. 5 touchdowns if
+            they're equally far from typical). That score is multiplied by its slider: at 50% a stat counts
+            normally, at 100% twice as much, and at 0% not at all. Nothing is weighted behind the scenes, so the
+            sliders alone decide what matters. A stat's
             <b>eye</b> switches it off entirely and hides its column. A card's eye does the same for a whole group.
           </p>
           <h4>Good and bad stats</h4>
           <p>
             Stats where lower is better (turnovers, sacks allowed, points allowed, stuffed runs...) count
-            against a player. Stats that can go negative, like EPA, are compared across the league's range,
-            so the worst in the league isn't punished to zero.
+            against a player. Extreme values are capped, so one fluky number (say, 100% on two chances) can't
+            swamp the list, and a stat a player has no data for counts as the list's worst, or as average when
+            "-" just means no chances yet.
           </p>
           <h4>Totals, breakdowns and per game</h4>
           <p>
@@ -101,8 +105,8 @@
           </p>
           <p>
             The exception is the QB page's <b>Responsibility</b> grade: how much the offense runs through the
-            QB (pass rate over expected, share of the team's yards). Carrying the offense counts <em>for</em> him.
-            It's the one grade you set by hand: use the arrows beside it to raise or lower it for any QB.
+            QB (his share of the team's plays and yards, in the games he led). Carrying the offense counts
+            <em>for</em> him.
           </p>
           <h4>The tabs grade each other</h4>
           <ul>
@@ -126,7 +130,7 @@
             Early on, a few games isn't much to go on, so Weapons, O-Line and Coaching grades blend a preseason
             grade with this season's results. The season counts for about 17% after 1 game, 35% after 3, 56%
             after 6, 80% after 10, and completely from game 14 on. The blended scores are then curved like the
-            rest.
+            rest. First-year head coaches start from a neutral C, since there's no track record to grade.
           </p>
         }
 
@@ -164,7 +168,7 @@
           <ul class="tips">
             <li><mat-icon fontIcon="drag_indicator"></mat-icon><span><b>Reorder columns</b> by dragging a column header within its group. <b>Reorder groups</b> or <b>stats</b> by dragging the cards and slider rows in the filter menu; the table follows.</span></li>
             <li><mat-icon fontIcon="visibility"></mat-icon><span><b>Eyes</b> switch a stat or a whole group off: the column hides and it stops counting, but its slider keeps its value.</span></li>
-            <li><mat-icon fontIcon="palette"></mat-icon><span><b>Color-coded values</b> are green above the league average and red below it. Hover a column label to see the average.</span></li>
+            <li><mat-icon fontIcon="palette"></mat-icon><span><b>Color-coded values</b> are green above the league average and red below it. Counting stats compare per game, so missed games don't turn a good player red. Hover a column label for the average of what the column shows.</span></li>
             <li><mat-icon fontIcon="emoji_events"></mat-icon><span><b>Rank tiles:</b> gold for the top 5, white through 15, grey after that, and red for the bottom 5.</span></li>
             <li><mat-icon fontIcon="content_copy"></mat-icon><span><b>Copy</b> puts your whole ranked list on the clipboard, ready to paste into a group chat.</span></li>
             <li><mat-icon fontIcon="link"></mat-icon><span><b>Share a tab</b> by copying the address bar. The link opens straight to that tab (e.g. <code>?pos=WR</code>).</span></li>
@@ -221,7 +225,8 @@
               Team grades (QB Play, RB Play, Weapons, O-Line, Defense, Coaching) come from the other tabs'
               rankings, so re-rank the tab they come from: drag a team's line up the Offensive Lines tab, or a
               receiver up the WR tab, and their grades follow everywhere. The QB page's Responsibility grade is
-              set per quarterback, so it has arrows beside it to raise or lower it directly.
+              worked out from each QB's share of his team's plays and yards; if you think it counts too much or
+              too little, turn its slider up or down.
             </p>
           </details>
           <details>
@@ -282,7 +287,11 @@
               (EPA, success rate, CPOE, win probability), season stats and fantasy points, snap counts, Next Gen
               Stats tracking data and Pro Football Reference's charting (pressures, broken tackles, drops, bad throws).
             </li>
-            <li>Preseason team grades are set by hand before the season, then blended out as games are played.</li>
+            <li>
+              Preseason grades (team Weapons, O-Line and Coaching, and each QB's Responsibility) are set by hand
+              before the season, then blended out as games are played. A first-year head coach has no track
+              record, so he starts at a neutral C.
+            </li>
           </ul>
           <h4>Thanks</h4>
           <p>

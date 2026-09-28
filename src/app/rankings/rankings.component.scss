@@ -320,7 +320,6 @@ section {
   color: #fff;
   justify-content: flex-start;
   list-style-type: none;
-  padding: 0.25em 0.5em;
   text-shadow: 1px 1px 5px rgb(0, 0, 0, 0.5);
 
   &:first-of-type {
@@ -663,7 +662,6 @@ section ul {
     font-variant-numeric: tabular-nums;
     margin-bottom: 0.1em;
     transition:
-      transform 0.15s ease,
       background 0.15s ease,
       box-shadow 0.15s ease;
   }
@@ -1508,15 +1506,12 @@ section ul li.player:not(.header-row) .team-badge {
   --logo: 1.4em;
   --badge-pad: 6px;
   align-items: center;
-  // Solid disc with a 2px ring around its edge: the same color lightened (35% white), at half opacity
-  background: radial-gradient(
-      circle closest-side,
-      var(--team-badge) calc(100% - 2.5px),
-      color-mix(in srgb, color-mix(in srgb, var(--team-badge) 65%, #fff) 50%, transparent) calc(100% - 2px)
-        calc(100% - 0.5px),
-      transparent 100%
-    )
-    content-box no-repeat;
+  // Solid disc in the team color (no ring), with a soft anti-aliased edge
+  background: radial-gradient(circle closest-side, var(--team-badge) calc(100% - 0.5px), transparent 100%) content-box
+    no-repeat;
+  // Crisp, tight shadow down and to the right (same light direction as the text shadows); drop-shadow follows
+  // the round disc, not the element's square box
+  filter: drop-shadow(1px 1px 0.5px rgba(0, 0, 0, 0.6));
   border-left: none;
   display: inline-flex;
   flex: 0 0 auto;
@@ -1688,4 +1683,79 @@ section ul li.player .rank-value {
     margin-left: 3px;
     opacity: 0.75;
   }
+}
+
+// Header groups: no outline box. Each group's tint fills the header bar top to bottom and runs to
+// the next group, with a thin line in the group's color on its left, in line with the category
+// dividers in the rows below (0.68em reaches the bar's edges from the 1.9em label band; 1.1em is the
+// gap to the next group's line)
+section ul li.player.header-row > .col-group > div {
+  &::after {
+    border: none;
+    border-radius: 0;
+    bottom: -0.68em;
+    right: -0.5em;
+    top: -0.68em;
+  }
+
+  &:first-child::after {
+    border-left: 1px solid color-mix(in srgb, var(--group-color) 70%, transparent);
+    border-radius: 0;
+    left: -0.5em;
+  }
+
+  &:last-child::after {
+    border-radius: 0;
+    border-right: none;
+    right: -1.1em;
+  }
+}
+
+// Row drag: the other rows slide aside smoothly only while a drag is in progress. On drop the list
+// takes its new order and the drag offsets clear at once, so rows snap into place (a transition here
+// made them jump a row and slide back). The preview keeps the row's exact size.
+section ul.cdk-drop-list-dragging li.player:not(.cdk-drag-placeholder) {
+  transition: transform 0.2s ease;
+}
+
+section ul li.player.cdk-drag-preview {
+  box-sizing: border-box;
+}
+
+// Each group's icon sits in a fixed slot at the start of the group (just after its colored line),
+// not inside the first column's label, so reordering columns never squeezes a long label against it.
+// Every row reserves the same slot, so the columns stay aligned under their headers.
+section ul li.player > .col-group > div:first-child {
+  padding-left: 1.8em;
+}
+
+section
+  ul
+  li.player.header-row
+  .col-group
+  > div:first-child
+  > .stat-label::before,
+section
+  ul
+  li.player.header-row
+  .col-group
+  > div.box:first-child
+  > div:first-child
+  .stat-label::before {
+  content: none;
+}
+
+section ul li.player.header-row > .col-group > div > .group-icon {
+  color: var(--group-color);
+  cursor: default;
+  font-size: 17px;
+  height: 17px;
+  left: 0.35em;
+  line-height: 1;
+  position: absolute;
+  text-shadow: none;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 17px;
+  z-index: 1;
 }

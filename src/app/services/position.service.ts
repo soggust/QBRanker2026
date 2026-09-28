@@ -337,21 +337,6 @@ export class PositionService {
     this.aboutOpenSubject.next(open);
   }
 
-  // Responsibility grades raised or lowered with the arrows, per QB (unit id -> 0-12). Every grade is
-  // back to its data value on each page load.
-  private gradeAdjustmentsSubject = new BehaviorSubject<Record<string, number>>({});
-  public gradeAdjustments$ = this.gradeAdjustmentsSubject.asObservable();
-
-  adjustedGrade(unit: SkillPlayer, base: number): number {
-    return this.gradeAdjustmentsSubject.value[unit.gsisId] ?? base;
-  }
-
-  // One grade step up or down (stays within F-A+)
-  stepGrade(unit: SkillPlayer, base: number, step: 1 | -1): void {
-    const current = this.adjustedGrade(unit, base);
-    const next = Math.min(12, Math.max(0, current + step));
-    if (next !== current) this.gradeAdjustmentsSubject.next({ ...this.gradeAdjustmentsSubject.value, [unit.gsisId]: next });
-  }
 
 
   private fantasyScoringSubject = new BehaviorSubject<FantasyScoring>(this.settingsSubject.value.fantasyScoring);

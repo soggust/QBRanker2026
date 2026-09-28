@@ -148,6 +148,13 @@ export const RANK_BASIS_LABELS: Record<RankBasis, string> = {
   yards: 'Yards',
 };
 
+// A stat's column / slider label; the unit ranks say what they're ranked on ("Off Rank (Pts)"), so
+// the table and sidebar read the same without opening the settings
+export function statLabelFor(stat: SkillStat, rankBasis: RankBasis): string {
+  if (stat.format !== 'rank') return stat.label;
+  return `${stat.label} (${rankBasis === 'points' ? 'Pts' : 'Yds'})`;
+}
+
 // The stat each rank uses, and whether higher is better
 export const RANK_METRICS: Record<'offRank' | 'defRank', Record<RankBasis, [SkillStatKey, boolean]>> = {
   offRank: { points: ['ptsPerGame', true], yards: ['yardsPerGame', true] },
@@ -199,16 +206,12 @@ export interface SkillStat {
   format: 'int' | 'dec1' | 'dec2' | 'pct' | 'pctPoints' | 'grade' | 'record' | 'recent' | 'rank';
   // Full name for hover text, when STAT_NAMES' name for the key doesn't fit this tab
   name?: string;
-  // Scaled against the league range instead of the max (stats that can go negative, or bunch up)
-  signed?: boolean;
   // Counts against the player (e.g. fumbles)
   negative?: boolean;
   // Team support graded 0-12: better support is a (dampened) penalty, credit for doing more with less
   support?: boolean;
   // A support grade that counts for the player instead (QB Responsibility: carrying the offense)
   supportHelps?: boolean;
-  // A grade the user can raise or lower per player with arrows (QB Responsibility)
-  adjustable?: boolean;
   // Shown for context only: no slider and no weight in the ranking
   infoOnly?: boolean;
   // A missing value ("-") means no chances yet, so it scores as the league average, not the worst
@@ -452,16 +455,15 @@ const WEAPONS_STAT: SkillStat = {
 };
 
 // How much the offense runs through the QB (pass rate over expected, his share of the team's yards):
-// carrying the offense counts for him, and it's the one grade set by hand (arrows, per QB)
+// carrying the offense counts for him
 const RESPONSIBILITY_STAT: SkillStat = {
   key: 'responsibility',
   label: 'Responsibility',
-  description: 'How much the offense runs through the QB: carrying it counts for him (arrows to adjust)',
+  description: 'How much the offense runs through the QB (his share of the plays and yards): carrying it counts for him',
   kind: 'efficiency',
   format: 'grade',
   support: true,
   supportHelps: true,
-  adjustable: true,
 };
 
 // Team RB grade from the RB rankings: a support grade for offensive lines (a good back makes the
@@ -534,7 +536,6 @@ const EPA_PER_TARGET_STAT: SkillStat = {
   description: 'Expected Points Added per target',
   kind: 'efficiency',
   format: 'dec2',
-  signed: true,
 };
 
 const RECEIVING_STATS: SkillStat[] = [
@@ -564,7 +565,6 @@ const RECEIVING_STATS: SkillStat[] = [
     description: 'Yards after catch above expected, per reception (Next Gen Stats)',
     kind: 'efficiency',
     format: 'dec1',
-    signed: true,
   },
   {
     key: 'dropPct',
@@ -626,7 +626,6 @@ export const SKILL_STATS: Record<SkillPosition, SkillStat[]> = {
       description: 'Expected Points Added per play (dropbacks and runs)',
       kind: 'efficiency',
       format: 'dec2',
-      signed: true,
     },
     {
       key: 'successRate',
@@ -634,7 +633,6 @@ export const SKILL_STATS: Record<SkillPosition, SkillStat[]> = {
       description: 'Share of plays gaining positive EPA',
       kind: 'efficiency',
       format: 'pct',
-      signed: true,
     },
     {
       key: 'cpoe',
@@ -642,7 +640,6 @@ export const SKILL_STATS: Record<SkillPosition, SkillStat[]> = {
       description: 'Completion % over expected',
       kind: 'efficiency',
       format: 'pctPoints',
-      signed: true,
     },
     {
       key: 'pressureToSack',
@@ -650,7 +647,6 @@ export const SKILL_STATS: Record<SkillPosition, SkillStat[]> = {
       description: 'Share of pressures that turn into sacks (lower is better)',
       kind: 'efficiency',
       format: 'pct',
-      signed: true,
       negative: true,
     },
     {
@@ -659,7 +655,6 @@ export const SKILL_STATS: Record<SkillPosition, SkillStat[]> = {
       description: 'Share of attempts charted as inaccurate (lower is better)',
       kind: 'efficiency',
       format: 'pct',
-      signed: true,
       negative: true,
     },
     {
@@ -669,17 +664,15 @@ export const SKILL_STATS: Record<SkillPosition, SkillStat[]> = {
       description: 'Seconds from snap to throw (quicker is better)',
       kind: 'efficiency',
       format: 'dec2',
-      signed: true,
       negative: true,
     },
-    { key: 'adot', label: 'aDOT', description: 'Average depth of target', kind: 'efficiency', format: 'dec1', signed: true },
+    { key: 'adot', label: 'aDOT', description: 'Average depth of target', kind: 'efficiency', format: 'dec1' },
     {
       key: 'aggressiveness',
       label: 'Aggressive %',
       description: 'Throws into tight coverage',
       kind: 'efficiency',
       format: 'pctPoints',
-      signed: true,
     },
     FANTASY_STAT,
     WEAPONS_STAT,
@@ -715,7 +708,6 @@ export const SKILL_STATS: Record<SkillPosition, SkillStat[]> = {
       description: 'Expected Points Added per carry',
       kind: 'efficiency',
       format: 'dec2',
-      signed: true,
     },
     EPA_PER_TARGET_STAT,
     {
@@ -724,7 +716,6 @@ export const SKILL_STATS: Record<SkillPosition, SkillStat[]> = {
       description: 'Rush yards over expected per carry, given the blocking and defenders (Next Gen Stats)',
       kind: 'efficiency',
       format: 'dec2',
-      signed: true,
     },
     {
       key: 'yacoPerCarry',
@@ -768,7 +759,6 @@ export const SKILL_STATS: Record<SkillPosition, SkillStat[]> = {
       description: 'Expected Points Added per field goal and extra point attempt',
       kind: 'efficiency',
       format: 'dec2',
-      signed: true,
     },
     {
       key: 'fgOverExp',
@@ -776,7 +766,6 @@ export const SKILL_STATS: Record<SkillPosition, SkillStat[]> = {
       description: 'Field goal % above what the kick distances predict, in percentage points',
       kind: 'efficiency',
       format: 'pctPoints',
-      signed: true,
     },
     {
       ...FANTASY_STAT,
@@ -808,7 +797,6 @@ export const SKILL_STATS: Record<SkillPosition, SkillStat[]> = {
       description: 'Expected Points Added per punt (for the punting team)',
       kind: 'efficiency',
       format: 'dec2',
-      signed: true,
     },
     {
       key: 'touchbacks',
@@ -835,7 +823,6 @@ export const SKILL_STATS: Record<SkillPosition, SkillStat[]> = {
       description: 'Expected Points Added per play allowed (lower is better)',
       kind: 'efficiency',
       format: 'dec2',
-      signed: true,
       negative: true,
     },
     {
@@ -844,7 +831,6 @@ export const SKILL_STATS: Record<SkillPosition, SkillStat[]> = {
       description: 'EPA per pass play allowed (lower is better)',
       kind: 'efficiency',
       format: 'dec2',
-      signed: true,
       negative: true,
     },
     {
@@ -853,7 +839,6 @@ export const SKILL_STATS: Record<SkillPosition, SkillStat[]> = {
       description: 'EPA per run play allowed (lower is better)',
       kind: 'efficiency',
       format: 'dec2',
-      signed: true,
       negative: true,
     },
     {
@@ -862,7 +847,6 @@ export const SKILL_STATS: Record<SkillPosition, SkillStat[]> = {
       description: 'Share of plays where the offense gained positive EPA (lower is better)',
       kind: 'efficiency',
       format: 'pct',
-      signed: true,
       negative: true,
     },
     { key: 'sacks', label: 'Sacks', description: 'Sacks', kind: 'volume', format: 'int' },
@@ -886,7 +870,6 @@ export const SKILL_STATS: Record<SkillPosition, SkillStat[]> = {
       description: 'Points allowed per game (lower is better)',
       kind: 'efficiency',
       format: 'dec1',
-      signed: true,
       negative: true,
     },
     {
@@ -895,7 +878,6 @@ export const SKILL_STATS: Record<SkillPosition, SkillStat[]> = {
       description: 'Opponent third-down conversion rate (lower is better)',
       kind: 'efficiency',
       format: 'pct',
-      signed: true,
       negative: true,
     },
     {
@@ -904,7 +886,6 @@ export const SKILL_STATS: Record<SkillPosition, SkillStat[]> = {
       description: 'Share of opponent red-zone drives ending in a touchdown (lower is better)',
       kind: 'efficiency',
       format: 'pct',
-      signed: true,
       negative: true,
     },
     {
@@ -913,7 +894,6 @@ export const SKILL_STATS: Record<SkillPosition, SkillStat[]> = {
       description: 'Missed tackles per tackle attempt (lower is better)',
       kind: 'efficiency',
       format: 'pct',
-      signed: true,
       negative: true,
     },
     {
@@ -943,14 +923,13 @@ export const SKILL_STATS: Record<SkillPosition, SkillStat[]> = {
       format: 'int',
       negative: true,
     },
-    { key: 'ypc', label: 'Yds / Carry', description: 'Yards per designed run', kind: 'efficiency', format: 'dec1', signed: true },
+    { key: 'ypc', label: 'Yds / Carry', description: 'Yards per designed run', kind: 'efficiency', format: 'dec1' },
     {
       key: 'stuffRate',
       label: 'Stuff %',
       description: 'Share of designed runs stopped at or behind the line (lower is better)',
       kind: 'efficiency',
       format: 'pct',
-      signed: true,
       negative: true,
     },
     {
@@ -959,7 +938,6 @@ export const SKILL_STATS: Record<SkillPosition, SkillStat[]> = {
       description: 'Conversion rate on 3rd and 4th and 1-2 runs',
       kind: 'efficiency',
       format: 'pct',
-      signed: true,
       missingIsAverage: true,
     },
     {
@@ -968,7 +946,6 @@ export const SKILL_STATS: Record<SkillPosition, SkillStat[]> = {
       description: 'Holding, false starts and other blocking penalties per game (lower is better)',
       kind: 'efficiency',
       format: 'dec1',
-      signed: true,
       negative: true,
     },
     {
@@ -977,7 +954,6 @@ export const SKILL_STATS: Record<SkillPosition, SkillStat[]> = {
       description: 'Expected Points Added per designed run',
       kind: 'efficiency',
       format: 'dec2',
-      signed: true,
     },
     {
       key: 'runSuccess',
@@ -985,7 +961,6 @@ export const SKILL_STATS: Record<SkillPosition, SkillStat[]> = {
       description: 'Share of designed runs with positive EPA',
       kind: 'efficiency',
       format: 'pct',
-      signed: true,
     },
     {
       key: 'pressureRate',
@@ -993,7 +968,6 @@ export const SKILL_STATS: Record<SkillPosition, SkillStat[]> = {
       description: 'Pressures allowed per dropback (lower is better)',
       kind: 'efficiency',
       format: 'pct',
-      signed: true,
       negative: true,
     },
     {
@@ -1002,7 +976,6 @@ export const SKILL_STATS: Record<SkillPosition, SkillStat[]> = {
       description: 'Sacks allowed per dropback (lower is better)',
       kind: 'efficiency',
       format: 'pct',
-      signed: true,
       negative: true,
     },
     {
@@ -1011,7 +984,6 @@ export const SKILL_STATS: Record<SkillPosition, SkillStat[]> = {
       description: 'Yards before first contact per carry',
       kind: 'efficiency',
       format: 'dec2',
-      signed: true,
     },
     {
       key: 'timeToThrow',
@@ -1033,7 +1005,6 @@ export const SKILL_STATS: Record<SkillPosition, SkillStat[]> = {
       description: 'Wins minus the wins implied by the betting lines before each game',
       kind: 'efficiency',
       format: 'dec2',
-      signed: true,
     },
     {
       key: 'atsPct',
@@ -1067,7 +1038,6 @@ export const SKILL_STATS: Record<SkillPosition, SkillStat[]> = {
       description: 'Average points scored minus points allowed per game',
       kind: 'efficiency',
       format: 'dec1',
-      signed: true,
     },
     {
       key: 'turnoverDiffPerGame',
@@ -1075,7 +1045,6 @@ export const SKILL_STATS: Record<SkillPosition, SkillStat[]> = {
       description: 'Takeaways minus giveaways per game',
       kind: 'efficiency',
       format: 'dec1',
-      signed: true,
     },
     {
       key: 'penaltiesPerGame',
@@ -1083,7 +1052,6 @@ export const SKILL_STATS: Record<SkillPosition, SkillStat[]> = {
       description: 'Penalties called on the team per game (lower is better)',
       kind: 'efficiency',
       format: 'dec1',
-      signed: true,
       negative: true,
     },
     {
@@ -1092,7 +1060,6 @@ export const SKILL_STATS: Record<SkillPosition, SkillStat[]> = {
       description: "Team offense EPA/play minus defense EPA/play allowed in the coach's games",
       kind: 'efficiency',
       format: 'dec2',
-      signed: true,
     },
     {
       key: 'offEpa',
@@ -1101,7 +1068,6 @@ export const SKILL_STATS: Record<SkillPosition, SkillStat[]> = {
       description: "The offense's EPA per play",
       kind: 'efficiency',
       format: 'dec2',
-      signed: true,
     },
     {
       key: 'defEpaAllowed',
@@ -1110,7 +1076,6 @@ export const SKILL_STATS: Record<SkillPosition, SkillStat[]> = {
       description: 'EPA per play allowed by the defense (lower is better)',
       kind: 'efficiency',
       format: 'dec2',
-      signed: true,
       negative: true,
     },
     {
@@ -1120,7 +1085,6 @@ export const SKILL_STATS: Record<SkillPosition, SkillStat[]> = {
       description: 'Expected Points Added per game on kicks, punts and returns (net of opponents)',
       kind: 'efficiency',
       format: 'dec2',
-      signed: true,
     },
     {
       key: 'oneScoreWinPct',
