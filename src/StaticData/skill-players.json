@@ -4787,8 +4787,8 @@
         "epaPerCarry": -0.372,
         "epaPerTarget": 0.023
       },
-      "injuryStatus": "Active",
-      "injured": false
+      "injuryStatus": "Injured Reserve",
+      "injured": true
     },
     {
       "id": 4360569,
@@ -10797,8 +10797,8 @@
         "epaPerCarry": 0,
         "epaPerTarget": -0.517
       },
-      "injuryStatus": "Active",
-      "injured": false
+      "injuryStatus": "Injured Reserve",
+      "injured": true
     },
     {
       "id": 4426553,

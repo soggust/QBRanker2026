@@ -530,12 +530,30 @@ about-panel ::-webkit-scrollbar-track {
   }
 }
 
-// Off for the season in progress: the whole item dims
-.mat-mdc-menu-panel .min-games-item.off {
-  opacity: 0.45;
-}
-
 // Settings items you click to cycle: their current value in goalpost yellow
 .mat-mdc-menu-panel .mat-mdc-menu-item .menu-value {
   color: var(--scoreboard-led) !important;
+}
+
+// The footer's year dropdown (styles.scss because these are inside Material's select template): white
+// year on the left, white caret on the right; both turn yellow on hover
+section footer .mat-mdc-select.season-select {
+  .mat-mdc-select-trigger {
+    width: 100%;
+  }
+
+  .mat-mdc-select-value,
+  .mat-mdc-select-value-text {
+    color: #fff !important;
+    text-align: left;
+  }
+
+  .mat-mdc-select-arrow {
+    color: #fff !important;
+  }
+
+  &:hover .mat-mdc-select-value-text,
+  &:hover .mat-mdc-select-arrow {
+    color: var(--scoreboard-led) !important;
+  }
 }

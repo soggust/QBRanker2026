@@ -2091,7 +2091,8 @@ section ul li.player .player-name .player-awards {
   }
 }
 
-// Footer row, every screen size: [filters] [copy] on the left, [info] [settings] on the right
+// Footer row, every screen size: [filters] [copy] on the left, the year dropdown centered, [info]
+// [settings] on the right
 section footer {
   gap: 10px;
   justify-content: flex-start;
@@ -2112,8 +2113,12 @@ section footer {
     order: 2;
   }
 
+  .season-select {
+    margin: 0 auto;
+    order: 3;
+  }
+
   .info-toggle {
-    margin-left: auto !important;
     order: 4;
   }
 
@@ -2132,4 +2137,37 @@ section footer .filter-toggle.open .mat-icon {
 section ul li.player.header-row div .stat-label .label-tag {
   font-size: 8px;
   white-space: pre;
+}
+
+// The footer's year dropdown: a scoreboard panel the height of the leather buttons, the year in the
+// position tabs' lettering (Nunito, spaced out) with a white caret
+section footer .mat-mdc-select.season-select {
+  align-items: center;
+  background: var(--scoreboard-dots), var(--scoreboard);
+  border: 1px solid #3a3a3a;
+  border-radius: 8px;
+  box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.6);
+  box-sizing: border-box;
+  display: inline-flex;
+  font-family: "Nunito", sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  height: 42px;
+  letter-spacing: 1.5px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+  padding: 0 12px 0 16px;
+  width: 150px;
+
+  // (its text and caret are styled in styles.scss: they're inside Material's own template)
+}
+
+// Narrow screens: just the year, in a narrower box
+@media (max-width: 575px) {
+  section footer .mat-mdc-select.season-select {
+    width: 104px;
+
+    .season-word {
+      display: none;
+    }
+  }
 }

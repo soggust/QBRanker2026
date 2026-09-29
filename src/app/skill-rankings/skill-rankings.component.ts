@@ -30,7 +30,7 @@ import {
 import { MAX_MIN_GAMES, PositionService } from 'app/services/position.service';
 import { copyRankingsToClipboard } from 'app/utils/clipboard';
 import { SKILL_UNITS, UnitRankKey, recencyScore, statIsEmpty, unitRanks, weightedTotals } from 'app/utils/unit-scoring';
-import { CURRENT_SEASON, dataSeason, dataVersion } from 'StaticData/data';
+import { CURRENT_SEASON, SEASONS, dataSeason, dataVersion } from 'StaticData/data';
 import { AWARD_INFO, AwardWin, awardsFor } from 'app/awards';
 import { TintScale, tintFrom, tintScale } from 'app/utils/value-tint';
 import { badgeColor, whiteLogo } from 'app/utils/team-colors';
@@ -125,6 +125,15 @@ export class SkillRankingsComponent implements OnChanges {
       : 'Finished the season on injured reserve';
   }
 
+  // Footer year dropdown: every season we have, newest first
+  readonly seasons = SEASONS;
+  season = CURRENT_SEASON;
+  seasonLoading = false;
+
+  selectSeason(season: number) {
+    this.positionService.setSeason(season);
+  }
+
   // Footer filter button: opens / closes the filters menu
   get filtersOpen(): boolean {
     return this.positionService.filtersOpen;
@@ -134,24 +143,20 @@ export class SkillRankingsComponent implements OnChanges {
     this.positionService.setFiltersOpen(!this.filtersOpen);
   }
 
-  // Min Games (settings menu): players with fewer games are left out. Only for a finished season: the
-  // one in progress is off (shown as 1), since everyone's still a few games in. Tops out at that
-  // season's length (16 games through 2020, 17 since).
-  get minGamesOff(): boolean {
-    return dataSeason === CURRENT_SEASON;
-  }
-
+  // Min Games (settings menu): players with fewer games are left out. Tops out at the most games any
+  // team has played that season: a finished season's length (16 through 2020, 17 since), or so far this
+  // season. A higher setting counts as that (Min Games 15 in week 4 means 4).
   get seasonGames(): number {
     return Math.min(MAX_MIN_GAMES, Math.max(1, ...SKILL_UNITS.DEF.map((team) => team.games)));
   }
 
   get minGames(): number {
-    return this.minGamesOff ? 1 : Math.min(this.positionService.settings.minGames, this.seasonGames);
+    return Math.min(this.positionService.settings.minGames, this.seasonGames);
   }
 
   stepMinGames(step: number) {
     const next = Math.min(this.seasonGames, Math.max(1, this.minGames + step));
-    if (this.minGamesOff || next === this.minGames) return;
+    if (next === this.minGames) return;
     this.positionService.updateSettings({ minGames: next });
     this.sortPlayers();
   }
@@ -282,9 +287,12 @@ export class SkillRankingsComponent implements OnChanges {
 
     // Another season from the year selector: the new rows from the top, in that season's order for
     // this tab (dragged or not) if it has one, otherwise sorted by the sliders
-    this.positionService.season$.pipe(skip(1)).subscribe(() => {
-      if (this.position) this.ngOnChanges();
+    this.positionService.season$.subscribe((season) => {
+      const changed = season !== this.season;
+      this.season = season;
+      if (changed && this.position) this.ngOnChanges();
     });
+    this.positionService.seasonLoading$.subscribe((loading) => (this.seasonLoading = loading));
   }
 
   // Empty Recent slots for games not played yet (up to five)

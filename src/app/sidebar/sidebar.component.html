@@ -13,21 +13,7 @@
   <!-- Filters: the same cards and sliders on every tab (positions.ts) -->
   @if (position; as skill) {
     <div class="filters">
-      <!-- Season and presets side by side -->
-      <div class="dropdown-row">
-        <!-- Year selector: another season's stats with the same sliders -->
-        <mat-select
-          class="season-select"
-          aria-label="Season"
-          title="Season: rank any year's players with the same sliders"
-          [value]="season"
-          [disabled]="seasonLoading"
-          (valueChange)="selectSeason($event)"
-        >
-          @for (year of seasons; track year) {
-            <mat-option [value]="year">{{ year }}</mat-option>
-          }
-        </mat-select>
+      <div>
         <mat-select
           [placeholder]="position + ' Presets...'"
           title="Ready-made slider settings, each built around a style of play (hover an option to see what it weighs)"

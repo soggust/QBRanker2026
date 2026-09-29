@@ -27,6 +27,7 @@
       "cpoe": -1.102,
       "successRate": 0.453,
       "plays": 741,
+      "realGames": 16,
       "fantasyStd": 301.24,
       "receptions": 0,
       "competitive": {
@@ -77,6 +78,7 @@
       "cpoe": 6.905,
       "successRate": 0.466,
       "plays": 148,
+      "realGames": 4,
       "fantasyStd": 55.26,
       "receptions": 0,
       "competitive": {
@@ -86,7 +88,7 @@
       }
     },
     "box": {
-      "games": 7,
+      "games": 4,
       "fumLost": 1,
       "passYards": 854,
       "passTd": 6,
@@ -128,6 +130,7 @@
       "cpoe": -0.218,
       "successRate": 0.461,
       "plays": 625,
+      "realGames": 16,
       "fantasyStd": 271.24,
       "receptions": 0,
       "competitive": {
@@ -175,6 +178,7 @@
       "cpoe": 7.098,
       "successRate": 0.412,
       "plays": 17,
+      "realGames": 1,
       "fantasyStd": 7.96,
       "receptions": 0,
       "competitive": {
@@ -226,6 +230,7 @@
       "cpoe": -4.235,
       "successRate": 0.415,
       "plays": 352,
+      "realGames": 7,
       "fantasyStd": 130.84,
       "receptions": 0,
       "competitive": {
@@ -277,6 +282,7 @@
       "cpoe": 3.955,
       "successRate": 0.523,
       "plays": 480,
+      "realGames": 12,
       "fantasyStd": 244.2,
       "receptions": 0,
       "competitive": {
@@ -286,7 +292,7 @@
       }
     },
     "box": {
-      "games": 13,
+      "games": 12,
       "fumLost": 2,
       "passYards": 3250,
       "passTd": 25,
@@ -325,6 +331,7 @@
       "cpoe": -1.064,
       "successRate": 0.41,
       "plays": 122,
+      "realGames": 3,
       "fantasyStd": 19.18,
       "receptions": 0,
       "competitive": {
@@ -376,6 +383,7 @@
       "cpoe": 6.521,
       "successRate": 0.53,
       "plays": 543,
+      "realGames": 12,
       "fantasyStd": 228.12,
       "receptions": 0,
       "competitive": {
@@ -427,6 +435,7 @@
       "cpoe": -1.766,
       "successRate": 0.406,
       "plays": 347,
+      "realGames": 8,
       "fantasyStd": 129.74,
       "receptions": 0,
       "competitive": {
@@ -478,6 +487,7 @@
       "cpoe": -2.958,
       "successRate": 0.456,
       "plays": 739,
+      "realGames": 16,
       "fantasyStd": 316.12,
       "receptions": 0,
       "competitive": {
@@ -530,6 +540,7 @@
       "cpoe": 4.369,
       "successRate": 0.512,
       "plays": 172,
+      "realGames": 5,
       "fantasyStd": 66.42,
       "receptions": 0,
       "competitive": {
@@ -539,7 +550,7 @@
       }
     },
     "box": {
-      "games": 6,
+      "games": 5,
       "fumLost": 1,
       "passYards": 1043,
       "passTd": 5,
@@ -581,6 +592,7 @@
       "cpoe": -1.714,
       "successRate": 0.467,
       "plays": 420,
+      "realGames": 11,
       "fantasyStd": 166.64,
       "receptions": 0,
       "competitive": {
@@ -632,6 +644,7 @@
       "cpoe": -1.152,
       "successRate": 0.465,
       "plays": 333,
+      "realGames": 8,
       "fantasyStd": 116.78,
       "receptions": 0,
       "competitive": {
@@ -683,6 +696,7 @@
       "cpoe": 0.136,
       "successRate": 0.497,
       "plays": 680,
+      "realGames": 16,
       "fantasyStd": 389.08,
       "receptions": 0,
       "competitive": {
@@ -734,6 +748,7 @@
       "cpoe": 5.283,
       "successRate": 0.525,
       "plays": 613,
+      "realGames": 16,
       "fantasyStd": 309.24,
       "receptions": 0,
       "competitive": {
@@ -785,6 +800,7 @@
       "cpoe": -4.462,
       "successRate": 0.493,
       "plays": 144,
+      "realGames": 5,
       "fantasyStd": 43.62,
       "receptions": 0,
       "competitive": {
@@ -794,7 +810,7 @@
       }
     },
     "box": {
-      "games": 6,
+      "games": 5,
       "fumLost": 2,
       "passYards": 828,
       "passTd": 4,
@@ -836,6 +852,7 @@
       "cpoe": -5.216,
       "successRate": 0.41,
       "plays": 324,
+      "realGames": 8,
       "fantasyStd": 110.2,
       "receptions": 0,
       "competitive": {
@@ -845,7 +862,7 @@
       }
     },
     "box": {
-      "games": 9,
+      "games": 8,
       "fumLost": 1,
       "passYards": 1615,
       "passTd": 6,
@@ -883,6 +900,7 @@
       "cpoe": -11.426,
       "successRate": 0.429,
       "plays": 42,
+      "realGames": 1,
       "fantasyStd": 10.04,
       "receptions": 0,
       "competitive": {
@@ -892,7 +910,7 @@
       }
     },
     "box": {
-      "games": 2,
+      "games": 1,
       "fumLost": 0,
       "passYards": 201,
       "passTd": 1,
@@ -934,6 +952,7 @@
       "cpoe": -2.776,
       "successRate": 0.443,
       "plays": 654,
+      "realGames": 16,
       "fantasyStd": 271.28,
       "receptions": 0,
       "competitive": {
@@ -985,6 +1004,7 @@
       "cpoe": 2.049,
       "successRate": 0.478,
       "plays": 709,
+      "realGames": 15,
       "fantasyStd": 304.2,
       "receptions": 0,
       "competitive": {
@@ -1033,6 +1053,7 @@
       "cpoe": 0.29,
       "successRate": 0.481,
       "plays": 108,
+      "realGames": 2,
       "fantasyStd": 38.84,
       "receptions": 0,
       "competitive": {
@@ -1042,7 +1063,7 @@
       }
     },
     "box": {
-      "games": 7,
+      "games": 2,
       "fumLost": 1,
       "passYards": 561,
       "passTd": 3,
@@ -1084,6 +1105,7 @@
       "cpoe": -1.253,
       "successRate": 0.467,
       "plays": 702,
+      "realGames": 16,
       "fantasyStd": 287.38,
       "receptions": 0,
       "competitive": {
@@ -1131,6 +1153,7 @@
       "cpoe": 2.304,
       "successRate": 0.571,
       "plays": 49,
+      "realGames": 1,
       "fantasyStd": 20,
       "receptions": 0,
       "competitive": {
@@ -1182,6 +1205,7 @@
       "cpoe": -0.021,
       "successRate": 0.476,
       "plays": 654,
+      "realGames": 16,
       "fantasyStd": 274.98,
       "receptions": 0,
       "competitive": {
@@ -1233,6 +1257,7 @@
       "cpoe": 2.276,
       "successRate": 0.478,
       "plays": 571,
+      "realGames": 15,
       "fantasyStd": 226.46,
       "receptions": 0,
       "competitive": {
@@ -1284,6 +1309,7 @@
       "cpoe": -4.281,
       "successRate": 0.315,
       "plays": 146,
+      "realGames": 4,
       "fantasyStd": 33.16,
       "receptions": 0,
       "competitive": {
@@ -1335,6 +1361,7 @@
       "cpoe": -0.194,
       "successRate": 0.466,
       "plays": 466,
+      "realGames": 10,
       "fantasyStd": 161.94,
       "receptions": 0,
       "competitive": {
@@ -1386,6 +1413,7 @@
       "cpoe": -2.557,
       "successRate": 0.411,
       "plays": 285,
+      "realGames": 7,
       "fantasyStd": 95,
       "receptions": 0,
       "competitive": {
@@ -1395,7 +1423,7 @@
       }
     },
     "box": {
-      "games": 9,
+      "games": 7,
       "fumLost": 3,
       "passYards": 1500,
       "passTd": 7,
@@ -1433,6 +1461,7 @@
       "cpoe": -11.271,
       "successRate": 0.441,
       "plays": 34,
+      "realGames": 1,
       "fantasyStd": 10.36,
       "receptions": 0,
       "competitive": {
@@ -1484,6 +1513,7 @@
       "cpoe": 0.74,
       "successRate": 0.471,
       "plays": 363,
+      "realGames": 8,
       "fantasyStd": 132.16,
       "receptions": 0,
       "competitive": {
@@ -1533,6 +1563,7 @@
       "cpoe": -3.181,
       "successRate": 0.465,
       "plays": 114,
+      "realGames": 3,
       "fantasyStd": 33.06,
       "receptions": 0,
       "competitive": {
@@ -1584,6 +1615,7 @@
       "cpoe": 5.722,
       "successRate": 0.493,
       "plays": 625,
+      "realGames": 16,
       "fantasyStd": 293.44,
       "receptions": 0,
       "competitive": {
@@ -1632,6 +1664,7 @@
       "cpoe": -2.634,
       "successRate": 0.443,
       "plays": 61,
+      "realGames": 2,
       "fantasyStd": 22.02,
       "receptions": 0,
       "competitive": {
@@ -1641,7 +1674,7 @@
       }
     },
     "box": {
-      "games": 7,
+      "games": 2,
       "fumLost": 1,
       "passYards": 513,
       "passTd": 3,
@@ -1679,6 +1712,7 @@
       "cpoe": 15.972,
       "successRate": 0.532,
       "plays": 47,
+      "realGames": 1,
       "fantasyStd": 11.4,
       "receptions": 0,
       "competitive": {
@@ -1688,7 +1722,7 @@
       }
     },
     "box": {
-      "games": 8,
+      "games": 1,
       "fumLost": 0,
       "passYards": 335,
       "passTd": 0,
@@ -1730,6 +1764,7 @@
       "cpoe": 0.785,
       "successRate": 0.466,
       "plays": 474,
+      "realGames": 12,
       "fantasyStd": 210.02,
       "receptions": 1,
       "competitive": {
@@ -1778,6 +1813,7 @@
       "cpoe": -3.798,
       "successRate": 0.421,
       "plays": 107,
+      "realGames": 3,
       "fantasyStd": 32.84,
       "receptions": 0,
       "competitive": {
@@ -1787,7 +1823,7 @@
       }
     },
     "box": {
-      "games": 4,
+      "games": 3,
       "fumLost": 1,
       "passYards": 616,
       "passTd": 4,
@@ -1829,6 +1865,7 @@
       "cpoe": -4.556,
       "successRate": 0.435,
       "plays": 248,
+      "realGames": 7,
       "fantasyStd": 66.84,
       "receptions": 0,
       "competitive": {
@@ -1838,7 +1875,7 @@
       }
     },
     "box": {
-      "games": 10,
+      "games": 7,
       "fumLost": 0,
       "passYards": 1276,
       "passTd": 5,
@@ -1880,6 +1917,7 @@
       "cpoe": -2.263,
       "successRate": 0.466,
       "plays": 298,
+      "realGames": 8,
       "fantasyStd": 91.1,
       "receptions": 0,
       "competitive": {
@@ -1927,6 +1965,7 @@
       "cpoe": 0.625,
       "successRate": 0.429,
       "plays": 35,
+      "realGames": 1,
       "fantasyStd": 9.68,
       "receptions": 0,
       "competitive": {
@@ -1936,7 +1975,7 @@
       }
     },
     "box": {
-      "games": 2,
+      "games": 1,
       "fumLost": 1,
       "passYards": 142,
       "passTd": 2,
@@ -1978,6 +2017,7 @@
       "cpoe": 0.164,
       "successRate": 0.513,
       "plays": 709,
+      "realGames": 16,
       "fantasyStd": 233.94,
       "receptions": 0,
       "competitive": {
@@ -2026,6 +2066,7 @@
       "cpoe": 1.276,
       "successRate": 0.444,
       "plays": 90,
+      "realGames": 2,
       "fantasyStd": 26.6,
       "receptions": 0,
       "competitive": {
@@ -2077,6 +2118,7 @@
       "cpoe": 0.555,
       "successRate": 0.492,
       "plays": 699,
+      "realGames": 16,
       "fantasyStd": 289.78,
       "receptions": 1,
       "competitive": {
@@ -2125,6 +2167,7 @@
       "cpoe": -0.058,
       "successRate": 0.337,
       "plays": 92,
+      "realGames": 3,
       "fantasyStd": 30.74,
       "receptions": 0,
       "competitive": {
@@ -2134,7 +2177,7 @@
       }
     },
     "box": {
-      "games": 5,
+      "games": 3,
       "fumLost": 0,
       "passYards": 371,
       "passTd": 2,
@@ -2176,6 +2219,7 @@
       "cpoe": -6.911,
       "successRate": 0.361,
       "plays": 379,
+      "realGames": 11,
       "fantasyStd": 96.08,
       "receptions": 0,
       "competitive": {
@@ -2227,6 +2271,7 @@
       "cpoe": -2.389,
       "successRate": 0.414,
       "plays": 365,
+      "realGames": 10,
       "fantasyStd": 91.36,
       "receptions": 0,
       "competitive": {
@@ -2278,6 +2323,7 @@
       "cpoe": 2.737,
       "successRate": 0.477,
       "plays": 767,
+      "realGames": 16,
       "fantasyStd": 284.48,
       "receptions": 0,
       "competitive": {
@@ -2329,6 +2375,7 @@
       "cpoe": 7.925,
       "successRate": 0.523,
       "plays": 637,
+      "realGames": 16,
       "fantasyStd": 336.26,
       "receptions": 0,
       "competitive": {
@@ -2380,6 +2427,7 @@
       "cpoe": -1.527,
       "successRate": 0.455,
       "plays": 651,
+      "realGames": 15,
       "fantasyStd": 285.2,
       "receptions": 0,
       "competitive": {
@@ -2389,7 +2437,7 @@
       }
     },
     "box": {
-      "games": 16,
+      "games": 15,
       "fumLost": 2,
       "passYards": 3905,
       "passTd": 31,
@@ -2431,6 +2479,7 @@
       "cpoe": -7.211,
       "successRate": 0.428,
       "plays": 264,
+      "realGames": 7,
       "fantasyStd": 70.94,
       "receptions": 0,
       "competitive": {
@@ -2440,7 +2489,7 @@
       }
     },
     "box": {
-      "games": 8,
+      "games": 7,
       "fumLost": 0,
       "passYards": 1336,
       "passTd": 5,
@@ -2482,6 +2531,7 @@
       "cpoe": 0.918,
       "successRate": 0.426,
       "plays": 695,
+      "realGames": 16,
       "fantasyStd": 257.32,
       "receptions": 1,
       "competitive": {
@@ -2533,6 +2583,7 @@
       "cpoe": -0.263,
       "successRate": 0.448,
       "plays": 614,
+      "realGames": 14,
       "fantasyStd": 194.9,
       "receptions": 0,
       "competitive": {
@@ -2580,6 +2631,7 @@
       "cpoe": -10.849,
       "successRate": 0.406,
       "plays": 69,
+      "realGames": 3,
       "fantasyStd": 22.8,
       "receptions": 0,
       "competitive": {
@@ -2589,7 +2641,7 @@
       }
     },
     "box": {
-      "games": 4,
+      "games": 3,
       "fumLost": 1,
       "passYards": 370,
       "passTd": 3,
@@ -2631,6 +2683,7 @@
       "cpoe": 3.264,
       "successRate": 0.429,
       "plays": 555,
+      "realGames": 16,
       "fantasyStd": 200.44,
       "receptions": 0,
       "competitive": {
@@ -2682,6 +2735,7 @@
       "cpoe": -0.093,
       "successRate": 0.473,
       "plays": 727,
+      "realGames": 16,
       "fantasyStd": 343.7,
       "receptions": 1,
       "competitive": {
@@ -2732,6 +2786,7 @@
       "cpoe": 2.909,
       "successRate": 0.504,
       "plays": 137,
+      "realGames": 4,
       "fantasyStd": 40.66,
       "receptions": 0,
       "competitive": {
@@ -2783,6 +2838,7 @@
       "cpoe": 3.023,
       "successRate": 0.428,
       "plays": 544,
+      "realGames": 14,
       "fantasyStd": 270.6,
       "receptions": 1,
       "competitive": {
@@ -2833,6 +2889,7 @@
       "cpoe": -2.444,
       "successRate": 0.407,
       "plays": 189,
+      "realGames": 5,
       "fantasyStd": 42.2,
       "receptions": 0,
       "competitive": {
@@ -2842,7 +2899,7 @@
       }
     },
     "box": {
-      "games": 7,
+      "games": 5,
       "fumLost": 2,
       "passYards": 935,
       "passTd": 4,

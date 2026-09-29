@@ -256,6 +256,11 @@ async function loadNflverse() {
 // Returns a Map of ESPN id -> { epaPerPlay, cpoe, successRate, plays, fantasyStd, receptions }
 // Also pressure-to-sack rate and bad-throw rate (Pro Football Reference via nflverse), and
 // time to throw, aDOT and aggressiveness (Next Gen Stats)
+// A QB's games played, for per-game stats, the 17-game pace and sample size: his starts, plus any
+// relief appearance with real snaps (at least this many dropbacks and runs). ESPN counts a
+// five-snap cameo as a full game, which would halve a one-start QB's per-game numbers.
+const QB_GAME_PLAYS = 10;
+
 function advancedStats(espnIds, { pbp, playerStats, gsisByEspn, pfrByGsis, ngs, pfr }) {
   const plays = pbp.filter((play) => play.season_type === 'REG' && (play.pass === '1' || play.rush === '1'));
   const seasonRows = new Map(playerStats.map((row) => [row.player_id, row]));
@@ -279,6 +284,10 @@ function advancedStats(espnIds, { pbp, playerStats, gsisByEspn, pfrByGsis, ngs, 
       cpoe: mean(cpoe.filter((v) => v !== null)),
       successRate: mean(own.map((play) => num(play.success)).filter((v) => v !== null)),
       plays: own.length,
+      // Games he really played QB in: at least QB_GAME_PLAYS dropbacks and runs (see qbGamesPlayed)
+      realGames: new Set(
+        [...Map.groupBy(own, (play) => play.game_id)].filter(([, list]) => list.length >= QB_GAME_PLAYS).map(([id]) => id)
+      ).size,
       fantasyStd: round(num(seasonRows.get(gsisId)?.fantasy_points) ?? 0, 2),
       receptions: num(seasonRows.get(gsisId)?.receptions) ?? 0,
     });
@@ -1318,6 +1327,11 @@ async function main() {
   const boxes = await mapBatched(gameData, 8, (qb) => qbBoxStats(qb.id).catch(() => undefined));
   gameData.forEach((qb, i) => {
     qb.box = boxes[i] === undefined ? (previous.find((p) => p.id === qb.id)?.box ?? null) : boxes[i];
+    // Games played: starts plus real relief appearances, not ESPN's every-snap count (see QB_GAME_PLAYS)
+    const realGames = qb.advanced?.realGames;
+    if (qb.box && realGames !== undefined) {
+      qb.box.games = Math.max(qb.wins + qb.losses + qb.ties, realGames);
+    }
   });
   const noBox = gameData.filter((qb) => !qb.box).map((qb) => qb.name);
   if (noBox.length) console.warn(`No ESPN box stats for: ${noBox.join(', ')}`);

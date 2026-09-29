@@ -1318,28 +1318,6 @@
   }
 }
 
-// Season and presets dropdowns share one row, the width of the cards below: the year takes a narrow
-// box, the presets the rest (the row carries the spacing the dropdowns had on their own)
-.sidebar .filters .dropdown-row {
-  display: flex;
-  gap: 0.6em;
-  margin: 1.4em 0 2.6em;
-
-  .mat-mdc-select {
-    margin: 0;
-    width: auto;
-  }
-
-  .mat-mdc-select.season-select {
-    flex: 0 0 30%;
-  }
-
-  .mat-mdc-select:not(.season-select) {
-    flex: 1 1 auto;
-    min-width: 0;
-  }
-}
-
 // The X that closes the filters: top right, level with the logo, white (yellow on hover) like the
 // About panel's
 .sidebar .logo {
@@ -1375,4 +1353,10 @@
     color: var(--scoreboard-led);
     outline: none;
   }
+}
+
+// The presets dropdown on its own again: a little more room above it, a little less below
+.sidebar .filters > div > .mat-mdc-select {
+  margin-bottom: 2.1em;
+  margin-top: 1.9em;
 }

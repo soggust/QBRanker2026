@@ -187,6 +187,22 @@
       ></mat-icon>
     </button>
 
+    <!-- Year: another season's stats with the same sliders -->
+    <mat-select
+      class="season-select"
+      aria-label="Season"
+      title="Season: rank any year's players with the same sliders"
+      [value]="season"
+      [disabled]="seasonLoading"
+      (valueChange)="selectSeason($event)"
+    >
+      <!-- "2026 SEASON", or just the year on narrow screens -->
+      <mat-select-trigger>{{ season }}<span class="season-word"> SEASON</span></mat-select-trigger>
+      @for (year of seasons; track year) {
+        <mat-option [value]="year">{{ year }}</mat-option>
+      }
+    </mat-select>
+
     <!-- About / FAQ -->
     <button
       (click)="openAbout()"
@@ -233,18 +249,13 @@
       <div
         mat-menu-item
         class="min-games-item"
-        [class.off]="minGamesOff"
-        [title]="
-          minGamesOff
-            ? 'Min Games is disabled for current season'
-            : 'Leave out players with fewer games than this (player tabs only)'
-        "
+        title="Leave out players with fewer games than this (player tabs only; tops out at the most games any team has played that season)"
         (click)="$event.stopPropagation()"
       >
         <span class="min-games-stepper" (click)="$event.stopPropagation()">
-          <button type="button" aria-label="Fewer games" [disabled]="minGamesOff || minGames <= 1" (click)="stepMinGames(-1)">−</button>
+          <button type="button" aria-label="Fewer games" [disabled]="minGames <= 1" (click)="stepMinGames(-1)">−</button>
           <span class="min-games-value">{{ minGames }}</span>
-          <button type="button" aria-label="More games" [disabled]="minGamesOff || minGames >= seasonGames" (click)="stepMinGames(1)">+</button>
+          <button type="button" aria-label="More games" [disabled]="minGames >= seasonGames" (click)="stepMinGames(1)">+</button>
         </span>
         <span>Min Games</span>
       </div>

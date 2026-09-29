@@ -161,8 +161,8 @@ export class PositionService {
   private unitOrdersSubject = new BehaviorSubject<Partial<Record<SkillPosition, UnitOrder>>>({});
 
   // The filters menu: open or closed, set by the footer's filter button and the menu's X. On large
-  // screens it's the sidebar (open at each page load); below 1200px a slide-out menu (closed at load).
-  private filtersOpenSubject = new BehaviorSubject<boolean>(!window.matchMedia('(max-width: 1199px)').matches);
+  // screens it's the sidebar, below 1200px a slide-out menu; closed at each page load either way.
+  private filtersOpenSubject = new BehaviorSubject<boolean>(false);
   public filtersOpen$ = this.filtersOpenSubject.asObservable();
 
   get filtersOpen(): boolean {

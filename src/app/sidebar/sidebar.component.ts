@@ -2,7 +2,6 @@ import { Component } from '@angular/core';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { SKILL_PRESETS, SkillPresetDef } from 'app/skill-presets';
 import { PositionService } from '../services/position.service';
-import { CURRENT_SEASON, SEASONS } from 'StaticData/data';
 import { statIsEmpty } from 'app/utils/unit-scoring';
 
 import {
@@ -55,24 +54,13 @@ export class SidebarComponent {
     SkillPreset | 'custom' | null
   >;
 
-  // The year selector: every season we have, newest first
-  readonly seasons = SEASONS;
-  season = CURRENT_SEASON;
-  seasonLoading = false;
-
   constructor(private positionService: PositionService) {}
 
   closeFilters(): void {
     this.positionService.setFiltersOpen(false);
   }
 
-  selectSeason(season: number): void {
-    this.positionService.setSeason(season);
-  }
-
   ngOnInit(): void {
-    this.positionService.season$.subscribe((season) => (this.season = season));
-    this.positionService.seasonLoading$.subscribe((loading) => (this.seasonLoading = loading));
 
     this.positionService.skillHidden$.subscribe((hidden) => {
       this.skillHidden = hidden[this.position] ?? {};
