@@ -39,7 +39,7 @@
           </p>
           <div class="callout">
             <strong>New here?</strong> Pick a tab up top, then try a preset from the dropdown at the top of the
-            filter menu (the <b>filter</b> button, bottom left, opens and closes it). Each preset ranks around a
+            filter menu (the <b>filter</b> button above the list, on the left, opens and closes it). Each preset ranks around a
             different idea of "best". Then drag a few sliders and watch the list move.
           </div>
           <h4>Quick start</h4>
@@ -50,14 +50,14 @@
               every slider back at 50%.
             </li>
             <li>
-              The <b>season</b> dropdown beside the presets ranks any year from 2000 on with the same sliders, so
+              The <b>season</b> dropdown above the list ranks any year from 2000 on with the same sliders, so
               you can see how your formula grades another season.
             </li>
             <li><b>Drag rows</b> to rank by hand. Your order sticks until that tab's sliders change.</li>
             <li><b>Hover</b> any column label for the full stat name and the league average.</li>
             <li>
-              In the footer: <b>filter</b> opens the filter menu, <b>copy</b> copies your list, <b>info</b> opens
-              this panel and the <b>gear</b> has the settings.
+              In the bar above the list: <b>filter</b> opens the filter menu, <b>copy</b> copies your list,
+              <b>info</b> opens this panel and the <b>gear</b> has the settings.
             </li>
             <li>
               <b>Badges</b> under a name mark that season's honors: the Super Bowl, conference titles, MVP and the
@@ -133,12 +133,32 @@
             card's eye or by setting the sliders to 0%.
           </p>
           <p>
-            The exception is the QB page's <b>Responsibility</b> grade: how much the offense runs through the
-            QB (his share of the team's plays and yards, in the games he led). Carrying the offense counts
-            <em>for</em> him.
+            The exception is the QB page's <b class="grade-name">Responsibility</b> grade: how much the offense
+            runs through the QB. Carrying the offense counts <em>for</em> him.
           </p>
+          <h4>How <span class="grade-name">Responsibility</span> is worked out</h4>
+          <ol>
+            <li>Only the games he led count: those where he had the most dropbacks for his team.</li>
+            <li>
+              <b>Play share:</b> his dropbacks (passes, sacks, scrambles) and designed runs, out of all his team's
+              offensive plays in those games. Kneel-downs and spikes are left out.
+            </li>
+            <li><b>Yard share:</b> his passing plus rushing yards, out of all his team's yards in those games.</li>
+            <li>
+              Each share is compared across all the QBs (how far above or below the average he is), the two count
+              equally, and the QBs are ranked on the result: the top one an A+, the bottom one an F.
+            </li>
+            <li>
+              Early in the season that's blended with a preseason grade, leaning on the season more with every
+              game (see below), then curved again so the grades always run the full A+ to F.
+            </li>
+            <li>
+              In the ranking it counts at the same light strength as the other support grades, but in the QB's
+              favor. Its slider sets how much.
+            </li>
+          </ol>
           <h4>The tabs grade each other</h4>
-          <ul>
+          <ul class="tab-grades">
             <li><b>QB Play</b> comes from the QB tab, weighted by each QB's starts for the team.</li>
             <li><b>RB Play</b> comes from the RB tab, weighted by each back's carries.</li>
             <li>
@@ -172,7 +192,6 @@
             <li><mat-icon fontIcon="palette"></mat-icon><span><b>Color-coded values</b> are green above the league average and red below it. Counting stats compare per game, so missed games don't turn a good player red. Hover a column label for the average of what the column shows.</span></li>
             <li><mat-icon fontIcon="emoji_events"></mat-icon><span><b>Rank tiles:</b> a trophy for #1, green through 10, white in the middle and red for the bottom 10.</span></li>
             <li><mat-icon fontIcon="content_copy"></mat-icon><span><b>Copy</b> puts your whole ranked list on the clipboard, ready to paste into a group chat.</span></li>
-            <li><mat-icon fontIcon="link"></mat-icon><span><b>Share a tab</b> by copying the address bar. The link opens straight to that tab and season (e.g. <code>?pos=WR&amp;season=2019</code>).</span></li>
             <li><mat-icon fontIcon="healing"></mat-icon><span>The <b>bandage</b> marks players ESPN lists as Out, Doubtful or on IR (in a past season, those who finished it on IR). Hide them with <b>Injured Players</b> in the settings.</span></li>
             <li><mat-icon fontIcon="hourglass_bottom"></mat-icon><span>Turn off <b>Garbage Time Stats</b> to leave out plays run once the game was decided (win probability under 10% or over 90%). Stats padded in blowouts shrink.</span></li>
             <li><mat-icon fontIcon="leaderboard"></mat-icon><span><b>Unit Ranks</b> in the settings sets what the head coaches' Off and Def Rank columns rank on: points or yards per game.</span></li>
@@ -198,9 +217,9 @@
           <details>
             <summary>How do past seasons work?</summary>
             <p>
-              Pick a year from the season dropdown at the top of the filter menu. Your sliders, eyes and column
+              Pick a year from the season dropdown above the list. Your sliders, eyes and column
               order stay as they are; the list re-ranks with that year's stats. Each season keeps its own
-              hand-dragged order while the page is open, and the address updates so you can share the year. A
+              hand-dragged order while the page is open. A
               finished season uses its full-season results for every grade (no preseason blend), and the
               bandage marks players who finished it on injured reserve. Stats that weren't tracked yet that
               year are left out, columns and sliders both: tracking stats like separation and time to throw
@@ -234,6 +253,22 @@
             <p>
               It's credit for doing more with less (see Grades &amp; Support). It's a small effect and you can
               switch it off with the Support card's eye.
+            </p>
+          </details>
+          <details>
+            <summary>What is the QB's Responsibility grade?</summary>
+            <p>
+              How much of the offense runs through the QB. In each game he led (the most dropbacks for his team),
+              it measures his share of the team's plays (his dropbacks, scrambles and designed runs, leaving out
+              kneels and spikes) and his share of the team's yards, passing plus rushing. Those two are combined
+              and compared across all the QBs, blended with a preseason grade early in the year (the season takes
+              over as games are played), and curved: the QB who carries his offense the most is an A+, the one
+              most carried by it an F.
+            </p>
+            <p>
+              Unlike the other support grades, it counts <em>for</em> the QB (carrying the offense is to his
+              credit), at the same light strength as the rest. Turn its slider up or down, or to 0% to leave it
+              out.
             </p>
           </details>
           <details>

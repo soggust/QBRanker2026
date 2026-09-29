@@ -192,7 +192,8 @@ nav {
     margin: 0 0 12px;
   }
 
-  ul {
+  ul,
+  ol {
     margin: 0 0 12px;
     padding-left: 20px;
   }
@@ -420,4 +421,10 @@ details {
 ::-webkit-scrollbar {
   height: 10px;
   width: 10px;
+}
+
+// Grade names in goalpost yellow ("The tabs grade each other" and Responsibility above it)
+.about-body .tab-grades b,
+.about-body .grade-name {
+  color: var(--scoreboard-led);
 }
