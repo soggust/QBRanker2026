@@ -108,6 +108,15 @@ export class SkillRankingsComponent implements OnChanges {
     this.positionService.updateSettings({ showInjured: value });
   }
 
+  // Footer filter button: opens / closes the filters menu
+  get filtersOpen(): boolean {
+    return this.positionService.filtersOpen;
+  }
+
+  toggleFilters() {
+    this.positionService.setFiltersOpen(!this.filtersOpen);
+  }
+
   // Min Games (settings menu): players with fewer games are left out. Only for a finished season: the
   // one in progress is off (shown as 1), since everyone's still a few games in. Tops out at that
   // season's length (16 games through 2020, 17 since).

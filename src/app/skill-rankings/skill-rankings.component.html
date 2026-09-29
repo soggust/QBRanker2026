@@ -178,6 +178,19 @@
       <a href="https://github.com/nflverse" target="_blank" rel="noopener" title="nflverse"><img src="assets/nflverse-logo.png" alt="nflverse logo" class="nflverse-logo" /></a>
     </p>
 
+    <!-- Filters menu (the menu's X closes it) -->
+    <button
+      (click)="toggleFilters()"
+      aria-label="Filters"
+      [attr.aria-expanded]="filtersOpen"
+      [title]="filtersOpen ? 'Hide filters' : 'Show filters'"
+      class="filter-toggle"
+      [class.open]="filtersOpen"
+    >
+      <!-- A crossed-out filter (in yellow) while the menu is open -->
+      <mat-icon aria-hidden="true" [fontIcon]="filtersOpen ? 'filter_alt_off' : 'filter_alt'"></mat-icon>
+    </button>
+
     <!-- Clipboard -->
     <button
       (click)="copyPlayerListToClipboard()"

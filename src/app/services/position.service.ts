@@ -171,6 +171,19 @@ export class PositionService {
   // that tab's own sliders or settings re-sort it.
   private unitOrdersSubject = new BehaviorSubject<Partial<Record<SkillPosition, UnitOrder>>>({});
 
+  // The filters menu: open or closed, set by the footer's filter button and the menu's X. On large
+  // screens it's the sidebar (open at each page load); below 1200px a slide-out menu (closed at load).
+  private filtersOpenSubject = new BehaviorSubject<boolean>(!window.matchMedia('(max-width: 1199px)').matches);
+  public filtersOpen$ = this.filtersOpenSubject.asObservable();
+
+  get filtersOpen(): boolean {
+    return this.filtersOpenSubject.value;
+  }
+
+  setFiltersOpen(open: boolean): void {
+    this.filtersOpenSubject.next(open);
+  }
+
   // The season on screen (the year selector). Sliders, eyes and column orders carry over to another
   // season; each season keeps its own tab orders (drags included) while the page is open.
   private seasonSubject = new BehaviorSubject<number>(dataSeason);

@@ -1339,3 +1339,40 @@
     min-width: 0;
   }
 }
+
+// The X that closes the filters: top right, level with the logo, white (yellow on hover) like the
+// About panel's
+.sidebar .logo {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+}
+
+.sidebar .filters-close {
+  align-items: center;
+  background: none;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  display: inline-flex;
+  flex: 0 0 auto;
+  height: 28px;
+  justify-content: center;
+  padding: 0;
+  width: 28px;
+
+  // (the icon takes the button's color, not the sidebar's yellow icon color)
+  .mat-icon {
+    color: inherit !important;
+    font-size: 20px;
+    height: 20px;
+    width: 20px;
+  }
+
+  // Yellow on hover / keyboard focus, like the About panel's X
+  &:hover,
+  &:focus-visible {
+    color: var(--scoreboard-led);
+    outline: none;
+  }
+}

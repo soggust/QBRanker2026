@@ -62,6 +62,10 @@ export class SidebarComponent {
 
   constructor(private positionService: PositionService) {}
 
+  closeFilters(): void {
+    this.positionService.setFiltersOpen(false);
+  }
+
   selectSeason(season: number): void {
     this.positionService.setSeason(season);
   }

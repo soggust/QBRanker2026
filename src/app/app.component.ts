@@ -9,7 +9,6 @@ import { POSITIONS, Position } from './positions';
     standalone: false
 })
 export class AppComponent {
-  menuOpen: boolean = false;
   position$ = this.positionService.position$;
   aboutOpen$ = this.positionService.aboutOpen$;
   positions = POSITIONS;
@@ -25,30 +24,26 @@ export class AppComponent {
     HC: 'Head Coaches',
   };
 
-  // The filter menu always starts open on large screens; the drawer tab hides it for this visit
-  sidebarCollapsed: boolean = false;
-
-  // Below 1200px the filters are a slide-out menu (menuOpen); above, a sidebar that collapses
+  // Below 1200px the filters are a slide-out menu (menu-open); above, a sidebar that collapses. Both
+  // follow the one open / closed state (the footer's filter button and the menu's X).
   private readonly smallScreen = window.matchMedia('(max-width: 1199px)');
 
   constructor(private positionService: PositionService) {}
 
-  // The drawer tab opens / closes whichever the filters are on this screen size
-  get drawerOpen(): boolean {
-    return this.smallScreen.matches ? this.menuOpen : !this.sidebarCollapsed;
+  get menuOpen(): boolean {
+    return this.smallScreen.matches && this.positionService.filtersOpen;
   }
 
-  toggleDrawer() {
-    if (this.smallScreen.matches) this.menuOpen = !this.menuOpen;
-    else this.toggleSidebar();
+  get sidebarCollapsed(): boolean {
+    return !this.smallScreen.matches && !this.positionService.filtersOpen;
+  }
+
+  closeFilters() {
+    this.positionService.setFiltersOpen(false);
   }
 
   selectPosition(position: Position) {
     this.positionService.setPosition(position);
-  }
-
-  toggleSidebar() {
-    this.sidebarCollapsed = !this.sidebarCollapsed;
   }
 
   closeAbout() {

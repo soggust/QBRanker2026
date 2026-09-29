@@ -1,20 +1,9 @@
 <main [class.menu-open]="menuOpen" [class.sidebar-collapsed]="sidebarCollapsed">
-  <!-- Sidebar, with a pull tab on its right edge that slides it in and out (on small screens the
-       tab sits at the bottom of the left edge and rides along with the slide-out menu) -->
+  <!-- Filters menu: opened by the footer's filter button, closed by its X (or the shade on small screens) -->
   <div class="sidebar-shell">
     <sidebar class="sidebar"></sidebar>
-    <button
-      type="button"
-      class="drawer-tab"
-      (click)="toggleDrawer()"
-      [attr.aria-expanded]="drawerOpen"
-      [attr.aria-label]="drawerOpen ? 'Hide filters' : 'Show filters'"
-      [title]="drawerOpen ? 'Hide filters' : 'Show filters'"
-    >
-      <mat-icon [fontIcon]="drawerOpen ? 'close' : 'filter_alt'"></mat-icon>
-    </button>
   </div>
-  <div class="shade" (click)="menuOpen = false"></div>
+  <div class="shade" (click)="closeFilters()"></div>
 
   @let position = position$ | async;
   <div class="content">

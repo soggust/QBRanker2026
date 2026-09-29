@@ -1623,30 +1623,6 @@ section ul li.player.header-row div .stat-label:hover {
   font-size: 11px;
 }
 
-// Footer: settings on the far left with copy and info right after it, credits pushed to the right
-section footer {
-  .settings-toggle {
-    order: -2;
-  }
-
-  .copy-toggle,
-  .info-toggle {
-    margin-left: 1em;
-    margin-right: 0;
-    order: -1;
-  }
-
-  p.small {
-    margin-left: auto;
-  }
-}
-
-// Small screens (no credits line): the two buttons sit centered
-@media (max-width: 1199px) {
-  section footer {
-    justify-content: center;
-  }
-}
 
 // Names and values lift off the leather a touch more: a tight dark edge plus a soft halo
 section ul li.player:not(.header-row) .player-name strong,
@@ -1669,13 +1645,6 @@ section ul li.player:not(.header-row) > .col-group > div:not(.box) > p:not(.stat
   }
 }
 
-// Small screens: a bit more room between the two centered buttons
-@media (max-width: 1199px) {
-  section footer .copy-toggle,
-  section footer .info-toggle {
-    margin-left: 2em;
-  }
-}
 
 // League ranks (#7, #7 (t) for ties): the "#" and tie mark are small and dimmed so the number reads first
 section ul li.player .rank-value {
@@ -1858,6 +1827,7 @@ section ul li.player.cdk-drag-preview:hover {
 // Experiment: leather footer buttons. Settings, copy and info become solid leather tiles (the rows'
 // texture and sheen) with their white icons on top, instead of bare outline icons.
 // ===========================================================================
+section footer .filter-toggle,
 section footer .settings-toggle,
 section footer .copy-toggle,
 section footer .info-toggle {
@@ -2119,4 +2089,65 @@ section ul li.player .player-name .player-awards {
   section ul li.player .player-awards .lombardi.award-trophy {
     animation: none;
   }
+}
+
+// Footer row, every screen size: [filters] [copy] on the left, [info] [settings] on the right, and
+// the credits centered between them while there's room (they drop out as soon as the row gets tight)
+section footer {
+  container-type: inline-size;
+  gap: 10px;
+  justify-content: flex-start;
+
+  .ghost-div,
+  .sports-football,
+  h1 {
+    display: none !important;
+  }
+
+  .filter-toggle,
+  .copy-toggle,
+  .info-toggle,
+  .settings-toggle {
+    flex: 0 0 auto;
+    margin: 0 !important;
+  }
+
+  .filter-toggle {
+    order: 1;
+  }
+
+  .copy-toggle {
+    order: 2;
+  }
+
+  p.small {
+    align-items: center;
+    display: flex;
+    flex: 1 1 auto;
+    justify-content: center;
+    margin: 0;
+    min-width: 0;
+    order: 3;
+    white-space: nowrap;
+  }
+
+  .info-toggle {
+    margin-left: auto !important;
+    order: 4;
+  }
+
+  .settings-toggle {
+    order: 5;
+  }
+}
+
+@container (max-width: 520px) {
+  section footer p.small {
+    display: none;
+  }
+}
+
+// While the filters are open, the filter button's crossed-out icon is goalpost yellow
+section footer .filter-toggle.open .mat-icon {
+  color: var(--scoreboard-led);
 }

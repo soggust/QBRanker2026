@@ -4,6 +4,10 @@
       <!-- Same leather football as the slider thumbs, tilted like a logo -->
       <span class="logo-football" aria-hidden="true"></span>NFL Ranker
     </h1>
+    <!-- Close the filters (the footer's filter button opens them) -->
+    <button type="button" class="filters-close" aria-label="Close filters" title="Close filters" (click)="closeFilters()">
+      <mat-icon fontIcon="close"></mat-icon>
+    </button>
   </div>
 
   <!-- Filters: the same cards and sliders on every tab (positions.ts) -->

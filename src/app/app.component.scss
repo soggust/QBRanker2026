@@ -40,9 +40,7 @@ main {
       margin-left: -26em;
     }
 
-    // Room on the left for the pull tab
     .content {
-      padding-left: 3em;
       width: 100%;
     }
   }
@@ -285,45 +283,8 @@ main .content {
   transition: width 0.25s ease;
 }
 
-// The tab hangs off the sidebar's right edge, near the top, in the scoreboard style
-main .drawer-tab {
-  align-items: center;
-  background: var(--scoreboard-dots), var(--scoreboard);
-  border: 1px solid #3a3a3a;
-  border-left: none;
-  border-radius: 0 10px 10px 0;
-  box-shadow: 3px 2px 8px rgba(0, 0, 0, 0.35);
-  cursor: pointer;
-  display: flex;
-  height: 3.4em;
-  justify-content: center;
-  left: 100%;
-  padding: 0;
-  position: absolute;
-  top: 1.1em;
-  width: 2em;
-
-  .mat-icon {
-    color: var(--scoreboard-led);
-    font-size: 1.5em;
-    height: 1em;
-    width: 1em;
-  }
-
-  &:hover {
-    background: var(--scoreboard-dots), #1d1d1d;
-
-    .mat-icon {
-      color: #fff;
-    }
-  }
-}
-
 // Small screens use the slide-out menu and the filter button instead
 @media (max-width: 1199px) {
-  main .drawer-tab {
-    display: none;
-  }
 
   main.sidebar-collapsed .sidebar-shell {
     margin-left: 0;
@@ -336,53 +297,6 @@ main .drawer-tab {
   }
 }
 
-// The tab lines up with the menu's logo header: flush to the top, same 64px height
-main .drawer-tab {
-  border-radius: 0 0 10px 0;
-  border-top: none;
-  box-sizing: border-box;
-  height: 64px;
-  top: 0;
-}
-
-// A touch wider when it's the only piece showing
-main.sidebar-collapsed .drawer-tab {
-  width: 2.25em;
-}
-
-// Start the tab where the menu body begins (just under the 64px logo header), all corners on the right rounded
-main .drawer-tab {
-  border-radius: 0 10px 10px 0;
-  border-top: 1px solid #3a3a3a;
-  top: 64px;
-}
-
-// Seamless tab: no border, it overlaps the menu's 3px right border, and its LED dot pattern
-// lines up with the menu's (both pinned to the viewport)
-main .drawer-tab {
-  background: var(--scoreboard-dots), var(--scoreboard);
-  background-attachment: fixed;
-  border: none;
-  left: calc(100% - 3px);
-  top: calc(62px - 0.25em);
-  width: calc(2em + 3px);
-}
-
-main.sidebar-collapsed .drawer-tab {
-  width: calc(2.25em + 3px);
-}
-
-// Tab sits 4.5em down the menu's right edge (both right corners rounded)
-main .drawer-tab {
-  border-radius: 0 10px 10px 0;
-  top: calc(4.5em - 1px);
-}
-
-// The X (menu open) is a bit smaller than the filter icon
-main:not(.sidebar-collapsed) .drawer-tab .mat-icon {
-  font-size: 1.2em;
-}
-
 // Inactive position pills are lighter weight so the active one stands out
 .position-bar button:not(.active):not(.collapse-toggle) {
   font-weight: 500;
@@ -393,36 +307,12 @@ main:not(.sidebar-collapsed) .drawer-tab .mat-icon {
   border: none;
 }
 
-// The X on the drawer tab is white (the collapsed filter icon stays yellow)
-main:not(.sidebar-collapsed) .drawer-tab .mat-icon {
-  color: #fff;
-}
-
 // Yellow on hover: unselected pills and the drawer X
 .position-bar button:not(.active):not(.collapse-toggle):hover {
   border-color: var(--scoreboard-led);
   color: var(--scoreboard-led);
 }
 
-main:not(.sidebar-collapsed) .drawer-tab:hover .mat-icon {
-  color: var(--scoreboard-led);
-}
-
-// Drawer tab icon is white in both states, yellow on hover
-main .drawer-tab .mat-icon {
-  color: #fff;
-}
-
-main .drawer-tab:hover .mat-icon {
-  color: var(--scoreboard-led);
-}
-
-// Large screens: room on the left for the drawer tab whether the menu is open or collapsed
-@media (min-width: 1200px) {
-  main .content {
-    padding-left: 3em;
-  }
-}
 
 // The active pill keeps the same lighter weight (its scoreboard font and color set it apart)
 .position-bar button.active:not(.collapse-toggle) {
@@ -472,37 +362,6 @@ main .drawer-tab:hover .mat-icon {
         text-shadow: none;
       }
     }
-  }
-}
-
-// Small screens: the same drawer tab opens the slide-out filters. It sits at the very bottom of the
-// left edge (down in the footer), and rides along the menu's right edge when the menu is open.
-@media (max-width: 1199px) {
-  main .drawer-tab {
-    bottom: 0.25em;
-    display: flex;
-    left: 0;
-    position: fixed;
-    top: auto;
-    transition: left 0.3s ease-out;
-    width: calc(3em + 3px);
-    z-index: 4;
-  }
-
-  // Overlaps the slide-out menu's 3px right border: the menu is min(100vw - 43px, max(26em, 50vw))
-  // wide at the sidebar's 13px font (26em = 338px), plus that border; 43px is this tab's width
-  main.menu-open .drawer-tab {
-    left: min(calc(100vw - 43px), max(338px, 50vw));
-    width: calc(3em + 3px);
-  }
-
-  // The X is a bit smaller and white, like the big-screen tab
-  main.menu-open .drawer-tab .mat-icon {
-    font-size: 1.2em;
-  }
-
-  main:not(.menu-open) .drawer-tab .mat-icon {
-    font-size: 1.5em;
   }
 }
 
@@ -566,13 +425,13 @@ main .drawer-tab:hover .mat-icon {
 
 // Desktop: the position tabs are a full-width eyebrow bar, flush to the top of the window and
 // running from the filter menu's edge (or the window's, when the menu is collapsed) to the right
-// edge: pulled out through the content area's padding (1em top, 2em right, 3em left)
+// edge: pulled out through the content area's padding (1em top, 2em on each side)
 @media (min-width: 1200px) {
   .position-bar {
     border-radius: 0;
     border-width: 0 0 1px;
     height: 50px;
-    margin: -1em -2em 12px -3em;
+    margin: -1em -2em 12px;
 
     button:not(.collapse-toggle) {
       font-size: 1em;
