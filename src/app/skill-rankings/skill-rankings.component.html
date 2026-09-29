@@ -18,7 +18,7 @@
               <mat-icon class="group-icon" [fontIcon]="group.icon" [title]="group.title"></mat-icon>
               @for (stat of group.stats; track stat.key) {
                 <div [columnDrag]="{ list: position + '.' + group.id, id: columnId(stat) }">
-                  <p class="stat-label" [title]="labelTitle(stat)">{{ statLabel(stat) }}</p>
+                  <p class="stat-label" [title]="labelTitle(stat)">{{ labelParts(stat)[0] }}@if (labelParts(stat)[1]; as tag) {<span class="label-tag">{{ ' ' + tag }}</span>}</p>
                 </div>
               }
             </div>
@@ -31,7 +31,7 @@
                   }
                   <div class="last-five">
                     <div></div>
-                    <p class="stat-label" [title]="labelTitle(stat)">{{ statLabel(stat) }}</p>
+                    <p class="stat-label" [title]="labelTitle(stat)">{{ labelParts(stat)[0] }}@if (labelParts(stat)[1]; as tag) {<span class="label-tag">{{ ' ' + tag }}</span>}</p>
                   </div>
                 </div>
               } @else {
@@ -39,7 +39,7 @@
                   @if (first) {
                     <mat-icon class="group-icon" [fontIcon]="group.icon" [title]="group.title"></mat-icon>
                   }
-                  <p class="stat-label" [title]="labelTitle(stat)">{{ statLabel(stat) }}</p>
+                  <p class="stat-label" [title]="labelTitle(stat)">{{ labelParts(stat)[0] }}@if (labelParts(stat)[1]; as tag) {<span class="label-tag">{{ ' ' + tag }}</span>}</p>
                 </div>
               }
             }
@@ -75,7 +75,7 @@
                 aria-label="Injury Icon"
                 fontIcon="healing"
                 class="injury-icon"
-                [title]="'This player is currently injured (' + player.injuryStatus + ')'"
+                [title]="injuryTitle(player)"
               ></mat-icon>
             }
             <!-- The season's awards: a Lombardi for the Super Bowl champion, a silver cup for both conference
@@ -230,43 +230,41 @@
 
     <!-- Menu -->
     <mat-menu #menu="matMenu" class="settings-menu">
-      <!-- Stats: what's counted, and how -->
-      <div class="menu-section section-stats" (click)="$event.stopPropagation()">Stats</div>
+      <!-- Format: how the stats are counted and shown -->
+      <div class="menu-section section-stats" (click)="$event.stopPropagation()">Format</div>
       <div mat-menu-item title="Click to switch the scoring behind Fantasy Pts: PPR, Half PPR or Standard (kickers and defenses keep their own fixed scoring)" (click)="$event.stopPropagation(); cycleFantasyScoring()">
         <span class="lombardi menu-icon" aria-hidden="true"></span>
-        <span>Fantasy Scoring: {{ scoringLabels[fantasyScoring] }}</span>
+        <span>Fantasy Scoring: <span class="menu-value">{{ scoringLabels[fantasyScoring] }}</span></span>
+      </div>
+      <div
+        mat-menu-item
+        title="Click to switch how counting stats (yards, touchdowns, sacks...) are shown and ranked: season totals, per game (fairer to anyone who missed games), or a 17-game pace (per game over a full 17-game season, whatever the player's games or the era's schedule)"
+        (click)="$event.stopPropagation(); cycleStatBasis()"
+      >
+        <mat-icon class="menu-icon unit-rank-icon" fontIcon="functions" aria-hidden="true"></mat-icon>
+        <span>Stat Totals: <span class="menu-value">{{ statBasisLabels[statBasis] }}</span></span>
       </div>
       <div mat-menu-item title="Click to switch what the head coaches' Off Rank and Def Rank columns rank on: points per game or yards per game (their EPA per play has its own columns in Advanced Stats)" (click)="$event.stopPropagation(); cycleRankBasis()">
         <mat-icon class="menu-icon unit-rank-icon" fontIcon="leaderboard" aria-hidden="true"></mat-icon>
-        <span>Unit Ranks: {{ rankBasisLabels[rankBasis] }}</span>
+        <span>Unit Ranks: <span class="menu-value">{{ rankBasisLabels[rankBasis] }}</span></span>
       </div>
       <div
         mat-menu-item
-        title="Off: EPA, success rate, CPOE and other play-by-play stats leave out plays run with the game already decided (win probability under 10% or over 90%). Season totals aren't affected"
-        (click)="$event.stopPropagation(); garbageTime = !garbageTime"
+        class="min-games-item"
+        [class.off]="minGamesOff"
+        [title]="
+          minGamesOff
+            ? 'Min Games is disabled for current season'
+            : 'Leave out players with fewer games than this (player tabs only)'
+        "
+        (click)="$event.stopPropagation()"
       >
-        <mat-slide-toggle hideIcon
-          color="accent"
-          class="slide-toggle"
-          [(ngModel)]="garbageTime"
-          (click)="$event.stopPropagation()"
-        ></mat-slide-toggle>
-        <span>Garbage Time Stats</span>
-      </div>
-      <div
-        mat-menu-item
-        title="Show counting stats (yards, touchdowns, sacks...) per game instead of season totals, and rank on them that way"
-        (click)="$event.stopPropagation(); perGame = !perGame; sortPlayers()"
-      >
-        <mat-slide-toggle hideIcon
-          id="pgs-menu"
-          color="accent"
-          class="slide-toggle"
-          [(ngModel)]="perGame"
-          (ngModelChange)="sortPlayers()"
-          (click)="$event.stopPropagation()"
-        ></mat-slide-toggle>
-        <span>Per-Game Stats</span>
+        <span class="min-games-stepper" (click)="$event.stopPropagation()">
+          <button type="button" aria-label="Fewer games" [disabled]="minGamesOff || minGames <= 1" (click)="stepMinGames(-1)">−</button>
+          <span class="min-games-value">{{ minGames }}</span>
+          <button type="button" aria-label="More games" [disabled]="minGamesOff || minGames >= seasonGames" (click)="stepMinGames(1)">+</button>
+        </span>
+        <span>Min Games</span>
       </div>
 
       <!-- Display: what the table shows -->
@@ -304,23 +302,20 @@
       </div>
       <div
         mat-menu-item
-        title="Show columns for stats whose slider is at 0% (they still don't count in the ranking). Stats switched off with their eye stay hidden"
-        (click)="$event.stopPropagation(); showUnused = !showUnused"
+        title="Off: EPA, success rate, CPOE and other play-by-play stats leave out plays run with the game already decided (win probability under 10% or over 90%). Season totals aren't affected"
+        (click)="$event.stopPropagation(); garbageTime = !garbageTime"
       >
         <mat-slide-toggle hideIcon
           color="accent"
           class="slide-toggle"
-          [(ngModel)]="showUnused"
+          [(ngModel)]="garbageTime"
           (click)="$event.stopPropagation()"
         ></mat-slide-toggle>
-        <span>Unweighted Stats</span>
+        <span>Garbage Time Stats</span>
       </div>
-
-      <!-- Players: who's in the list -->
-      <div class="menu-section section-players" (click)="$event.stopPropagation()">Players</div>
       <div
         mat-menu-item
-        title="Off: hide players listed Out, Doubtful or on Injured Reserve in ESPN's injury report, and leave them out of the rankings"
+        title="Off: hide players listed Out, Doubtful or on Injured Reserve in ESPN's injury report (in a past season, those who finished it on injured reserve), and leave them out of the rankings"
         (click)="
           $event.stopPropagation(); showInjured = !showInjured; sortPlayers()
         "
@@ -336,21 +331,16 @@
       </div>
       <div
         mat-menu-item
-        class="min-games-item"
-        [class.off]="minGamesOff"
-        [title]="
-          minGamesOff
-            ? 'Min Games is disabled for current season'
-            : 'Leave out players with fewer games than this (player tabs only)'
-        "
-        (click)="$event.stopPropagation()"
+        title="Show columns for stats whose slider is at 0% (they still don't count in the ranking). Stats switched off with their eye stay hidden"
+        (click)="$event.stopPropagation(); showUnused = !showUnused"
       >
-        <span class="min-games-stepper" (click)="$event.stopPropagation()">
-          <button type="button" aria-label="Fewer games" [disabled]="minGamesOff || minGames <= 1" (click)="stepMinGames(-1)">−</button>
-          <span class="min-games-value">{{ minGames }}</span>
-          <button type="button" aria-label="More games" [disabled]="minGamesOff || minGames >= seasonGames" (click)="stepMinGames(1)">+</button>
-        </span>
-        <span>Min Games</span>
+        <mat-slide-toggle hideIcon
+          color="accent"
+          class="slide-toggle"
+          [(ngModel)]="showUnused"
+          (click)="$event.stopPropagation()"
+        ></mat-slide-toggle>
+        <span>Unweighted Stats</span>
       </div>
     </mat-menu>
   </footer>

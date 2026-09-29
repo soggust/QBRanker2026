@@ -16,9 +16,10 @@
 //                                          run once, since a finished season doesn't change)
 //        OUT_DIR=some/folder              (write somewhere else, e.g. for a dry run)
 //
-// A past season has no injury report (everyone is Active) and no hand-set preseason grades (a
-// full season of stats outweighs them completely), and it fails outright if nflverse can't be
-// loaded, rather than keeping previous values.
+// A past season has no injury report (its injury flags are the players who finished it on injured
+// reserve, from the rosters) and no hand-set preseason grades (a full season of stats
+// outweighs them completely), and it fails outright if nflverse can't be loaded, rather than keeping
+// previous values.
 
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { pathToFileURL } from 'node:url';
@@ -769,6 +770,37 @@ async function espnHeadCoaches() {
   return coaches;
 }
 
+// A past season has no injury report, so its injury flags come from the rosters instead: a player
+// whose status in his team's last regular-season week was reserve (almost always injured reserve)
+// finished the season on IR. nflverse's weekly rosters start in 2002; before that its season roster
+// (one end-of-season status per player, which matches the weekly rosters' last week wherever both
+// exist) stands in. ESPN id -> status.
+async function seasonEndReserve(espnByGsis) {
+  const url = `${NFLVERSE}/weekly_rosters/roster_weekly_${SEASON}.csv`;
+  let rows = await getCsv(url).catch(() => optionalCsvGz(`${url}.gz`));
+  if (!rows.length) {
+    rows = (await getCsv(`${NFLVERSE}/rosters/roster_${SEASON}.csv`).catch(() => [])).map((row) => ({
+      ...row,
+      game_type: 'REG',
+      week: '0',
+    }));
+  }
+  const last = new Map();
+  for (const row of rows) {
+    if (row.game_type !== 'REG') continue;
+    const seen = last.get(row.gsis_id);
+    if (!seen || Number(row.week) > Number(seen.week)) last.set(row.gsis_id, row);
+  }
+  const statuses = new Map();
+  for (const [gsisId, row] of last) {
+    if (row.status !== 'RES') continue;
+    const espnId = Number(row.espn_id) || espnByGsis.get(gsisId);
+    if (espnId) statuses.set(espnId, 'Injured Reserve');
+  }
+  console.log(`Finished the season on reserve: ${statuses.size} players`);
+  return statuses;
+}
+
 // Injury report statuses that mean a player won't play (Questionable players usually do)
 const INJURED_STATUSES = ['Out', 'Doubtful', 'Injured Reserve'];
 
@@ -1251,8 +1283,11 @@ async function main() {
   let advanced = new Map();
   let skill = null;
   let dataGrades = null;
+  // (a past season's injury flags: who finished it on injured reserve)
+  let seasonEndInjuries = new Map();
   try {
     const nflverse = await loadNflverse();
+    if (PAST_SEASON) seasonEndInjuries = await seasonEndReserve(nflverse.espnByGsis);
     // ESPN's staff pages show today's coach, so a past season names its coaches from the schedule
     nflverse.headCoaches = PAST_SEASON ? new Map() : await espnHeadCoaches().catch((err) => {
       console.warn(`Could not load head coaches from ESPN, using nflverse names: ${err.message}`);
@@ -1288,8 +1323,8 @@ async function main() {
   if (noBox.length) console.warn(`No ESPN box stats for: ${noBox.join(', ')}`);
 
   // Injury flags from ESPN's report; keep yesterday's if the report can't be loaded
-  // (a past season has none: everyone is Active)
-  const injuries = PAST_SEASON ? new Map() : await espnInjuries().catch((err) => {
+  // (a past season has no report: its flags are the players who finished on injured reserve)
+  const injuries = PAST_SEASON ? seasonEndInjuries : await espnInjuries().catch((err) => {
     console.warn(`Could not load the ESPN injury report, keeping previous injury flags: ${err.message}`);
     return null;
   });

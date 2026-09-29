@@ -4,6 +4,8 @@ import { skip } from 'rxjs';
 import {
   FANTASY_SCORING_LABELS,
   RANK_BASIS_LABELS,
+  STAT_BASIS_LABELS,
+  StatBasis,
   RANK_METRICS,
   RankBasis,
   statLabelFor,
@@ -49,11 +51,19 @@ export class SkillRankingsComponent implements OnChanges {
   stats: SkillStat[] = [];
   weights: SkillWeights = {};
   // Settings-menu toggles are shared with every position (see PositionService)
-  get perGame(): boolean {
-    return this.positionService.settings.perGame;
+  // Settings menu: counting stats as season totals, per game or at a 17-game pace
+  get statBasis(): StatBasis {
+    return this.positionService.settings.statBasis;
   }
-  set perGame(value: boolean) {
-    this.positionService.updateSettings({ perGame: value });
+  statBasisLabels = STAT_BASIS_LABELS;
+
+  cycleStatBasis() {
+    this.positionService.cycleStatBasis();
+  }
+
+  // Counting stats are rates (per game, or per game x 17) rather than season totals
+  get perGame(): boolean {
+    return this.statBasis !== 'season';
   }
 
   // Same settings menu as the QB page; these two only change the QB table but stay in sync
@@ -106,6 +116,13 @@ export class SkillRankingsComponent implements OnChanges {
   }
   set showInjured(value: boolean) {
     this.positionService.updateSettings({ showInjured: value });
+  }
+
+  // Bandage hover: this season's injury report status, or for a past season, finishing it on IR
+  injuryTitle(player: SkillPlayer): string {
+    return dataSeason === CURRENT_SEASON
+      ? `This player is currently injured (${player.injuryStatus})`
+      : 'Finished the season on injured reserve';
   }
 
   // Footer filter button: opens / closes the filters menu
@@ -174,7 +191,7 @@ export class SkillRankingsComponent implements OnChanges {
   private scalesFor?: unknown[];
 
   private columnScale(stat: SkillStat, basis: 'rate' | 'shown'): TintScale | null {
-    const inputs = [this.playerList, this.dataVersion, this.perGame, this.fantasyScoring, this.garbageTime, this.rankBasis];
+    const inputs = [this.playerList, this.dataVersion, this.statBasis, this.fantasyScoring, this.garbageTime, this.rankBasis];
     if (!this.scalesFor || inputs.some((v, i) => v !== this.scalesFor![i])) {
       this.scales.clear();
       this.scalesFor = inputs;
@@ -347,7 +364,7 @@ export class SkillRankingsComponent implements OnChanges {
   }
 
   // Label hover: the stat written out, plus the list average of what the column shows (season totals,
-  // or per game when Per-Game Stats is on)
+  // per game or 17-game pace, as the Stat Totals setting says)
   labelTitle(stat: SkillStat): string {
     const name = this.statName(stat);
     if (stat.format === 'record' || stat.format === 'recent' || stat.format === 'rank') return name;
@@ -368,20 +385,30 @@ export class SkillRankingsComponent implements OnChanges {
         shown = avg.toFixed(2);
         break;
       default:
-        shown = avg.toFixed(1);
+        // (a 17-game pace reads in whole numbers, like its column)
+        shown = this.statBasis === 'pace17' && stat.kind === 'volume' ? Math.round(avg).toLocaleString('en-US') : avg.toFixed(1);
     }
     return `${name} (Avg: ${shown})`;
   }
 
-  // Volume stats show per-game values when Per-Game Stats is on
+  // Volume stats show per-game (or 17-game pace) values unless Stat Totals is on Season Totals
   private showsPerGame(stat: SkillStat): boolean {
     return this.perGame && stat.kind === 'volume';
   }
 
-  // Column label, switched to its per-game name when the column shows per-game values
+  // Column label, switched to its per-game name (or tagged "17G") when the column shows rates
   statLabel(stat: SkillStat): string {
     const label = statLabelFor(stat, this.rankBasis);
-    return this.showsPerGame(stat) ? (PER_GAME_LABELS[stat.key] ?? `${label} / Game`) : label;
+    if (!this.showsPerGame(stat)) return label;
+    return this.statBasis === 'pace17' ? `${label} (17G)` : (PER_GAME_LABELS[stat.key] ?? `${label} / Game`);
+  }
+
+  // A header label split before its parenthetical ("Off Rank" + "(Pts)", "Pass Yards" + "(17G)"), which
+  // shows smaller
+  labelParts(stat: SkillStat): [string, string | null] {
+    const label = this.statLabel(stat);
+    const match = label.match(/^(.*?)\s*(\([^()]*\))$/);
+    return match ? [match[1], match[2]] : [label, null];
   }
 
   // The stat written out in full; kickers and defenses have their own fixed fantasy scoring
@@ -394,7 +421,8 @@ export class SkillRankingsComponent implements OnChanges {
     if (stat.key in RANK_METRICS) {
       return `${name} (by ${RANK_BASIS_LABELS[this.rankBasis]})`;
     }
-    return this.showsPerGame(stat) ? `${name} per Game` : name;
+    if (!this.showsPerGame(stat)) return name;
+    return this.statBasis === 'pace17' ? `${name} (17-game pace)` : `${name} per Game`;
   }
 
   // Player-row hover (the label invisibly covers its value): "[value] [stat name]"
@@ -404,11 +432,12 @@ export class SkillRankingsComponent implements OnChanges {
     return value === '-' ? name : `${value} ${name}`;
   }
 
-  // Displayed value: per game for volume stats when the setting is on
+  // Displayed value: for volume stats, per game or per game x 17 as the Stat Totals setting says
   value(player: SkillPlayer, stat: SkillStat): number | null {
     const raw = this.rawValue(player, stat);
     if (raw === null) return null;
-    return this.perGame && stat.kind === 'volume' && player.games ? raw / player.games : raw;
+    if (!this.perGame || stat.kind !== 'volume' || !player.games) return raw;
+    return (raw / player.games) * (this.statBasis === 'pace17' ? 17 : 1);
   }
 
   // A row's awards this season (badges beside the name), looked up once per season
@@ -552,7 +581,9 @@ export class SkillRankingsComponent implements OnChanges {
   format(player: SkillPlayer, stat: SkillStat): string {
     const value = this.value(player, stat);
     if (value === null) return '-';
-    const perGameVolume = this.perGame && stat.kind === 'volume';
+    // Per game reads to a decimal; a 17-game pace rounds to a whole season's worth
+    const perGameVolume = this.statBasis === 'perGame' && stat.kind === 'volume';
+    const paceVolume = this.statBasis === 'pace17' && stat.kind === 'volume';
     switch (stat.format) {
       case 'grade':
         return this.grade(value);
@@ -572,7 +603,8 @@ export class SkillRankingsComponent implements OnChanges {
       case 'dec2':
         return (Number(value.toFixed(2)) + 0).toFixed(2);
       default:
-        return perGameVolume ? value.toFixed(1) : value.toLocaleString('en-US');
+        if (perGameVolume) return value.toFixed(1);
+        return (paceVolume ? Math.round(value) : value).toLocaleString('en-US');
     }
   }
 

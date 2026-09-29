@@ -1233,8 +1233,8 @@
       "rushYards": 243,
       "rushTd": 1
     },
-    "injuryStatus": "Active",
-    "injured": false
+    "injuryStatus": "Injured Reserve",
+    "injured": true
   },
   {
     "id": 2026,
@@ -1433,8 +1433,8 @@
       "rushYards": 5,
       "rushTd": 0
     },
-    "injuryStatus": "Active",
-    "injured": false
+    "injuryStatus": "Injured Reserve",
+    "injured": true
   },
   {
     "id": 76,
@@ -2532,8 +2532,8 @@
       "rushYards": 45,
       "rushTd": 0
     },
-    "injuryStatus": "Active",
-    "injured": false
+    "injuryStatus": "Injured Reserve",
+    "injured": true
   },
   {
     "id": 927,

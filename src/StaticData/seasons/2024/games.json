@@ -749,8 +749,8 @@
       "rushYards": 54,
       "rushTd": 1
     },
-    "injuryStatus": "Active",
-    "injured": false
+    "injuryStatus": "Injured Reserve",
+    "injured": true
   },
   {
     "id": 3917792,
@@ -949,8 +949,8 @@
       "rushYards": 148,
       "rushTd": 1
     },
-    "injuryStatus": "Active",
-    "injured": false
+    "injuryStatus": "Injured Reserve",
+    "injured": true
   },
   {
     "id": 4239086,
@@ -1198,8 +1198,8 @@
       "rushYards": 58,
       "rushTd": 0
     },
-    "injuryStatus": "Active",
-    "injured": false
+    "injuryStatus": "Injured Reserve",
+    "injured": true
   },
   {
     "id": 15864,
@@ -2941,8 +2941,8 @@
       "rushYards": 119,
       "rushTd": 3
     },
-    "injuryStatus": "Active",
-    "injured": false
+    "injuryStatus": "Injured Reserve",
+    "injured": true
   },
   {
     "id": 4383351,

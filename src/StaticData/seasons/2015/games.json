@@ -856,8 +856,8 @@
       "rushYards": 256,
       "rushTd": 1
     },
-    "injuryStatus": "Active",
-    "injured": false
+    "injuryStatus": "Injured Reserve",
+    "injured": true
   },
   {
     "id": 8559,
@@ -1355,8 +1355,8 @@
       "rushYards": 23,
       "rushTd": 3
     },
-    "injuryStatus": "Active",
-    "injured": false
+    "injuryStatus": "Injured Reserve",
+    "injured": true
   },
   {
     "id": 16736,
@@ -1504,8 +1504,8 @@
       "rushYards": 98,
       "rushTd": 1
     },
-    "injuryStatus": "Active",
-    "injured": false
+    "injuryStatus": "Injured Reserve",
+    "injured": true
   },
   {
     "id": 14882,
@@ -1699,8 +1699,8 @@
       "rushYards": 0,
       "rushTd": 0
     },
-    "injuryStatus": "Active",
-    "injured": false
+    "injuryStatus": "Injured Reserve",
+    "injured": true
   },
   {
     "id": 2576980,
@@ -2600,8 +2600,8 @@
       "rushYards": 0,
       "rushTd": 0
     },
-    "injuryStatus": "Active",
-    "injured": false
+    "injuryStatus": "Injured Reserve",
+    "injured": true
   },
   {
     "id": 16728,
@@ -2752,8 +2752,8 @@
       "rushYards": 13,
       "rushTd": 0
     },
-    "injuryStatus": "Active",
-    "injured": false
+    "injuryStatus": "Injured Reserve",
+    "injured": true
   },
   {
     "id": 14163,

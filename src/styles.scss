@@ -270,6 +270,11 @@ html .mat-mdc-slide-toggle.mat-accent {
   color: var(--scoreboard-led) !important;
 }
 
+// (the Stat Totals and Unit Ranks icons too: the trophy is a span, these are icons)
+.mat-mdc-menu-panel .mat-mdc-menu-item:hover .mat-icon.menu-icon {
+  color: var(--scoreboard-led) !important;
+}
+
 // Preset dropdown caret in goalpost yellow
 .sidebar .mat-mdc-select-arrow {
   color: var(--scoreboard-led) !important;
@@ -442,28 +447,6 @@ about-panel ::-webkit-scrollbar-track {
   width: 46px;
 }
 
-// Settings switches take their section's category color (softened toward the menu's dark gray)
-// instead of the yellow the section titles use: Stats blue, Display purple, Players green (each rule covers the items after its title; the
-// later sections' rules win for their own items)
-.mat-mdc-menu-panel .section-stats ~ .mat-mdc-menu-item .mat-mdc-slide-toggle {
-  --section-track: color-mix(in srgb, #4fc3f7 60%, #3a3a3a);
-}
-
-.mat-mdc-menu-panel .section-display ~ .mat-mdc-menu-item .mat-mdc-slide-toggle {
-  --section-track: color-mix(in srgb, #b388ff 60%, #3a3a3a);
-}
-
-.mat-mdc-menu-panel .section-players ~ .mat-mdc-menu-item .mat-mdc-slide-toggle {
-  --section-track: color-mix(in srgb, #66d17a 60%, #3a3a3a);
-}
-
-.mat-mdc-menu-panel .menu-section ~ .mat-mdc-menu-item .mat-mdc-slide-toggle {
-  --mat-slide-toggle-selected-track-color: var(--section-track);
-  --mat-slide-toggle-selected-hover-track-color: var(--section-track);
-  --mat-slide-toggle-selected-focus-track-color: var(--section-track);
-  --mat-slide-toggle-selected-pressed-track-color: var(--section-track);
-}
-
 // Slider footballs in real leather: the rows' pebbled texture over the football brown, with a soft
 // sheen on top (the laces are drawn over it by the ::after above). Material paints the knob with a
 // solid border, so that goes transparent and the background (leather) fills the whole football.
@@ -550,4 +533,9 @@ about-panel ::-webkit-scrollbar-track {
 // Off for the season in progress: the whole item dims
 .mat-mdc-menu-panel .min-games-item.off {
   opacity: 0.45;
+}
+
+// Settings items you click to cycle: their current value in goalpost yellow
+.mat-mdc-menu-panel .mat-mdc-menu-item .menu-value {
+  color: var(--scoreboard-led) !important;
 }

@@ -2151,3 +2151,9 @@ section footer {
 section footer .filter-toggle.open .mat-icon {
   color: var(--scoreboard-led);
 }
+
+// A header label's parenthetical ("(Pts)", "(17G)") is smaller than the label
+section ul li.player.header-row div .stat-label .label-tag {
+  font-size: 8px;
+  white-space: pre;
+}

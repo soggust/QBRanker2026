@@ -101,8 +101,10 @@
           <h4>Totals, breakdowns and per game</h4>
           <p>
             Paired stats like yards and touchdowns have a total slider with a breakdown underneath (click the
-            label to open it). The total scales both parts. Turn on <b>Per-Game Stats</b> in the settings to
-            compare counting stats per game instead of season totals, which is fairer to anyone who missed games.
+            label to open it). The total scales both parts. <b>Stat Totals</b> in the settings switches counting
+            stats between season totals, <b>per game</b> (fairer to anyone who missed games) and a
+            <b>17-game pace</b>: per game over a full 17-game season, so a 12-game year or a 16-game era reads like
+            a full modern season. Per game and 17-game pace rank the same; they just read differently.
           </p>
           <h4>Ranking by hand</h4>
           <p>
@@ -169,7 +171,7 @@
             <li><mat-icon fontIcon="emoji_events"></mat-icon><span><b>Rank tiles:</b> a trophy for #1, green through 10, white in the middle and red for the bottom 10.</span></li>
             <li><mat-icon fontIcon="content_copy"></mat-icon><span><b>Copy</b> puts your whole ranked list on the clipboard, ready to paste into a group chat.</span></li>
             <li><mat-icon fontIcon="link"></mat-icon><span><b>Share a tab</b> by copying the address bar. The link opens straight to that tab and season (e.g. <code>?pos=WR&amp;season=2019</code>).</span></li>
-            <li><mat-icon fontIcon="healing"></mat-icon><span>The <b>bandage</b> marks players ESPN lists as Out, Doubtful or on IR. Hide them with <b>Injured Players</b> in the settings.</span></li>
+            <li><mat-icon fontIcon="healing"></mat-icon><span>The <b>bandage</b> marks players ESPN lists as Out, Doubtful or on IR (in a past season, those who finished it on IR). Hide them with <b>Injured Players</b> in the settings.</span></li>
             <li><mat-icon fontIcon="hourglass_bottom"></mat-icon><span>Turn off <b>Garbage Time Stats</b> to leave out plays run once the game was decided (win probability under 10% or over 90%). Stats padded in blowouts shrink.</span></li>
             <li><mat-icon fontIcon="leaderboard"></mat-icon><span><b>Unit Ranks</b> in the settings sets what the head coaches' Off and Def Rank columns rank on: points or yards per game.</span></li>
             <li><mat-icon fontIcon="swap_horiz"></mat-icon><span><b>Combine Rush/Pass Stats</b> shows yards and touchdowns as single totals, leaving more room for other columns.</span></li>
@@ -197,9 +199,10 @@
               Pick a year from the season dropdown at the top of the filter menu. Your sliders, eyes and column
               order stay as they are; the list re-ranks with that year's stats. Each season keeps its own
               hand-dragged order while the page is open, and the address updates so you can share the year. A
-              finished season uses its full-season results for every grade (no preseason blend), and there are
-              no injury flags. Stats that weren't tracked yet that year are left out, columns and sliders both:
-              tracking stats like separation and time to throw start in 2016, CPOE, YAC and air yards in 2006,
+              finished season uses its full-season results for every grade (no preseason blend), and the
+              bandage marks players who finished it on injured reserve. Stats that weren't tracked yet that
+              year are left out, columns and sliders both: tracking stats like separation and time to throw
+              start in 2016, CPOE, YAC and air yards in 2006,
               and 2003 to 2008 have no targets (so no target share or catch rate either). Min Games in the
               settings works for past seasons.
             </p>
@@ -221,7 +224,7 @@
             <summary>Why is my guy ranked so low?</summary>
             <p>
               The ranking only reflects the sliders. Try a preset that fits his game, check whether a support
-              grade is pulling him down, or turn on Per-Game Stats if he missed time. And if you still
+              grade is pulling him down, or switch Stat Totals to Per Game or 17-Game Pace if he missed time. And if you still
               disagree, drag him where he belongs.
             </p>
           </details>

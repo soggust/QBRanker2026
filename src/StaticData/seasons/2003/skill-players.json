@@ -3359,8 +3359,8 @@
         "epaPerCarry": 0.129,
         "epaPerTarget": -0.736
       },
-      "injuryStatus": "Active",
-      "injured": false
+      "injuryStatus": "Injured Reserve",
+      "injured": true
     },
     {
       "id": 1165,
@@ -3443,8 +3443,8 @@
         "epaPerCarry": 0.179,
         "epaPerTarget": 0.564
       },
-      "injuryStatus": "Active",
-      "injured": false
+      "injuryStatus": "Injured Reserve",
+      "injured": true
     },
     {
       "id": 2297,
@@ -4409,8 +4409,8 @@
         "epaPerCarry": -0.201,
         "epaPerTarget": 0.389
       },
-      "injuryStatus": "Active",
-      "injured": false
+      "injuryStatus": "Injured Reserve",
+      "injured": true
     },
     {
       "id": 389,
@@ -5753,8 +5753,8 @@
         "epaPerCarry": -0.193,
         "epaPerTarget": 0.098
       },
-      "injuryStatus": "Active",
-      "injured": false
+      "injuryStatus": "Injured Reserve",
+      "injured": true
     },
     {
       "id": 979,
@@ -6173,8 +6173,8 @@
         "epaPerCarry": 0.112,
         "epaPerTarget": 0.314
       },
-      "injuryStatus": "Active",
-      "injured": false
+      "injuryStatus": "Injured Reserve",
+      "injured": true
     },
     {
       "id": 3544,
@@ -7351,8 +7351,8 @@
         "epaPerCarry": 3.075,
         "epaPerTarget": 0.873
       },
-      "injuryStatus": "Active",
-      "injured": false
+      "injuryStatus": "Injured Reserve",
+      "injured": true
     },
     {
       "id": 1966,
@@ -9241,8 +9241,8 @@
         "epaPerCarry": -1.261,
         "epaPerTarget": 1.172
       },
-      "injuryStatus": "Active",
-      "injured": false
+      "injuryStatus": "Injured Reserve",
+      "injured": true
     },
     {
       "id": 940,
@@ -10335,8 +10335,8 @@
         "epaPerCarry": 0,
         "epaPerTarget": 0.426
       },
-      "injuryStatus": "Active",
-      "injured": false
+      "injuryStatus": "Injured Reserve",
+      "injured": true
     },
     {
       "id": 2199,
@@ -11343,8 +11343,8 @@
         "epaPerCarry": 0,
         "epaPerTarget": 0.349
       },
-      "injuryStatus": "Active",
-      "injured": false
+      "injuryStatus": "Injured Reserve",
+      "injured": true
     },
     {
       "id": 3683,
@@ -12147,8 +12147,8 @@
         "fantasyStd": 77,
         "receptions": 0
       },
-      "injuryStatus": "Active",
-      "injured": false
+      "injuryStatus": "Injured Reserve",
+      "injured": true
     },
     {
       "id": 2489,

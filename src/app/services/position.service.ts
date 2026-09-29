@@ -8,6 +8,7 @@ import {
   POSITIONS,
   Position,
   RankBasis,
+  StatBasis,
   SkillPlayer,
   SkillPosition,
   SkillWeights,
@@ -30,7 +31,8 @@ try {
 
 // Settings-menu toggles, shared by every position and remembered per browser
 export interface RankerSettings {
-  perGame: boolean;
+  // Counting stats as season totals, per game or at a 17-game pace
+  statBasis: StatBasis;
   showUnused: boolean;
   showInjured: boolean;
   // Players with fewer games are left out (player tabs only; see SkillRankingsComponent.minGamesFor)
@@ -51,7 +53,7 @@ const SETTINGS_KEY = 'rankerSettings';
 // The Min Games setting runs 1 to a full season
 export const MAX_MIN_GAMES = 17;
 const DEFAULT_SETTINGS: RankerSettings = {
-  perGame: false,
+  statBasis: 'season',
   showUnused: false,
   showInjured: true,
   minGames: 1,
@@ -68,6 +70,9 @@ function readSettings(): RankerSettings {
     const saved = { ...DEFAULT_SETTINGS, ...JSON.parse(localStorage.getItem(SETTINGS_KEY) ?? '{}') };
     // Unit ranks used to offer EPA (now its own columns)
     if (!['points', 'yards'].includes(saved.rankBasis)) saved.rankBasis = DEFAULT_SETTINGS.rankBasis;
+    // Per-Game Stats used to be an on / off switch
+    if (!['season', 'perGame', 'pace17'].includes(saved.statBasis)) saved.statBasis = saved.perGame ? 'perGame' : 'season';
+    delete (saved as { perGame?: boolean }).perGame;
     const minGames = Math.round(Number(saved.minGames));
     saved.minGames = minGames >= 1 && minGames <= MAX_MIN_GAMES ? minGames : DEFAULT_SETTINGS.minGames;
     return saved;
@@ -450,6 +455,12 @@ export class PositionService {
 
   get fantasyScoring(): FantasyScoring {
     return this.fantasyScoringSubject.value;
+  }
+
+  // Cycle Season Totals -> Per Game -> 17-Game Pace
+  cycleStatBasis(): void {
+    const order: StatBasis[] = ['season', 'perGame', 'pace17'];
+    this.updateSettings({ statBasis: order[(order.indexOf(this.settings.statBasis) + 1) % order.length] });
   }
 
   // Switch Points <-> Yards

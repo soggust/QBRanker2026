@@ -410,13 +410,10 @@ main .content {
         color: var(--scoreboard-led);
       }
 
-      // Active: lit-up panel framed like a goalpost, yellow up both sides and across the bottom
+      // Active: lit-up panel with a thin goalpost-yellow line along its bottom edge
       &.active {
         background: var(--scoreboard-dots), #1f1f1f;
-        box-shadow:
-          inset 1px 0 0 var(--scoreboard-led),
-          inset -1px 0 0 var(--scoreboard-led),
-          inset 0 -1px 0 var(--scoreboard-led);
+        box-shadow: inset 0 -1px 0 var(--scoreboard-led);
       }
 
     }

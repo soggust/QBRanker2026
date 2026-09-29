@@ -3149,8 +3149,8 @@
         "epaPerCarry": -0.204,
         "epaPerTarget": 0.305
       },
-      "injuryStatus": "Active",
-      "injured": false
+      "injuryStatus": "Injured Reserve",
+      "injured": true
     },
     {
       "id": 16921,
@@ -3275,8 +3275,8 @@
         "epaPerCarry": -0.164,
         "epaPerTarget": 0.073
       },
-      "injuryStatus": "Active",
-      "injured": false
+      "injuryStatus": "Injured Reserve",
+      "injured": true
     },
     {
       "id": 16889,
@@ -3401,8 +3401,8 @@
         "epaPerCarry": 0.183,
         "epaPerTarget": 1.104
       },
-      "injuryStatus": "Active",
-      "injured": false
+      "injuryStatus": "Injured Reserve",
+      "injured": true
     },
     {
       "id": 12497,
@@ -4283,8 +4283,8 @@
         "epaPerCarry": -0.139,
         "epaPerTarget": -0.32
       },
-      "injuryStatus": "Active",
-      "injured": false
+      "injuryStatus": "Injured Reserve",
+      "injured": true
     },
     {
       "id": 16944,
@@ -4829,8 +4829,8 @@
         "epaPerCarry": -0.02,
         "epaPerTarget": -0.305
       },
-      "injuryStatus": "Active",
-      "injured": false
+      "injuryStatus": "Injured Reserve",
+      "injured": true
     },
     {
       "id": 13536,
@@ -5669,8 +5669,8 @@
         "epaPerCarry": -0.068,
         "epaPerTarget": 0.301
       },
-      "injuryStatus": "Active",
-      "injured": false
+      "injuryStatus": "Injured Reserve",
+      "injured": true
     },
     {
       "id": 12503,
@@ -6089,8 +6089,8 @@
         "epaPerCarry": -0.085,
         "epaPerTarget": -0.066
       },
-      "injuryStatus": "Active",
-      "injured": false
+      "injuryStatus": "Injured Reserve",
+      "injured": true
     },
     {
       "id": 5549,
@@ -6553,8 +6553,8 @@
         "epaPerCarry": 0,
         "epaPerTarget": -0.048
       },
-      "injuryStatus": "Active",
-      "injured": false
+      "injuryStatus": "Injured Reserve",
+      "injured": true
     },
     {
       "id": 14912,
@@ -6889,8 +6889,8 @@
         "epaPerCarry": 0.588,
         "epaPerTarget": 0.309
       },
-      "injuryStatus": "Active",
-      "injured": false
+      "injuryStatus": "Injured Reserve",
+      "injured": true
     },
     {
       "id": 12576,
@@ -6973,8 +6973,8 @@
         "epaPerCarry": 0,
         "epaPerTarget": 0.106
       },
-      "injuryStatus": "Active",
-      "injured": false
+      "injuryStatus": "Injured Reserve",
+      "injured": true
     },
     {
       "id": 12568,
@@ -8401,8 +8401,8 @@
         "epaPerCarry": 0,
         "epaPerTarget": -0.158
       },
-      "injuryStatus": "Active",
-      "injured": false
+      "injuryStatus": "Injured Reserve",
+      "injured": true
     },
     {
       "id": 15818,
@@ -9073,8 +9073,8 @@
         "epaPerCarry": 0,
         "epaPerTarget": 0.431
       },
-      "injuryStatus": "Active",
-      "injured": false
+      "injuryStatus": "Injured Reserve",
+      "injured": true
     },
     {
       "id": 14922,
@@ -10125,8 +10125,8 @@
         "epaPerCarry": 0,
         "epaPerTarget": -0.352
       },
-      "injuryStatus": "Active",
-      "injured": false
+      "injuryStatus": "Injured Reserve",
+      "injured": true
     },
     {
       "id": 5557,
@@ -13145,8 +13145,8 @@
         "epaPerPunt": -0.208,
         "fairCatchPct": 0.218
       },
-      "injuryStatus": "Active",
-      "injured": false
+      "injuryStatus": "Injured Reserve",
+      "injured": true
     },
     {
       "id": 16863,

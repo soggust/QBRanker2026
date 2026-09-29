@@ -143,6 +143,17 @@ export const FANTASY_SCORING_LABELS: Record<FantasyScoring, string> = {
 // columns, like special teams' EPA)
 export type RankBasis = 'points' | 'yards';
 
+// How counting stats (yards, touchdowns, sacks...) are shown and ranked: season totals, per game, or
+// per game over a 17-game season (a full season's pace, whatever the player's games or the era's
+// schedule). Per Game and 17-Game Pace rank the same; they only read differently.
+export type StatBasis = 'season' | 'perGame' | 'pace17';
+
+export const STAT_BASIS_LABELS: Record<StatBasis, string> = {
+  season: 'Season Totals',
+  perGame: 'Per Game',
+  pace17: '17-Game Pace',
+};
+
 export const RANK_BASIS_LABELS: Record<RankBasis, string> = {
   points: 'Points',
   yards: 'Yards',
@@ -317,7 +328,7 @@ export const STAT_NAMES: Partial<Record<SkillColumnKey, string>> = {
   timeToThrow: 'QB Time to Throw (Seconds)',
 };
 
-// Short labels for volume stats when Per-Game Stats is on (yards read as YPG, points as PPG)
+// Short labels for volume stats when Stat Totals is on Per Game (yards read as YPG, points as PPG)
 export const PER_GAME_LABELS: Partial<Record<SkillColumnKey, string>> = {
   passYards: 'Pass YPG',
   passTds: 'Pass TDs / Game',
