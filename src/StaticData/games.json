@@ -448,6 +448,54 @@
     "injured": false
   },
   {
+    "id": 15168,
+    "name": "Case Keenum",
+    "team": "Chicago Bears",
+    "teamLogo": "../assets/NFL_Icons/Bears.png",
+    "wins": 1,
+    "losses": 0,
+    "ties": 0,
+    "lastFive": [
+      1
+    ],
+    "starts": {
+      "../assets/NFL_Icons/Bears.png": 1
+    },
+    "advanced": {
+      "pressureToSack": null,
+      "badThrowPct": null,
+      "timeToThrow": 2.41,
+      "adot": 6.4,
+      "aggressiveness": 14.7,
+      "epaPerPlay": 0.28,
+      "cpoe": 2.776,
+      "successRate": 0.564,
+      "plays": 39,
+      "realGames": 1,
+      "fantasyStd": 24.48,
+      "receptions": 0,
+      "competitive": {
+        "epaPerPlay": 0.393,
+        "cpoe": 8.592,
+        "successRate": 0.613
+      }
+    },
+    "box": {
+      "games": 1,
+      "fumLost": 0,
+      "passYards": 247,
+      "passTd": 2,
+      "ints": 0,
+      "compPercent": 70.6,
+      "ypa": 7.26,
+      "rating": 110.8,
+      "rushYards": 6,
+      "rushTd": 1
+    },
+    "injuryStatus": "Active",
+    "injured": false
+  },
+  {
     "id": 2972515,
     "name": "Cooper Rush",
     "team": "Atlanta Falcons",
@@ -851,45 +899,46 @@
     "team": "Philadelphia Eagles",
     "teamLogo": "../assets/NFL_Icons/Eagles.png",
     "wins": 2,
-    "losses": 0,
+    "losses": 1,
     "ties": 0,
     "lastFive": [
+      0,
       1,
       1
     ],
     "starts": {
-      "../assets/NFL_Icons/Eagles.png": 2
+      "../assets/NFL_Icons/Eagles.png": 3
     },
     "advanced": {
       "pressureToSack": 0.333,
-      "badThrowPct": 0.177,
-      "timeToThrow": 3.41,
-      "adot": 9.4,
-      "aggressiveness": 8.1,
-      "epaPerPlay": 0.191,
-      "cpoe": 10.02,
-      "successRate": 0.432,
-      "plays": 81,
-      "realGames": 2,
-      "fantasyStd": 40.88,
+      "badThrowPct": 0.126,
+      "timeToThrow": 3.26,
+      "adot": 8.7,
+      "aggressiveness": 8,
+      "epaPerPlay": 0.083,
+      "cpoe": 7.044,
+      "successRate": 0.412,
+      "plays": 114,
+      "realGames": 3,
+      "fantasyStd": 53.5,
       "receptions": 0,
       "competitive": {
-        "epaPerPlay": 0.191,
-        "cpoe": 10.02,
-        "successRate": 0.432
+        "epaPerPlay": 0.148,
+        "cpoe": 9.104,
+        "successRate": 0.417
       }
     },
     "box": {
-      "games": 2,
+      "games": 3,
       "fumLost": 0,
-      "passYards": 467,
+      "passYards": 620,
       "passTd": 5,
-      "ints": 2,
-      "compPercent": 64.5,
-      "ypa": 7.53,
-      "rating": 100.7,
-      "rushYards": 62,
-      "rushTd": 0
+      "ints": 3,
+      "compPercent": 64.4,
+      "ypa": 7.13,
+      "rating": 90.2,
+      "rushYards": 87,
+      "rushTd": 1
     },
     "injuryStatus": "Active",
     "injured": false

@@ -22,7 +22,7 @@
       "games": 3,
       "newCoach": false,
       "coach": "Kevin Stefanski",
-      "oline": 6.6,
+      "oline": 5.8,
       "weapons": 11.2,
       "metrics": {
         "pressureRate": 0.187,
@@ -59,7 +59,7 @@
       "newCoach": true,
       "coach": "Joe Brady",
       "oline": 11.2,
-      "weapons": 9.3,
+      "weapons": 9.7,
       "metrics": {
         "pressureRate": 0.167,
         "sackRate": 0.078,
@@ -76,8 +76,8 @@
       "games": 3,
       "newCoach": false,
       "coach": "Dave Canales",
-      "oline": 5.4,
-      "weapons": 8.9,
+      "oline": 3.9,
+      "weapons": 9.3,
       "metrics": {
         "pressureRate": 0.25,
         "sackRate": 0.053,
@@ -91,29 +91,29 @@
       }
     },
     "Bears": {
-      "games": 2,
+      "games": 3,
       "newCoach": false,
       "coach": "Ben Johnson",
-      "oline": 1.5,
-      "weapons": 10.8,
+      "oline": 7,
+      "weapons": 8.9,
       "metrics": {
-        "pressureRate": 0.342,
-        "sackRate": 0.076,
+        "pressureRate": 0.237,
+        "sackRate": 0.053,
         "yardsBeforeContact": 3.329,
-        "stuffRate": 0.219,
-        "separation": 3.806,
-        "yacOverExpected": 0.72,
-        "dropRate": 0.078,
-        "rushOverExpected": 1.226,
-        "brokenTackles": 0.099
+        "stuffRate": 0.198,
+        "separation": 2.999,
+        "yacOverExpected": 0.516,
+        "dropRate": 0.051,
+        "rushOverExpected": 0.642,
+        "brokenTackles": 0.081
       }
     },
     "Bengals": {
       "games": 3,
       "newCoach": false,
       "coach": "Zac Taylor",
-      "oline": 7,
-      "weapons": 6.2,
+      "oline": 6.6,
+      "weapons": 5.8,
       "metrics": {
         "pressureRate": 0.177,
         "sackRate": 0.062,
@@ -130,8 +130,8 @@
       "games": 3,
       "newCoach": true,
       "coach": "Todd Monken",
-      "oline": 0.8,
-      "weapons": 10.1,
+      "oline": 1.2,
+      "weapons": 10.5,
       "metrics": {
         "pressureRate": 0.154,
         "sackRate": 0.087,
@@ -149,7 +149,7 @@
       "newCoach": false,
       "coach": "Brian Schottenheimer",
       "oline": 8.1,
-      "weapons": 4.6,
+      "weapons": 5,
       "metrics": {
         "pressureRate": 0.144,
         "sackRate": 0.025,
@@ -167,7 +167,7 @@
       "newCoach": false,
       "coach": "Sean Payton",
       "oline": 8.5,
-      "weapons": 3.1,
+      "weapons": 3.5,
       "metrics": {
         "pressureRate": 0.139,
         "sackRate": 0.05,
@@ -184,8 +184,8 @@
       "games": 3,
       "newCoach": false,
       "coach": "Dan Campbell",
-      "oline": 6.2,
-      "weapons": 9.7,
+      "oline": 5.4,
+      "weapons": 10.1,
       "metrics": {
         "pressureRate": 0.174,
         "sackRate": 0.058,
@@ -202,7 +202,7 @@
       "games": 3,
       "newCoach": false,
       "coach": "Matt LaFleur",
-      "oline": 0.4,
+      "oline": 0,
       "weapons": 0.4,
       "metrics": {
         "pressureRate": 0.28,
@@ -220,7 +220,7 @@
       "games": 3,
       "newCoach": false,
       "coach": "DeMeco Ryans",
-      "oline": 2.3,
+      "oline": 1.5,
       "weapons": 2.3,
       "metrics": {
         "pressureRate": 0.179,
@@ -293,7 +293,7 @@
       "newCoach": false,
       "coach": "Sean McVay",
       "oline": 11.6,
-      "weapons": 8.5,
+      "weapons": 8.1,
       "metrics": {
         "pressureRate": 0.084,
         "sackRate": 0.042,
@@ -311,7 +311,7 @@
       "newCoach": false,
       "coach": "Jim Harbaugh",
       "oline": 4.3,
-      "weapons": 7.4,
+      "weapons": 7.7,
       "metrics": {
         "pressureRate": 0.183,
         "sackRate": 0.077,
@@ -328,7 +328,7 @@
       "games": 3,
       "newCoach": true,
       "coach": "Klint Kubiak",
-      "oline": 3.1,
+      "oline": 2.7,
       "weapons": 3.9,
       "metrics": {
         "pressureRate": 0.127,
@@ -346,8 +346,8 @@
       "games": 3,
       "newCoach": true,
       "coach": "Jeff Hafley",
-      "oline": 1.2,
-      "weapons": 5,
+      "oline": 0.4,
+      "weapons": 4.6,
       "metrics": {
         "pressureRate": 0.234,
         "sackRate": 0.084,
@@ -382,7 +382,7 @@
       "games": 3,
       "newCoach": false,
       "coach": "Mike Vrabel",
-      "oline": 2.7,
+      "oline": 2.3,
       "weapons": 6.6,
       "metrics": {
         "pressureRate": 0.17,
@@ -400,8 +400,8 @@
       "games": 3,
       "newCoach": false,
       "coach": "Kellen Moore",
-      "oline": 5.8,
-      "weapons": 5.8,
+      "oline": 6.2,
+      "weapons": 6.2,
       "metrics": {
         "pressureRate": 0.129,
         "sackRate": 0.068,
@@ -418,7 +418,7 @@
       "games": 3,
       "newCoach": false,
       "coach": "John Harbaugh",
-      "oline": 3.9,
+      "oline": 3.1,
       "weapons": 2.7,
       "metrics": {
         "pressureRate": 0.161,
@@ -437,7 +437,7 @@
       "newCoach": false,
       "coach": "Aaron Glenn",
       "oline": 1.9,
-      "weapons": 7,
+      "weapons": 7.4,
       "metrics": {
         "pressureRate": 0.133,
         "sackRate": 0.075,
@@ -451,29 +451,29 @@
       }
     },
     "Eagles": {
-      "games": 2,
+      "games": 3,
       "newCoach": false,
       "coach": "Nick Sirianni",
-      "oline": 0,
-      "weapons": 8.1,
+      "oline": 0.8,
+      "weapons": 7,
       "metrics": {
-        "pressureRate": 0.24,
-        "sackRate": 0.08,
+        "pressureRate": 0.17,
+        "sackRate": 0.075,
         "yardsBeforeContact": 1.877,
-        "stuffRate": 0.288,
-        "separation": 2.731,
-        "yacOverExpected": 0.889,
-        "dropRate": 0.032,
-        "rushOverExpected": 1.278,
-        "brokenTackles": 0.031
+        "stuffRate": 0.275,
+        "separation": 2.733,
+        "yacOverExpected": 0.298,
+        "dropRate": 0.023,
+        "rushOverExpected": 1.141,
+        "brokenTackles": 0.027
       }
     },
     "Steelers": {
       "games": 3,
       "newCoach": false,
       "coach": "Mike McCarthy",
-      "oline": 5,
-      "weapons": 10.5,
+      "oline": 4.6,
+      "weapons": 10.8,
       "metrics": {
         "pressureRate": 0.168,
         "sackRate": 0.064,
@@ -491,7 +491,7 @@
       "newCoach": false,
       "coach": "Mike Macdonald",
       "oline": 10.5,
-      "weapons": 3.5,
+      "weapons": 3.1,
       "metrics": {
         "pressureRate": 0.099,
         "sackRate": 0.03,
@@ -526,7 +526,7 @@
       "games": 3,
       "newCoach": false,
       "coach": "Todd Bowles",
-      "oline": 4.6,
+      "oline": 5,
       "weapons": 5.4,
       "metrics": {
         "pressureRate": 0.123,
@@ -545,7 +545,7 @@
       "newCoach": false,
       "coach": "Robert Saleh",
       "oline": 10.1,
-      "weapons": 7.7,
+      "weapons": 8.5,
       "metrics": {
         "pressureRate": 0.162,
         "sackRate": 0.051,
@@ -580,7 +580,7 @@
   "qbs": {
     "8439": {
       "games": 3,
-      "responsibility": 8.3,
+      "responsibility": 8.4,
       "metrics": {
         "playShare": 0.629,
         "yardShare": 0.784
@@ -588,7 +588,7 @@
     },
     "12483": {
       "games": 3,
-      "responsibility": 4.7,
+      "responsibility": 4.9,
       "metrics": {
         "playShare": 0.579,
         "yardShare": 0.706
@@ -596,15 +596,23 @@
     },
     "14880": {
       "games": 3,
-      "responsibility": 3.3,
+      "responsibility": 3.6,
       "metrics": {
         "playShare": 0.534,
         "yardShare": 0.708
       }
     },
+    "15168": {
+      "games": 1,
+      "responsibility": 2.3,
+      "metrics": {
+        "playShare": 0.514,
+        "yardShare": 0.676
+      }
+    },
     "15864": {
       "games": 3,
-      "responsibility": 9,
+      "responsibility": 9.1,
       "metrics": {
         "playShare": 0.601,
         "yardShare": 0.829
@@ -620,7 +628,7 @@
     },
     "2576980": {
       "games": 1,
-      "responsibility": 4.3,
+      "responsibility": 4.5,
       "metrics": {
         "playShare": 0.537,
         "yardShare": 0.754
@@ -636,7 +644,7 @@
     },
     "2578570": {
       "games": 3,
-      "responsibility": 7.7,
+      "responsibility": 7.8,
       "metrics": {
         "playShare": 0.623,
         "yardShare": 0.746
@@ -660,7 +668,7 @@
     },
     "3046779": {
       "games": 3,
-      "responsibility": 6,
+      "responsibility": 6.2,
       "metrics": {
         "playShare": 0.6,
         "yardShare": 0.74
@@ -668,7 +676,7 @@
     },
     "3052587": {
       "games": 3,
-      "responsibility": 10,
+      "responsibility": 10.1,
       "metrics": {
         "playShare": 0.626,
         "yardShare": 0.812
@@ -684,7 +692,7 @@
     },
     "3139477": {
       "games": 3,
-      "responsibility": 3,
+      "responsibility": 3.2,
       "metrics": {
         "playShare": 0.551,
         "yardShare": 0.684
@@ -700,7 +708,7 @@
     },
     "3915511": {
       "games": 3,
-      "responsibility": 10.3,
+      "responsibility": 10.4,
       "metrics": {
         "playShare": 0.648,
         "yardShare": 0.799
@@ -708,7 +716,7 @@
     },
     "3916387": {
       "games": 3,
-      "responsibility": 2.7,
+      "responsibility": 2.9,
       "metrics": {
         "playShare": 0.503,
         "yardShare": 0.727
@@ -716,7 +724,7 @@
     },
     "3917315": {
       "games": 1,
-      "responsibility": 7.3,
+      "responsibility": 7.5,
       "metrics": {
         "playShare": 0.576,
         "yardShare": 0.804
@@ -724,7 +732,7 @@
     },
     "3917792": {
       "games": 3,
-      "responsibility": 5.3,
+      "responsibility": 5.5,
       "metrics": {
         "playShare": 0.584,
         "yardShare": 0.716
@@ -732,7 +740,7 @@
     },
     "3918298": {
       "games": 3,
-      "responsibility": 7,
+      "responsibility": 7.1,
       "metrics": {
         "playShare": 0.615,
         "yardShare": 0.748
@@ -740,7 +748,7 @@
     },
     "3924327": {
       "games": 2,
-      "responsibility": 1.7,
+      "responsibility": 1.6,
       "metrics": {
         "playShare": 0.429,
         "yardShare": 0.654
@@ -756,23 +764,23 @@
     },
     "4038941": {
       "games": 3,
-      "responsibility": 5,
+      "responsibility": 5.2,
       "metrics": {
         "playShare": 0.565,
         "yardShare": 0.729
       }
     },
     "4040715": {
-      "games": 2,
-      "responsibility": 8,
+      "games": 3,
+      "responsibility": 8.1,
       "metrics": {
-        "playShare": 0.605,
-        "yardShare": 0.803
+        "playShare": 0.609,
+        "yardShare": 0.78
       }
     },
     "4242512": {
       "games": 3,
-      "responsibility": 8.7,
+      "responsibility": 8.8,
       "metrics": {
         "playShare": 0.596,
         "yardShare": 0.835
@@ -780,7 +788,7 @@
     },
     "4360310": {
       "games": 3,
-      "responsibility": 2.3,
+      "responsibility": 2.6,
       "metrics": {
         "playShare": 0.52,
         "yardShare": 0.687
@@ -796,7 +804,7 @@
     },
     "4360689": {
       "games": 3,
-      "responsibility": 11.3,
+      "responsibility": 11.4,
       "metrics": {
         "playShare": 0.674,
         "yardShare": 0.856
@@ -804,7 +812,7 @@
     },
     "4361741": {
       "games": 3,
-      "responsibility": 4,
+      "responsibility": 4.2,
       "metrics": {
         "playShare": 0.548,
         "yardShare": 0.735
@@ -812,7 +820,7 @@
     },
     "4426338": {
       "games": 3,
-      "responsibility": 6.7,
+      "responsibility": 6.8,
       "metrics": {
         "playShare": 0.614,
         "yardShare": 0.749
@@ -820,7 +828,7 @@
     },
     "4426348": {
       "games": 2,
-      "responsibility": 0.7,
+      "responsibility": 0.6,
       "metrics": {
         "playShare": 0.461,
         "yardShare": 0.526
@@ -828,7 +836,7 @@
     },
     "4431452": {
       "games": 3,
-      "responsibility": 3.7,
+      "responsibility": 3.9,
       "metrics": {
         "playShare": 0.545,
         "yardShare": 0.725
@@ -836,7 +844,7 @@
     },
     "4431611": {
       "games": 2,
-      "responsibility": 2,
+      "responsibility": 1.9,
       "metrics": {
         "playShare": 0.507,
         "yardShare": 0.605
@@ -852,7 +860,7 @@
     },
     "4685720": {
       "games": 3,
-      "responsibility": 9.3,
+      "responsibility": 9.4,
       "metrics": {
         "playShare": 0.622,
         "yardShare": 0.808
@@ -860,7 +868,7 @@
     },
     "4688380": {
       "games": 3,
-      "responsibility": 6.3,
+      "responsibility": 6.5,
       "metrics": {
         "playShare": 0.626,
         "yardShare": 0.714
@@ -868,7 +876,7 @@
     },
     "4689114": {
       "games": 1,
-      "responsibility": 5.7,
+      "responsibility": 5.8,
       "metrics": {
         "playShare": 0.591,
         "yardShare": 0.724
