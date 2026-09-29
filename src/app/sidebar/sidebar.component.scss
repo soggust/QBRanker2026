@@ -926,13 +926,11 @@
   background-attachment: fixed;
 }
 
-// Header / footer dividers: thin, long dashes (yard-line style) instead of solid lines
+// Header / footer dividers: the menu body is the field. Each divider is a thick 4px sideline with
+// hash marks running into the body (down from the header, up from the footer): four little ones to
+// each big one, like the grid's category sidelines. Drawn in solid white and faded as a whole, so where a big
+// and little hash overlap they don't double up.
 .sidebar {
-  --yard-dash: repeating-linear-gradient(
-    90deg,
-    rgba(255, 255, 255, 0.15) 0 14px,
-    transparent 14px 30px
-  );
 
   .logo,
   footer {
@@ -949,21 +947,32 @@
 
   .logo::after,
   footer::before {
-    background: var(--yard-dash);
+    // --hash-edge (top or bottom) is the side the sideline sits on
+    // Hashes start at the sideline, so past its 4px they reach 10px (big) and 5px (little)
+    background:
+      linear-gradient(#fff, #fff) 0 var(--hash-edge) / 100% 4px no-repeat,
+      repeating-linear-gradient(90deg, #fff 0 1px, transparent 1px 60px) 8px var(--hash-edge) / 100% 14px no-repeat,
+      repeating-linear-gradient(90deg, #fff 0 1px, transparent 1px 12px) 8px var(--hash-edge) / 100% 9px no-repeat;
     content: "";
-    height: 2px;
+    height: 14px;
     left: 0;
+    opacity: 0.2;
     pointer-events: none;
     position: absolute;
     right: 0;
+    z-index: 1;
   }
 
+  // Sideline along the header's bottom edge, hashes hanging down into the body
   .logo::after {
-    bottom: 0;
+    --hash-edge: top;
+    top: 100%;
   }
 
+  // Sideline along the footer's top edge, hashes standing up into the body
   footer::before {
-    top: 0;
+    --hash-edge: bottom;
+    bottom: 100%;
   }
 }
 
@@ -1306,5 +1315,27 @@
     border: none;
     color: #fff;
     filter: brightness(1.15);
+  }
+}
+
+// Season and presets dropdowns share one row, the width of the cards below: the year takes a narrow
+// box, the presets the rest (the row carries the spacing the dropdowns had on their own)
+.sidebar .filters .dropdown-row {
+  display: flex;
+  gap: 0.6em;
+  margin: 1.4em 0 2.6em;
+
+  .mat-mdc-select {
+    margin: 0;
+    width: auto;
+  }
+
+  .mat-mdc-select.season-select {
+    flex: 0 0 30%;
+  }
+
+  .mat-mdc-select:not(.season-select) {
+    flex: 1 1 auto;
+    min-width: 0;
   }
 }

@@ -27,7 +27,7 @@
               "src/favicon.ico",
               "src/favicon.svg",
               "src/assets",
-              { "glob": "*.json", "input": "src/StaticData", "output": "data" }
+              { "glob": "**/*.json", "input": "src/StaticData", "output": "data" }
             ],
             "styles": ["src/styles.scss"],
             "scripts": []

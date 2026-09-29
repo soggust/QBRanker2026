@@ -1,7 +1,8 @@
 import { dataWeight, preseasonCoaching, preseasonOline, preseasonWeapons, teamGamesPlayed } from 'StaticData/StaticData';
+import { CURRENT_SEASON, dataSeason, loadData } from 'StaticData/data';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, combineLatest, distinctUntilChanged, map, shareReplay } from 'rxjs';
-import { SKILL_UNITS, curveGrades, defaultRanking, gradesByRank } from 'app/utils/unit-scoring';
+import { SKILL_UNITS, curveGrades, defaultRanking, gradesByRank, rebuildUnits } from 'app/utils/unit-scoring';
 import {
   FantasyScoring,
   POSITIONS,
@@ -32,6 +33,8 @@ export interface RankerSettings {
   perGame: boolean;
   showUnused: boolean;
   showInjured: boolean;
+  // Players with fewer games are left out (player tabs only; see SkillRankingsComponent.minGamesFor)
+  minGames: number;
   totalStats: boolean;
   // Tint values green / red by how far above / below the list average they are
   colorValues: boolean;
@@ -45,10 +48,13 @@ export interface RankerSettings {
 }
 
 const SETTINGS_KEY = 'rankerSettings';
+// The Min Games setting runs 1 to a full season
+export const MAX_MIN_GAMES = 17;
 const DEFAULT_SETTINGS: RankerSettings = {
   perGame: false,
   showUnused: false,
   showInjured: true,
+  minGames: 1,
   totalStats: true,
   colorValues: true,
   categoryColors: true,
@@ -62,6 +68,8 @@ function readSettings(): RankerSettings {
     const saved = { ...DEFAULT_SETTINGS, ...JSON.parse(localStorage.getItem(SETTINGS_KEY) ?? '{}') };
     // Unit ranks used to offer EPA (now its own columns)
     if (!['points', 'yards'].includes(saved.rankBasis)) saved.rankBasis = DEFAULT_SETTINGS.rankBasis;
+    const minGames = Math.round(Number(saved.minGames));
+    saved.minGames = minGames >= 1 && minGames <= MAX_MIN_GAMES ? minGames : DEFAULT_SETTINGS.minGames;
     return saved;
   } catch {
     return DEFAULT_SETTINGS;
@@ -99,23 +107,27 @@ function teamGradesByUsage(ranked: SkillPlayer[], usage: (player: SkillPlayer) =
   return new Map([...totals].map(([team, { sum, usage }]) => [team, sum / usage]));
 }
 
+// A receiver's targets, or his catches in the seasons that didn't record targets (2003-2008)
+const looks = (p: SkillPlayer) => p.stats.targets ?? p.stats.receptions ?? 0;
+
 // How much each position counts toward a team's weapons grade (receivers lead: it's mostly about
 // who the QB throws to). A team missing a position splits its share among the others.
 const WEAPONS_SHARES: [SkillPosition, number, (player: SkillPlayer) => number][] = [
-  ['WR', 0.5, (p) => p.stats.targets ?? 0],
-  ['RB', 0.3, (p) => (p.stats.carries ?? 0) + (p.stats.targets ?? 0)],
-  ['TE', 0.2, (p) => p.stats.targets ?? 0],
+  ['WR', 0.5, (p) => looks(p)],
+  ['RB', 0.3, (p) => (p.stats.carries ?? 0) + looks(p)],
+  ['TE', 0.2, (p) => looks(p)],
 ];
 
-// Every team (logo path), for grades that cover the whole league
-const ALL_TEAMS = SKILL_UNITS.DEF.map((unit) => unit.teamLogo);
+// Every team in the loaded season (logo path), for grades that cover the whole league (31 teams
+// before 2002)
+const allTeams = () => SKILL_UNITS.DEF.map((unit) => unit.teamLogo);
 
 // A team grade that starts from preseason: each team's preseason grade blended with this season's
 // grade (leaning on this season more with every game played), then curved so the best team is an
 // A+ and the worst an F
 function blendedCurve(preseason: (team: string) => number, season: Map<string, number>): Map<string, number> {
   const scores = new Map(
-    ALL_TEAMS.map((team) => {
+    allTeams().map((team) => {
       const start = preseason(team);
       const now = season.get(team);
       return [team, now === undefined ? start : start + (now - start) * dataWeight(teamGamesPlayed(team))];
@@ -158,6 +170,42 @@ export class PositionService {
   // when you switch away and back. manual: the order was dragged by hand, so it stays put until
   // that tab's own sliders or settings re-sort it.
   private unitOrdersSubject = new BehaviorSubject<Partial<Record<SkillPosition, UnitOrder>>>({});
+
+  // The season on screen (the year selector). Sliders, eyes and column orders carry over to another
+  // season; each season keeps its own tab orders (drags included) while the page is open.
+  private seasonSubject = new BehaviorSubject<number>(dataSeason);
+  public season$ = this.seasonSubject.asObservable();
+  private seasonLoadingSubject = new BehaviorSubject<boolean>(false);
+  public seasonLoading$ = this.seasonLoadingSubject.asObservable();
+  private ordersBySeason = new Map<number, Partial<Record<SkillPosition, UnitOrder>>>();
+
+  get season(): number {
+    return this.seasonSubject.value;
+  }
+
+  // Load another season's data and show it. The rows are rebuilt first, then the orders swap to that
+  // season's (which re-ranks every tab and re-grades the teams), then the pages hear the season changed.
+  async setSeason(season: number): Promise<void> {
+    if (season === this.season || this.seasonLoadingSubject.value) return;
+    this.seasonLoadingSubject.next(true);
+    try {
+      await loadData(season);
+      rebuildUnits();
+      this.ordersBySeason.set(this.season, this.unitOrdersSubject.value);
+      this.unitOrdersSubject.next(this.ordersBySeason.get(season) ?? {});
+      this.seasonSubject.next(season);
+
+      // A past season goes in the address, so a shared link opens it (?season=2024)
+      const url = new URL(location.href);
+      if (season === CURRENT_SEASON) url.searchParams.delete('season');
+      else url.searchParams.set('season', String(season));
+      history.replaceState(null, '', url);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      this.seasonLoadingSubject.next(false);
+    }
+  }
 
   unitOrder(position: SkillPosition): UnitOrder | undefined {
     return this.unitOrdersSubject.value[position];

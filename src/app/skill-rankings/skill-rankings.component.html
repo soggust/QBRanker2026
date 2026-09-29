@@ -78,6 +78,28 @@
                 [title]="'This player is currently injured (' + player.injuryStatus + ')'"
               ></mat-icon>
             }
+            <!-- The season's awards: a Lombardi for the Super Bowl champion, a silver cup for both conference
+                 champions, and small plaques (gold awards, silver All-Pro, bronze Pro Bowl); hover one for
+                 the award written out -->
+            @if (awards(player); as won) {
+              @if (won.length) {
+                <span class="player-awards">
+                  @for (award of won; track award.id) {
+                    @if (award.id === 'sb') {
+                      <span class="lombardi award-trophy" [title]="award.title"></span
+                      ><span class="visually-hidden">{{ awardInfo[award.id].short }}</span>
+                    } @else if (award.id === 'conf') {
+                      <mat-icon class="award-cup" fontIcon="emoji_events" [title]="award.title"></mat-icon
+                      ><span class="visually-hidden">{{ awardInfo[award.id].short }}</span>
+                    } @else {
+                      <span class="award-badge" [ngClass]="'award-' + award.id" [title]="award.title"
+                        >{{ awardInfo[award.id].short }}</span
+                      >
+                    }
+                  }
+                </span>
+              }
+            }
           </p>
         </div>
 
@@ -144,7 +166,7 @@
       fontIcon="sports_football"
       class="sports-football"
     ></mat-icon>
-    <h1>2026 NFL Ranker</h1>
+    <h1>NFL Ranker</h1>
     <p class="small">
       Stats courtesy of
       <a href="https://www.espn.com/nfl/" target="_blank" rel="noopener" title="ESPN"
@@ -298,6 +320,24 @@
           (click)="$event.stopPropagation()"
         ></mat-slide-toggle>
         <span>Injured Players</span>
+      </div>
+      <div
+        mat-menu-item
+        class="min-games-item"
+        [class.off]="minGamesOff"
+        [title]="
+          minGamesOff
+            ? 'Min Games is disabled for current season'
+            : 'Leave out players with fewer games than this (player tabs only)'
+        "
+        (click)="$event.stopPropagation()"
+      >
+        <span class="min-games-stepper" (click)="$event.stopPropagation()">
+          <button type="button" aria-label="Fewer games" [disabled]="minGamesOff || minGames <= 1" (click)="stepMinGames(-1)">−</button>
+          <span class="min-games-value">{{ minGames }}</span>
+          <button type="button" aria-label="More games" [disabled]="minGamesOff || minGames >= seasonGames" (click)="stepMinGames(1)">+</button>
+        </span>
+        <span>Min Games</span>
       </div>
     </mat-menu>
   </footer>

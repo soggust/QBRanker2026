@@ -1,0 +1,2510 @@
+[
+  {
+    "id": 8439,
+    "name": "Aaron Rodgers",
+    "team": "Green Bay Packers",
+    "teamLogo": "../assets/NFL_Icons/Packers.png",
+    "wins": 11,
+    "losses": 5,
+    "ties": 0,
+    "lastFive": [
+      0,
+      1,
+      1,
+      1,
+      1
+    ],
+    "starts": {
+      "../assets/NFL_Icons/Packers.png": 16
+    },
+    "advanced": {
+      "pressureToSack": null,
+      "badThrowPct": null,
+      "timeToThrow": null,
+      "adot": null,
+      "aggressiveness": null,
+      "epaPerPlay": 0.224,
+      "cpoe": 5.836,
+      "successRate": 0.526,
+      "plays": 694,
+      "fantasyStd": 343.6,
+      "receptions": 1,
+      "competitive": {
+        "epaPerPlay": 0.265,
+        "cpoe": 8.18,
+        "successRate": 0.556
+      }
+    },
+    "box": {
+      "games": 16,
+      "fumLost": 4,
+      "passYards": 4295,
+      "passTd": 39,
+      "ints": 8,
+      "compPercent": 67.2,
+      "ypa": 7.78,
+      "rating": 108,
+      "rushYards": 259,
+      "rushTd": 2
+    },
+    "injuryStatus": "Active",
+    "injured": false
+  },
+  {
+    "id": 8416,
+    "name": "Alex Smith",
+    "team": "San Francisco 49ers",
+    "teamLogo": "../assets/NFL_Icons/49ers.png",
+    "wins": 6,
+    "losses": 2,
+    "ties": 0,
+    "lastFive": [
+      1,
+      1,
+      0,
+      1,
+      1
+    ],
+    "starts": {
+      "../assets/NFL_Icons/49ers.png": 8
+    },
+    "advanced": {
+      "pressureToSack": null,
+      "badThrowPct": null,
+      "timeToThrow": null,
+      "adot": null,
+      "aggressiveness": null,
+      "epaPerPlay": 0.155,
+      "cpoe": 5.234,
+      "successRate": 0.513,
+      "plays": 275,
+      "fantasyStd": 122.68,
+      "receptions": 0,
+      "competitive": {
+        "epaPerPlay": 0.226,
+        "cpoe": 6.602,
+        "successRate": 0.548
+      }
+    },
+    "box": {
+      "games": 10,
+      "fumLost": 1,
+      "passYards": 1737,
+      "passTd": 13,
+      "ints": 5,
+      "compPercent": 70.2,
+      "ypa": 7.97,
+      "rating": 104.1,
+      "rushYards": 132,
+      "rushTd": 0
+    },
+    "injuryStatus": "Active",
+    "injured": false
+  },
+  {
+    "id": 14874,
+    "name": "Andrew Luck",
+    "team": "Indianapolis Colts",
+    "teamLogo": "../assets/NFL_Icons/Colts.png",
+    "wins": 11,
+    "losses": 5,
+    "ties": 0,
+    "lastFive": [
+      1,
+      1,
+      0,
+      1,
+      1
+    ],
+    "starts": {
+      "../assets/NFL_Icons/Colts.png": 16
+    },
+    "advanced": {
+      "pressureToSack": null,
+      "badThrowPct": null,
+      "timeToThrow": null,
+      "adot": null,
+      "aggressiveness": null,
+      "epaPerPlay": 0.105,
+      "cpoe": -4.314,
+      "successRate": 0.476,
+      "plays": 752,
+      "fantasyStd": 276.46,
+      "receptions": 0,
+      "competitive": {
+        "epaPerPlay": 0.157,
+        "cpoe": -3.993,
+        "successRate": 0.48
+      }
+    },
+    "box": {
+      "games": 16,
+      "fumLost": 5,
+      "passYards": 4374,
+      "passTd": 23,
+      "ints": 18,
+      "compPercent": 54.1,
+      "ypa": 6.98,
+      "rating": 76.5,
+      "rushYards": 255,
+      "rushTd": 5
+    },
+    "injuryStatus": "Active",
+    "injured": false
+  },
+  {
+    "id": 14012,
+    "name": "Andy Dalton",
+    "team": "Cincinnati Bengals",
+    "teamLogo": "../assets/NFL_Icons/Bengals.png",
+    "wins": 10,
+    "losses": 6,
+    "ties": 0,
+    "lastFive": [
+      1,
+      1,
+      1,
+      0,
+      1
+    ],
+    "starts": {
+      "../assets/NFL_Icons/Bengals.png": 16
+    },
+    "advanced": {
+      "pressureToSack": null,
+      "badThrowPct": null,
+      "timeToThrow": null,
+      "adot": null,
+      "aggressiveness": null,
+      "epaPerPlay": 0.038,
+      "cpoe": 1.455,
+      "successRate": 0.456,
+      "plays": 630,
+      "fantasyStd": 250.76,
+      "receptions": 0,
+      "competitive": {
+        "epaPerPlay": 0.08,
+        "cpoe": 1.437,
+        "successRate": 0.463
+      }
+    },
+    "box": {
+      "games": 16,
+      "fumLost": 4,
+      "passYards": 3669,
+      "passTd": 27,
+      "ints": 16,
+      "compPercent": 62.3,
+      "ypa": 6.95,
+      "rating": 87.4,
+      "rushYards": 120,
+      "rushTd": 4
+    },
+    "injuryStatus": "Active",
+    "injured": false
+  },
+  {
+    "id": 5536,
+    "name": "Ben Roethlisberger",
+    "team": "Pittsburgh Steelers",
+    "teamLogo": "../assets/NFL_Icons/Steelers.png",
+    "wins": 7,
+    "losses": 6,
+    "ties": 0,
+    "lastFive": [
+      1,
+      0,
+      0,
+      0,
+      1
+    ],
+    "starts": {
+      "../assets/NFL_Icons/Steelers.png": 13
+    },
+    "advanced": {
+      "pressureToSack": null,
+      "badThrowPct": null,
+      "timeToThrow": null,
+      "adot": null,
+      "aggressiveness": null,
+      "epaPerPlay": 0.142,
+      "cpoe": 2.468,
+      "successRate": 0.504,
+      "plays": 510,
+      "fantasyStd": 223.8,
+      "receptions": 0,
+      "competitive": {
+        "epaPerPlay": 0.158,
+        "cpoe": 2.365,
+        "successRate": 0.503
+      }
+    },
+    "box": {
+      "games": 13,
+      "fumLost": 3,
+      "passYards": 3265,
+      "passTd": 26,
+      "ints": 8,
+      "compPercent": 63.3,
+      "ypa": 7.27,
+      "rating": 97,
+      "rushYards": 92,
+      "rushTd": 0
+    },
+    "injuryStatus": "Active",
+    "injured": false
+  },
+  {
+    "id": 13987,
+    "name": "Blaine Gabbert",
+    "team": "Jacksonville Jaguars",
+    "teamLogo": "../assets/NFL_Icons/Jaguars.png",
+    "wins": 1,
+    "losses": 7,
+    "ties": 0,
+    "lastFive": [
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "starts": {
+      "../assets/NFL_Icons/Jaguars.png": 8
+    },
+    "advanced": {
+      "pressureToSack": null,
+      "badThrowPct": null,
+      "timeToThrow": null,
+      "adot": null,
+      "aggressiveness": null,
+      "epaPerPlay": -0.102,
+      "cpoe": -5.215,
+      "successRate": 0.431,
+      "plays": 343,
+      "fantasyStd": 94.08,
+      "receptions": 0,
+      "competitive": {
+        "epaPerPlay": -0.01,
+        "cpoe": -4.614,
+        "successRate": 0.44
+      }
+    },
+    "box": {
+      "games": 10,
+      "fumLost": 3,
+      "passYards": 1662,
+      "passTd": 9,
+      "ints": 6,
+      "compPercent": 58.3,
+      "ypa": 5.98,
+      "rating": 77.4,
+      "rushYards": 56,
+      "rushTd": 0
+    },
+    "injuryStatus": "Active",
+    "injured": false
+  },
+  {
+    "id": 10466,
+    "name": "Brady Quinn",
+    "team": "Kansas City Chiefs",
+    "teamLogo": "../assets/NFL_Icons/Chiefs.png",
+    "wins": 1,
+    "losses": 6,
+    "ties": 0,
+    "lastFive": [
+      0,
+      0,
+      0,
+      0,
+      1
+    ],
+    "starts": {
+      "../assets/NFL_Icons/Chiefs.png": 7
+    },
+    "advanced": {
+      "pressureToSack": null,
+      "badThrowPct": null,
+      "timeToThrow": null,
+      "adot": null,
+      "aggressiveness": null,
+      "epaPerPlay": -0.297,
+      "cpoe": -4.207,
+      "successRate": 0.362,
+      "plays": 243,
+      "fantasyStd": 44.24,
+      "receptions": 0,
+      "competitive": {
+        "epaPerPlay": -0.248,
+        "cpoe": -0.457,
+        "successRate": 0.385
+      }
+    },
+    "box": {
+      "games": 10,
+      "fumLost": 0,
+      "passYards": 1141,
+      "passTd": 2,
+      "ints": 8,
+      "compPercent": 56.9,
+      "ypa": 5.79,
+      "rating": 60.1,
+      "rushYards": 66,
+      "rushTd": 0
+    },
+    "injuryStatus": "Active",
+    "injured": false
+  },
+  {
+    "id": 14878,
+    "name": "Brandon Weeden",
+    "team": "Cleveland Browns",
+    "teamLogo": "../assets/NFL_Icons/Browns.png",
+    "wins": 5,
+    "losses": 10,
+    "ties": 0,
+    "lastFive": [
+      0,
+      0,
+      1,
+      1,
+      1
+    ],
+    "starts": {
+      "../assets/NFL_Icons/Browns.png": 15
+    },
+    "advanced": {
+      "pressureToSack": null,
+      "badThrowPct": null,
+      "timeToThrow": null,
+      "adot": null,
+      "aggressiveness": null,
+      "epaPerPlay": -0.038,
+      "cpoe": -4.655,
+      "successRate": 0.419,
+      "plays": 585,
+      "fantasyStd": 165.6,
+      "receptions": 0,
+      "competitive": {
+        "epaPerPlay": -0.033,
+        "cpoe": -5.274,
+        "successRate": 0.416
+      }
+    },
+    "box": {
+      "games": 15,
+      "fumLost": 1,
+      "passYards": 3385,
+      "passTd": 14,
+      "ints": 17,
+      "compPercent": 57.4,
+      "ypa": 6.55,
+      "rating": 72.6,
+      "rushYards": 111,
+      "rushTd": 0
+    },
+    "injuryStatus": "Active",
+    "injured": false
+  },
+  {
+    "id": 12477,
+    "name": "Brian Hoyer",
+    "team": "Arizona Cardinals",
+    "teamLogo": "../assets/NFL_Icons/Cardinals.png",
+    "wins": 0,
+    "losses": 1,
+    "ties": 0,
+    "lastFive": [
+      0
+    ],
+    "starts": {
+      "../assets/NFL_Icons/Cardinals.png": 1
+    },
+    "advanced": {
+      "pressureToSack": null,
+      "badThrowPct": null,
+      "timeToThrow": null,
+      "adot": null,
+      "aggressiveness": null,
+      "epaPerPlay": -0.205,
+      "cpoe": -5.65,
+      "successRate": 0.367,
+      "plays": 60,
+      "fantasyStd": 13.8,
+      "receptions": 0,
+      "competitive": {
+        "epaPerPlay": -0.251,
+        "cpoe": -17.647,
+        "successRate": 0.36
+      }
+    },
+    "box": {
+      "games": 2,
+      "fumLost": 0,
+      "passYards": 330,
+      "passTd": 1,
+      "ints": 2,
+      "compPercent": 56.6,
+      "ypa": 6.23,
+      "rating": 65.8,
+      "rushYards": 6,
+      "rushTd": 0
+    },
+    "injuryStatus": "Active",
+    "injured": false
+  },
+  {
+    "id": 4465,
+    "name": "Byron Leftwich",
+    "team": "Pittsburgh Steelers",
+    "teamLogo": "../assets/NFL_Icons/Steelers.png",
+    "wins": 0,
+    "losses": 1,
+    "ties": 0,
+    "lastFive": [
+      0
+    ],
+    "starts": {
+      "../assets/NFL_Icons/Steelers.png": 1
+    },
+    "advanced": {
+      "pressureToSack": null,
+      "badThrowPct": null,
+      "timeToThrow": null,
+      "adot": null,
+      "aggressiveness": null,
+      "epaPerPlay": 0.07,
+      "cpoe": -12.902,
+      "successRate": 0.361,
+      "plays": 61,
+      "fantasyStd": 17.98,
+      "receptions": 0,
+      "competitive": {
+        "epaPerPlay": 0.099,
+        "cpoe": -13.728,
+        "successRate": 0.35
+      }
+    },
+    "box": {
+      "games": 2,
+      "fumLost": 0,
+      "passYards": 272,
+      "passTd": 0,
+      "ints": 1,
+      "compPercent": 47.2,
+      "ypa": 5.13,
+      "rating": 54.9,
+      "rushYards": 31,
+      "rushTd": 1
+    },
+    "injuryStatus": "Active",
+    "injured": false
+  },
+  {
+    "id": 13994,
+    "name": "Cam Newton",
+    "team": "Carolina Panthers",
+    "teamLogo": "../assets/NFL_Icons/Panthers.png",
+    "wins": 7,
+    "losses": 9,
+    "ties": 0,
+    "lastFive": [
+      1,
+      1,
+      1,
+      1,
+      0
+    ],
+    "starts": {
+      "../assets/NFL_Icons/Panthers.png": 16
+    },
+    "advanced": {
+      "pressureToSack": null,
+      "badThrowPct": null,
+      "timeToThrow": null,
+      "adot": null,
+      "aggressiveness": null,
+      "epaPerPlay": 0.168,
+      "cpoe": -1.64,
+      "successRate": 0.472,
+      "plays": 672,
+      "fantasyStd": 325.46,
+      "receptions": 0,
+      "competitive": {
+        "epaPerPlay": 0.161,
+        "cpoe": -3.019,
+        "successRate": 0.461
+      }
+    },
+    "box": {
+      "games": 16,
+      "fumLost": 3,
+      "passYards": 3869,
+      "passTd": 19,
+      "ints": 12,
+      "compPercent": 57.7,
+      "ypa": 7.98,
+      "rating": 86.2,
+      "rushYards": 741,
+      "rushTd": 8
+    },
+    "injuryStatus": "Active",
+    "injured": false
+  },
+  {
+    "id": 4459,
+    "name": "Carson Palmer",
+    "team": "Oakland Raiders",
+    "teamLogo": "../assets/NFL_Icons/Raiders.png",
+    "wins": 4,
+    "losses": 10,
+    "ties": 0,
+    "lastFive": [
+      1,
+      0,
+      0,
+      0,
+      0
+    ],
+    "starts": {
+      "../assets/NFL_Icons/Raiders.png": 14
+    },
+    "advanced": {
+      "pressureToSack": null,
+      "badThrowPct": null,
+      "timeToThrow": null,
+      "adot": null,
+      "aggressiveness": null,
+      "epaPerPlay": 0.065,
+      "cpoe": -0.427,
+      "successRate": 0.461,
+      "plays": 631,
+      "fantasyStd": 224.32,
+      "receptions": 0,
+      "competitive": {
+        "epaPerPlay": 0.025,
+        "cpoe": -0.627,
+        "successRate": 0.453
+      }
+    },
+    "box": {
+      "games": 15,
+      "fumLost": 5,
+      "passYards": 4018,
+      "passTd": 22,
+      "ints": 14,
+      "compPercent": 61.1,
+      "ypa": 7.11,
+      "rating": 85.3,
+      "rushYards": 36,
+      "rushTd": 1
+    },
+    "injuryStatus": "Active",
+    "injured": false
+  },
+  {
+    "id": 11291,
+    "name": "Chad Henne",
+    "team": "Jacksonville Jaguars",
+    "teamLogo": "../assets/NFL_Icons/Jaguars.png",
+    "wins": 1,
+    "losses": 7,
+    "ties": 0,
+    "lastFive": [
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "starts": {
+      "../assets/NFL_Icons/Jaguars.png": 8
+    },
+    "advanced": {
+      "pressureToSack": null,
+      "badThrowPct": null,
+      "timeToThrow": null,
+      "adot": null,
+      "aggressiveness": null,
+      "epaPerPlay": -0.119,
+      "cpoe": -4.94,
+      "successRate": 0.414,
+      "plays": 374,
+      "fantasyStd": 113.16,
+      "receptions": 1,
+      "competitive": {
+        "epaPerPlay": -0.081,
+        "cpoe": -7.688,
+        "successRate": 0.395
+      }
+    },
+    "box": {
+      "games": 10,
+      "fumLost": 2,
+      "passYards": 2084,
+      "passTd": 11,
+      "ints": 11,
+      "compPercent": 53.9,
+      "ypa": 6.77,
+      "rating": 72.2,
+      "rushYards": 64,
+      "rushTd": 1
+    },
+    "injuryStatus": "Active",
+    "injured": false
+  },
+  {
+    "id": 1490,
+    "name": "Charlie Batch",
+    "team": "Pittsburgh Steelers",
+    "teamLogo": "../assets/NFL_Icons/Steelers.png",
+    "wins": 1,
+    "losses": 1,
+    "ties": 0,
+    "lastFive": [
+      1,
+      0
+    ],
+    "starts": {
+      "../assets/NFL_Icons/Steelers.png": 2
+    },
+    "advanced": {
+      "pressureToSack": null,
+      "badThrowPct": null,
+      "timeToThrow": null,
+      "adot": null,
+      "aggressiveness": null,
+      "epaPerPlay": 0.005,
+      "cpoe": 1.45,
+      "successRate": 0.463,
+      "plays": 80,
+      "fantasyStd": 15,
+      "receptions": 0,
+      "competitive": {
+        "epaPerPlay": 0.004,
+        "cpoe": 1.673,
+        "successRate": 0.455
+      }
+    },
+    "box": {
+      "games": 2,
+      "fumLost": 0,
+      "passYards": 475,
+      "passTd": 1,
+      "ints": 4,
+      "compPercent": 64.3,
+      "ypa": 6.79,
+      "rating": 64.9,
+      "rushYards": 0,
+      "rushTd": 0
+    },
+    "injuryStatus": "Active",
+    "injured": false
+  },
+  {
+    "id": 13966,
+    "name": "Christian Ponder",
+    "team": "Minnesota Vikings",
+    "teamLogo": "../assets/NFL_Icons/Vikings.png",
+    "wins": 10,
+    "losses": 6,
+    "ties": 0,
+    "lastFive": [
+      1,
+      1,
+      1,
+      1,
+      0
+    ],
+    "starts": {
+      "../assets/NFL_Icons/Vikings.png": 16
+    },
+    "advanced": {
+      "pressureToSack": null,
+      "badThrowPct": null,
+      "timeToThrow": null,
+      "adot": null,
+      "aggressiveness": null,
+      "epaPerPlay": 0.026,
+      "cpoe": -2.384,
+      "successRate": 0.441,
+      "plays": 587,
+      "fantasyStd": 193.2,
+      "receptions": 1,
+      "competitive": {
+        "epaPerPlay": 0.109,
+        "cpoe": -0.94,
+        "successRate": 0.454
+      }
+    },
+    "box": {
+      "games": 16,
+      "fumLost": 5,
+      "passYards": 2935,
+      "passTd": 18,
+      "ints": 12,
+      "compPercent": 62.1,
+      "ypa": 6.08,
+      "rating": 81.2,
+      "rushYards": 253,
+      "rushTd": 2
+    },
+    "injuryStatus": "Active",
+    "injured": false
+  },
+  {
+    "id": 14001,
+    "name": "Colin Kaepernick",
+    "team": "San Francisco 49ers",
+    "teamLogo": "../assets/NFL_Icons/49ers.png",
+    "wins": 5,
+    "losses": 2,
+    "ties": 1,
+    "lastFive": [
+      1,
+      0,
+      1,
+      1,
+      0
+    ],
+    "starts": {
+      "../assets/NFL_Icons/49ers.png": 8
+    },
+    "advanced": {
+      "pressureToSack": null,
+      "badThrowPct": null,
+      "timeToThrow": null,
+      "adot": null,
+      "aggressiveness": null,
+      "epaPerPlay": 0.195,
+      "cpoe": 4.48,
+      "successRate": 0.479,
+      "plays": 303,
+      "fantasyStd": 174.06,
+      "receptions": 0,
+      "competitive": {
+        "epaPerPlay": 0.265,
+        "cpoe": 5.87,
+        "successRate": 0.495
+      }
+    },
+    "box": {
+      "games": 13,
+      "fumLost": 2,
+      "passYards": 1814,
+      "passTd": 10,
+      "ints": 3,
+      "compPercent": 62.4,
+      "ypa": 8.32,
+      "rating": 98.3,
+      "rushYards": 415,
+      "rushTd": 5
+    },
+    "injuryStatus": "Active",
+    "injured": false
+  },
+  {
+    "id": 2580,
+    "name": "Drew Brees",
+    "team": "New Orleans Saints",
+    "teamLogo": "../assets/NFL_Icons/Saints.png",
+    "wins": 7,
+    "losses": 9,
+    "ties": 0,
+    "lastFive": [
+      0,
+      1,
+      1,
+      0,
+      0
+    ],
+    "starts": {
+      "../assets/NFL_Icons/Saints.png": 16
+    },
+    "advanced": {
+      "pressureToSack": null,
+      "badThrowPct": null,
+      "timeToThrow": null,
+      "adot": null,
+      "aggressiveness": null,
+      "epaPerPlay": 0.18,
+      "cpoe": 0.995,
+      "successRate": 0.513,
+      "plays": 723,
+      "fantasyStd": 345.58,
+      "receptions": 0,
+      "competitive": {
+        "epaPerPlay": 0.213,
+        "cpoe": 1.4,
+        "successRate": 0.52
+      }
+    },
+    "box": {
+      "games": 16,
+      "fumLost": 1,
+      "passYards": 5177,
+      "passTd": 43,
+      "ints": 19,
+      "compPercent": 63,
+      "ypa": 7.73,
+      "rating": 96.3,
+      "rushYards": 5,
+      "rushTd": 1
+    },
+    "injuryStatus": "Active",
+    "injured": false
+  },
+  {
+    "id": 5526,
+    "name": "Eli Manning",
+    "team": "New York Giants",
+    "teamLogo": "../assets/NFL_Icons/Giants.png",
+    "wins": 9,
+    "losses": 7,
+    "ties": 0,
+    "lastFive": [
+      1,
+      0,
+      0,
+      1,
+      0
+    ],
+    "starts": {
+      "../assets/NFL_Icons/Giants.png": 16
+    },
+    "advanced": {
+      "pressureToSack": null,
+      "badThrowPct": null,
+      "timeToThrow": null,
+      "adot": null,
+      "aggressiveness": null,
+      "epaPerPlay": 0.144,
+      "cpoe": 0.735,
+      "successRate": 0.502,
+      "plays": 609,
+      "fantasyStd": 232.92,
+      "receptions": 0,
+      "competitive": {
+        "epaPerPlay": 0.194,
+        "cpoe": 4.274,
+        "successRate": 0.525
+      }
+    },
+    "box": {
+      "games": 16,
+      "fumLost": 1,
+      "passYards": 3948,
+      "passTd": 26,
+      "ints": 15,
+      "compPercent": 59.9,
+      "ypa": 7.37,
+      "rating": 87.2,
+      "rushYards": 30,
+      "rushTd": 0
+    },
+    "injuryStatus": "Active",
+    "injured": false
+  },
+  {
+    "id": 14101,
+    "name": "Greg McElroy",
+    "team": "New York Jets",
+    "teamLogo": "../assets/NFL_Icons/Jets.png",
+    "wins": 0,
+    "losses": 1,
+    "ties": 0,
+    "lastFive": [
+      0
+    ],
+    "starts": {
+      "../assets/NFL_Icons/Jets.png": 1
+    },
+    "advanced": {
+      "pressureToSack": null,
+      "badThrowPct": null,
+      "timeToThrow": null,
+      "adot": null,
+      "aggressiveness": null,
+      "epaPerPlay": -0.297,
+      "cpoe": 1.411,
+      "successRate": 0.377,
+      "plays": 53,
+      "fantasyStd": 11.56,
+      "receptions": 0,
+      "competitive": {
+        "epaPerPlay": -0.15,
+        "cpoe": -6.984,
+        "successRate": 0.342
+      }
+    },
+    "box": {
+      "games": 2,
+      "fumLost": 1,
+      "passYards": 214,
+      "passTd": 1,
+      "ints": 1,
+      "compPercent": 61.3,
+      "ypa": 6.9,
+      "rating": 79.2,
+      "rushYards": 30,
+      "rushTd": 0
+    },
+    "injuryStatus": "Active",
+    "injured": false
+  },
+  {
+    "id": 13969,
+    "name": "Jake Locker",
+    "team": "Tennessee Titans",
+    "teamLogo": "../assets/NFL_Icons/Titans.png",
+    "wins": 4,
+    "losses": 6,
+    "ties": 0,
+    "lastFive": [
+      1,
+      0,
+      1,
+      0,
+      0
+    ],
+    "starts": {
+      "../assets/NFL_Icons/Titans.png": 10
+    },
+    "advanced": {
+      "pressureToSack": null,
+      "badThrowPct": null,
+      "timeToThrow": null,
+      "adot": null,
+      "aggressiveness": null,
+      "epaPerPlay": -0.023,
+      "cpoe": -3.737,
+      "successRate": 0.391,
+      "plays": 399,
+      "fantasyStd": 132.14,
+      "receptions": 0,
+      "competitive": {
+        "epaPerPlay": -0.025,
+        "cpoe": -4.64,
+        "successRate": 0.38
+      }
+    },
+    "box": {
+      "games": 11,
+      "fumLost": 4,
+      "passYards": 2176,
+      "passTd": 10,
+      "ints": 11,
+      "compPercent": 56.4,
+      "ypa": 6.93,
+      "rating": 74,
+      "rushYards": 291,
+      "rushTd": 1
+    },
+    "injuryStatus": "Active",
+    "injured": false
+  },
+  {
+    "id": 8440,
+    "name": "Jason Campbell",
+    "team": "Chicago Bears",
+    "teamLogo": "../assets/NFL_Icons/Bears.png",
+    "wins": 0,
+    "losses": 2,
+    "ties": 0,
+    "lastFive": [
+      0,
+      0
+    ],
+    "starts": {
+      "../assets/NFL_Icons/Bears.png": 2
+    },
+    "advanced": {
+      "pressureToSack": null,
+      "badThrowPct": null,
+      "timeToThrow": null,
+      "adot": null,
+      "aggressiveness": null,
+      "epaPerPlay": -0.175,
+      "cpoe": 2.553,
+      "successRate": 0.409,
+      "plays": 66,
+      "fantasyStd": 17.4,
+      "receptions": 0,
+      "competitive": {
+        "epaPerPlay": -0.454,
+        "cpoe": -11.136,
+        "successRate": 0.192
+      }
+    },
+    "box": {
+      "games": 6,
+      "fumLost": 0,
+      "passYards": 265,
+      "passTd": 2,
+      "ints": 2,
+      "compPercent": 62.7,
+      "ypa": 5.2,
+      "rating": 72.8,
+      "rushYards": 28,
+      "rushTd": 0
+    },
+    "injuryStatus": "Active",
+    "injured": false
+  },
+  {
+    "id": 9597,
+    "name": "Jay Cutler",
+    "team": "Chicago Bears",
+    "teamLogo": "../assets/NFL_Icons/Bears.png",
+    "wins": 10,
+    "losses": 4,
+    "ties": 0,
+    "lastFive": [
+      1,
+      1,
+      0,
+      0,
+      0
+    ],
+    "starts": {
+      "../assets/NFL_Icons/Bears.png": 14
+    },
+    "advanced": {
+      "pressureToSack": null,
+      "badThrowPct": null,
+      "timeToThrow": null,
+      "adot": null,
+      "aggressiveness": null,
+      "epaPerPlay": 0.023,
+      "cpoe": -1.063,
+      "successRate": 0.43,
+      "plays": 530,
+      "fantasyStd": 184.62,
+      "receptions": 0,
+      "competitive": {
+        "epaPerPlay": -0.023,
+        "cpoe": -4.016,
+        "successRate": 0.412
+      }
+    },
+    "box": {
+      "games": 15,
+      "fumLost": 4,
+      "passYards": 3033,
+      "passTd": 19,
+      "ints": 14,
+      "compPercent": 58.8,
+      "ypa": 6.99,
+      "rating": 81.3,
+      "rushYards": 233,
+      "rushTd": 0
+    },
+    "injuryStatus": "Active",
+    "injured": false
+  },
+  {
+    "id": 11252,
+    "name": "Joe Flacco",
+    "team": "Baltimore Ravens",
+    "teamLogo": "../assets/NFL_Icons/Ravens.png",
+    "wins": 10,
+    "losses": 5,
+    "ties": 0,
+    "lastFive": [
+      1,
+      0,
+      0,
+      0,
+      1
+    ],
+    "starts": {
+      "../assets/NFL_Icons/Ravens.png": 15
+    },
+    "advanced": {
+      "pressureToSack": null,
+      "badThrowPct": null,
+      "timeToThrow": null,
+      "adot": null,
+      "aggressiveness": null,
+      "epaPerPlay": 0.061,
+      "cpoe": 0.019,
+      "successRate": 0.442,
+      "plays": 627,
+      "fantasyStd": 234.88,
+      "receptions": 0,
+      "competitive": {
+        "epaPerPlay": 0.048,
+        "cpoe": 1.115,
+        "successRate": 0.437
+      }
+    },
+    "box": {
+      "games": 16,
+      "fumLost": 4,
+      "passYards": 3817,
+      "passTd": 22,
+      "ints": 10,
+      "compPercent": 59.7,
+      "ypa": 7.19,
+      "rating": 87.7,
+      "rushYards": 22,
+      "rushTd": 3
+    },
+    "injuryStatus": "Active",
+    "injured": false
+  },
+  {
+    "id": 13458,
+    "name": "John Skelton",
+    "team": "Arizona Cardinals",
+    "teamLogo": "../assets/NFL_Icons/Cardinals.png",
+    "wins": 1,
+    "losses": 4,
+    "ties": 0,
+    "lastFive": [
+      0,
+      0,
+      0,
+      0,
+      1
+    ],
+    "starts": {
+      "../assets/NFL_Icons/Cardinals.png": 5
+    },
+    "advanced": {
+      "pressureToSack": null,
+      "badThrowPct": null,
+      "timeToThrow": null,
+      "adot": null,
+      "aggressiveness": null,
+      "epaPerPlay": -0.295,
+      "cpoe": -9.578,
+      "successRate": 0.381,
+      "plays": 226,
+      "fantasyStd": 31.78,
+      "receptions": 0,
+      "competitive": {
+        "epaPerPlay": -0.33,
+        "cpoe": -14.257,
+        "successRate": 0.371
+      }
+    },
+    "box": {
+      "games": 7,
+      "fumLost": 2,
+      "passYards": 1132,
+      "passTd": 2,
+      "ints": 9,
+      "compPercent": 54.2,
+      "ypa": 5.63,
+      "rating": 55.4,
+      "rushYards": 5,
+      "rushTd": 0
+    },
+    "injuryStatus": "Active",
+    "injured": false
+  },
+  {
+    "id": 12473,
+    "name": "Josh Freeman",
+    "team": "Tampa Bay Buccaneers",
+    "teamLogo": "../assets/NFL_Icons/Bucs.png",
+    "wins": 7,
+    "losses": 9,
+    "ties": 0,
+    "lastFive": [
+      1,
+      0,
+      0,
+      0,
+      0
+    ],
+    "starts": {
+      "../assets/NFL_Icons/Bucs.png": 16
+    },
+    "advanced": {
+      "pressureToSack": null,
+      "badThrowPct": null,
+      "timeToThrow": null,
+      "adot": null,
+      "aggressiveness": null,
+      "epaPerPlay": 0.041,
+      "cpoe": -4.16,
+      "successRate": 0.424,
+      "plays": 641,
+      "fantasyStd": 248.5,
+      "receptions": 0,
+      "competitive": {
+        "epaPerPlay": 0.082,
+        "cpoe": -4.191,
+        "successRate": 0.432
+      }
+    },
+    "box": {
+      "games": 16,
+      "fumLost": 2,
+      "passYards": 4065,
+      "passTd": 27,
+      "ints": 17,
+      "compPercent": 54.8,
+      "ypa": 7.28,
+      "rating": 81.6,
+      "rushYards": 139,
+      "rushTd": 0
+    },
+    "injuryStatus": "Active",
+    "injured": false
+  },
+  {
+    "id": 10480,
+    "name": "Kevin Kolb",
+    "team": "Arizona Cardinals",
+    "teamLogo": "../assets/NFL_Icons/Cardinals.png",
+    "wins": 3,
+    "losses": 2,
+    "ties": 0,
+    "lastFive": [
+      0,
+      0,
+      1,
+      1,
+      1
+    ],
+    "starts": {
+      "../assets/NFL_Icons/Cardinals.png": 5
+    },
+    "advanced": {
+      "pressureToSack": null,
+      "badThrowPct": null,
+      "timeToThrow": null,
+      "adot": null,
+      "aggressiveness": null,
+      "epaPerPlay": -0.082,
+      "cpoe": -4.656,
+      "successRate": 0.423,
+      "plays": 234,
+      "fantasyStd": 84.76,
+      "receptions": 0,
+      "competitive": {
+        "epaPerPlay": -0.03,
+        "cpoe": -5.612,
+        "successRate": 0.417
+      }
+    },
+    "box": {
+      "games": 6,
+      "fumLost": 2,
+      "passYards": 1169,
+      "passTd": 8,
+      "ints": 3,
+      "compPercent": 59.6,
+      "ypa": 6.39,
+      "rating": 86.1,
+      "rushYards": 100,
+      "rushTd": 1
+    },
+    "injuryStatus": "Active",
+    "injured": false
+  },
+  {
+    "id": 14880,
+    "name": "Kirk Cousins",
+    "team": "Washington Redskins",
+    "teamLogo": "../assets/NFL_Icons/Commanders.png",
+    "wins": 1,
+    "losses": 0,
+    "ties": 0,
+    "lastFive": [
+      1
+    ],
+    "starts": {
+      "../assets/NFL_Icons/Commanders.png": 1
+    },
+    "advanced": {
+      "pressureToSack": null,
+      "badThrowPct": null,
+      "timeToThrow": null,
+      "adot": null,
+      "aggressiveness": null,
+      "epaPerPlay": 0.3,
+      "cpoe": 6.927,
+      "successRate": 0.536,
+      "plays": 56,
+      "fantasyStd": 32.84,
+      "receptions": 0,
+      "competitive": {
+        "epaPerPlay": 0.201,
+        "cpoe": 3.444,
+        "successRate": 0.457
+      }
+    },
+    "box": {
+      "games": 3,
+      "fumLost": 0,
+      "passYards": 466,
+      "passTd": 4,
+      "ints": 3,
+      "compPercent": 68.8,
+      "ypa": 9.71,
+      "rating": 101.6,
+      "rushYards": 22,
+      "rushTd": 0
+    },
+    "injuryStatus": "Active",
+    "injured": false
+  },
+  {
+    "id": 12482,
+    "name": "Mark Sanchez",
+    "team": "New York Jets",
+    "teamLogo": "../assets/NFL_Icons/Jets.png",
+    "wins": 6,
+    "losses": 9,
+    "ties": 0,
+    "lastFive": [
+      0,
+      0,
+      1,
+      1,
+      0
+    ],
+    "starts": {
+      "../assets/NFL_Icons/Jets.png": 15
+    },
+    "advanced": {
+      "pressureToSack": null,
+      "badThrowPct": null,
+      "timeToThrow": null,
+      "adot": null,
+      "aggressiveness": null,
+      "epaPerPlay": -0.115,
+      "cpoe": -6.155,
+      "successRate": 0.437,
+      "plays": 536,
+      "fantasyStd": 118.12,
+      "receptions": 0,
+      "competitive": {
+        "epaPerPlay": -0.171,
+        "cpoe": -7.301,
+        "successRate": 0.421
+      }
+    },
+    "box": {
+      "games": 15,
+      "fumLost": 7,
+      "passYards": 2883,
+      "passTd": 13,
+      "ints": 18,
+      "compPercent": 54.3,
+      "ypa": 6.36,
+      "rating": 66.9,
+      "rushYards": 28,
+      "rushTd": 0
+    },
+    "injuryStatus": "Active",
+    "injured": false
+  },
+  {
+    "id": 8644,
+    "name": "Matt Cassel",
+    "team": "Kansas City Chiefs",
+    "teamLogo": "../assets/NFL_Icons/Chiefs.png",
+    "wins": 1,
+    "losses": 8,
+    "ties": 0,
+    "lastFive": [
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "starts": {
+      "../assets/NFL_Icons/Chiefs.png": 9
+    },
+    "advanced": {
+      "pressureToSack": null,
+      "badThrowPct": null,
+      "timeToThrow": null,
+      "adot": null,
+      "aggressiveness": null,
+      "epaPerPlay": -0.1,
+      "cpoe": -1.914,
+      "successRate": 0.448,
+      "plays": 330,
+      "fantasyStd": 78.34,
+      "receptions": 0,
+      "competitive": {
+        "epaPerPlay": -0.18,
+        "cpoe": -3.31,
+        "successRate": 0.44
+      }
+    },
+    "box": {
+      "games": 9,
+      "fumLost": 7,
+      "passYards": 1796,
+      "passTd": 6,
+      "ints": 12,
+      "compPercent": 58.1,
+      "ypa": 6.48,
+      "rating": 66.7,
+      "rushYards": 145,
+      "rushTd": 1
+    },
+    "injuryStatus": "Active",
+    "injured": false
+  },
+  {
+    "id": 1575,
+    "name": "Matt Hasselbeck",
+    "team": "Tennessee Titans",
+    "teamLogo": "../assets/NFL_Icons/Titans.png",
+    "wins": 2,
+    "losses": 4,
+    "ties": 0,
+    "lastFive": [
+      0,
+      0,
+      1,
+      1,
+      0
+    ],
+    "starts": {
+      "../assets/NFL_Icons/Titans.png": 6
+    },
+    "advanced": {
+      "pressureToSack": null,
+      "badThrowPct": null,
+      "timeToThrow": null,
+      "adot": null,
+      "aggressiveness": null,
+      "epaPerPlay": -0.055,
+      "cpoe": -1.078,
+      "successRate": 0.431,
+      "plays": 253,
+      "fantasyStd": 76.48,
+      "receptions": 0,
+      "competitive": {
+        "epaPerPlay": -0.033,
+        "cpoe": 0.864,
+        "successRate": 0.399
+      }
+    },
+    "box": {
+      "games": 8,
+      "fumLost": 1,
+      "passYards": 1367,
+      "passTd": 7,
+      "ints": 5,
+      "compPercent": 62.4,
+      "ypa": 6.19,
+      "rating": 81,
+      "rushYards": 38,
+      "rushTd": 0
+    },
+    "injuryStatus": "Active",
+    "injured": false
+  },
+  {
+    "id": 9596,
+    "name": "Matt Leinart",
+    "team": "Oakland Raiders",
+    "teamLogo": "../assets/NFL_Icons/Raiders.png",
+    "wins": 0,
+    "losses": 1,
+    "ties": 0,
+    "lastFive": [
+      0
+    ],
+    "starts": {
+      "../assets/NFL_Icons/Raiders.png": 1
+    },
+    "advanced": {
+      "pressureToSack": null,
+      "badThrowPct": null,
+      "timeToThrow": null,
+      "adot": null,
+      "aggressiveness": null,
+      "epaPerPlay": -0.348,
+      "cpoe": -11.402,
+      "successRate": 0.286,
+      "plays": 35,
+      "fantasyStd": 2.6,
+      "receptions": 0,
+      "competitive": {
+        "epaPerPlay": -0.323,
+        "cpoe": -11.643,
+        "successRate": 0.276
+      }
+    },
+    "box": {
+      "games": 2,
+      "fumLost": 0,
+      "passYards": 115,
+      "passTd": 0,
+      "ints": 1,
+      "compPercent": 48.5,
+      "ypa": 3.48,
+      "rating": 44.4,
+      "rushYards": 0,
+      "rushTd": 0
+    },
+    "injuryStatus": "Active",
+    "injured": false
+  },
+  {
+    "id": 11128,
+    "name": "Matt Moore",
+    "team": "Miami Dolphins",
+    "teamLogo": "../assets/NFL_Icons/Dolphins.png",
+    "wins": 1,
+    "losses": 0,
+    "ties": 0,
+    "lastFive": [
+      1
+    ],
+    "starts": {
+      "../assets/NFL_Icons/Dolphins.png": 1
+    },
+    "advanced": {
+      "pressureToSack": null,
+      "badThrowPct": null,
+      "timeToThrow": null,
+      "adot": null,
+      "aggressiveness": null,
+      "epaPerPlay": 0.205,
+      "cpoe": 10.695,
+      "successRate": 0.44,
+      "plays": 25,
+      "fantasyStd": 8.94,
+      "receptions": 0,
+      "competitive": {
+        "epaPerPlay": 0.133,
+        "cpoe": 10.865,
+        "successRate": 0.5
+      }
+    },
+    "box": {
+      "games": 2,
+      "fumLost": 0,
+      "passYards": 131,
+      "passTd": 1,
+      "ints": 0,
+      "compPercent": 57.9,
+      "ypa": 6.89,
+      "rating": 96.6,
+      "rushYards": -3,
+      "rushTd": 0
+    },
+    "injuryStatus": "Active",
+    "injured": false
+  },
+  {
+    "id": 11237,
+    "name": "Matt Ryan",
+    "team": "Atlanta Falcons",
+    "teamLogo": "../assets/NFL_Icons/Falcons.png",
+    "wins": 13,
+    "losses": 3,
+    "ties": 0,
+    "lastFive": [
+      0,
+      1,
+      1,
+      0,
+      1
+    ],
+    "starts": {
+      "../assets/NFL_Icons/Falcons.png": 16
+    },
+    "advanced": {
+      "pressureToSack": null,
+      "badThrowPct": null,
+      "timeToThrow": null,
+      "adot": null,
+      "aggressiveness": null,
+      "epaPerPlay": 0.231,
+      "cpoe": 5.659,
+      "successRate": 0.531,
+      "plays": 699,
+      "fantasyStd": 304.86,
+      "receptions": 0,
+      "competitive": {
+        "epaPerPlay": 0.208,
+        "cpoe": 5.05,
+        "successRate": 0.522
+      }
+    },
+    "box": {
+      "games": 16,
+      "fumLost": 2,
+      "passYards": 4719,
+      "passTd": 32,
+      "ints": 14,
+      "compPercent": 68.6,
+      "ypa": 7.67,
+      "rating": 99.1,
+      "rushYards": 141,
+      "rushTd": 1
+    },
+    "injuryStatus": "Active",
+    "injured": false
+  },
+  {
+    "id": 5615,
+    "name": "Matt Schaub",
+    "team": "Houston Texans",
+    "teamLogo": "../assets/NFL_Icons/Texans.png",
+    "wins": 12,
+    "losses": 4,
+    "ties": 0,
+    "lastFive": [
+      0,
+      0,
+      1,
+      0,
+      1
+    ],
+    "starts": {
+      "../assets/NFL_Icons/Texans.png": 16
+    },
+    "advanced": {
+      "pressureToSack": null,
+      "badThrowPct": null,
+      "timeToThrow": null,
+      "adot": null,
+      "aggressiveness": null,
+      "epaPerPlay": 0.172,
+      "cpoe": 0.366,
+      "successRate": 0.487,
+      "plays": 599,
+      "fantasyStd": 222.82,
+      "receptions": 1,
+      "competitive": {
+        "epaPerPlay": 0.201,
+        "cpoe": 1.803,
+        "successRate": 0.487
+      }
+    },
+    "box": {
+      "games": 16,
+      "fumLost": 0,
+      "passYards": 4008,
+      "passTd": 22,
+      "ints": 12,
+      "compPercent": 64.3,
+      "ypa": 7.37,
+      "rating": 90.7,
+      "rushYards": -9,
+      "rushTd": 0
+    },
+    "injuryStatus": "Active",
+    "injured": false
+  },
+  {
+    "id": 12483,
+    "name": "Matthew Stafford",
+    "team": "Detroit Lions",
+    "teamLogo": "../assets/NFL_Icons/Lions.png",
+    "wins": 4,
+    "losses": 12,
+    "ties": 0,
+    "lastFive": [
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "starts": {
+      "../assets/NFL_Icons/Lions.png": 16
+    },
+    "advanced": {
+      "pressureToSack": null,
+      "badThrowPct": null,
+      "timeToThrow": null,
+      "adot": null,
+      "aggressiveness": null,
+      "epaPerPlay": 0.068,
+      "cpoe": -2.544,
+      "successRate": 0.481,
+      "plays": 808,
+      "fantasyStd": 275.58,
+      "receptions": 1,
+      "competitive": {
+        "epaPerPlay": 0.06,
+        "cpoe": -2.556,
+        "successRate": 0.487
+      }
+    },
+    "box": {
+      "games": 16,
+      "fumLost": 4,
+      "passYards": 4967,
+      "passTd": 20,
+      "ints": 17,
+      "compPercent": 59.8,
+      "ypa": 6.83,
+      "rating": 79.8,
+      "rushYards": 126,
+      "rushTd": 4
+    },
+    "injuryStatus": "Active",
+    "injured": false
+  },
+  {
+    "id": 2549,
+    "name": "Mike Vick",
+    "team": "Philadelphia Eagles",
+    "teamLogo": "../assets/NFL_Icons/Eagles.png",
+    "wins": 3,
+    "losses": 6,
+    "ties": 0,
+    "lastFive": [
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "starts": {
+      "../assets/NFL_Icons/Eagles.png": 9
+    },
+    "advanced": {
+      "pressureToSack": null,
+      "badThrowPct": null,
+      "timeToThrow": null,
+      "adot": null,
+      "aggressiveness": null,
+      "epaPerPlay": -0.011,
+      "cpoe": 0.211,
+      "successRate": 0.435,
+      "plays": 448,
+      "fantasyStd": 151.68,
+      "receptions": 0,
+      "competitive": {
+        "epaPerPlay": -0.052,
+        "cpoe": 1.975,
+        "successRate": 0.443
+      }
+    },
+    "box": {
+      "games": 10,
+      "fumLost": 5,
+      "passYards": 2362,
+      "passTd": 12,
+      "ints": 10,
+      "compPercent": 58.1,
+      "ypa": 6.73,
+      "rating": 78.1,
+      "rushYards": 332,
+      "rushTd": 1
+    },
+    "injuryStatus": "Active",
+    "injured": false
+  },
+  {
+    "id": 14877,
+    "name": "Nick Foles",
+    "team": "Philadelphia Eagles",
+    "teamLogo": "../assets/NFL_Icons/Eagles.png",
+    "wins": 1,
+    "losses": 6,
+    "ties": 0,
+    "lastFive": [
+      0,
+      0,
+      1,
+      0,
+      0
+    ],
+    "starts": {
+      "../assets/NFL_Icons/Eagles.png": 7
+    },
+    "advanced": {
+      "pressureToSack": null,
+      "badThrowPct": null,
+      "timeToThrow": null,
+      "adot": null,
+      "aggressiveness": null,
+      "epaPerPlay": -0.049,
+      "cpoe": 0.227,
+      "successRate": 0.404,
+      "plays": 314,
+      "fantasyStd": 86.16,
+      "receptions": 0,
+      "competitive": {
+        "epaPerPlay": -0.038,
+        "cpoe": 2.13,
+        "successRate": 0.419
+      }
+    },
+    "box": {
+      "games": 7,
+      "fumLost": 3,
+      "passYards": 1699,
+      "passTd": 6,
+      "ints": 5,
+      "compPercent": 60.8,
+      "ypa": 6.41,
+      "rating": 79.1,
+      "rushYards": 42,
+      "rushTd": 1
+    },
+    "injuryStatus": "Active",
+    "injured": false
+  },
+  {
+    "id": 1428,
+    "name": "Peyton Manning",
+    "team": "Denver Broncos",
+    "teamLogo": "../assets/NFL_Icons/Broncos.png",
+    "wins": 13,
+    "losses": 3,
+    "ties": 0,
+    "lastFive": [
+      1,
+      1,
+      1,
+      1,
+      1
+    ],
+    "starts": {
+      "../assets/NFL_Icons/Broncos.png": 16
+    },
+    "advanced": {
+      "pressureToSack": null,
+      "badThrowPct": null,
+      "timeToThrow": null,
+      "adot": null,
+      "aggressiveness": null,
+      "epaPerPlay": 0.294,
+      "cpoe": 7.368,
+      "successRate": 0.538,
+      "plays": 645,
+      "fantasyStd": 310.96,
+      "receptions": 0,
+      "competitive": {
+        "epaPerPlay": 0.246,
+        "cpoe": 7.809,
+        "successRate": 0.544
+      }
+    },
+    "box": {
+      "games": 16,
+      "fumLost": 2,
+      "passYards": 4659,
+      "passTd": 37,
+      "ints": 11,
+      "compPercent": 68.6,
+      "ypa": 7.99,
+      "rating": 105.8,
+      "rushYards": 6,
+      "rushTd": 0
+    },
+    "injuryStatus": "Active",
+    "injured": false
+  },
+  {
+    "id": 5529,
+    "name": "Philip Rivers",
+    "team": "San Diego Chargers",
+    "teamLogo": "../assets/NFL_Icons/Chargers.png",
+    "wins": 7,
+    "losses": 9,
+    "ties": 0,
+    "lastFive": [
+      1,
+      1,
+      0,
+      1,
+      0
+    ],
+    "starts": {
+      "../assets/NFL_Icons/Chargers.png": 16
+    },
+    "advanced": {
+      "pressureToSack": null,
+      "badThrowPct": null,
+      "timeToThrow": null,
+      "adot": null,
+      "aggressiveness": null,
+      "epaPerPlay": 0.013,
+      "cpoe": 2.897,
+      "successRate": 0.454,
+      "plays": 625,
+      "fantasyStd": 208.24,
+      "receptions": 0,
+      "competitive": {
+        "epaPerPlay": 0.036,
+        "cpoe": 1.644,
+        "successRate": 0.458
+      }
+    },
+    "box": {
+      "games": 16,
+      "fumLost": 7,
+      "passYards": 3606,
+      "passTd": 26,
+      "ints": 15,
+      "compPercent": 64.1,
+      "ypa": 6.84,
+      "rating": 88.6,
+      "rushYards": 40,
+      "rushTd": 0
+    },
+    "injuryStatus": "Active",
+    "injured": false
+  },
+  {
+    "id": 14875,
+    "name": "Robert Griffin III",
+    "team": "Washington Redskins",
+    "teamLogo": "../assets/NFL_Icons/Commanders.png",
+    "wins": 9,
+    "losses": 6,
+    "ties": 0,
+    "lastFive": [
+      1,
+      1,
+      1,
+      1,
+      1
+    ],
+    "starts": {
+      "../assets/NFL_Icons/Commanders.png": 15
+    },
+    "advanced": {
+      "pressureToSack": null,
+      "badThrowPct": null,
+      "timeToThrow": null,
+      "adot": null,
+      "aggressiveness": null,
+      "epaPerPlay": 0.238,
+      "cpoe": 4.095,
+      "successRate": 0.504,
+      "plays": 556,
+      "fantasyStd": 317.5,
+      "receptions": 0,
+      "competitive": {
+        "epaPerPlay": 0.306,
+        "cpoe": 5.007,
+        "successRate": 0.509
+      }
+    },
+    "box": {
+      "games": 15,
+      "fumLost": 2,
+      "passYards": 3200,
+      "passTd": 20,
+      "ints": 5,
+      "compPercent": 65.6,
+      "ypa": 8.14,
+      "rating": 102.4,
+      "rushYards": 815,
+      "rushTd": 7
+    },
+    "injuryStatus": "Active",
+    "injured": false
+  },
+  {
+    "id": 14881,
+    "name": "Russell Wilson",
+    "team": "Seattle Seahawks",
+    "teamLogo": "../assets/NFL_Icons/Seahawks.png",
+    "wins": 11,
+    "losses": 5,
+    "ties": 0,
+    "lastFive": [
+      1,
+      1,
+      1,
+      1,
+      1
+    ],
+    "starts": {
+      "../assets/NFL_Icons/Seahawks.png": 16
+    },
+    "advanced": {
+      "pressureToSack": null,
+      "badThrowPct": null,
+      "timeToThrow": null,
+      "adot": null,
+      "aggressiveness": null,
+      "epaPerPlay": 0.213,
+      "cpoe": 5.152,
+      "successRate": 0.498,
+      "plays": 544,
+      "fantasyStd": 275.62,
+      "receptions": 0,
+      "competitive": {
+        "epaPerPlay": 0.177,
+        "cpoe": 4.745,
+        "successRate": 0.499
+      }
+    },
+    "box": {
+      "games": 16,
+      "fumLost": 3,
+      "passYards": 3118,
+      "passTd": 26,
+      "ints": 10,
+      "compPercent": 64.1,
+      "ypa": 7.93,
+      "rating": 100,
+      "rushYards": 489,
+      "rushTd": 4
+    },
+    "injuryStatus": "Active",
+    "injured": false
+  },
+  {
+    "id": 8664,
+    "name": "Ryan Fitzpatrick",
+    "team": "Buffalo Bills",
+    "teamLogo": "../assets/NFL_Icons/Bills.png",
+    "wins": 6,
+    "losses": 10,
+    "ties": 0,
+    "lastFive": [
+      1,
+      0,
+      0,
+      0,
+      1
+    ],
+    "starts": {
+      "../assets/NFL_Icons/Bills.png": 16
+    },
+    "advanced": {
+      "pressureToSack": null,
+      "badThrowPct": null,
+      "timeToThrow": null,
+      "adot": null,
+      "aggressiveness": null,
+      "epaPerPlay": 0.039,
+      "cpoe": -1.537,
+      "successRate": 0.432,
+      "plays": 590,
+      "fantasyStd": 213.7,
+      "receptions": 0,
+      "competitive": {
+        "epaPerPlay": 0.067,
+        "cpoe": -1.391,
+        "successRate": 0.445
+      }
+    },
+    "box": {
+      "games": 16,
+      "fumLost": 6,
+      "passYards": 3400,
+      "passTd": 24,
+      "ints": 16,
+      "compPercent": 60.6,
+      "ypa": 6.73,
+      "rating": 83.3,
+      "rushYards": 197,
+      "rushTd": 1
+    },
+    "injuryStatus": "Active",
+    "injured": false
+  },
+  {
+    "id": 14883,
+    "name": "Ryan Lindley",
+    "team": "Arizona Cardinals",
+    "teamLogo": "../assets/NFL_Icons/Cardinals.png",
+    "wins": 1,
+    "losses": 4,
+    "ties": 0,
+    "lastFive": [
+      0,
+      1,
+      0,
+      0,
+      0
+    ],
+    "starts": {
+      "../assets/NFL_Icons/Cardinals.png": 5
+    },
+    "advanced": {
+      "pressureToSack": null,
+      "badThrowPct": null,
+      "timeToThrow": null,
+      "adot": null,
+      "aggressiveness": null,
+      "epaPerPlay": -0.446,
+      "cpoe": -12.221,
+      "successRate": 0.332,
+      "plays": 196,
+      "fantasyStd": 12.78,
+      "receptions": 0,
+      "competitive": {
+        "epaPerPlay": -0.471,
+        "cpoe": -13.212,
+        "successRate": 0.333
+      }
+    },
+    "box": {
+      "games": 6,
+      "fumLost": 2,
+      "passYards": 752,
+      "passTd": 0,
+      "ints": 7,
+      "compPercent": 52,
+      "ypa": 4.4,
+      "rating": 46.7,
+      "rushYards": 7,
+      "rushTd": 0
+    },
+    "injuryStatus": "Active",
+    "injured": false
+  },
+  {
+    "id": 14876,
+    "name": "Ryan Tannehill",
+    "team": "Miami Dolphins",
+    "teamLogo": "../assets/NFL_Icons/Dolphins.png",
+    "wins": 6,
+    "losses": 9,
+    "ties": 0,
+    "lastFive": [
+      0,
+      1,
+      1,
+      0,
+      0
+    ],
+    "starts": {
+      "../assets/NFL_Icons/Dolphins.png": 15
+    },
+    "advanced": {
+      "pressureToSack": null,
+      "badThrowPct": null,
+      "timeToThrow": null,
+      "adot": null,
+      "aggressiveness": null,
+      "epaPerPlay": 0.02,
+      "cpoe": -3.449,
+      "successRate": 0.459,
+      "plays": 586,
+      "fantasyStd": 182.86,
+      "receptions": 0,
+      "competitive": {
+        "epaPerPlay": 0.036,
+        "cpoe": -4.009,
+        "successRate": 0.465
+      }
+    },
+    "box": {
+      "games": 16,
+      "fumLost": 4,
+      "passYards": 3294,
+      "passTd": 12,
+      "ints": 13,
+      "compPercent": 58.3,
+      "ypa": 6.81,
+      "rating": 76.1,
+      "rushYards": 211,
+      "rushTd": 2
+    },
+    "injuryStatus": "Active",
+    "injured": false
+  },
+  {
+    "id": 13197,
+    "name": "Sam Bradford",
+    "team": "St. Louis Rams",
+    "teamLogo": "../assets/NFL_Icons/Rams.png",
+    "wins": 7,
+    "losses": 8,
+    "ties": 1,
+    "lastFive": [
+      0,
+      1,
+      0,
+      1,
+      1
+    ],
+    "starts": {
+      "../assets/NFL_Icons/Rams.png": 16
+    },
+    "advanced": {
+      "pressureToSack": null,
+      "badThrowPct": null,
+      "timeToThrow": null,
+      "adot": null,
+      "aggressiveness": null,
+      "epaPerPlay": 0.021,
+      "cpoe": -2.107,
+      "successRate": 0.457,
+      "plays": 634,
+      "fantasyStd": 230.48,
+      "receptions": 0,
+      "competitive": {
+        "epaPerPlay": 0.014,
+        "cpoe": -1.721,
+        "successRate": 0.452
+      }
+    },
+    "box": {
+      "games": 16,
+      "fumLost": 1,
+      "passYards": 3702,
+      "passTd": 21,
+      "ints": 13,
+      "compPercent": 59.5,
+      "ypa": 6.72,
+      "rating": 82.6,
+      "rushYards": 124,
+      "rushTd": 1
+    },
+    "injuryStatus": "Active",
+    "injured": false
+  },
+  {
+    "id": 14851,
+    "name": "Terrelle Pryor Sr.",
+    "team": "Oakland Raiders",
+    "teamLogo": "../assets/NFL_Icons/Raiders.png",
+    "wins": 0,
+    "losses": 1,
+    "ties": 0,
+    "lastFive": [
+      0
+    ],
+    "starts": {
+      "../assets/NFL_Icons/Raiders.png": 1
+    },
+    "advanced": {
+      "pressureToSack": null,
+      "badThrowPct": null,
+      "timeToThrow": null,
+      "adot": null,
+      "aggressiveness": null,
+      "epaPerPlay": 0.066,
+      "cpoe": -9.091,
+      "successRate": 0.447,
+      "plays": 47,
+      "fantasyStd": 25.5,
+      "receptions": 1,
+      "competitive": {
+        "epaPerPlay": -0.045,
+        "cpoe": -16.535,
+        "successRate": 0.433
+      }
+    },
+    "box": {
+      "games": 3,
+      "fumLost": 0,
+      "passYards": 155,
+      "passTd": 2,
+      "ints": 1,
+      "compPercent": 46.7,
+      "ypa": 5.17,
+      "rating": 70.8,
+      "rushYards": 51,
+      "rushTd": 1
+    },
+    "injuryStatus": "Active",
+    "injured": false
+  },
+  {
+    "id": 13606,
+    "name": "Thaddeus Lewis",
+    "team": "Cleveland Browns",
+    "teamLogo": "../assets/NFL_Icons/Browns.png",
+    "wins": 0,
+    "losses": 1,
+    "ties": 0,
+    "lastFive": [
+      0
+    ],
+    "starts": {
+      "../assets/NFL_Icons/Browns.png": 1
+    },
+    "advanced": {
+      "pressureToSack": null,
+      "badThrowPct": null,
+      "timeToThrow": null,
+      "adot": null,
+      "aggressiveness": null,
+      "epaPerPlay": 0.056,
+      "cpoe": 6.835,
+      "successRate": 0.514,
+      "plays": 37,
+      "fantasyStd": 10.46,
+      "receptions": 0,
+      "competitive": {
+        "epaPerPlay": 0.079,
+        "cpoe": 2.916,
+        "successRate": 0.452
+      }
+    },
+    "box": {
+      "games": 1,
+      "fumLost": 0,
+      "passYards": 204,
+      "passTd": 1,
+      "ints": 1,
+      "compPercent": 68.8,
+      "ypa": 6.38,
+      "rating": 83.3,
+      "rushYards": 3,
+      "rushTd": 0
+    },
+    "injuryStatus": "Active",
+    "injured": false
+  },
+  {
+    "id": 2330,
+    "name": "Tom Brady",
+    "team": "New England Patriots",
+    "teamLogo": "../assets/NFL_Icons/Patriots.png",
+    "wins": 12,
+    "losses": 4,
+    "ties": 0,
+    "lastFive": [
+      1,
+      1,
+      0,
+      1,
+      1
+    ],
+    "starts": {
+      "../assets/NFL_Icons/Patriots.png": 16
+    },
+    "advanced": {
+      "pressureToSack": null,
+      "badThrowPct": null,
+      "timeToThrow": null,
+      "adot": null,
+      "aggressiveness": null,
+      "epaPerPlay": 0.301,
+      "cpoe": 1.787,
+      "successRate": 0.542,
+      "plays": 719,
+      "fantasyStd": 340.28,
+      "receptions": 0,
+      "competitive": {
+        "epaPerPlay": 0.301,
+        "cpoe": 2.138,
+        "successRate": 0.542
+      }
+    },
+    "box": {
+      "games": 16,
+      "fumLost": 0,
+      "passYards": 4827,
+      "passTd": 34,
+      "ints": 8,
+      "compPercent": 63,
+      "ypa": 7.58,
+      "rating": 98.7,
+      "rushYards": 32,
+      "rushTd": 4
+    },
+    "injuryStatus": "Active",
+    "injured": false
+  },
+  {
+    "id": 5209,
+    "name": "Tony Romo",
+    "team": "Dallas Cowboys",
+    "teamLogo": "../assets/NFL_Icons/Cowboys.png",
+    "wins": 8,
+    "losses": 8,
+    "ties": 0,
+    "lastFive": [
+      0,
+      0,
+      1,
+      1,
+      1
+    ],
+    "starts": {
+      "../assets/NFL_Icons/Cowboys.png": 16
+    },
+    "advanced": {
+      "pressureToSack": null,
+      "badThrowPct": null,
+      "timeToThrow": null,
+      "adot": null,
+      "aggressiveness": null,
+      "epaPerPlay": 0.128,
+      "cpoe": 2.715,
+      "successRate": 0.51,
+      "plays": 733,
+      "fantasyStd": 278.92,
+      "receptions": 1,
+      "competitive": {
+        "epaPerPlay": 0.111,
+        "cpoe": 2.929,
+        "successRate": 0.517
+      }
+    },
+    "box": {
+      "games": 16,
+      "fumLost": 3,
+      "passYards": 4903,
+      "passTd": 28,
+      "ints": 19,
+      "compPercent": 65.6,
+      "ypa": 7.57,
+      "rating": 90.5,
+      "rushYards": 49,
+      "rushTd": 1
+    },
+    "injuryStatus": "Active",
+    "injured": false
+  },
+  {
+    "id": 14163,
+    "name": "Tyrod Taylor",
+    "team": "Baltimore Ravens",
+    "teamLogo": "../assets/NFL_Icons/Ravens.png",
+    "wins": 0,
+    "losses": 1,
+    "ties": 0,
+    "lastFive": [
+      0
+    ],
+    "starts": {
+      "../assets/NFL_Icons/Ravens.png": 1
+    },
+    "advanced": {
+      "pressureToSack": null,
+      "badThrowPct": null,
+      "timeToThrow": null,
+      "adot": null,
+      "aggressiveness": null,
+      "epaPerPlay": -0.005,
+      "cpoe": -3.8,
+      "successRate": 0.467,
+      "plays": 45,
+      "fantasyStd": 18.46,
+      "receptions": 0,
+      "competitive": {
+        "epaPerPlay": -0.022,
+        "cpoe": -3.85,
+        "successRate": 0.448
+      }
+    },
+    "box": {
+      "games": 7,
+      "fumLost": 0,
+      "passYards": 179,
+      "passTd": 0,
+      "ints": 1,
+      "compPercent": 58.6,
+      "ypa": 6.17,
+      "rating": 62.3,
+      "rushYards": 73,
+      "rushTd": 1
+    },
+    "injuryStatus": "Active",
+    "injured": false
+  }
+]

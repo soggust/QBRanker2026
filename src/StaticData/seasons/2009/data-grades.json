@@ -1,0 +1,1030 @@
+{
+  "teams": {
+    "Cardinals": {
+      "games": 16,
+      "newCoach": false,
+      "coach": "Ken Whisenhunt",
+      "oline": 3.9,
+      "weapons": 12,
+      "metrics": {
+        "pressureRate": null,
+        "sackRate": 0.042,
+        "yardsBeforeContact": null,
+        "stuffRate": 0.255,
+        "separation": null,
+        "yacOverExpected": null,
+        "dropRate": null,
+        "rushOverExpected": null,
+        "brokenTackles": null
+      }
+    },
+    "Falcons": {
+      "games": 16,
+      "newCoach": false,
+      "coach": "Mike Smith",
+      "oline": 11.2,
+      "weapons": 11.6,
+      "metrics": {
+        "pressureRate": null,
+        "sackRate": 0.045,
+        "yardsBeforeContact": null,
+        "stuffRate": 0.191,
+        "separation": null,
+        "yacOverExpected": null,
+        "dropRate": null,
+        "rushOverExpected": null,
+        "brokenTackles": null
+      }
+    },
+    "Ravens": {
+      "games": 16,
+      "newCoach": false,
+      "coach": "John Harbaugh",
+      "oline": 9.3,
+      "weapons": 11.2,
+      "metrics": {
+        "pressureRate": null,
+        "sackRate": 0.066,
+        "yardsBeforeContact": null,
+        "stuffRate": 0.181,
+        "separation": null,
+        "yacOverExpected": null,
+        "dropRate": null,
+        "rushOverExpected": null,
+        "brokenTackles": null
+      }
+    },
+    "Bills": {
+      "games": 16,
+      "newCoach": false,
+      "coach": "Dick Jauron",
+      "oline": 2.3,
+      "weapons": 10.8,
+      "metrics": {
+        "pressureRate": null,
+        "sackRate": 0.09,
+        "yardsBeforeContact": null,
+        "stuffRate": 0.199,
+        "separation": null,
+        "yacOverExpected": null,
+        "dropRate": null,
+        "rushOverExpected": null,
+        "brokenTackles": null
+      }
+    },
+    "Panthers": {
+      "games": 16,
+      "newCoach": false,
+      "coach": "John Fox",
+      "oline": 3.5,
+      "weapons": 10.5,
+      "metrics": {
+        "pressureRate": null,
+        "sackRate": 0.066,
+        "yardsBeforeContact": null,
+        "stuffRate": 0.232,
+        "separation": null,
+        "yacOverExpected": null,
+        "dropRate": null,
+        "rushOverExpected": null,
+        "brokenTackles": null
+      }
+    },
+    "Bears": {
+      "games": 16,
+      "newCoach": false,
+      "coach": "Lovie Smith",
+      "oline": 6.6,
+      "weapons": 10.1,
+      "metrics": {
+        "pressureRate": null,
+        "sackRate": 0.056,
+        "yardsBeforeContact": null,
+        "stuffRate": 0.217,
+        "separation": null,
+        "yacOverExpected": null,
+        "dropRate": null,
+        "rushOverExpected": null,
+        "brokenTackles": null
+      }
+    },
+    "Bengals": {
+      "games": 16,
+      "newCoach": false,
+      "coach": "Marvin Lewis",
+      "oline": 6.2,
+      "weapons": 9.7,
+      "metrics": {
+        "pressureRate": null,
+        "sackRate": 0.056,
+        "yardsBeforeContact": null,
+        "stuffRate": 0.224,
+        "separation": null,
+        "yacOverExpected": null,
+        "dropRate": null,
+        "rushOverExpected": null,
+        "brokenTackles": null
+      }
+    },
+    "Browns": {
+      "games": 16,
+      "newCoach": false,
+      "coach": "Eric Mangini",
+      "oline": 8.5,
+      "weapons": 9.3,
+      "metrics": {
+        "pressureRate": null,
+        "sackRate": 0.063,
+        "yardsBeforeContact": null,
+        "stuffRate": 0.19,
+        "separation": null,
+        "yacOverExpected": null,
+        "dropRate": null,
+        "rushOverExpected": null,
+        "brokenTackles": null
+      }
+    },
+    "Cowboys": {
+      "games": 16,
+      "newCoach": false,
+      "coach": "Wade Phillips",
+      "oline": 8.1,
+      "weapons": 8.9,
+      "metrics": {
+        "pressureRate": null,
+        "sackRate": 0.057,
+        "yardsBeforeContact": null,
+        "stuffRate": 0.204,
+        "separation": null,
+        "yacOverExpected": null,
+        "dropRate": null,
+        "rushOverExpected": null,
+        "brokenTackles": null
+      }
+    },
+    "Broncos": {
+      "games": 16,
+      "newCoach": true,
+      "coach": "Josh McDaniels",
+      "oline": 4.3,
+      "weapons": 8.5,
+      "metrics": {
+        "pressureRate": null,
+        "sackRate": 0.057,
+        "yardsBeforeContact": null,
+        "stuffRate": 0.23,
+        "separation": null,
+        "yacOverExpected": null,
+        "dropRate": null,
+        "rushOverExpected": null,
+        "brokenTackles": null
+      }
+    },
+    "Lions": {
+      "games": 16,
+      "newCoach": true,
+      "coach": "Jim Schwartz",
+      "oline": 1.9,
+      "weapons": 8.1,
+      "metrics": {
+        "pressureRate": null,
+        "sackRate": 0.065,
+        "yardsBeforeContact": null,
+        "stuffRate": 0.24,
+        "separation": null,
+        "yacOverExpected": null,
+        "dropRate": null,
+        "rushOverExpected": null,
+        "brokenTackles": null
+      }
+    },
+    "Packers": {
+      "games": 16,
+      "newCoach": false,
+      "coach": "Mike McCarthy",
+      "oline": 7.4,
+      "weapons": 7.7,
+      "metrics": {
+        "pressureRate": null,
+        "sackRate": 0.08,
+        "yardsBeforeContact": null,
+        "stuffRate": 0.17,
+        "separation": null,
+        "yacOverExpected": null,
+        "dropRate": null,
+        "rushOverExpected": null,
+        "brokenTackles": null
+      }
+    },
+    "Texans": {
+      "games": 16,
+      "newCoach": false,
+      "coach": "Gary Kubiak",
+      "oline": 7,
+      "weapons": 7.4,
+      "metrics": {
+        "pressureRate": null,
+        "sackRate": 0.041,
+        "yardsBeforeContact": null,
+        "stuffRate": 0.237,
+        "separation": null,
+        "yacOverExpected": null,
+        "dropRate": null,
+        "rushOverExpected": null,
+        "brokenTackles": null
+      }
+    },
+    "Colts": {
+      "games": 16,
+      "newCoach": true,
+      "coach": "Jim Caldwell",
+      "oline": 8.9,
+      "weapons": 7,
+      "metrics": {
+        "pressureRate": null,
+        "sackRate": 0.021,
+        "yardsBeforeContact": null,
+        "stuffRate": 0.257,
+        "separation": null,
+        "yacOverExpected": null,
+        "dropRate": null,
+        "rushOverExpected": null,
+        "brokenTackles": null
+      }
+    },
+    "Jaguars": {
+      "games": 16,
+      "newCoach": false,
+      "coach": "Jack Del Rio",
+      "oline": 5.4,
+      "weapons": 6.6,
+      "metrics": {
+        "pressureRate": null,
+        "sackRate": 0.074,
+        "yardsBeforeContact": null,
+        "stuffRate": 0.199,
+        "separation": null,
+        "yacOverExpected": null,
+        "dropRate": null,
+        "rushOverExpected": null,
+        "brokenTackles": null
+      }
+    },
+    "Chiefs": {
+      "games": 16,
+      "newCoach": true,
+      "coach": "Todd Haley",
+      "oline": 0,
+      "weapons": 6.2,
+      "metrics": {
+        "pressureRate": null,
+        "sackRate": 0.075,
+        "yardsBeforeContact": null,
+        "stuffRate": 0.251,
+        "separation": null,
+        "yacOverExpected": null,
+        "dropRate": null,
+        "rushOverExpected": null,
+        "brokenTackles": null
+      }
+    },
+    "Rams": {
+      "games": 16,
+      "newCoach": true,
+      "coach": "Steve Spagnuolo",
+      "oline": 0.4,
+      "weapons": 5.8,
+      "metrics": {
+        "pressureRate": null,
+        "sackRate": 0.073,
+        "yardsBeforeContact": null,
+        "stuffRate": 0.246,
+        "separation": null,
+        "yacOverExpected": null,
+        "dropRate": null,
+        "rushOverExpected": null,
+        "brokenTackles": null
+      }
+    },
+    "Chargers": {
+      "games": 16,
+      "newCoach": false,
+      "coach": "Norv Turner",
+      "oline": 9.7,
+      "weapons": 5.4,
+      "metrics": {
+        "pressureRate": null,
+        "sackRate": 0.047,
+        "yardsBeforeContact": null,
+        "stuffRate": 0.209,
+        "separation": null,
+        "yacOverExpected": null,
+        "dropRate": null,
+        "rushOverExpected": null,
+        "brokenTackles": null
+      }
+    },
+    "Raiders": {
+      "games": 16,
+      "newCoach": false,
+      "coach": "Tom Cable",
+      "oline": 5,
+      "weapons": 5,
+      "metrics": {
+        "pressureRate": null,
+        "sackRate": 0.087,
+        "yardsBeforeContact": null,
+        "stuffRate": 0.177,
+        "separation": null,
+        "yacOverExpected": null,
+        "dropRate": null,
+        "rushOverExpected": null,
+        "brokenTackles": null
+      }
+    },
+    "Dolphins": {
+      "games": 16,
+      "newCoach": false,
+      "coach": "Tony Sparano",
+      "oline": 10.8,
+      "weapons": 4.6,
+      "metrics": {
+        "pressureRate": null,
+        "sackRate": 0.058,
+        "yardsBeforeContact": null,
+        "stuffRate": 0.171,
+        "separation": null,
+        "yacOverExpected": null,
+        "dropRate": null,
+        "rushOverExpected": null,
+        "brokenTackles": null
+      }
+    },
+    "Vikings": {
+      "games": 16,
+      "newCoach": false,
+      "coach": "Brad Childress",
+      "oline": 3.1,
+      "weapons": 4.3,
+      "metrics": {
+        "pressureRate": null,
+        "sackRate": 0.058,
+        "yardsBeforeContact": null,
+        "stuffRate": 0.246,
+        "separation": null,
+        "yacOverExpected": null,
+        "dropRate": null,
+        "rushOverExpected": null,
+        "brokenTackles": null
+      }
+    },
+    "Patriots": {
+      "games": 16,
+      "newCoach": false,
+      "coach": "Bill Belichick",
+      "oline": 12,
+      "weapons": 3.9,
+      "metrics": {
+        "pressureRate": null,
+        "sackRate": 0.029,
+        "yardsBeforeContact": null,
+        "stuffRate": 0.177,
+        "separation": null,
+        "yacOverExpected": null,
+        "dropRate": null,
+        "rushOverExpected": null,
+        "brokenTackles": null
+      }
+    },
+    "Saints": {
+      "games": 16,
+      "newCoach": false,
+      "coach": "Sean Payton",
+      "oline": 11.6,
+      "weapons": 3.5,
+      "metrics": {
+        "pressureRate": null,
+        "sackRate": 0.037,
+        "yardsBeforeContact": null,
+        "stuffRate": 0.199,
+        "separation": null,
+        "yacOverExpected": null,
+        "dropRate": null,
+        "rushOverExpected": null,
+        "brokenTackles": null
+      }
+    },
+    "Giants": {
+      "games": 16,
+      "newCoach": false,
+      "coach": "Tom Coughlin",
+      "oline": 5.8,
+      "weapons": 3.1,
+      "metrics": {
+        "pressureRate": null,
+        "sackRate": 0.055,
+        "yardsBeforeContact": null,
+        "stuffRate": 0.226,
+        "separation": null,
+        "yacOverExpected": null,
+        "dropRate": null,
+        "rushOverExpected": null,
+        "brokenTackles": null
+      }
+    },
+    "Jets": {
+      "games": 16,
+      "newCoach": true,
+      "coach": "Rex Ryan",
+      "oline": 10.5,
+      "weapons": 2.7,
+      "metrics": {
+        "pressureRate": null,
+        "sackRate": 0.068,
+        "yardsBeforeContact": null,
+        "stuffRate": 0.172,
+        "separation": null,
+        "yacOverExpected": null,
+        "dropRate": null,
+        "rushOverExpected": null,
+        "brokenTackles": null
+      }
+    },
+    "Eagles": {
+      "games": 16,
+      "newCoach": false,
+      "coach": "Andy Reid",
+      "oline": 7.7,
+      "weapons": 2.3,
+      "metrics": {
+        "pressureRate": null,
+        "sackRate": 0.066,
+        "yardsBeforeContact": null,
+        "stuffRate": 0.193,
+        "separation": null,
+        "yacOverExpected": null,
+        "dropRate": null,
+        "rushOverExpected": null,
+        "brokenTackles": null
+      }
+    },
+    "Steelers": {
+      "games": 16,
+      "newCoach": false,
+      "coach": "Mike Tomlin",
+      "oline": 2.7,
+      "weapons": 1.9,
+      "metrics": {
+        "pressureRate": null,
+        "sackRate": 0.084,
+        "yardsBeforeContact": null,
+        "stuffRate": 0.204,
+        "separation": null,
+        "yacOverExpected": null,
+        "dropRate": null,
+        "rushOverExpected": null,
+        "brokenTackles": null
+      }
+    },
+    "Seahawks": {
+      "games": 16,
+      "newCoach": false,
+      "coach": "Jim Mora",
+      "oline": 1.2,
+      "weapons": 1.5,
+      "metrics": {
+        "pressureRate": null,
+        "sackRate": 0.061,
+        "yardsBeforeContact": null,
+        "stuffRate": 0.256,
+        "separation": null,
+        "yacOverExpected": null,
+        "dropRate": null,
+        "rushOverExpected": null,
+        "brokenTackles": null
+      }
+    },
+    "49ers": {
+      "games": 16,
+      "newCoach": false,
+      "coach": "Mike Singletary",
+      "oline": 1.5,
+      "weapons": 1.2,
+      "metrics": {
+        "pressureRate": null,
+        "sackRate": 0.069,
+        "yardsBeforeContact": null,
+        "stuffRate": 0.242,
+        "separation": null,
+        "yacOverExpected": null,
+        "dropRate": null,
+        "rushOverExpected": null,
+        "brokenTackles": null
+      }
+    },
+    "Bucs": {
+      "games": 16,
+      "newCoach": true,
+      "coach": "Raheem Morris",
+      "oline": 4.6,
+      "weapons": 0.8,
+      "metrics": {
+        "pressureRate": null,
+        "sackRate": 0.054,
+        "yardsBeforeContact": null,
+        "stuffRate": 0.234,
+        "separation": null,
+        "yacOverExpected": null,
+        "dropRate": null,
+        "rushOverExpected": null,
+        "brokenTackles": null
+      }
+    },
+    "Titans": {
+      "games": 16,
+      "newCoach": false,
+      "coach": "Jeff Fisher",
+      "oline": 10.1,
+      "weapons": 0.4,
+      "metrics": {
+        "pressureRate": null,
+        "sackRate": 0.027,
+        "yardsBeforeContact": null,
+        "stuffRate": 0.242,
+        "separation": null,
+        "yacOverExpected": null,
+        "dropRate": null,
+        "rushOverExpected": null,
+        "brokenTackles": null
+      }
+    },
+    "Commanders": {
+      "games": 16,
+      "newCoach": false,
+      "coach": "Jim Zorn",
+      "oline": 0.8,
+      "weapons": 0,
+      "metrics": {
+        "pressureRate": null,
+        "sackRate": 0.075,
+        "yardsBeforeContact": null,
+        "stuffRate": 0.237,
+        "separation": null,
+        "yacOverExpected": null,
+        "dropRate": null,
+        "rushOverExpected": null,
+        "brokenTackles": null
+      }
+    }
+  },
+  "qbs": {
+    "112": {
+      "games": 16,
+      "responsibility": 4.8,
+      "metrics": {
+        "playShare": 0.528,
+        "yardShare": 0.691
+      }
+    },
+    "445": {
+      "games": 1,
+      "responsibility": 1.1,
+      "metrics": {
+        "playShare": 0.468,
+        "yardShare": 0.479
+      }
+    },
+    "734": {
+      "games": 7,
+      "responsibility": 2.4,
+      "metrics": {
+        "playShare": 0.533,
+        "yardShare": 0.536
+      }
+    },
+    "1428": {
+      "games": 15,
+      "responsibility": 10.5,
+      "metrics": {
+        "playShare": 0.597,
+        "yardShare": 0.778
+      }
+    },
+    "1575": {
+      "games": 13,
+      "responsibility": 8.9,
+      "metrics": {
+        "playShare": 0.607,
+        "yardShare": 0.73
+      }
+    },
+    "1682": {
+      "games": 14,
+      "responsibility": 8.5,
+      "metrics": {
+        "playShare": 0.593,
+        "yardShare": 0.742
+      }
+    },
+    "1693": {
+      "games": 11,
+      "responsibility": 2.2,
+      "metrics": {
+        "playShare": 0.49,
+        "yardShare": 0.585
+      }
+    },
+    "1753": {
+      "games": 14,
+      "responsibility": 9.2,
+      "metrics": {
+        "playShare": 0.588,
+        "yardShare": 0.762
+      }
+    },
+    "1762": {
+      "games": 4,
+      "responsibility": 7.4,
+      "metrics": {
+        "playShare": 0.57,
+        "yardShare": 0.745
+      }
+    },
+    "2149": {
+      "games": 2,
+      "responsibility": 1.7,
+      "metrics": {
+        "playShare": 0.465,
+        "yardShare": 0.548
+      }
+    },
+    "2206": {
+      "games": 3,
+      "responsibility": 11.3,
+      "metrics": {
+        "playShare": 0.615,
+        "yardShare": 0.798
+      }
+    },
+    "2299": {
+      "games": 7,
+      "responsibility": 5.9,
+      "metrics": {
+        "playShare": 0.585,
+        "yardShare": 0.647
+      }
+    },
+    "2330": {
+      "games": 16,
+      "responsibility": 5.5,
+      "metrics": {
+        "playShare": 0.541,
+        "yardShare": 0.698
+      }
+    },
+    "2440": {
+      "games": 1,
+      "responsibility": 2.8,
+      "metrics": {
+        "playShare": 0.508,
+        "yardShare": 0.591
+      }
+    },
+    "2580": {
+      "games": 15,
+      "responsibility": 6.3,
+      "metrics": {
+        "playShare": 0.549,
+        "yardShare": 0.708
+      }
+    },
+    "3529": {
+      "games": 1,
+      "responsibility": 0,
+      "metrics": {
+        "playShare": 0.254,
+        "yardShare": 0.242
+      }
+    },
+    "3636": {
+      "games": 16,
+      "responsibility": 8.7,
+      "metrics": {
+        "playShare": 0.603,
+        "yardShare": 0.728
+      }
+    },
+    "4459": {
+      "games": 16,
+      "responsibility": 3.5,
+      "metrics": {
+        "playShare": 0.497,
+        "yardShare": 0.645
+      }
+    },
+    "4465": {
+      "games": 3,
+      "responsibility": 7.6,
+      "metrics": {
+        "playShare": 0.615,
+        "yardShare": 0.675
+      }
+    },
+    "4477": {
+      "games": 5,
+      "responsibility": 3.9,
+      "metrics": {
+        "playShare": 0.538,
+        "yardShare": 0.622
+      }
+    },
+    "4568": {
+      "games": 3,
+      "responsibility": 8.1,
+      "metrics": {
+        "playShare": 0.598,
+        "yardShare": 0.721
+      }
+    },
+    "5209": {
+      "games": 16,
+      "responsibility": 7.2,
+      "metrics": {
+        "playShare": 0.574,
+        "yardShare": 0.718
+      }
+    },
+    "5526": {
+      "games": 15,
+      "responsibility": 6.8,
+      "metrics": {
+        "playShare": 0.548,
+        "yardShare": 0.728
+      }
+    },
+    "5529": {
+      "games": 15,
+      "responsibility": 7.9,
+      "metrics": {
+        "playShare": 0.553,
+        "yardShare": 0.779
+      }
+    },
+    "5536": {
+      "games": 15,
+      "responsibility": 10.7,
+      "metrics": {
+        "playShare": 0.594,
+        "yardShare": 0.782
+      }
+    },
+    "5615": {
+      "games": 16,
+      "responsibility": 10.9,
+      "metrics": {
+        "playShare": 0.61,
+        "yardShare": 0.789
+      }
+    },
+    "8416": {
+      "games": 11,
+      "responsibility": 9.4,
+      "metrics": {
+        "playShare": 0.613,
+        "yardShare": 0.725
+      }
+    },
+    "8439": {
+      "games": 16,
+      "responsibility": 10.3,
+      "metrics": {
+        "playShare": 0.595,
+        "yardShare": 0.78
+      }
+    },
+    "8440": {
+      "games": 16,
+      "responsibility": 9.6,
+      "metrics": {
+        "playShare": 0.592,
+        "yardShare": 0.77
+      }
+    },
+    "8481": {
+      "games": 3,
+      "responsibility": 2,
+      "metrics": {
+        "playShare": 0.468,
+        "yardShare": 0.588
+      }
+    },
+    "8520": {
+      "games": 16,
+      "responsibility": 6.5,
+      "metrics": {
+        "playShare": 0.555,
+        "yardShare": 0.709
+      }
+    },
+    "8627": {
+      "games": 8,
+      "responsibility": 0.7,
+      "metrics": {
+        "playShare": 0.416,
+        "yardShare": 0.476
+      }
+    },
+    "8644": {
+      "games": 15,
+      "responsibility": 6.1,
+      "metrics": {
+        "playShare": 0.571,
+        "yardShare": 0.672
+      }
+    },
+    "8664": {
+      "games": 9,
+      "responsibility": 3.7,
+      "metrics": {
+        "playShare": 0.51,
+        "yardShare": 0.634
+      }
+    },
+    "9589": {
+      "games": 9,
+      "responsibility": 3.3,
+      "metrics": {
+        "playShare": 0.519,
+        "yardShare": 0.598
+      }
+    },
+    "9596": {
+      "games": 2,
+      "responsibility": 4.6,
+      "metrics": {
+        "playShare": 0.54,
+        "yardShare": 0.66
+      }
+    },
+    "9597": {
+      "games": 16,
+      "responsibility": 11.1,
+      "metrics": {
+        "playShare": 0.622,
+        "yardShare": 0.773
+      }
+    },
+    "9635": {
+      "games": 1,
+      "responsibility": 0.2,
+      "metrics": {
+        "playShare": 0.379,
+        "yardShare": 0.367
+      }
+    },
+    "9671": {
+      "games": 1,
+      "responsibility": 12,
+      "metrics": {
+        "playShare": 0.587,
+        "yardShare": 0.941
+      }
+    },
+    "9780": {
+      "games": 5,
+      "responsibility": 5,
+      "metrics": {
+        "playShare": 0.523,
+        "yardShare": 0.709
+      }
+    },
+    "10446": {
+      "games": 8,
+      "responsibility": 2.6,
+      "metrics": {
+        "playShare": 0.496,
+        "yardShare": 0.605
+      }
+    },
+    "10466": {
+      "games": 8,
+      "responsibility": 4.1,
+      "metrics": {
+        "playShare": 0.549,
+        "yardShare": 0.607
+      }
+    },
+    "10480": {
+      "games": 2,
+      "responsibility": 11.8,
+      "metrics": {
+        "playShare": 0.642,
+        "yardShare": 0.812
+      }
+    },
+    "10487": {
+      "games": 2,
+      "responsibility": 0.4,
+      "metrics": {
+        "playShare": 0.385,
+        "yardShare": 0.413
+      }
+    },
+    "10536": {
+      "games": 6,
+      "responsibility": 7,
+      "metrics": {
+        "playShare": 0.574,
+        "yardShare": 0.706
+      }
+    },
+    "11128": {
+      "games": 5,
+      "responsibility": 1.5,
+      "metrics": {
+        "playShare": 0.439,
+        "yardShare": 0.565
+      }
+    },
+    "11237": {
+      "games": 13,
+      "responsibility": 5.2,
+      "metrics": {
+        "playShare": 0.557,
+        "yardShare": 0.662
+      }
+    },
+    "11252": {
+      "games": 16,
+      "responsibility": 4.4,
+      "metrics": {
+        "playShare": 0.539,
+        "yardShare": 0.654
+      }
+    },
+    "11290": {
+      "games": 1,
+      "responsibility": 11.6,
+      "metrics": {
+        "playShare": 0.62,
+        "yardShare": 0.82
+      }
+    },
+    "11291": {
+      "games": 14,
+      "responsibility": 3.1,
+      "metrics": {
+        "playShare": 0.503,
+        "yardShare": 0.614
+      }
+    },
+    "11390": {
+      "games": 1,
+      "responsibility": 1.3,
+      "metrics": {
+        "playShare": 0.42,
+        "yardShare": 0.577
+      }
+    },
+    "11394": {
+      "games": 4,
+      "responsibility": 9.8,
+      "metrics": {
+        "playShare": 0.593,
+        "yardShare": 0.769
+      }
+    },
+    "12473": {
+      "games": 9,
+      "responsibility": 8.3,
+      "metrics": {
+        "playShare": 0.593,
+        "yardShare": 0.741
+      }
+    },
+    "12482": {
+      "games": 15,
+      "responsibility": 0.9,
+      "metrics": {
+        "playShare": 0.43,
+        "yardShare": 0.529
+      }
+    },
+    "12483": {
+      "games": 10,
+      "responsibility": 10,
+      "metrics": {
+        "playShare": 0.609,
+        "yardShare": 0.753
+      }
+    },
+    "12709": {
+      "games": 4,
+      "responsibility": 5.7,
+      "metrics": {
+        "playShare": 0.557,
+        "yardShare": 0.684
+      }
+    }
+  }
+}

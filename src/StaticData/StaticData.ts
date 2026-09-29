@@ -2,12 +2,6 @@ import type { SkillPlayer } from 'app/positions';
 import { QbBoxStats, QbPlayByPlay, StaticPlayerData } from 'app/types';
 import { DATA } from './data';
 
-// Loaded by main.ts before the app starts (see data.ts)
-const gamesJson = DATA.games;
-const subjective = DATA.subjective;
-const teamGradesJson = DATA.teamGrades;
-const dataGradesJson = DATA.dataGrades;
-
 // games.json is generated from ESPN box scores by `npm run update-data` — don't edit it by hand.
 // team-grades.json holds the preseason team grades (0 = F ... 12 = A+), keyed by team logo name.
 // subjective.json holds preseason per-QB scores, keyed by ESPN player id.
@@ -52,16 +46,17 @@ export interface TeamGrades {
 // display name and injured flag (normally from ESPN's injury report) for a single QB
 type SubjectiveScores = Pick<StaticPlayerData, 'responsibility'> & { name?: string; injured?: boolean };
 
-const games = gamesJson as unknown as GameData[];
-const scores = subjective as Record<string, SubjectiveScores>;
-const teamGrades = teamGradesJson as Record<string, TeamGrades>;
+// Read from DATA on every call, since the year selector can load another season (see data.ts)
+const games = () => DATA.games as GameData[];
+const scores = () => DATA.subjective as Record<string, SubjectiveScores>;
+const teamGrades = () => DATA.teamGrades as Record<string, TeamGrades>;
 
 interface DataGrades {
   // newCoach: a first-year head coach (no NFL head-coaching games before this season)
   teams: Record<string, { games: number; oline: number; weapons: number; newCoach?: boolean }>;
   qbs: Record<string, { games: number; responsibility: number }>;
 }
-const dataGrades = dataGradesJson as unknown as DataGrades;
+const dataGrades = () => DATA.dataGrades as DataGrades;
 
 // Share of a grade that comes from this season's stats, rising to all of it by 14 games:
 // 17% after 1 game, 35% after 3, 56% after 6, 68% after 8, 80% after 10, 90% after 12, 100% at 14+.
@@ -80,23 +75,23 @@ function blendScore(preseason: number, fromData: number | undefined, games: numb
 // Preseason coaching grade per team; the app blends it with the Head Coaches rankings. A first-year
 // head coach has no track record, so he starts at a neutral C (6) whatever the team's grade says.
 export function preseasonCoaching(teamLogo: string): number {
-  if (dataGrades.teams[teamKey(teamLogo)]?.newCoach) return 6;
-  return (teamGrades[teamKey(teamLogo)] ?? { coaching: 6 }).coaching;
+  if (dataGrades().teams[teamKey(teamLogo)]?.newCoach) return 6;
+  return (teamGrades()[teamKey(teamLogo)] ?? { coaching: 6 }).coaching;
 }
 
 // Preseason weapons grade per team; the app blends it with the RB, WR and TE rankings
 export function preseasonWeapons(teamLogo: string): number {
-  return (teamGrades[teamKey(teamLogo)] ?? { weapons: 6 }).weapons;
+  return (teamGrades()[teamKey(teamLogo)] ?? { weapons: 6 }).weapons;
 }
 
 // Preseason O-line grade per team; the app blends it with the Offensive Lines rankings
 export function preseasonOline(teamLogo: string): number {
-  return (teamGrades[teamKey(teamLogo)] ?? { oline: 6 }).oline;
+  return (teamGrades()[teamKey(teamLogo)] ?? { oline: 6 }).oline;
 }
 
 // Team games played this season (from the stats grades)
 export function teamGamesPlayed(teamLogo: string): number {
-  return dataGrades.teams[teamKey(teamLogo)]?.games ?? 0;
+  return dataGrades().teams[teamKey(teamLogo)]?.games ?? 0;
 }
 
 // "../assets/NFL_Icons/Bills.png" -> "Bills"
@@ -104,87 +99,94 @@ export function teamKey(teamLogo: string): string {
   return teamLogo.split('/').pop()!.replace('.png', '');
 }
 
-// Static Data
-export const StaticData: StaticPlayerData[] = games.map((game) => {
-  const { name, injured, ...playerScores } = scores[game.id];
-  const qbStats = dataGrades.qbs[game.id];
+// The loaded season's QBs, with their blended and curved Responsibility
+function qbData(): StaticPlayerData[] {
+  const grades = dataGrades();
+  const qbs: StaticPlayerData[] = games().map((game) => {
+    // A QB missing from subjective.json starts from a neutral C
+    const { name, injured, ...playerScores } = scores()[game.id] ?? { responsibility: 6 };
+    const qbStats = grades.qbs[game.id];
 
-  return {
-    id: game.id,
-    name: name ?? game.name,
-    teamLogo: game.teamLogo,
-    wins: game.wins,
-    losses: game.losses,
-    ties: game.ties,
-    lastFive: game.lastFive,
-    epaPerPlay: game.advanced?.epaPerPlay ?? null,
-    cpoe: game.advanced?.cpoe ?? null,
-    successRate: game.advanced?.successRate ?? null,
-    fantasyStd: game.advanced?.fantasyStd ?? null,
-    receptions: game.advanced?.receptions ?? 0,
-    pressureToSack: game.advanced?.pressureToSack ?? null,
-    badThrowPct: game.advanced?.badThrowPct ?? null,
-    timeToThrow: game.advanced?.timeToThrow ?? null,
-    adot: game.advanced?.adot ?? null,
-    aggressiveness: game.advanced?.aggressiveness ?? null,
-    competitive: game.advanced?.competitive ?? null,
-    starts: game.starts,
-    box: game.box ?? null,
-    injured: injured ?? game.injured ?? false,
-    ...playerScores,
-    responsibility: blendScore(playerScores.responsibility, qbStats?.responsibility, qbStats?.games ?? 0),
-  };
-});
+    return {
+      id: game.id,
+      name: name ?? game.name,
+      teamLogo: game.teamLogo,
+      wins: game.wins,
+      losses: game.losses,
+      ties: game.ties,
+      lastFive: game.lastFive,
+      epaPerPlay: game.advanced?.epaPerPlay ?? null,
+      cpoe: game.advanced?.cpoe ?? null,
+      successRate: game.advanced?.successRate ?? null,
+      fantasyStd: game.advanced?.fantasyStd ?? null,
+      receptions: game.advanced?.receptions ?? 0,
+      pressureToSack: game.advanced?.pressureToSack ?? null,
+      badThrowPct: game.advanced?.badThrowPct ?? null,
+      timeToThrow: game.advanced?.timeToThrow ?? null,
+      adot: game.advanced?.adot ?? null,
+      aggressiveness: game.advanced?.aggressiveness ?? null,
+      competitive: game.advanced?.competitive ?? null,
+      starts: game.starts,
+      box: game.box ?? null,
+      injured: injured ?? game.injured ?? false,
+      ...playerScores,
+      responsibility: blendScore(playerScores.responsibility, qbStats?.responsibility, qbStats?.games ?? 0),
+    };
+  });
 
-// Responsibility on a curve across the QBs: the highest blended score grades A+, the lowest F
-{
-  const ranked = [...StaticData].sort((a, b) => b.responsibility - a.responsibility);
+  // Responsibility on a curve across the QBs: the highest blended score grades A+, the lowest F
+  const ranked = [...qbs].sort((a, b) => b.responsibility - a.responsibility);
   const last = Math.max(ranked.length - 1, 1);
   ranked.forEach((qb, rank) => (qb.responsibility = Math.round(12 * (1 - rank / last))));
+  return qbs;
 }
 
 // The QBs as rows of the shared rankings table (the same shape as every other tab's units): ESPN box
 // stats, record and recent results, the nflverse play-by-play stats (plus their no-garbage-time copy),
 // and the blended, curved Responsibility grade. QBs with no ESPN stats this season yet are left out.
-export const QB_UNITS: SkillPlayer[] = StaticData.filter((qb) => !!qb.box).map((qb) => {
-  const box = qb.box!;
-  const ties = qb.ties ?? 0;
-  const starts = qb.wins + qb.losses + ties;
-  return {
-    id: qb.id,
-    gsisId: `QB-${qb.id}`,
-    name: qb.name,
-    teamLogo: qb.teamLogo,
-    games: box.games,
-    injured: qb.injured,
-    lastFive: qb.lastFive,
-    starts: qb.starts,
-    competitive: qb.competitive ?? undefined,
-    stats: {
-      wins: qb.wins,
-      losses: qb.losses,
-      ties,
-      winPct: starts ? (qb.wins + ties * 0.5) / starts : null,
-      compPct: box.compPercent,
-      passYards: box.passYards,
-      rushYards: box.rushYards,
-      passTds: box.passTd,
-      rushTds: box.rushTd,
-      ints: box.ints,
-      fumbles: box.fumLost,
-      ypa: box.ypa,
-      rating: box.rating,
-      epaPerPlay: qb.epaPerPlay,
-      successRate: qb.successRate,
-      cpoe: qb.cpoe,
-      pressureToSack: qb.pressureToSack,
-      badThrowPct: qb.badThrowPct,
-      timeToThrow: qb.timeToThrow,
-      adot: qb.adot,
-      aggressiveness: qb.aggressiveness,
-      fantasyStd: qb.fantasyStd,
-      receptions: qb.receptions,
-      responsibility: qb.responsibility,
-    } as SkillPlayer['stats'],
-  };
-});
+export function buildQbUnits(): SkillPlayer[] {
+  return qbData()
+    .filter((qb) => !!qb.box)
+    .map((qb) => {
+      const box = qb.box!;
+      const ties = qb.ties ?? 0;
+      const starts = qb.wins + qb.losses + ties;
+      return {
+        id: qb.id,
+        gsisId: `QB-${qb.id}`,
+        name: qb.name,
+        teamLogo: qb.teamLogo,
+        games: box.games,
+        injured: qb.injured,
+        lastFive: qb.lastFive,
+        starts: qb.starts,
+        competitive: qb.competitive ?? undefined,
+        stats: {
+          wins: qb.wins,
+          losses: qb.losses,
+          ties,
+          winPct: starts ? (qb.wins + ties * 0.5) / starts : null,
+          compPct: box.compPercent,
+          passYards: box.passYards,
+          rushYards: box.rushYards,
+          passTds: box.passTd,
+          rushTds: box.rushTd,
+          ints: box.ints,
+          fumbles: box.fumLost,
+          ypa: box.ypa,
+          rating: box.rating,
+          epaPerPlay: qb.epaPerPlay,
+          successRate: qb.successRate,
+          cpoe: qb.cpoe,
+          pressureToSack: qb.pressureToSack,
+          badThrowPct: qb.badThrowPct,
+          timeToThrow: qb.timeToThrow,
+          adot: qb.adot,
+          aggressiveness: qb.aggressiveness,
+          fantasyStd: qb.fantasyStd,
+          receptions: qb.receptions,
+          responsibility: qb.responsibility,
+        } as SkillPlayer['stats'],
+      };
+    });
+}

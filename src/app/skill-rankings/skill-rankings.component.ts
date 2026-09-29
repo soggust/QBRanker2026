@@ -1,5 +1,6 @@
 import { Component, Input, OnChanges, ElementRef, ViewChild } from '@angular/core';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
+import { skip } from 'rxjs';
 import {
   FANTASY_SCORING_LABELS,
   RANK_BASIS_LABELS,
@@ -24,9 +25,11 @@ import {
   skillGroups,
   statGroup,
 } from 'app/positions';
-import { PositionService } from 'app/services/position.service';
+import { MAX_MIN_GAMES, PositionService } from 'app/services/position.service';
 import { copyRankingsToClipboard } from 'app/utils/clipboard';
-import { SKILL_UNITS, UnitRankKey, recencyScore, unitRanks, weightedTotals } from 'app/utils/unit-scoring';
+import { SKILL_UNITS, UnitRankKey, recencyScore, statIsEmpty, unitRanks, weightedTotals } from 'app/utils/unit-scoring';
+import { CURRENT_SEASON, dataSeason, dataVersion } from 'StaticData/data';
+import { AWARD_INFO, AwardWin, awardsFor } from 'app/awards';
 import { TintScale, tintFrom, tintScale } from 'app/utils/value-tint';
 import { badgeColor, whiteLogo } from 'app/utils/team-colors';
 
@@ -75,7 +78,7 @@ export class SkillRankingsComponent implements OnChanges {
   private rankCache?: { key: string; ranks: Map<SkillPlayer, Record<UnitRankKey, number | null>> };
 
   private unitRank(player: SkillPlayer, key: UnitRankKey): number | null {
-    const cacheKey = `${this.rankBasis}.${this.garbageTime}`;
+    const cacheKey = `${dataVersion}.${this.rankBasis}.${this.garbageTime}`;
     if (this.rankCache?.key !== cacheKey) {
       this.rankCache = { key: cacheKey, ranks: unitRanks(SKILL_UNITS.HC, this.rankBasis, this.garbageTime) };
     }
@@ -103,6 +106,36 @@ export class SkillRankingsComponent implements OnChanges {
   }
   set showInjured(value: boolean) {
     this.positionService.updateSettings({ showInjured: value });
+  }
+
+  // Min Games (settings menu): players with fewer games are left out. Only for a finished season: the
+  // one in progress is off (shown as 1), since everyone's still a few games in. Tops out at that
+  // season's length (16 games through 2020, 17 since).
+  get minGamesOff(): boolean {
+    return dataSeason === CURRENT_SEASON;
+  }
+
+  get seasonGames(): number {
+    return Math.min(MAX_MIN_GAMES, Math.max(1, ...SKILL_UNITS.DEF.map((team) => team.games)));
+  }
+
+  get minGames(): number {
+    return this.minGamesOff ? 1 : Math.min(this.positionService.settings.minGames, this.seasonGames);
+  }
+
+  stepMinGames(step: number) {
+    const next = Math.min(this.seasonGames, Math.max(1, this.minGames + step));
+    if (this.minGamesOff || next === this.minGames) return;
+    this.positionService.updateSettings({ minGames: next });
+    this.sortPlayers();
+  }
+
+  // The players this tab lists: injured players only with Show Injured on, and enough games (not on
+  // the team tabs, where everyone plays every week)
+  private listedPlayers(): SkillPlayer[] {
+    const teamTab = this.position === 'DEF' || this.position === 'OL' || this.position === 'HC';
+    const min = teamTab ? 0 : this.minGames;
+    return SKILL_UNITS[this.position].filter((player) => (this.showInjured || !player.injured) && player.games >= min);
   }
 
   get categoryColors(): boolean {
@@ -220,6 +253,12 @@ export class SkillRankingsComponent implements OnChanges {
       this.fantasyScoring = scoring;
       if (this.position) this.sortPlayers();
     });
+
+    // Another season from the year selector: the new rows from the top, in that season's order for
+    // this tab (dragged or not) if it has one, otherwise sorted by the sliders
+    this.positionService.season$.pipe(skip(1)).subscribe(() => {
+      if (this.position) this.ngOnChanges();
+    });
   }
 
   // Empty Recent slots for games not played yet (up to five)
@@ -256,7 +295,7 @@ export class SkillRankingsComponent implements OnChanges {
 
   // Put the list back in a saved order (units that have since appeared go at the end)
   private restoreOrder(ids: string[]) {
-    const players = SKILL_UNITS[this.position].filter((player) => this.showInjured || !player.injured);
+    const players = this.listedPlayers();
     const rank = new Map(ids.map((id, i) => [id, i]));
     this.playerList = [...players].sort((a, b) => (rank.get(a.gsisId) ?? Infinity) - (rank.get(b.gsisId) ?? Infinity));
   }
@@ -268,13 +307,16 @@ export class SkillRankingsComponent implements OnChanges {
 
   // Sort Players By Weighted Total
   sortPlayers() {
-    // Injured players drop out unless the settings menu's Show Injured is on (same as QBs)
-    const players = SKILL_UNITS[this.position].filter((player) => this.showInjured || !player.injured);
+    // Injured players drop out unless the settings menu's Show Injured is on, and so do players under
+    // the Min Games setting
+    const players = this.listedPlayers();
     // Switched-off groups don't count
     const counted = this.stats.filter((stat) => !this.hidden[statGroup(stat)] && !this.statHidden(stat.key));
-    const totals = weightedTotals(players, counted, this.effectiveWeights(), (player, stat) =>
-      this.value(player, stat),
-    );
+    // Rates count by how many games they're from (per-game volume stats are rates too)
+    const totals = weightedTotals(players, counted, this.effectiveWeights(), (player, stat) => this.value(player, stat), {
+      games: (player) => player.games,
+      isRate: (stat) => stat.kind === 'efficiency' || (this.perGame && stat.kind === 'volume'),
+    });
     this.playerList = [...players].sort(
       (a, b) => (totals.get(b) ?? 0) - (totals.get(a) ?? 0),
     );
@@ -358,6 +400,21 @@ export class SkillRankingsComponent implements OnChanges {
     const raw = this.rawValue(player, stat);
     if (raw === null) return null;
     return this.perGame && stat.kind === 'volume' && player.games ? raw / player.games : raw;
+  }
+
+  // A row's awards this season (badges beside the name), looked up once per season
+  readonly awardInfo = AWARD_INFO;
+  private awardCache?: { key: string; wins: Map<SkillPlayer, AwardWin[]> };
+
+  awards(player: SkillPlayer): AwardWin[] {
+    const key = `${dataVersion}.${this.position}`;
+    if (this.awardCache?.key !== key) this.awardCache = { key, wins: new Map() };
+    let wins = this.awardCache.wins.get(player);
+    if (!wins) {
+      wins = awardsFor(player, this.position, dataSeason);
+      this.awardCache.wins.set(player, wins);
+    }
+    return wins;
   }
 
   rawValue(player: SkillPlayer, stat: SkillStat): number | null {
@@ -472,10 +529,12 @@ export class SkillRankingsComponent implements OnChanges {
     const weights = this.effectiveWeights();
     const combined = combinedFor(this.position).find((c) => c.stat.key === stat.key);
     if (combined) {
-      const parts = combined.parts.filter((key) => !this.statHidden(key));
+      const parts = combined.parts.filter((key) => !this.statHidden(key) && !statIsEmpty(this.position, key));
       return parts.length > 0 && (this.showUnused || parts.some((key) => !!weights[key]));
     }
     if (this.statHidden(stat.key)) return false;
+    // Not recorded that season
+    if (statIsEmpty(this.position, stat.key)) return false;
     // Display-only columns (Games, FG Att) have no weight, so they show unless their eye is off
     if (stat.infoOnly) return true;
     return this.showUnused || !!weights[stat.key];

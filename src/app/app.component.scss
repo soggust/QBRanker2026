@@ -35,9 +35,9 @@ main {
   // Large screens: sidebar hidden via the toggle in the position bar
   // Collapsed: the shell slides left by the sidebar's width; only its pull tab stays visible
   &.sidebar-collapsed {
-    // 26em sidebar plus its 3px border
+    // The 26em sidebar (it no longer has a right border, so nothing extra)
     .sidebar-shell {
-      margin-left: calc(-26em - 3px);
+      margin-left: -26em;
     }
 
     // Room on the left for the pull tab
@@ -551,10 +551,13 @@ main .drawer-tab:hover .mat-icon {
         color: var(--scoreboard-led);
       }
 
-      // Active: lit-up panel with a goalpost-yellow line along its top edge
+      // Active: lit-up panel framed like a goalpost, yellow up both sides and across the bottom
       &.active {
         background: var(--scoreboard-dots), #1f1f1f;
-        box-shadow: inset 0 3px 0 var(--scoreboard-led);
+        box-shadow:
+          inset 1px 0 0 var(--scoreboard-led),
+          inset -1px 0 0 var(--scoreboard-led),
+          inset 0 -1px 0 var(--scoreboard-led);
       }
 
     }

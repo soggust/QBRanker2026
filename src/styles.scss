@@ -158,18 +158,15 @@ body {
   background-color: rgba(255, 255, 255, 0.14) !important;
 }
 
-// Scrollbars: chalk-white thumbs on the scoreboard track (component styles set these too, so they
-// need the extra weight). --chalk is the off-white of the chalk values on the board.
-:root {
-  --chalk: #f1efe6;
-}
-
+// Scoreboard scrollbars (component styles set these too, so they need the extra weight). The thumb is
+// the tabs' yellow deepened a touch (5% black), since a solid bar of it reads brighter than the
+// tabs' thin glowing text; it lights up to the full yellow on hover.
 ::-webkit-scrollbar-track {
   background-color: var(--scoreboard) !important;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--chalk) !important;
+  background: color-mix(in srgb, var(--scoreboard-led) 95%, #000) !important;
 }
 
 // LCD / segment-display fonts (open source, DSEG by keshikan)
@@ -268,7 +265,8 @@ html .mat-mdc-slide-toggle.mat-accent {
 }
 
 // Settings menu items light up goalpost yellow on hover
-.mat-mdc-menu-panel .mat-mdc-menu-item:hover span {
+// (not Min Games: only its buttons are clickable)
+.mat-mdc-menu-panel .mat-mdc-menu-item:not(.min-games-item):hover span {
   color: var(--scoreboard-led) !important;
 }
 
@@ -364,12 +362,12 @@ about-panel ::-webkit-scrollbar-track {
 
 // Standard scrollbar feedback: brighter on hover, deeper while dragging
 ::-webkit-scrollbar-thumb:hover {
-  background: #fff !important;
+  background: var(--scoreboard-led) !important;
   background-clip: padding-box !important;
 }
 
 ::-webkit-scrollbar-thumb:active {
-  background: color-mix(in srgb, var(--chalk) 80%, #000) !important;
+  background: color-mix(in srgb, var(--scoreboard-led) 85%, #000) !important;
   background-clip: padding-box !important;
 }
 
@@ -397,16 +395,17 @@ about-panel ::-webkit-scrollbar-track {
 }
 
 // The trophy takes the same width as a settings switch (the mask keeps it centered in that
-// space) so "Fantasy Scoring" lines up with the switch labels below it
+// space) so "Fantasy Scoring" lines up with the switch labels below it. Every label starts at the
+// same spot as Min Games' (its stepper is the widest control): 18px further than the switches need.
 .mat-mdc-menu-panel .lombardi.menu-icon {
   flex: 0 0 auto;
-  margin-right: 14px;
+  margin-right: 32px;
   width: 46px;
 }
 
-// A little more room between each settings switch and its label
+// Room between each settings switch and its label (lined up with Min Games)
 .mat-mdc-menu-panel .mat-mdc-menu-item .slide-toggle {
-  margin-right: 7.5px;
+  margin-right: 25.5px;
 }
 
 // Sidebar "Presets..." placeholder reads like a selected preset (Material grays placeholders out;
@@ -438,7 +437,7 @@ about-panel ::-webkit-scrollbar-track {
 // The Unit Ranks icon sits where the switches do, like the fantasy trophy
 .mat-mdc-menu-panel .mat-mdc-menu-item .unit-rank-icon {
   flex: 0 0 auto;
-  margin-right: 14px;
+  margin-right: 32px;
   text-align: center;
   width: 46px;
 }
@@ -484,4 +483,71 @@ about-panel ::-webkit-scrollbar-track {
 // gray-green chalkboard; the texture adds grain on top of this color rather than its own orange
 :root {
   --leather: #6b4e38;
+}
+
+// Min Games stepper in the settings menu: a number between leather minus and plus buttons, where
+// the other items' switches sit. The item itself isn't clickable, so it doesn't highlight on hover.
+.mat-mdc-menu-panel .min-games-stepper {
+  align-items: center;
+  display: inline-flex;
+  flex: 0 0 auto;
+  margin-right: 14px;
+
+  button {
+    align-items: center;
+    background:
+      radial-gradient(ellipse at 35% 20%, rgba(255, 255, 255, 0.2), transparent 60%),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(0, 0, 0, 0.18)),
+      url("assets/textures/leather.jpg") center / 48px,
+      var(--leather);
+    background-blend-mode: normal, normal, soft-light, normal;
+    border: none;
+    border-radius: 50%;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.18),
+      1px 1px 1px rgba(0, 0, 0, 0.6);
+    color: #fff;
+    cursor: pointer;
+    display: inline-flex;
+    font-size: 13px;
+    font-weight: 700;
+    height: 18px;
+    justify-content: center;
+    line-height: 1;
+    padding: 0;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+    width: 18px;
+
+    &:hover:not(:disabled) {
+      filter: brightness(1.2);
+    }
+
+    &:disabled {
+      cursor: default;
+      opacity: 0.35;
+    }
+  }
+
+  .min-games-value {
+    color: var(--scoreboard-led) !important;
+    font-family: "Orbitron", sans-serif !important;
+    font-size: 11px;
+    font-weight: 700;
+    margin: 0 7px;
+    min-width: 14px;
+    text-align: center;
+  }
+}
+
+.mat-mdc-menu-panel .min-games-item {
+  cursor: default;
+
+  &:hover {
+    background: transparent !important;
+  }
+}
+
+// Off for the season in progress: the whole item dims
+.mat-mdc-menu-panel .min-games-item.off {
+  opacity: 0.45;
 }

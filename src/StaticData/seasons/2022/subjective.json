@@ -1,0 +1,266 @@
+{
+  "2330": {
+    "name": "Tom Brady",
+    "responsibility": 6
+  },
+  "8439": {
+    "name": "Aaron Rodgers",
+    "responsibility": 6
+  },
+  "11237": {
+    "name": "Matt Ryan",
+    "responsibility": 6
+  },
+  "11252": {
+    "name": "Joe Flacco",
+    "responsibility": 6
+  },
+  "12483": {
+    "name": "Matthew Stafford",
+    "responsibility": 6
+  },
+  "13199": {
+    "name": "Colt McCoy",
+    "responsibility": 6
+  },
+  "14012": {
+    "name": "Andy Dalton",
+    "responsibility": 6
+  },
+  "14876": {
+    "name": "Ryan Tannehill",
+    "responsibility": 6
+  },
+  "14877": {
+    "name": "Nick Foles",
+    "responsibility": 6
+  },
+  "14880": {
+    "name": "Kirk Cousins",
+    "responsibility": 6
+  },
+  "14881": {
+    "name": "Russell Wilson",
+    "responsibility": 6
+  },
+  "15864": {
+    "name": "Geno Smith",
+    "responsibility": 6
+  },
+  "16728": {
+    "name": "Teddy Bridgewater",
+    "responsibility": 6
+  },
+  "16757": {
+    "name": "Derek Carr",
+    "responsibility": 6
+  },
+  "16760": {
+    "name": "Jimmy Garoppolo",
+    "responsibility": 6
+  },
+  "2511109": {
+    "name": "Trevor Siemian",
+    "responsibility": 6
+  },
+  "2565969": {
+    "name": "Taylor Heinicke",
+    "responsibility": 6
+  },
+  "2573079": {
+    "name": "Carson Wentz",
+    "responsibility": 6
+  },
+  "2576980": {
+    "name": "Marcus Mariota",
+    "responsibility": 6
+  },
+  "2577417": {
+    "name": "Dak Prescott",
+    "responsibility": 6
+  },
+  "2578570": {
+    "name": "Jacoby Brissett",
+    "responsibility": 6
+  },
+  "2969939": {
+    "name": "Jameis Winston",
+    "responsibility": 6
+  },
+  "2972236": {
+    "name": "Nathan Peterman",
+    "responsibility": 6
+  },
+  "2972515": {
+    "name": "Cooper Rush",
+    "responsibility": 6
+  },
+  "3039707": {
+    "name": "Mitchell Trubisky",
+    "responsibility": 6
+  },
+  "3044720": {
+    "name": "Joshua Dobbs",
+    "responsibility": 6
+  },
+  "3046779": {
+    "name": "Jared Goff",
+    "responsibility": 6
+  },
+  "3051308": {
+    "name": "PJ Walker",
+    "responsibility": 6
+  },
+  "3051381": {
+    "name": "Mike White",
+    "responsibility": 6
+  },
+  "3052587": {
+    "name": "Baker Mayfield",
+    "responsibility": 6
+  },
+  "3052600": {
+    "name": "Davis Webb",
+    "responsibility": 6
+  },
+  "3115293": {
+    "name": "Kyle Allen",
+    "responsibility": 6
+  },
+  "3116172": {
+    "name": "Trace McSorley",
+    "responsibility": 6
+  },
+  "3116188": {
+    "name": "David Blough",
+    "responsibility": 6
+  },
+  "3122840": {
+    "name": "Deshaun Watson",
+    "responsibility": 6
+  },
+  "3124092": {
+    "name": "John Wolford",
+    "responsibility": 6
+  },
+  "3139477": {
+    "name": "Patrick Mahomes",
+    "responsibility": 6
+  },
+  "3675812": {
+    "name": "Bryce Perkins",
+    "responsibility": 6
+  },
+  "3722362": {
+    "name": "Brett Rypien",
+    "responsibility": 6
+  },
+  "3892775": {
+    "name": "Jarrett Stidham",
+    "responsibility": 6
+  },
+  "3912547": {
+    "name": "Sam Darnold",
+    "responsibility": 6
+  },
+  "3915511": {
+    "name": "Joe Burrow",
+    "responsibility": 6
+  },
+  "3916387": {
+    "name": "Lamar Jackson",
+    "responsibility": 6
+  },
+  "3917315": {
+    "name": "Kyler Murray",
+    "responsibility": 6
+  },
+  "3917792": {
+    "name": "Daniel Jones",
+    "responsibility": 6
+  },
+  "3918298": {
+    "name": "Josh Allen",
+    "responsibility": 6
+  },
+  "4035312": {
+    "name": "Anthony Brown Jr.",
+    "responsibility": 6
+  },
+  "4035671": {
+    "name": "Tyler Huntley",
+    "responsibility": 6
+  },
+  "4036419": {
+    "name": "Skylar Thompson",
+    "responsibility": 6
+  },
+  "4038524": {
+    "name": "Gardner Minshew II",
+    "responsibility": 6
+  },
+  "4038941": {
+    "name": "Justin Herbert",
+    "responsibility": 6
+  },
+  "4040715": {
+    "name": "Jalen Hurts",
+    "responsibility": 6
+  },
+  "4239086": {
+    "name": "Desmond Ridder",
+    "responsibility": 6
+  },
+  "4240703": {
+    "name": "Kenny Pickett",
+    "responsibility": 6
+  },
+  "4241464": {
+    "name": "Mac Jones",
+    "responsibility": 6
+  },
+  "4241479": {
+    "name": "Tua Tagovailoa",
+    "responsibility": 6
+  },
+  "4241820": {
+    "name": "Sam Ehlinger",
+    "responsibility": 6
+  },
+  "4242512": {
+    "name": "Malik Willis",
+    "responsibility": 6
+  },
+  "4242546": {
+    "name": "Davis Mills",
+    "responsibility": 6
+  },
+  "4250360": {
+    "name": "Bailey Zappe",
+    "responsibility": 6
+  },
+  "4360310": {
+    "name": "Trevor Lawrence",
+    "responsibility": 6
+  },
+  "4361259": {
+    "name": "Zach Wilson",
+    "responsibility": 6
+  },
+  "4361741": {
+    "name": "Brock Purdy",
+    "responsibility": 6
+  },
+  "4362887": {
+    "name": "Justin Fields",
+    "responsibility": 6
+  },
+  "4383351": {
+    "name": "Trey Lance",
+    "responsibility": 6
+  },
+  "4426875": {
+    "name": "Sam Howell",
+    "responsibility": 6
+  }
+}

@@ -1,0 +1,778 @@
+{
+  "2000": {
+    "QB": {
+      "Rich Gannon": 1,
+      "Peyton Manning": 2
+    },
+    "RB": {
+      "Eddie George": 1,
+      "Marshall Faulk": 1,
+      "Edgerrin James": 2,
+      "Robert Smith": 2
+    },
+    "WR": {
+      "Randy Moss": 1,
+      "Terrell Owens": 1,
+      "Rod Smith": 2,
+      "Marvin Harrison": 2
+    },
+    "TE": {
+      "Tony Gonzalez": 1,
+      "Frank Wycheck": 2,
+      "Chad Lewis": 2
+    },
+    "K": {
+      "Matt Stover": 1,
+      "Martin Gramatica": 2
+    },
+    "P": {
+      "Shane Lechler": 1,
+      "Chris Gardocki": 2
+    }
+  },
+  "2001": {
+    "QB": {
+      "Kurt Warner": 1,
+      "Brett Favre": 2
+    },
+    "RB": {
+      "Priest Holmes": 1,
+      "Marshall Faulk": 1,
+      "Ahman Green": 2,
+      "Curtis Martin": 2
+    },
+    "WR": {
+      "Terrell Owens": 1,
+      "David Boston": 1,
+      "Marvin Harrison": 2,
+      "Rod Smith": 2
+    },
+    "TE": {
+      "Tony Gonzalez": 1,
+      "Ernie Conwell": 2
+    },
+    "K": {
+      "David Akers": 1,
+      "Jason Elam": 2
+    },
+    "P": {
+      "Todd Sauerbrun": 1,
+      "Shane Lechler": 2
+    }
+  },
+  "2002": {
+    "QB": {
+      "Rich Gannon": 1,
+      "Brett Favre": 2
+    },
+    "RB": {
+      "Ricky Williams": 1,
+      "Priest Holmes": 1,
+      "LaDainian Tomlinson": 2
+    },
+    "WR": {
+      "Terrell Owens": 1,
+      "Marvin Harrison": 1,
+      "Hines Ward": 2,
+      "Eric Moulds": 2,
+      "Jerry Rice": 2
+    },
+    "TE": {
+      "Jeremy Shockey": 1,
+      "Tony Gonzalez": 2
+    },
+    "K": {
+      "Adam Vinatieri": 1,
+      "David Akers": 2
+    },
+    "P": {
+      "Todd Sauerbrun": 1,
+      "Chris Hanson": 2
+    }
+  },
+  "2003": {
+    "QB": {
+      "Peyton Manning": 1,
+      "Steve McNair": 2
+    },
+    "RB": {
+      "Priest Holmes": 1,
+      "Jamal Lewis": 1,
+      "LaDainian Tomlinson": 2
+    },
+    "WR": {
+      "Randy Moss": 1,
+      "Torry Holt": 1,
+      "Hines Ward": 2,
+      "Chad Johnson": 2,
+      "Marvin Harrison": 2
+    },
+    "TE": {
+      "Tony Gonzalez": 1,
+      "Todd Heap": 2
+    },
+    "K": {
+      "Mike Vanderjagt": 1,
+      "Jeff Wilkins": 2
+    },
+    "P": {
+      "Shane Lechler": 1,
+      "Todd Sauerbrun": 2
+    }
+  },
+  "2004": {
+    "QB": {
+      "Peyton Manning": 1
+    },
+    "RB": {
+      "LaDainian Tomlinson": 1,
+      "Curtis Martin": 1,
+      "Shaun Alexander": 2,
+      "Edgerrin James": 2
+    },
+    "WR": {
+      "Muhsin Muhammad": 1,
+      "Terrell Owens": 1,
+      "Hines Ward": 2,
+      "Marvin Harrison": 2
+    },
+    "TE": {
+      "Antonio Gates": 1,
+      "Tony Gonzalez": 2
+    },
+    "K": {
+      "Adam Vinatieri": 1,
+      "David Akers": 2
+    },
+    "P": {
+      "Shane Lechler": 1,
+      "Brad Maynard": 2
+    }
+  },
+  "2005": {
+    "QB": {
+      "Peyton Manning": 1,
+      "Tom Brady": 2
+    },
+    "RB": {
+      "Tiki Barber": 1,
+      "Shaun Alexander": 1,
+      "Larry Johnson": 2,
+      "LaDainian Tomlinson": 2
+    },
+    "WR": {
+      "Chad Johnson": 1,
+      "Steve Smith": 1,
+      "Santana Moss": 2,
+      "Marvin Harrison": 2
+    },
+    "TE": {
+      "Antonio Gates": 1
+    },
+    "K": {
+      "Neil Rackers": 1,
+      "Shayne Graham": 2
+    },
+    "P": {
+      "Brian Moorman": 1,
+      "Josh Bidwell": 2
+    }
+  },
+  "2006": {
+    "QB": {
+      "Drew Brees": 1,
+      "Peyton Manning": 2
+    },
+    "RB": {
+      "LaDainian Tomlinson": 1,
+      "Larry Johnson": 1,
+      "Frank Gore": 2,
+      "Steven Jackson": 2
+    },
+    "WR": {
+      "Marvin Harrison": 1,
+      "Chad Johnson": 1,
+      "Torry Holt": 2,
+      "Andre Johnson": 2
+    },
+    "TE": {
+      "Antonio Gates": 1,
+      "Tony Gonzalez": 2
+    },
+    "K": {
+      "Robbie Gould": 1,
+      "Nate Kaeding": 2,
+      "Matt Stover": 2
+    },
+    "P": {
+      "Brian Moorman": 1,
+      "Mat McBriar": 2
+    }
+  },
+  "2007": {
+    "QB": {
+      "Tom Brady": 1,
+      "Brett Favre": 2
+    },
+    "RB": {
+      "LaDainian Tomlinson": 1,
+      "Brian Westbrook": 1,
+      "Adrian Peterson": 2,
+      "Fred Taylor": 2
+    },
+    "WR": {
+      "Terrell Owens": 1,
+      "Randy Moss": 1,
+      "Reggie Wayne": 2,
+      "Braylon Edwards": 2,
+      "Wes Welker": 2
+    },
+    "TE": {
+      "Jason Witten": 1,
+      "Tony Gonzalez": 2
+    },
+    "K": {
+      "Rob Bironas": 1,
+      "Phil Dawson": 2
+    },
+    "P": {
+      "Andy Lee": 1,
+      "Shane Lechler": 2
+    }
+  },
+  "2008": {
+    "QB": {
+      "Peyton Manning": 1,
+      "Drew Brees": 2
+    },
+    "RB": {
+      "Adrian Peterson": 1,
+      "Michael Turner": 1,
+      "Clinton Portis": 2,
+      "DeAngelo Williams": 2
+    },
+    "WR": {
+      "Andre Johnson": 1,
+      "Larry Fitzgerald": 1,
+      "Steve Smith": 2,
+      "Wes Welker": 2
+    },
+    "TE": {
+      "Tony Gonzalez": 1,
+      "Jason Witten": 2
+    },
+    "K": {
+      "Stephen Gostkowski": 1,
+      "John Carney": 2
+    },
+    "P": {
+      "Shane Lechler": 1,
+      "Donnie Jones": 2
+    }
+  },
+  "2009": {
+    "QB": {
+      "Peyton Manning": 1,
+      "Drew Brees": 2
+    },
+    "RB": {
+      "Chris Johnson": 1,
+      "Adrian Peterson": 1,
+      "Ray Rice": 2,
+      "Steven Jackson": 2
+    },
+    "WR": {
+      "Wes Welker": 1,
+      "Andre Johnson": 1,
+      "Larry Fitzgerald": 2,
+      "Reggie Wayne": 2
+    },
+    "TE": {
+      "Dallas Clark": 1,
+      "Antonio Gates": 2
+    },
+    "K": {
+      "Nate Kaeding": 1,
+      "David Akers": 2
+    },
+    "P": {
+      "Shane Lechler": 1,
+      "Andy Lee": 2,
+      "Donnie Jones": 2
+    }
+  },
+  "2010": {
+    "QB": {
+      "Tom Brady": 1
+    },
+    "RB": {
+      "Jamaal Charles": 1,
+      "Arian Foster": 1,
+      "Michael Turner": 2,
+      "Adrian Peterson": 2
+    },
+    "WR": {
+      "Roddy White": 1,
+      "Reggie Wayne": 1,
+      "Brandon Lloyd": 2,
+      "Calvin Johnson": 2,
+      "Dwayne Bowe": 2
+    },
+    "TE": {
+      "Jason Witten": 1,
+      "Antonio Gates": 2
+    },
+    "K": {
+      "Billy Cundiff": 1,
+      "David Akers": 2
+    },
+    "P": {
+      "Shane Lechler": 1,
+      "Mat McBriar": 2
+    }
+  },
+  "2011": {
+    "QB": {
+      "Aaron Rodgers": 1,
+      "Drew Brees": 2
+    },
+    "RB": {
+      "Maurice Jones-Drew": 1,
+      "LeSean McCoy": 1,
+      "Arian Foster": 2,
+      "Ray Rice": 2
+    },
+    "WR": {
+      "Wes Welker": 1,
+      "Calvin Johnson": 1,
+      "Larry Fitzgerald": 2,
+      "Victor Cruz": 2
+    },
+    "TE": {
+      "Rob Gronkowski": 1,
+      "Jimmy Graham": 2
+    },
+    "K": {
+      "David Akers": 1,
+      "Sebastian Janikowski": 2
+    },
+    "P": {
+      "Andy Lee": 1,
+      "Shane Lechler": 2
+    }
+  },
+  "2012": {
+    "QB": {
+      "Peyton Manning": 1,
+      "Aaron Rodgers": 2
+    },
+    "RB": {
+      "Adrian Peterson": 1,
+      "Marshawn Lynch": 1,
+      "Alfred Morris": 2,
+      "Jamaal Charles": 2
+    },
+    "WR": {
+      "Brandon Marshall": 1,
+      "Calvin Johnson": 1,
+      "Andre Johnson": 2,
+      "A.J. Green": 2
+    },
+    "TE": {
+      "Tony Gonzalez": 1,
+      "Jason Witten": 2
+    },
+    "K": {
+      "Blair Walsh": 1,
+      "Phil Dawson": 2
+    },
+    "P": {
+      "Andy Lee": 1,
+      "Thomas Morstead": 2
+    }
+  },
+  "2013": {
+    "QB": {
+      "Peyton Manning": 1
+    },
+    "RB": {
+      "LeSean McCoy": 1,
+      "Jamaal Charles": 1,
+      "Eddie Lacy": 2,
+      "Adrian Peterson": 2
+    },
+    "TE": {
+      "Jimmy Graham": 1,
+      "Vernon Davis": 2
+    },
+    "WR": {
+      "Calvin Johnson": 1,
+      "Josh Gordon": 1,
+      "Demaryius Thomas": 2,
+      "A.J. Green": 2,
+      "Antonio Brown": 2
+    },
+    "K": {
+      "Justin Tucker": 1,
+      "Matt Prater": 2
+    },
+    "P": {
+      "Johnny Hekker": 1,
+      "Brandon Fields": 2
+    }
+  },
+  "2014": {
+    "QB": {
+      "Aaron Rodgers": 1,
+      "Tony Romo": 2
+    },
+    "RB": {
+      "DeMarco Murray": 1,
+      "Le'Veon Bell": 1,
+      "Marshawn Lynch": 2
+    },
+    "TE": {
+      "Rob Gronkowski": 1
+    },
+    "WR": {
+      "Antonio Brown": 1,
+      "Dez Bryant": 1,
+      "Jordy Nelson": 2,
+      "Demaryius Thomas": 2
+    },
+    "K": {
+      "Adam Vinatieri": 1,
+      "Stephen Gostkowski": 2
+    },
+    "P": {
+      "Patrick McAfee": 1,
+      "Johnny Hekker": 2
+    }
+  },
+  "2015": {
+    "QB": {
+      "Cam Newton": 1,
+      "Carson Palmer": 2
+    },
+    "RB": {
+      "Adrian Peterson": 1,
+      "Doug Martin": 1,
+      "Devonta Freeman": 2,
+      "Todd Gurley": 2
+    },
+    "TE": {
+      "Rob Gronkowski": 1,
+      "Greg Olsen": 2
+    },
+    "WR": {
+      "Antonio Brown": 1,
+      "Julio Jones": 1,
+      "Brandon Marshall": 2,
+      "Odell Beckham Jr.": 2,
+      "DeAndre Hopkins": 2
+    },
+    "K": {
+      "Stephen Gostkowski": 1,
+      "Dan Bailey": 2
+    },
+    "P": {
+      "Johnny Hekker": 1,
+      "Sam Koch": 2
+    }
+  },
+  "2016": {
+    "QB": {
+      "Matt Ryan": 1,
+      "Tom Brady": 2
+    },
+    "RB": {
+      "Ezekiel Elliott": 1,
+      "David Johnson": 1,
+      "Le'Veon Bell": 2
+    },
+    "TE": {
+      "Travis Kelce": 1,
+      "Greg Olsen": 2
+    },
+    "WR": {
+      "Antonio Brown": 1,
+      "Julio Jones": 1,
+      "Mike Evans": 2,
+      "Odell Beckham Jr.": 2
+    },
+    "K": {
+      "Justin Tucker": 1
+    },
+    "P": {
+      "Johnny Hekker": 1,
+      "Marquette King": 2
+    }
+  },
+  "2017": {
+    "QB": {
+      "Tom Brady": 1,
+      "Carson Wentz": 2
+    },
+    "RB": {
+      "Todd Gurley": 1,
+      "Le'Veon Bell": 1,
+      "Alvin Kamara": 2
+    },
+    "TE": {
+      "Rob Gronkowski": 1,
+      "Travis Kelce": 2
+    },
+    "WR": {
+      "Antonio Brown": 1,
+      "DeAndre Hopkins": 1,
+      "Julio Jones": 2,
+      "Adam Thielen": 2
+    },
+    "K": {
+      "Greg Zuerlein": 1,
+      "Justin Tucker": 2
+    },
+    "P": {
+      "Johnny Hekker": 1,
+      "Brett Kern": 2
+    }
+  },
+  "2018": {
+    "QB": {
+      "Patrick Mahomes": 1,
+      "Drew Brees": 2
+    },
+    "RB": {
+      "Todd Gurley": 1,
+      "Ezekiel Elliott": 2,
+      "Christian McCaffrey": 2
+    },
+    "WR": {
+      "Tyreek Hill": 1,
+      "Michael Thomas": 1,
+      "DeAndre Hopkins": 1,
+      "Julio Jones": 2
+    },
+    "TE": {
+      "Travis Kelce": 1,
+      "George Kittle": 2
+    },
+    "K": {
+      "Justin Tucker": 1,
+      "Aldrick Rosas": 2
+    },
+    "P": {
+      "Michael Dickson": 1,
+      "Johnny Hekker": 2
+    }
+  },
+  "2019": {
+    "QB": {
+      "Lamar Jackson": 1,
+      "Russell Wilson": 2
+    },
+    "RB": {
+      "Christian McCaffrey": 1,
+      "Derrick Henry": 2
+    },
+    "TE": {
+      "George Kittle": 1,
+      "Travis Kelce": 2
+    },
+    "WR": {
+      "Michael Thomas": 1,
+      "DeAndre Hopkins": 1,
+      "Julio Jones": 2,
+      "Chris Godwin Jr.": 2
+    },
+    "K": {
+      "Justin Tucker": 1,
+      "Josh Lambo": 2
+    },
+    "P": {
+      "Brett Kern": 1,
+      "Tress Way": 2
+    }
+  },
+  "2020": {
+    "QB": {
+      "Aaron Rodgers": 1,
+      "Patrick Mahomes": 2,
+      "Josh Allen": 2
+    },
+    "RB": {
+      "Derrick Henry": 1,
+      "Alvin Kamara": 2
+    },
+    "WR": {
+      "Tyreek Hill": 1,
+      "Stefon Diggs": 1,
+      "Davante Adams": 1,
+      "DeAndre Hopkins": 2,
+      "Justin Jefferson": 2,
+      "Calvin Ridley": 2,
+      "DK Metcalf": 2,
+      "Cole Beasley": 2
+    },
+    "TE": {
+      "Travis Kelce": 1
+    },
+    "K": {
+      "Jason Sanders": 1,
+      "Justin Tucker": 2
+    },
+    "P": {
+      "Jake Bailey": 1,
+      "Jack Fox": 2
+    }
+  },
+  "2021": {
+    "QB": {
+      "Aaron Rodgers": 1,
+      "Tom Brady": 2
+    },
+    "RB": {
+      "Jonathan Taylor": 1
+    },
+    "WR": {
+      "Davante Adams": 1,
+      "Cooper Kupp": 1,
+      "Deebo Samuel Sr.": 1,
+      "Ja'Marr Chase": 2,
+      "Justin Jefferson": 2
+    },
+    "TE": {
+      "Mark Andrews": 1,
+      "Travis Kelce": 2
+    },
+    "K": {
+      "Justin Tucker": 1,
+      "Daniel Carlson": 2
+    },
+    "P": {
+      "AJ Cole": 1,
+      "Bryan Anger": 2
+    }
+  },
+  "2022": {
+    "QB": {
+      "Patrick Mahomes": 1,
+      "Jalen Hurts": 2
+    },
+    "RB": {
+      "Josh Jacobs": 1,
+      "Nick Chubb": 2
+    },
+    "WR": {
+      "Justin Jefferson": 1,
+      "Tyreek Hill": 1,
+      "Davante Adams": 1,
+      "A.J. Brown": 2,
+      "Stefon Diggs": 2,
+      "CeeDee Lamb": 2
+    },
+    "TE": {
+      "Travis Kelce": 1,
+      "George Kittle": 2
+    },
+    "K": {
+      "Daniel Carlson": 1,
+      "Justin Tucker": 2
+    },
+    "P": {
+      "Tommy Townsend": 1,
+      "Ryan Stonehouse": 2
+    }
+  },
+  "2023": {
+    "QB": {
+      "Lamar Jackson": 1,
+      "Dak Prescott": 2
+    },
+    "RB": {
+      "Christian McCaffrey": 1,
+      "Kyren Williams": 2
+    },
+    "WR": {
+      "Tyreek Hill": 1,
+      "CeeDee Lamb": 1,
+      "Amon-Ra St. Brown": 1,
+      "A.J. Brown": 2,
+      "Puka Nacua": 2,
+      "Brandon Aiyuk": 2,
+      "Mike Evans": 2
+    },
+    "TE": {
+      "George Kittle": 1,
+      "Sam LaPorta": 2
+    },
+    "K": {
+      "Brandon Aubrey": 1,
+      "Jake Elliott": 2
+    },
+    "P": {
+      "AJ Cole": 1,
+      "Bryan Anger": 2
+    }
+  },
+  "2024": {
+    "QB": {
+      "Lamar Jackson": 1,
+      "Josh Allen": 2
+    },
+    "RB": {
+      "Saquon Barkley": 1,
+      "Derrick Henry": 2
+    },
+    "WR": {
+      "Ja'Marr Chase": 1,
+      "Justin Jefferson": 1,
+      "Amon-Ra St. Brown": 1,
+      "Terry McLaurin": 2,
+      "CeeDee Lamb": 2,
+      "A.J. Brown": 2
+    },
+    "TE": {
+      "Brock Bowers": 1,
+      "George Kittle": 2
+    },
+    "K": {
+      "Chris Boswell": 1,
+      "Brandon Aubrey": 2
+    },
+    "P": {
+      "Jack Fox": 1,
+      "Logan Cooke": 2
+    }
+  },
+  "2025": {
+    "QB": {
+      "Matthew Stafford": 1,
+      "Drake Maye": 2
+    },
+    "RB": {
+      "Bijan Robinson": 1,
+      "James Cook": 2
+    },
+    "WR": {
+      "Puka Nacua": 1,
+      "Jaxon Smith-Njigba": 1,
+      "Ja'Marr Chase": 1,
+      "George Pickens": 2,
+      "Chris Olave": 2,
+      "Amon-Ra St. Brown": 2
+    },
+    "TE": {
+      "Trey McBride": 1,
+      "Kyle Pitts": 2
+    },
+    "K": {
+      "Will Reichard": 1,
+      "Brandon Aubrey": 2
+    },
+    "P": {
+      "Jordan Stout": 1,
+      "Michael Dickson": 2
+    }
+  }
+}

@@ -2,6 +2,8 @@ import { Component } from '@angular/core';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { SKILL_PRESETS, SkillPresetDef } from 'app/skill-presets';
 import { PositionService } from '../services/position.service';
+import { CURRENT_SEASON, SEASONS } from 'StaticData/data';
+import { statIsEmpty } from 'app/utils/unit-scoring';
 
 import {
   POSITIONS,
@@ -53,9 +55,21 @@ export class SidebarComponent {
     SkillPreset | 'custom' | null
   >;
 
+  // The year selector: every season we have, newest first
+  readonly seasons = SEASONS;
+  season = CURRENT_SEASON;
+  seasonLoading = false;
+
   constructor(private positionService: PositionService) {}
 
+  selectSeason(season: number): void {
+    this.positionService.setSeason(season);
+  }
+
   ngOnInit(): void {
+    this.positionService.season$.subscribe((season) => (this.season = season));
+    this.positionService.seasonLoading$.subscribe((loading) => (this.seasonLoading = loading));
+
     this.positionService.skillHidden$.subscribe((hidden) => {
       this.skillHidden = hidden[this.position] ?? {};
     });
@@ -98,7 +112,8 @@ export class SidebarComponent {
   // A card's rows: pairs (Total Yds, Total TDs, Turnovers) become one parent row where the first of
   // the two sits
   skillRows(group: SkillStatGroup): SkillRow[] {
-    const stats = this.orderedStats(group);
+    // Stats not recorded in the loaded season (e.g. drops before 2018) have no slider
+    const stats = this.orderedStats(group).filter((stat) => !statIsEmpty(this.position, stat.key));
     const pairs = combinedFor(this.position);
     const rows: SkillRow[] = [];
     const used = new Set<string>();
@@ -122,7 +137,9 @@ export class SidebarComponent {
     const rows = this.skillRows(group);
     moveItemInArray(rows, event.previousIndex, event.currentIndex);
     const keys = rows.flatMap((row) => (row.children ? row.children.map((child) => child.key) : [row.key]));
-    this.positionService.setColumnOrder(`${this.position}.${group.id}`, keys);
+    // Stats this season has no row for keep their place at the end
+    const rest = this.orderedStats(group).map((stat) => stat.key).filter((key) => !keys.includes(key));
+    this.positionService.setColumnOrder(`${this.position}.${group.id}`, [...keys, ...rest]);
   }
 
   // Which parent rows have their breakdown open (per tab)

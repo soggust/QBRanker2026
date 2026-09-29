@@ -2,14 +2,28 @@
   <div class="logo">
     <h1>
       <!-- Same leather football as the slider thumbs, tilted like a logo -->
-      <span class="logo-football" aria-hidden="true"></span>2026 NFL Ranker
+      <span class="logo-football" aria-hidden="true"></span>NFL Ranker
     </h1>
   </div>
 
   <!-- Filters: the same cards and sliders on every tab (positions.ts) -->
   @if (position; as skill) {
     <div class="filters">
-      <div>
+      <!-- Season and presets side by side -->
+      <div class="dropdown-row">
+        <!-- Year selector: another season's stats with the same sliders -->
+        <mat-select
+          class="season-select"
+          aria-label="Season"
+          title="Season: rank any year's players with the same sliders"
+          [value]="season"
+          [disabled]="seasonLoading"
+          (valueChange)="selectSeason($event)"
+        >
+          @for (year of seasons; track year) {
+            <mat-option [value]="year">{{ year }}</mat-option>
+          }
+        </mat-select>
         <mat-select
           [placeholder]="position + ' Presets...'"
           title="Ready-made slider settings, each built around a style of play (hover an option to see what it weighs)"
@@ -19,6 +33,8 @@
           @if (skillPresets[skill] === 'custom') {
             <mat-option value="custom" disabled="disabled">CUSTOM</mat-option>
           }
+          <!-- Every stat at 50% (what Reset goes back to) -->
+          <mat-option value="default" title="Every stat at 50%, support grades included">DEFAULT</mat-option>
           @for (option of skillPresetOptions; track option.key) {
             <mat-option [value]="option.key" [title]="option.description">{{ option.label | uppercase }}</mat-option>
           }

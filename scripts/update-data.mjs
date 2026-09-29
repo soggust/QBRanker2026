@@ -11,16 +11,28 @@
 // and head coaches come from nflverse play-by-play and schedules (coach names from
 // ESPN). All are written to skill-players.json.
 //
-// Usage: npm run update-data            (season defaults to 2026)
-//        SEASON=2027 npm run update-data
+// Usage: npm run update-data              (the current season, 2026)
+//        SEASON=2025 npm run update-data  (a past season, written to src/StaticData/seasons/2025/;
+//                                          run once, since a finished season doesn't change)
+//        OUT_DIR=some/folder              (write somewhere else, e.g. for a dry run)
+//
+// A past season has no injury report (everyone is Active) and no hand-set preseason grades (a
+// full season of stats outweighs them completely), and it fails outright if nflverse can't be
+// loaded, rather than keeping previous values.
 
-import { readFile, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { pathToFileURL } from 'node:url';
 import { gunzipSync } from 'node:zlib';
 
-const SEASON = Number(process.env.SEASON ?? 2026);
+const CURRENT_SEASON = 2026;
+const SEASON = Number(process.env.SEASON ?? CURRENT_SEASON);
+const PAST_SEASON = SEASON < CURRENT_SEASON;
 const WEEKS = 18;
 const SITE = 'https://site.api.espn.com/apis/site/v2/sports/football/nfl';
-const DATA_DIR = new URL('../src/StaticData/', import.meta.url);
+const DATA_DIR = process.env.OUT_DIR
+  ? pathToFileURL(process.env.OUT_DIR.replace(/[\/]?$/, '/'))
+  : new URL(PAST_SEASON ? `../src/StaticData/seasons/${SEASON}/` : '../src/StaticData/', import.meta.url);
+const TEAM_GRADES_FILE = new URL('team-grades.json', DATA_DIR);
 const GAMES_FILE = new URL('games.json', DATA_DIR);
 const SUBJECTIVE_FILE = new URL('subjective.json', DATA_DIR);
 const SKILL_FILE = new URL('skill-players.json', DATA_DIR);
@@ -51,10 +63,12 @@ async function mapBatched(items, size, fn) {
   return out;
 }
 
-// "Tampa Bay Buccaneers" -> "../assets/NFL_Icons/Bucs.png"
+// "Tampa Bay Buccaneers" -> "../assets/NFL_Icons/Bucs.png". Washington's earlier names (the
+// Redskins through 2019, the Football Team in 2020-21, or just "Washington") use today's Commanders logo.
+const MASCOT_ICONS = { Buccaneers: 'Bucs', Redskins: 'Commanders', Team: 'Commanders', Washington: 'Commanders' };
 function teamLogo(teamName) {
   const mascot = teamName.split(' ').pop();
-  return `../assets/NFL_Icons/${mascot === 'Buccaneers' ? 'Bucs' : mascot}.png`;
+  return `../assets/NFL_Icons/${MASCOT_ICONS[mascot] ?? mascot}.png`;
 }
 
 // Minimal CSV parser (handles quoted fields), returns an array of row objects
@@ -129,8 +143,36 @@ function totalsBy(rows, keyOf, fields) {
   return totals;
 }
 
+// Pro Football Reference's weekly advanced stats only go back to 2024. Earlier seasons come from its
+// season totals (one row per player, back to 2018), renamed to the weekly files' columns so the rest
+// of the script reads them the same way. The season passing file has no sacks, so each QB's are
+// counted from the play-by-play. Players who changed teams mid-season are listed as "2TM" and left out
+// of the team totals.
+const PFR_SEASON_COLUMNS = {
+  pass: { pfr_player_id: 'pfr_id', team: 'team', times_pressured: 'times_pressured', passing_bad_throws: 'bad_throws', passing_drops: 'drops' },
+  rush: {
+    pfr_player_id: 'pfr_id', team: 'tm', carries: 'att', rushing_yards_before_contact: 'ybc',
+    rushing_yards_after_contact: 'yac', rushing_broken_tackles: 'brk_tkl',
+  },
+  rec: { pfr_player_id: 'pfr_id', team: 'tm', receiving_drop: 'drop', receiving_broken_tackles: 'brk_tkl' },
+  def: { pfr_player_id: 'pfr_id', team: 'tm', def_pressures: 'prss', def_missed_tackles: 'm_tkl', def_tackles_combined: 'comb' },
+};
+
+async function pfrSeasonRows(type, sacksByPfr) {
+  const rows = await optionalCsvGz(`${NFLVERSE}/pfr_advstats/advstats_season_${type}.csv.gz`);
+  return rows
+    .filter((row) => row.season === String(SEASON))
+    .map((row) => {
+      const out = { game_type: 'REG' };
+      for (const [weekly, season] of Object.entries(PFR_SEASON_COLUMNS[type])) out[weekly] = row[season];
+      if (out.team === 'LAR') out.team = 'LA';
+      if (type === 'pass') out.times_sacked = String(sacksByPfr.get(out.pfr_player_id) ?? 0);
+      return out;
+    });
+}
+
 async function loadNflverse() {
-  const [players, pbp, playerStats, schedule, ngsPass, ngsRush, ngsRec, pfrPass, pfrRush, pfrRec, pfrDef, snaps] =
+  let [players, pbp, playerStats, schedule, ngsPass, ngsRush, ngsRec, pfrPass, pfrRush, pfrRec, pfrDef, snaps] =
     await Promise.all([
       getCsvGz(`${NFLVERSE}/players/players.csv.gz`),
       getCsvGz(`${NFLVERSE}/pbp/play_by_play_${SEASON}.csv.gz`),
@@ -144,6 +186,20 @@ async function loadNflverse() {
       ),
       optionalCsvGz(`${NFLVERSE}/snap_counts/snap_counts_${SEASON}.csv.gz`),
     ]);
+  if (!pfrPass.length) {
+    const pfrByGsis = new Map(players.filter((p) => p.pfr_id && p.pfr_id !== 'NA').map((p) => [p.gsis_id, p.pfr_id]));
+    const sacksByPfr = new Map();
+    for (const play of pbp) {
+      if (play.season_type !== 'REG' || play.sack !== '1') continue;
+      const pfrId = pfrByGsis.get(play.passer_player_id);
+      if (pfrId) sacksByPfr.set(pfrId, (sacksByPfr.get(pfrId) ?? 0) + 1);
+    }
+    [pfrPass, pfrRush, pfrRec, pfrDef] = await Promise.all(
+      ['pass', 'rush', 'rec', 'def'].map((type) => pfrSeasonRows(type, sacksByPfr)),
+    );
+    console.log(`Pro Football Reference: season totals (no weekly files for ${SEASON})`);
+  }
+  for (const rows of [pbp, playerStats, schedule, pfrPass, pfrRush, pfrRec, pfrDef, snaps]) sameTeamAbbrs(rows);
   const espnIds = players.filter((p) => p.espn_id && p.espn_id !== 'NA');
 
   // Next Gen Stats: week 0 rows are regular-season totals
@@ -239,6 +295,22 @@ const TEAM_ICONS = {
   TEN: 'Titans', WAS: 'Commanders',
 };
 
+// Earlier seasons' abbreviations for teams that moved, as today's (see sameTeamAbbrs)
+const MOVED_TEAMS = { OAK: 'LV', SD: 'LAC', STL: 'LA' };
+
+// Rewrite moved teams' old abbreviations in every team column (posteam, defteam, recent_team...),
+// so older seasons line up with today's 32 teams
+function sameTeamAbbrs(rows) {
+  const keys = Object.keys(rows[0] ?? {}).filter((key) => key.includes('team'));
+  for (const row of rows) {
+    for (const key of keys) {
+      const now = MOVED_TEAMS[row[key]];
+      if (now) row[key] = now;
+    }
+  }
+  return rows;
+}
+
 // Missing values (null) pass through as null
 const round = (value, digits) =>
   value === null || value === undefined || Number.isNaN(value) ? null : Number(value.toFixed(digits));
@@ -247,28 +319,38 @@ const ngsValue = (row, key, digits = 2) => (row ? round(num(row[key]), digits) :
 
 // RB/WR/TE season totals plus derived rates, tracking stats (Next Gen Stats), contact and drop
 // stats (Pro Football Reference via nflverse) and snap share
+// Some seasons' player stats leave targets out (2003-2008) and air yards / YAC out (before 2006).
+// ctx.receiving (from receivingFromPbp) fills targets and target share in from the play-by-play when
+// it names the receiver on incompletions too; otherwise targets can't be known, and the target stats
+// (targets, share, catch %, EPA / target) are null (hidden) rather than 0, like air yards and YAC
 function offenseStats(n, ctx) {
+  const rec = ctx.receiving;
+  const targets = rec.hasTargets ? n('targets') : rec.pbpHasTargets ? rec.targets : null;
   const stats = {
     carries: n('carries'),
     rushYards: n('rushing_yards'),
     rushTds: n('rushing_tds'),
-    targets: n('targets'),
+    targets,
     receptions: n('receptions'),
     recYards: n('receiving_yards'),
     recTds: n('receiving_tds'),
-    yac: n('receiving_yards_after_catch'),
+    yac: rec.hasYac ? n('receiving_yards_after_catch') : null,
     firstDowns: n('rushing_first_downs') + n('receiving_first_downs'),
     fumbles: n('rushing_fumbles_lost') + n('receiving_fumbles_lost'),
-    targetShare: round(n('target_share'), 3),
+    targetShare: rec.hasTargets
+      ? round(n('target_share'), 3)
+      : targets !== null && rec.teamTargets
+        ? round(targets / rec.teamTargets, 3)
+        : null,
     fantasyStd: round(n('fantasy_points'), 2),
   };
   return {
     ...stats,
     ypc: ratio(stats.rushYards, stats.carries, 2),
     totalTds: stats.rushTds + stats.recTds,
-    catchPct: ratio(stats.receptions, stats.targets),
+    catchPct: stats.targets === null ? null : ratio(stats.receptions, stats.targets),
     epaPerCarry: ratio(n('rushing_epa'), stats.carries),
-    epaPerTarget: ratio(n('receiving_epa'), stats.targets),
+    epaPerTarget: stats.targets === null ? null : ratio(n('receiving_epa'), stats.targets),
     ryoePerAtt: ngsValue(ctx.ngsRush, 'rush_yards_over_expected_per_att'),
     yacoPerCarry:
       ctx.pfrRush && stats.carries ? ratio(ctx.pfrRush.rushing_yards_after_contact, stats.carries, 2) : null,
@@ -280,7 +362,7 @@ function offenseStats(n, ctx) {
     separation: ngsValue(ctx.ngsRec, 'avg_separation', 1),
     yacOverExp: ngsValue(ctx.ngsRec, 'avg_yac_above_expectation', 1),
     adot: ngsValue(ctx.ngsRec, 'avg_intended_air_yards', 1),
-    airYardsShare: round(n('air_yards_share'), 3),
+    airYardsShare: rec.hasAirYards ? round(n('air_yards_share'), 3) : null,
     dropPct: ctx.pfrRec && stats.targets ? ratio(ctx.pfrRec.receiving_drop, stats.targets) : null,
     // Charted drops (Pro Football Reference); null (scored as average) with no targets yet, or when
     // PFR has no receiving line for the player
@@ -356,6 +438,11 @@ function teamIcon(abbr) {
   return `../assets/NFL_Icons/${icon}.png`;
 }
 
+// The teams that played this season (31 before the Texans joined in 2002)
+function seasonTeams(games) {
+  return Object.keys(TEAM_ICONS).filter((team) => games.some((g) => g.home_team === team || g.away_team === team));
+}
+
 // Each completed game from one team's side
 function teamGames(games, team) {
   return games
@@ -388,7 +475,7 @@ function pointsAllowedFantasy(points) {
 // Team defenses: EPA/success allowed, sacks, takeaways, points allowed and D/ST fantasy
 // (sack 1, takeaway 2, TD 6, safety 2, plus the points-allowed tier each game)
 function defenseUnits({ pbp, games, pfr }) {
-  return Object.keys(TEAM_ICONS).map((team) => {
+  return seasonTeams(games).map((team) => {
     const defPlays = pbp.filter((play) => play.defteam === team);
     const scrimmage = defPlays.filter(EPA_PLAY);
     const epa = (plays) => mean(plays.map((play) => num(play.epa))) ?? 0;
@@ -441,7 +528,7 @@ function defenseUnits({ pbp, games, pfr }) {
 const OLINE_PENALTIES = ['Offensive Holding', 'False Start', 'Illegal Formation', 'Illegal Use of Hands', 'Chop Block'];
 
 function olineUnits({ pbp, games, pfr, ngs }) {
-  return Object.keys(TEAM_ICONS).map((team) => {
+  return seasonTeams(games).map((team) => {
     const plays = pbp.filter((play) => play.posteam === team);
     const dropbacks = plays.filter((play) => play.qb_dropback === '1');
     const sacks = dropbacks.filter((play) => play.sack === '1').length;
@@ -533,7 +620,7 @@ function ngsTeamAverage(rows, team, key, weightKey, filter = () => true) {
 // Weapons: receiver separation, YAC over expected, drops, RB rush yards over expected and
 // broken tackles; stats that depend least on how good the QB is.
 function teamDataGrades({ pbp, games, pfr, ngs, pastCoaches, headCoaches }) {
-  const teams = Object.keys(TEAM_ICONS).map((team) => {
+  const teams = seasonTeams(games).map((team) => {
     const plays = pbp.filter((play) => play.posteam === team);
     const count = (test) => plays.filter(test).length;
     const dropbacks = count((play) => play.qb_dropback === '1');
@@ -549,7 +636,7 @@ function teamDataGrades({ pbp, games, pfr, ngs, pastCoaches, headCoaches }) {
     return {
       team,
       games: played.length,
-      coach: headCoaches?.get(team) ?? played.at(-1)?.coach ?? null,
+      coach: headCoaches?.get(team) ?? mostGamesCoach(played) ?? null,
       oline: {
         key: team,
         metrics: {
@@ -762,11 +849,19 @@ function specialTeamsNet(plays, team) {
   return total;
 }
 
+// The coach on the sideline for most of a team's games (a past season's head coach, where an
+// interim coach finished the year)
+function mostGamesCoach(played) {
+  const counts = new Map();
+  for (const { coach } of played) counts.set(coach, (counts.get(coach) ?? 0) + 1);
+  return [...counts].sort((a, b) => b[1] - a[1])[0]?.[0];
+}
+
 function coachUnits({ pbp, games, headCoaches }) {
   const coaches = Object.keys(TEAM_ICONS)
     .map((team) => {
       const played = teamGames(games, team);
-      const name = headCoaches.get(team) ?? played.at(-1)?.coach;
+      const name = headCoaches.get(team) ?? mostGamesCoach(played);
       return { name, team, games: played };
     })
     .filter((coach) => coach.name && coach.games.length);
@@ -939,8 +1034,44 @@ function listedPlayers(all, { count, usage, leaders = [] }) {
   return new Set([top(usage), ...leaders.map((key) => top((s) => s[key] ?? 0))].flat());
 }
 
+// Targets per receiver and per team, counted from the play-by-play (every pass that names a receiver,
+// sacks and spikes aside), and which receiving stats this season's player stats actually have
+function receivingFromPbp(playerStats, pbp) {
+  const targets = new Map();
+  const teamTargets = new Map();
+  let incompletions = 0;
+  for (const play of pbp) {
+    if (play.pass_attempt !== '1' || play.sack === '1' || play.qb_spike === '1') continue;
+    const id = play.receiver_player_id;
+    if (!id || id === 'NA') continue;
+    if (play.complete_pass === '0') incompletions++;
+    targets.set(id, (targets.get(id) ?? 0) + 1);
+    teamTargets.set(play.posteam, (teamTargets.get(play.posteam) ?? 0) + 1);
+  }
+  // A stat is there if nearly every player with a catch has it (a stray value doesn't count)
+  const catchers = playerStats.filter((row) => (num(row.receptions) ?? 0) > 0);
+  const has = (key) => catchers.filter((row) => (num(row[key]) ?? 0) !== 0).length >= catchers.length * 0.8;
+  return {
+    pbpTargets: [...targets.values()].reduce((a, b) => a + b, 0),
+    // Older play-by-play names the receiver only on catches, which would make every target a catch
+    pbpHasTargets: incompletions > 1000,
+    hasTargets: has('targets'),
+    hasYac: has('receiving_yards_after_catch'),
+    hasAirYards: has('air_yards_share'),
+    forPlayer: (id, team) => ({ targets: targets.get(id) ?? 0, teamTargets: teamTargets.get(team) ?? 0 }),
+  };
+}
+
 function skillPlayers(nflverse) {
   const { playerStats, pbp, espnByGsis, pfrByGsis, ngs, pfr, snapShare } = nflverse;
+  const receiving = receivingFromPbp(playerStats, pbp);
+  if (!receiving.hasTargets) {
+    console.log(
+      receiving.pbpHasTargets
+        ? `Player stats have no targets this season: ${receiving.pbpTargets} counted from the play-by-play`
+        : 'No targets this season (the play-by-play names receivers on catches only): target stats left out',
+    );
+  }
   const stEpa = specialTeamsEpa(pbp);
   const fgOverExp = fieldGoalsOverExpected(pbp);
   const competitive = { ...nflverse, pbp: pbp.filter(competitivePlay) };
@@ -968,6 +1099,7 @@ function skillPlayers(nflverse) {
           pfrRush: pfr.rush.get(pfrId),
           pfrRec: pfr.rec.get(pfrId),
           snapShare: snapShare.get(pfrId),
+          receiving: { ...receiving, ...receiving.forPlayer(row.player_id, row.recent_team) },
         };
         return {
           id: espnByGsis.get(row.player_id) ?? null,
@@ -1000,6 +1132,20 @@ async function completedGames() {
 
 // A QB's season box stats from ESPN (what the app used to fetch live on every page load).
 // null when ESPN has no stats for them this season (404); throws on other failures.
+// NFL passer rating from the box score: four parts (completion %, yards, TDs and interceptions per
+// attempt), each held to 0-2.375, averaged and scaled to 0-158.3. Worked out here rather than taken
+// from ESPN, whose rating field is wrong for seasons before 2021.
+function passerRating(completions, attempts, yards, tds, ints) {
+  if (!attempts) return null;
+  const part = (value) => Math.max(0, Math.min(2.375, value));
+  const sum =
+    part((completions / attempts - 0.3) * 5) +
+    part((yards / attempts - 3) * 0.25) +
+    part((tds / attempts) * 20) +
+    part(2.375 - (ints / attempts) * 25);
+  return round((sum / 6) * 100, 1);
+}
+
 async function qbBoxStats(id) {
   const url = `https://sports.core.api.espn.com/v2/sports/football/leagues/nfl/seasons/${SEASON}/types/2/athletes/${id}/statistics`;
   const res = await fetch(url);
@@ -1008,6 +1154,7 @@ async function qbBoxStats(id) {
   const data = await res.json();
   const stat = (category, name) =>
     data.splits.categories.find((c) => c.name === category)?.stats.find((s) => s.name === name)?.value ?? 0;
+  const attempts = stat('passing', 'passingAttempts');
   return {
     games: stat('general', 'gamesPlayed'),
     fumLost: stat('general', 'fumblesLost'),
@@ -1016,7 +1163,13 @@ async function qbBoxStats(id) {
     ints: stat('passing', 'interceptions'),
     compPercent: round(stat('passing', 'completionPct'), 1),
     ypa: round(stat('passing', 'yardsPerPassAttempt'), 2),
-    rating: round(stat('passing', 'QBRating'), 1),
+    rating: passerRating(
+      stat('passing', 'completions'),
+      attempts,
+      stat('passing', 'passingYards'),
+      stat('passing', 'passingTouchdowns'),
+      stat('passing', 'interceptions')
+    ),
     rushYards: stat('rushing', 'rushingYards'),
     rushTd: stat('rushing', 'rushingTouchdowns'),
   };
@@ -1036,6 +1189,8 @@ async function gameStarters(game) {
       const attempts = Number(a.stats[attIndex].split('/')[1]);
       return !best || attempts > best.attempts ? { athlete: a.athlete, attempts } : best;
     }, null);
+    // (a few old box scores list no passers)
+    if (!starter) return [];
     const competitor = competitors.find((c) => c.team.id === teamStats.team.id);
     return [
       {
@@ -1047,12 +1202,16 @@ async function gameStarters(game) {
   });
 
   if (starters.length !== 2) {
-    throw new Error(`Game ${game.id} (${game.date}): found ${starters.length} starting QBs, expected 2`);
+    const problem = `Game ${game.id} (${game.date}): found ${starters.length} starting QBs, expected 2`;
+    // An old season's gap only costs a start or two in the records; this season's means something broke
+    if (!PAST_SEASON) throw new Error(problem);
+    console.warn(`${problem}; left out of the QB records`);
   }
   return starters;
 }
 
 async function main() {
+  await mkdir(DATA_DIR, { recursive: true });
   const games = await completedGames();
   console.log(`Season ${SEASON}: ${games.length} completed games`);
 
@@ -1094,7 +1253,8 @@ async function main() {
   let dataGrades = null;
   try {
     const nflverse = await loadNflverse();
-    nflverse.headCoaches = await espnHeadCoaches().catch((err) => {
+    // ESPN's staff pages show today's coach, so a past season names its coaches from the schedule
+    nflverse.headCoaches = PAST_SEASON ? new Map() : await espnHeadCoaches().catch((err) => {
       console.warn(`Could not load head coaches from ESPN, using nflverse names: ${err.message}`);
       return new Map();
     });
@@ -1105,6 +1265,7 @@ async function main() {
     skill = skillPlayers(nflverse);
     dataGrades = { teams: teamDataGrades(nflverse), qbs: qbDataGrades(gameData.map((qb) => qb.id), nflverse) };
   } catch (err) {
+    if (PAST_SEASON) throw err;
     console.warn(`Could not load nflverse data, keeping previous values: ${err.message}`);
   }
   if (dataGrades) {
@@ -1127,7 +1288,8 @@ async function main() {
   if (noBox.length) console.warn(`No ESPN box stats for: ${noBox.join(', ')}`);
 
   // Injury flags from ESPN's report; keep yesterday's if the report can't be loaded
-  const injuries = await espnInjuries().catch((err) => {
+  // (a past season has none: everyone is Active)
+  const injuries = PAST_SEASON ? new Map() : await espnInjuries().catch((err) => {
     console.warn(`Could not load the ESPN injury report, keeping previous injury flags: ${err.message}`);
     return null;
   });
@@ -1172,7 +1334,7 @@ async function main() {
 
   // Add any new QBs to subjective.json. Weapons/O-line/coaching come from team-grades.json and
   // defense from the Defenses rankings, so only the per-QB scores are needed.
-  const subjective = JSON.parse(await readFile(SUBJECTIVE_FILE, 'utf8'));
+  const subjective = JSON.parse(await readFile(SUBJECTIVE_FILE, 'utf8').catch(() => '{}'));
   const added = [];
   for (const qb of gameData) {
     if (subjective[qb.id]) continue;
@@ -1181,11 +1343,14 @@ async function main() {
   }
   if (added.length) {
     await writeFile(SUBJECTIVE_FILE, JSON.stringify(subjective, null, 2) + '\n');
-    console.log(`Added to subjective.json (review their scores): ${added.join(', ')}`);
+    if (!PAST_SEASON) console.log(`Added to subjective.json (review their scores): ${added.join(', ')}`);
   }
+  // The app loads team-grades.json with every season; a past season has no preseason grades (every
+  // team falls back to a C, which a full season of stats outweighs)
+  if (PAST_SEASON) await writeFile(TEAM_GRADES_FILE, '{}' + String.fromCharCode(10));
 }
 
 main().catch((err) => {
-  console.error(err.message);
+  console.error(process.env.DEBUG ? err.stack : err.message);
   process.exit(1);
 });

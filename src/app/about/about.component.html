@@ -2,7 +2,7 @@
 <div class="about-panel" role="dialog" aria-modal="true" aria-labelledby="about-title">
   <header>
     <span class="about-ball" aria-hidden="true"></span>
-    <h2 id="about-title">2026 NFL Ranker</h2>
+    <h2 id="about-title">NFL Ranker</h2>
     <button #closeButton type="button" class="about-close" aria-label="Close" title="Close (Esc)" (click)="close()">
       <mat-icon fontIcon="close"></mat-icon>
     </button>
@@ -34,7 +34,8 @@
           </p>
           <p>
             It covers quarterbacks, running backs, wide receivers, tight ends, offensive lines, kickers,
-            punters, defenses and head coaches, all with this season's stats, updated every night.
+            punters, defenses and head coaches, all with this season's stats, updated every night, plus every
+            season back to 2000.
           </p>
           <div class="callout">
             <strong>New here?</strong> Pick a tab up top, then try a preset from the dropdown at the top of the
@@ -45,6 +46,10 @@
           <ul>
             <li><b>Sliders</b> set how much each stat counts. 50% is normal, 100% is double, 0% ignores it.</li>
             <li><b>Presets</b> load a ready-made set of sliders built around a style of play.</li>
+            <li>
+              The <b>season</b> dropdown above the presets ranks any year from 2000 on with the same sliders, so
+              you can see how your formula grades another season.
+            </li>
             <li><b>Drag rows</b> to rank by hand. Your order sticks until that tab's sliders change.</li>
             <li><b>Hover</b> any column label for the full stat name and the league average.</li>
             <li>The <b>gear</b> in the footer has display settings; the <b>copy</b> button copies your list.</li>
@@ -163,6 +168,18 @@
 
         @case ('faq') {
           <h3>FAQ</h3>
+          <details>
+            <summary>How do past seasons work?</summary>
+            <p>
+              Pick a year from the season dropdown at the top of the filter menu. Your sliders, eyes and column
+              order stay as they are; the list re-ranks with that year's stats. Each season keeps its own
+              hand-dragged order while the page is open, and the address updates so you can share the year. A
+              finished season uses its full-season results for every grade (no preseason blend), and there are
+              no injury flags. Stats that weren't tracked yet that year are left out, columns and sliders both:
+              charting stats like drops and pressures start in 2018, tracking stats like separation and time to
+              throw in 2016, and CPOE in 2006.
+            </p>
+          </details>
           <details open>
             <summary>Why is my guy ranked so low?</summary>
             <p>
