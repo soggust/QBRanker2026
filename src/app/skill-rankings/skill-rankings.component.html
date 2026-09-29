@@ -175,7 +175,7 @@
 
     <!-- Clipboard -->
     <button
-      (click)="copyPlayerListToClipboard()"
+      (click)="copyPlayerListToClipboard($any($event.currentTarget))"
       aria-label="Copy To Clipboard Button"
       title="Copy to Clipboard"
       class="copy-toggle"
@@ -211,12 +211,13 @@
       aria-label="About and FAQ"
       title="About, how it works and FAQ"
       class="info-toggle"
+      [class.open]="aboutOpen"
     >
       <mat-icon aria-hidden="true" fontIcon="info" class="arrow-drop-up"></mat-icon>
     </button>
 
     <!-- Toast -->
-    <div class="toast" [class.show]="isToastVisible">List copied to clipboard!</div>
+    <div class="toast" [class.show]="isToastVisible" [style.top.px]="toastAt.top" [style.left.px]="toastAt.left">List copied to clipboard!</div>
 
     <!-- Settings Icon -->
     <button

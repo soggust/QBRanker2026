@@ -220,6 +220,8 @@ export class SkillRankingsComponent implements OnChanges {
     this.positionService.updateSettings({ showUnused: value });
   }
   isToastVisible: boolean = false;
+  // Where the toast shows: centered just under the copy button
+  toastAt = { top: 0, left: 0 };
   fantasyScoring: FantasyScoring = 'ppr';
   scoringLabels = FANTASY_SCORING_LABELS;
   teamQbPlay = new Map<string, number>();
@@ -650,13 +652,19 @@ export class SkillRankingsComponent implements OnChanges {
     return 'count';
   }
 
-  // Footer info button: the About / FAQ panel
+  // Footer info button: the About / FAQ panel (the button lights up while it's open)
+  get aboutOpen(): boolean {
+    return this.positionService.aboutOpen;
+  }
+
   openAbout() {
     this.positionService.setAboutOpen(true);
   }
 
   // Copy Player Names
-  copyPlayerListToClipboard() {
+  copyPlayerListToClipboard(button: HTMLElement) {
+    const rect = button.getBoundingClientRect();
+    this.toastAt = { top: rect.bottom + 8, left: rect.left + rect.width / 2 };
     copyRankingsToClipboard(this.rankingsList.nativeElement)
       .then(() => this.showToast())
       .catch((err) => console.error('Failed to copy: ', err));

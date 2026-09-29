@@ -558,15 +558,14 @@ section {
   background-color: var(--primary-700);
   border: solid 1px var(--primary-500);
   border-radius: 2.5px;
-  bottom: 5em;
   box-shadow: 0 0 1em rgba(0, 0, 0, 0.4);
   color: #fff9e7;
   min-width: 100px;
   opacity: 0;
   padding: 10px;
   position: fixed;
-  right: 4em;
   text-align: center;
+  white-space: nowrap;
   transform: translateX(-50%);
   transition: opacity 0.35s ease-in-out;
   visibility: hidden;
@@ -2128,8 +2127,10 @@ section footer {
 }
 
 
-// While the filters are open, the filter button's crossed-out icon is goalpost yellow
-section footer .filter-toggle.open .mat-icon {
+// While the filters, the About panel or the settings menu are open, that button's icon is goalpost yellow
+section footer .filter-toggle.open .mat-icon,
+section footer .info-toggle.open .mat-icon,
+section footer .settings-toggle[aria-expanded="true"] .mat-icon {
   color: var(--scoreboard-led);
 }
 

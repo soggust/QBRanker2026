@@ -15,13 +15,13 @@ export class AboutComponent implements AfterViewInit {
   @ViewChild('body') body!: ElementRef<HTMLElement>;
 
   sections: { id: SectionId; title: string; icon: string }[] = [
-    { id: 'about', title: 'About', icon: 'sports_football' },
-    { id: 'ranking', title: 'How Rankings Work', icon: 'tune' },
-    { id: 'grades', title: 'Grades & Support', icon: 'groups' },
-    { id: 'tips', title: 'Tips & Tricks', icon: 'lightbulb' },
-    { id: 'glossary', title: 'Stat Glossary', icon: 'menu_book' },
+    { id: 'about', title: 'Guide', icon: 'sports_football' },
+    { id: 'ranking', title: 'Rankings', icon: 'tune' },
+    { id: 'grades', title: 'Grades', icon: 'groups' },
+    { id: 'tips', title: 'Tips', icon: 'lightbulb' },
+    { id: 'glossary', title: 'Stats', icon: 'menu_book' },
     { id: 'faq', title: 'FAQ', icon: 'help_outline' },
-    { id: 'data', title: 'Data & Credits', icon: 'dataset' },
+    { id: 'data', title: 'Credits', icon: 'dataset' },
   ];
   active: SectionId = 'about';
 

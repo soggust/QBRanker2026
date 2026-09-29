@@ -383,6 +383,10 @@ export class PositionService {
   private aboutOpenSubject = new BehaviorSubject<boolean>(false);
   public aboutOpen$ = this.aboutOpenSubject.asObservable();
 
+  get aboutOpen(): boolean {
+    return this.aboutOpenSubject.value;
+  }
+
   setAboutOpen(open: boolean): void {
     this.aboutOpenSubject.next(open);
   }
