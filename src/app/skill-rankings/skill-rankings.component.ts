@@ -127,6 +127,7 @@ export class SkillRankingsComponent implements OnChanges {
 
   // Footer year dropdown: every season we have, newest first
   readonly seasons = SEASONS;
+  readonly currentSeason = CURRENT_SEASON;
   season = CURRENT_SEASON;
   seasonLoading = false;
 

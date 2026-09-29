@@ -2155,8 +2155,9 @@ section footer .mat-mdc-select.season-select {
   height: 42px;
   letter-spacing: 1.5px;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
-  padding: 0 12px 0 16px;
-  width: 150px;
+  padding: 0 1em;
+  // (text on the left, caret on the right, room between)
+  width: 215px;
 
   // (its text and caret are styled in styles.scss: they're inside Material's own template)
 }
@@ -2164,10 +2165,61 @@ section footer .mat-mdc-select.season-select {
 // Narrow screens: just the year, in a narrower box
 @media (max-width: 575px) {
   section footer .mat-mdc-select.season-select {
-    width: 104px;
+    width: 150px;
 
     .season-word {
       display: none;
     }
+  }
+}
+
+// Experiment: the footer bar sits above the grid instead of below it
+section.rankings-wrapper {
+  display: flex;
+  flex-direction: column;
+
+  > footer {
+    height: auto;
+    margin-bottom: 12px;
+    order: -1;
+  }
+}
+
+// (with the bar on top: [filter] [year] on the left, [copy] [info] [settings] on the right)
+section.rankings-wrapper > footer {
+  justify-content: flex-start;
+
+  .filter-toggle {
+    order: 1;
+  }
+
+  .season-select {
+    margin: 0;
+    order: 2;
+  }
+
+  .copy-toggle {
+    margin-left: auto !important;
+    order: 3;
+  }
+
+  .info-toggle {
+    order: 4;
+  }
+
+  .settings-toggle {
+    order: 5;
+  }
+}
+
+// Below 1200px the bar gets the same 12px above and below as on large screens (the grid's own top
+// margin gives way to it)
+@media (max-width: 1199px) {
+  section.rankings-wrapper > footer {
+    margin: 8px 0 12px;
+  }
+
+  section.rankings-wrapper ul {
+    margin-top: 0;
   }
 }

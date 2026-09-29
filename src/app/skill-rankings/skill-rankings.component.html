@@ -196,10 +196,12 @@
       [disabled]="seasonLoading"
       (valueChange)="selectSeason($event)"
     >
-      <!-- "2026 SEASON", or just the year on narrow screens -->
-      <mat-select-trigger>{{ season }}<span class="season-word"> SEASON</span></mat-select-trigger>
+      <!-- "2019 SEASON" (just the year on narrow screens), or "CURRENT SEASON" for this one -->
+      <mat-select-trigger
+        >{{ season === currentSeason ? 'CURRENT' : season }}<span class="season-word"> SEASON</span></mat-select-trigger
+      >
       @for (year of seasons; track year) {
-        <mat-option [value]="year">{{ year }}</mat-option>
+        <mat-option [value]="year">{{ year === currentSeason ? 'CURRENT' : year }}</mat-option>
       }
     </mat-select>
 
