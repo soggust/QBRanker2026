@@ -415,3 +415,9 @@ details {
     #1f2824;
   background-attachment: local, scroll, local, local, local;
 }
+
+// Scrollbars the same 10px as the filter menu's and the grid's (the colors come from styles.scss)
+::-webkit-scrollbar {
+  height: 10px;
+  width: 10px;
+}

@@ -2091,18 +2091,10 @@ section ul li.player .player-name .player-awards {
   }
 }
 
-// Footer row, every screen size: [filters] [copy] on the left, [info] [settings] on the right, and
-// the credits centered between them while there's room (they drop out as soon as the row gets tight)
+// Footer row, every screen size: [filters] [copy] on the left, [info] [settings] on the right
 section footer {
-  container-type: inline-size;
   gap: 10px;
   justify-content: flex-start;
-
-  .ghost-div,
-  .sports-football,
-  h1 {
-    display: none !important;
-  }
 
   .filter-toggle,
   .copy-toggle,
@@ -2120,17 +2112,6 @@ section footer {
     order: 2;
   }
 
-  p.small {
-    align-items: center;
-    display: flex;
-    flex: 1 1 auto;
-    justify-content: center;
-    margin: 0;
-    min-width: 0;
-    order: 3;
-    white-space: nowrap;
-  }
-
   .info-toggle {
     margin-left: auto !important;
     order: 4;
@@ -2141,11 +2122,6 @@ section footer {
   }
 }
 
-@container (max-width: 520px) {
-  section footer p.small {
-    display: none;
-  }
-}
 
 // While the filters are open, the filter button's crossed-out icon is goalpost yellow
 section footer .filter-toggle.open .mat-icon {
