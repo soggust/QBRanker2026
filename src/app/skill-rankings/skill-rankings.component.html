@@ -64,9 +64,19 @@
           >@if (i === 0) {<span class="lombardi" aria-hidden="true"></span
             ><span class="visually-hidden">1</span>} @else {{{ i + 1 }}}</span
         >
-          <span class="team-badge" [class.white-logo]="teamLogoWhite(player)"
-            ><img [src]="player.teamLogo" class="team-logo"
-          /></span>
+          <!-- The team card, with the player's headshot standing in it (teams and units: just the logo) -->
+          <span class="badge-slot" [class.with-photo]="headshot(player)"
+            ><span class="team-badge" [class.white-logo]="teamLogoWhite(player)"
+              ><img [src]="player.teamLogo" class="team-logo" alt=""
+            /></span
+            >@if (headshot(player); as photo) {<img
+                class="headshot"
+                [src]="photo"
+                alt=""
+                loading="lazy"
+                (error)="noHeadshot(player)"
+              />}</span
+          >
           <p class="player-name">
             <strong>{{ player.name }}</strong>
             @if (player.injured) {

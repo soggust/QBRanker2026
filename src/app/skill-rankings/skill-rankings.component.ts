@@ -636,6 +636,19 @@ export class SkillRankingsComponent implements OnChanges {
     return badgeColor(unit.teamLogo);
   }
 
+  // The player's ESPN headshot (a cutout on a clear background), sized for the team card; none for
+  // teams and units, or when ESPN has no photo (older seasons often don't)
+  private missingHeadshots = new Set<number>();
+
+  headshot(unit: { id?: number | null }): string | null {
+    if (!unit.id || this.missingHeadshots.has(unit.id)) return null;
+    return `https://a.espncdn.com/combiner/i?img=/i/headshots/nfl/players/full/${unit.id}.png&w=160&h=116`;
+  }
+
+  noHeadshot(unit: { id?: number | null }): void {
+    if (unit.id) this.missingHeadshots.add(unit.id);
+  }
+
   // Logos drawn in white on their badge (e.g. the Giants)
   teamLogoWhite(unit: { teamLogo: string }): boolean {
     return whiteLogo(unit.teamLogo);

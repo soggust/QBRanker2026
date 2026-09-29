@@ -7,10 +7,10 @@ section.spread ul li.player {
   }
 
   > div.player-info {
-    flex: 0 0 20em;
+    flex: 0 0 23em;
 
     @media (min-width: 1600px) {
-      flex-basis: 26em;
+      flex-basis: 29em;
     }
   }
 }
@@ -205,12 +205,12 @@ section {
 
           &.player-info {
             align-items: center;
-            flex: 1 0 20em;
+            flex: 1 0 23em;
             flex-direction: row;
             height: 4em;
             justify-content: flex-start;
-            min-width: 20em;
-            width: 20em;
+            min-width: 23em;
+            width: 23em;
           }
 
           &.support-box {
@@ -486,8 +486,8 @@ section {
         align-items: center;
         justify-content: flex-start;
         flex-direction: row;
-        width: 20em;
-        min-width: 20em;
+        width: 23em;
+        min-width: 23em;
         height: 4em;
       }
 
@@ -1895,17 +1895,13 @@ section ul li.player.cdk-drag-preview {
   overflow: hidden !important;
 }
 
-// Rank tiles get a thin border in their digits' color (half strength): green 1-10, white mid, red
-// bottom 10. #1's digit color is still gold, so its tile takes the trophy's green.
+// Rank tiles have no border (the digits carry the color)
 section ul li.player:not(.header-row) .count,
 section ul li.player:not(.header-row) .count.top-5,
 section ul li.player:not(.header-row) .count.top-10,
-section ul li.player:not(.header-row) .count.top-15 {
-  border: 1px solid color-mix(in srgb, currentColor 50%, transparent);
-}
-
-section ul li.player:not(.header-row) .count.top-5 {
-  border-color: color-mix(in srgb, var(--tint-good, #3ee07a) 50%, transparent);
+section ul li.player:not(.header-row) .count.top-15,
+section ul li.player:not(.header-row) .count.bottom-5 {
+  border: none;
 }
 
 // The #1 trophy catches the light now and then: a soft diagonal glint sweeps across it (inside the
@@ -2285,4 +2281,68 @@ section ul li.player:not(.header-row) .team-badge.white-logo .team-logo {
 section ul li.player:not(.header-row) .team-badge .team-logo[src*="/Colts.png"] {
   height: calc(var(--orb) * 1.05);
   width: calc(var(--orb) * 1.05);
+}
+
+// ===========================================================================
+// Team cards: every row's badge is a glassy card in the team color. A player's card has their
+// headshot standing in it (head popping out over the top edge, shoulders cut off by the card) with the
+// logo big behind them on the left; a team or unit (DEF, OL, HC), or a player ESPN has no photo of,
+// gets the logo big in the middle. Same size either way, so the names line up.
+// ===========================================================================
+section ul li.player:not(.header-row) .badge-slot {
+  --card-w: 68px;
+  --card-h: 46px;
+  --card-r: 11px;
+  // The headshot: taller than the card by how far the head pops out, and hanging off its right side
+  --shot-h: 58px;
+  --shot-w: calc(var(--shot-h) * 1.379);
+  --shot-hang: 14px;
+  display: inline-flex;
+  flex: 0 0 auto;
+  height: var(--card-h);
+  margin-right: 1.6em;
+  position: relative;
+  width: var(--card-w);
+
+  .team-badge {
+    --orb: var(--card-h);
+    // (the ring counts inside the card's size, so the photo can line up with its outer edge)
+    box-sizing: border-box;
+    border-radius: var(--card-r);
+    height: var(--card-h);
+    margin-right: 0;
+    width: var(--card-w);
+  }
+
+  // The gloss is a band across the top, not a round cap
+  .team-badge::after {
+    border-radius: calc(var(--card-r) - 3px) calc(var(--card-r) - 3px) 40% 40% / calc(var(--card-r) - 3px)
+      calc(var(--card-r) - 3px) 30% 30%;
+    height: 48%;
+    left: 4%;
+    top: 4%;
+    width: 92%;
+  }
+
+  .headshot {
+    bottom: 0;
+    // Cut off flush with the card's right side and bottom (with its rounded corner), open above it
+    clip-path: inset(-50% var(--shot-hang) 0 0 round 0 0 var(--card-r) 0);
+    filter: drop-shadow(-3px 1px 3px rgba(0, 0, 0, 0.55));
+    height: var(--shot-h);
+    pointer-events: none;
+    position: absolute;
+    right: calc(var(--shot-hang) * -1);
+    width: var(--shot-w);
+    z-index: 1;
+  }
+}
+
+// With a photo, the logo moves left behind the player and dims a little
+section ul li.player:not(.header-row) .badge-slot.with-photo .team-badge {
+  .team-logo,
+  &.white-logo .team-logo {
+    left: 30%;
+    opacity: 0.85;
+  }
 }
