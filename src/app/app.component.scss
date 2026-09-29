@@ -211,7 +211,7 @@ main {
     background: var(--scoreboard-dots), var(--scoreboard);
     border-color: #3a3a3a;
     color: var(--scoreboard-led);
-    font-family: "Orbitron", sans-serif;
+    font-family: v.$font-base;
     text-shadow: var(--scoreboard-glow);
   }
 }
@@ -346,7 +346,7 @@ main .content {
       cursor: pointer;
       display: block;
       flex: 1;
-      font-family: "Orbitron", sans-serif;
+      font-family: v.$font-base;
       font-size: 0.9em;
       font-weight: 500;
       height: 100%;

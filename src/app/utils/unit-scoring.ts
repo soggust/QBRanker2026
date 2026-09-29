@@ -1,4 +1,4 @@
-import { DATA, dataVersion } from 'StaticData/data';
+import { AppData, DATA, dataVersion } from 'StaticData/data';
 import { buildQbUnits } from 'StaticData/StaticData';
 import {
   RANK_METRICS,
@@ -23,6 +23,18 @@ export function rebuildUnits(): void {
   Object.assign(SKILL_UNITS, DATA.skillPlayers as Record<string, SkillPlayer[]>, { QB: buildQbUnits() });
 }
 rebuildUnits();
+
+// Another season's rows, built from its files without touching the loaded season (DATA is swapped
+// just while the QBs are built, then put back)
+export function unitsForSeason(data: AppData): Record<SkillPosition, SkillPlayer[]> {
+  const loaded = { ...DATA };
+  Object.assign(DATA, data);
+  try {
+    return { ...(data.skillPlayers as Record<SkillPosition, SkillPlayer[]>), QB: buildQbUnits() };
+  } finally {
+    Object.assign(DATA, loaded);
+  }
+}
 
 // A stat nobody on a tab has a value for in the loaded season (tracking and charting stats before
 // they were recorded, e.g. drops before 2018): its column and slider are hidden, and it never
@@ -134,14 +146,14 @@ export function curveGrades<K>(scores: Map<K, number>): Map<K, number> {
 
 // A tab's default ranking (its sliders, before it's been opened), best first. Rush / rec parts are
 // scaled by their parent Total Yds / Total TDs sliders, fantasy is PPR, and support grades from
-// other tabs count as average (C).
+// other tabs count as average (C). The loaded season's rows unless given another season's.
 export function defaultRanking(
   position: SkillPosition,
   weights: SkillWeights,
   garbageTime = true,
   rankBasis: RankBasis = 'points',
+  units: SkillPlayer[] = SKILL_UNITS[position],
 ): SkillPlayer[] {
-  const units = SKILL_UNITS[position];
   const ranks = position === 'HC' ? unitRanks(units, rankBasis, garbageTime) : null;
   const effective = { ...weights };
   for (const { stat, parts } of combinedFor(position)) {

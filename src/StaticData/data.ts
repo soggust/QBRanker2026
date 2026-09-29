@@ -50,16 +50,25 @@ export function linkedSeason(): number {
 // the server first, so a nightly data update shows up on the next visit); a finished season never
 // changes, so the browser's copy is used as is
 export async function loadData(season = CURRENT_SEASON): Promise<void> {
-  const current = season === CURRENT_SEASON;
-  const dir = current ? 'data' : `data/seasons/${season}`;
-  const entries = await Promise.all(
-    Object.entries(FILES).map(async ([key, file]) => {
-      const res = await fetch(`${dir}/${file}`, { cache: current ? 'no-cache' : 'default' });
-      if (!res.ok) throw new Error(`Could not load ${season} ${file}: ${res.status}`);
-      return [key, await res.json()] as const;
-    }),
-  );
-  Object.assign(DATA, Object.fromEntries(entries));
+  Object.assign(DATA, await fetchSeason(season));
   dataSeason = season;
   dataVersion++;
+}
+
+// A season's files, without loading them into DATA (the player card reads other seasons this way,
+// leaving the table on its own)
+export async function fetchSeason(season: number): Promise<AppData> {
+  const entries = await Promise.all(
+    Object.entries(FILES).map(async ([key, file]) => [key, await fetchSeasonFile(season, file)] as const),
+  );
+  return Object.fromEntries(entries) as unknown as AppData;
+}
+
+// One file of a season's data (also comps.json, the similar seasons of a finished one)
+export async function fetchSeasonFile<T = unknown>(season: number, file: string): Promise<T> {
+  const current = season === CURRENT_SEASON;
+  const dir = current ? 'data' : `data/seasons/${season}`;
+  const res = await fetch(`${dir}/${file}`, { cache: current ? 'no-cache' : 'default' });
+  if (!res.ok) throw new Error(`Could not load ${season} ${file}: ${res.status}`);
+  return res.json();
 }

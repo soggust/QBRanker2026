@@ -1213,6 +1213,21 @@ export function statGroup(stat: SkillStat): StatGroupId {
   return 'box';
 }
 
+// A position's headline stats for the player card's Seasons tab: its first few basic stats, as
+// numbers (not grades, records or ranks)
+export function headlineStats(position: SkillPosition, count = 3): SkillStat[] {
+  return SKILL_STATS[position]
+    .filter(
+      (stat) =>
+        statGroup(stat) === 'box' &&
+        !stat.infoOnly &&
+        stat.key !== 'fantasy' &&
+        !['grade', 'record', 'recent', 'rank'].includes(stat.format) &&
+        !combinedFor(position).some(({ stat: total }) => total.key === stat.key),
+    )
+    .slice(0, count);
+}
+
 export interface SkillStatGroup {
   id: StatGroupId;
   title: string;

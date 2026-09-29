@@ -421,14 +421,14 @@ about-panel ::-webkit-scrollbar-track {
 }
 
 // Settings menu sections (Stats / Display / Players): small caps labels with a rule above, so the
-// longer menu reads in groups
+// longer menu reads in groups (bold Nunito, like the filter cards' titles)
 .mat-mdc-menu-panel .menu-section {
   border-top: 1px solid rgba(255, 255, 255, 0.12);
   color: var(--scoreboard-led);
   cursor: default;
-  font-family: "Orbitron", sans-serif;
-  font-size: 10px;
-  font-weight: 500;
+  font-family: v.$font-base;
+  font-size: 11px;
+  font-weight: 800;
   letter-spacing: 1.5px;
   padding: 10px 16px 4px;
   text-transform: uppercase;
@@ -513,8 +513,8 @@ about-panel ::-webkit-scrollbar-track {
 
   .min-games-value {
     color: var(--scoreboard-led) !important;
-    font-family: "Orbitron", sans-serif !important;
-    font-size: 11px;
+    font-family: "Cabin Sketch", cursive !important;
+    font-size: 15px;
     font-weight: 700;
     margin: 0 7px;
     min-width: 14px;

@@ -213,6 +213,12 @@ export class PositionService {
     return this.unitOrdersSubject.value[position];
   }
 
+  // A tab's order in any season this visit (the player card ranks other seasons with it when it was
+  // dragged by hand)
+  seasonUnitOrder(season: number, position: SkillPosition): UnitOrder | undefined {
+    return season === this.season ? this.unitOrder(position) : this.ordersBySeason.get(season)?.[position];
+  }
+
   setUnitOrder(position: SkillPosition, ids: string[], manual: boolean): void {
     const current = this.unitOrdersSubject.value[position];
     if (current && current.manual === manual && current.ids.join('|') === ids.join('|')) return;

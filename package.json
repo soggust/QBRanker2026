@@ -8,7 +8,8 @@
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "update-data": "node scripts/update-data.mjs",
-    "update-honors": "node scripts/update-honors.mjs"
+    "update-honors": "node scripts/update-honors.mjs",
+    "build-comps": "node scripts/build-comps.mjs"
   },
   "private": true,
   "dependencies": {

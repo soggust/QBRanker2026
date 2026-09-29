@@ -1993,7 +1993,8 @@ section ul li.player .player-name:has(.player-awards) {
   row-gap: 4px;
 }
 
-section ul li.player .player-name .player-awards {
+section ul li.player .player-name .player-awards,
+.player-card .player-awards {
   align-items: center;
   display: flex;
   flex: 0 0 100%;
@@ -2008,13 +2009,14 @@ section ul li.player .player-name .player-awards {
       0 1px 2px rgba(0, 0, 0, 0.6);
     color: #3a2800;
     cursor: help;
-    font-family: "Orbitron", sans-serif;
-    font-size: 8px;
+    font-family: v.$font-base;
+    font-size: 9px;
     font-weight: 900;
-    letter-spacing: 0.3px;
+    letter-spacing: 0.2px;
     line-height: 1;
     overflow: hidden;
-    padding: 2px 4px 2px;
+    // (Nunito sits high in its line box: a little more room on top centers the caps)
+    padding: 3px 3px 1px;
     position: relative;
     text-shadow: 0 1px 0 rgba(255, 255, 255, 0.35);
     white-space: nowrap;
@@ -2290,13 +2292,13 @@ section ul li.player:not(.header-row) .team-badge .team-logo[src*="/Colts.png"] 
 // gets the logo big in the middle. Same size either way, so the names line up.
 // ===========================================================================
 section ul li.player:not(.header-row) .badge-slot {
-  --card-w: 68px;
-  --card-h: 46px;
-  --card-r: 11px;
+  --card-w: 61px;
+  --card-h: 41px;
+  --card-r: 10px;
   // The headshot: taller than the card by how far the head pops out, and hanging off its right side
-  --shot-h: 58px;
+  --shot-h: 52px;
   --shot-w: calc(var(--shot-h) * 1.379);
-  --shot-hang: 14px;
+  --shot-hang: 13px;
   display: inline-flex;
   flex: 0 0 auto;
   height: var(--card-h);
@@ -2344,5 +2346,38 @@ section ul li.player:not(.header-row) .badge-slot.with-photo .team-badge {
   &.white-logo .team-logo {
     left: 30%;
     opacity: 0.85;
+  }
+}
+
+// The badge through the name opens the player card (the name reaches back over the gap, so there's no
+// dead spot between them); hovering anywhere on it lights the name and the badge's ring yellow
+section ul li.player:not(.header-row) .card-target {
+  cursor: pointer;
+}
+
+section ul li.player:not(.header-row) .player-name.card-target {
+  margin-left: -1.6em;
+  padding-left: 1.6em;
+}
+
+section ul li.player:not(.header-row) .player-info {
+  .card-link {
+    transition: color 0.15s ease;
+  }
+
+  .team-badge {
+    transition: border-color 0.15s ease;
+  }
+
+  &:has(.card-target:hover),
+  &:has(.card-link:focus-visible) {
+    .card-link {
+      color: var(--scoreboard-led) !important;
+      outline: none;
+    }
+
+    .team-badge {
+      border-color: var(--scoreboard-led);
+    }
   }
 }
