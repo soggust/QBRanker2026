@@ -30,8 +30,18 @@ const FILES: Record<keyof AppData, string> = {
   skillPlayers: 'skill-players.json',
 };
 
-// A season from a shared link (?season=2024), if it's one we have
+// A season from a shared link (?season=2024), if it's one we have. Refreshing the page goes back to
+// the current season (and takes ?season out of the address); opening a link still lands on its year.
 export function linkedSeason(): number {
+  const navigation = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming | undefined;
+  if (navigation?.type === 'reload') {
+    const url = new URL(location.href);
+    if (url.searchParams.has('season')) {
+      url.searchParams.delete('season');
+      history.replaceState(null, '', url);
+    }
+    return CURRENT_SEASON;
+  }
   const linked = Number(new URLSearchParams(location.search).get('season'));
   return SEASONS.includes(linked) ? linked : CURRENT_SEASON;
 }

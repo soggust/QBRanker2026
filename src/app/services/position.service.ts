@@ -19,17 +19,17 @@ import {
 // Groups switched off with the sidebar eye, per position (every group is on at each page load)
 export type HiddenGroups = Partial<Record<SkillPosition, Partial<Record<StatGroupId, boolean>>>>;
 
-// Rankings, grades, filters and open cards start fresh on every page load; only the settings menu
-// is remembered. Clear what older versions of the app saved for the rest.
+// Everything starts fresh on every page load: rankings, grades, filters, open cards and the settings
+// menu. Clear what older versions of the app saved.
 try {
-  for (const key of ['qbFilterGroups', 'skillFilterGroups', 'qbHiddenGroups', 'skillHiddenGroups']) {
+  for (const key of ['qbFilterGroups', 'skillFilterGroups', 'qbHiddenGroups', 'skillHiddenGroups', 'rankerSettings']) {
     localStorage.removeItem(key);
   }
 } catch {
   // Storage unavailable: nothing to clear
 }
 
-// Settings-menu toggles, shared by every position and remembered per browser
+// Settings-menu toggles, shared by every position (back to the defaults on every page load)
 export interface RankerSettings {
   // Counting stats as season totals, per game or at a 17-game pace
   statBasis: StatBasis;
@@ -49,7 +49,6 @@ export interface RankerSettings {
   garbageTime: boolean;
 }
 
-const SETTINGS_KEY = 'rankerSettings';
 // The Min Games setting runs 1 to a full season
 export const MAX_MIN_GAMES = 17;
 const DEFAULT_SETTINGS: RankerSettings = {
@@ -65,21 +64,6 @@ const DEFAULT_SETTINGS: RankerSettings = {
   garbageTime: true,
 };
 
-function readSettings(): RankerSettings {
-  try {
-    const saved = { ...DEFAULT_SETTINGS, ...JSON.parse(localStorage.getItem(SETTINGS_KEY) ?? '{}') };
-    // Unit ranks used to offer EPA (now its own columns)
-    if (!['points', 'yards'].includes(saved.rankBasis)) saved.rankBasis = DEFAULT_SETTINGS.rankBasis;
-    // Per-Game Stats used to be an on / off switch
-    if (!['season', 'perGame', 'pace17'].includes(saved.statBasis)) saved.statBasis = saved.perGame ? 'perGame' : 'season';
-    delete (saved as { perGame?: boolean }).perGame;
-    const minGames = Math.round(Number(saved.minGames));
-    saved.minGames = minGames >= 1 && minGames <= MAX_MIN_GAMES ? minGames : DEFAULT_SETTINGS.minGames;
-    return saved;
-  } catch {
-    return DEFAULT_SETTINGS;
-  }
-}
 
 // Open the tab from a shared link, e.g. ?pos=WR
 function linkedPosition(): Position {
@@ -151,7 +135,7 @@ export interface UnitOrder {
 })
 export class PositionService {
   // First, since the grade streams below read the settings
-  private settingsSubject = new BehaviorSubject<RankerSettings>(readSettings());
+  private settingsSubject = new BehaviorSubject<RankerSettings>({ ...DEFAULT_SETTINGS });
   public settings$ = this.settingsSubject.asObservable();
 
   private positionSubject = new BehaviorSubject<Position>(linkedPosition());
@@ -413,13 +397,7 @@ export class PositionService {
   }
 
   updateSettings(changes: Partial<RankerSettings>): void {
-    const next = { ...this.settingsSubject.value, ...changes };
-    this.settingsSubject.next(next);
-    try {
-      localStorage.setItem(SETTINGS_KEY, JSON.stringify(next));
-    } catch {
-      // Storage unavailable; the settings still apply for this visit
-    }
+    this.settingsSubject.next({ ...this.settingsSubject.value, ...changes });
   }
 
   setPosition(position: Position): void {
