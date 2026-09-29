@@ -29,6 +29,8 @@ export interface StaticPlayerData {
   id: number;
   lastFive: number[];
   injured: boolean;
+  // ESPN injury report status (Out, Doubtful, Injured Reserve)
+  injuryStatus?: string;
   responsibility: number;
   epaPerPlay: number | null;
   cpoe: number | null;

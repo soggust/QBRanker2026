@@ -121,7 +121,7 @@ export class SkillRankingsComponent implements OnChanges {
   // Bandage hover: this season's injury report status, or for a past season, finishing it on IR
   injuryTitle(player: SkillPlayer): string {
     return dataSeason === CURRENT_SEASON
-      ? `This player is currently injured (${player.injuryStatus})`
+      ? `This player is currently injured${player.injuryStatus ? ` (${player.injuryStatus})` : ''}`
       : 'Finished the season on injured reserve';
   }
 

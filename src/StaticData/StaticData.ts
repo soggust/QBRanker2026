@@ -18,6 +18,7 @@ interface GameData {
   starts: Record<string, number>;
   // From ESPN's injury report: Out, Doubtful or Injured Reserve
   injured: boolean;
+  injuryStatus?: string;
   // ESPN season box stats, fetched in the same nightly run as the results (null: no stats yet)
   box?: QbBoxStats | null;
   advanced: {
@@ -129,6 +130,7 @@ function qbData(): StaticPlayerData[] {
       starts: game.starts,
       box: game.box ?? null,
       injured: injured ?? game.injured ?? false,
+      injuryStatus: game.injuryStatus,
       ...playerScores,
       responsibility: blendScore(playerScores.responsibility, qbStats?.responsibility, qbStats?.games ?? 0),
     };
@@ -158,6 +160,7 @@ export function buildQbUnits(): SkillPlayer[] {
         teamLogo: qb.teamLogo,
         games: box.games,
         injured: qb.injured,
+        injuryStatus: qb.injuryStatus,
         lastFive: qb.lastFive,
         starts: qb.starts,
         competitive: qb.competitive ?? undefined,
