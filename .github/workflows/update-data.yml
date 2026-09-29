@@ -2,10 +2,13 @@ name: Update Game Data
 
 on:
   schedule:
-    # Once a day at 08:00 UTC (3 AM CDT / 2 AM CST): hours after the last night game
-    # ends, so a day's results and stats land together in one update. Runs with no
-    # changes are a no-op.
-    - cron: "0 8 * * *"
+    # Nightly at 07:13 UTC (2:13 AM CDT / 1:13 AM CST): hours after the last night game ends,
+    # so a day's results and stats land together in one update. Off the top of the hour on
+    # purpose: GitHub delays and sometimes drops scheduled runs set for :00, when everyone's
+    # run at once. The 10:47 UTC run (5:47 AM CDT) is a backup for a delayed or dropped one;
+    # a run with nothing new is a no-op (no commit, no deploy).
+    - cron: "13 7 * * *"
+    - cron: "47 10 * * *"
   workflow_dispatch:
 
 # One update at a time: a run that starts while another is still going waits for it
