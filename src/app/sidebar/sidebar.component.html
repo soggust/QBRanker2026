@@ -120,7 +120,7 @@
                           (ngModelChange)="skillPresets[skill] = 'custom'; saveSkillWeights()"
                         />
                       </mat-slider>
-                      <span class="slider-value">{{ skillWeights[row.key] }}%</span>
+                      <span class="slider-value">{{ skillWeights[row.key] ?? 50 }}%</span>
                       <button
                         type="button"
                         class="slider-eye"
@@ -144,7 +144,7 @@
                                 (ngModelChange)="skillPresets[skill] = 'custom'; saveSkillWeights()"
                               />
                             </mat-slider>
-                            <span class="slider-value">{{ skillWeights[child.key] }}%</span>
+                            <span class="slider-value">{{ skillWeights[child.key] ?? 50 }}%</span>
                             <button
                               type="button"
                               class="slider-eye"
@@ -184,7 +184,7 @@
                           (ngModelChange)="skillPresets[skill] = 'custom'; saveSkillWeights()"
                         />
                       </mat-slider>
-                      <span class="slider-value">{{ skillWeights[row.key] }}%</span>
+                      <span class="slider-value">{{ skillWeights[row.key] ?? 50 }}%</span>
                       <button
                         type="button"
                         class="slider-eye"

@@ -77,51 +77,29 @@ export function unitRanks(
 // Standard scores are capped here, so one extreme value (e.g. 100% on two chances) can't swamp a list
 const MAX_Z = 2.5;
 
-// Sample size for rates: a rate stat (completion %, yards per carry, win %...) from a few games says less
-// than the same rate over a full season, so before scoring, each unit's rate is pulled toward the list's
-// average by k / (games + k), with k a quarter of the most games anyone in the list has played. Over a
-// full 17-game season that leaves a 17-game starter 80% of his lead on average and a 1-game fill-in
-// 19%; three weeks in, 80% and 57%. It follows the season on screen, so there's no games cutoff to
-// set, and a list where everyone has played the same (the team tabs) ranks exactly as it would without it.
-const SAMPLE_SHARE = 0.25;
-
-export interface SampleSize<T> {
-  // Games (or other sample) behind a unit's rates
-  games: (unit: T) => number;
-  // Whether a stat is a rate as scored (efficiency stats, and volume stats shown per game)
-  isRate: (stat: SkillStat) => boolean;
-}
-
 // Weighted total for each unit. Every stat is put on the same scale first: its standard score (how
 // many standard deviations above or below the list's average), capped at +/-2.5 and flipped for
 // lower-is-better stats, so at the same slider every stat moves the ranking by the same amount and
 // the sliders alone decide what matters. The slider multiplies it (50 = 1x, 100 = 2x). Support
 // grades count at a fifth of that strength, against the unit (credit for doing more with less) or
 // for it (QB Responsibility). A missing value (null) scores as the list's worst, or as average for
-// stats flagged missingIsAverage and for support grades. Rates are weighed by sample size first
-// (see SAMPLE_SHARE).
+// stats flagged missingIsAverage and for support grades. Small samples aren't adjusted for: a stat
+// alone sorts the list exactly by its values (the Min Games setting leaves out players with too few).
 export function weightedTotals<T>(
   units: T[],
   stats: SkillStat[],
   weights: SkillWeights,
   value: (unit: T, stat: SkillStat) => number | null,
-  sample?: SampleSize<T>,
 ): Map<T, number> {
   const totals = new Map<T, number>(units.map((unit) => [unit, 0]));
-  const games = sample ? units.map(sample.games) : [];
-  const k = SAMPLE_SHARE * Math.max(0, ...games);
   for (const stat of stats) {
     const weight = weights[stat.key] ?? 0;
     if (!weight || stat.infoOnly) continue;
 
-    let raw = units.map((unit) => value(unit, stat));
+    const raw = units.map((unit) => value(unit, stat));
     const known = raw.filter((v): v is number => v !== null);
     if (known.length < 2) continue;
     const mean = known.reduce((a, b) => a + b, 0) / known.length;
-    // Rates pulled toward the average by how little they're based on (team grades aren't rates)
-    if (sample && k > 0 && !stat.support && sample.isRate(stat)) {
-      raw = raw.map((v, i) => (v === null ? null : mean + ((v - mean) * games[i]) / (games[i] + k)));
-    }
     const sd = Math.sqrt(known.reduce((a, b) => a + (b - mean) ** 2, 0) / known.length);
     if (!sd) continue;
 
@@ -183,6 +161,6 @@ export function defaultRanking(
         // Support grades from other tabs count as average here; a QB's own Responsibility counts
         return stat.support && stat.key !== 'responsibility' ? null : unitStat(unit, stat.key as SkillStatKey, garbageTime);
     }
-  }, { games: (unit) => unit.games, isRate: (stat) => stat.kind === 'efficiency' });
+  });
   return [...units].sort((a, b) => (totals.get(b) ?? 0) - (totals.get(a) ?? 0));
 }

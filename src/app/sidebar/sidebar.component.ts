@@ -146,10 +146,10 @@ export class SidebarComponent {
     this.skillRowOpen = { ...this.skillRowOpen, [id]: !this.skillRowOpen[id] };
   }
 
-  // A breakdown slider dims when it or its parent is at 0 or switched off
+  // A slider row dims when its eye (or its parent row's) is switched off; a slider at 0% keeps its
+  // white label and football
   skillRowOff(key: SkillColumnKey, parent?: SkillColumnKey): boolean {
-    const off = (k: SkillColumnKey) => !this.skillWeights[k] || this.skillStatHidden(k);
-    return off(key) || (!!parent && off(parent));
+    return this.skillStatHidden(key) || (!!parent && this.skillStatHidden(parent));
   }
 
   // This tab's presets (skill-presets.ts)
@@ -199,9 +199,13 @@ export class SidebarComponent {
     this.saveSkillWeights();
   }
 
+  // Every slider to 0%, the group sliders (Total Yds, Total TDs, Turnovers) included
   clearAll(): void {
     this.skillPresets[this.position] = 'custom';
-    this.skillWeights = Object.fromEntries(this.skillStats.map((stat) => [stat.key, 0]));
+    this.skillWeights = {
+      ...Object.fromEntries(this.skillStats.map((stat) => [stat.key, 0])),
+      ...Object.fromEntries(combinedFor(this.position).map(({ stat }) => [stat.key, 0])),
+    };
     this.saveSkillWeights();
   }
 }

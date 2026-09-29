@@ -256,7 +256,7 @@ async function loadNflverse() {
 // Returns a Map of ESPN id -> { epaPerPlay, cpoe, successRate, plays, fantasyStd, receptions }
 // Also pressure-to-sack rate and bad-throw rate (Pro Football Reference via nflverse), and
 // time to throw, aDOT and aggressiveness (Next Gen Stats)
-// A QB's games played, for per-game stats, the 17-game pace and sample size: his starts, plus any
+// A QB's games played, for per-game stats, the 17-game pace and Min Games: his starts, plus any
 // relief appearance with real snaps (at least this many dropbacks and runs). ESPN counts a
 // five-snap cameo as a full game, which would halve a one-start QB's per-game numbers.
 const QB_GAME_PLAYS = 10;
