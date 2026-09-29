@@ -2223,3 +2223,64 @@ section.rankings-wrapper > footer {
     margin-top: 0;
   }
 }
+
+// Experiment: glassy 3D team badges. A rounded orb in the team color (lit from the top left, shaded
+// at the bottom right), the logo drawn big and clipped by the circle, and a glass gloss across the top
+// with a soft inner edge, like an app icon.
+section ul li.player:not(.header-row) .team-badge {
+  --orb: 34px;
+  background:
+    radial-gradient(circle at 30% 22%, rgba(255, 255, 255, 0.35), transparent 55%),
+    radial-gradient(circle at 70% 90%, rgba(0, 0, 0, 0.45), transparent 60%),
+    var(--team-badge);
+  border-radius: 50%;
+  box-shadow:
+    inset 0 -3px 6px rgba(0, 0, 0, 0.35),
+    inset 0 1px 2px rgba(255, 255, 255, 0.45),
+    0 2px 4px rgba(0, 0, 0, 0.55);
+  filter: none;
+  height: var(--orb);
+  overflow: hidden;
+  position: relative;
+  width: var(--orb);
+
+  // The logo: big enough to run off the edges
+  .team-logo,
+  &.white-logo .team-logo {
+    height: calc(var(--orb) * 1.45);
+    margin: 0;
+    max-width: none;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: calc(var(--orb) * 1.45);
+  }
+
+  // Glass: a bright gloss over the top half, fading out, above the logo
+  &::after {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0.12) 60%, transparent);
+    border-radius: 50% / 45%;
+    content: "";
+    height: 52%;
+    left: 8%;
+    pointer-events: none;
+    position: absolute;
+    top: 3%;
+    width: 84%;
+  }
+}
+
+// (white-logo teams, like the Giants' "ny", are all lettering: at the big size it turns into white
+// blobs, so they stay nearly whole)
+section ul li.player:not(.header-row) .team-badge.white-logo .team-logo {
+  height: calc(var(--orb) * 0.95);
+  width: calc(var(--orb) * 0.95);
+}
+
+// (the Colts' horseshoe is mostly its open middle: at the big size only the gap shows, so it stays
+// close to whole)
+section ul li.player:not(.header-row) .team-badge .team-logo[src*="/Colts.png"] {
+  height: calc(var(--orb) * 1.05);
+  width: calc(var(--orb) * 1.05);
+}
