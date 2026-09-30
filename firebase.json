@@ -8,6 +8,10 @@
     ],
     "rewrites": [
       {
+        "source": "/nfl",
+        "destination": "/nfl/index.html"
+      },
+      {
         "source": "/nfl/**",
         "destination": "/nfl/index.html"
       }
@@ -44,11 +48,6 @@
     "redirects": [
       {
         "source": "/",
-        "destination": "/nfl/",
-        "type": 301
-      },
-      {
-        "source": "/nfl",
         "destination": "/nfl/",
         "type": 301
       }
