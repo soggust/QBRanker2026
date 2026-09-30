@@ -1,6 +1,8 @@
 <section class="rankings-wrapper spread" [class.category-colors]="categoryColors">
   <!-- Columns to show, worked out once per render (not once per row) -->
   @let groups = visibleGroups;
+  <!-- The position tabs (from the app), between the button bar and the grid -->
+  <ng-content></ng-content>
   <ul #rankingsList cdkDropList (cdkDropListDropped)="drop($event)" columnHighlight>
     <!-- Column headers (stat groups switch on / off with the sidebar eyes) -->
     <li class="player header-row">
@@ -67,7 +69,7 @@
           <!-- The team card, with the player's headshot standing in it (teams and units: just the logo) -->
           <span class="badge-slot card-target" [class.with-photo]="headshot(player)" (click)="openCard(player)"
             ><span class="team-badge" [class.white-logo]="teamLogoWhite(player)"
-              ><img [src]="player.teamLogo" class="team-logo" alt=""
+              ><img [src]="seasonLogo(player.teamLogo)" class="team-logo" alt=""
             /></span
             >@if (headshot(player); as photo) {<img
                 class="headshot"
@@ -632,7 +634,7 @@
                     [title]="s.season === c.season ? 'Showing this season' : 'Open the ' + s.season + ' card'"
                     (click)="s.season !== c.season && openSeasonCard(s.season, c.player.gsisId)"
                   >
-                    <img [src]="s.logo" alt="" [class.white-logo]="teamLogoWhite({ teamLogo: s.logo })" />
+                    <img [src]="s.logo" alt="" [class.white-logo]="teamLogoWhite({ teamLogo: s.teamLogo })" />
                     <span class="season-year">{{ s.season === currentSeason ? 'This Season' : s.season }}</span>
                     <span class="season-games">{{ s.games }} G</span>
                     <!-- Headline stats as readouts: value, a bar against their best season, label; best lit -->

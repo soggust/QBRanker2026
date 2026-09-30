@@ -107,6 +107,111 @@
           }
         }
       }
+    },
+    "mlb": {
+      "projectType": "application",
+      "schematics": {
+        "@schematics/angular:component": {
+          "style": "scss"
+        }
+      },
+      "root": "apps/mlb",
+      "sourceRoot": "apps/mlb/src",
+      "prefix": "app",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-angular:browser",
+          "options": {
+            "outputPath": "dist/site/mlb",
+            "index": "apps/mlb/src/index.html",
+            "main": "apps/mlb/src/main.ts",
+            "polyfills": [
+              "zone.js"
+            ],
+            "tsConfig": "apps/mlb/tsconfig.app.json",
+            "inlineStyleLanguage": "scss",
+            "assets": [
+              "apps/mlb/src/favicon.png",
+              "apps/mlb/src/favicon.svg",
+              "apps/mlb/src/assets",
+              {
+                "glob": "**/*.json",
+                "input": "apps/mlb/src/StaticData",
+                "output": "data"
+              }
+            ],
+            "styles": [
+              "apps/mlb/src/styles.scss"
+            ],
+            "scripts": [],
+            "baseHref": "/mlb/"
+          },
+          "configurations": {
+            "production": {
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "1.5mb",
+                  "maximumError": "3mb"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "60kb",
+                  "maximumError": "100kb"
+                }
+              ],
+              "outputHashing": "all"
+            },
+            "development": {
+              "buildOptimizer": false,
+              "optimization": false,
+              "vendorChunk": true,
+              "extractLicenses": false,
+              "sourceMap": true,
+              "namedChunks": true
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "serve": {
+          "builder": "@angular-devkit/build-angular:dev-server",
+          "configurations": {
+            "production": {
+              "buildTarget": "mlb:build:production"
+            },
+            "development": {
+              "buildTarget": "mlb:build:development"
+            }
+          },
+          "defaultConfiguration": "development"
+        },
+        "extract-i18n": {
+          "builder": "@angular-devkit/build-angular:extract-i18n",
+          "options": {
+            "buildTarget": "mlb:build"
+          }
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "polyfills": [
+              "zone.js",
+              "zone.js/testing"
+            ],
+            "tsConfig": "apps/mlb/tsconfig.spec.json",
+            "inlineStyleLanguage": "scss",
+            "assets": [
+              "apps/mlb/src/favicon.png",
+              "apps/mlb/src/favicon.svg",
+              "apps/mlb/src/assets"
+            ],
+            "styles": [
+              "apps/mlb/src/styles.scss"
+            ],
+            "scripts": []
+          }
+        }
+      }
     }
   },
   "schematics": {

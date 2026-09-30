@@ -14,6 +14,14 @@
       {
         "source": "/nfl/**",
         "destination": "/nfl/index.html"
+      },
+      {
+        "source": "/mlb",
+        "destination": "/mlb/index.html"
+      },
+      {
+        "source": "/mlb/**",
+        "destination": "/mlb/index.html"
       }
     ],
     "headers": [
@@ -37,6 +45,15 @@
       },
       {
         "source": "/nfl/",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache"
+          }
+        ]
+      },
+      {
+        "source": "/mlb/",
         "headers": [
           {
             "key": "Cache-Control",

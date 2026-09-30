@@ -1,0 +1,7 @@
+{
+  "/mlb": {
+    "target": "http://localhost:4201",
+    "secure": false,
+    "changeOrigin": true
+  }
+}

@@ -1,0 +1,12 @@
+<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'>
+  <!-- The baseball seams for the wide MLB dropdowns: stretched over a box five times wider than the
+       buttons, so the seams bow in far less (and the stitches are shorter) to keep the same curve -->
+  <g fill='none' stroke='#c8102e' stroke-linecap='round' opacity='0.28'>
+    <path d='M3 -2 C5 28 5 72 3 102' stroke-width='2' vector-effect='non-scaling-stroke'/>
+    <path d='M97 -2 C95 28 95 72 97 102' stroke-width='2' vector-effect='non-scaling-stroke'/>
+    <g stroke-width='1.2' vector-effect='non-scaling-stroke'>
+      <path d='M3.5 10 l1.5 -2 M3.5 10 l1.5 3 M4 24 l1.5 -1 M4 24 l1.5 3 M4.5 38 l1.5 0 M4.5 38 l1.5 3 M4.5 52 l1.5 -1 M4.5 52 l1.5 2 M4.5 66 l1.5 -2 M4.5 66 l1.5 2 M4 80 l1.5 -3 M4 80 l1.5 1 M3.5 93 l1.5 -3 M3.5 93 l1.5 1'/>
+      <path d='M96.5 10 l-1.5 -2 M96.5 10 l-1.5 3 M96 24 l-1.5 -1 M96 24 l-1.5 3 M95.5 38 l-1.5 0 M95.5 38 l-1.5 3 M95.5 52 l-1.5 -1 M95.5 52 l-1.5 2 M95.5 66 l-1.5 -2 M95.5 66 l-1.5 2 M96 80 l-1.5 -3 M96 80 l-1.5 1 M96.5 93 l-1.5 -3 M96.5 93 l-1.5 1'/>
+    </g>
+  </g>
+</svg>

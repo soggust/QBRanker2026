@@ -1,0 +1,12 @@
+<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'>
+  <!-- A baseball's two red seams for the MLB buttons (stretched over the button): each hugs a side edge,
+       bowing in just a little, with small stitches, so the icon or text in the middle stays clear -->
+  <g fill='none' stroke='#c8102e' stroke-linecap='round' opacity='0.28'>
+    <path d='M5 -2 C13 28 13 72 5 102' stroke-width='2' vector-effect='non-scaling-stroke'/>
+    <path d='M95 -2 C87 28 87 72 95 102' stroke-width='2' vector-effect='non-scaling-stroke'/>
+    <g stroke-width='1.2' vector-effect='non-scaling-stroke'>
+      <path d='M7 10 l4 -2 M7 10 l4 3 M9 24 l4 -1 M9 24 l4 3 M11 38 l4 0 M11 38 l4 3 M11 52 l4 -1 M11 52 l4 2 M11 66 l4 -2 M11 66 l4 2 M9 80 l4 -3 M9 80 l4 1 M7 93 l4 -3 M7 93 l4 1'/>
+      <path d='M93 10 l-4 -2 M93 10 l-4 3 M91 24 l-4 -1 M91 24 l-4 3 M89 38 l-4 0 M89 38 l-4 3 M89 52 l-4 -1 M89 52 l-4 2 M89 66 l-4 -2 M89 66 l-4 2 M91 80 l-4 -3 M91 80 l-4 1 M93 93 l-4 -3 M93 93 l-4 1'/>
+    </g>
+  </g>
+</svg>

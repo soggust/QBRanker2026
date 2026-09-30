@@ -330,9 +330,9 @@
       color: var(--scoreboard-led);
     }
 
+    // Active: lit like the position tabs (bottom row of dots glowing)
     &.active {
-      background: var(--scoreboard-dots), #1f1f1f;
-      box-shadow: inset 0 -1px 0 var(--scoreboard-led);
+      @include v.lit-dots;
       color: var(--scoreboard-led);
       text-shadow: var(--scoreboard-glow);
     }
@@ -556,7 +556,7 @@
     }
   }
 
-  // Like the tabs: hover lightens it and lights the year; the season showing is lit with a line under it
+  // Like the tabs: hover lightens it and lights the year; the season showing is lit along its bottom row of dots
   &:hover:not(.active) {
     background: linear-gradient(rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.06)), var(--scoreboard-dots), var(--scoreboard);
 
@@ -565,9 +565,9 @@
     }
   }
 
+  // (lit like the position tabs: bottom row of dots glowing)
   &.active {
-    background: var(--scoreboard-dots), #1f1f1f;
-    box-shadow: inset 0 -1px 0 var(--scoreboard-led);
+    @include v.lit-dots;
     cursor: default;
 
     .season-year {

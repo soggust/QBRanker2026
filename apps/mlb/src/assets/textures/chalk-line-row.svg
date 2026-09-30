@@ -1,0 +1,19 @@
+<svg xmlns='http://www.w3.org/2000/svg' width='240' height='16' viewBox='0 0 240 16' preserveAspectRatio='none'>
+  <!-- The faint chalk line between the MLB rows: the same chalk as chalk-line-h.svg, drawn at
+       30% strength (the rows' background stretches it thin: see rankings.component.scss) -->
+  <defs>
+    <filter id='line' x='0' y='-50%' width='100%' height='200%'>
+      <feTurbulence type='fractalNoise' baseFrequency='0.03 0.08' numOctaves='3' seed='4' stitchTiles='stitch' result='wobble'/>
+      <feDisplacementMap in='SourceGraphic' in2='wobble' scale='3.2' xChannelSelector='R' yChannelSelector='G' result='rough'/>
+      <feTurbulence type='fractalNoise' baseFrequency='0.35 0.55' numOctaves='2' seed='9' stitchTiles='stitch' result='grain'/>
+      <feColorMatrix in='grain' values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  1.6 0 0 0 0.05' result='porous'/>
+      <feComposite in='rough' in2='porous' operator='in' result='core'/>
+      <feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='1' seed='21' stitchTiles='stitch' result='dustnoise'/>
+      <feColorMatrix in='dustnoise' values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  3.4 0 0 0 -2.05' result='specks'/>
+      <feGaussianBlur in='SourceGraphic' stdDeviation='0 3.2' result='halo'/>
+      <feComposite in='specks' in2='halo' operator='in' result='dust'/>
+      <feGaussianBlur in='core' stdDeviation='0.7' result='powder'/><feColorMatrix in='powder' values='1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 0.55 0' result='soft'/><feMerge><feMergeNode in='dust'/><feMergeNode in='soft'/><feMergeNode in='core'/></feMerge>
+    </filter>
+  </defs>
+  <g opacity='0.3'><rect x='-10' y='5.6' width='260' height='4.8' fill='#fbfaf5' filter='url(#line)'/></g>
+</svg>

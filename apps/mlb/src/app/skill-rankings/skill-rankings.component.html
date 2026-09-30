@@ -1,0 +1,584 @@
+<section class="rankings-wrapper spread" [class.category-colors]="categoryColors">
+  <!-- Columns to show, worked out once per render (not once per row) -->
+  @let groups = visibleGroups;
+  <!-- The position tabs (from the app), between the button bar and the grid -->
+  <ng-content></ng-content>
+  <ul #rankingsList cdkDropList (cdkDropListDropped)="drop($event)" columnHighlight>
+    <!-- Column headers (stat groups switch on / off with the sidebar eyes) -->
+    <li class="player header-row">
+      <mat-icon fontIcon="drag_indicator" class="drag-indicator" style="visibility: hidden"></mat-icon>
+      <div class="player-info">
+        <!-- Plain labels over the rank and name columns -->
+        <p class="stat-label header-rank">Rank</p>
+        <p class="stat-label header-name">Player</p>
+      </div>
+      @for (group of groups; track group.id) {
+        <div class="col-group" [ngClass]="'group-' + group.id">
+          <!-- Each group's icon sits in the slot at the start of its first cell; hover shows the group's name -->
+          @if (group.id === 'support') {
+            <div class="box support-box" [style.min-width.em]="group.stats.length * 7.5">
+              <mat-icon class="group-icon" [fontIcon]="group.icon" [title]="group.title"></mat-icon>
+              @for (stat of group.stats; track stat.key) {
+                <div [columnDrag]="{ list: position + '.' + group.id, id: columnId(stat) }">
+                  <p class="stat-label" [title]="labelTitle(stat)">{{ labelParts(stat)[0] }}@if (labelParts(stat)[1]; as tag) {<span class="label-tag">{{ ' ' + tag }}</span>}</p>
+                </div>
+              }
+            </div>
+          } @else {
+            @for (stat of group.stats; track stat.key; let first = $first) {
+                <div [columnDrag]="{ list: position + '.' + group.id, id: columnId(stat) }">
+                  @if (first) {
+                    <mat-icon class="group-icon" [fontIcon]="group.icon" [title]="group.title"></mat-icon>
+                  }
+                  <p class="stat-label" [title]="labelTitle(stat)">{{ labelParts(stat)[0] }}@if (labelParts(stat)[1]; as tag) {<span class="label-tag">{{ ' ' + tag }}</span>}</p>
+                </div>
+            }
+          }
+        </div>
+      }
+    </li>
+    @for (player of playerList; track player.gsisId; let i = $index) {
+      <li cdkDrag cdkDragPreviewContainer="parent" class="player">
+        <mat-icon
+          cdkDragHandle
+          aria-hidden="false"
+          aria-label="drag icon"
+          fontIcon="drag_indicator"
+          class="drag-indicator"
+        ></mat-icon>
+        <div
+          class="player-info"
+          [style.--team-badge]="teamBadge(player)"
+        >
+          <span [ngClass]="getCountClasses(i)"
+          >@if (i === 0) {<span class="lombardi" aria-hidden="true"></span
+            ><span class="visually-hidden">1</span>} @else {{{ i + 1 }}}</span
+        >
+          <!-- The team card, with the player's headshot standing in it (teams and units: just the logo) -->
+          <span class="badge-slot card-target" [class.with-photo]="headshot(player)" (click)="openCard(player)"
+            ><span class="team-badge" [class.white-logo]="teamLogoWhite(player)"
+              ><img [src]="seasonLogo(player.teamLogo)" class="team-logo" alt=""
+            /></span
+            >@if (headshot(player); as photo) {<img
+                class="headshot"
+                [src]="photo"
+                alt=""
+                loading="lazy"
+                (error)="noHeadshot(player)"
+              />}</span
+          >
+          <!-- The badge through the name opens the player card -->
+          <p class="player-name card-target" (click)="openCard(player)">
+            <strong class="card-link" role="button" tabindex="0" (keydown.enter)="openCard(player)">{{ player.name }}</strong>
+            @if (player.injured) {
+              <mat-icon
+                aria-hidden="false"
+                aria-label="Injury Icon"
+                fontIcon="healing"
+                class="injury-icon"
+                [title]="injuryTitle(player)"
+              ></mat-icon>
+            }
+            <!-- The season's awards: a gold cup for the World Series champion, a silver flag for both
+                 pennant winners, and plaques for the rest; hover one for the award written out -->
+            @if (awards(player); as won) {
+              @if (won.length) {
+                <span class="player-awards">
+                  @for (award of won; track award.id) {
+                    @if (award.id === 'ws') {
+                      <mat-icon class="award-cup award-gold" fontIcon="emoji_events" [title]="award.title"></mat-icon
+                      ><span class="visually-hidden">{{ awardInfo[award.id].short }}</span>
+                    } @else if (award.id === 'pennant') {
+                      <mat-icon class="award-cup award-pennant" fontIcon="flag" [title]="award.title"></mat-icon
+                      ><span class="visually-hidden">{{ awardInfo[award.id].short }}</span>
+                    } @else {
+                      <span class="award-badge" [ngClass]="'award-' + award.id" [title]="award.title"
+                        >{{ awardInfo[award.id].short }}</span
+                      >
+                    }
+                  }
+                </span>
+              }
+            }
+          </p>
+        </div>
+
+        @for (group of groups; track group.id) {
+          <div class="col-group" [ngClass]="'group-' + group.id">
+            @if (group.id === 'support') {
+              <!-- Support grades share a dark box -->
+              <div class="box support-box" [style.min-width.em]="group.stats.length * 7.5">
+                @for (stat of group.stats; track stat.key) {
+                  <div>
+                    <p [style.color]="gradeColor(player, stat) ?? valueColor(player, stat)">{{ format(player, stat) }}</p>
+                    <p class="stat-label" [title]="valueTitle(player, stat)">{{ statLabel(stat) }}</p>
+                  </div>
+                }
+              </div>
+            } @else {
+              @for (stat of group.stats; track stat.key) {
+                  <div>
+                    <p [style.color]="gradeColor(player, stat) ?? valueColor(player, stat)">{{ format(player, stat) }}</p>
+                    <p class="stat-label" [title]="valueTitle(player, stat)">
+                      {{ statLabel(stat) }}
+                    </p>
+                  </div>
+              }
+            }
+          </div>
+        }
+      </li>
+    }
+  </ul>
+
+  <!-- Footer -->
+  <footer>
+    <!-- Filters menu (the menu's X closes it) -->
+    <button
+      (click)="toggleFilters()"
+      aria-label="Filters"
+      [attr.aria-expanded]="filtersOpen"
+      [title]="filtersOpen ? 'Hide filters' : 'Show filters'"
+      class="filter-toggle"
+      [class.open]="filtersOpen"
+    >
+      <!-- A crossed-out filter (in yellow) while the menu is open -->
+      <mat-icon aria-hidden="true" [fontIcon]="filtersOpen ? 'filter_alt_off' : 'filter_alt'"></mat-icon>
+    </button>
+
+    <!-- Clipboard -->
+    <button
+      (click)="copyPlayerListToClipboard($any($event.currentTarget))"
+      aria-label="Copy To Clipboard Button"
+      title="Copy to Clipboard"
+      class="copy-toggle"
+    >
+      <mat-icon
+        aria-hidden="false"
+        aria-label="Copy To Clipboard Icon"
+        fontIcon="content_copy"
+      ></mat-icon>
+    </button>
+
+    <!-- Year: another season's stats with the same sliders -->
+    <mat-select
+      class="season-select"
+      aria-label="Season"
+      title="Season: rank any year's players with the same sliders"
+      [value]="season"
+      [disabled]="seasonLoading"
+      (valueChange)="selectSeason($event)"
+    >
+      <!-- "2019 SEASON" (just the year on narrow screens), or "CURRENT SEASON" for this one -->
+      <mat-select-trigger
+        >{{ season === currentSeason ? 'CURRENT' : season }}<span class="season-word"> SEASON</span></mat-select-trigger
+      >
+      @for (year of seasons; track year) {
+        <mat-option [value]="year">{{ year === currentSeason ? 'CURRENT' : year }}</mat-option>
+      }
+    </mat-select>
+
+    <!-- About / FAQ -->
+    <button
+      (click)="openAbout()"
+      aria-label="About and FAQ"
+      title="About, how it works and FAQ"
+      class="info-toggle"
+      [class.open]="aboutOpen"
+    >
+      <mat-icon aria-hidden="true" fontIcon="info" class="arrow-drop-up"></mat-icon>
+    </button>
+
+    <!-- Toast -->
+    <div class="toast" [class.show]="isToastVisible" [style.top.px]="toastAt.top" [style.left.px]="toastAt.left">List copied to clipboard!</div>
+
+    <!-- Settings Icon -->
+    <button
+      class="settings-toggle"
+      [matMenuTriggerFor]="menu"
+      aria-label="Settings menu"
+      title="Settings"
+    >
+      <mat-icon aria-hidden="false" aria-label="Settings Icon" fontIcon="settings"></mat-icon>
+    </button>
+
+    <!-- Menu -->
+    <mat-menu #menu="matMenu" class="settings-menu">
+      <!-- Format: how the stats are counted and shown -->
+      <div class="menu-section section-stats" (click)="$event.stopPropagation()">Format</div>
+      <div
+        mat-menu-item
+        title="Click to switch how counting stats (home runs, RBI, strikeouts, innings...) are shown and ranked: season totals, per game (fairer to anyone who missed time), or a full season's pace (162 games for hitters, 32 starts for starters, 65 appearances for relievers)"
+        (click)="$event.stopPropagation(); cycleStatBasis()"
+      >
+        <mat-icon class="menu-icon unit-rank-icon" fontIcon="functions" aria-hidden="true"></mat-icon>
+        <span>Stat Totals: <span class="menu-value">{{ statBasisLabels[statBasis] }}</span></span>
+      </div>
+      <div
+        mat-menu-item
+        class="min-games-item"
+        title="Leave out players with fewer plate appearances than this (for pitchers, batters faced); steps of 25, topping out at the most anyone on the tab has"
+        (click)="$event.stopPropagation()"
+      >
+        <span class="min-games-stepper" (click)="$event.stopPropagation()">
+          <button type="button" aria-label="Fewer plate appearances" [disabled]="minPa <= minPaFloor" (click)="stepMinPa(-1)">−</button>
+          <span class="min-games-value">{{ minPa }}</span>
+          <button type="button" aria-label="More plate appearances" [disabled]="minPa >= maxPa" (click)="stepMinPa(1)">+</button>
+        </span>
+        <span>Min PA</span>
+      </div>
+
+      <!-- Display: what the table shows -->
+      <div class="menu-section section-display" (click)="$event.stopPropagation()">Display</div>
+      <div mat-menu-item title="A chalk line before each stat group in the rows, in the same color as its filter card" (click)="$event.stopPropagation(); categoryColors = !categoryColors">
+        <mat-slide-toggle hideIcon
+          color="accent"
+          class="slide-toggle"
+          [(ngModel)]="categoryColors"
+          (click)="$event.stopPropagation()"
+        ></mat-slide-toggle>
+        <span>Category Dividers</span>
+      </div>
+      <div mat-menu-item title="Tint each value green above the list average and red below it, stronger the further out (flipped for lower-is-better stats like ERA)" (click)="$event.stopPropagation(); colorValues = !colorValues">
+        <mat-slide-toggle hideIcon
+          color="accent"
+          class="slide-toggle"
+          [(ngModel)]="colorValues"
+          (click)="$event.stopPropagation()"
+        ></mat-slide-toggle>
+        <span>Color-Coded Values</span>
+      </div>
+      <div
+        mat-menu-item
+        title="Off: hide players on the injured list (this season), and leave them out of the rankings"
+        (click)="
+          $event.stopPropagation(); showInjured = !showInjured; sortPlayers()
+        "
+      >
+        <mat-slide-toggle hideIcon
+          color="accent"
+          class="slide-toggle"
+          [(ngModel)]="showInjured"
+          (ngModelChange)="sortPlayers()"
+          (click)="$event.stopPropagation()"
+        ></mat-slide-toggle>
+        <span>Injured Players</span>
+      </div>
+      <div
+        mat-menu-item
+        title="Show columns for stats whose slider is at 0% (they still don't count in the ranking). Stats switched off with their eye stay hidden"
+        (click)="$event.stopPropagation(); showUnused = !showUnused"
+      >
+        <mat-slide-toggle hideIcon
+          color="accent"
+          class="slide-toggle"
+          [(ngModel)]="showUnused"
+          (click)="$event.stopPropagation()"
+        ></mat-slide-toggle>
+        <span>Unweighted Stats</span>
+      </div>
+    </mat-menu>
+  </footer>
+</section>
+
+<!-- Player card (click a name): the columns showing in the grid as ranks in this list -->
+@if (card; as c) {
+  <div class="card-backdrop" (click)="closeCard()"></div>
+  <div
+    class="player-card"
+    role="dialog"
+    aria-modal="true"
+    [attr.aria-label]="c.name"
+    [class.loading]="cardLoading"
+    [style.--team-badge]="c.color"
+  >
+    <header class="card-hero">
+      <!-- The team card, big: the logo behind, the player standing in front and out over the top -->
+      <div class="hero-badge" [class.with-photo]="c.photo">
+        <span class="hero-card" [class.white-logo]="c.whiteLogo"><img class="hero-logo" [src]="c.logo" alt="" /></span>
+        @if (c.photo) {
+          <img class="hero-photo" [src]="c.photo" alt="" (error)="c.photo = null" />
+        }
+      </div>
+
+      <div class="hero-text">
+        <!-- The season this card is for, as a lit scoreboard chip -->
+        <p class="hero-kicker">
+          <span class="season-chip">{{ c.seasonLabel }}</span>
+        </p>
+        <h2>{{ c.name }}</h2>
+        <!-- Position (yellow) • team -->
+        <p class="hero-team">
+          <span class="hero-position">{{ c.positionName }}</span>
+          @if (c.teamName) {
+            <span class="hero-dot">•</span>{{ c.teamName }}
+          }
+        </p>
+        @if (c.awards.length) {
+          <span class="player-awards">
+            @for (award of c.awards; track award.id) {
+              @if (award.id === 'ws') {
+                <mat-icon class="award-cup award-gold" fontIcon="emoji_events" [title]="award.title"></mat-icon>
+              } @else if (award.id === 'pennant') {
+                <mat-icon class="award-cup award-pennant" fontIcon="flag" [title]="award.title"></mat-icon>
+              } @else {
+                <span class="award-badge" [ngClass]="'award-' + award.id" [title]="award.title">{{ awardInfo[award.id].short }}</span>
+              }
+            }
+          </span>
+        }
+      </div>
+
+      <!-- Overall rank, as a scoreboard tile -->
+      <div class="hero-rank" [style.--tone]="rankTone(c.of > 1 ? (c.of - c.rank) / (c.of - 1) : 1)">
+        <span class="rank-label">Rank</span>
+        <span class="rank-number">{{ c.rank }}</span>
+        <span class="rank-of">of {{ c.of }}</span>
+      </div>
+
+      <div class="card-controls">
+        <button type="button" aria-label="Previous" title="Previous (←)" (click)="stepCard(-1)">
+          <mat-icon fontIcon="chevron_left"></mat-icon>
+        </button>
+        <button type="button" aria-label="Next" title="Next (→)" (click)="stepCard(1)">
+          <mat-icon fontIcon="chevron_right"></mat-icon>
+        </button>
+        <button type="button" aria-label="Close" title="Close (Esc)" (click)="closeCard()">
+          <mat-icon fontIcon="close"></mat-icon>
+        </button>
+      </div>
+    </header>
+
+    <!-- Tabs: Overview, Stats, Seasons (see cardTabs) -->
+    <nav class="card-tabs" role="tablist">
+      @for (tab of cardTabs(c); track tab.id) {
+        <button
+          type="button"
+          role="tab"
+          [class.active]="cardTab === tab.id"
+          [attr.aria-selected]="cardTab === tab.id"
+          (click)="selectCardTab(tab.id); cardBody.scrollTop = 0"
+        >
+          {{ tab.title }}
+        </button>
+      }
+    </nav>
+
+    <div class="card-body" #cardBody>
+      <!-- One stat: value, rank in the list, a bar for where that sits, the list average -->
+      <ng-template #statTile let-s>
+        <div
+          class="card-stat"
+          [ngClass]="'group-' + s.group"
+          [title]="s.name"
+          [style.--pct]="s.pct ?? 0"
+          [style.--tone]="rankTone(s.pct)"
+        >
+          <span class="stat-name">{{ s.label }}</span>
+          <span class="stat-rank">
+            @if (s.rank !== null) {
+              {{ s.tied ? 'T-' : '#' }}{{ s.rank }}<small> / {{ s.of }}</small>
+            }
+          </span>
+          @if (s.dots) {
+            <span class="stat-value stat-dots">
+              @for (d of s.dots; track $index) {
+                <i [class.win]="d === 1" [class.tie]="d === 0.5"></i>
+              }
+            </span>
+          } @else {
+            <span class="stat-value" [style.color]="s.tint">{{ s.display }}</span>
+          }
+          <span class="stat-bar" [class.empty]="s.rank === null"><i></i></span>
+          <span class="stat-avg">{{ s.avg !== null ? 'Avg ' + s.avg : '' }}</span>
+        </div>
+      </ng-template>
+
+      @switch (cardTab) {
+        @case ('stats') {
+          <!-- Each group folds shut from its header bar, like the filter menu's -->
+          @for (group of c.groups; track group.id) {
+            <div class="stat-group" [ngClass]="'group-' + group.id" [class.closed]="cardClosed.has(group.id)">
+              <button
+                type="button"
+                class="group-bar"
+                [attr.aria-expanded]="!cardClosed.has(group.id)"
+                [title]="(cardClosed.has(group.id) ? 'Show ' : 'Hide ') + group.title"
+                (click)="toggleCardGroup(group.id)"
+              >
+                <mat-icon class="group-bar-icon" [fontIcon]="group.icon"></mat-icon>
+                <span>{{ group.title }}</span>
+                <mat-icon class="group-bar-chevron" [fontIcon]="cardClosed.has(group.id) ? 'expand_more' : 'expand_less'"></mat-icon>
+              </button>
+              @if (!cardClosed.has(group.id)) {
+                <div class="card-stats">
+                  @for (s of group.stats; track s.key) {
+                    <ng-container *ngTemplateOutlet="statTile; context: { $implicit: s }"></ng-container>
+                  }
+                </div>
+              }
+            </div>
+          }
+        }
+
+        <!-- Overview: the archetype and a one-line take, context flags, a skill radar (with last
+             season's shape as a ghost), and a scouting report of skills with the stats behind them -->
+        @case ('overview') {
+          @let o = c.overview;
+          @let flags = sortFlags(o.flags);
+          <div class="ov-top">
+            <div class="ov-profile">
+              <h4 class="ov-archetype">{{ o.archetype }}</h4>
+              <p class="ov-blurb">{{ o.blurb }}</p>
+              @if (flags.length) {
+                <ul class="ov-flags">
+                  @for (f of flags; track f.text) {
+                    <li [ngClass]="f.tone"><mat-icon [fontIcon]="f.icon"></mat-icon><span>{{ f.text }}</span></li>
+                  }
+                </ul>
+              }
+            </div>
+
+            @if (o.skills.length >= 3) {
+              <div class="ov-radar">
+                <svg viewBox="-215 -140 430 285" role="img" [attr.aria-label]="'Skill profile of ' + c.name">
+                  @for (ring of o.radar.rings; track $index) {
+                    <polygon class="ring" [class.avg]="$index === 1" [attr.points]="ring"></polygon>
+                  }
+                  @for (a of o.radar.axes; track a.label) {
+                    <line class="spoke" x1="0" y1="0" [attr.x2]="a.x" [attr.y2]="a.y"></line>
+                  }
+                  @if (o.prev) {
+                    <polygon class="ghost" [attr.points]="o.prev.shape"></polygon>
+                  }
+                  <polygon class="shape" [attr.points]="o.radar.shape"></polygon>
+                  @for (d of o.radar.dots; track $index) {
+                    <circle class="dot" r="3.5" [attr.cx]="d.x" [attr.cy]="d.y" [style.fill]="rankTone(d.pct)"></circle>
+                  }
+                  @for (a of o.radar.axes; track a.label) {
+                    <text class="axis-label" [attr.x]="a.lx" [attr.y]="a.ly" [attr.text-anchor]="a.anchor">{{ a.label }}</text>
+                  }
+                </svg>
+                <div class="ov-legend">
+                  <span><i class="key now"></i>{{ c.season === currentSeason ? 'This Season' : c.season }}</span>
+                  @if (o.prev) {
+                    <span><i class="key prev"></i>{{ o.prev.season }}</span>
+                  }
+                  <span><i class="key avg"></i>League Avg</span>
+                </div>
+              </div>
+            }
+          </div>
+
+          <!-- Scouting report: every skill, strengths first, then average, then weaknesses, each with
+               the stats behind it -->
+          @for (side of o.report; track side.title) {
+            @if (side.list.length) {
+              <div class="ov-section" [ngClass]="side.tone">
+                <h3><mat-icon [fontIcon]="side.icon"></mat-icon>{{ side.title }}</h3>
+                <div class="ov-skills">
+                  @for (s of side.list; track s.id) {
+                    <div class="skill-card" [style.--pct]="s.pct" [style.--tone]="rankTone(s.pct)">
+                      <div class="skill-head">
+                        <span class="skill-name">{{ s.name }}</span>
+                        <span class="skill-standing">{{ s.standing }}</span>
+                      </div>
+                      <span class="stat-bar"><i></i></span>
+                      <span class="skill-evidence">
+                        @for (e of s.evidence; track e.label) {
+                          <span><b [style.--tone]="rankTone(e.of > 1 ? (e.of - e.rank) / (e.of - 1) : 1)">#{{ e.rank }}</b> {{ e.label }}</span>
+                        }
+                      </span>
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+          }
+
+          <!-- The three closest seasons by anyone else, 2000 on (finished seasons only) -->
+          @if (c.season !== currentSeason && c.comps?.length) {
+            <div class="ov-section similar">
+              <h3><mat-icon fontIcon="compare_arrows"></mat-icon>Similar Seasons</h3>
+              <div class="comps-row">
+                @for (m of c.comps; track m.season + m.gsisId) {
+                  <button type="button" class="comp" [style.--team-badge]="m.color" (click)="openSeasonCard(m.season, m.gsisId)">
+                    <span class="comp-badge" [class.with-photo]="m.photo">
+                      <span class="comp-card" [class.white-logo]="m.whiteLogo"><img class="comp-logo" [src]="m.logo" alt="" /></span>
+                      @if (m.photo) {
+                        <img class="comp-photo" [src]="m.photo" alt="" (error)="m.photo = null" />
+                      }
+                    </span>
+                    <span class="comp-text">
+                      <span class="comp-season">{{ m.season }}</span>
+                      <span class="comp-name">{{ m.name }}</span>
+                    </span>
+                    <span class="comp-match" [style.--tone]="rankTone((m.match - 60) / 40)">{{ m.match }}<small>%</small></span>
+                  </button>
+                }
+              </div>
+            </div>
+          }
+        }
+
+        <!-- Every season they're in: each opens that season's card (the table stays as it is) -->
+        @case ('seasons') {
+          <div class="card-group card-career">
+            <h3><mat-icon fontIcon="calendar_month"></mat-icon>Seasons</h3>
+            @if (!c.seasons) {
+              <p class="card-note">Loading…</p>
+            } @else {
+              <!-- Career arc: a bar per season, as tall as where they ranked (first = full height) -->
+              <div class="career-chart" [style.--count]="c.seasons.length">
+                @for (s of c.seasons; track s.season) {
+                  <button
+                    type="button"
+                    class="arc"
+                    [class.active]="s.season === c.season"
+                    [class.pending]="!s.yours"
+                    [style.--pct]="s.pct"
+                    [style.--tone]="rankTone(s.pct)"
+                    [title]="s.season + ': #' + s.rank + ' of ' + s.of"
+                    (click)="s.season !== c.season && openSeasonCard(s.season, c.player.gsisId)"
+                  >
+                    <span class="arc-rank">#{{ s.rank }}</span>
+                    <span class="arc-bar"></span>
+                    <span class="arc-year">'{{ s.season % 100 | number: '2.0' }}</span>
+                  </button>
+                }
+              </div>
+
+              <!-- A line per season, newest first: each opens that season's card -->
+              <div class="season-list">
+                @for (s of c.seasons.slice().reverse(); track s.season) {
+                  <button
+                    type="button"
+                    class="season-row"
+                    [class.active]="s.season === c.season"
+                    [class.pending]="!s.yours"
+                    [style.--tone]="rankTone(s.pct)"
+                    [title]="s.season === c.season ? 'Showing this season' : 'Open the ' + s.season + ' card'"
+                    (click)="s.season !== c.season && openSeasonCard(s.season, c.player.gsisId)"
+                  >
+                    <img [src]="s.logo" alt="" [class.white-logo]="teamLogoWhite({ teamLogo: s.teamLogo })" />
+                    <span class="season-year">{{ s.season === currentSeason ? 'This Season' : s.season }}</span>
+                    <span class="season-games">{{ s.games }} G</span>
+                    <!-- Headline stats as readouts: value, a bar against their best season, label; best lit -->
+                    @for (h of s.stats; track h.label) {
+                      <span class="readout" [class.lead]="$first" [class.best]="h.best" [class.tinted]="h.tint" [style.--share]="h.share" [style.--tint]="h.tint" [title]="h.best ? 'Career best' : ''">
+                        <b>{{ h.text }}</b>
+                        <i></i>
+                        <small>{{ h.label }}</small>
+                      </span>
+                    }
+                    <span class="season-rank">#{{ s.rank }}<small> / {{ s.of }}</small></span>
+                  </button>
+                }
+              </div>
+            }
+          </div>
+        }
+      }
+    </div>
+  </div>
+}

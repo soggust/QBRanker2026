@@ -56,6 +56,7 @@ import {
   tierWord,
 } from 'app/utils/player-skills';
 import { badgeColor, whiteLogo } from 'app/utils/team-colors';
+import { logoForSeason } from 'app/utils/logo-eras';
 
 
 // The player card (click a name): a stat's value, where it ranks in the list and how that compares
@@ -174,7 +175,9 @@ type CareersFile = Partial<
 // A season on the card's Seasons tab: team, games, rank with the default sliders, headline stats
 export interface CardSeason {
   season: number;
+  // The team's logo as it looked that season, and the team's own logo path (its key)
   logo: string;
+  teamLogo: string;
   games: number;
   rank: number;
   of: number;
@@ -866,6 +869,11 @@ export class SkillRankingsComponent implements OnChanges {
   }
 
   // Logos drawn in white on their badge (e.g. the Giants)
+  // The team's logo as it looked in the table's season
+  seasonLogo(teamLogo: string): string {
+    return logoForSeason(teamLogo, this.season);
+  }
+
   teamLogoWhite(unit: { teamLogo: string }): boolean {
     return whiteLogo(unit.teamLogo);
   }
@@ -1730,7 +1738,7 @@ export class SkillRankingsComponent implements OnChanges {
         positionName: POSITION_NAMES[this.position],
         seasonLabel: season === CURRENT_SEASON ? 'This Season' : `${season}`,
         teamName: this.position === 'DEF' || team === player.name ? null : team,
-        logo: player.teamLogo,
+        logo: logoForSeason(player.teamLogo, season),
         color: this.teamBadge(player),
         whiteLogo: this.teamLogoWhite(player),
         // The same headshot, big enough for the card's hero
@@ -1758,7 +1766,9 @@ export class SkillRankingsComponent implements OnChanges {
       const headline = headlineStats(this.position);
       const line = (season: number, logo: string, games: number, rank: number, of: number, stats: (number | null)[]) => ({
         season,
-        logo,
+        // (the team's logo that season; whiteLogo below reads the team's own file)
+        logo: logoForSeason(logo, season),
+        teamLogo: logo,
         games,
         rank,
         of,
@@ -1824,7 +1834,7 @@ export class SkillRankingsComponent implements OnChanges {
           gsisId,
           name,
           match,
-          logo: teamLogo,
+          logo: logoForSeason(teamLogo, season),
           color: badgeColor(teamLogo),
           whiteLogo: whiteLogo(teamLogo),
           photo: photo && photo.replace('&w=160&h=116', '&w=240&h=174'),

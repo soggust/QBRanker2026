@@ -1,3 +1,23 @@
 // Fonts
 $font-base: "Nunito", sans-serif;
 $font-heading: "Zain", cursive;
+
+// The active tab / item on a scoreboard panel: a lit-up panel whose bottom row of dots glows in the
+// accent color. Its dots are counted up from the bottom edge (not down from the top) so the lit row is
+// always one whole row of dots, whatever the element's height.
+@mixin lit-dots($panel: #1f1f1f) {
+  background: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1.3px) 0 100% / 4px 4px, $panel;
+  position: relative;
+
+  &::after {
+    background: radial-gradient(var(--scoreboard-led) 1px, transparent 1.3px) 0 100% / 4px 4px;
+    bottom: 0;
+    content: "";
+    filter: drop-shadow(0 0 1.5px var(--scoreboard-led));
+    height: 4px;
+    left: 0;
+    pointer-events: none;
+    position: absolute;
+    right: 0;
+  }
+}

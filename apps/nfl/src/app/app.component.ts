@@ -9,6 +9,14 @@ import { POSITIONS, Position } from './positions';
     standalone: false
 })
 export class AppComponent {
+  // The sport bar across the top: each sport is its own app on the same site (apps/<sport>, served at
+  // /<sport>/); this one is lit
+  readonly sport = 'nfl';
+  readonly sports = [
+    { id: 'nfl', label: 'NFL' },
+    { id: 'mlb', label: 'MLB' },
+  ];
+
   position$ = this.positionService.position$;
   aboutOpen$ = this.positionService.aboutOpen$;
   positions = POSITIONS;

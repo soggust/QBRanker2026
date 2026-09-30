@@ -6,7 +6,7 @@
   display: flex;
   flex-direction: column;
   font-family: v.$font-base;
-  height: 100dvh;
+  height: calc(100dvh - var(--sport-bar-height));
   position: relative;
   width: 26em;
 

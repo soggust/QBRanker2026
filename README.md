@@ -10,27 +10,32 @@ dependencies and the TypeScript settings.
 
 ```
 apps/
+  mlb/                  the MLB app: same engine and look as the NFL app, with baseball positions,
+                        stats and presets (MLB Stats API + Baseball Savant), a dirt / chalk theme
   nfl/                  the NFL app
     src/                app code, styles, assets, and StaticData/ (the season data it serves)
     scripts/            data scripts (nightly update, honors, similar seasons, run blocking)
     tsconfig.json       imports resolve from src/ (app/..., StaticData/...)
     tsconfig.app.json   build config
     tsconfig.spec.json  test config
-angular.json            one project per app ("nfl")
+angular.json            one project per app ("nfl", "mlb")
 tsconfig.json           compiler options shared by every app
-firebase.json           hosting: serves dist/site, each sport under its own path (/nfl/); / redirects to /nfl/
-.github/workflows/      nfl-update-data.yml (nightly data), firebase-deploy.yml (deploy on push)
+firebase.json           hosting: serves dist/site, each sport under its own path (/nfl/, /mlb/); / redirects to /nfl/
+.github/workflows/      nfl-update-data.yml and mlb-update-data.yml (nightly data), firebase-deploy.yml (deploy on push)
 ```
 
 ## Commands
 
 | Command | What it does |
 | --- | --- |
-| `npm start` | Dev server at http://localhost:4200/nfl/ |
-| `npm run build` | Production build to `dist/site/nfl` |
+| `npm run dev` | Every app at once, all at http://localhost:4200 (`/nfl/`, `/mlb/`) so the sport bar works like the live site, each with live reload (`PORT=4300 npm run dev` if 4200 is taken) |
+| `npm start` / `npm run start:mlb` | Just one app's dev server (the sport bar's other link won't work) |
+| `npm run build` | Production build of every app into `dist/site` (`nfl/`, `mlb/`) |
 | `npm run update-data` | Pull the current season (`SEASON=2025` for a past one) |
 | `npm run update-honors` | All-Pro and Pro Bowl lists from Wikipedia |
 | `npm run build-comps` | The player card's similar seasons and season history |
+| `npm run mlb:update-data` | MLB: pull this season (`SEASON=2019` for a past one, `ALL=1` for 2000 on) |
+| `npm run mlb:build-comps` | MLB: the player card's similar seasons and season history |
 | `npm run build-blocking` | The player card's run-blocking reads (after a season's participation data is out) |
 
 ## Adding another sport

@@ -1,0 +1,33 @@
+<svg xmlns='http://www.w3.org/2000/svg' width='1400' height='720' fill='none' stroke='white' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round' opacity='0.03'><filter id='c'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' seed='7' result='t'/><feDisplacementMap in='SourceGraphic' in2='t' scale='2.6'/></filter><g filter='url(#c)'>
+<!-- Left: a full field with the nine fielders at their spots (X's), and one play: a ball hit into the right-center gap (dashed) and the batter running to second -->
+<path d='M380 330 L130 90'/><path d='M380 330 L630 90'/><path d='M130 90 C220 -10 540 -10 630 90'/>
+<path d='M262 222 C300 150 460 150 498 222'/>
+<path d='M370 320 L390 320 L390 338 L380 346 L370 338 Z'/>
+<rect x='470' y='224' width='16' height='16' transform='rotate(45 478 232)'/>
+<rect x='372' y='126' width='16' height='16' transform='rotate(45 380 134)'/>
+<rect x='274' y='224' width='16' height='16' transform='rotate(45 282 232)'/>
+<circle cx='380' cy='242' r='14'/>
+<path d='M372 354l16 16M388 354l-16 16'/>
+<path d='M372 234l16 16M388 234l-16 16'/>
+<path d='M446 190l16 16M462 190l-16 16'/>
+<path d='M424 150l16 16M440 150l-16 16'/>
+<path d='M320 150l16 16M336 150l-16 16'/>
+<path d='M298 190l16 16M314 190l-16 16'/>
+<path d='M220 100l16 16M236 100l-16 16'/>
+<path d='M372 50l16 16M388 50l-16 16'/>
+<path d='M524 100l16 16M540 100l-16 16'/>
+<path d='M384 324 C420 250 440 150 458 62' stroke-dasharray='10 9'/><path d='M448 72 L460 56 L466 76'/>
+<path d='M394 322 C440 290 466 262 474 242' stroke-dasharray='6 8'/><path d='M466 214 C440 176 412 150 392 140' stroke-dasharray='6 8'/><path d='M404 136 L388 139 L398 152'/>
+<!-- Right: a 6-4-3 double play: shortstop to second, second baseman to first -->
+<path d='M960 700 L820 560'/><path d='M960 700 L1100 560'/>
+<path d='M880 612 C910 560 1010 560 1040 612'/>
+<path d='M952 692 L968 692 L968 706 L960 712 L952 706 Z'/>
+<rect x='1032' y='612' width='14' height='14' transform='rotate(45 1039 619)'/>
+<rect x='953' y='532' width='14' height='14' transform='rotate(45 960 539)'/>
+<rect x='874' y='612' width='14' height='14' transform='rotate(45 881 619)'/>
+<path d='M904 562l14 14M918 562l-14 14'/><text x='898' y='556' fill='white' stroke='none' font-family='sans-serif' font-size='16'>6</text>
+<path d='M998 562l14 14M1012 562l-14 14'/><text x='1016' y='556' fill='white' stroke='none' font-family='sans-serif' font-size='16'>4</text>
+<path d='M1014 594l14 14M1028 594l-14 14'/><text x='1032' y='590' fill='white' stroke='none' font-family='sans-serif' font-size='16'>3</text>
+<path d='M920 574 C934 560 946 548 954 542'/><path d='M942 542 L956 540 L950 553'/>
+<path d='M968 544 C990 562 1004 580 1014 592'/><path d='M1002 590 L1016 596 L1014 582'/>
+</g></svg>

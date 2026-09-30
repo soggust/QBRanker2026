@@ -3,14 +3,18 @@
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
+    "dev": "node dev.mjs",
     "start": "ng serve nfl",
-    "build": "ng build nfl",
+    "build": "ng build nfl && ng build mlb",
     "watch": "ng build nfl --watch --configuration development",
     "test": "ng test nfl",
     "update-data": "node apps/nfl/scripts/update-data.mjs",
     "update-honors": "node apps/nfl/scripts/update-honors.mjs",
     "build-comps": "node apps/nfl/scripts/build-comps.mjs",
-    "build-blocking": "node --max-old-space-size=6144 apps/nfl/scripts/build-blocking.mjs"
+    "build-blocking": "node --max-old-space-size=6144 apps/nfl/scripts/build-blocking.mjs",
+    "start:mlb": "ng serve mlb",
+    "mlb:update-data": "node apps/mlb/scripts/update-data.mjs",
+    "mlb:build-comps": "node apps/mlb/scripts/build-comps.mjs"
   },
   "private": true,
   "dependencies": {

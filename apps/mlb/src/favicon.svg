@@ -1,0 +1,19 @@
+<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'>
+  <!-- A baseball: off-white leather with a soft shade and two red stitched seams -->
+  <defs>
+    <radialGradient id='b' cx='38%' cy='32%' r='70%'>
+      <stop offset='0' stop-color='#ffffff'/>
+      <stop offset='0.65' stop-color='#f1ece0'/>
+      <stop offset='1' stop-color='#c9c1ae'/>
+    </radialGradient>
+  </defs>
+  <circle cx='32' cy='32' r='29' fill='url(#b)' stroke='#8a8270' stroke-width='1.5'/>
+  <g fill='none' stroke='#c8102e' stroke-width='2.4' stroke-linecap='round'>
+    <path d='M17 8 C26 20 26 44 17 56'/>
+    <path d='M47 8 C38 20 38 44 47 56'/>
+  </g>
+  <g fill='none' stroke='#c8102e' stroke-width='1.6' stroke-linecap='round'>
+    <path d='M19 14 l5 -2 M22 20 l5 -1 M23 26 l5 0 M23 32 l5 0 M23 38 l5 0 M22 44 l5 1 M19 50 l5 2'/>
+    <path d='M45 14 l-5 -2 M42 20 l-5 -1 M41 26 l-5 0 M41 32 l-5 0 M41 38 l-5 0 M42 44 l-5 1 M45 50 l-5 2'/>
+  </g>
+</svg>
