@@ -377,6 +377,9 @@ function offenseStats(n, ctx) {
     // Charted drops (Pro Football Reference); null (scored as average) with no targets yet, or when
     // PFR has no receiving line for the player
     drops: ctx.pfrRec && stats.targets ? ctx.pfrRec.receiving_drop : null,
+    // Run Block EPA: filled in for finished seasons by build-blocking.mjs (who was on the field each play
+    // isn't published until a season is over), so it stays empty (and its column hidden) until then
+    runBlockEpa: null,
   };
 }
 

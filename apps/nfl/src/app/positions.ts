@@ -71,6 +71,7 @@ export type SkillStatKey =
   | 'airYardsShare'
   | 'dropPct'
   | 'drops'
+  | 'runBlockEpa'
   | 'pressureRate'
   | 'missedTacklePct'
   | 'thirdDownPct'
@@ -269,6 +270,7 @@ export const STAT_NAMES: Partial<Record<SkillColumnKey, string>> = {
   airYardsShare: 'Air Yards Share',
   dropPct: 'Drop Percentage',
   drops: 'Dropped Passes',
+  runBlockEpa: 'Run Game EPA per Carry With Him On vs Off the Field',
   snapShare: 'Snap Percentage',
   carries: 'Carries',
   rushYards: 'Rushing Yards',
@@ -530,6 +532,19 @@ const DROPS_STAT: SkillStat = {
   missingIsAverage: true,
 };
 
+// Run blocking (finished seasons only: it comes from nflverse's record of who was on the field each
+// play, published after each season; this season's column and slider stay hidden until then). The
+// team's rushing EPA per carry with him on the field minus with him off (at least 40 runs off). A
+// rough read (the line, the back and the play calls all count too), so it starts with a small weight.
+export const RUN_BLOCK_STAT: SkillStat = {
+  key: 'runBlockEpa',
+  label: 'Run Block EPA',
+  description: 'Rushing EPA per carry with him on the field minus with him off (finished seasons)',
+  kind: 'efficiency',
+  format: 'dec2',
+  missingIsAverage: true,
+};
+
 // Passing-game role and efficiency: WR/TE, and RBs' receiving side
 const TARGETS_STAT: SkillStat = { key: 'targets', label: 'Targets', description: 'Times targeted', kind: 'volume', format: 'int' };
 
@@ -606,6 +621,7 @@ const RECEIVING_STATS: SkillStat[] = [
     kind: 'efficiency',
     format: 'pct',
   },
+  RUN_BLOCK_STAT,
   FANTASY_STAT,
   QB_PLAY_STAT,
 ];
@@ -749,6 +765,7 @@ export const SKILL_STATS: Record<SkillPosition, SkillStat[]> = {
       kind: 'efficiency',
       format: 'pct',
     },
+    RUN_BLOCK_STAT,
     FANTASY_STAT,
     QB_PLAY_STAT,
     OLINE_STAT,
@@ -1123,7 +1140,7 @@ export function hasFantasy(position: SkillPosition): boolean {
   return SKILL_STATS[position].some((stat) => stat.key === 'fantasy');
 }
 
-// Default: everything at 50. A preset (skill-presets.ts) sets the stats it's named for, keeps every
+// Default: everything at 50 (Run Block EPA at 10). A preset (skill-presets.ts) sets the stats it's named for, keeps every
 // other stat at 25, and leaves support grades and the parent Total Yds / Total TDs sliders at 50.
 // Fantasy ranks purely on fantasy points.
 export function presetWeights(position: SkillPosition, preset: SkillPreset): SkillWeights {
@@ -1133,6 +1150,8 @@ export function presetWeights(position: SkillPosition, preset: SkillPreset): Ski
   for (const stat of SKILL_STATS[position]) {
     if (stat.infoOnly) continue;
     if (fantasyOnly) weights[stat.key] = 0;
+    // Run blocking is a rough read, so it starts small (a touch of weight, never the story)
+    else if (stat.key === 'runBlockEpa') weights[stat.key] = 10;
     else if (!def || stat.support) weights[stat.key] = 50;
     else weights[stat.key] = 25;
   }
@@ -1186,6 +1205,7 @@ const ADVANCED_STATS = new Set<SkillColumnKey>([
   'adot',
   'airYardsShare',
   'dropPct',
+  'runBlockEpa',
   'epaPerKick',
   'fgOverExp',
   'epaPerPunt',

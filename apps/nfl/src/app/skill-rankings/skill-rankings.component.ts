@@ -1132,8 +1132,8 @@ export class SkillRankingsComponent implements OnChanges {
 
   // ---------------------------------------------------------------------------
   // Run blocking (TEs mostly, WRs lightly): from who was on the field each play, published after each
-  // season (scripts/build-blocking.mjs), so it only shows up in the analysis, never the table. This
-  // season's card uses the latest charted season. Only notable numbers say anything.
+  // season (scripts/build-blocking.mjs). The card's analysis reads the detail; the table has Run Block
+  // EPA. A season that isn't charted yet (this one) says nothing. Only notable numbers say anything.
   // ---------------------------------------------------------------------------
   private blockingFiles = new Map<number, Promise<Record<string, BlockingRow>>>();
 
@@ -1165,25 +1165,25 @@ export class SkillRankingsComponent implements OnChanges {
           share: on / teamRuns,
         });
       }
-      if (this.card !== card || !charted.length) return;
+      // Only the card's own season counts: a season that isn't charted (this one, until it's over)
+      // says nothing about run blocking rather than borrowing an older season's
       const latest = charted[charted.length - 1];
+      if (this.card !== card || !latest || latest.season !== card.season) return;
       await this.addBlockingSkill(card, latest.season);
       // (backs only get the radar axis: nothing else about their run blocking is worth a note)
       if (this.card !== card || this.position === 'RB') return;
-      // (this season isn't charted until it's over: say which season the numbers are from)
-      const when = latest.season === card.season ? '' : ` in ${latest.season}`;
       const flags: CardFlag[] = [];
       const epa = (v: number) => `${v > 0 ? '+' : ''}${v.toFixed(2)}`;
       if (te) {
         if (latest.tilt >= 1.2) {
-          flags.push({ icon: 'sports_mma', tone: 'info', text: `Blocking-first role${when}: out there far more on runs than passes` });
+          flags.push({ icon: 'sports_mma', tone: 'info', text: `Blocking-first role: out there far more on runs than passes` });
         } else if (latest.tilt <= 0.65) {
-          flags.push({ icon: 'open_with', tone: 'info', text: `Move tight end${when}: rarely on the field for runs` });
+          flags.push({ icon: 'open_with', tone: 'info', text: `Move tight end: rarely on the field for runs` });
         }
         if (latest.impact !== null && latest.impact >= 0.08) {
-          flags.push({ icon: 'sports_mma', tone: 'good', text: `Run-game boost${when}: ${epa(latest.impact)} EPA per carry with him on the field` });
+          flags.push({ icon: 'sports_mma', tone: 'good', text: `Run-game boost: ${epa(latest.impact)} EPA per carry with him on the field` });
         } else if (latest.impact !== null && latest.impact <= -0.08) {
-          flags.push({ icon: 'sports_mma', tone: 'bad', text: `Runs fared worse with him on the field${when} (${epa(latest.impact)} EPA per carry)` });
+          flags.push({ icon: 'sports_mma', tone: 'bad', text: `Runs fared worse with him on the field (${epa(latest.impact)} EPA per carry)` });
         }
         // Across the career: a steady plus in the run game
         const measured = charted.filter((c) => c.impact !== null);
@@ -1210,10 +1210,10 @@ export class SkillRankingsComponent implements OnChanges {
       } else {
         // Receivers: only the notable (a passing-down specialist, or a big run-game swing)
         if (latest.tilt <= 0.65) {
-          flags.push({ icon: 'swap_vert', tone: 'info', text: `Passing-down specialist${when}: rarely on the field for runs` });
+          flags.push({ icon: 'swap_vert', tone: 'info', text: `Passing-down specialist: rarely on the field for runs` });
         }
         if (latest.impact !== null && latest.impact >= 0.15) {
-          flags.push({ icon: 'sports_mma', tone: 'info', text: `Runs gained ${epa(latest.impact)} EPA per carry with him on the field${when}` });
+          flags.push({ icon: 'sports_mma', tone: 'info', text: `Runs gained ${epa(latest.impact)} EPA per carry with him on the field` });
         }
       }
       card.overview.flags = [...card.overview.flags, ...flags];
@@ -1225,7 +1225,7 @@ export class SkillRankingsComponent implements OnChanges {
   // A Run Blocking skill on the radar and in the report (TEs; backs and receivers when there's an on/off
   // sample): the share of his team's runs he was on the field for, and the run game with him on
   // against off (when he sat for enough runs to tell), each as a percentile among that season's
-  // players at the position. This season uses the latest charted one.
+  // players at the position (finished seasons only).
   private async addBlockingSkill(card: PlayerCard, season: number): Promise<void> {
     const [file, tes] = await Promise.all([this.blockingFor(season), this.tabRowsFor(season)]);
     const rows = tes
@@ -1246,9 +1246,6 @@ export class SkillRankingsComponent implements OnChanges {
     if (myImpact !== null && impacts.length >= 5) parts.push(pctOf(impacts, myImpact));
     const pct = Math.min(1, parts.reduce((a, v) => a + v, 0) / parts.length);
     const rankIn = (values: number[], v: number) => 1 + values.filter((x) => x > v).length;
-    // (this season isn't charted until it's over: the skill borrows the latest season, which only the
-    // small stat lines under it mention)
-    const when = season === card.season ? '' : ` (${season})`;
     const skill: CardSkill = {
       id: 'blocking',
       name: 'Run Blocking',
@@ -1257,8 +1254,8 @@ export class SkillRankingsComponent implements OnChanges {
       tier: tierWord(pct),
       standing: standing(pct),
       evidence: [
-        { label: `Share of Runs On Field${when}`, rank: rankIn(shares, share(mine.row)), of: shares.length },
-        ...(myImpact !== null ? [{ label: `Run EPA On vs Off${when}`, rank: rankIn(impacts, myImpact), of: impacts.length }] : []),
+        { label: `Share of Runs On Field`, rank: rankIn(shares, share(mine.row)), of: shares.length },
+        ...(myImpact !== null ? [{ label: `Run EPA On vs Off`, rank: rankIn(impacts, myImpact), of: impacts.length }] : []),
       ],
     };
     const o = card.overview;

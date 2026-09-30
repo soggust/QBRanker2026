@@ -156,5 +156,25 @@ for (const season of seasons) {
     out[id] = [on, on + off, round(on ? epaOn / on : null), round(on ? sOn / on : null), off, round(off ? epaOff / off : null), round(off ? sOff / off : null), snaps, teamSnaps];
   }
   fs.writeFileSync(path.join(SEASONS_DIR, String(season), 'blocking.json'), JSON.stringify(out));
-  console.log(`${season}: ${Object.keys(out).length} players`);
+
+  // The table's Run Block EPA (runs with him on minus off, when he sat for at least 40), written into
+  // the season's player lists; run build-comps afterwards so its per-tab files pick it up
+  let filled = 0;
+  for (const pos of POSITIONS) {
+    for (const unit of units[pos] ?? []) {
+      const row = out[unit.gsisId];
+      const value = row && row[4] >= 40 && row[2] !== null && row[5] !== null ? round(row[2] - row[5]) : null;
+      unit.stats.runBlockEpa = value;
+      if (value !== null) filled++;
+    }
+  }
+  fs.writeFileSync(path.join(SEASONS_DIR, String(season), 'skill-players.json'), JSON.stringify(units, null, 2) + '\n');
+  console.log(`${season}: ${Object.keys(out).length} players, ${filled} with Run Block EPA`);
 }
+
+// This season has no participation data yet: an empty Run Block EPA keeps its column hidden (the
+// nightly update writes it empty too)
+const currentFile = path.join(SEASONS_DIR, '..', 'skill-players.json');
+const current = JSON.parse(fs.readFileSync(currentFile, 'utf8'));
+for (const pos of POSITIONS) for (const unit of current[pos] ?? []) unit.stats.runBlockEpa ??= null;
+fs.writeFileSync(currentFile, JSON.stringify(current, null, 2) + '\n');
