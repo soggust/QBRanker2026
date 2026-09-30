@@ -30,7 +30,7 @@ export const SKILLS: Record<SkillPosition, SkillDef[]> = {
     { id: 'efficiency', name: 'Rushing Efficiency', short: 'Efficiency', parts: [['ypc', 1], ['epaPerCarry', 1], ['ryoePerAtt', 1]] },
     { id: 'power', name: 'Breaking Tackles', short: 'Power', parts: [['yacoPerCarry', 1], ['brokenTackles', 1]] },
     { id: 'workload', name: 'Workload', short: 'Workload', parts: [['carries', 1], ['snapShare', 1], ['rushYards', 1]] },
-    { id: 'receiving', name: 'Receiving', short: 'Receiving', parts: [['receptions', 1], ['recYards', 1], ['targetShare', 1], ['epaPerTarget', 1]] },
+    { id: 'receiving', name: 'Receiving', short: 'Receiving', parts: [['receptions', 1], ['recYards', 1], ['targets', 1], ['epaPerTarget', 1]] },
     { id: 'scoring', name: 'Scoring & Chains', short: 'Scoring', parts: [['rushTds', 1], ['recTds', 1], ['firstDowns', 1]] },
     { id: 'security', name: 'Ball Security', short: 'Security', parts: [['fumbles', -1], ['drops', -1]] },
   ],

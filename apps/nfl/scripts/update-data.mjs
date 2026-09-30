@@ -380,6 +380,8 @@ function offenseStats(n, ctx) {
     // Run Block EPA: filled in for finished seasons by build-blocking.mjs (who was on the field each play
     // isn't published until a season is over), so it stays empty (and its column hidden) until then
     runBlockEpa: null,
+    // Pass Pro (RBs): same, from build-blocking.mjs
+    passProPct: null,
   };
 }
 

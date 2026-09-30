@@ -1,13 +1,19 @@
-// Run-blocking involvement for the player card (never the table or the sliders), from who was on the
-// field each play (nflverse participation, published after each season: 2016 on). For every RB, WR
-// and TE: how many of his team's designed runs he was on the field for without carrying the ball,
-// out of the team's runs in the games he played, and how those runs went with him on and off the
-// field. Run after a season's participation data comes out: `npm run build-blocking`.
+// Blocking reads from who was on the field each play (nflverse participation, published after each
+// season: 2016 on). For every RB, WR and TE: how many of his team's designed runs he was on the field
+// for without carrying the ball, out of the team's runs in the games he played, and how those runs
+// went with him on and off the field; and (for backs' pass protection) how often the QB was pressured
+// on dropbacks with him on and off. Run after a season's participation data comes out:
+// `npm run build-blocking`, then `npm run build-comps`.
 //
 // seasons/<year>/blocking.json: gsisId -> [runs on the field, team runs in his games, EPA per carry
 // with him on, success rate with him on, runs off the field, EPA per carry with him off, success off,
-// his offensive snaps (runs and passes), the team's snaps in his games]. The last two give his run
-// tilt: how much more of his snaps were runs than his team's play mix (a blocking role).
+// his offensive snaps (runs and passes), the team's snaps in his games, dropbacks on the field, QB
+// pressured on those, dropbacks off the field, pressured on those]. Snaps give his run tilt: how much
+// more of his snaps were runs than his team's play mix (a blocking role).
+//
+// The table gets Run Block EPA (WRs, TEs: runs with him on minus off) and Pass Pro (RBs: pressure rate
+// on dropbacks with him on minus off, in percentage points, lower is better), each once he sat for at
+// least 40 of those plays.
 import fs from 'node:fs';
 import path from 'node:path';
 import { gunzipSync } from 'node:zlib';
@@ -82,10 +88,10 @@ for (const season of seasons) {
   try {
     [pbp, participation] = await Promise.all([
       fetchText(`${NFLVERSE}/pbp/play_by_play_${season}.csv.gz`, true).then((t) =>
-        parseCsv(t, ['game_id', 'play_id', 'season_type', 'posteam', 'play_type', 'qb_scramble', 'rusher_player_id', 'epa', 'success', 'two_point_attempt']),
+        parseCsv(t, ['game_id', 'play_id', 'season_type', 'posteam', 'play_type', 'qb_scramble', 'qb_dropback', 'rusher_player_id', 'epa', 'success', 'two_point_attempt']),
       ),
       fetchText(`${NFLVERSE}/pbp_participation/pbp_participation_${season}.csv`, false).then((t) =>
-        parseCsv(t, ['nflverse_game_id', 'play_id', 'possession_team', 'offense_players']),
+        parseCsv(t, ['nflverse_game_id', 'play_id', 'possession_team', 'offense_players', 'was_pressure']),
       ),
     ]);
   } catch (err) {
@@ -98,6 +104,7 @@ for (const season of seasons) {
   const tracked = new Set(POSITIONS.flatMap((pos) => (units[pos] ?? []).map((u) => u.gsisId)));
 
   const onField = new Map(participation.map((p) => [`${p.nflverse_game_id}.${p.play_id}`, p.offense_players?.split(';') ?? []]));
+  const pressured = new Set(participation.filter((p) => p.was_pressure === 'TRUE').map((p) => `${p.nflverse_game_id}.${p.play_id}`));
   // Games each player was on the field for (by team), so a team's runs only count in his games
   const gamesOf = new Map();
   for (const p of participation) {
@@ -111,7 +118,18 @@ for (const season of seasons) {
   // Designed runs (no scrambles or two-point tries), by game and team; and every run or pass play
   const runs = new Map();
   const plays = new Map();
+  // Dropbacks (passes, sacks, scrambles), with whether the QB was pressured
+  const dropbacks = new Map();
   for (const play of pbp) {
+    if (play.season_type === 'REG' && play.qb_dropback === '1' && play.two_point_attempt !== '1') {
+      const id = `${play.game_id}.${play.play_id}`;
+      const players = onField.get(id);
+      if (players?.length) {
+        const key = `${play.game_id}.${play.posteam}`;
+        if (!dropbacks.has(key)) dropbacks.set(key, []);
+        dropbacks.get(key).push({ players: new Set(players), pressure: pressured.has(id) ? 1 : 0 });
+      }
+    }
     if (play.season_type === 'REG' && (play.play_type === 'run' || play.play_type === 'pass') && play.two_point_attempt !== '1') {
       const players = onField.get(`${play.game_id}.${play.play_id}`);
       if (players?.length) {
@@ -153,28 +171,55 @@ for (const season of seasons) {
         if (players.has(id)) snaps++;
       }
     }
-    out[id] = [on, on + off, round(on ? epaOn / on : null), round(on ? sOn / on : null), off, round(off ? epaOff / off : null), round(off ? sOff / off : null), snaps, teamSnaps];
+    let dbOn = 0, prOn = 0, dbOff = 0, prOff = 0;
+    for (const game of games) {
+      for (const db of dropbacks.get(game) ?? []) {
+        if (db.players.has(id)) {
+          dbOn++;
+          prOn += db.pressure;
+        } else {
+          dbOff++;
+          prOff += db.pressure;
+        }
+      }
+    }
+    out[id] = [on, on + off, round(on ? epaOn / on : null), round(on ? sOn / on : null), off, round(off ? epaOff / off : null), round(off ? sOff / off : null), snaps, teamSnaps, dbOn, prOn, dbOff, prOff];
   }
   fs.writeFileSync(path.join(SEASONS_DIR, String(season), 'blocking.json'), JSON.stringify(out));
 
-  // The table's Run Block EPA (runs with him on minus off, when he sat for at least 40), written into
-  // the season's player lists; run build-comps afterwards so its per-tab files pick it up
-  let filled = 0;
+  // The table's Run Block EPA (WRs, TEs) and Pass Pro (RBs), written into the season's player lists;
+  // run build-comps afterwards so its per-tab files pick them up
+  let runFilled = 0;
+  let passFilled = 0;
   for (const pos of POSITIONS) {
     for (const unit of units[pos] ?? []) {
       const row = out[unit.gsisId];
-      const value = row && row[4] >= 40 && row[2] !== null && row[5] !== null ? round(row[2] - row[5]) : null;
-      unit.stats.runBlockEpa = value;
-      if (value !== null) filled++;
+      if (pos === 'RB') {
+        delete unit.stats.runBlockEpa;
+        const value = row && row[11] >= 40 && row[9] >= 40 ? round((row[10] / row[9] - row[12] / row[11]) * 100, 1) : null;
+        unit.stats.passProPct = value;
+        if (value !== null) passFilled++;
+      } else {
+        const value = row && row[4] >= 40 && row[2] !== null && row[5] !== null ? round(row[2] - row[5]) : null;
+        unit.stats.runBlockEpa = value;
+        if (value !== null) runFilled++;
+      }
     }
   }
   fs.writeFileSync(path.join(SEASONS_DIR, String(season), 'skill-players.json'), JSON.stringify(units, null, 2) + '\n');
-  console.log(`${season}: ${Object.keys(out).length} players, ${filled} with Run Block EPA`);
+  console.log(`${season}: ${Object.keys(out).length} players, ${runFilled} with Run Block EPA, ${passFilled} RBs with Pass Pro`);
 }
 
-// This season has no participation data yet: an empty Run Block EPA keeps its column hidden (the
-// nightly update writes it empty too)
+// This season has no participation data yet: empty values keep those columns hidden (the nightly
+// update writes them empty too)
 const currentFile = path.join(SEASONS_DIR, '..', 'skill-players.json');
 const current = JSON.parse(fs.readFileSync(currentFile, 'utf8'));
-for (const pos of POSITIONS) for (const unit of current[pos] ?? []) unit.stats.runBlockEpa ??= null;
+for (const pos of POSITIONS) {
+  for (const unit of current[pos] ?? []) {
+    if (pos === 'RB') {
+      delete unit.stats.runBlockEpa;
+      unit.stats.passProPct ??= null;
+    } else unit.stats.runBlockEpa ??= null;
+  }
+}
 fs.writeFileSync(currentFile, JSON.stringify(current, null, 2) + '\n');

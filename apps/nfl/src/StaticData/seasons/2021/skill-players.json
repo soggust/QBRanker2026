@@ -3144,7 +3144,7 @@
         "airYardsShare": 0.012,
         "dropPct": 0.046,
         "drops": 3,
-        "runBlockEpa": -0.219
+        "passProPct": 6.6
       },
       "competitive": {
         "epaPerCarry": 0.067,
@@ -3187,7 +3187,7 @@
         "airYardsShare": 0.003,
         "dropPct": 0,
         "drops": 0,
-        "runBlockEpa": 0.32
+        "passProPct": -7
       },
       "competitive": {
         "epaPerCarry": 0.059,
@@ -3230,7 +3230,7 @@
         "airYardsShare": 0,
         "dropPct": 0,
         "drops": 0,
-        "runBlockEpa": -0.368
+        "passProPct": 0.7
       },
       "competitive": {
         "epaPerCarry": -0.135,
@@ -3273,7 +3273,7 @@
         "airYardsShare": 0.001,
         "dropPct": 0.026,
         "drops": 1,
-        "runBlockEpa": -0.05
+        "passProPct": -3.4
       },
       "competitive": {
         "epaPerCarry": -0.151,
@@ -3316,7 +3316,7 @@
         "airYardsShare": 0.021,
         "dropPct": 0.134,
         "drops": 9,
-        "runBlockEpa": 0.349
+        "passProPct": 2.7
       },
       "competitive": {
         "epaPerCarry": -0.168,
@@ -3359,7 +3359,7 @@
         "airYardsShare": 0.009,
         "dropPct": 0.038,
         "drops": 2,
-        "runBlockEpa": 0.13
+        "passProPct": 1.8
       },
       "competitive": {
         "epaPerCarry": -0.227,
@@ -3402,7 +3402,7 @@
         "airYardsShare": -0.002,
         "dropPct": 0.115,
         "drops": 6,
-        "runBlockEpa": -0.119
+        "passProPct": -6.5
       },
       "competitive": {
         "epaPerCarry": -0.111,
@@ -3445,7 +3445,7 @@
         "airYardsShare": 0.034,
         "dropPct": 0.074,
         "drops": 7,
-        "runBlockEpa": 0.224
+        "passProPct": -3.6
       },
       "competitive": {
         "epaPerCarry": -0.003,
@@ -3488,7 +3488,7 @@
         "airYardsShare": -0.002,
         "dropPct": 0,
         "drops": 0,
-        "runBlockEpa": 0.161
+        "passProPct": 2.5
       },
       "competitive": {
         "epaPerCarry": 0.136,
@@ -3531,7 +3531,7 @@
         "airYardsShare": 0.003,
         "dropPct": 0.041,
         "drops": 2,
-        "runBlockEpa": 0.166
+        "passProPct": -1.9
       },
       "competitive": {
         "epaPerCarry": -0.081,
@@ -3574,7 +3574,7 @@
         "airYardsShare": 0.005,
         "dropPct": 0.057,
         "drops": 3,
-        "runBlockEpa": -0.209
+        "passProPct": -2.5
       },
       "competitive": {
         "epaPerCarry": 0.017,
@@ -3617,7 +3617,7 @@
         "airYardsShare": 0.011,
         "dropPct": 0,
         "drops": 0,
-        "runBlockEpa": -1.731
+        "passProPct": -2.4
       },
       "competitive": {
         "epaPerCarry": -0.122,
@@ -3660,7 +3660,7 @@
         "airYardsShare": 0.021,
         "dropPct": 0,
         "drops": 0,
-        "runBlockEpa": 0.222
+        "passProPct": -9.2
       },
       "competitive": {
         "epaPerCarry": 0.038,
@@ -3703,7 +3703,7 @@
         "airYardsShare": 0,
         "dropPct": 0.189,
         "drops": 7,
-        "runBlockEpa": 0.009
+        "passProPct": -1.7
       },
       "competitive": {
         "epaPerCarry": -0.145,
@@ -3746,7 +3746,7 @@
         "airYardsShare": -0.011,
         "dropPct": 0.043,
         "drops": 1,
-        "runBlockEpa": 0.051
+        "passProPct": -3.4
       },
       "competitive": {
         "epaPerCarry": -0.111,
@@ -3789,7 +3789,7 @@
         "airYardsShare": 0.052,
         "dropPct": 0.014,
         "drops": 1,
-        "runBlockEpa": -0.051
+        "passProPct": -2.2
       },
       "competitive": {
         "epaPerCarry": -0.035,
@@ -3832,7 +3832,7 @@
         "airYardsShare": 0,
         "dropPct": 0.077,
         "drops": 6,
-        "runBlockEpa": -0.145
+        "passProPct": 4.6
       },
       "competitive": {
         "epaPerCarry": -0.213,
@@ -3875,7 +3875,7 @@
         "airYardsShare": 0.001,
         "dropPct": 0.12,
         "drops": 3,
-        "runBlockEpa": -0.21
+        "passProPct": 8.3
       },
       "competitive": {
         "epaPerCarry": 0.18,
@@ -3918,7 +3918,7 @@
         "airYardsShare": 0,
         "dropPct": 0.091,
         "drops": 1,
-        "runBlockEpa": 0.15
+        "passProPct": -8.7
       },
       "competitive": {
         "epaPerCarry": -0.121,
@@ -3961,7 +3961,7 @@
         "airYardsShare": -0.016,
         "dropPct": 0.122,
         "drops": 6,
-        "runBlockEpa": 0.436
+        "passProPct": -2.7
       },
       "competitive": {
         "epaPerCarry": -0.036,
@@ -4004,7 +4004,7 @@
         "airYardsShare": -0.002,
         "dropPct": 0,
         "drops": 0,
-        "runBlockEpa": -0.116
+        "passProPct": 1.2
       },
       "competitive": {
         "epaPerCarry": 0.056,
@@ -4047,7 +4047,7 @@
         "airYardsShare": 0.017,
         "dropPct": 0.018,
         "drops": 1,
-        "runBlockEpa": 0.819
+        "passProPct": -0.2
       },
       "competitive": {
         "epaPerCarry": 0.098,
@@ -4090,7 +4090,7 @@
         "airYardsShare": 0.007,
         "dropPct": 0.075,
         "drops": 3,
-        "runBlockEpa": -0.095
+        "passProPct": -0.2
       },
       "competitive": {
         "epaPerCarry": -0.079,
@@ -4133,7 +4133,7 @@
         "airYardsShare": 0.022,
         "dropPct": 0.024,
         "drops": 1,
-        "runBlockEpa": -0.501
+        "passProPct": 2.9
       },
       "competitive": {
         "epaPerCarry": -0.291,
@@ -4176,7 +4176,7 @@
         "airYardsShare": 0.01,
         "dropPct": 0.039,
         "drops": 2,
-        "runBlockEpa": -0.24
+        "passProPct": 3.6
       },
       "competitive": {
         "epaPerCarry": -0.105,
@@ -4219,7 +4219,7 @@
         "airYardsShare": 0.008,
         "dropPct": 0.043,
         "drops": 1,
-        "runBlockEpa": 1.431
+        "passProPct": 7.4
       },
       "competitive": {
         "epaPerCarry": 0.067,
@@ -4262,7 +4262,7 @@
         "airYardsShare": 0.002,
         "dropPct": 0.048,
         "drops": 1,
-        "runBlockEpa": 0.032
+        "passProPct": -4
       },
       "competitive": {
         "epaPerCarry": -0.363,
@@ -4305,7 +4305,7 @@
         "airYardsShare": -0.001,
         "dropPct": 0,
         "drops": 0,
-        "runBlockEpa": null
+        "passProPct": -6.7
       },
       "competitive": {
         "epaPerCarry": -0.056,
@@ -4348,7 +4348,7 @@
         "airYardsShare": 0.001,
         "dropPct": 0.1,
         "drops": 5,
-        "runBlockEpa": 0.505
+        "passProPct": -0.2
       },
       "competitive": {
         "epaPerCarry": 0.007,
@@ -4391,7 +4391,7 @@
         "airYardsShare": 0.007,
         "dropPct": 0.024,
         "drops": 1,
-        "runBlockEpa": 0.021
+        "passProPct": 2.4
       },
       "competitive": {
         "epaPerCarry": -0.017,
@@ -4434,7 +4434,7 @@
         "airYardsShare": -0.003,
         "dropPct": 0.044,
         "drops": 2,
-        "runBlockEpa": -0.608
+        "passProPct": -5.5
       },
       "competitive": {
         "epaPerCarry": -0.137,
@@ -4477,7 +4477,7 @@
         "airYardsShare": -0.006,
         "dropPct": 0.115,
         "drops": 3,
-        "runBlockEpa": 0.333
+        "passProPct": 4.7
       },
       "competitive": {
         "epaPerCarry": 0.04,
@@ -4520,7 +4520,7 @@
         "airYardsShare": -0.002,
         "dropPct": 0.2,
         "drops": 1,
-        "runBlockEpa": -0.165
+        "passProPct": -17.7
       },
       "competitive": {
         "epaPerCarry": 0.126,
@@ -4563,7 +4563,7 @@
         "airYardsShare": -0.003,
         "dropPct": 0.05,
         "drops": 1,
-        "runBlockEpa": -0.049
+        "passProPct": -5.6
       },
       "competitive": {
         "epaPerCarry": -0.055,
@@ -4606,7 +4606,7 @@
         "airYardsShare": 0.004,
         "dropPct": 0.046,
         "drops": 3,
-        "runBlockEpa": -0.475
+        "passProPct": -1.9
       },
       "competitive": {
         "epaPerCarry": -0.058,
@@ -4649,7 +4649,7 @@
         "airYardsShare": 0.008,
         "dropPct": 0,
         "drops": 0,
-        "runBlockEpa": 0.311
+        "passProPct": 6.7
       },
       "competitive": {
         "epaPerCarry": 0.05,
@@ -4692,7 +4692,7 @@
         "airYardsShare": 0.003,
         "dropPct": 0.036,
         "drops": 1,
-        "runBlockEpa": -0.556
+        "passProPct": -7
       },
       "competitive": {
         "epaPerCarry": -0.041,
@@ -4735,7 +4735,7 @@
         "airYardsShare": 0.002,
         "dropPct": 0,
         "drops": 0,
-        "runBlockEpa": 0.01
+        "passProPct": 3.2
       },
       "competitive": {
         "epaPerCarry": 0.042,
@@ -4778,7 +4778,7 @@
         "airYardsShare": 0.008,
         "dropPct": 0.087,
         "drops": 4,
-        "runBlockEpa": 0.595
+        "passProPct": -6.2
       },
       "competitive": {
         "epaPerCarry": -0.101,
@@ -4821,7 +4821,7 @@
         "airYardsShare": 0.017,
         "dropPct": 0.034,
         "drops": 1,
-        "runBlockEpa": -0.049
+        "passProPct": 11.9
       },
       "competitive": {
         "epaPerCarry": 0.093,
@@ -4864,7 +4864,7 @@
         "airYardsShare": -0.003,
         "dropPct": 0.057,
         "drops": 3,
-        "runBlockEpa": -0.035
+        "passProPct": -3.2
       },
       "competitive": {
         "epaPerCarry": -0.008,
@@ -4907,7 +4907,7 @@
         "airYardsShare": -0.002,
         "dropPct": 0,
         "drops": 0,
-        "runBlockEpa": 0.509
+        "passProPct": -6.4
       },
       "competitive": {
         "epaPerCarry": -0.078,
@@ -4950,7 +4950,7 @@
         "airYardsShare": 0,
         "dropPct": 0.053,
         "drops": 2,
-        "runBlockEpa": -0.755
+        "passProPct": 8.1
       },
       "competitive": {
         "epaPerCarry": -0.207,
@@ -4993,7 +4993,7 @@
         "airYardsShare": -0.002,
         "dropPct": 0.042,
         "drops": 2,
-        "runBlockEpa": -0.034
+        "passProPct": -6.9
       },
       "competitive": {
         "epaPerCarry": -0.13,
@@ -5036,7 +5036,7 @@
         "airYardsShare": -0.011,
         "dropPct": 0.098,
         "drops": 5,
-        "runBlockEpa": 0.761
+        "passProPct": -4.6
       },
       "competitive": {
         "epaPerCarry": 0.119,
@@ -5079,7 +5079,7 @@
         "airYardsShare": 0.002,
         "dropPct": 0.2,
         "drops": 1,
-        "runBlockEpa": -0.251
+        "passProPct": 3.4
       },
       "competitive": {
         "epaPerCarry": -0.049,
@@ -5122,7 +5122,7 @@
         "airYardsShare": -0.005,
         "dropPct": 0.078,
         "drops": 5,
-        "runBlockEpa": -0.037
+        "passProPct": -1.8
       },
       "competitive": {
         "epaPerCarry": -0.155,
@@ -5165,7 +5165,7 @@
         "airYardsShare": 0.004,
         "dropPct": 0.08,
         "drops": 2,
-        "runBlockEpa": 0.053
+        "passProPct": -5.7
       },
       "competitive": {
         "epaPerCarry": -0.058,
@@ -5208,7 +5208,7 @@
         "airYardsShare": 0.001,
         "dropPct": 0.037,
         "drops": 1,
-        "runBlockEpa": 0.666
+        "passProPct": -3.1
       },
       "competitive": {
         "epaPerCarry": 0.104,
@@ -5251,7 +5251,7 @@
         "airYardsShare": 0.022,
         "dropPct": 0.1,
         "drops": 5,
-        "runBlockEpa": -0.39
+        "passProPct": 1.4
       },
       "competitive": {
         "epaPerCarry": -0.001,
@@ -5294,7 +5294,7 @@
         "airYardsShare": 0.014,
         "dropPct": 0,
         "drops": 0,
-        "runBlockEpa": 0.251
+        "passProPct": -4
       },
       "competitive": {
         "epaPerCarry": -0.113,
@@ -5337,7 +5337,7 @@
         "airYardsShare": -0.001,
         "dropPct": 0.063,
         "drops": 1,
-        "runBlockEpa": -0.087
+        "passProPct": -8.4
       },
       "competitive": {
         "epaPerCarry": -0.001,
@@ -5380,7 +5380,7 @@
         "airYardsShare": 0,
         "dropPct": 0.077,
         "drops": 1,
-        "runBlockEpa": -0.1
+        "passProPct": -3.4
       },
       "competitive": {
         "epaPerCarry": -0.046,
@@ -5423,7 +5423,7 @@
         "airYardsShare": 0.01,
         "dropPct": 0.071,
         "drops": 6,
-        "runBlockEpa": 0.512
+        "passProPct": -9
       },
       "competitive": {
         "epaPerCarry": 0.089,
@@ -5466,7 +5466,7 @@
         "airYardsShare": 0,
         "dropPct": 0,
         "drops": 0,
-        "runBlockEpa": 0.613
+        "passProPct": 3.8
       },
       "competitive": {
         "epaPerCarry": -0.155,
@@ -5509,7 +5509,7 @@
         "airYardsShare": 0.003,
         "dropPct": 0.079,
         "drops": 3,
-        "runBlockEpa": 0.38
+        "passProPct": 3.4
       },
       "competitive": {
         "epaPerCarry": -0.112,
@@ -5552,7 +5552,7 @@
         "airYardsShare": 0.008,
         "dropPct": 0.073,
         "drops": 4,
-        "runBlockEpa": 0.358
+        "passProPct": -7.3
       },
       "competitive": {
         "epaPerCarry": -0.02,
@@ -5595,7 +5595,7 @@
         "airYardsShare": -0.013,
         "dropPct": 0.034,
         "drops": 2,
-        "runBlockEpa": -0.357
+        "passProPct": -0.3
       },
       "competitive": {
         "epaPerCarry": -0.058,
@@ -5638,7 +5638,7 @@
         "airYardsShare": -0.004,
         "dropPct": 0.029,
         "drops": 1,
-        "runBlockEpa": 0.46
+        "passProPct": -2
       },
       "competitive": {
         "epaPerCarry": 0.013,
@@ -5681,7 +5681,7 @@
         "airYardsShare": 0.007,
         "dropPct": 0.048,
         "drops": 3,
-        "runBlockEpa": 0.146
+        "passProPct": 2.1
       },
       "competitive": {
         "epaPerCarry": -0.197,
@@ -5724,7 +5724,7 @@
         "airYardsShare": -0.003,
         "dropPct": 0.074,
         "drops": 7,
-        "runBlockEpa": 0.513
+        "passProPct": -1.9
       },
       "competitive": {
         "epaPerCarry": -0.079,
@@ -5767,7 +5767,7 @@
         "airYardsShare": 0.003,
         "dropPct": 0,
         "drops": 0,
-        "runBlockEpa": 0.045
+        "passProPct": -5.4
       },
       "competitive": {
         "epaPerCarry": 0.001,
@@ -5810,7 +5810,7 @@
         "airYardsShare": 0.028,
         "dropPct": 0.035,
         "drops": 2,
-        "runBlockEpa": 0.56
+        "passProPct": -1.1
       },
       "competitive": {
         "epaPerCarry": 0.01,
@@ -5853,7 +5853,7 @@
         "airYardsShare": -0.003,
         "dropPct": 0.125,
         "drops": 1,
-        "runBlockEpa": 0.184
+        "passProPct": -10.3
       },
       "competitive": {
         "epaPerCarry": 0.086,
@@ -5896,7 +5896,7 @@
         "airYardsShare": 0.013,
         "dropPct": 0,
         "drops": 0,
-        "runBlockEpa": 0.415
+        "passProPct": 0.6
       },
       "competitive": {
         "epaPerCarry": -0.007,
@@ -5939,7 +5939,7 @@
         "airYardsShare": -0.001,
         "dropPct": 0.056,
         "drops": 1,
-        "runBlockEpa": 0.27
+        "passProPct": -5.4
       },
       "competitive": {
         "epaPerCarry": -0.036,
@@ -5982,7 +5982,7 @@
         "airYardsShare": -0.003,
         "dropPct": 0.077,
         "drops": 1,
-        "runBlockEpa": 1.96
+        "passProPct": -1.1
       },
       "competitive": {
         "epaPerCarry": -0.014,
@@ -6025,7 +6025,7 @@
         "airYardsShare": 0.002,
         "dropPct": 0.032,
         "drops": 1,
-        "runBlockEpa": 0.184
+        "passProPct": 9.4
       },
       "competitive": {
         "epaPerCarry": -0.128,
@@ -6068,7 +6068,7 @@
         "airYardsShare": 0.007,
         "dropPct": 0.105,
         "drops": 6,
-        "runBlockEpa": 0.036
+        "passProPct": 8.8
       },
       "competitive": {
         "epaPerCarry": -0.188,
@@ -6111,7 +6111,7 @@
         "airYardsShare": -0.003,
         "dropPct": 0.091,
         "drops": 3,
-        "runBlockEpa": 1.123
+        "passProPct": -0.3
       },
       "competitive": {
         "epaPerCarry": -0.107,
@@ -6154,7 +6154,7 @@
         "airYardsShare": -0.005,
         "dropPct": 0.125,
         "drops": 2,
-        "runBlockEpa": 0.155
+        "passProPct": 12
       },
       "competitive": {
         "epaPerCarry": -0.055,
@@ -6197,7 +6197,7 @@
         "airYardsShare": 0.002,
         "dropPct": 0.065,
         "drops": 3,
-        "runBlockEpa": 0.308
+        "passProPct": 0.7
       },
       "competitive": {
         "epaPerCarry": 0.15,
@@ -6240,7 +6240,7 @@
         "airYardsShare": 0.01,
         "dropPct": 0.05,
         "drops": 1,
-        "runBlockEpa": 1.725
+        "passProPct": 3.8
       },
       "competitive": {
         "epaPerCarry": 1.06,
@@ -6283,7 +6283,7 @@
         "airYardsShare": 0.03,
         "dropPct": 0.127,
         "drops": 7,
-        "runBlockEpa": -0.024
+        "passProPct": -0.3
       },
       "competitive": {
         "epaPerCarry": -0.268,
@@ -6326,7 +6326,7 @@
         "airYardsShare": 0.005,
         "dropPct": 0.094,
         "drops": 3,
-        "runBlockEpa": 0.056
+        "passProPct": 1.3
       },
       "competitive": {
         "epaPerCarry": -0.162,

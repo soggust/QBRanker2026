@@ -72,6 +72,7 @@ export type SkillStatKey =
   | 'dropPct'
   | 'drops'
   | 'runBlockEpa'
+  | 'passProPct'
   | 'pressureRate'
   | 'missedTacklePct'
   | 'thirdDownPct'
@@ -271,6 +272,7 @@ export const STAT_NAMES: Partial<Record<SkillColumnKey, string>> = {
   dropPct: 'Drop Percentage',
   drops: 'Dropped Passes',
   runBlockEpa: 'Run Game EPA per Carry With Him On vs Off the Field',
+  passProPct: 'QB Pressure Rate With Him On vs Off the Field',
   snapShare: 'Snap Percentage',
   carries: 'Carries',
   rushYards: 'Rushing Yards',
@@ -545,6 +547,19 @@ export const RUN_BLOCK_STAT: SkillStat = {
   missingIsAverage: true,
 };
 
+// A back's pass protection, the same way (finished seasons only): the QB's pressure rate on dropbacks
+// with him on the field minus with him off, in percentage points (at least 40 dropbacks off). Lower is
+// better. Also rough (he may be running a route rather than blocking), so it starts small too.
+export const PASS_PRO_STAT: SkillStat = {
+  key: 'passProPct',
+  label: 'Pass Pro',
+  description: 'QB pressure rate with him on the field minus with him off, in points (lower is better; finished seasons)',
+  kind: 'efficiency',
+  format: 'pctPoints',
+  negative: true,
+  missingIsAverage: true,
+};
+
 // Passing-game role and efficiency: WR/TE, and RBs' receiving side
 const TARGETS_STAT: SkillStat = { key: 'targets', label: 'Targets', description: 'Times targeted', kind: 'volume', format: 'int' };
 
@@ -714,9 +729,9 @@ export const SKILL_STATS: Record<SkillPosition, SkillStat[]> = {
     { key: 'rushYards', label: 'Rush Yards', description: 'Rushing yards', kind: 'volume', format: 'int' },
     { key: 'ypc', label: 'Yds / Carry', description: 'Yards per carry', kind: 'efficiency', format: 'dec1' },
     { key: 'receptions', label: 'Receptions', description: 'Catches', kind: 'volume', format: 'int' },
-    // Receiving role, so pass-catching backs get their due (EPA / Target sits in Advanced)
+    // Receiving role, so pass-catching backs get their due (EPA / Target sits in Advanced; no target
+    // share: targets already carry it)
     TARGETS_STAT,
-    TARGET_SHARE_STAT,
     { key: 'recYards', label: 'Rec Yards', description: 'Receiving yards', kind: 'volume', format: 'int' },
     { key: 'rushTds', label: 'Rush TDs', description: 'Rushing touchdowns', kind: 'volume', format: 'int' },
     { key: 'recTds', label: 'Rec TDs', description: 'Receiving touchdowns', kind: 'volume', format: 'int' },
@@ -765,7 +780,7 @@ export const SKILL_STATS: Record<SkillPosition, SkillStat[]> = {
       kind: 'efficiency',
       format: 'pct',
     },
-    RUN_BLOCK_STAT,
+    PASS_PRO_STAT,
     FANTASY_STAT,
     QB_PLAY_STAT,
     OLINE_STAT,
@@ -1140,7 +1155,7 @@ export function hasFantasy(position: SkillPosition): boolean {
   return SKILL_STATS[position].some((stat) => stat.key === 'fantasy');
 }
 
-// Default: everything at 50 (Run Block EPA at 10). A preset (skill-presets.ts) sets the stats it's named for, keeps every
+// Default: everything at 50 (Run Block EPA and Pass Pro at 10). A preset (skill-presets.ts) sets the stats it's named for, keeps every
 // other stat at 25, and leaves support grades and the parent Total Yds / Total TDs sliders at 50.
 // Fantasy ranks purely on fantasy points.
 export function presetWeights(position: SkillPosition, preset: SkillPreset): SkillWeights {
@@ -1151,7 +1166,7 @@ export function presetWeights(position: SkillPosition, preset: SkillPreset): Ski
     if (stat.infoOnly) continue;
     if (fantasyOnly) weights[stat.key] = 0;
     // Run blocking is a rough read, so it starts small (a touch of weight, never the story)
-    else if (stat.key === 'runBlockEpa') weights[stat.key] = 10;
+    else if (stat.key === 'runBlockEpa' || stat.key === 'passProPct') weights[stat.key] = 10;
     else if (!def || stat.support) weights[stat.key] = 50;
     else weights[stat.key] = 25;
   }
@@ -1206,6 +1221,7 @@ const ADVANCED_STATS = new Set<SkillColumnKey>([
   'airYardsShare',
   'dropPct',
   'runBlockEpa',
+  'passProPct',
   'epaPerKick',
   'fgOverExp',
   'epaPerPunt',

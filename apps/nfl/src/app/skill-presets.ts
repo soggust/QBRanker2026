@@ -143,8 +143,8 @@ export const SKILL_PRESETS: Record<SkillPosition, SkillPresetDef[]> = {
     {
       key: 'passCatcher',
       label: 'Pass Catcher',
-      description: 'Backs who matter in the passing game: targets, share, catches and receiving production',
-      weights: { targets: 100, targetShare: 100, receptions: 90, recYards: 90, recTds: 75, epaPerTarget: 75 },
+      description: 'Backs who matter in the passing game: targets, catches and receiving production',
+      weights: { targets: 100, receptions: 90, recYards: 90, recTds: 75, epaPerTarget: 75 },
     },
     {
       key: 'elusive',

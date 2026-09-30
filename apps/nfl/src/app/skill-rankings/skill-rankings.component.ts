@@ -124,8 +124,23 @@ export interface CardOverview {
 }
 
 // blocking.json (scripts/build-blocking.mjs): runs on the field, team runs in his games, EPA and
-// success per carry with him on, runs off, EPA and success with him off, his snaps, the team's snaps
-type BlockingRow = [number, number, number | null, number | null, number, number | null, number | null, number, number];
+// success per carry with him on, runs off, EPA and success with him off, his snaps, the team's snaps,
+// dropbacks on the field, QB pressured on those, dropbacks off, pressured on those
+type BlockingRow = [
+  number,
+  number,
+  number | null,
+  number | null,
+  number,
+  number | null,
+  number | null,
+  number,
+  number,
+  number,
+  number,
+  number,
+  number,
+];
 
 interface CareerSeason {
   season: number;
@@ -1169,9 +1184,13 @@ export class SkillRankingsComponent implements OnChanges {
       // says nothing about run blocking rather than borrowing an older season's
       const latest = charted[charted.length - 1];
       if (this.card !== card || !latest || latest.season !== card.season) return;
+      // (backs are read on pass protection instead)
+      if (this.position === 'RB') {
+        await this.addPassProSkill(card, card.season);
+        return;
+      }
       await this.addBlockingSkill(card, latest.season);
-      // (backs only get the radar axis: nothing else about their run blocking is worth a note)
-      if (this.card !== card || this.position === 'RB') return;
+      if (this.card !== card) return;
       const flags: CardFlag[] = [];
       const epa = (v: number) => `${v > 0 ? '+' : ''}${v.toFixed(2)}`;
       if (te) {
@@ -1263,6 +1282,39 @@ export class SkillRankingsComponent implements OnChanges {
     o.radar = this.radar(o.skills);
     o.report = this.reportFor(o.skills).report;
     if (o.prev) o.prev.shape = this.radarShape(o.skills.map((s) => o.prev!.pcts.get(s.id) ?? s.pct));
+  }
+
+  // A back's Pass Pro skill on the radar and in the report, and a take when it's notable: the QB's
+  // pressure rate on dropbacks with him on the field against off (at least 40 dropbacks each way), as a
+  // percentile among that season's backs (lower pressure is better)
+  private async addPassProSkill(card: PlayerCard, season: number): Promise<void> {
+    const [file, backs] = await Promise.all([this.blockingFor(season), this.tabRowsFor(season)]);
+    const delta = (r: BlockingRow | undefined) =>
+      r && r[9] >= 40 && r[11] >= 40 ? (r[10] / r[9] - r[12] / r[11]) * 100 : null;
+    const values = backs.map((u) => delta(file[u.gsisId])).filter((v): v is number => v !== null);
+    const mine = delta(file[card.player.gsisId]);
+    if (mine === null || values.length < 5 || this.card !== card) return;
+    const pct = values.filter((v) => v > mine).length / Math.max(values.length - 1, 1);
+    const skill: CardSkill = {
+      id: 'passPro',
+      name: 'Pass Protection',
+      short: 'Pass Pro',
+      pct: Math.min(1, pct),
+      tier: tierWord(pct),
+      standing: standing(pct),
+      evidence: [{ label: 'QB Pressure On vs Off', rank: 1 + values.filter((v) => v < mine).length, of: values.length }],
+    };
+    const o = card.overview;
+    o.skills = [...o.skills.filter((s) => s.id !== 'passPro'), skill];
+    o.radar = this.radar(o.skills);
+    o.report = this.reportFor(o.skills).report;
+    if (o.prev) o.prev.shape = this.radarShape(o.skills.map((s) => o.prev!.pcts.get(s.id) ?? s.pct));
+    const pts = (v: number) => `${Math.abs(v).toFixed(1)} points`;
+    if (mine <= -5) {
+      o.flags = [...o.flags, { icon: 'shield', tone: 'good', text: `Pass-pro plus: the QB was pressured ${pts(mine)} less often with him on the field` }];
+    } else if (mine >= 5) {
+      o.flags = [...o.flags, { icon: 'shield', tone: 'bad', text: `Pass-pro concern: the QB was pressured ${pts(mine)} more often with him on the field` }];
+    }
   }
 
   // Good first, then neutral, then bad
