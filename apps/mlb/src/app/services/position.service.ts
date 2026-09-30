@@ -13,23 +13,22 @@ export interface RankerSettings {
   statBasis: StatBasis;
   showUnused: boolean;
   showInjured: boolean;
-  // Players with fewer plate appearances (hitters) or batters faced (pitchers) are left out
-  minPa: number;
+  // Players with less than this share of the most plate appearances (pitchers: batters faced) on the
+  // tab are left out (0-100; 0 is everyone)
+  minShare: number;
   // Tint values green / red by how far above / below the list average they are
   colorValues: boolean;
   // Carry each stat group's color down the rows (a chalk line before each group)
   categoryColors: boolean;
 }
 
-// The Min PA setting: steps of MIN_PA_STEP from the data's floor (the data script keeps everyone
-// with 25+), up to the most anyone on the tab has
-export const MIN_PA_FLOOR = 25;
-export const MIN_PA_STEP = 25;
+// The Min PA setting: a share of the season so far, in steps of MIN_SHARE_STEP (0 is 1, everyone)
+export const MIN_SHARE_STEP = 10;
 const DEFAULT_SETTINGS: RankerSettings = {
   statBasis: 'season',
   showUnused: false,
   showInjured: true,
-  minPa: 50,
+  minShare: 10,
   colorValues: true,
   categoryColors: true,
 };

@@ -217,15 +217,15 @@
       <div
         mat-menu-item
         class="min-games-item"
-        title="Leave out players with fewer plate appearances than this (for pitchers, batters faced); steps of 25, topping out at the most anyone on the tab has"
+        title="Leave out players with less than this share of the most plate appearances on the tab (for pitchers, batters faced; 1 shows everyone); the number is the PA it takes"
         (click)="$event.stopPropagation()"
       >
         <span class="min-games-stepper" (click)="$event.stopPropagation()">
-          <button type="button" aria-label="Fewer plate appearances" [disabled]="minPa <= minPaFloor" (click)="stepMinPa(-1)">−</button>
-          <span class="min-games-value">{{ minPa }}</span>
-          <button type="button" aria-label="More plate appearances" [disabled]="minPa >= maxPa" (click)="stepMinPa(1)">+</button>
+          <button type="button" aria-label="Lower" [disabled]="minShare <= 0" (click)="stepMinShare(-1)">−</button>
+          <span class="min-games-value">{{ minShare ? minShare + '%' : 1 }}</span>
+          <button type="button" aria-label="Higher" [disabled]="minShare >= 100" (click)="stepMinShare(1)">+</button>
         </span>
-        <span>Min PA</span>
+        <span>Min PA: <span class="menu-value">{{ minCount }}</span></span>
       </div>
 
       <!-- Display: what the table shows -->

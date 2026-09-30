@@ -1,0 +1,1389 @@
+@use "../../variables.scss" as v;
+
+.sidebar {
+  background: color-mix(in srgb, var(--primary-800) 75%, transparent);
+  box-shadow: 0 0 0.75em rgba(0, 0, 0, 0.25);
+  display: flex;
+  flex-direction: column;
+  font-family: v.$font-base;
+  height: calc(100dvh - var(--sport-bar-height));
+  position: relative;
+  width: 26em;
+
+  .expanded-panel {
+    background: transparent;
+    box-shadow: inset 0 0 10em rgba(0, 0, 0, 0.4);
+    color: var(--primary-50);
+
+    &.mat-expanded {
+      padding: 1em 0 1em 1em;
+
+      span {
+        margin-left: 5em;
+      }
+
+      .mat-mdc-slider {
+        width: 60%;
+      }
+
+      ::ng-deep.mat-expansion-panel-body {
+        padding: 0;
+      }
+    }
+  }
+
+  p {
+    align-items: center;
+    display: flex;
+    font-size: 0.75em;
+    font-weight: bold;
+    height: 2.5em;
+    justify-content: space-between;
+    letter-spacing: 0.25px;
+    margin-bottom: 0;
+    margin-left: 0.75em;
+    margin-top: 0.5em;
+    opacity: 1;
+    text-shadow: var(--text-shadow-small);
+    text-transform: uppercase;
+
+    span {
+      color: var(--primary-50);
+      font-size: 1em;
+      margin-left: 0;
+    }
+
+    button {
+      align-items: center;
+      background: var(--accent-200);
+      border: 1px solid transparent;
+      border-radius: 0.25em;
+      display: flex;
+      height: 2.5em;
+      justify-content: center;
+      margin-right: 1em;
+      padding: 0;
+      width: 2.5em;
+
+      .mat-icon {
+        color: var(--primary-900);
+        margin-right: 0;
+      }
+
+      &:hover {
+        cursor: pointer;
+      }
+    }
+
+    &.mt-0 {
+      margin-top: 0px;
+    }
+  }
+
+  button {
+    background: var(--accent-200);
+    border: solid 1px var(--primary-50);
+    color: var(--primary-900);
+    font-family: v.$font-base;
+    font-size: 0.9em;
+    font-weight: bold;
+    height: 2.25em;
+    margin-left: 0.5em;
+    margin-right: 0.5em;
+    padding: 1.5em;
+    text-transform: uppercase;
+
+    &.negative {
+      background: var(--primary-800);
+      color: var(--primary-50);
+    }
+  }
+
+  .logo {
+    align-items: center;
+    border-bottom: solid 1px var(--primary-900);
+    display: flex;
+    padding: 2.85em 0.5em;
+
+    .mat-icon {
+      margin-right: 0.5em;
+      // Nudge up to sit centered on the all-caps title
+      position: relative;
+      top: -0.1em;
+    }
+
+    h1 {
+      align-items: center;
+      color: var(--accent-50);
+      display: flex;
+      font-family: v.$font-heading;
+      font-size: 1.5em;
+      font-weight: 900;
+      line-height: 1;
+      margin: 0 0 0 0.5em;
+      text-shadow: var(--text-shadow-small);
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+  }
+
+  .filters {
+    box-shadow: inset 0 0 5em rgba(0, 0, 0, 0.3);
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding-top: 1em;
+
+    div {
+      padding: 0em 1.5em;
+    }
+  }
+
+  footer {
+    align-items: center;
+    border-top: solid 1px var(--primary-900);
+    display: flex;
+    height: 4em;
+    justify-content: center;
+    padding: 1em;
+  }
+
+  hr {
+    opacity: 0.2;
+  }
+
+  span {
+    color: var(--primary-50);
+    font-size: 0.75em;
+    font-weight: bold;
+    margin-left: 2.5em;
+  }
+
+  .mat-mdc-slider {
+    --mat-slider-active-track-color: var(--accent-200);
+    --mat-slider-inactive-track-color: var(--primary-600);
+    --mat-slider-handle-color: var(--accent-100);
+    width: 72.5%;
+  }
+
+  .mat-mdc-select {
+    background: var(--accent-100);
+    border-radius: 0.175em;
+    color: var(--primary-900);
+    display: flex;
+    font-weight: bold;
+    margin: 1em 0 2em 0;
+    padding: 0.75em;
+    text-align: center;
+    width: auto;
+
+    &:hover {
+      background: var(--accent-200);
+    }
+  }
+}
+
+.disabled {
+  opacity: 0.3;
+}
+
+::-webkit-scrollbar {
+  height: 10px;
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background-color: var(--primary-900);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--accent-200);
+  border-radius: 4px;
+  box-shadow:
+    inset 0 0 0.5em rgba(0, 0, 0, 0.2),
+    0 0 1em rgba(0, 0, 0, 0.2);
+}
+
+// Small screens: the sidebar slides over the rankings, so make it solid and a bit wider
+@media (max-width: 1199px) {
+  .sidebar {
+    background: var(--primary-800);
+    // Leaves room on narrow phones for the 43px drawer tab (it overlaps the 3px border)
+    width: min(calc(100vw - 43px), max(26em, 50vw));
+  }
+}
+
+// ===========================================================================
+// Turf theme: the sidebar is a scoreboard
+// ===========================================================================
+.sidebar {
+  background: var(--scoreboard-dots), var(--scoreboard);
+
+  .logo {
+    border-bottom-color: #2a2a2a;
+
+    h1 {
+      color: var(--scoreboard-led);
+      font-family: "Orbitron", sans-serif;
+      font-size: 1.15em;
+      letter-spacing: 1px;
+      text-shadow: var(--scoreboard-glow);
+    }
+
+    .mat-icon {
+      color: var(--scoreboard-led);
+    }
+  }
+
+  .filters {
+    box-shadow: inset 0 0 3em rgba(0, 0, 0, 0.6);
+  }
+
+  // Slider percentages read like scoreboard digits
+  span {
+    color: var(--scoreboard-led);
+    font-family: "Orbitron", sans-serif;
+    text-shadow: var(--scoreboard-glow);
+  }
+
+  p span {
+    color: #fff;
+    font-family: inherit;
+    text-shadow: none;
+  }
+
+  .mat-mdc-slider {
+    --mat-slider-active-track-color: var(--scoreboard-led);
+    --mat-slider-handle-color: #7a3d1c;
+  }
+
+  .mat-mdc-select {
+    background: #1e1e1e;
+    border: 1px solid #3a3a3a;
+    color: var(--scoreboard-led);
+
+    &:hover {
+      background: #262626;
+    }
+  }
+
+  footer {
+    border-top-color: #2a2a2a;
+  }
+
+  button {
+    background: var(--scoreboard-led);
+    border-color: var(--scoreboard-led);
+    color: #1a1a1a;
+
+    &.negative {
+      background: transparent;
+      color: var(--scoreboard-led);
+    }
+  }
+
+  p button {
+    background: #262626;
+    border: 1px solid #3a3a3a !important;
+
+    .mat-icon {
+      color: var(--scoreboard-led);
+    }
+  }
+}
+
+@media (max-width: 1199px) {
+  .sidebar {
+    background: var(--scoreboard-dots), var(--scoreboard);
+  }
+}
+
+// Round 2: LCD title, lighter leather slider footballs
+.sidebar {
+  .logo h1 {
+    font-family: "DSEG14", "Orbitron", sans-serif;
+    font-size: 1em;
+    letter-spacing: 0;
+  }
+
+  .mat-mdc-slider {
+    --mat-slider-handle-color: #a8602f;
+  }
+
+  span {
+    font-family: "DSEG7", "Orbitron", sans-serif;
+    font-size: 0.7em;
+  }
+
+  p span {
+    font-family: inherit;
+    font-size: 1em;
+  }
+}
+
+// Round 5: the slider football stays leather brown when hovered or grabbed
+.sidebar .mat-mdc-slider {
+  --mat-slider-hover-handle-color: #a8602f;
+  --mat-slider-focus-handle-color: #a8602f;
+}
+
+// Round 6: white LCD title with room between the words
+.sidebar .logo h1 {
+  color: #fff;
+  text-shadow: 0 0 6px rgba(255, 255, 255, 0.35);
+  word-spacing: 0.3em;
+}
+
+// Round 8: roomier expand buttons, white divider lines under the logo and above the footer
+.sidebar {
+  // Centered over the percentage below it
+  p button {
+    margin-right: 3px;
+    padding: 0 0.7em;
+    width: auto;
+  }
+
+  .logo {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.6);
+  }
+
+  footer {
+    border-top: 1px solid rgba(255, 255, 255, 0.6);
+  }
+}
+
+// ===========================================================================
+// Grouped QB filters: collapsible scoreboard cards with compact one-line sliders
+// ===========================================================================
+.sidebar .filters .filter-group {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid #2c2c2c;
+  border-radius: 0.5em;
+  margin: 0 1em 0.75em;
+  overflow: hidden;
+  padding: 0;
+
+  &.open {
+    border-color: #3a3a3a;
+  }
+
+  // Card header: icon, title, chevron
+  button.group-header {
+    align-items: center;
+    background: rgba(255, 255, 255, 0.04);
+    border: none;
+    border-radius: 0;
+    color: #fff;
+    cursor: pointer;
+    display: flex;
+    font-family: inherit;
+    font-size: 0.8em;
+    font-weight: 800;
+    gap: 0.6em;
+    height: auto;
+    letter-spacing: 1px;
+    margin: 0;
+    padding: 0.8em 1em;
+    text-shadow: none;
+    text-transform: uppercase;
+    width: 100%;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.08);
+
+      .group-chevron {
+        color: var(--scoreboard-led);
+      }
+    }
+
+    .group-icon {
+      color: var(--scoreboard-led);
+      font-size: 1.4em;
+      height: 1em;
+      margin: 0;
+      width: 1em;
+    }
+
+    .group-title {
+      color: #fff;
+      font-family: inherit;
+      font-size: 1em;
+      margin: 0;
+      text-shadow: none;
+    }
+
+    .group-chevron {
+      color: rgba(255, 255, 255, 0.6);
+      margin-left: auto;
+      margin-right: 0;
+    }
+  }
+
+  .group-body {
+    padding: 0.25em 0 0.5em;
+  }
+}
+
+// One-line slider row: label | slider | value | expand button
+.sidebar .filters .slider-row {
+  align-items: center;
+  column-gap: 0.4em;
+  display: grid;
+  grid-template-columns: 7.2em minmax(0, 1fr) 2.8em 1.7em;
+  min-height: 2.3em;
+  padding: 0 0.8em 0 1em;
+
+  &.disabled {
+    opacity: 0.35;
+  }
+
+  // The group-wide weight sits right under the header, a touch stronger
+  &.master {
+    background: rgba(255, 205, 0, 0.05);
+    border-bottom: 1px solid #2c2c2c;
+    min-height: 2.6em;
+
+    .slider-label {
+      color: var(--scoreboard-led);
+    }
+  }
+
+  p.slider-label {
+    display: block;
+    font-size: 0.68em;
+    font-weight: 800;
+    height: auto;
+    letter-spacing: 0.5px;
+    line-height: 1.15;
+    margin: 0;
+  }
+
+  .mat-mdc-slider {
+    margin: 0;
+    min-width: 0;
+    width: auto;
+  }
+
+  span.slider-value {
+    font-size: 0.65em;
+    margin: 0;
+    text-align: right;
+  }
+
+  button.row-expand {
+    align-items: center;
+    background: #262626;
+    border: 1px solid #3a3a3a !important;
+    border-radius: 0.3em;
+    cursor: pointer;
+    display: flex;
+    height: 1.6em;
+    justify-content: center;
+    margin: 0;
+    padding: 0;
+    width: 1.6em;
+
+    .mat-icon {
+      color: var(--scoreboard-led);
+      font-size: 1.1em;
+      height: 1em;
+      margin: 0;
+      width: 1em;
+    }
+  }
+}
+
+// Sub-sliders (pass vs rush, etc.) indent under their row with a yellow guide line
+.sidebar .filters .sub-rows {
+  border-left: 2px solid rgba(255, 205, 0, 0.35);
+  margin: 0 0 0.35em 1.4em;
+
+  .slider-row {
+    grid-template-columns: 6.3em minmax(0, 1fr) 2.8em 1.7em;
+    min-height: 2em;
+    padding-left: 0.6em;
+  }
+}
+
+// Preset dropdown gets the same side margins as the cards
+.sidebar .filters > div:first-child {
+  padding: 0 1em;
+}
+
+// Two-line rows: label / value / expand on top, a full-width slider underneath
+.sidebar .filters .slider-row,
+.sidebar .filters .sub-rows .slider-row {
+  grid-template-areas:
+    "label value expand"
+    "slider slider slider";
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  min-height: 0;
+  padding: 0.45em 1em 0.1em;
+  row-gap: 0;
+
+  p.slider-label {
+    grid-area: label;
+  }
+
+  span.slider-value {
+    grid-area: value;
+  }
+
+  button.row-expand,
+  > span:last-child {
+    grid-area: expand;
+  }
+
+  button.row-expand {
+    height: 1.4em;
+    margin-left: 0.5em;
+    width: 1.4em;
+  }
+
+  .mat-mdc-slider {
+    grid-area: slider;
+    height: 30px;
+    margin: 0 -2px;
+  }
+}
+
+.sidebar .filters .slider-row.master {
+  min-height: 0;
+  padding-bottom: 0.25em;
+}
+
+.sidebar .filters .sub-rows .slider-row {
+  padding-left: 0.7em;
+}
+
+// Keep Material's slider height (the thumb is positioned for it) and trim the extra space instead;
+// the expand column is always reserved so every percentage lines up
+.sidebar .filters .slider-row,
+.sidebar .filters .sub-rows .slider-row {
+  grid-template-columns: minmax(0, 1fr) auto 1.9em;
+
+  .mat-mdc-slider {
+    height: 48px;
+    margin: -10px -2px -8px;
+  }
+
+  button.row-expand {
+    justify-self: end;
+    margin-left: 0;
+  }
+}
+
+// Group Weight reads as the card's own control: it continues the header band, has a yellow
+// accent bar and a badge label, and a divider separates it from the individual sliders
+.sidebar .filters .slider-row.master {
+  background: rgba(255, 255, 255, 0.04);
+  border-bottom: 1px dashed rgba(255, 205, 0, 0.35);
+  box-shadow: inset 3px 0 0 var(--scoreboard-led);
+  padding-bottom: 0.4em;
+  padding-top: 0.3em;
+
+  p.slider-label {
+    background: var(--scoreboard-led);
+    border-radius: 999px;
+    color: #111;
+    font-size: 0.6em;
+    justify-self: start;
+    letter-spacing: 1px;
+    padding: 0.25em 0.8em;
+  }
+
+  span.slider-value {
+    font-size: 0.9em;
+  }
+}
+
+// Solid white divider under Group Weight, plain white label, and the group's own sliders
+// indented so they read as sitting inside the group
+.sidebar .filters .slider-row.master {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.55);
+
+  p.slider-label {
+    background: none;
+    border-radius: 0;
+    color: #fff;
+    font-size: 0.68em;
+    padding: 0;
+  }
+}
+
+.sidebar .filters .filter-group .group-body > .slider-row {
+  padding-left: 2em;
+  padding-right: 1em;
+}
+
+.sidebar .filters .filter-group .group-body > .sub-rows {
+  margin-left: 2.4em;
+}
+
+// The old ".filters div" padding doesn't apply here, so sub-rows line up on the right
+.sidebar .filters .filter-group .group-body > .sub-rows {
+  padding: 0;
+
+  .slider-row {
+    padding-left: 1em;
+  }
+}
+
+// Row labels line up with the group title; sub-sliders step in again with the guide line
+// sitting under the parent label
+.sidebar .filters .filter-group .group-body > .slider-row {
+  padding-left: 2.4em;
+}
+
+.sidebar .filters .filter-group .group-body > .sub-rows {
+  margin-left: 2.4em;
+
+  .slider-row {
+    padding-left: 1.5em;
+  }
+}
+
+// Card header is now a row: [icon + title] ... [eye] [chevron]
+.sidebar .filters .filter-group div.group-header {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.04);
+  display: flex;
+  padding: 0 0.4em 0 0;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  button {
+    background: transparent;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    font-family: inherit;
+    height: auto;
+    margin: 0;
+    text-shadow: none;
+  }
+
+  button.group-toggle {
+    align-items: center;
+    display: flex;
+    flex: 1;
+    font-size: 0.8em;
+    font-weight: 800;
+    gap: 0.6em;
+    letter-spacing: 1px;
+    padding: 0.8em 1em;
+    text-align: left;
+    text-transform: uppercase;
+
+    .group-icon {
+      color: var(--scoreboard-led);
+      font-size: 1.4em;
+      height: 1em;
+      margin: 0;
+      width: 1em;
+    }
+
+    .group-title {
+      color: #fff;
+      font-size: 1em;
+      margin: 0;
+      text-shadow: none;
+    }
+  }
+
+  button.group-eye,
+  button.group-chevron-button {
+    align-items: center;
+    border-radius: 0.3em;
+    display: flex;
+    justify-content: center;
+    padding: 0.3em;
+
+    .mat-icon {
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 1.25em;
+      height: 1em;
+      margin: 0;
+      width: 1em;
+    }
+
+    &:hover .mat-icon {
+      color: var(--scoreboard-led);
+    }
+  }
+}
+
+// A switched-off group: dimmed title and sliders, eye crossed out
+.sidebar .filters .filter-group.group-hidden {
+  .group-toggle .group-title,
+  .group-toggle .group-icon,
+  .slider-row {
+    opacity: 0.4;
+  }
+
+  button.group-eye .mat-icon {
+    color: var(--scoreboard-led);
+  }
+}
+
+// Group titles keep the body font (the sidebar's LCD rule for slider values targets spans)
+.sidebar
+  .filters
+  .filter-group
+  div.group-header
+  button.group-toggle
+  span.group-title {
+  font-family: v.$font-base;
+  font-size: 1em;
+  text-transform: uppercase;
+}
+
+// Card icons take their group's color
+.sidebar
+  .filters
+  .filter-group
+  div.group-header
+  button.group-toggle
+  .group-icon {
+  color: var(--group-color);
+}
+
+// Eye is solid white; the chevron keeps its dimmer gray
+.sidebar .filters .filter-group div.group-header button.group-eye .mat-icon {
+  color: #fff;
+}
+
+// Round 9: breathing room at the top of an open card, clickable labels for breakdowns,
+// and the percentage sits at the right edge now that the expand button is gone
+.sidebar .filters .filter-group .group-body {
+  padding-top: 1em;
+}
+
+.sidebar .filters .slider-row,
+.sidebar .filters .sub-rows .slider-row {
+  grid-template-areas:
+    "label value"
+    "slider slider";
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.sidebar .filters .slider-row button.slider-label.expandable {
+  align-items: center;
+  background: none;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  display: inline-flex;
+  font-family: inherit;
+  font-size: 0.68em;
+  font-weight: 800;
+  gap: 0.2em;
+  grid-area: label;
+  height: auto;
+  justify-self: start;
+  letter-spacing: 0.5px;
+  line-height: 1.15;
+  margin: 0;
+  padding: 0;
+  text-shadow: var(--text-shadow-small);
+  text-transform: uppercase;
+
+  .mat-icon {
+    color: var(--scoreboard-led);
+    font-size: 1.6em;
+    height: 1em;
+    margin: 0;
+    width: 1em;
+  }
+
+  &:hover,
+  &.open {
+    color: var(--scoreboard-led);
+  }
+}
+
+.sidebar .filters .filter-group .group-body > .sub-rows {
+  margin-top: 0.5em;
+}
+
+// The value is the row's last span now; keep it in the value slot (an older rule targets
+// "> span:last-child" for the removed expand column)
+.sidebar .filters .slider-row > span.slider-value,
+.sidebar .filters .sub-rows .slider-row > span.slider-value {
+  grid-area: value;
+}
+
+// The slider's invisible touch area reaches up into the label row; keep labels on top of it
+.sidebar .filters .slider-row .slider-label {
+  position: relative;
+  z-index: 3;
+}
+
+// A little more air between the sliders inside an open card
+.sidebar .filters .filter-group .group-body .slider-row {
+  margin-bottom: 0.8em;
+}
+
+// Per-slider eye sits at the end of the bar
+.sidebar .filters .slider-row,
+.sidebar .filters .sub-rows .slider-row {
+  grid-template-areas:
+    "label value"
+    "slider eye";
+
+  button.slider-eye {
+    align-items: center;
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    grid-area: eye;
+    height: auto;
+    justify-content: center;
+    margin: 0 0 0 0.3em;
+    padding: 0.15em;
+    position: relative;
+    z-index: 3;
+
+    .mat-icon {
+      color: rgba(255, 255, 255, 0.55);
+      font-size: 1.15em;
+      height: 1em;
+      margin: 0;
+      width: 1em;
+    }
+
+    &:hover .mat-icon {
+      color: var(--scoreboard-led);
+    }
+  }
+
+  // A switched-off slider still shows its eye clearly so it can be turned back on
+  &.disabled button.slider-eye .mat-icon {
+    color: #fff;
+  }
+}
+
+// Dim a switched-off row's label, slider and value, but not its eye
+.sidebar .filters .slider-row.disabled {
+  opacity: 1;
+
+  > *:not(.slider-eye) {
+    opacity: 0.35;
+  }
+}
+
+// Every eye is white (yellow on hover); percentages are quiet gray
+.sidebar .filters {
+  .slider-row span.slider-value {
+    color: #9a9a9a;
+    text-shadow: none;
+  }
+
+  .slider-row button.slider-eye .mat-icon,
+  .slider-row.disabled button.slider-eye .mat-icon,
+  .sub-rows .slider-row button.slider-eye .mat-icon,
+  .filter-group div.group-header button.group-eye .mat-icon {
+    color: #fff;
+  }
+
+  .slider-row button.slider-eye:hover .mat-icon,
+  .sub-rows .slider-row button.slider-eye:hover .mat-icon,
+  .filter-group div.group-header button.group-eye:hover .mat-icon {
+    color: var(--scoreboard-led);
+  }
+}
+
+// A switched-off group's eye turns yellow so it stands out
+.sidebar
+  .filters
+  .filter-group.group-hidden
+  div.group-header
+  button.group-eye
+  .mat-icon {
+  color: var(--scoreboard-led);
+}
+
+// A switched-off slider's eye turns yellow, like a switched-off group's
+.sidebar .filters .slider-row button.slider-eye.off .mat-icon,
+.sidebar .filters .sub-rows .slider-row button.slider-eye.off .mat-icon {
+  color: var(--scoreboard-led);
+}
+
+// Display-only rows (e.g. Games): label and eye, no slider
+.sidebar .filters .slider-row.info-row {
+  // One line: label and eye (no slider underneath, so leave room before the next row)
+  grid-template-areas: "label eye";
+  grid-template-columns: minmax(0, 1fr) auto;
+  padding-bottom: 0.75em;
+}
+
+// Pin the LED dot pattern to the viewport so the drawer tab's dots line up with it
+.sidebar {
+  background-attachment: fixed;
+}
+
+// Header / footer dividers: the menu body is the field. Each divider is a thick 4px sideline with
+// hash marks running into the body (down from the header, up from the footer): four little ones to
+// each big one, like the grid's category sidelines. Drawn in solid white and faded as a whole, so where a big
+// and little hash overlap they don't double up.
+.sidebar {
+
+  .logo,
+  footer {
+    position: relative;
+  }
+
+  .logo {
+    border-bottom: none;
+  }
+
+  footer {
+    border-top: none;
+  }
+
+  .logo::after,
+  footer::before {
+    // --hash-edge (top or bottom) is the side the sideline sits on
+    // Hashes start at the sideline, so past its 4px they reach 10px (big) and 5px (little)
+    background:
+      linear-gradient(#fff, #fff) 0 var(--hash-edge) / 100% 4px no-repeat,
+      repeating-linear-gradient(90deg, #fff 0 1px, transparent 1px 60px) 8px var(--hash-edge) / 100% 14px no-repeat,
+      repeating-linear-gradient(90deg, #fff 0 1px, transparent 1px 12px) 8px var(--hash-edge) / 100% 9px no-repeat;
+    content: "";
+    height: 14px;
+    left: 0;
+    opacity: 0.2;
+    pointer-events: none;
+    position: absolute;
+    right: 0;
+    z-index: 1;
+  }
+
+  // Sideline along the header's bottom edge, hashes hanging down into the body
+  .logo::after {
+    --hash-edge: top;
+    top: 100%;
+  }
+
+  // Sideline along the footer's top edge, hashes standing up into the body
+  footer::before {
+    --hash-edge: bottom;
+    bottom: 100%;
+  }
+}
+
+// Logo title in the body font (same as player names) for readability
+.sidebar .logo h1 {
+  font-family: v.$font-base;
+  font-size: 1.35em;
+  font-weight: 800;
+  letter-spacing: normal;
+  word-spacing: normal;
+}
+
+// Compact preset dropdown
+.sidebar .mat-mdc-select {
+  font-size: 0.85em;
+  margin: 0.75em 0 1.25em;
+  padding: 0.5em 0.75em;
+}
+
+// Bigger card headers: icon, title, eye and chevron
+.sidebar .filters .filter-group div.group-header {
+  button.group-toggle {
+    font-size: 0.92em;
+    padding: 0.95em 1em;
+
+    .group-icon {
+      font-size: 1.55em;
+    }
+  }
+
+  button.group-eye .mat-icon,
+  button.group-chevron-button .mat-icon {
+    font-size: 1.45em;
+  }
+}
+
+// Preset dropdown: centered, not full width, with room above and below
+.sidebar .mat-mdc-select {
+  margin: 1.4em auto 1.8em;
+  width: 70%;
+}
+
+// More space under the preset dropdown, and between the cards
+.sidebar .mat-mdc-select {
+  margin-bottom: 2.6em;
+}
+
+.sidebar .filters .filter-group {
+  margin-bottom: 1em;
+}
+
+// Total Weight: breathing room on every side, and a gap before the sliders below it
+.sidebar .filters .slider-row.master {
+  margin-bottom: 0.4em;
+  padding: 0.9em 1.2em 0.7em 1.4em;
+}
+
+// No yellow accent bar on Total Weight
+.sidebar .filters .slider-row.master {
+  box-shadow: none;
+}
+
+// White footer buttons: Defaults solid, Clear outlined
+.sidebar footer button {
+  background: #fff;
+  border-color: #fff;
+  color: #111;
+
+  &.negative {
+    background: transparent;
+    color: #fff;
+  }
+}
+
+// Preset dropdown text in white
+.sidebar .mat-mdc-select,
+.sidebar .mat-mdc-select .mat-mdc-select-value,
+.sidebar .mat-mdc-select .mat-mdc-select-value-text {
+  color: #fff;
+}
+
+// Yellow on hover for the white controls
+.sidebar footer button:hover {
+  background: var(--scoreboard-led);
+  border-color: var(--scoreboard-led);
+  color: #111;
+
+  &.negative {
+    background: transparent;
+    color: var(--scoreboard-led);
+  }
+}
+
+.sidebar .mat-mdc-select:hover,
+.sidebar .mat-mdc-select:hover .mat-mdc-select-value,
+.sidebar .mat-mdc-select:hover .mat-mdc-select-value-text {
+  color: var(--scoreboard-led);
+}
+
+// Both footer buttons are white outlines, yellow on hover
+.sidebar footer button,
+.sidebar footer button.negative {
+  background: transparent;
+  border: 1px solid #fff;
+  color: #fff;
+
+  &:hover {
+    background: transparent;
+    border-color: var(--scoreboard-led);
+    color: var(--scoreboard-led);
+  }
+}
+
+// A little space between each label and its slider so labels (and breakdown toggles) are easy to hit
+.sidebar .filters .slider-row,
+.sidebar .filters .sub-rows .slider-row {
+  row-gap: 0.7em;
+}
+
+// Slider rows line up with the group title text (past the header icon); sub-rows keep their own indent
+.sidebar .filters .filter-group .group-body > .slider-row {
+  padding-left: 2.9em;
+}
+
+// Hovering a card header turns its title yellow, like the other hover states
+.sidebar .filters .filter-group div.group-header:hover button.group-toggle span.group-title {
+  color: var(--scoreboard-led);
+}
+
+// Card headers take a light fill of their group's color, matching the table's header outlines
+.sidebar .filters .filter-group div.group-header {
+  background: color-mix(in srgb, var(--group-color) 16%, transparent);
+
+  &:hover {
+    background: color-mix(in srgb, var(--group-color) 24%, transparent);
+  }
+}
+
+// Logo football: the slider thumb's brown leather and white laces, tilted
+.sidebar .logo h1 .logo-football {
+  // Real leather (the rows' pebbled texture over the football brown) with a soft sheen
+  background:
+    radial-gradient(ellipse at 40% 25%, rgba(255, 255, 255, 0.25), transparent 65%),
+    url("../../assets/textures/leather.jpg") center / 40px,
+    #a8602f;
+  background-blend-mode: normal, soft-light, normal;
+  border-radius: 50%;
+  box-shadow:
+    0 2px 5px rgba(0, 0, 0, 0.75),
+    0 0 0 1.5px rgba(0, 0, 0, 0.35);
+  display: inline-block;
+  flex: 0 0 auto;
+  height: 17px;
+  // Centered over the category card icons below (and clear of the sidebar's generic span margin)
+  margin-left: 6.5px;
+  margin-right: calc(0.75em + 4px);
+  position: relative;
+  // Centered on the capital letters (flex centering sits it on the line box, a touch low)
+  top: -0.25px;
+  transform: rotate(-40deg);
+  width: 27px;
+
+  &::after {
+    background:
+      linear-gradient(#fff, #fff) center / 100% 1.5px no-repeat,
+      repeating-linear-gradient(90deg, #fff 0 1.5px, transparent 1.5px 3px) center / 100% 6px no-repeat;
+    content: "";
+    height: 6px;
+    left: 50%;
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 11px;
+  }
+}
+
+// Slider eyes: a bigger click target with more room after the slider, and above the slider's
+// invisible input (which reaches past the track and used to swallow clicks on the eye)
+.sidebar .filters .slider-row button.slider-eye,
+.sidebar .filters .sub-rows .slider-row button.slider-eye {
+  margin-left: 0.7em;
+  padding: 0.45em;
+  z-index: 10;
+}
+
+// Drag to reorder: a small grip in each card header (before the group icon) and before each
+// slider row, sitting in the existing left padding so titles and labels don't move
+.sidebar .filters {
+  .filter-group div.group-header,
+  .row-drag {
+    position: relative;
+  }
+
+  .group-handle,
+  .row-handle {
+    color: rgba(255, 255, 255, 0.35);
+    cursor: grab;
+    font-size: 1em;
+    height: 1em;
+    position: absolute;
+    width: 1em;
+    z-index: 4;
+
+    &:hover {
+      color: var(--scoreboard-led);
+    }
+  }
+
+  // A touch smaller so it fits the padding before the group icon
+  .group-handle {
+    font-size: 0.85em;
+    height: 1em;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 1em;
+  }
+
+  // Level with the row's label (the first line of the row)
+  .row-handle {
+    left: 1.1em;
+    top: 0.7em;
+  }
+
+  // The spot the dragged card / row came from, and a smooth settle into place
+  .cdk-drag-placeholder {
+    opacity: 0.3;
+  }
+
+  .cdk-drag-animating,
+  .group-list.cdk-drop-list-dragging .filter-group:not(.cdk-drag-placeholder),
+  .group-body.cdk-drop-list-dragging .row-drag:not(.cdk-drag-placeholder) {
+    transition: transform 200ms ease;
+  }
+
+  .cdk-drag-preview {
+    box-shadow: 0 0.5em 1.5em rgba(0, 0, 0, 0.5);
+    cursor: grabbing;
+  }
+
+  .row-drag.cdk-drag-preview {
+    background: var(--scoreboard-dots), #1d1d1d;
+    border-radius: 6px;
+  }
+}
+
+// The drag wrappers (card list, slider rows) skip the old ".filters div" side padding, and rows
+// inside them keep the indent that lines their labels up with the card titles
+.sidebar .filters .group-list,
+.sidebar .filters .row-drag {
+  padding: 0;
+}
+
+.sidebar .filters .filter-group .group-body > .row-drag > .slider-row {
+  padding-left: 2.9em;
+}
+
+// More room for the drag grips: card icons and titles move 21px right and slider labels 15px (a bit
+// more space after the header grip), and each row's grip sits centered on its label + slider
+.sidebar .filters .filter-group div.group-header button.group-toggle {
+  // Same 12px between icon and title as between the grip and the icon
+  gap: 12px;
+  padding-left: calc(1em + 21px);
+}
+
+.sidebar .filters .filter-group .group-body > .row-drag > .slider-row {
+  padding-left: calc(2.9em + 15px);
+}
+
+.sidebar .filters {
+  .group-handle {
+    left: 10px;
+  }
+
+  .row-handle {
+    // Between the card edge and the slider (its touch area starts about 31px in)
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+
+  // A row with its breakdown open: center on the row itself (60px tall), not row + breakdown
+  .row-drag:has(> .sub-rows) .row-handle {
+    top: 30px;
+  }
+}
+
+// Breakdown sliders (e.g. Pass / Rush Yards under Yards): their eyes line up with every other eye
+// (no right padding on the breakdown box), and their labels sit indented past the parent row's
+.sidebar .filters .sub-rows {
+  padding-right: 0;
+}
+
+.sidebar .filters .sub-rows .slider-row {
+  padding-left: calc(0.7em + 24px);
+}
+
+// Logo title in the scoreboard font
+.sidebar .logo h1 {
+  font-family: "Orbitron", sans-serif;
+  font-weight: 500;
+}
+
+// Slider labels at 11px (regular and breakdown rows)
+.sidebar .filters .slider-row p.slider-label,
+.sidebar .filters .slider-row button.slider-label.expandable {
+  font-size: 11px;
+}
+
+// A slider's filled track takes its card's category color (green results, blue basic stats, purple
+// advanced stats, orange support), like the card icons and the grid's group headers
+.sidebar .filters .filter-group .mat-mdc-slider {
+  --mat-slider-active-track-color: var(--group-color);
+}
+
+// Reset / Clear All: leather tiles like the table's footer buttons (no outline), white text
+.sidebar footer button,
+.sidebar footer button.negative {
+  background:
+    radial-gradient(ellipse at 35% 20%, rgba(255, 255, 255, 0.2), transparent 60%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(0, 0, 0, 0.18)),
+    url("../../assets/textures/leather.jpg") center / 96px,
+    var(--leather);
+  background-blend-mode: normal, normal, soft-light, normal;
+  border: none;
+  border-radius: 4px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    1px 1px 1px rgba(0, 0, 0, 0.6);
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+
+  &:hover {
+    background:
+      radial-gradient(ellipse at 35% 20%, rgba(255, 255, 255, 0.2), transparent 60%),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(0, 0, 0, 0.18)),
+      url("../../assets/textures/leather.jpg") center / 96px,
+      var(--leather);
+    background-blend-mode: normal, normal, soft-light, normal;
+    border: none;
+    color: #fff;
+    filter: brightness(1.15);
+  }
+}
+
+// The X that closes the filters: top right, level with the logo, white (yellow on hover) like the
+// About panel's
+.sidebar .logo {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+}
+
+.sidebar .filters-close {
+  align-items: center;
+  background: none;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  display: inline-flex;
+  flex: 0 0 auto;
+  height: 28px;
+  justify-content: center;
+  padding: 0;
+  width: 28px;
+
+  // (the icon takes the button's color, not the sidebar's yellow icon color)
+  .mat-icon {
+    color: inherit !important;
+    font-size: 20px;
+    height: 20px;
+    width: 20px;
+  }
+
+  // Yellow on hover / keyboard focus, like the About panel's X
+  &:hover,
+  &:focus-visible {
+    color: var(--scoreboard-led);
+    outline: none;
+  }
+}
+
+// The presets dropdown on its own again: a little more room above it, a little less below
+.sidebar .filters > div > .mat-mdc-select {
+  margin-bottom: 2.1em;
+  margin-top: 1.9em;
+}
+
+// MLB: the logo's ball is a baseball (upright, round)
+.sidebar .logo h1 .logo-basketball {
+  // (the app's basketball, like the favicon and the slider knobs)
+  background: url("../../assets/textures/basketball.svg") center / 100% 100% no-repeat;
+  background-blend-mode: normal;
+  height: 18px;
+  transform: none;
+  width: 18px;
+
+  &::before,
+  &::after {
+    display: none;
+  }
+}
+
+// NBA: the header's and footer's edges are painted court lines (solid, like the table's category
+// lines, with the same faint sheen down the middle) in court-paint white, instead of a football
+// sideline with hash marks
+.sidebar .logo::after,
+.sidebar footer::before {
+  background:
+    linear-gradient(transparent 30%, rgba(255, 255, 255, 0.45) 50%, transparent 70%) 0 var(--hash-edge) / 100% 3px no-repeat,
+    linear-gradient(#efe6d8, #efe6d8) 0 var(--hash-edge) / 100% 3px no-repeat;
+  height: 3px;
+  opacity: 0.55;
+}

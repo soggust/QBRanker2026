@@ -170,9 +170,9 @@ async function buildSeason(season) {
       ])
     : [new Map(), new Map(), new Map(), new Map(), new Map(), new Map()];
 
-  // Everyone with at least MIN_PA plate appearances (hitters) or batters faced (pitchers); the app's
-  // Min PA setting narrows it from there
-  const MIN_PA = 25;
+  // Everyone with a plate appearance (hitters) or a batter faced (pitchers); the app's Min PA setting
+  // narrows it from there
+  const MIN_PA = 1;
 
   const logo = (team) => `assets/MLB_Icons/${team?.id ?? 'mlb'}.svg`;
   const base = (split, prefix) => ({

@@ -1,33 +1,46 @@
 <svg xmlns='http://www.w3.org/2000/svg' width='1400' height='720' fill='none' stroke='white' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round' opacity='0.03'><filter id='c'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' seed='7' result='t'/><feDisplacementMap in='SourceGraphic' in2='t' scale='2.6'/></filter><g filter='url(#c)'>
-<!-- Left: a full field with the nine fielders at their spots (X's), and one play: a ball hit into the right-center gap (dashed) and the batter running to second -->
-<path d='M380 330 L130 90'/><path d='M380 330 L630 90'/><path d='M130 90 C220 -10 540 -10 630 90'/>
-<path d='M262 222 C300 150 460 150 498 222'/>
-<path d='M370 320 L390 320 L390 338 L380 346 L370 338 Z'/>
-<rect x='470' y='224' width='16' height='16' transform='rotate(45 478 232)'/>
-<rect x='372' y='126' width='16' height='16' transform='rotate(45 380 134)'/>
-<rect x='274' y='224' width='16' height='16' transform='rotate(45 282 232)'/>
-<circle cx='380' cy='242' r='14'/>
-<path d='M372 354l16 16M388 354l-16 16'/>
-<path d='M372 234l16 16M388 234l-16 16'/>
-<path d='M446 190l16 16M462 190l-16 16'/>
-<path d='M424 150l16 16M440 150l-16 16'/>
-<path d='M320 150l16 16M336 150l-16 16'/>
-<path d='M298 190l16 16M314 190l-16 16'/>
-<path d='M220 100l16 16M236 100l-16 16'/>
-<path d='M372 50l16 16M388 50l-16 16'/>
-<path d='M524 100l16 16M540 100l-16 16'/>
-<path d='M384 324 C420 250 440 150 458 62' stroke-dasharray='10 9'/><path d='M448 72 L460 56 L466 76'/>
-<path d='M394 322 C440 290 466 262 474 242' stroke-dasharray='6 8'/><path d='M466 214 C440 176 412 150 392 140' stroke-dasharray='6 8'/><path d='M404 136 L388 139 L398 152'/>
-<!-- Right: a 6-4-3 double play: shortstop to second, second baseman to first -->
-<path d='M960 700 L820 560'/><path d='M960 700 L1100 560'/>
-<path d='M880 612 C910 560 1010 560 1040 612'/>
-<path d='M952 692 L968 692 L968 706 L960 712 L952 706 Z'/>
-<rect x='1032' y='612' width='14' height='14' transform='rotate(45 1039 619)'/>
-<rect x='953' y='532' width='14' height='14' transform='rotate(45 960 539)'/>
-<rect x='874' y='612' width='14' height='14' transform='rotate(45 881 619)'/>
-<path d='M904 562l14 14M918 562l-14 14'/><text x='898' y='556' fill='white' stroke='none' font-family='sans-serif' font-size='16'>6</text>
-<path d='M998 562l14 14M1012 562l-14 14'/><text x='1016' y='556' fill='white' stroke='none' font-family='sans-serif' font-size='16'>4</text>
-<path d='M1014 594l14 14M1028 594l-14 14'/><text x='1032' y='590' fill='white' stroke='none' font-family='sans-serif' font-size='16'>3</text>
-<path d='M920 574 C934 560 946 548 954 542'/><path d='M942 542 L956 540 L950 553'/>
-<path d='M968 544 C990 562 1004 580 1014 592'/><path d='M1002 590 L1016 596 L1014 582'/>
+<!-- Left: a whole field drawn to scale (1.1px a foot, home plate at 380,700, shifted up 14px so the catcher fits): foul lines to 330 ft poles,
+     a 400 ft fence in center, the infield grass line, bases 90 ft apart and the mound 60.5 ft out. The
+     nine fielders (X's) stand at their usual spots, measured from home as distance and angle off
+     straight away: C behind the plate, P on the mound, 1B and 3B 110 ft out just inside the lines (38
+     degrees), 2B and SS 150 ft out either side of second (17 degrees), LF and RF 290 ft out (27
+     degrees), CF 320 ft straight away. One play: a double into the right-center gap (dashed), the
+     batter running through first to second. -->
+<g transform='translate(0 -14)'>
+<path d='M380 700 L123 443'/><path d='M380 700 L637 443'/>
+<path d='M123 443 A271.5 271.5 0 0 1 637 443'/>
+<path d='M278 610 A104.5 104.5 0 0 1 482 610'/>
+<path d='M373 693 L387 693 L387 704 L380 710 L373 704 Z'/>
+<rect x='443' y='623' width='14' height='14' transform='rotate(45 450 630)'/>
+<rect x='373' y='553' width='14' height='14' transform='rotate(45 380 560)'/>
+<rect x='303' y='623' width='14' height='14' transform='rotate(45 310 630)'/>
+<circle cx='380' cy='633' r='10'/>
+<path d='M373 709l14 14M387 709l-14 14'/>
+<path d='M373 626l14 14M387 626l-14 14'/>
+<path d='M447 598l14 14M461 598l-14 14'/>
+<path d='M421 535l14 14M435 535l-14 14'/>
+<path d='M325 535l14 14M339 535l-14 14'/>
+<path d='M298 598l14 14M312 598l-14 14'/>
+<path d='M228 409l14 14M242 409l-14 14'/>
+<path d='M373 341l14 14M387 341l-14 14'/>
+<path d='M518 409l14 14M532 409l-14 14'/>
+<path d='M386 692 C405 560 430 420 455 305' stroke-dasharray='10 9'/><path d='M444 314 L456 299 L461 317'/>
+<path d='M388 694 L444 636' stroke-dasharray='6 8'/><path d='M444 624 L388 566' stroke-dasharray='6 8'/><path d='M392 580 L386 565 L401 569'/>
+</g>
+<!-- Right: a 6-4-3 double play up close (1.6px a foot, home at 960,330): a grounder to the shortstop,
+     who throws to the second baseman covering the bag, who turns and throws on to first -->
+<path d='M960 330 L835 205'/><path d='M960 330 L1085 205'/>
+<path d='M833 150 A152 152 0 0 1 1087 150'/>
+<path d='M952 322 L968 322 L968 336 L960 342 L952 336 Z'/>
+<rect x='1054' y='220' width='16' height='16' transform='rotate(45 1062 228)'/>
+<rect x='952' y='118' width='16' height='16' transform='rotate(45 960 126)'/>
+<rect x='850' y='220' width='16' height='16' transform='rotate(45 858 228)'/>
+<circle cx='960' cy='233' r='12'/>
+<path d='M883 94l14 14M897 94l-14 14'/><text x='870' y='92' fill='white' stroke='none' font-family='sans-serif' font-size='18'>6</text>
+<path d='M1023 94l14 14M1037 94l-14 14'/><text x='1042' y='92' fill='white' stroke='none' font-family='sans-serif' font-size='18'>4</text>
+<path d='M1061 184l14 14M1075 184l-14 14'/><text x='1080' y='182' fill='white' stroke='none' font-family='sans-serif' font-size='18'>3</text>
+<path d='M954 320 C930 250 905 170 892 112' stroke-dasharray='10 9'/><path d='M884 124 L891 108 L900 122'/>
+<path d='M1026 110 C1000 116 980 120 970 124' stroke-dasharray='6 8'/><path d='M994 110 L972 124 L996 128'/>
+<path d='M902 104 C925 110 940 116 950 122'/><path d='M936 112 L952 123 L934 127'/>
+<path d='M968 132 C1000 160 1040 190 1060 216'/><path d='M1046 212 L1062 220 L1058 202'/>
 </g></svg>

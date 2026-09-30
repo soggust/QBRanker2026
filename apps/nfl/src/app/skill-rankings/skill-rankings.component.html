@@ -265,15 +265,15 @@
       <div
         mat-menu-item
         class="min-games-item"
-        title="Leave out players with fewer games than this (player tabs only; tops out at the most games any team has played that season)"
+        title="Leave out players who played less than this share of the season so far (player tabs only; 1 shows everyone); the number is the games it takes"
         (click)="$event.stopPropagation()"
       >
         <span class="min-games-stepper" (click)="$event.stopPropagation()">
-          <button type="button" aria-label="Fewer games" [disabled]="minGames <= 1" (click)="stepMinGames(-1)">−</button>
-          <span class="min-games-value">{{ minGames }}</span>
-          <button type="button" aria-label="More games" [disabled]="minGames >= seasonGames" (click)="stepMinGames(1)">+</button>
+          <button type="button" aria-label="Lower" [disabled]="minShare <= 0" (click)="stepMinShare(-1)">−</button>
+          <span class="min-games-value">{{ minShare ? minShare + '%' : 1 }}</span>
+          <button type="button" aria-label="Higher" [disabled]="minShare >= 100" (click)="stepMinShare(1)">+</button>
         </span>
-        <span>Min Games</span>
+        <span>Min Games: <span class="menu-value">{{ minCount }}</span></span>
       </div>
 
       <!-- Display: what the table shows -->

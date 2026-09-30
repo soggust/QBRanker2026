@@ -12,30 +12,34 @@ dependencies and the TypeScript settings.
 apps/
   mlb/                  the MLB app: same engine and look as the NFL app, with baseball positions,
                         stats and presets (MLB Stats API + Baseball Savant), a dirt / chalk theme
+  nba/                  the NBA app: the same engine with the five positions, basketball stats and
+                        presets (Basketball-Reference + ESPN), a hardwood / basketball theme
   nfl/                  the NFL app
     src/                app code, styles, assets, and StaticData/ (the season data it serves)
     scripts/            data scripts (nightly update, honors, similar seasons, run blocking)
     tsconfig.json       imports resolve from src/ (app/..., StaticData/...)
     tsconfig.app.json   build config
     tsconfig.spec.json  test config
-angular.json            one project per app ("nfl", "mlb")
+angular.json            one project per app ("nfl", "mlb", "nba")
 tsconfig.json           compiler options shared by every app
-firebase.json           hosting: serves dist/site, each sport under its own path (/nfl/, /mlb/); / redirects to /nfl/
-.github/workflows/      nfl-update-data.yml and mlb-update-data.yml (nightly data), firebase-deploy.yml (deploy on push)
+firebase.json           hosting: serves dist/site, each sport under its own path (/nfl/, /mlb/, /nba/); / redirects to /nfl/
+.github/workflows/      nfl-, mlb- and nba-update-data.yml (nightly data), firebase-deploy.yml (deploy on push)
 ```
 
 ## Commands
 
 | Command | What it does |
 | --- | --- |
-| `npm run dev` | Every app at once, all at http://localhost:4200 (`/nfl/`, `/mlb/`) so the sport bar works like the live site, each with live reload (`PORT=4300 npm run dev` if 4200 is taken) |
-| `npm start` / `npm run start:mlb` | Just one app's dev server (the sport bar's other link won't work) |
-| `npm run build` | Production build of every app into `dist/site` (`nfl/`, `mlb/`) |
+| `npm run dev` | Every app at once, all at http://localhost:4200 (`/nfl/`, `/mlb/`, `/nba/`) so the sport bar works like the live site, each with live reload (`PORT=4300 npm run dev` if 4200 is taken) |
+| `npm start` / `npm run start:mlb` / `npm run start:nba` | Just one app's dev server (the sport bar's other links won't work) |
+| `npm run build` | Production build of every app into `dist/site` (`nfl/`, `mlb/`, `nba/`) |
 | `npm run update-data` | Pull the current season (`SEASON=2025` for a past one) |
 | `npm run update-honors` | All-Pro and Pro Bowl lists from Wikipedia |
 | `npm run build-comps` | The player card's similar seasons and season history |
 | `npm run mlb:update-data` | MLB: pull this season (`SEASON=2019` for a past one, `ALL=1` for 2000 on) |
 | `npm run mlb:build-comps` | MLB: the player card's similar seasons and season history |
+| `npm run nba:update-data` | NBA: pull this season (`SEASON=2019` for a past one, named for the year it ends in; `ALL=1` for 2000-01 on; about 10 minutes, Basketball-Reference allows 20 requests a minute) |
+| `npm run nba:build-comps` | NBA: the player card's similar seasons and season history |
 | `npm run build-blocking` | The player card's run-blocking reads (after a season's participation data is out) |
 
 ## Adding another sport

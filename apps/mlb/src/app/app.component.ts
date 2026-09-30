@@ -15,6 +15,7 @@ export class AppComponent {
   readonly sports = [
     { id: 'nfl', label: 'NFL' },
     { id: 'mlb', label: 'MLB' },
+    { id: 'nba', label: 'NBA' },
   ];
 
   position$ = this.positionService.position$;

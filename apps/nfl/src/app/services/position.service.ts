@@ -35,8 +35,9 @@ export interface RankerSettings {
   statBasis: StatBasis;
   showUnused: boolean;
   showInjured: boolean;
-  // Players with fewer games are left out (player tabs only; see SkillRankingsComponent.minGamesFor)
-  minGames: number;
+  // Players with less than this share of the season's games are left out (0-100; 0 is everyone;
+  // player tabs only)
+  minShare: number;
   totalStats: boolean;
   // Tint values green / red by how far above / below the list average they are
   colorValues: boolean;
@@ -49,13 +50,15 @@ export interface RankerSettings {
   garbageTime: boolean;
 }
 
-// The Min Games setting runs 1 to a full season
+// The Min Games setting: a share of the season so far, in steps of MIN_SHARE_STEP (0 is 1, everyone),
+// of at most a full season
 export const MAX_MIN_GAMES = 17;
+export const MIN_SHARE_STEP = 10;
 const DEFAULT_SETTINGS: RankerSettings = {
   statBasis: 'season',
   showUnused: false,
   showInjured: true,
-  minGames: 1,
+  minShare: 10,
   totalStats: true,
   colorValues: true,
   categoryColors: true,

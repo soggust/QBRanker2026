@@ -29,7 +29,7 @@ import {
   headlineStats,
   presetWeights,
 } from 'app/positions';
-import { MAX_MIN_GAMES, PositionService } from 'app/services/position.service';
+import { MAX_MIN_GAMES, MIN_SHARE_STEP, PositionService } from 'app/services/position.service';
 import { copyRankingsToClipboard } from 'app/utils/clipboard';
 import {
   SKILL_UNITS,
@@ -348,21 +348,38 @@ export class SkillRankingsComponent implements OnChanges {
     this.positionService.setFiltersOpen(!this.filtersOpen);
   }
 
-  // Min Games (settings menu): players with fewer games are left out. Tops out at the most games any
-  // team has played that season: a finished season's length (16 through 2020, 17 since), or so far this
-  // season. A higher setting counts as that (Min Games 15 in week 4 means 4).
+  // The most games any team has played that season: a finished season's length (16 through 2020, 17
+  // since), or so far this season
   get seasonGames(): number {
     return Math.min(MAX_MIN_GAMES, Math.max(1, ...SKILL_UNITS.DEF.map((team) => team.games)));
   }
 
-  get minGames(): number {
-    return Math.min(this.positionService.settings.minGames, this.seasonGames);
+  // Min Games (settings menu): players with less than a share of the season so far are left out. The
+  // setting is a percent (0 means 1: everyone, then 10% to 100% in steps of 10), of the team games so far (a full season at most), so it
+  // scales with the season: 10% is a game or two early on and a real cutoff by the end.
+  get minShare(): number {
+    return this.positionService.settings.minShare;
   }
 
-  stepMinGames(step: number) {
-    const next = Math.min(this.seasonGames, Math.max(1, this.minGames + step));
-    if (next === this.minGames) return;
-    this.positionService.updateSettings({ minGames: next });
+  // What the share is of (the team games so far (a full season at most))
+  get minTotal(): number {
+    return this.seasonGames;
+  }
+
+  // The cutoff: the share of a total, rounded (never under 1)
+  minCountFor(total: number): number {
+    const share = this.positionService.settings.minShare;
+    return share ? Math.max(1, Math.round((share / 100) * total)) : 1;
+  }
+
+  get minCount(): number {
+    return this.minCountFor(this.minTotal);
+  }
+
+  stepMinShare(step: number) {
+    const next = Math.min(100, Math.max(0, this.minShare + Math.sign(step) * MIN_SHARE_STEP));
+    if (next === this.minShare) return;
+    this.positionService.updateSettings({ minShare: next });
     this.sortPlayers();
   }
 
@@ -370,7 +387,7 @@ export class SkillRankingsComponent implements OnChanges {
   // the team tabs, where everyone plays every week)
   private listedPlayers(): SkillPlayer[] {
     const teamTab = this.position === 'DEF' || this.position === 'OL' || this.position === 'HC';
-    const min = teamTab ? 0 : this.minGames;
+    const min = teamTab ? 0 : this.minCount;
     return SKILL_UNITS[this.position].filter((player) => (this.showInjured || !player.injured) && player.games >= min);
   }
 
@@ -1616,8 +1633,8 @@ export class SkillRankingsComponent implements OnChanges {
   private seasonContext(season: number, rows: Record<SkillPosition, SkillPlayer[]>): SeasonContext {
     const units = rows[this.position];
     const teamTab = this.position === 'DEF' || this.position === 'OL' || this.position === 'HC';
-    const seasonGames = Math.max(0, ...units.map((p) => p.games));
-    const min = teamTab ? 0 : Math.min(this.positionService.settings.minGames, seasonGames);
+    const seasonGames = Math.min(MAX_MIN_GAMES, Math.max(1, ...units.map((p) => p.games)));
+    const min = teamTab ? 0 : this.minCountFor(seasonGames);
     const context: SeasonContext = {
       season,
       rows,

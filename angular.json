@@ -212,6 +212,111 @@
           }
         }
       }
+    },
+    "nba": {
+      "projectType": "application",
+      "schematics": {
+        "@schematics/angular:component": {
+          "style": "scss"
+        }
+      },
+      "root": "apps/nba",
+      "sourceRoot": "apps/nba/src",
+      "prefix": "app",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-angular:browser",
+          "options": {
+            "outputPath": "dist/site/nba",
+            "index": "apps/nba/src/index.html",
+            "main": "apps/nba/src/main.ts",
+            "polyfills": [
+              "zone.js"
+            ],
+            "tsConfig": "apps/nba/tsconfig.app.json",
+            "inlineStyleLanguage": "scss",
+            "assets": [
+              "apps/nba/src/favicon.png",
+              "apps/nba/src/favicon.svg",
+              "apps/nba/src/assets",
+              {
+                "glob": "**/*.json",
+                "input": "apps/nba/src/StaticData",
+                "output": "data"
+              }
+            ],
+            "styles": [
+              "apps/nba/src/styles.scss"
+            ],
+            "scripts": [],
+            "baseHref": "/nba/"
+          },
+          "configurations": {
+            "production": {
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "1.5mb",
+                  "maximumError": "3mb"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "60kb",
+                  "maximumError": "100kb"
+                }
+              ],
+              "outputHashing": "all"
+            },
+            "development": {
+              "buildOptimizer": false,
+              "optimization": false,
+              "vendorChunk": true,
+              "extractLicenses": false,
+              "sourceMap": true,
+              "namedChunks": true
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "serve": {
+          "builder": "@angular-devkit/build-angular:dev-server",
+          "configurations": {
+            "production": {
+              "buildTarget": "nba:build:production"
+            },
+            "development": {
+              "buildTarget": "nba:build:development"
+            }
+          },
+          "defaultConfiguration": "development"
+        },
+        "extract-i18n": {
+          "builder": "@angular-devkit/build-angular:extract-i18n",
+          "options": {
+            "buildTarget": "nba:build"
+          }
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "polyfills": [
+              "zone.js",
+              "zone.js/testing"
+            ],
+            "tsConfig": "apps/nba/tsconfig.spec.json",
+            "inlineStyleLanguage": "scss",
+            "assets": [
+              "apps/nba/src/favicon.png",
+              "apps/nba/src/favicon.svg",
+              "apps/nba/src/assets"
+            ],
+            "styles": [
+              "apps/nba/src/styles.scss"
+            ],
+            "scripts": []
+          }
+        }
+      }
     }
   },
   "schematics": {

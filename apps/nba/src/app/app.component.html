@@ -1,0 +1,54 @@
+<!-- Sport bar: a link to each sport's app on this site (the page shrinks by its height) -->
+<nav class="sport-bar" aria-label="Sport">
+  @for (s of sports; track s.id) {
+    <a [href]="'/' + s.id + '/'" [class.active]="s.id === sport" [attr.aria-current]="s.id === sport ? 'page' : null">{{ s.label }}</a>
+  }
+</nav>
+
+<main [class.menu-open]="menuOpen" [class.sidebar-collapsed]="sidebarCollapsed">
+  <!-- Filters menu: opened by the footer's filter button, closed by its X (or the shade on small screens) -->
+  <div class="sidebar-shell">
+    <sidebar class="sidebar"></sidebar>
+  </div>
+  <div class="shade" (click)="closeFilters()"></div>
+
+  @let position = position$ | async;
+  <div class="content">
+
+    <!-- Rankings: every tab is the same config-driven table (see positions.ts) -->
+    @if (position) {
+      <skill-rankings class="rankings" [position]="position">
+        <!-- Position tabs: shown between the rankings' button bar and the grid, as wide as the grid -->
+        <nav class="position-bar" aria-label="Position">
+          @for (tab of positions; track tab) {
+            <button
+              type="button"
+              [class.active]="tab === position"
+              [attr.aria-current]="tab === position ? 'page' : null"
+              (click)="selectPosition(tab)"
+            >
+              <span class="full">{{ positionNames[tab] }}</span>
+              <span class="short">{{ tab }}</span>
+            </button>
+          }
+          <!-- Phones: one dropdown instead of eight pills (native, so it opens the phone's own picker) -->
+          <select
+            class="position-select"
+            aria-label="Position"
+            [value]="position"
+            (change)="selectPosition($any($event.target).value)"
+          >
+            @for (tab of positions; track tab) {
+              <option [value]="tab" [selected]="tab === position">{{ positionNames[tab] }}</option>
+            }
+          </select>
+        </nav>
+      </skill-rankings>
+    }
+  </div>
+</main>
+
+<!-- About / FAQ, opened from the info button in the footer -->
+@if (aboutOpen$ | async) {
+  <about-panel (closed)="closeAbout()"></about-panel>
+}

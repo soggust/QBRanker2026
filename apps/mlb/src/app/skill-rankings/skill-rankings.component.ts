@@ -21,7 +21,7 @@ import {
   headlineStats,
   presetWeights,
 } from 'app/positions';
-import { MIN_PA_FLOOR, MIN_PA_STEP, PositionService } from 'app/services/position.service';
+import { MIN_SHARE_STEP, PositionService } from 'app/services/position.service';
 import { copyRankingsToClipboard } from 'app/utils/clipboard';
 import { SKILL_UNITS, defaultRanking, statIsEmpty, unitsForSeason, weightedTotals } from 'app/utils/unit-scoring';
 import { CURRENT_SEASON, SEASONS, dataSeason, dataVersion, fetchSeason, fetchSeasonFile } from 'StaticData/data';
@@ -261,31 +261,39 @@ export class SkillRankingsComponent implements OnChanges {
     this.positionService.setFiltersOpen(!this.filtersOpen);
   }
 
-  // Min PA (settings menu): players with fewer plate appearances (a pitcher: batters faced) are left
-  // out. Steps by 25; tops out at the most anyone on this tab has (early in the season, a high setting
-  // just means the everyday players), so a higher setting counts as that.
-  readonly minPaFloor = MIN_PA_FLOOR;
-
-  get maxPa(): number {
-    return Math.max(MIN_PA_FLOOR, ...(SKILL_UNITS[this.position] ?? []).map((p) => p.stats.pa ?? 0));
+  // Min PA (settings menu): players with less than a share of the season so far are left out. The
+  // setting is a percent (0 means 1: everyone, then 10% to 100% in steps of 10), of the most plate appearances anyone on the tab has (batters faced, for pitchers), so it
+  // scales with the season: 10% is a game or two early on and a real cutoff by the end.
+  get minShare(): number {
+    return this.positionService.settings.minShare;
   }
 
-  get minPa(): number {
-    return Math.min(this.positionService.settings.minPa, this.maxPa);
+  // What the share is of (the most plate appearances anyone on the tab has (batters faced, for pitchers))
+  get minTotal(): number {
+    return Math.max(1, ...(SKILL_UNITS[this.position] ?? []).map((p) => p.stats.pa ?? 0));
   }
 
-  stepMinPa(step: number) {
-    const by = Math.sign(step) * MIN_PA_STEP;
-    const next = Math.min(this.maxPa, Math.max(MIN_PA_FLOOR, this.minPa + by));
-    if (next === this.minPa) return;
-    this.positionService.updateSettings({ minPa: next });
+  // The cutoff: the share of a total, rounded (never under 1)
+  minCountFor(total: number): number {
+    const share = this.positionService.settings.minShare;
+    return share ? Math.max(1, Math.round((share / 100) * total)) : 1;
+  }
+
+  get minCount(): number {
+    return this.minCountFor(this.minTotal);
+  }
+
+  stepMinShare(step: number) {
+    const next = Math.min(100, Math.max(0, this.minShare + Math.sign(step) * MIN_SHARE_STEP));
+    if (next === this.minShare) return;
+    this.positionService.updateSettings({ minShare: next });
     this.sortPlayers();
   }
 
   // The players this tab lists: injured players only with Show Injured on, and enough plate appearances
   private listedPlayers(): SkillPlayer[] {
     return SKILL_UNITS[this.position].filter(
-      (player) => (this.showInjured || !player.injured) && (player.stats.pa ?? 0) >= this.minPa,
+      (player) => (this.showInjured || !player.injured) && (player.stats.pa ?? 0) >= this.minCount,
     );
   }
 
@@ -1239,8 +1247,7 @@ export class SkillRankingsComponent implements OnChanges {
   // Another season's list: the same filters as the table, ranked with the current sliders
   private seasonContext(season: number, rows: Record<SkillPosition, SkillPlayer[]>): SeasonContext {
     const units = rows[this.position];
-    const most = Math.max(0, ...units.map((p) => p.stats.pa ?? 0));
-    const min = Math.min(this.positionService.settings.minPa, most);
+    const min = this.minCountFor(Math.max(1, ...units.map((p) => p.stats.pa ?? 0)));
     const context: SeasonContext = {
       season,
       rows,

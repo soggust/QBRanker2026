@@ -22,6 +22,14 @@
       {
         "source": "/mlb/**",
         "destination": "/mlb/index.html"
+      },
+      {
+        "source": "/nba",
+        "destination": "/nba/index.html"
+      },
+      {
+        "source": "/nba/**",
+        "destination": "/nba/index.html"
       }
     ],
     "headers": [
@@ -54,6 +62,15 @@
       },
       {
         "source": "/mlb/",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache"
+          }
+        ]
+      },
+      {
+        "source": "/nba/",
         "headers": [
           {
             "key": "Cache-Control",

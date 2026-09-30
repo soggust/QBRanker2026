@@ -703,7 +703,7 @@ section footer .mat-mdc-select.season-select,
 }
 
 // Their open lists in plain cream hide (the settings menu stays a scoreboard panel; seams would sit
-// behind the options), dark options that turn red, and the page's 10px scrollbar with a red thumb
+// behind the options), dark options that turn red, and the page's 10px scrollbar with an off-white thumb
 .mdc-menu-surface.mat-mdc-select-panel {
   background:
     radial-gradient(ellipse at 35% 10%, rgba(255, 255, 255, 0.7), transparent 60%),
@@ -734,13 +734,18 @@ section footer .mat-mdc-select.season-select,
   }
 
   &::-webkit-scrollbar-thumb {
-    background: #c8102e !important;
+    background: linear-gradient(90deg, #fff, #f1ece0 55%, #c9c1ae) !important;
     background-clip: padding-box !important;
   }
 
-  &::-webkit-scrollbar-thumb:hover,
+  &::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(90deg, #fff, #fbf8f1 55%, #ddd5c3) !important;
+    background-clip: padding-box !important;
+  }
+
   &::-webkit-scrollbar-thumb:active {
-    background: #a50d26 !important;
+    background: linear-gradient(90deg, #f1ece0, #ddd5c3 55%, #b5ab95) !important;
+    background-clip: padding-box !important;
   }
 }
 
@@ -782,4 +787,42 @@ section footer .mat-mdc-select.season-select {
 // The filter menu's Clear All and Reset buttons: bold, like the other MLB labels on cream
 .sidebar footer button {
   font-weight: 800 !important;
+}
+
+// Scrollbars: the thumb is a baseball's off-white leather (no seams), shaded across its width like
+// the ball, on every scroller (the table, the menus, the About panel and the open lists)
+::-webkit-scrollbar-thumb:vertical {
+  background: linear-gradient(90deg, #fff, #f1ece0 55%, #c9c1ae) !important;
+  background-clip: padding-box !important;
+}
+
+::-webkit-scrollbar-thumb:horizontal {
+  background: linear-gradient(180deg, #fff, #f1ece0 55%, #c9c1ae) !important;
+  background-clip: padding-box !important;
+}
+
+// (brighter under the pointer, a shade deeper while dragging)
+::-webkit-scrollbar-thumb:vertical:hover {
+  background: linear-gradient(90deg, #fff, #fbf8f1 55%, #ddd5c3) !important;
+  background-clip: padding-box !important;
+}
+
+::-webkit-scrollbar-thumb:horizontal:hover {
+  background: linear-gradient(180deg, #fff, #fbf8f1 55%, #ddd5c3) !important;
+  background-clip: padding-box !important;
+}
+
+::-webkit-scrollbar-thumb:vertical:active {
+  background: linear-gradient(90deg, #f1ece0, #ddd5c3 55%, #b5ab95) !important;
+  background-clip: padding-box !important;
+}
+
+::-webkit-scrollbar-thumb:horizontal:active {
+  background: linear-gradient(180deg, #f1ece0, #ddd5c3 55%, #b5ab95) !important;
+  background-clip: padding-box !important;
+}
+
+// (on the cream open lists, a darker track so the off-white thumb still shows)
+.mdc-menu-surface.mat-mdc-select-panel::-webkit-scrollbar-track {
+  background-color: rgba(60, 45, 25, 0.35) !important;
 }

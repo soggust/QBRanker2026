@@ -3,5 +3,10 @@
     "target": "http://localhost:4201",
     "secure": false,
     "changeOrigin": true
+  },
+  "/nba": {
+    "target": "http://localhost:4202",
+    "secure": false,
+    "changeOrigin": true
   }
 }

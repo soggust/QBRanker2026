@@ -1,0 +1,49 @@
+<svg xmlns='http://www.w3.org/2000/svg' width='1400' height='720' fill='none' stroke='white' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round' opacity='0.03'><filter id='c'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' seed='7' result='t'/><feDisplacementMap in='SourceGraphic' in2='t' scale='2.6'/></filter><g filter='url(#c)'>
+<!-- Left: a half court (baseline at the bottom) and a pick-and-roll: 5 sets a screen for 1 at the top,
+     1 drives off it, 5 rolls to the rim, 2 lifts to the corner, and the pocket pass (dashed) to 5 -->
+<path d='M90 640 H670'/><path d='M90 640 V160'/><path d='M670 640 V160'/><path d='M90 160 H670'/>
+<path d='M300 640 V470 H460 V640'/>
+<circle cx='380' cy='470' r='60'/>
+<path d='M130 640 V560 C150 330 610 330 630 560 V640'/>
+<circle cx='380' cy='612' r='10'/><path d='M350 626 H410'/>
+<path d='M320 160 C320 200 440 200 440 160'/>
+<circle cx='380' cy='300' r='16'/><path d='M374 292 l6 -6 v28'/>
+<circle cx='430' cy='318' r='16'/><path d='M424 312 c10 -8 14 4 2 8 c12 2 8 16 -4 8'/>
+<path d='M414 318 H446' stroke-width='3'/><path d='M402 330 L458 306'/>
+<path d='M380 316 C390 360 420 400 450 440' /><path d='M440 430 L452 444 L456 426'/>
+<path d='M430 334 C420 400 400 480 390 580' stroke-dasharray='10 9'/><path d='M380 568 L390 586 L400 568'/>
+<circle cx='170' cy='420' r='16'/><path d='M164 414 c10 -8 16 4 0 16 h14'/>
+<path d='M170 436 C160 500 140 560 130 600'/><path d='M122 590 L130 606 L140 592'/>
+<circle cx='600' cy='420' r='16'/><path d='M594 414 c10 -8 16 4 2 8 c12 2 8 16 -4 8'/>
+<circle cx='250' cy='560' r='16'/><path d='M246 552 v10 h12 M254 552 v18'/>
+<path d='M364 350l16 16M380 350l-16 16'/>
+<path d='M404 360l16 16M420 360l-16 16'/>
+<path d='M184 450l16 16M200 450l-16 16'/>
+<path d='M560 440l16 16M576 440l-16 16'/>
+<path d='M270 520l16 16M286 520l-16 16'/>
+<path d='M436 520 C470 470 520 440 580 430' stroke-dasharray='10 9'/>
+<!-- Right: a half court and "horns": both bigs at the elbows, 1 comes off a ball screen, the other
+     big pops to the arc, the wings cut backdoor from the corners -->
+<path d='M730 640 H1310'/><path d='M730 640 V160'/><path d='M1310 640 V160'/><path d='M730 160 H1310'/>
+<path d='M940 640 V470 H1100 V640'/>
+<circle cx='1020' cy='470' r='60'/>
+<path d='M770 640 V560 C790 330 1250 330 1270 560 V640'/>
+<circle cx='1020' cy='612' r='10'/><path d='M990 626 H1050'/>
+<path d='M960 160 C960 200 1080 200 1080 160'/>
+<circle cx='1020' cy='270' r='16'/><path d='M1014 262 l6 -6 v28'/>
+<circle cx='950' cy='470' r='16'/><path d='M944 464 c10 -8 14 4 2 8 c12 2 8 16 -4 8'/>
+<circle cx='1090' cy='470' r='16'/><path d='M1086 462 v10 h12 M1094 462 v18'/>
+<path d='M934 470 H966' stroke-width='3'/>
+<circle cx='790' cy='590' r='16'/><path d='M784 584 c10 -8 16 4 0 16 h14'/>
+<circle cx='1250' cy='590' r='16'/><path d='M1244 582 h12 l-10 10 c10 -4 14 8 2 12'/>
+<path d='M1020 286 C990 330 960 400 960 440'/><path d='M950 430 L960 446 L970 430'/>
+<path d='M1090 454 C1110 410 1140 380 1180 370'/><path d='M1166 362 L1184 368 L1172 382'/>
+<path d='M806 586 C860 560 900 560 960 600'/><path d='M946 604 L964 604 L956 588'/>
+<path d='M1234 586 C1180 560 1140 560 1080 600'/><path d='M1094 604 L1076 604 L1084 588'/>
+<path d='M1004 290 C940 380 900 480 880 560' stroke-dasharray='10 9'/>
+<path d='M1004 250l16 16M1020 250l-16 16'/>
+<path d='M934 430l16 16M950 430l-16 16'/>
+<path d='M1100 430l16 16M1116 430l-16 16'/>
+<path d='M800 540l16 16M816 540l-16 16'/>
+<path d='M1220 540l16 16M1236 540l-16 16'/>
+</g></svg>

@@ -93,8 +93,9 @@
             Hitters are listed at their primary position (left, center and right field together as
             outfielders). Pitchers who started at least half their games are starters; the rest are
             relievers. A two-way player like Ohtani shows on both sides. <b>Min PA</b> in the settings sets how
-            much playing time it takes to be listed: plate appearances for hitters, batters faced for pitchers
-            (50 to start, in steps of 25).
+            much playing time it takes to be listed, as a share of the most plate appearances on the tab
+            (batters faced, for pitchers): 10% to start, in steps of 10%, down to 1 to see everyone. It grows
+            with the season, and the settings show the plate appearances it takes.
           </p>
           <h4>Support grades</h4>
           <p>
@@ -169,7 +170,7 @@
             <li><mat-icon fontIcon="emoji_events"></mat-icon><span><b>Rank tiles:</b> a trophy for #1, green through 10, white in the middle and red for the bottom 10.</span></li>
             <li><mat-icon fontIcon="content_copy"></mat-icon><span><b>Copy</b> puts your whole ranked list on the clipboard, ready to paste into a group chat.</span></li>
             <li><mat-icon fontIcon="healing"></mat-icon><span>The <b>bandage</b> marks players on the injured list. Hide them with <b>Injured Players</b> in the settings.</span></li>
-            <li><mat-icon fontIcon="filter_list"></mat-icon><span><b>Min PA</b> in the settings leaves out players with fewer plate appearances (pitchers: batters faced), in steps of 25. Try 400+ for everyday players only, or 25 to see everyone.</span></li>
+            <li><mat-icon fontIcon="filter_list"></mat-icon><span><b>Min PA</b> in the settings leaves out players with less than a share of the season's playing time (plate appearances; pitchers: batters faced), in steps of 10%. Try 50%+ for everyday players only, or 1 to see everyone.</span></li>
             <li><mat-icon fontIcon="military_tech"></mat-icon><span>Hover any <b>badge</b> under a name for the award written out.</span></li>
           </ul>
         }
@@ -248,7 +249,7 @@
             <p>
               He may be under the Min PA setting (plate appearances, or batters faced for a pitcher; lower it
               to see more), listed at a different position (his primary one), or on the injured list with
-              Injured Players turned off. The data includes everyone with 25 or more.
+              Injured Players turned off. At 1, everyone who batted or pitched is listed.
             </p>
           </details>
         }

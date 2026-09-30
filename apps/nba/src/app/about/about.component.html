@@ -1,0 +1,298 @@
+<div class="about-backdrop" (click)="close()"></div>
+<div class="about-panel" role="dialog" aria-modal="true" aria-labelledby="about-title">
+  <header>
+    <mat-icon class="about-icon" aria-hidden="true" fontIcon="info"></mat-icon>
+    <h2 id="about-title">About NBA Ranker</h2>
+    <button #closeButton type="button" class="about-close" aria-label="Close" title="Close (Esc)" (click)="close()">
+      <mat-icon fontIcon="close"></mat-icon>
+    </button>
+  </header>
+
+  <div class="about-layout">
+    <nav aria-label="About sections">
+      @for (section of sections; track section.id) {
+        <button
+          type="button"
+          [class.active]="active === section.id"
+          [attr.aria-current]="active === section.id ? 'true' : null"
+          (click)="show(section.id)"
+        >
+          <span>{{ section.title }}</span>
+        </button>
+      }
+    </nav>
+
+    <div class="about-body" #body>
+      @switch (active) {
+        @case ('about') {
+          <h3>Your rankings, your rules</h3>
+          <p>
+            Every NBA ranking is really an argument about what matters. Is it points per game or efficiency?
+            The box score or the plus-minus? Does a rim protector's defense count as much as a scorer's
+            buckets? This site lets you settle it yourself: move the sliders and the list re-ranks instantly.
+          </p>
+          <p>
+            It covers all five positions (point guards, shooting guards, small forwards, power forwards and
+            centers) plus head coaches, with this season's stats, updated every night during the season, and every season back
+            to 2000-01.
+          </p>
+          <div class="callout">
+            <strong>New here?</strong> Pick a tab up top, then try a preset from the dropdown at the top of the
+            filter menu (the <b>filter</b> button above the list, on the left, opens and closes it). Each preset ranks around a
+            different idea of "best". Then drag a few sliders and watch the list move.
+          </div>
+          <h4>Quick start</h4>
+          <ul>
+            <li><b>Sliders</b> set how much each stat counts. 50% is normal, 100% is double, 0% ignores it.</li>
+            <li>
+              <b>Presets</b> load a ready-made set of sliders built around a kind of player (a floor general, a
+              3-and-D wing, a rim protector...); <b>Default</b> puts every slider back at 50%.
+            </li>
+            <li>
+              The <b>season</b> dropdown above the list ranks any season from 2000-01 on with the same sliders,
+              so you can see how your formula grades another year.
+            </li>
+            <li><b>Drag rows</b> to rank by hand. Your order sticks until that tab's sliders change.</li>
+            <li><b>Hover</b> any column label for the full stat name and the league average.</li>
+            <li><b>Click a name</b> (or its card) for the player card: an overview with a skill radar, archetype and scouting report, every stat as a rank, and his seasons.</li>
+            <li>
+              In the bar above the list: <b>filter</b> opens the filter menu, <b>copy</b> copies your list,
+              <b>info</b> opens this panel and the <b>gear</b> has the settings.
+            </li>
+            <li>
+              <b>Badges</b> under a name mark that season's honors: the championship, the conference title,
+              MVP, Defensive Player of the Year, All-NBA, All-Defensive, All-Star, Coach of the Year and more (see
+              the FAQ).
+            </li>
+          </ul>
+        }
+
+        @case ('ranking') {
+          <h3>How the rankings work</h3>
+          <p>
+            Every player gets a score from the stats you weigh, and the list is sorted by that score. Here's
+            what goes into it:
+          </p>
+          <h4>Sliders and weights</h4>
+          <p>
+            Every stat is first put on the same scale: how far above or below the list's average a player is,
+            measured in standard deviations (so 60% true shooting counts as much as 28 points a game if
+            they're equally far from typical). That score is multiplied by its slider: at 50% a stat counts
+            normally, at 100% twice as much, and at 0% not at all. Nothing is weighted behind the scenes, so
+            the sliders alone decide what matters. A stat's <b>eye</b> switches it off entirely and hides its
+            column. A card's eye does the same for a whole group.
+          </p>
+          <h4>Good and bad stats</h4>
+          <p>
+            Stats where lower is better (turnovers and turnover rate) count against a player. Extreme values
+            are capped, so one fluky number can't swamp the list. A shooting percentage from too few attempts
+            (under 25 threes or 20 free throws) shows as "-" and counts as average.
+          </p>
+          <h4>No hand-made grades</h4>
+          <p>
+            Plenty of basketball is hard to measure (defense most of all), but nothing here is a grade
+            somebody made up. Defense is read from what can be counted: <b>Defensive Box Plus/Minus</b>,
+            steal and block rates, defensive rebounding, and <b>On-Off</b> (how the team does with him on the
+            floor against off it, which catches what the box score misses, noisily). The voters' opinions
+            show up as badges instead of stats: <b>All-Defensive</b> teams, <b>Defensive Player of the
+            Year</b> and <b>Clutch Player of the Year</b> sit under names and never move the ranking.
+          </p>
+          <h4>Who's on each tab</h4>
+          <p>
+            Players are listed at the position Basketball-Reference lists for their season (a "SG-PG" counts
+            as a shooting guard). <b>Min Games</b> in the settings sets how many games it takes to be listed, as
+            a share of the season so far: 10% to start, in steps of 10%, down to 1 to see everyone. The settings
+            show the games it takes.
+          </p>
+          <h4>Support grades</h4>
+          <p>
+            The Support columns grade the situation around a player, <b>F</b> to <b>A+</b> on a curve across
+            the league: <b>Teammates</b> (how good the rest of his team was, without him: their Box Plus/Minus
+            weighted by minutes) and <b>Coaching</b> (his team's coaching lift, from the Head Coaches tab).
+          </p>
+          <p>
+            Better support counts slightly <em>against</em> a player: it's credit for doing more with less, so a
+            big season next to an All-Star cast or under a coach getting the most out of everyone counts a little less. It's a light
+            touch (a fifth of a normal stat's strength), and the Support card's eye or the sliders turn it off.
+          </p>
+          <h4>Head coaches</h4>
+          <p>
+            The <b>Head Coaches</b> tab ranks every coach of the season (an interim coach has his own row, with
+            his own games, record and playoff wins; the team's ratings are its whole season's). Its key stat is
+            the <b>Coaching Lift</b>: how much better the team played than its roster's talent coming in.
+            The talent is last season's Box Plus/Minus of the players he used, weighted by their minutes for him
+            (a newcomer to the league counts as replacement level), turned into the net rating it predicts. A
+            coach whose team beats that got more out of the roster; one whose team falls short got less.
+            <b>W vs Pt Diff</b> is how many more (or fewer) games the team won than its point differential
+            implies: mostly close games, where coaching and luck both play a part.
+          </p>
+          <h4>Totals and per game</h4>
+          <p>
+            Counting stats read <b>per game</b> to start (points, rebounds and assists per game, the way the
+            NBA talks). <b>Stat Totals</b> in the settings switches them to <b>season totals</b> or an
+            <b>82-game pace</b>. Per game and the pace rank the same; they just read differently. Win Shares
+            and VORP are always season totals.
+          </p>
+          <h4>Ranking by hand</h4>
+          <p>
+            Drag a row by its handle to move it. A hand-dragged order stays put when you switch tabs, and
+            is kept until you change that tab's own sliders or settings.
+          </p>
+        }
+
+        @case ('grades') {
+          <h3>The player card</h3>
+          <p>
+            Click any name for his card. It has three tabs:
+          </p>
+          <ul>
+            <li>
+              <b>Overview:</b> related stats rolled up into skills (scoring, efficiency, shooting, playmaking,
+              rebounding, defense, impact and overall value), each as a percentile in the list. They make up
+              the radar, pick his <b>archetype</b> (a Floor General, a 3-and-D Wing, a Stretch Five, a Rim
+              Protector...) and fill the scouting report, strengths first.
+            </li>
+            <li><b>Stats:</b> every column as a rank in the list, with the list average.</li>
+            <li><b>Seasons:</b> his career year by year, each season ranked with your sliders. Click one for that season's card.</li>
+          </ul>
+          <h4>The takes</h4>
+          <p>
+            The points under the archetype read the season in context: a small sample or missed games, how
+            the team did with him on the floor against off it, a heavy scoring load (and whether it came
+            efficiently), his defense, and his career so far: where he is (a promising rookie, an established
+            star, a veteran), whether this is a breakout or a down year against his recent norm, streaks, and
+            the skills that have defined his career. A card only looks at that season and the ones before it.
+          </p>
+          <h4>Similar seasons</h4>
+          <p>
+            Finished seasons show the three closest seasons by anyone else since 2000-01: every stat is
+            compared by how far it stood out from its own year's league, so a 2004 season and a 2024 one line
+            up fairly (a lot more threes go up now).
+          </p>
+        }
+
+        @case ('tips') {
+          <h3>Tips &amp; tricks</h3>
+          <ul class="tips">
+            <li><mat-icon fontIcon="drag_indicator"></mat-icon><span><b>Reorder columns</b> by dragging a column header within its group. <b>Reorder groups</b> or <b>stats</b> by dragging the cards and slider rows in the filter menu; the table follows.</span></li>
+            <li><mat-icon fontIcon="visibility"></mat-icon><span><b>Eyes</b> switch a stat or a whole group off: the column hides and it stops counting, but its slider keeps its value.</span></li>
+            <li><mat-icon fontIcon="palette"></mat-icon><span><b>Color-coded values</b> are green above the league average and red below it. Counting stats compare per game, so missed time doesn't turn a good player red. Hover a column label for the average of what the column shows.</span></li>
+            <li><mat-icon fontIcon="emoji_events"></mat-icon><span><b>Rank tiles:</b> a trophy for #1, green through 10, white in the middle and red for the bottom 10.</span></li>
+            <li><mat-icon fontIcon="content_copy"></mat-icon><span><b>Copy</b> puts your whole ranked list on the clipboard, ready to paste into a group chat.</span></li>
+            <li><mat-icon fontIcon="healing"></mat-icon><span>The <b>bandage</b> marks players on the injury report. Hide them with <b>Injured Players</b> in the settings.</span></li>
+            <li><mat-icon fontIcon="filter_list"></mat-icon><span><b>Min Games</b> in the settings leaves out players who played less than a share of the season, in steps of 10%. Try 70%+ for full-season regulars, or 1 to see everyone.</span></li>
+            <li><mat-icon fontIcon="military_tech"></mat-icon><span>Hover any <b>badge</b> under a name for the award written out.</span></li>
+          </ul>
+        }
+
+        @case ('glossary') {
+          <h3>Stat glossary</h3>
+          <p class="muted">Every column label also shows its full name on hover.</p>
+          <dl class="glossary">
+            @for (entry of glossary; track entry[0]) {
+              <dt>{{ entry[0] }}</dt>
+              <dd>{{ entry[1] }}</dd>
+            }
+          </dl>
+        }
+
+        @case ('faq') {
+          <h3>FAQ</h3>
+          <details>
+            <summary>How do past seasons work?</summary>
+            <p>
+              Pick a season from the dropdown above the list. Your sliders, eyes and column order stay as they
+              are; the list re-ranks with that season's stats. Each season keeps its own hand-dragged order
+              while the page is open. A season is named for both years it spans (2024-25).
+            </p>
+          </details>
+          <details>
+            <summary>What are the badges under names?</summary>
+            <p>
+              That season's honors, hover one for the details. A gold <b>trophy</b> for the champion and a silver
+              <b>trophy</b> for both conference champions (the two Finals teams), on every row from that team.
+              Plaques for <b>MVP</b>, Defensive Player of the Year (<b>DPOY</b>), Rookie of the Year
+              (<b>ROY</b>), Sixth Man (<b>6MOY</b>), Most Improved (<b>MIP</b>), Clutch Player of the Year
+              (<b>CPOY</b>, from 2023), <b>All-NBA</b> first, second and third teams (NBA1-3, in gold, silver and
+              bronze), <b>All-Defensive</b> first and second teams (DEF1-2), the <b>All-Star</b> team (AS) and, for coaches,
+              Coach of the Year (<b>COY</b>). A
+              traded player's trophy follows the team he finished the season with.
+            </p>
+          </details>
+          <details open>
+            <summary>Why is my guy ranked so low?</summary>
+            <p>
+              The ranking only reflects the sliders. Try a preset that fits his game, or check Min Games if
+              he missed time. And if you still disagree, drag him where he belongs.
+            </p>
+          </details>
+          <details>
+            <summary>What are Win Shares, BPM and VORP?</summary>
+            <p>
+              Basketball-Reference's all-in-one numbers. <b>Win Shares</b> split a team's wins among its players
+              by their offense and defense (10+ is an All-NBA-type season). <b>Box Plus/Minus</b> estimates the
+              points per 100 possessions a player adds over an average one from his box score (+5 is an
+              All-Star, +10 an MVP). <b>VORP</b> turns BPM and minutes into value over a replacement-level
+              player. Each is one slider like any other.
+            </p>
+          </details>
+          <details>
+            <summary>What does "-" mean?</summary>
+            <p>
+              The stat isn't available for that player, usually a shooting percentage from too few attempts.
+              Those count as league average.
+            </p>
+          </details>
+          <details>
+            <summary>When do the stats update?</summary>
+            <p>
+              The current season updates every night during the season, once the day's games are final.
+              Finished seasons don't change.
+            </p>
+          </details>
+          <details>
+            <summary>Is my ranking saved?</summary>
+            <p>
+              No. Everything resets when you reload the page: sliders, drags, column changes, the settings menu
+              and the season (back to the current one). Copy your list if you want to keep it.
+            </p>
+          </details>
+          <details>
+            <summary>A player I'm looking for isn't listed.</summary>
+            <p>
+              He may be under the Min Games setting (lower it to see more), listed at a different position
+              (the one listed for his season), or on the injury report with Injured Players turned off. At 1,
+              everyone who got into a game is listed.
+            </p>
+          </details>
+        }
+
+        @case ('data') {
+          <h3>Data &amp; credits</h3>
+          <h4>Where the numbers come from</h4>
+          <ul>
+            <li>
+              <a href="https://www.basketball-reference.com" target="_blank" rel="noopener">Basketball-Reference</a>:
+              season stats, positions, PER, Win Shares, Box Plus/Minus, VORP, on-off, team records and ratings, coaches,
+              awards and All-NBA teams, and the Finals.
+            </li>
+            <li>
+              <a href="https://www.espn.com/nba/" target="_blank" rel="noopener">ESPN</a>: player headshots and the
+              injury report.
+            </li>
+            <li><a href="https://www.nba.com" target="_blank" rel="noopener">NBA.com</a>: team logos.</li>
+          </ul>
+          <h4>Thanks</h4>
+          <p>
+            Thanks to Sports Reference for keeping so much basketball history open, and to
+            <a href="https://claude.ai" target="_blank" rel="noopener">Claude</a>, which helped build it: the
+            rankings math, the data pipeline back to 2000-01 and just about every pixel.
+          </p>
+          <p class="muted">
+            An unofficial fan project, not affiliated with the NBA or any team. Team logos belong to their teams.
+          </p>
+        }
+      }
+    </div>
+  </div>
+</div>
