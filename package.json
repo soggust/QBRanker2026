@@ -3,13 +3,14 @@
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
-    "start": "ng serve",
-    "build": "ng build",
-    "watch": "ng build --watch --configuration development",
-    "test": "ng test",
-    "update-data": "node scripts/update-data.mjs",
-    "update-honors": "node scripts/update-honors.mjs",
-    "build-comps": "node scripts/build-comps.mjs"
+    "start": "ng serve nfl",
+    "build": "ng build nfl",
+    "watch": "ng build nfl --watch --configuration development",
+    "test": "ng test nfl",
+    "update-data": "node apps/nfl/scripts/update-data.mjs",
+    "update-honors": "node apps/nfl/scripts/update-honors.mjs",
+    "build-comps": "node apps/nfl/scripts/build-comps.mjs",
+    "build-blocking": "node --max-old-space-size=6144 apps/nfl/scripts/build-blocking.mjs"
   },
   "private": true,
   "dependencies": {

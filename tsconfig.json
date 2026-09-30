@@ -1,9 +1,9 @@
-/* To learn more about this file see: https://angular.io/config/tsconfig. */
+/* Shared compiler options for every app in apps/ (each app sets its own baseUrl in apps/<sport>/tsconfig.json). */
 {
   "compileOnSave": false,
+  "files": [],
   "compilerOptions": {
-    "baseUrl": "src",
-    "outDir": "./dist/out-tsc",
+    "outDir": "./out-tsc",
     "forceConsistentCasingInFileNames": true,
     "strict": true,
     "noImplicitAny": false,

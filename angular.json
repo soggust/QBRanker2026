@@ -1,36 +1,45 @@
 {
   "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
   "version": 1,
-  "newProjectRoot": "projects",
+  "newProjectRoot": "apps",
   "projects": {
-    "QBRanker": {
+    "nfl": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
           "style": "scss"
         }
       },
-      "root": "",
-      "sourceRoot": "src",
+      "root": "apps/nfl",
+      "sourceRoot": "apps/nfl/src",
       "prefix": "app",
       "architect": {
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
-            "outputPath": "dist/qbranker",
-            "index": "src/index.html",
-            "main": "src/main.ts",
-            "polyfills": ["zone.js"],
-            "tsConfig": "tsconfig.app.json",
+            "outputPath": "dist/site/nfl",
+            "index": "apps/nfl/src/index.html",
+            "main": "apps/nfl/src/main.ts",
+            "polyfills": [
+              "zone.js"
+            ],
+            "tsConfig": "apps/nfl/tsconfig.app.json",
             "inlineStyleLanguage": "scss",
             "assets": [
-              "src/favicon.ico",
-              "src/favicon.svg",
-              "src/assets",
-              { "glob": "**/*.json", "input": "src/StaticData", "output": "data" }
+              "apps/nfl/src/favicon.ico",
+              "apps/nfl/src/favicon.svg",
+              "apps/nfl/src/assets",
+              {
+                "glob": "**/*.json",
+                "input": "apps/nfl/src/StaticData",
+                "output": "data"
+              }
             ],
-            "styles": ["src/styles.scss"],
-            "scripts": []
+            "styles": [
+              "apps/nfl/src/styles.scss"
+            ],
+            "scripts": [],
+            "baseHref": "/nfl/"
           },
           "configurations": {
             "production": {
@@ -63,10 +72,10 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "QBRanker:build:production"
+              "buildTarget": "nfl:build:production"
             },
             "development": {
-              "buildTarget": "QBRanker:build:development"
+              "buildTarget": "nfl:build:development"
             }
           },
           "defaultConfiguration": "development"
@@ -74,17 +83,26 @@
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "buildTarget": "QBRanker:build"
+            "buildTarget": "nfl:build"
           }
         },
         "test": {
           "builder": "@angular-devkit/build-angular:karma",
           "options": {
-            "polyfills": ["zone.js", "zone.js/testing"],
-            "tsConfig": "tsconfig.spec.json",
+            "polyfills": [
+              "zone.js",
+              "zone.js/testing"
+            ],
+            "tsConfig": "apps/nfl/tsconfig.spec.json",
             "inlineStyleLanguage": "scss",
-            "assets": ["src/favicon.ico", "src/favicon.svg", "src/assets"],
-            "styles": ["src/styles.scss"],
+            "assets": [
+              "apps/nfl/src/favicon.ico",
+              "apps/nfl/src/favicon.svg",
+              "apps/nfl/src/assets"
+            ],
+            "styles": [
+              "apps/nfl/src/styles.scss"
+            ],
             "scripts": []
           }
         }

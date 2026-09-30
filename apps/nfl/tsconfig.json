@@ -1,0 +1,8 @@
+/* The NFL app: imports resolve from src/ (app/..., StaticData/...). The build and test configs extend this. */
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": "./src"
+  },
+  "include": ["src/**/*.ts", "scripts/**/*.ts"]
+}
