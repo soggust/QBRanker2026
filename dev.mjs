@@ -1,6 +1,6 @@
 // `npm run dev`: every app's dev server at once, all under http://localhost:4200 so the sport bar's
 // links work like on the live site. The NFL server is the front door on 4200 and passes /mlb/ and /nba/
-// through to the MLB server on 4201 and the NBA server on 4202 (proxy.dev.json); each keeps its own live reload. Ctrl+C stops them all.
+// through to the MLB server on 4201 and the NBA server on 4202 (proxy.dev.mjs; a bare localhost:4200/ redirects to /nfl/, like the live site); each keeps its own live reload. Ctrl+C stops them all.
 import { spawn } from 'node:child_process';
 
 // (PORT=4300 npm run dev if 4200 is taken)
@@ -9,7 +9,7 @@ const port = process.env.PORT ?? '4200';
 const servers = [
   ['mlb', ['ng', 'serve', 'mlb', '--port', '4201', '--public-host', 'localhost:4201']],
   ['nba', ['ng', 'serve', 'nba', '--port', '4202', '--public-host', 'localhost:4202']],
-  ['nfl', ['ng', 'serve', 'nfl', '--port', port, '--proxy-config', 'proxy.dev.json']],
+  ['nfl', ['ng', 'serve', 'nfl', '--port', port, '--proxy-config', 'proxy.dev.mjs']],
 ];
 
 const children = servers.map(([name, args]) => {
