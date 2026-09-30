@@ -16,8 +16,8 @@
       "../assets/NFL_Icons/Steelers.png": 3
     },
     "advanced": {
-      "pressureToSack": 0.3,
-      "badThrowPct": 0.124,
+      "pressureToSack": 0.258,
+      "badThrowPct": 0.186,
       "timeToThrow": 2.89,
       "adot": 8.3,
       "aggressiveness": 14.2,
@@ -66,8 +66,8 @@
       "../assets/NFL_Icons/Bucs.png": 3
     },
     "advanced": {
-      "pressureToSack": 0.467,
-      "badThrowPct": 0.094,
+      "pressureToSack": 0.448,
+      "badThrowPct": 0.198,
       "timeToThrow": 2.99,
       "adot": 8.9,
       "aggressiveness": 12.5,
@@ -116,8 +116,8 @@
       "../assets/NFL_Icons/Broncos.png": 3
     },
     "advanced": {
-      "pressureToSack": 0.286,
-      "badThrowPct": 0.108,
+      "pressureToSack": 0.217,
+      "badThrowPct": 0.183,
       "timeToThrow": 2.92,
       "adot": 6.9,
       "aggressiveness": 14,
@@ -167,7 +167,7 @@
     },
     "advanced": {
       "pressureToSack": 0,
-      "badThrowPct": 0.024,
+      "badThrowPct": 0.084,
       "timeToThrow": 2.96,
       "adot": 7.4,
       "aggressiveness": 14.5,
@@ -216,8 +216,8 @@
       "../assets/NFL_Icons/Panthers.png": 3
     },
     "advanced": {
-      "pressureToSack": 0.121,
-      "badThrowPct": 0.066,
+      "pressureToSack": 0.156,
+      "badThrowPct": 0.157,
       "timeToThrow": 3.02,
       "adot": 10.2,
       "aggressiveness": 12.4,
@@ -266,8 +266,8 @@
       "../assets/NFL_Icons/Texans.png": 3
     },
     "advanced": {
-      "pressureToSack": 0.292,
-      "badThrowPct": 0.142,
+      "pressureToSack": 0.333,
+      "badThrowPct": 0.167,
       "timeToThrow": 2.97,
       "adot": 9.3,
       "aggressiveness": 20,
@@ -345,7 +345,7 @@
       "rushYards": 107,
       "rushTd": 2
     },
-    "injuryStatus": "Out",
+    "injuryStatus": "Doubtful",
     "injured": true
   },
   {
@@ -365,8 +365,8 @@
       "../assets/NFL_Icons/Titans.png": 3
     },
     "advanced": {
-      "pressureToSack": 0.313,
-      "badThrowPct": 0.125,
+      "pressureToSack": 0.238,
+      "badThrowPct": 0.205,
       "timeToThrow": 2.87,
       "adot": 6.3,
       "aggressiveness": 6.8,
@@ -561,8 +561,8 @@
       "../assets/NFL_Icons/Cowboys.png": 3
     },
     "advanced": {
-      "pressureToSack": 0.118,
-      "badThrowPct": 0.076,
+      "pressureToSack": 0.115,
+      "badThrowPct": 0.162,
       "timeToThrow": 2.69,
       "adot": 7.9,
       "aggressiveness": 18.1,
@@ -611,8 +611,8 @@
       "../assets/NFL_Icons/Colts.png": 3
     },
     "advanced": {
-      "pressureToSack": 0.143,
-      "badThrowPct": 0.051,
+      "pressureToSack": 0.273,
+      "badThrowPct": 0.122,
       "timeToThrow": 2.8,
       "adot": 6.5,
       "aggressiveness": 17.3,
@@ -661,8 +661,8 @@
       "../assets/NFL_Icons/Browns.png": 3
     },
     "advanced": {
-      "pressureToSack": 0.438,
-      "badThrowPct": 0.073,
+      "pressureToSack": 0.36,
+      "badThrowPct": 0.159,
       "timeToThrow": 2.91,
       "adot": 6.6,
       "aggressiveness": 12.2,
@@ -711,8 +711,8 @@
       "../assets/NFL_Icons/Patriots.png": 3
     },
     "advanced": {
-      "pressureToSack": 0.333,
-      "badThrowPct": 0.037,
+      "pressureToSack": 0.391,
+      "badThrowPct": 0.087,
       "timeToThrow": 3.04,
       "adot": 9.2,
       "aggressiveness": 11.3,
@@ -810,8 +810,8 @@
       "../assets/NFL_Icons/Jets.png": 3
     },
     "advanced": {
-      "pressureToSack": 0.25,
-      "badThrowPct": 0.02,
+      "pressureToSack": 0.391,
+      "badThrowPct": 0.049,
       "timeToThrow": 2.94,
       "adot": 7.6,
       "aggressiveness": 18.6,
@@ -860,8 +860,8 @@
       "../assets/NFL_Icons/Cardinals.png": 3
     },
     "advanced": {
-      "pressureToSack": 0.176,
-      "badThrowPct": 0.077,
+      "pressureToSack": 0.185,
+      "badThrowPct": 0.137,
       "timeToThrow": 2.62,
       "adot": 6.4,
       "aggressiveness": 14.5,
@@ -959,8 +959,8 @@
       "../assets/NFL_Icons/Giants.png": 2
     },
     "advanced": {
-      "pressureToSack": 0.222,
-      "badThrowPct": 0.163,
+      "pressureToSack": 0.313,
+      "badThrowPct": 0.245,
       "timeToThrow": 2.72,
       "adot": 8.2,
       "aggressiveness": 24.5,
@@ -1009,8 +1009,8 @@
       "../assets/NFL_Icons/Lions.png": 3
     },
     "advanced": {
-      "pressureToSack": 0.238,
-      "badThrowPct": 0.083,
+      "pressureToSack": 0.259,
+      "badThrowPct": 0.119,
       "timeToThrow": 2.82,
       "adot": 7.2,
       "aggressiveness": 21.1,
@@ -1136,8 +1136,8 @@
       "rushYards": 100,
       "rushTd": 0
     },
-    "injuryStatus": "Out",
-    "injured": true
+    "injuryStatus": "Questionable",
+    "injured": false
   },
   {
     "id": 3915511,
@@ -1156,8 +1156,8 @@
       "../assets/NFL_Icons/Bengals.png": 3
     },
     "advanced": {
-      "pressureToSack": 0.3,
-      "badThrowPct": 0.087,
+      "pressureToSack": 0.259,
+      "badThrowPct": 0.117,
       "timeToThrow": 2.54,
       "adot": 6.6,
       "aggressiveness": 11.7,
@@ -1256,8 +1256,8 @@
       "../assets/NFL_Icons/Bills.png": 3
     },
     "advanced": {
-      "pressureToSack": 0.235,
-      "badThrowPct": 0.093,
+      "pressureToSack": 0.333,
+      "badThrowPct": 0.174,
       "timeToThrow": 2.98,
       "adot": 10,
       "aggressiveness": 10.5,
@@ -1306,8 +1306,8 @@
       "../assets/NFL_Icons/Chargers.png": 3
     },
     "advanced": {
-      "pressureToSack": 0.316,
-      "badThrowPct": 0.125,
+      "pressureToSack": 0.258,
+      "badThrowPct": 0.17,
       "timeToThrow": 2.84,
       "adot": 9.5,
       "aggressiveness": 13.6,
@@ -1356,8 +1356,8 @@
       "../assets/NFL_Icons/Raiders.png": 3
     },
     "advanced": {
-      "pressureToSack": 0.154,
-      "badThrowPct": 0.087,
+      "pressureToSack": 0.238,
+      "badThrowPct": 0.12,
       "timeToThrow": 2.81,
       "adot": 8.7,
       "aggressiveness": 14.1,
@@ -1404,8 +1404,8 @@
       "../assets/NFL_Icons/Vikings.png": 1
     },
     "advanced": {
-      "pressureToSack": 0,
-      "badThrowPct": 0,
+      "pressureToSack": 0.273,
+      "badThrowPct": 0.147,
       "timeToThrow": 2.8,
       "adot": 9.5,
       "aggressiveness": 14.7,
@@ -1454,8 +1454,8 @@
       "../assets/NFL_Icons/Ravens.png": 3
     },
     "advanced": {
-      "pressureToSack": 0.385,
-      "badThrowPct": 0.145,
+      "pressureToSack": 0.263,
+      "badThrowPct": 0.184,
       "timeToThrow": 3.14,
       "adot": 10.2,
       "aggressiveness": 13.2,
@@ -1504,8 +1504,8 @@
       "../assets/NFL_Icons/Dolphins.png": 3
     },
     "advanced": {
-      "pressureToSack": 0.36,
-      "badThrowPct": 0.116,
+      "pressureToSack": 0.31,
+      "badThrowPct": 0.198,
       "timeToThrow": 2.93,
       "adot": 10.1,
       "aggressiveness": 20.9,
@@ -1552,8 +1552,8 @@
       "../assets/NFL_Icons/Commanders.png": 1
     },
     "advanced": {
-      "pressureToSack": 0,
-      "badThrowPct": 0.043,
+      "pressureToSack": 0.105,
+      "badThrowPct": 0.128,
       "timeToThrow": 2.91,
       "adot": 9.1,
       "aggressiveness": 14.9,
@@ -1602,8 +1602,8 @@
       "../assets/NFL_Icons/Rams.png": 3
     },
     "advanced": {
-      "pressureToSack": 0.111,
-      "badThrowPct": 0.063,
+      "pressureToSack": 0.208,
+      "badThrowPct": 0.153,
       "timeToThrow": 2.77,
       "adot": 10,
       "aggressiveness": 16.2,
@@ -1652,9 +1652,9 @@
     "advanced": {
       "pressureToSack": 0,
       "badThrowPct": 0.08,
-      "timeToThrow": 2.27,
-      "adot": 7,
-      "aggressiveness": 4,
+      "timeToThrow": null,
+      "adot": null,
+      "aggressiveness": null,
       "epaPerPlay": 0.398,
       "cpoe": 8.774,
       "successRate": 0.655,
@@ -1700,8 +1700,8 @@
       "../assets/NFL_Icons/Chiefs.png": 3
     },
     "advanced": {
-      "pressureToSack": 0.308,
-      "badThrowPct": 0.092,
+      "pressureToSack": 0.2,
+      "badThrowPct": 0.112,
       "timeToThrow": 2.6,
       "adot": 5.8,
       "aggressiveness": 5.1,
@@ -1748,8 +1748,8 @@
       "../assets/NFL_Icons/Seahawks.png": 1
     },
     "advanced": {
-      "pressureToSack": 1,
-      "badThrowPct": 0.021,
+      "pressureToSack": 0.067,
+      "badThrowPct": 0.043,
       "timeToThrow": 3.24,
       "adot": 7.1,
       "aggressiveness": 17,
@@ -1798,8 +1798,8 @@
       "../assets/NFL_Icons/Jaguars.png": 3
     },
     "advanced": {
-      "pressureToSack": 0.25,
-      "badThrowPct": 0.074,
+      "pressureToSack": 0.222,
+      "badThrowPct": 0.099,
       "timeToThrow": 2.82,
       "adot": 9.5,
       "aggressiveness": 13.6,
@@ -1848,8 +1848,8 @@
       "../assets/NFL_Icons/Saints.png": 3
     },
     "advanced": {
-      "pressureToSack": 0.421,
-      "badThrowPct": 0.083,
+      "pressureToSack": 0.345,
+      "badThrowPct": 0.136,
       "timeToThrow": 2.66,
       "adot": 7.5,
       "aggressiveness": 14.4,
