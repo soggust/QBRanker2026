@@ -55,6 +55,12 @@ html .mat-mdc-slide-toggle.mat-accent {
     height: 18px !important;
     width: 18px !important;
 
+    // (no white knob showing round the glove: the glove alone)
+    &::before {
+      background: transparent !important;
+      border-color: transparent !important;
+    }
+
     &::after {
       background: $glove center / 100% 100% no-repeat !important;
       background-blend-mode: normal !important;
@@ -63,6 +69,10 @@ html .mat-mdc-slide-toggle.mat-accent {
       filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.6));
       rotate: none !important;
     }
+  }
+
+  .mdc-switch__shadow {
+    box-shadow: none !important;
   }
 }
 
@@ -265,4 +275,12 @@ section footer .mat-mdc-select.season-select,
     letter-spacing: 1.5px !important;
     text-transform: uppercase;
   }
+}
+
+// A switch that's on: an off-white track, so the red glove stands out on it (red on red ran together)
+.mdc-switch.mdc-switch--selected .mdc-switch__track::after,
+.mdc-switch.mdc-switch--selected:enabled:hover .mdc-switch__track::after,
+.mdc-switch.mdc-switch--selected:enabled:focus .mdc-switch__track::after,
+.mdc-switch.mdc-switch--selected:enabled:active .mdc-switch__track::after {
+  background: $white-text !important;
 }

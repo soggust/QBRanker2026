@@ -610,6 +610,9 @@ section {
     justify-content: center;
 
     ul {
+      // (its border and right padding inside the 100%: otherwise it spills 3px past the page's edge on
+      // each side, out of line with the buttons and the position bar above it)
+      box-sizing: border-box;
       // Leave room for the footer buttons below the table, plus the vertical margin
       height: calc(100dvh - 8em - var(--position-bar-space, 0px) - var(--sport-bar-height, 0px));
       margin: 1em 0 0;
@@ -2179,6 +2182,8 @@ section.rankings-wrapper {
   > footer {
     height: auto;
     margin-bottom: 12px;
+    // (a pixel out on each side: the buttons' borders then line up with the rows' edges)
+    margin-inline: -1px;
     order: -1;
   }
 }

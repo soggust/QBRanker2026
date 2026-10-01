@@ -3,8 +3,9 @@
   @for (s of sports; track s.id) {
     <a [href]="'/' + s.id + '/'" [class.active]="s.id === sport" [attr.aria-current]="s.id === sport ? 'page' : null">{{ s.label }}</a>
   }
-  <!-- The site's name on the far right, after a little podium (#1 on the middle step) in the sport's color -->
-  <span class="brand">
+  <!-- The site's name on the far right, after a little podium (#1 on the middle step) in the sport's color;
+       a click reloads this sport's page fresh, from the top -->
+  <a class="brand" [href]="'/' + sport + '/'" title="Season Ranker: reload">
     <svg class="brand-logo" viewBox="0 0 24 24" aria-hidden="true">
       <path d="M12 1.5l1.3 2.7 3 .4-2.2 2 .6 2.9-2.7-1.4-2.7 1.4.6-2.9-2.2-2 3-.4z" />
       <rect x="8.5" y="11" width="7" height="11.5" rx="1" />
@@ -12,7 +13,7 @@
       <rect x="16" y="17" width="6.5" height="5.5" rx="1" opacity="0.5" />
     </svg>
     <span class="brand-name">Season Ranker</span>
-  </span>
+  </a>
 </nav>
 
 <main [class.menu-open]="menuOpen" [class.sidebar-collapsed]="sidebarCollapsed">

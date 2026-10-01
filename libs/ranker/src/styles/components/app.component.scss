@@ -506,8 +506,10 @@ main .content {
 }
 
 // The site's name on the far right of the sport bar: a podium, then "Season Ranker" in the menu logo's
-// lettering, both in the sport's color. Phones: just the podium (the sport names fill the bar).
-.sport-bar .brand {
+// lettering, both in the sport's color, its right edge lined up with the page's (the position bar and
+// the grid below). A link: a click reloads the sport's page. Phones: just the podium (the sport names
+// fill the bar).
+.sport-bar a.brand {
   align-items: center;
   color: var(--scoreboard-led);
   display: flex;
@@ -517,7 +519,10 @@ main .content {
   gap: 8px;
   letter-spacing: 1px;
   margin-left: auto;
+  // (the bar's own padding plus this: the page's side margin, 26px)
+  margin-right: 13px;
   order: 2;
+  padding: 0;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
   text-transform: uppercase;
   white-space: nowrap;
@@ -531,7 +536,24 @@ main .content {
   }
 }
 
+.sport-bar a.brand:hover {
+  background: none;
+  color: var(--scoreboard-led);
+  filter: brightness(1.25);
+}
+
+// (the page's side margin is wider on tablets, narrower on phones)
+@media (max-width: 1199px) {
+  .sport-bar a.brand {
+    margin-right: 32px;
+  }
+}
+
 @media (max-width: 575px) {
+  .sport-bar a.brand {
+    margin-right: 7px;
+  }
+
   .sport-bar .brand .brand-name {
     display: none;
   }

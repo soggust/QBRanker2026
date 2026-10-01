@@ -265,9 +265,13 @@ html .mat-mdc-slide-toggle.mat-accent {
   color: #fff !important;
 }
 
-// No halo around a slider's knob (Material's hover, focus and drag ripples): the ball alone
-.mat-mdc-slider .mat-ripple {
-  display: none;
+// No halo around a slider's knob (Material's hover, focus and drag ripples): the ball alone. Nor round
+// a settings switch's knob when it's clicked.
+.mat-mdc-slider .mat-ripple,
+.mat-mdc-slide-toggle .mdc-switch__ripple,
+.mat-mdc-slide-toggle .mat-mdc-slide-toggle-ripple,
+.mat-mdc-slide-toggle .mat-focus-indicator {
+  display: none !important;
 }
 
 // Rolling balls: a slider's knob turns with its value (each slider sets --knob-roll), so the ball
