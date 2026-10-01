@@ -64,8 +64,9 @@ export interface SportSetting {
   options?: Record<string, string>;
   default: string | boolean;
   // Where it sits: the Format section's top, after Stat Totals, among the Display switches (before
-  // Injured Players), or at the bottom of the menu
-  slot: 'formatTop' | 'formatMid' | 'display' | 'displayEnd';
+  // Injured Players), at the bottom of the menu, or (a choice) as the footer's dropdown in the year
+  // selector's place (the UFC's Current / All-Time)
+  slot: 'formatTop' | 'formatMid' | 'display' | 'displayEnd' | 'footer';
   // Its menu icon (a cycled choice): a Material icon, or a class the styles draw ('lombardi')
   icon?: string;
   iconClass?: string;

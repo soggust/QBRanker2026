@@ -243,6 +243,15 @@ export class SkillRankingsComponent implements OnChanges {
     this.positionService.stepSportSetting(key);
   }
 
+  setSportSetting(key: string, value: string) {
+    this.positionService.setSportSetting(key, value);
+  }
+
+  // A choice setting's options, for its dropdown
+  settingOptions(setting: SportSetting): { value: string; label: string }[] {
+    return Object.entries(setting.options ?? {}).map(([value, label]) => ({ value, label }));
+  }
+
   // Combined pairs as one total column (SPORT.combined)
   get combineStats(): boolean {
     return this.positionService.settings.combineStats;

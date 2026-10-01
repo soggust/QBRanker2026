@@ -283,6 +283,11 @@ export class PositionService {
     this.skillHiddenSubject.next(next);
   }
 
+  // A sport setting set to a value (the footer's dropdown)
+  setSportSetting(key: string, value: string | boolean): void {
+    this.updateSettings({ sport: { ...this.settings.sport, [key]: value } });
+  }
+
   // A sport setting: the next of its options, or flipped
   stepSportSetting(key: string): void {
     const setting = SPORT.settings?.find((s) => s.key === key);

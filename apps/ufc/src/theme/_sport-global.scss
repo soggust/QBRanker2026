@@ -75,27 +75,41 @@ html .mat-mdc-slide-toggle.mat-accent {
 // black face with white text. The cut is a clip-path, so a hover darkens it rather than glowing past it.
 $cut: 7px;
 $edge: 2px;
-@mixin octagon($face: linear-gradient(180deg, #26262a, #121214)) {
-  background:
-    linear-gradient(to bottom right, $red calc(50% + #{$edge}), transparent calc(50% + #{$edge})) top left / $cut $cut no-repeat border-box,
-    linear-gradient(to bottom left, $red calc(50% + #{$edge}), transparent calc(50% + #{$edge})) top right / $cut $cut no-repeat border-box,
-    linear-gradient(to top right, $red calc(50% + #{$edge}), transparent calc(50% + #{$edge})) bottom left / $cut $cut no-repeat border-box,
-    linear-gradient(to top left, $red calc(50% + #{$edge}), transparent calc(50% + #{$edge})) bottom right / $cut $cut no-repeat border-box,
-    $face padding-box !important;
-  border: $edge solid $red !important;
+@function octagon-cut($c, $inset: 0px) {
+  @return polygon(
+    calc(#{$c} + #{$inset}) $inset,
+    calc(100% - #{$c} - #{$inset}) $inset,
+    calc(100% - #{$inset}) calc(#{$c} + #{$inset}),
+    calc(100% - #{$inset}) calc(100% - #{$c} - #{$inset}),
+    calc(100% - #{$c} - #{$inset}) calc(100% - #{$inset}),
+    calc(#{$c} + #{$inset}) calc(100% - #{$inset}),
+    $inset calc(100% - #{$c} - #{$inset}),
+    $inset calc(#{$c} + #{$inset})
+  );
+}
+
+// (the whole panel is the red edge; the black face is a smaller octagon laid inside it, behind the
+// content, so the edge is the same width all the way round, cut corners included)
+@mixin octagon($face: linear-gradient(180deg, #26262a, #121214), $c: $cut) {
+  background: $red !important;
+  border: none !important;
   border-radius: 0 !important;
   box-shadow: none !important;
-  clip-path: polygon(
-    $cut 0,
-    calc(100% - #{$cut}) 0,
-    100% $cut,
-    100% calc(100% - #{$cut}),
-    calc(100% - #{$cut}) 100%,
-    $cut 100%,
-    0 calc(100% - #{$cut}),
-    0 $cut
-  );
+  clip-path: octagon-cut($c);
   color: $white-text !important;
+  isolation: isolate;
+  position: relative;
+
+  &::before {
+    background: $face;
+    // (the inner cut: the outer one less (2 - √2) of the edge, so the diagonals are as thick as the sides)
+    clip-path: octagon-cut($c - 0.586 * $edge, $edge);
+    content: "";
+    inset: 0;
+    pointer-events: none;
+    position: absolute;
+    z-index: -1;
+  }
 }
 
 section footer .filter-toggle,
@@ -135,8 +149,7 @@ section footer .settings-toggle:hover,
 
 // (the little stepper buttons: tiny octagons)
 .mat-mdc-menu-panel .min-games-stepper button {
-  @include octagon;
-  clip-path: polygon(4px 0, calc(100% - 4px) 0, 100% 4px, 100% calc(100% - 4px), calc(100% - 4px) 100%, 4px 100%, 0 calc(100% - 4px), 0 4px);
+  @include octagon($c: 4px);
   text-shadow: none;
 }
 

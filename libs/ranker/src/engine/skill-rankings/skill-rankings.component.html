@@ -204,6 +204,22 @@
       ></mat-icon>
     </button>
 
+    <!-- The sport's footer dropdowns (the UFC's Current / All-Time), in the year selector's place -->
+    @for (setting of sportSettingsAt('footer'); track setting.key) {
+      <mat-select
+        class="season-select"
+        [attr.aria-label]="setting.label"
+        [title]="setting.title"
+        [value]="sportSettings[setting.key]"
+        (valueChange)="setSportSetting(setting.key, $event)"
+      >
+        <mat-select-trigger>{{ sportSettingText(setting) }}</mat-select-trigger>
+        @for (option of settingOptions(setting); track option.value) {
+          <mat-option [value]="option.value">{{ option.label }}</mat-option>
+        }
+      </mat-select>
+    }
+
     <!-- Year: another season's stats with the same sliders (not for a career-only sport) -->
     @if (!sport.careerOnly) {
     <mat-select

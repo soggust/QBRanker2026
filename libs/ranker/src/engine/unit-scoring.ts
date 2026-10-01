@@ -122,7 +122,9 @@ export function weightedTotals<T>(
     const better = stat.support ? (stat.supportHelps ? 1 : -1) : stat.negative ? -1 : 1;
     const score = (v: number) => better * Math.max(-MAX_Z, Math.min(MAX_Z, (v - mean) / sd));
     const worst = Math.min(...known.map(score));
-    const strength = (weight / 50) * (stat.support ? 0.2 : 1);
+    // (a sport can boost a stat behind its slider: the same 0-100% range, more effect at every step)
+    const boost = (stat as { boost?: number }).boost ?? 1;
+    const strength = (weight / 50) * boost * (stat.support ? 0.2 : 1);
 
     units.forEach((unit, i) => {
       const v = raw[i];

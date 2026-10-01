@@ -110,11 +110,12 @@ export const SPORT: SportConfig = {
   cardFlags,
   settings: [
     {
-      key: 'retired',
-      label: 'All-Time Fighters',
-      title: "On: every era, not just today's roster: add the retired fighters (6+ UFC fights) to the lists, the legends ranked on the same stats",
-      default: false,
-      slot: 'displayEnd',
+      key: 'era',
+      label: 'Fighters',
+      title: "Today's roster, or every era: All-Time adds the retired fighters (6+ UFC fights), the legends ranked on the same stats",
+      options: { current: 'Current Fighters', alltime: 'All-Time Fighters' },
+      default: 'current',
+      slot: 'footer',
     },
     {
       key: 'women',
@@ -125,7 +126,7 @@ export const SPORT: SportConfig = {
     },
   ],
   tabVisible: (position, settings) => !WOMENS_DIVISIONS.includes(position as Position) || !!settings['women'],
-  rowVisible: (player, settings) => !player.retired || !!settings['retired'],
+  rowVisible: (player, settings) => !player.retired || settings['era'] === 'alltime',
   // A fighter's rates rest on few fights early on: 4 UFC fights count half, 12 count three-quarters
   reliability: (player) => player.games / (player.games + 4),
   cardHistory: { title: 'Fights', icon: 'sports_mma', rows: (player) => fightRows(player) },

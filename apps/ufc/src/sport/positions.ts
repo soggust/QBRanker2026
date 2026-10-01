@@ -117,8 +117,9 @@ export interface SkillStat {
   supportHelps?: boolean;
   // Shown for context only: no slider and no weight in the ranking
   infoOnly?: boolean;
-  // Its slider's starting point when it isn't 50% (title defenses and title fight wins: 100%, asked for)
-  defaultWeight?: number;
+  // Counts for more behind its slider (2: double at every step, 50% included; 0% still off): the
+  // title stats and Elo, the clearest marks of an elite career
+  boost?: number;
   // A missing value ("-") means too small a sample, so it scores as the league average, not the worst
   missingIsAverage?: boolean;
 }
@@ -173,13 +174,13 @@ export type SkillPreset = string;
 const UFC_STATS: SkillStat[] = [
   { key: 'games', label: 'Fights', description: 'UFC fights (for context; not part of the ranking)', kind: 'efficiency', format: 'int', infoOnly: true },
   { key: 'winPct', label: 'Record', description: 'His UFC record, wins-losses-draws (draws include no contests; ranked on win percentage)', kind: 'efficiency', format: 'record' },
-  { key: 'recent', label: 'Recent', description: 'His last five UFC fights, newest first (ranked on a recency-weighted win rate)', kind: 'efficiency', format: 'recent' },
+  { key: 'recent', label: 'Recent', description: 'His last five UFC fights, newest first (ranked on a recency-weighted win rate); counts double behind its slider', kind: 'efficiency', format: 'recent', boost: 2 },
   { key: 'officialRank', label: 'UFC Rank', description: "UFC.com's official rank in his division (for context; not part of the ranking; the champion wears the belt)", kind: 'efficiency', format: 'rank', infoOnly: true },
-  // (the title ones start at double weight: the clearest mark of an elite career)
-  { key: 'titleDefenses', label: 'Title Defenses', description: 'Successful UFC title defenses, across every reign (from Wikipedia\'s list of UFC champions); starts at double weight', kind: 'volume', format: 'int', defaultWeight: 100 },
-  { key: 'titleWins', label: 'Title Wins', description: 'UFC title fight wins: winning a belt (interim ones too) and each defense; starts at double weight', kind: 'volume', format: 'int', defaultWeight: 100 },
+  // (the title ones and Elo count double behind their sliders: the clearest marks of an elite career)
+  { key: 'titleDefenses', label: 'Title Defenses', description: 'Successful UFC title defenses, across every reign (from Wikipedia\'s list of UFC champions); counts double behind its slider', kind: 'volume', format: 'int', boost: 2 },
+  { key: 'titleWins', label: 'Title Wins', description: 'UFC title fight wins: winning a belt (interim ones too) and each defense; counts double behind its slider', kind: 'volume', format: 'int', boost: 2 },
   // (the competition ones: results weighed by whom they came against)
-  { key: 'elo', label: 'Elo', description: "A rating built from every UFC fight since 2001: each result moves it by how surprising it was, so beating a highly rated opponent is worth far more than beating a low one (1500 to start)", kind: 'efficiency', format: 'int' },
+  { key: 'elo', label: 'Elo', description: "A rating built from every UFC fight since 2001: each result moves it by how surprising it was, so beating a highly rated opponent is worth far more than beating a low one (1500 to start); counts double behind its slider", kind: 'efficiency', format: 'int', boost: 2 },
   { key: 'peakElo', label: 'Peak Elo', description: 'His best Elo rating at any point in his UFC career', kind: 'efficiency', format: 'int' },
   { key: 'qualityWins', label: 'Quality Wins', description: 'Wins over opponents rated in the top fifth of UFC fighters (by Elo) going into the fight', kind: 'volume', format: 'int' },
   { key: 'mainEventWins', label: '5-Rd Wins', description: 'Wins in five-round fights: title fights and main events', kind: 'volume', format: 'int' },
@@ -218,7 +219,7 @@ export function presetWeights(position: SkillPosition, preset: SkillPreset): Ski
   const weights: SkillWeights = {};
   for (const stat of SKILL_STATS[position]) {
     if (stat.infoOnly) continue;
-    weights[stat.key] = def && !stat.support ? 25 : (stat.defaultWeight ?? 50);
+    weights[stat.key] = def && !stat.support ? 25 : 50;
   }
   return { ...weights, ...(def?.weights ?? {}) };
 }
