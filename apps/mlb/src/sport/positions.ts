@@ -387,9 +387,11 @@ export const STAT_GROUP_INFO: { id: StatGroupId; title: string; icon: string }[]
   { id: 'support', title: 'Support', icon: 'groups' },
 ];
 
-const RESULTS_STATS = new Set<SkillColumnKey>(['games', 'pa', 'war', 'winPct', 'saves', 'holds']);
+const RESULTS_STATS = new Set<SkillColumnKey>(['games', 'pa', 'winPct', 'saves', 'holds']);
 
+// (WAR leads them: the all-in-one value number, built on the rest)
 const ADVANCED_STATS = new Set<SkillColumnKey>([
+  'war',
   'wrcPlus',
   'xwoba',
   'barrelPct',
