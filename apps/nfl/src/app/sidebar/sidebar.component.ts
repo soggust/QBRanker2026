@@ -33,7 +33,7 @@ export interface SkillRow {
 @Component({
     selector: 'sidebar',
     templateUrl: './sidebar.component.html',
-    styleUrls: ['./sidebar.component.scss'],
+    styleUrls: ['../../../../../libs/ranker/src/styles/components/sidebar.component.scss'],
     standalone: false
 })
 export class SidebarComponent {

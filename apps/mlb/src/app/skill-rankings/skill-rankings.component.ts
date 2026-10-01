@@ -203,7 +203,8 @@ const POSITION_NAMES: Record<SkillPosition, string> = {
 @Component({
   selector: 'skill-rankings',
   templateUrl: './skill-rankings.component.html',
-  styleUrls: ['../rankings/rankings.component.scss', './player-card.scss'],
+  // (the shared look: libs/ranker/src/styles/components, plus this sport's theme partials)
+  styleUrls: ['../../../../../libs/ranker/src/styles/components/rankings.component.scss', '../../../../../libs/ranker/src/styles/components/player-card.scss'],
   standalone: false,
 })
 export class SkillRankingsComponent implements OnChanges {

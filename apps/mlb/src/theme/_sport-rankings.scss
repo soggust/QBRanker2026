@@ -1,0 +1,75 @@
+@use "variables" as v;
+
+// MLB grid touches: chalk lines, square headshots, Gold Glove / Silver Slugger in silver and All-Star
+// in bronze
+
+// Between the rows: a faint chalk line, the category lines' chalk squeezed to a quarter of their
+// thickness (the 16px-tall texture drawn 4px tall, so its line is about 1px)
+section ul li.player:not(.header-row):not(.cdk-drag-preview) {
+  background:
+    url("../assets/textures/chalk-line-row.svg") left bottom / 240px 4px repeat-x,
+    rgba(0, 0, 0, 0.1);
+}
+
+section ul li.player .player-name .player-awards,
+.player-card .player-awards {
+  .award-badge {
+    &.award-gg,
+    &.award-ss {
+      @include v.plaque-silver;
+    }
+
+    &.award-as {
+      @include v.plaque-bronze;
+    }
+  }
+}
+
+// The headshots are square (a smaller overhang puts the face where the NFL cutouts sit)
+section ul li.player:not(.header-row) .badge-slot {
+  --shot-w: var(--shot-h);
+  --shot-hang: 3px;
+}
+
+// MLB: the category lines are chalk (a real-looking chalk line: powdery, a bit thin in places, soft
+// edges and loose dust) in the category's color, instead of a football sideline with hash marks. The
+// chalk texture is a mask, filled with the category color lifted with a little white so it reads as
+// chalk. The rows carry it down from the header, where it replaces the solid line.
+$chalk-mask: url("../assets/textures/chalk-line-v.svg") center top / 10px 150px repeat-y;
+
+section.category-colors
+  ul
+  li.player:not(.header-row)
+  > .col-group
+  > div:first-child::before {
+  background: color-mix(in srgb, var(--group-color) 80%, #fff);
+  left: calc(-0.5em - 3px);
+  mask: $chalk-mask;
+  opacity: 0.75;
+  width: 10px;
+}
+
+section ul li.player.header-row > .col-group > div:first-child {
+  &::after {
+    border-left: none;
+  }
+
+  &::before {
+    background: color-mix(in srgb, var(--group-color) 80%, #fff);
+    bottom: -0.68em;
+    content: "";
+    left: calc(-0.5em - 4px);
+    mask: $chalk-mask;
+    pointer-events: none;
+    position: absolute;
+    top: -0.68em;
+    width: 10px;
+    z-index: 1;
+  }
+}
+
+// MLB: the headshots are square with the shoulders running to the image's edges, so their left side
+// fades out instead of ending in a hard line across the jersey
+section ul li.player:not(.header-row) .badge-slot .headshot {
+  mask-image: linear-gradient(90deg, transparent, #000 28%);
+}

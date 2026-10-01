@@ -1,0 +1,51 @@
+// Shared Sass variables and mixins. The sport's settings (apps/<sport>/src/theme/_sport-settings.scss)
+// tune the few things that differ between sports.
+@use "sport-settings" as sport;
+
+// Fonts
+$font-base: "Nunito", sans-serif;
+$font-heading: "Zain", cursive;
+
+// The active tab / item on a scoreboard panel: a lit-up panel whose bottom row of dots glows in the
+// accent color. Its dots are counted up from the bottom edge (not down from the top) so the lit row is
+// always one whole row of dots, whatever the element's height.
+@mixin lit-dots($panel: #1f1f1f) {
+  background: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1.3px) 0 100% / 4px 4px, $panel;
+  // (bold where the sport's settings say so)
+  @if sport.$lit-label-weight {
+    font-weight: sport.$lit-label-weight !important;
+  }
+  position: relative;
+
+  &::after {
+    background: radial-gradient(var(--scoreboard-led) 1px, transparent 1.3px) 0 100% / 4px 4px;
+    bottom: 0;
+    content: "";
+    filter: drop-shadow(0 0 1.5px var(--scoreboard-led));
+    height: 4px;
+    left: 0;
+    pointer-events: none;
+    position: absolute;
+    right: 0;
+  }
+}
+
+// Award plaques in the other metals (the default plaque is gold): a sport's theme picks which of its
+// awards wear which (apps/<sport>/src/theme/_sport-rankings.scss)
+@mixin plaque-silver {
+  background: linear-gradient(180deg, #f4f6f8, #b9c0c8 55%, #8d959e);
+  border-color: rgba(240, 244, 248, 0.85);
+  color: #1f262d;
+}
+
+@mixin plaque-bronze {
+  background: linear-gradient(180deg, #f3c79a, #c07a3e 55%, #8f5424);
+  border-color: rgba(246, 208, 170, 0.85);
+  color: #2e1705;
+}
+
+@mixin plaque-steel {
+  background: linear-gradient(180deg, #d9e6f2, #7f9bb5 55%, #56718a);
+  border-color: rgba(220, 232, 244, 0.85);
+  color: #0f1d2a;
+}

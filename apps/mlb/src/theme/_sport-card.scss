@@ -1,0 +1,33 @@
+// MLB player card touches: square headshots, chalked stat groups
+
+// The headshots are square: the hero's, the similar seasons' and (phones) the hero's again
+.hero-badge {
+  --shot-w: var(--shot-h);
+  --hang: 9px;
+}
+
+.comp-badge {
+  --shot-w: var(--shot-h);
+  --hang: 4px;
+}
+
+@media (max-width: 640px) {
+  .hero-badge {
+    --hang: 7px;
+  }
+}
+
+// MLB: the stat groups' edges are chalked baselines (the same chalk line as the table's) instead of
+// sidelines with hash marks
+.stat-group .card-stats {
+  background:
+    url("../assets/textures/chalk-line-v.svg") left top / 10px 150px repeat-y,
+    url("../assets/textures/chalk-line-v.svg") right top / 10px 150px repeat-y;
+  opacity: 1;
+}
+
+// MLB: the square headshots fade out on the left instead of ending in a hard line across the jersey
+.hero-photo,
+.comp-photo {
+  mask-image: linear-gradient(90deg, transparent, #000 28%);
+}

@@ -1,4 +1,5 @@
-@use "../../variables.scss" as v;
+@use "sass:meta";
+@use "../variables" as v;
 
 // Name column stays a fixed width and the stat columns share the rest of the row
 section.spread ul li.player {
@@ -1754,7 +1755,7 @@ section ul li.player > .col-group > div:last-child {
 // ===========================================================================
 section.rankings-wrapper ul.cdk-drop-list {
   background:
-    url("../../assets/textures/chalk-plays.svg") -1150px -420px / 2800px 1440px,
+    var(--tex-chalk-plays) -1150px -420px / 2800px 1440px,
     url("../../assets/textures/chalk-noise.svg") 0 0 / 300px 300px,
     radial-gradient(ellipse at 20% 15%, rgba(255, 255, 255, 0.05), transparent 40%),
     radial-gradient(ellipse at 75% 60%, rgba(255, 255, 255, 0.04), transparent 45%),
@@ -1812,7 +1813,7 @@ section ul li.player:not(.header-row) {
 section ul li.player.cdk-drag-preview,
 section ul li.player.cdk-drag-preview:hover {
   background:
-    url("../../assets/textures/chalk-plays.svg") -1150px -420px / 2800px 1440px,
+    var(--tex-chalk-plays) -1150px -420px / 2800px 1440px,
     url("../../assets/textures/chalk-noise.svg") 0 0 / 300px 300px,
     radial-gradient(ellipse at 20% 15%, rgba(255, 255, 255, 0.05), transparent 40%),
     radial-gradient(ellipse at 75% 60%, rgba(255, 255, 255, 0.04), transparent 45%),
@@ -2021,20 +2022,8 @@ section ul li.player .player-name .player-awards,
     text-shadow: 0 1px 0 rgba(255, 255, 255, 0.35);
     white-space: nowrap;
 
-    // AP All-Pro: the same plaque in silver
-    &.award-ap1,
-    &.award-ap2 {
-      background: linear-gradient(180deg, #f4f6f8, #b9c0c8 55%, #8d959e);
-      border-color: rgba(240, 244, 248, 0.85);
-      color: #1f262d;
-    }
-
-    // Pro Bowl: bronze
-    &.award-pb {
-      background: linear-gradient(180deg, #f3c79a, #c07a3e 55%, #8f5424);
-      border-color: rgba(246, 208, 170, 0.85);
-      color: #2e1705;
-    }
+    // (gold by default; a sport's theme puts its other awards in silver, bronze or steel: see the
+    // plaque mixins in _variables.scss)
 
     // The glint, on the same beat as the #1 trophy
     &::after {
@@ -2381,3 +2370,17 @@ section ul li.player:not(.header-row) .player-info {
     }
   }
 }
+
+// A champion's cup in gold (the cup is silver otherwise, like a conference or league title's)
+section ul li.player .player-name .player-awards .award-cup.award-gold,
+.player-card .player-awards .award-cup.award-gold {
+  background:
+    linear-gradient(105deg, transparent 40%, rgba(255, 255, 255, 0.95) 50%, transparent 60%) 150% 0 / 300% 100% no-repeat,
+    linear-gradient(180deg, #ffe27a, #d9a520 55%, #b8860b);
+  -webkit-background-clip: text;
+  background-clip: text;
+  filter: drop-shadow(0 0 3px rgba(255, 205, 0, 0.45));
+}
+
+// The sport's own touches (apps/<sport>/src/theme/_sport-rankings.scss)
+@include meta.load-css("sport-rankings");

@@ -6,7 +6,7 @@ type SectionId = 'about' | 'ranking' | 'grades' | 'tips' | 'glossary' | 'faq' | 
 @Component({
   selector: 'about-panel',
   templateUrl: './about.component.html',
-  styleUrls: ['./about.component.scss'],
+  styleUrls: ['../../../../../libs/ranker/src/styles/components/about.component.scss'],
   standalone: false,
 })
 export class AboutComponent implements AfterViewInit {

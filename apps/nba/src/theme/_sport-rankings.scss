@@ -1,0 +1,67 @@
+@use "variables" as v;
+
+// NBA grid touches: painted court lines, All-NBA plaques in gold / silver / bronze and All-Defensive
+// in steel
+
+// Between the rows: a thin painted line, like a court's (faint, so the rows still read as one board)
+section ul li.player:not(.header-row):not(.cdk-drag-preview) {
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.1)) left bottom / 100% 1px no-repeat,
+    rgba(0, 0, 0, 0.1);
+}
+
+section ul li.player .player-name .player-awards,
+.player-card .player-awards {
+  .award-badge {
+    &.award-nba2 {
+      @include v.plaque-silver;
+    }
+
+    // All-Defensive: steel blue (a separate honor from the All-NBA tiers)
+    &.award-def1,
+    &.award-def2 {
+      @include v.plaque-steel;
+    }
+
+    &.award-nba3,
+    &.award-as {
+      @include v.plaque-bronze;
+    }
+  }
+}
+
+// NBA: the category lines are painted court lines: a solid stripe of the category's color (lifted with
+// a little white, like paint on maple) with a faint sheen down its middle, carried down the rows from
+// the header, where it replaces the plain line
+$court-line:
+  linear-gradient(90deg, transparent 35%, rgba(255, 255, 255, 0.35) 50%, transparent 65%),
+  color-mix(in srgb, var(--group-color) 85%, #fff);
+
+section.category-colors
+  ul
+  li.player:not(.header-row)
+  > .col-group
+  > div:first-child::before {
+  background: $court-line;
+  left: calc(-0.5em + 1px);
+  opacity: 0.8;
+  width: 3px;
+}
+
+section ul li.player.header-row > .col-group > div:first-child {
+  &::after {
+    border-left: none;
+  }
+
+  &::before {
+    background: $court-line;
+    bottom: -0.68em;
+    content: "";
+    left: calc(-0.5em);
+    pointer-events: none;
+    position: absolute;
+    top: -0.68em;
+    width: 3px;
+    z-index: 1;
+  }
+}

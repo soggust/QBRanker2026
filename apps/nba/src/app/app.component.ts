@@ -5,7 +5,7 @@ import { POSITIONS, Position } from './positions';
 @Component({
     selector: 'app-root',
     templateUrl: './app.component.html',
-    styleUrls: ['./app.component.scss'],
+    styleUrls: ['../../../../libs/ranker/src/styles/components/app.component.scss'],
     standalone: false
 })
 export class AppComponent {

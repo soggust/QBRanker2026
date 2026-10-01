@@ -1,4 +1,5 @@
-@use "../../variables.scss" as v;
+@use "sass:meta";
+@use "../variables" as v;
 
 // Player card (click a name): a scoreboard panel like the About one. A hero in the team's color with
 // the big team card (player standing in it), name, awards and overall rank, then every column showing
@@ -20,7 +21,7 @@
   animation: card-rise 0.2s ease;
   // The table's playbook chalkboard (the body scrolls over it, like the rows)
   background:
-    url("../../assets/textures/chalk-plays.svg") -1150px -420px / 2800px 1440px,
+    var(--tex-chalk-plays) -1150px -420px / 2800px 1440px,
     url("../../assets/textures/chalk-noise.svg") 0 0 / 300px 300px,
     radial-gradient(ellipse at 20% 15%, rgba(255, 255, 255, 0.05), transparent 40%),
     radial-gradient(ellipse at 75% 60%, rgba(255, 255, 255, 0.04), transparent 45%),
@@ -1381,3 +1382,6 @@
     font-size: 11px;
   }
 }
+
+// The sport's own touches (apps/<sport>/src/theme/_sport-card.scss)
+@include meta.load-css("sport-card");

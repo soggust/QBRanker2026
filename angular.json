@@ -33,13 +33,24 @@
                 "glob": "**/*.json",
                 "input": "apps/nfl/src/StaticData",
                 "output": "data"
+              },
+              {
+                "glob": "**/*",
+                "input": "libs/ranker/src/assets",
+                "output": "assets"
               }
             ],
             "styles": [
               "apps/nfl/src/styles.scss"
             ],
             "scripts": [],
-            "baseHref": "/nfl/"
+            "baseHref": "/nfl/",
+            "stylePreprocessorOptions": {
+              "includePaths": [
+                "libs/ranker/src/styles",
+                "apps/nfl/src/theme"
+              ]
+            }
           },
           "configurations": {
             "production": {
@@ -103,7 +114,13 @@
             "styles": [
               "apps/nfl/src/styles.scss"
             ],
-            "scripts": []
+            "scripts": [],
+            "stylePreprocessorOptions": {
+              "includePaths": [
+                "libs/ranker/src/styles",
+                "apps/nfl/src/theme"
+              ]
+            }
           }
         }
       }
@@ -138,13 +155,24 @@
                 "glob": "**/*.json",
                 "input": "apps/mlb/src/StaticData",
                 "output": "data"
+              },
+              {
+                "glob": "**/*",
+                "input": "libs/ranker/src/assets",
+                "output": "assets"
               }
             ],
             "styles": [
               "apps/mlb/src/styles.scss"
             ],
             "scripts": [],
-            "baseHref": "/mlb/"
+            "baseHref": "/mlb/",
+            "stylePreprocessorOptions": {
+              "includePaths": [
+                "libs/ranker/src/styles",
+                "apps/mlb/src/theme"
+              ]
+            }
           },
           "configurations": {
             "production": {
@@ -208,7 +236,13 @@
             "styles": [
               "apps/mlb/src/styles.scss"
             ],
-            "scripts": []
+            "scripts": [],
+            "stylePreprocessorOptions": {
+              "includePaths": [
+                "libs/ranker/src/styles",
+                "apps/mlb/src/theme"
+              ]
+            }
           }
         }
       }
@@ -243,13 +277,24 @@
                 "glob": "**/*.json",
                 "input": "apps/nba/src/StaticData",
                 "output": "data"
+              },
+              {
+                "glob": "**/*",
+                "input": "libs/ranker/src/assets",
+                "output": "assets"
               }
             ],
             "styles": [
               "apps/nba/src/styles.scss"
             ],
             "scripts": [],
-            "baseHref": "/nba/"
+            "baseHref": "/nba/",
+            "stylePreprocessorOptions": {
+              "includePaths": [
+                "libs/ranker/src/styles",
+                "apps/nba/src/theme"
+              ]
+            }
           },
           "configurations": {
             "production": {
@@ -313,7 +358,13 @@
             "styles": [
               "apps/nba/src/styles.scss"
             ],
-            "scripts": []
+            "scripts": [],
+            "stylePreprocessorOptions": {
+              "includePaths": [
+                "libs/ranker/src/styles",
+                "apps/nba/src/theme"
+              ]
+            }
           }
         }
       }
