@@ -190,6 +190,10 @@ export interface SportConfig {
   // One career table rather than seasons: no season dropdown, the card reads "Career" and has no
   // season-by-season tab, history takes or similar seasons
   careerOnly?: boolean;
+  // How much evidence a row's rates rest on, 0-1 (the UFC: fights / (fights + 4)): each rate stat's
+  // score in the ranking is scaled by it, so small samples sway the list less. The columns show the
+  // real values either way.
+  reliability?: (player: SkillPlayer) => number;
   // Rows the sport's settings can hide (the UFC's retired fighters, until switched on)
   rowVisible?: (player: SkillPlayer, settings: SportSettings) => boolean;
   // A tab the sport's settings can hide (the UFC's women's divisions, until switched on)

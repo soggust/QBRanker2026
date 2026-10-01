@@ -126,6 +126,8 @@ export const SPORT: SportConfig = {
   ],
   tabVisible: (position, settings) => !WOMENS_DIVISIONS.includes(position as Position) || !!settings['women'],
   rowVisible: (player, settings) => !player.retired || !!settings['retired'],
+  // A fighter's rates rest on few fights early on: 4 UFC fights count half, 12 count three-quarters
+  reliability: (player) => player.games / (player.games + 4),
   cardHistory: { title: 'Fights', icon: 'sports_mma', rows: (player) => fightRows(player) },
   copy: {
     noHolesIcon: 'verified',

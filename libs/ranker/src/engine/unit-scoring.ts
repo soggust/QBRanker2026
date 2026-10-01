@@ -96,13 +96,15 @@ const MAX_Z = 2.5;
 // the sliders alone decide what matters. The slider multiplies it (50 = 1x, 100 = 2x). Support
 // grades count at a fifth of that strength, against the player (credit for doing more with less) or
 // for them (supportHelps). A missing value (null) scores as the list's worst, or as average for stats
-// flagged missingIsAverage and for support grades. Small samples aren't adjusted for: a stat alone
-// sorts the list exactly by its values (the Min setting leaves out players with too few).
+// flagged missingIsAverage and for support grades. Small samples aren't adjusted for unless the sport
+// says how much evidence a row's rates rest on (SPORT.reliability, 0-1: the UFC's fights): then each
+// rate's score is scaled by it, so a few fights' perfect numbers count less than a long career's.
 export function weightedTotals<T>(
   units: T[],
   stats: SkillStat[],
   weights: SkillWeights,
   value: (unit: T, stat: SkillStat) => number | null,
+  reliability: ((unit: T) => number) | null = (SPORT.reliability as ((unit: T) => number) | undefined) ?? null,
 ): Map<T, number> {
   const totals = new Map<T, number>(units.map((unit) => [unit, 0]));
   for (const stat of stats) {
@@ -125,7 +127,8 @@ export function weightedTotals<T>(
     units.forEach((unit, i) => {
       const v = raw[i];
       const scored = v !== null ? score(v) : stat.missingIsAverage || stat.support ? 0 : worst;
-      totals.set(unit, (totals.get(unit) ?? 0) + scored * strength);
+      const trust = reliability && stat.kind === 'efficiency' ? reliability(unit) : 1;
+      totals.set(unit, (totals.get(unit) ?? 0) + scored * strength * trust);
     });
   }
   return totals;

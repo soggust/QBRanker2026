@@ -77,8 +77,15 @@ createServer((req, res) => {
     res.writeHead(301, { Location: `/${id}/${url.search}` });
     return res.end();
   }
-  const dir = path.join(OUT, id);
-  let file = path.join(dir, decodeURIComponent(rest.join('/')));
+  // (the data straight from the app's source folder, so a data update shows on the next reload: the
+  // watch build only copies it when it starts)
+  const isData = rest[0] === 'data';
+  const dir = isData ? path.join(ROOT, 'apps', id, 'src/StaticData') : path.join(OUT, id);
+  let file = path.join(dir, decodeURIComponent((isData ? rest.slice(1) : rest).join('/')));
+  if (isData && (!existsSync(file) || statSync(file).isDirectory())) {
+    res.writeHead(404);
+    return res.end('Not found');
+  }
   // (an app's own routes, and its root: its index.html)
   if (!file.startsWith(dir) || !existsSync(file) || statSync(file).isDirectory()) file = path.join(dir, 'index.html');
   if (!existsSync(file)) {
