@@ -128,12 +128,13 @@ export const SPORT: SportConfig = {
     {
       key: 'women',
       label: "Women's Divisions",
-      title: "On: add the women's divisions (strawweight, flyweight and bantamweight) to the tabs",
+      title: "On: the women's tabs (pound-for-pound, bantamweight, flyweight and strawweight) in place of the men's",
       default: false,
       slot: 'displayEnd',
     },
   ],
-  tabVisible: (position, settings) => !WOMENS_DIVISIONS.includes(position as Position) || !!settings['women'],
+  // (the women's tabs or the men's, one set at a time)
+  tabVisible: (position, settings) => WOMENS_DIVISIONS.includes(position as Position) === !!settings['women'],
   // Current fighters: today's roster, each in the division he's in now (Jon Jones at heavyweight, not
   // light heavyweight); all-time: the retired fighters too, and everyone in every division he's had 3+
   // fights in

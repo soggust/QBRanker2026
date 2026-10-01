@@ -1,17 +1,12 @@
 <svg xmlns='http://www.w3.org/2000/svg' width='600' height='600'>
-<!-- The octagon's canvas (the page background, tiled): off-white canvas with a fine thread weave (lines, not dots: dots would read as the scoreboard panels), a soft mottling, and a few
+<!-- The octagon's canvas (the page background, tiled): plain off-white canvas (no weave: any regular grid reads as the scoreboard panels), a soft mottling, a fine grain, and a few
      faint scuffs and stains from the fights on it -->
 <defs>
-<pattern id='weave' width='6' height='6' patternUnits='userSpaceOnUse'>
-<rect width='6' height='6' fill='#e9e4da'/>
-<path d='M0 1.5 H6 M0 4.5 H6' stroke='#ddd6c9' stroke-width='1.1'/>
-<path d='M1.5 0 V6 M4.5 0 V6' stroke='#f1ede5' stroke-width='0.9' opacity='0.7'/>
-</pattern>
 <filter id='mottle'><feTurbulence type='fractalNoise' baseFrequency='0.012' numOctaves='3' seed='3'/><feColorMatrix values='0 0 0 0 0.45  0 0 0 0 0.4  0 0 0 0 0.34  0 0 0 0.22 0'/></filter>
 <filter id='grain'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' seed='8'/><feColorMatrix values='0 0 0 0 0.3  0 0 0 0 0.27  0 0 0 0 0.24  0 0 0 0.14 0'/></filter>
 <filter id='soft'><feGaussianBlur stdDeviation='10'/></filter>
 </defs>
-<rect width='600' height='600' fill='url(#weave)'/>
+<rect width='600' height='600' fill='#e9e4da'/>
 <rect width='600' height='600' filter='url(#mottle)'/>
 <rect width='600' height='600' filter='url(#grain)'/>
 <circle cx='5' cy='58' r='76' fill='#8a6b52' fill-opacity='0.057' filter='url(#soft)'/><circle cx='428' cy='170' r='58' fill='#8a6b52' fill-opacity='0.031' filter='url(#soft)'/><circle cx='593' cy='146' r='66' fill='#8a6b52' fill-opacity='0.061' filter='url(#soft)'/><circle cx='472' cy='482' r='44' fill='#8a6b52' fill-opacity='0.041' filter='url(#soft)'/><circle cx='544' cy='391' r='24' fill='#8a6b52' fill-opacity='0.042' filter='url(#soft)'/>
