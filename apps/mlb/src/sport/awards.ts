@@ -7,7 +7,8 @@ import type { SkillPlayer, SkillPosition } from '@sport/positions';
 export type AwardId = 'ws' | 'pennant' | 'mvp' | 'cy' | 'roy' | 'gg' | 'ss' | 'as';
 
 export const AWARD_INFO: Record<AwardId, AwardInfo> = {
-  ws: { name: 'World Series Champion', short: 'WS Champ', icon: { name: 'emoji_events', metal: 'gold' } },
+  // (the Commissioner's Trophy, the #1 rank's trophy, like the NFL's Lombardi)
+  ws: { name: 'World Series Champion', short: 'WS Champ', icon: { name: 'trophy' } },
   pennant: { name: 'Pennant Winner', short: 'Pennant', icon: { name: 'flag' } },
   mvp: { name: 'Most Valuable Player', short: 'MVP' },
   cy: { name: 'Cy Young Award', short: 'CY' },

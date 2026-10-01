@@ -7,7 +7,8 @@ import type { SkillPlayer, SkillPosition } from '@sport/positions';
 export type AwardId = 'cup' | 'conf' | 'hart' | 'vezina' | 'norris' | 'calder' | 'selke' | 'conn' | 'lindsay' | 'rocket' | 'artross';
 
 export const AWARD_INFO: Record<AwardId, AwardInfo> = {
-  cup: { name: 'Stanley Cup Champion', short: 'Cup', icon: { name: 'emoji_events', metal: 'gold' } },
+  // (the Stanley Cup itself, the #1 rank's trophy, like the NFL's Lombardi)
+  cup: { name: 'Stanley Cup Champion', short: 'Cup', icon: { name: 'trophy' } },
   conf: { name: 'Conference Champion', short: 'Conf', icon: { name: 'emoji_events' } },
   hart: { name: 'Hart Trophy (MVP)', short: 'HART' },
   vezina: { name: 'Vezina Trophy (best goalie)', short: 'VEZINA' },

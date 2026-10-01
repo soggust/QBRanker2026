@@ -22,7 +22,8 @@ export type AwardId =
   | 'coy';
 
 export const AWARD_INFO: Record<AwardId, AwardInfo> = {
-  champ: { name: 'NBA Champion', short: 'Champ', icon: { name: 'emoji_events', metal: 'gold' } },
+  // (the Larry O'Brien Trophy, the #1 rank's trophy, like the NFL's Lombardi)
+  champ: { name: 'NBA Champion', short: 'Champ', icon: { name: 'trophy' } },
   conf: { name: 'Conference Champion', short: 'Conf', icon: { name: 'emoji_events' } },
   mvp: { name: 'Most Valuable Player', short: 'MVP' },
   dpoy: { name: 'Defensive Player of the Year', short: 'DPOY' },
