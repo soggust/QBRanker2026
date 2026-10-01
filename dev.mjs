@@ -32,8 +32,18 @@ const TYPES = {
 const listeners = new Set();
 const RELOAD = `<script>new EventSource('/__reload').onmessage = (e) => location.pathname.startsWith('/' + e.data + '/') && location.reload();</script>`;
 
-// Every app, building and rebuilding on each change
-const builds = sports.map(({ id }) => {
+// (on Windows the build runs under a shell: end its whole process tree, not just the shell)
+const kill = (child) => {
+  if (process.platform === 'win32') spawnSync('taskkill', ['/pid', String(child.pid), '/T', '/F'], { stdio: 'ignore' });
+  else child.kill();
+};
+
+// Every app, building and rebuilding on each change. A rebuild that finishes without its index.html
+// (the watch build only rewrites what changed, so once the page is lost, say to another build sharing
+// Angular's cache, it stays lost and every page is a 503) restarts that app's build, which writes it
+// all fresh.
+const builds = new Map();
+const build = (id) => {
   const child = spawn('npx', ['ng', 'build', id, '--watch', '--configuration', 'development', '--output-path', `dist/dev/${id}`], {
     cwd: ROOT,
     shell: true,
@@ -45,15 +55,23 @@ const builds = sports.map(({ id }) => {
     out.write(text.replace(/^(?=.)/gm, tag));
     // (a finished build, first or a rebuild: tell its open pages)
     if (/Build at:/.test(text)) {
+      if (!existsSync(path.join(OUT, id, 'index.html'))) {
+        console.log(`${tag}built without its index.html: restarting its build`);
+        builds.delete(id);
+        kill(child);
+        builds.set(id, build(id));
+        return;
+      }
       console.log(`${tag}ready: http://localhost:${port}/${id}/`);
       for (const res of listeners) res.write(`data: ${id}\n\n`);
     }
   };
   child.stdout.on('data', relay(process.stdout));
   child.stderr.on('data', relay(process.stderr));
-  child.on('exit', (code) => console.log(`${tag}stopped (${code})`));
+  child.on('exit', (code) => builds.get(id) === child && console.log(`${tag}stopped (${code})`));
   return child;
-});
+};
+for (const { id } of sports) builds.set(id, build(id));
 
 createServer((req, res) => {
   const url = new URL(req.url, 'http://localhost');
@@ -100,12 +118,8 @@ createServer((req, res) => {
   console.log(`Building ${sports.map((s) => s.label).join(', ')}... then all at http://localhost:${port}/ (${sports.map((s) => `/${s.id}/`).join(', ')})`);
 });
 
-// (on Windows the build runs under a shell: end its whole process tree, not just the shell)
 const stop = () => {
-  for (const child of builds) {
-    if (process.platform === 'win32') spawnSync('taskkill', ['/pid', String(child.pid), '/T', '/F'], { stdio: 'ignore' });
-    else child.kill();
-  }
+  for (const child of builds.values()) kill(child);
   process.exit();
 };
 process.on('SIGINT', stop);

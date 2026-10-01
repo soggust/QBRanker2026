@@ -1,28 +1,30 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <!-- An MMA glove (the slider knobs and the settings switches), seen from the back of the hand: the
-       padded knuckles in fight-night red, the fingers curled under in black, the open thumb on the
-       side, and the white wrist strap with its velcro. Shaded from the top left. -->
+  <!-- An MMA glove (the slider knobs, the settings switches and the loading screen), seen from the back
+       of the hand: squared off like an MMA glove rather than a boxing glove's round mitt. A flat-topped,
+       boxy knuckle pad in fight-night red over the black curled fingers, a squared thumb on the side,
+       and the white wrist strap with its velcro. Shaded from the top left. -->
   <defs>
-    <radialGradient id="pad" cx="38%" cy="30%" r="75%">
+    <linearGradient id="pad" x1="0.2" y1="0" x2="0.6" y2="1">
       <stop offset="0" stop-color="#ff5a50"/>
-      <stop offset="0.55" stop-color="#c8141c"/>
+      <stop offset="0.5" stop-color="#c8141c"/>
       <stop offset="1" stop-color="#6e0a0e"/>
-    </radialGradient>
+    </linearGradient>
     <linearGradient id="strap" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0" stop-color="#ffffff"/>
       <stop offset="1" stop-color="#c9ccd2"/>
     </linearGradient>
   </defs>
-  <!-- The curled fingers (black, under the pad) -->
-  <path d="M12 22 C12 12 20 6 32 6 C44 6 52 12 52 22 V30 H12 Z" fill="#141414"/>
-  <!-- The padded knuckles -->
-  <path d="M10 26 C10 14 19 8 32 8 C45 8 54 14 54 26 C54 36 47 42 32 42 C17 42 10 36 10 26 Z" fill="url(#pad)" stroke="#3a0406" stroke-width="1.6"/>
+  <!-- The curled fingers (black, peeking above the pad) -->
+  <rect x="12" y="7" width="40" height="14" rx="4" fill="#141414"/>
+  <path d="M22 8 V20 M32 8 V20 M42 8 V20" stroke="#3a3a3e" stroke-width="1.2"/>
+  <!-- The padded knuckles: boxy, with small rounded corners -->
+  <rect x="10" y="12" width="44" height="29" rx="6" fill="url(#pad)" stroke="#3a0406" stroke-width="1.6"/>
   <!-- The knuckle seams -->
-  <path d="M21 13 C20 20 20 28 22 36 M32 10 V40 M43 13 C44 20 44 28 42 36" fill="none" stroke="#7a0a10" stroke-width="1.2" opacity="0.6"/>
+  <path d="M21.5 14 V39 M32 14 V39 M42.5 14 V39" fill="none" stroke="#7a0a10" stroke-width="1.2" opacity="0.6"/>
   <!-- The thumb -->
-  <path d="M6 30 C3 24 6 18 11 19 C13 22 13 28 12 33 Z" fill="#c8141c" stroke="#3a0406" stroke-width="1.4"/>
+  <rect x="4" y="21" width="8" height="15" rx="2.5" fill="#c8141c" stroke="#3a0406" stroke-width="1.4"/>
   <!-- The wrist strap -->
-  <rect x="13" y="40" width="38" height="16" rx="5" fill="url(#strap)" stroke="#1a1a1a" stroke-width="1.6"/>
-  <rect x="17" y="44" width="30" height="8" rx="2.5" fill="#111"/>
-  <rect x="20" y="46.5" width="24" height="3" rx="1.5" fill="#c8141c"/>
+  <rect x="13" y="40" width="38" height="16" rx="3" fill="url(#strap)" stroke="#1a1a1a" stroke-width="1.6"/>
+  <rect x="17" y="44" width="30" height="8" rx="1.5" fill="#111"/>
+  <rect x="20" y="46.5" width="24" height="3" rx="1" fill="#c8141c"/>
 </svg>
