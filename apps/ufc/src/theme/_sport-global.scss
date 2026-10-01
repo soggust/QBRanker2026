@@ -121,7 +121,7 @@ section footer .info-toggle,
 .sidebar footer button:hover,
 .sidebar footer button.negative:hover {
   @include octagon;
-  font-weight: 800 !important;
+  font-weight: 500 !important;
   text-shadow: 0 1px 1px rgba(0, 0, 0, 0.8) !important;
 
   .mat-icon {
@@ -177,7 +177,7 @@ section footer .mat-mdc-select.season-select,
     font-family: "Nunito", sans-serif !important;
     font-size: 12px !important;
     font-weight: 500 !important;
-    letter-spacing: 1.5px !important;
+    letter-spacing: normal !important;
     text-transform: uppercase;
   }
 
@@ -199,7 +199,7 @@ section footer .mat-mdc-select.season-select,
 
   .mat-mdc-option span {
     color: $white-text !important;
-    font-weight: 800 !important;
+    font-weight: 500 !important;
   }
 
   .mat-mdc-option.mdc-list-item--selected,
@@ -231,7 +231,7 @@ section footer .mat-mdc-select.season-select,
   &,
   .mdc-list-item__primary-text {
     font-size: 11.05px !important;
-    font-weight: 800 !important;
+    font-weight: 500 !important;
     letter-spacing: normal !important;
     text-transform: uppercase !important;
   }

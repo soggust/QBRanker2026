@@ -68,6 +68,8 @@ export const SPORT: SportConfig = {
   seasonText: seasonName,
   careerOnly: true,
   positionNames: {
+    P4P: 'Pound-for-Pound',
+    WP4P: "Women's Pound-for-Pound",
     HW: 'Heavyweight',
     LHW: 'Light Heavyweight',
     MW: 'Middleweight',
@@ -81,6 +83,8 @@ export const SPORT: SportConfig = {
     WSW: "Women's Strawweight",
   },
   tabNames: {
+    P4P: 'P4P',
+    WP4P: 'W P4P',
     HW: 'Heavyweight',
     LHW: 'Light Heavy',
     MW: 'Middleweight',
@@ -99,7 +103,8 @@ export const SPORT: SportConfig = {
   playingTime: {
     label: 'Fights',
     title: 'Leave out fighters with fewer UFC fights than this share of the most anyone in the division has (1 shows everyone); the number is the fights it takes',
-    of: (player) => player.games ?? 0,
+    // (his whole UFC career: a champion new to a division is still listed there)
+    of: (player) => player.careerGames ?? player.games ?? 0,
   },
   defaultStatBasis: 'season',
   perGameDecimals: 2,
@@ -127,11 +132,11 @@ export const SPORT: SportConfig = {
   ],
   tabVisible: (position, settings) => !WOMENS_DIVISIONS.includes(position as Position) || !!settings['women'],
   rowVisible: (player, settings) => !player.retired || settings['era'] === 'alltime',
-  // The UFC's rank in the ranking: the champion as #0 (above #1), an unranked fighter as #16 (just
-  // past the top 15), a retired one as average (the lists are today's)
+  // The UFC's rank in the ranking: a division's champion as #0 (above #1), an unranked fighter as #16
+  // (just past the top 15), a retired one as average (the lists are today's)
   scoreValue: (player, stat, shown) => {
     if (stat.key !== 'officialRank') return undefined;
-    if (player.awards?.includes('champ')) return 0;
+    if (player.titleHolder) return 0;
     if (player.retired) return null;
     return shown ?? 16;
   },

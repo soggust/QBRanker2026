@@ -57,6 +57,8 @@ const PRESETS: SkillPresetDef[] = [
 // (the same presets in every division; written out rather than read from positions.ts, which loads this
 // file: the type makes sure every division is here)
 export const SKILL_PRESETS: Record<SkillPosition, SkillPresetDef[]> = {
+  P4P: PRESETS,
+  WP4P: PRESETS,
   HW: PRESETS,
   LHW: PRESETS,
   MW: PRESETS,

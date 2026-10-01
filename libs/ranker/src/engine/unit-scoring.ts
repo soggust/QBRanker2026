@@ -123,9 +123,15 @@ export function weightedTotals<T>(
     const sd = Math.sqrt(known.reduce((a, b) => a + (b - mean) ** 2, 0) / known.length);
     if (!sd) continue;
 
-    // Standard score, pointed so higher is always better for the unit
+    // Standard score, pointed so higher is always better for the unit. A stat on a fixed scale (the
+    // UFC's rank: the champion to unranked) is laid evenly across the whole range instead, best to
+    // worst, so a list's many unranked fighters don't squeeze its top ranks together at the cap.
     const better = stat.support ? (stat.supportHelps ? 1 : -1) : stat.negative ? -1 : 1;
-    const score = (v: number) => better * Math.max(-MAX_Z, Math.min(MAX_Z, (v - mean) / sd));
+    const scale = (stat as { scale?: [best: number, worst: number] }).scale;
+    const clamp = (z: number) => Math.max(-MAX_Z, Math.min(MAX_Z, z));
+    const score = scale
+      ? (v: number) => clamp(MAX_Z * (1 - (2 * (v - scale[0])) / (scale[1] - scale[0])))
+      : (v: number) => better * clamp((v - mean) / sd);
     const worst = Math.min(...known.map(score));
     // (a sport can boost a stat behind its slider: the same 0-100% range, more effect at every step;
     // the boost can depend on the sport's settings)
@@ -136,7 +142,9 @@ export function weightedTotals<T>(
     units.forEach((unit, i) => {
       const v = raw[i];
       const scored = v !== null ? score(v) : stat.missingIsAverage || stat.support ? 0 : worst;
-      const trust = reliability && stat.kind === 'efficiency' ? reliability(unit) : 1;
+      // (a rate that isn't his own sample's, like the UFC's rank, isn't scaled: stat.settled)
+      const settled = (stat as { settled?: boolean }).settled;
+      const trust = reliability && stat.kind === 'efficiency' && !settled ? reliability(unit) : 1;
       totals.set(unit, (totals.get(unit) ?? 0) + scored * strength * trust);
     });
   }

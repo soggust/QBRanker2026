@@ -218,11 +218,12 @@ section footer .mat-mdc-select.season-select,
   color: #c8102e !important;
 }
 
-// MLB's accent is red rather than goalpost yellow: the scoreboard lettering, menu highlights, sliders
-// and scrollbars all read this. A bright red (lighter than the seams) so text reads on the dark panels.
+// MLB's accent is the baseball's cream rather than goalpost yellow: the scoreboard lettering, menu
+// highlights, sliders and scrollbars all read this on the dark panels (the cream hide itself keeps its
+// seam red for the same states)
 :root {
-  --scoreboard-led: #ff4b3e;
-  --scoreboard-glow: 0 0 6px rgba(255, 75, 62, 0.6);
+  --scoreboard-led: #f1ece0;
+  --scoreboard-glow: 0 0 6px rgba(241, 236, 224, 0.5);
 }
 
 // Both dropdowns: more room on each side so the text and caret clear the seams

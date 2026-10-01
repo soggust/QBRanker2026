@@ -190,7 +190,7 @@ async function bio(id) {
 // ---------------------------------------------------------------------------
 async function rankings() {
   const html = (await get(RANKINGS, 'text')) ?? '';
-  const out = { champions: new Map(), ranks: new Map(), p4p: new Map() };
+  const out = { champions: new Map(), ranks: new Map(), p4p: new Map(), wp4p: new Map() };
   const seen = new Set();
   for (const group of html.split('<div class="view-grouping">').slice(1)) {
     const head = (group.match(/view-grouping-header">([^<]*)/)?.[1] ?? '').replace(/&#0?39;/g, "'").trim();
@@ -199,7 +199,7 @@ async function rankings() {
     const champion = group.match(/<h5>\s*<a[^>]*>([^<]*)<\/a>/)?.[1];
     const ranked = [...group.matchAll(/views-field-title[^>]*>\s*<a[^>]*>([^<]*)<\/a>/g)].map((m) => nameKey(m[1]));
     if (/Pound-for-Pound/.test(head)) {
-      ranked.forEach((key, i) => out.p4p.set(key, i + 1));
+      ranked.forEach((key, i) => out[/Women/i.test(head) ? 'wp4p' : 'p4p'].set(key, i + 1));
       continue;
     }
     const tab = RANKING_DIVISIONS[head];
@@ -231,7 +231,8 @@ async function ufcStatus(name) {
 
 // ---------------------------------------------------------------------------
 // Title history: Wikipedia's championship tables (each division's reigns, interim ones included, with
-// a line per successful defense). A reign is a title fight win, and so is each defense. By name.
+// a line per successful defense). A reign is a title fight win, and so is each defense. By name, in
+// all and by division (the defunct women's featherweight title only in all).
 // ---------------------------------------------------------------------------
 async function titles() {
   const text = (await get(CHAMPIONS, 'text')) ?? '';
@@ -242,14 +243,26 @@ async function titles() {
   const end = text.indexOf('==Symbolic titles==');
   const defunct = text.slice(text.indexOf('==Defunct titles=='), text.indexOf('==Tournament winners=='));
   const tables = text.slice(start, end) + defunct.slice(defunct.indexOf("===Women's Featherweight"));
-  for (const row of tables.split(/\n\|-/)) {
+  let tab = null;
+  for (const chunk of tables.split(/\n\|-/)) {
+    // (a chunk can end a division's table and open the next: its reign is the old division's)
+    const row = chunk.split(/\n===/)[0];
+    const heading = chunk.match(/===\s*([^=]+?)\s+Championship\s*===/);
+    const division = tab;
+    if (heading) tab = DIVISIONS[heading[1]] ?? null;
     // A reign: its number (or "—"), the champion's flag and name, the event
     const champ = row.match(/\{\{flagicon\|[^}]*\}\}\s*\[\[([^\]|]+)(?:\|([^\]]+))?\]\]/);
     if (!champ || !/\[\[UFC|\[\[The Ultimate Fighter|\[\[UFC on/.test(row)) continue;
     const key = nameKey(champ[2] ?? champ[1].replace(/\s*\(.*\)$/, ''));
-    const t = out.get(key) ?? { reigns: 0, defenses: 0 };
+    const t = out.get(key) ?? { reigns: 0, defenses: 0, by: {} };
+    const defenses = (row.match(/\d+\.\s*def\./g) ?? []).length;
     t.reigns++;
-    t.defenses += (row.match(/\d+\.\s*def\./g) ?? []).length;
+    t.defenses += defenses;
+    if (division) {
+      const d = (t.by[division] ??= { reigns: 0, defenses: 0 });
+      d.reigns++;
+      d.defenses += defenses;
+    }
     out.set(key, t);
   }
   return out;
@@ -427,14 +440,17 @@ const strength = new Map(
 );
 
 const debutCutoff = new Date(Date.now() - 365 * 864e5).toISOString().slice(0, 10);
-const out = Object.fromEntries(['HW', 'LHW', 'MW', 'WW', 'LW', 'FW', 'BW', 'FLW', 'WBW', 'WFLW', 'WSW'].map((tab) => [tab, []]));
+const WOMENS = ['WBW', 'WFLW', 'WSW'];
+const out = Object.fromEntries(['P4P', 'HW', 'LHW', 'MW', 'WW', 'LW', 'FW', 'BW', 'FLW', 'WP4P', 'WBW', 'WFLW', 'WSW'].map((tab) => [tab, []]));
 for (const id of active) {
   const fights = byFighter.get(id);
   const b = cache[id]?.bio;
   const name = b?.name ?? fights[0].fighters.find((f) => f.id === id).name;
   // His divisions: ESPN's for him (else his last fight's, not a catchweight), and every other division
   // he's had 3+ UFC fights in (Alex Pereira at middleweight, light heavyweight and heavyweight), listed
-  // in each with his whole UFC career
+  // in each with his fights there (catchweights count in his own); and the pound-for-pound tab (men's
+  // or women's) with his whole UFC career. His form (the last five, the streak) and Elo are his
+  // whole career's everywhere.
   const lastDivision = fights.find((f) => DIVISIONS[f.division])?.division;
   const home = DIVISIONS[b?.division] ?? DIVISIONS[lastDivision];
   if (!home) continue;
@@ -442,7 +458,10 @@ for (const id of active) {
   for (const f of fights) if (DIVISIONS[f.division]) perDivision.set(DIVISIONS[f.division], (perDivision.get(DIVISIONS[f.division]) ?? 0) + 1);
   const tabs = new Set([home, ...[...perDivision].filter(([, n]) => n >= 3).map(([t]) => t)]);
   const key = nameKey(name);
-  const c = career(id, fights, cache[id]?.stats ?? {}, cache);
+  const inDivision = (tab) => {
+    const own = fights.filter((f) => (DIVISIONS[f.division] ?? home) === tab);
+    return own.length ? own : fights;
+  };
   // Results newest first: 1 a win, 0.5 a draw or no contest, 0 a loss
   const results = fights.map((f) => (f.fighters.find((x) => x.id === id).winner ? 1 : f.fighters.find((x) => x.id !== id).winner ? 0 : 0.5));
   let streak = 0;
@@ -452,22 +471,29 @@ for (const id of active) {
     else if ((streak > 0 && r) || (streak < 0 && !r)) streak += Math.sign(streak);
     else break;
   }
-  const opponents = fights.map((f) => strength.get(f.fighters.find((x) => x.id !== id).id) ?? 0.5);
-  const won = fights.filter((f) => f.fighters.find((x) => x.id === id).winner);
-  const qualityWins = won.filter((f) => (eloBefore.get(`${f.id}/${f.fighters.find((x) => x.id !== id).id}`) ?? ELO_START) >= QUALITY_ELO).length;
-  const mainEventWins = won.filter((f) => f.rounds >= 5).length;
   const champion = ranked.champions.get(key);
-  const p4p = ranked.p4p.get(key);
+  const p4pTab = WOMENS.includes(home) ? 'WP4P' : 'P4P';
+  const p4p = ranked[WOMENS.includes(home) ? 'wp4p' : 'p4p'].get(key);
   // (Wikipedia may write a name surname-first: "Weili Zhang" for Zhang Weili)
-  const title = titleHistory.get(key) ?? titleHistory.get(nameKey(name.split(' ').reverse().join(' '))) ?? { reigns: 0, defenses: 0 };
-  const row = (tab) => ({
+  const title = titleHistory.get(key) ?? titleHistory.get(nameKey(name.split(' ').reverse().join(' '))) ?? { reigns: 0, defenses: 0, by: {} };
+  const row = (tab) => {
+    const list = tab === p4pTab ? fights : inDivision(tab);
+    const c = career(id, list, cache[id]?.stats ?? {}, cache);
+    const opponents = list.map((f) => strength.get(f.fighters.find((x) => x.id !== id).id) ?? 0.5);
+    const won = list.filter((f) => f.fighters.find((x) => x.id === id).winner);
+    const titles = tab === p4pTab ? title : (title.by[tab] ?? { reigns: 0, defenses: 0 });
+    return {
+    division: tab === p4pTab ? (champion ?? home) : tab,
+    titleHolder: champion === tab,
     id: Number(id),
     gsisId: id,
     name,
     teamLogo: b?.flag ?? 'assets/textures/octagon.svg',
     teamName: b?.gym ?? null,
     country: b?.country ?? null,
-    games: fights.length,
+    games: list.length,
+    // (his whole UFC career's fights: the Fights filter's count, so a champion new to a division stays listed)
+    careerGames: fights.length,
     rookie: fights[fights.length - 1].date >= debutCutoff,
     // (no UFC fight in two years: listed with the Retired Fighters setting on)
     retired: !activeSet.has(id),
@@ -478,16 +504,17 @@ for (const id of active) {
       schedule: round(opponents.reduce((s, v) => s + v, 0) / opponents.length),
       elo: Math.round(elo.get(id) ?? ELO_START),
       peakElo: Math.round(peakElo.get(id) ?? ELO_START),
-      qualityWins,
-      mainEventWins,
-      titleWins: title.reigns + title.defenses,
-      titleDefenses: title.defenses,
-      officialRank: champion === tab ? null : (ranked.ranks.get(`${tab}/${key}`) ?? null),
+      qualityWins: won.filter((f) => (eloBefore.get(`${f.id}/${f.fighters.find((x) => x.id !== id).id}`) ?? ELO_START) >= QUALITY_ELO).length,
+      mainEventWins: won.filter((f) => f.rounds >= 5).length,
+      titleWins: titles.reigns + titles.defenses,
+      titleDefenses: titles.defenses,
+      // (the division's top 15, the champion above it; pound-for-pound on that tab)
+      officialRank: tab === p4pTab ? (p4p ?? null) : champion === tab ? null : (ranked.ranks.get(`${tab}/${key}`) ?? null),
       age: b?.age ?? null,
       reach: b?.reach ?? null,
     },
     pro: b?.pro ?? null,
-    awards: [...(champion === tab ? ['champ'] : []), ...(p4p ? [`p4p${p4p}`] : [])],
+    awards: [...(champion && (champion === tab || tab === p4pTab) ? ['champ'] : []), ...(p4p ? [`p4p${p4p}`] : [])],
     // His UFC fights, newest first (the card's Fights tab): date, opponent, result, how it ended, event
     fights: fights.slice(0, 15).map((f) => {
       const opp = f.fighters.find((x) => x.id !== id);
@@ -498,8 +525,9 @@ for (const id of active) {
       const how = f.decision ? (result === 'D' ? 'Draw' : 'Decision') : result === 'D' ? `No contest · R${f.period} ${time}` : `R${f.period} ${time}`;
       return [f.date, opp.name, result, how, f.event];
     }),
-  });
-  for (const tab of tabs) out[tab].push(row(tab));
+    };
+  };
+  for (const tab of [p4pTab, ...tabs]) out[tab].push(row(tab));
 }
 for (const tab of Object.keys(out)) out[tab].sort((a, b) => a.name.localeCompare(b.name));
 await mkdir(STATIC, { recursive: true });

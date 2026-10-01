@@ -21,6 +21,8 @@ export interface AwardWin {
 }
 
 const DIVISION_NAMES: Record<SkillPosition, string> = {
+  P4P: 'Pound-for-Pound',
+  WP4P: "Women's Pound-for-Pound",
   HW: 'Heavyweight',
   LHW: 'Light Heavyweight',
   MW: 'Middleweight',
@@ -40,7 +42,7 @@ export const seasonName = (_season: number) => 'Career';
 export function awardsFor(unit: SkillPlayer, position: SkillPosition, _season: number): AwardWin[] {
   return (unit.awards ?? []).map((id) =>
     id === 'champ'
-      ? { id: 'champ', title: `UFC ${DIVISION_NAMES[position]} Champion` }
+      ? { id: 'champ', title: `UFC ${DIVISION_NAMES[(unit.division as SkillPosition) ?? position]} Champion` }
       : { id: id as AwardId, title: `UFC ${position.startsWith('W') ? "Women's " : "Men's "}Pound-for-Pound #${id.slice(3)}` },
   );
 }

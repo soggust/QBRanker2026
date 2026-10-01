@@ -32,7 +32,7 @@ export class AboutComponent implements AfterViewInit {
     ["UFC Rank", "UFC.com's official rank in his division (context only: the ranking here is yours)."],
     ["Title Defenses / Title Wins", "Successful UFC title defenses across every reign, and title fight wins (winning a belt, interim ones too, and each defense), from Wikipedia's list of UFC champions. These two, Elo and Recent count double behind their sliders: every slider still starts at 50% and 0% still turns them off, but each step moves the ranking twice as much."],
     ["Elo / Peak Elo", "A rating built from every UFC fight since 2001 (everyone starts at 1500): each result moves it by how surprising it was, so beating a highly rated opponent is worth far more than beating a low one. Now, and his best ever. Elo counts double behind its slider."],
-    ["UFC Rank", "UFC.com's official rank in the division: the champion counts as #0 and an unranked fighter as #16. It counts triple behind its slider among current fighters, the heaviest of all, and 1.5x in the all-time lists, where retired fighters (no rank) count as average."],
+    ["UFC Rank", "UFC.com's official rank in the division: the champion counts as #0 and an unranked fighter as #16. On the P4P tabs it's the pound-for-pound rank. It counts 15x behind its slider among current fighters, so the UFC's own order leads, and 3x in the all-time lists, where retired fighters (no rank) count as average."],
     ["Quality Wins", "Wins over opponents rated in the top fifth of UFC fighters (by Elo) going into the fight."],
     ["5-Rd Wins", "Wins in five-round fights: title fights and main events."],
     ["Streak", "His current run: +3 is three straight wins, -2 two straight losses."],

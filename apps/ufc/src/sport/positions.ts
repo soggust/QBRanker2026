@@ -1,15 +1,16 @@
 import type { SportSettings, StatFormat } from '@ranker/engine/sport';
 import { SKILL_PRESETS } from '@sport/skill-presets';
 
-// The UFC tabs: the eight men's divisions, heaviest first, and the three women's (shown with the
-// Women's Divisions setting on). A fighter is in the division ESPN lists him in (his last fight's
-// otherwise).
-export type Position = 'HW' | 'LHW' | 'MW' | 'WW' | 'LW' | 'FW' | 'BW' | 'FLW' | 'WBW' | 'WFLW' | 'WSW';
+// The UFC tabs: pound-for-pound (every man, his whole UFC career), the eight men's divisions, heaviest
+// first, and the women's pound-for-pound and three divisions (shown with the Women's Divisions setting
+// on). A fighter is in the division ESPN lists him in (his last fight's otherwise) and any other he's
+// had 3+ fights in, on his fights there.
+export type Position = 'P4P' | 'HW' | 'LHW' | 'MW' | 'WW' | 'LW' | 'FW' | 'BW' | 'FLW' | 'WP4P' | 'WBW' | 'WFLW' | 'WSW';
 // Every tab uses the same config-driven table, sidebar and scoring below
 export type SkillPosition = Position;
 
-export const POSITIONS: Position[] = ['HW', 'LHW', 'MW', 'WW', 'LW', 'FW', 'BW', 'FLW', 'WBW', 'WFLW', 'WSW'];
-export const WOMENS_DIVISIONS: Position[] = ['WBW', 'WFLW', 'WSW'];
+export const POSITIONS: Position[] = ['P4P', 'HW', 'LHW', 'MW', 'WW', 'LW', 'FW', 'BW', 'FLW', 'WP4P', 'WBW', 'WFLW', 'WSW'];
+export const WOMENS_DIVISIONS: Position[] = ['WP4P', 'WBW', 'WFLW', 'WSW'];
 
 // Keys of the stats object in skill-players.json (scripts/update-data.mjs): his UFC career
 export type SkillStatKey =
@@ -65,7 +66,7 @@ export const STAT_BASIS_LABELS: Record<StatBasis, string> = {
   pace17: '10-Fight Pace',
 };
 
-export const PACE_GAMES: Record<Position, number> = { HW: 10, LHW: 10, MW: 10, WW: 10, LW: 10, FW: 10, BW: 10, FLW: 10, WBW: 10, WFLW: 10, WSW: 10 };
+export const PACE_GAMES: Record<Position, number> = { P4P: 10, WP4P: 10, HW: 10, LHW: 10, MW: 10, WW: 10, LW: 10, FW: 10, BW: 10, FLW: 10, WBW: 10, WFLW: 10, WSW: 10 };
 
 export interface SkillPlayer {
   // ESPN's fighter id (headshots), and the same as text
@@ -76,8 +77,14 @@ export interface SkillPlayer {
   teamLogo: string;
   teamName?: string | null;
   country?: string | null;
-  // UFC fights
+  // UFC fights (in the tab's division; all of them on pound-for-pound)
   games: number;
+  // Every UFC fight he's had (the Fights filter counts these)
+  careerGames?: number;
+  // The division the row's belt and stats are for (his own, or the one he holds, on pound-for-pound)
+  division?: string;
+  // The champion of this tab's division (his UFC rank counts as #0)
+  titleHolder?: boolean;
   stats: Record<SkillStatKey, number | null>;
   // His UFC debut came in the last year (the Rookies Only setting: the newcomers)
   rookie?: boolean;
@@ -118,9 +125,15 @@ export interface SkillStat {
   // Shown for context only: no slider and no weight in the ranking
   infoOnly?: boolean;
   // Counts for more behind its slider (2: double at every step, 50% included; 0% still off): the
-  // title stats, Elo and Recent, the clearest marks of an elite career; the UFC's rank more still (3,
-  // the heaviest) among current fighters, less (1.5) in the all-time lists, where the legends have none
+  // title stats, Elo and Recent, the clearest marks of an elite career; the UFC's rank far more (15:
+  // the UFC's own order leads among current fighters), less (3) in the all-time lists, where the legends
+  // have none
   boost?: number | ((settings: SportSettings) => number);
+  // Scored on a fixed scale, best to worst, rather than against the list (the UFC's rank: #0, the
+  // champion, to #16, unranked)
+  scale?: [best: number, worst: number];
+  // Not a rate resting on his fights, so not scaled by how many he's had (the UFC's rank)
+  settled?: boolean;
   // A missing value ("-") means too small a sample, so it scores as the league average, not the worst
   missingIsAverage?: boolean;
 }
@@ -176,7 +189,7 @@ const UFC_STATS: SkillStat[] = [
   { key: 'games', label: 'Fights', description: 'UFC fights (for context; not part of the ranking)', kind: 'efficiency', format: 'int', infoOnly: true },
   { key: 'winPct', label: 'Record', description: 'His UFC record, wins-losses-draws (draws include no contests; ranked on win percentage)', kind: 'efficiency', format: 'record' },
   { key: 'recent', label: 'Recent', description: 'His last five UFC fights, newest first (ranked on a recency-weighted win rate); counts double behind its slider', kind: 'efficiency', format: 'recent', boost: 2 },
-  { key: 'officialRank', label: 'UFC Rank', description: "UFC.com's official rank in his division (the champion wears the belt and counts as #0; unranked fighters as #16; retired ones as average); counts triple behind its slider among current fighters, 1.5x in the all-time lists", kind: 'efficiency', format: 'rank', negative: true, missingIsAverage: true, boost: (settings) => (settings['era'] === 'alltime' ? 1.5 : 3) },
+  { key: 'officialRank', label: 'UFC Rank', description: "UFC.com's official rank in his division, or pound-for-pound on those tabs (a division's champion wears the belt and counts as #0; unranked fighters as #16; retired ones as average); counts 15x behind its slider among current fighters, 3x in the all-time lists", kind: 'efficiency', format: 'rank', negative: true, missingIsAverage: true, scale: [0, 16], settled: true, boost: (settings) => (settings['era'] === 'alltime' ? 3 : 15) },
   // (the title ones and Elo count double behind their sliders: the clearest marks of an elite career)
   { key: 'titleDefenses', label: 'Title Defenses', description: 'Successful UFC title defenses, across every reign (from Wikipedia\'s list of UFC champions); counts double behind its slider', kind: 'volume', format: 'int', boost: 2 },
   { key: 'titleWins', label: 'Title Wins', description: 'UFC title fight wins: winning a belt (interim ones too) and each defense; counts double behind its slider', kind: 'volume', format: 'int', boost: 2 },
