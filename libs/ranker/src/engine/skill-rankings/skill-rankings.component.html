@@ -344,6 +344,15 @@
         ></mat-slide-toggle>
         <span>Injured Players</span>
       </div>
+      <div mat-menu-item [title]="rookiesTitle" (click)="$event.stopPropagation(); rookiesOnly = !rookiesOnly">
+        <mat-slide-toggle hideIcon
+          color="accent"
+          class="slide-toggle"
+          [(ngModel)]="rookiesOnly"
+          (click)="$event.stopPropagation()"
+        ></mat-slide-toggle>
+        <span>Rookies Only</span>
+      </div>
       <div
         mat-menu-item
         title="Show columns for stats whose slider is at 0% (they still don't count in the ranking). Stats switched off with their eye stay hidden"

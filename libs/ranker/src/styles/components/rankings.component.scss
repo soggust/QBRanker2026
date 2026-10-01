@@ -2124,6 +2124,8 @@ section footer .settings-toggle[aria-expanded="true"] .mat-icon {
 // A header label's parenthetical ("(Pts)", "(17G)") is smaller than the label
 section ul li.player.header-row div .stat-label .label-tag {
   font-size: 8px;
+  // (2px lower than centered on the label: centered, the smaller text read as sitting high)
+  transform: translateY(2px);
   white-space: pre;
 }
 

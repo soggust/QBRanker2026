@@ -24,6 +24,8 @@ export interface RankerSettings {
   categoryColors: boolean;
   // Show each combined pair (SPORT.combined: rushing + receiving yards) as one total column
   combineStats: boolean;
+  // List only rookies (and first-year head coaches): everyone else is left out, like Min Games
+  rookiesOnly: boolean;
   // The sport's own settings (SPORT.settings), by key
   sport: SportSettings;
 }
@@ -38,6 +40,7 @@ const DEFAULT_SETTINGS: RankerSettings = {
   colorValues: true,
   categoryColors: true,
   combineStats: true,
+  rookiesOnly: false,
   sport: DEFAULT_SPORT_SETTINGS,
 };
 

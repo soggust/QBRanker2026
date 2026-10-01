@@ -325,12 +325,66 @@ export class SkillRankingsComponent implements OnChanges {
     return isLiveSeason(season);
   }
 
-  // The players this tab lists: injured players only with Show Injured on, and enough playing time
+  // The players this tab lists: injured players only with Show Injured on, enough playing time, and
+  // only rookies with Rookies Only on
   private listedPlayers(): SkillPlayer[] {
     const min = this.hasMin ? this.minCount : 0;
     return SKILL_UNITS[this.position].filter(
-      (player) => (this.showInjured || !player.injured) && SPORT.playingTime.of(player) >= min,
+      (player) =>
+        (this.showInjured || !player.injured) && SPORT.playingTime.of(player) >= min && this.rookieOk(player, this.season),
     );
+  }
+
+  // Rookies Only (settings menu): players in their first season (first-year head coaches on a
+  // coaches' tab). A first season is the first one they're in the data (careers.json, loaded when
+  // the setting is turned on), so the data's first season can't tell and lists everyone; so do team
+  // tabs (defenses, O-lines).
+  get rookiesOnly(): boolean {
+    return this.positionService.settings.rookiesOnly;
+  }
+  set rookiesOnly(value: boolean) {
+    this.positionService.updateSettings({ rookiesOnly: value });
+  }
+
+  readonly rookiesTitle =
+    `On: list only players in their first season (and first-year head coaches), across every tab but the team ones. ` +
+    `A first season is the first one they're in our data, so ${SPORT.seasonText(SPORT.firstSeason)} lists everyone`;
+
+  // Each player's first season in the data (id -> season), across every tab
+  private firstSeasons: Map<string, number> | null = null;
+  private firstSeasonsLoading = false;
+
+  private loadFirstSeasons(): void {
+    if (this.firstSeasons || this.firstSeasonsLoading) return;
+    this.firstSeasonsLoading = true;
+    this.careersFile()
+      .then((careers) => {
+        const first = new Map<string, number>();
+        for (const byId of Object.values(careers)) {
+          for (const [id, seasons] of Object.entries(byId ?? {})) {
+            for (const [season] of seasons) first.set(id, Math.min(season, first.get(id) ?? Infinity));
+          }
+        }
+        this.firstSeasons = first;
+        if (this.position && this.rookiesOnly) this.sortPlayers();
+      })
+      .catch((err) => console.error(err))
+      .finally(() => (this.firstSeasonsLoading = false));
+  }
+
+  // In the list as far as Rookies Only goes: no earlier season in the data (careers.json has the
+  // finished seasons, so this season's rookies aren't in it at all)
+  private rookieOk(player: SkillPlayer, season: number): boolean {
+    if (!this.rookiesOnly || SPORT.teamTabs?.includes(this.position)) return true;
+    // (a sport whose data says who's a rookie: that decides)
+    const flagged = (player as { rookie?: boolean }).rookie;
+    if (flagged !== undefined) return flagged;
+    if (season <= SPORT.firstSeason) return true;
+    if (!this.firstSeasons) {
+      this.loadFirstSeasons();
+      return true;
+    }
+    return (this.firstSeasons.get(player.gsisId) ?? season) >= season;
   }
 
   // The name column's header
@@ -854,6 +908,16 @@ export class SkillRankingsComponent implements OnChanges {
   private seasonComps = new Map<number, Promise<CompsFile>>();
   private careers?: Promise<CareersFile>;
 
+  // Everyone's finished seasons (checked with the server each visit: it changes once a year, at the
+  // season rollover)
+  private careersFile(): Promise<CareersFile> {
+    if (!this.careers) {
+      this.careers = fetch('data/careers.json', { cache: 'no-cache' }).then((res) => res.json());
+      this.careers.catch(() => (this.careers = undefined));
+    }
+    return this.careers;
+  }
+
   // A name in the table: their card for the table's season, ranked as the table has them
   openCard(player: SkillPlayer): void {
     // (a name in the table always opens on the Overview; flipping through players and seasons keeps
@@ -1347,7 +1411,9 @@ export class SkillRankingsComponent implements OnChanges {
       empty: (key) =>
         units.some((p) => key in p.stats) && units.every((p) => p.stats[key as SkillStatKey] == null),
     };
-    const listed = units.filter((p) => (this.showInjured || !p.injured) && SPORT.playingTime.of(p) >= min);
+    const listed = units.filter(
+      (p) => (this.showInjured || !p.injured) && SPORT.playingTime.of(p) >= min && this.rookieOk(p, season),
+    );
     // That season's list as dragged by hand this visit, if it was; otherwise ranked by the sliders
     const saved = this.positionService.seasonUnitOrder(season, this.position);
     if (saved?.manual) {
@@ -1480,7 +1546,7 @@ export class SkillRankingsComponent implements OnChanges {
     const id = card.player.gsisId;
     try {
       // (checked with the server each visit: it changes once a year, at the season rollover)
-      this.careers ??= fetch('data/careers.json', { cache: 'no-cache' }).then((res) => res.json());
+
       const current = this.season === CURRENT_SEASON ? SKILL_UNITS : await this.rowsFor(CURRENT_SEASON);
       const headline = headlineStats(this.position);
       const line = (season: number, logo: string, games: number, rank: number, of: number, stats: (number | null)[]) => ({
@@ -1500,7 +1566,7 @@ export class SkillRankingsComponent implements OnChanges {
           best: false,
         })),
       });
-      const past = ((await this.careers)[this.position]?.[id] ?? []).map(([season, logo, games, rank, of, stats]) =>
+      const past = ((await this.careersFile())[this.position]?.[id] ?? []).map(([season, logo, games, rank, of, stats]) =>
         line(season, SPORT.teamLogo(logo), games, rank, of, stats),
       );
       // This season, ranked the same way (the default sliders) from the rows on hand
