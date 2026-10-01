@@ -1,30 +1,41 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <!-- An MMA glove (the slider knobs, the settings switches and the loading screen), seen from the back
-       of the hand: squared off like an MMA glove rather than a boxing glove's round mitt. A flat-topped,
-       boxy knuckle pad in fight-night red over the black curled fingers, a squared thumb on the side,
-       and the white wrist strap with its velcro. Shaded from the top left. -->
+  <!-- An MMA glove (the slider knobs, the settings switches and the loading screen), not a boxing glove:
+       open-fingered, the bare fingertips standing up out of their holes above a thin padded knuckle
+       strip in fight-night red, the glove itself all red (shaded darker toward the wrist, the pad a lighter band), the bare thumb tip out to
+       the side, and the red wrist strap with its white velcro tab. Shaded from the top left. -->
   <defs>
-    <linearGradient id="pad" x1="0.2" y1="0" x2="0.6" y2="1">
+    <linearGradient id="skin" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f0c39c"/>
+      <stop offset="1" stop-color="#c98d64"/>
+    </linearGradient>
+    <linearGradient id="pad" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0" stop-color="#ff5a50"/>
-      <stop offset="0.5" stop-color="#c8141c"/>
+      <stop offset="0.6" stop-color="#c8141c"/>
+      <stop offset="1" stop-color="#7a0a10"/>
+    </linearGradient>
+    <linearGradient id="back" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#b3121a"/>
       <stop offset="1" stop-color="#6e0a0e"/>
     </linearGradient>
-    <linearGradient id="strap" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#ffffff"/>
-      <stop offset="1" stop-color="#c9ccd2"/>
-    </linearGradient>
   </defs>
-  <!-- The curled fingers (black, peeking above the pad) -->
-  <rect x="12" y="7" width="40" height="14" rx="4" fill="#141414"/>
-  <path d="M22 8 V20 M32 8 V20 M42 8 V20" stroke="#3a3a3e" stroke-width="1.2"/>
-  <!-- The padded knuckles: boxy, with small rounded corners -->
-  <rect x="10" y="12" width="44" height="29" rx="6" fill="url(#pad)" stroke="#3a0406" stroke-width="1.6"/>
-  <!-- The knuckle seams -->
-  <path d="M21.5 14 V39 M32 14 V39 M42.5 14 V39" fill="none" stroke="#7a0a10" stroke-width="1.2" opacity="0.6"/>
-  <!-- The thumb -->
-  <rect x="4" y="21" width="8" height="15" rx="2.5" fill="#c8141c" stroke="#3a0406" stroke-width="1.4"/>
-  <!-- The wrist strap -->
-  <rect x="13" y="40" width="38" height="16" rx="3" fill="url(#strap)" stroke="#1a1a1a" stroke-width="1.6"/>
-  <rect x="17" y="44" width="30" height="8" rx="1.5" fill="#111"/>
-  <rect x="20" y="46.5" width="24" height="3" rx="1" fill="#c8141c"/>
+  <!-- The bare fingertips, out of the open finger holes (the middle two longest) -->
+  <g fill="url(#skin)" stroke="#5a3520" stroke-width="1.3">
+    <rect x="13.5" y="9" width="9" height="16" rx="4.5"/>
+    <rect x="23" y="5" width="9" height="20" rx="4.5"/>
+    <rect x="32.5" y="5.5" width="9" height="19.5" rx="4.5"/>
+    <rect x="42" y="10" width="8.5" height="15" rx="4.25"/>
+  </g>
+  <!-- The thumb tip, out the side -->
+  <rect x="4" y="27" width="9" height="13" rx="4.5" transform="rotate(-28 8.5 33.5)" fill="url(#skin)" stroke="#5a3520" stroke-width="1.3"/>
+  <!-- The back of the glove -->
+  <path d="M12 24 H52 V40 C52 45 48 48 43 48 H21 C16 48 12 45 12 40 Z" fill="url(#back)" stroke="#3a0406" stroke-width="1.4"/>
+  <!-- The thin knuckle pad, with a seam between each finger hole -->
+  <rect x="11" y="20" width="42" height="11" rx="5.5" fill="url(#pad)" stroke="#3a0406" stroke-width="1.4"/>
+  <path d="M22.7 21.5 V29.5 M32.2 21.5 V29.5 M41.7 21.5 V29.5" stroke="#5a060a" stroke-width="1.1" opacity="0.7"/>
+  <!-- The thumb loop -->
+  <path d="M12 31 C8 32 7 37 10 40 L13 39 Z" fill="#c8141c" stroke="#3a0406" stroke-width="1.2"/>
+  <!-- The wrist strap: a darker red cuff, a brighter velcro band, a white tab -->
+  <rect x="14" y="46" width="36" height="13" rx="4" fill="#7a0a10" stroke="#3a0406" stroke-width="1.4"/>
+  <rect x="14" y="49.5" width="36" height="6" fill="#d61a1f"/>
+  <rect x="38" y="48.5" width="9" height="8" rx="1.5" fill="#f4f1ec" stroke="#1a1a1a" stroke-width="1"/>
 </svg>
