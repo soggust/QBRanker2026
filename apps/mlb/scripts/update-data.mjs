@@ -111,9 +111,10 @@ async function statsFor(season, group, type) {
   return new Map(splits.map((s) => [s.player.id, s]));
 }
 
-// Fielding over every position a player fielded, by MLBAM id: fielding percentage, (putouts +
-// assists) / chances, with 20+ chances (fewer says little); and range factor, (putouts + assists) per 9
-// innings in the field, with 50+ innings (pitching left out: a two-way player's range is his fielding)
+// Fielding by MLBAM id, in the field and on the mound apart (a two-way player's fielding is his work
+// at his positions): fielding percentage, (putouts + assists) / chances, with 20+ chances in the field
+// (fewer says little) or 10+ as a pitcher (a pitcher sees few: a starter maybe 20-40 a season); and
+// range factor, (putouts + assists) per 9 innings in the field, with 50+ innings
 const outsOf = (innings) => {
   const [whole, thirds = '0'] = String(innings ?? '0').split('.');
   return Number(whole) * 3 + Number(thirds);
@@ -122,22 +123,22 @@ async function fieldingFor(season) {
   const url = `${API}/stats?stats=season&group=fielding&season=${season}&sportId=1&playerPool=all&limit=5000`;
   const totals = new Map();
   for (const s of (await json(url)).stats?.[0]?.splits ?? []) {
-    const t = totals.get(s.player.id) ?? { made: 0, chances: 0, fieldMade: 0, outs: 0 };
+    const t = totals.get(s.player.id) ?? { made: 0, chances: 0, outs: 0, pMade: 0, pChances: 0 };
     const made = (s.stat.putOuts ?? 0) + (s.stat.assists ?? 0);
-    const pitching = s.position?.abbreviation === 'P';
-    totals.set(s.player.id, {
-      made: t.made + made,
-      chances: t.chances + made + (s.stat.errors ?? 0),
-      fieldMade: t.fieldMade + (pitching ? 0 : made),
-      outs: t.outs + (pitching ? 0 : outsOf(s.stat.innings)),
-    });
+    const chances = made + (s.stat.errors ?? 0);
+    if (s.position?.abbreviation === 'P') {
+      totals.set(s.player.id, { ...t, pMade: t.pMade + made, pChances: t.pChances + chances });
+    } else {
+      totals.set(s.player.id, { ...t, made: t.made + made, chances: t.chances + chances, outs: t.outs + outsOf(s.stat.innings) });
+    }
   }
   return new Map(
     [...totals].map(([id, t]) => [
       id,
       {
         pct: t.chances >= 20 ? Math.round((t.made / t.chances) * 1000) / 1000 : null,
-        range: t.outs >= 150 ? Math.round(((t.fieldMade * 27) / t.outs) * 100) / 100 : null,
+        range: t.outs >= 150 ? Math.round(((t.made * 27) / t.outs) * 100) / 100 : null,
+        pitcherPct: t.pChances >= 10 ? Math.round((t.pMade / t.pChances) * 1000) / 1000 : null,
       },
     ]),
   );
@@ -294,6 +295,7 @@ async function buildSeason(season) {
       fip: round(num(sab.fip), 2),
       xfip: round(num(sab.xfip), 2),
       xera: statcast ? sc(xPit, id, 'xera', 2) : null,
+      fieldingPct: fielding.get(id)?.pitcherPct ?? null,
       xwobaAllowed: statcast ? sc(xPit, id, 'est_woba') : null,
       whiffPct: statcast ? sc(pitchCustom, id, 'whiff_percent', 1) : null,
       hardHitAllowed: statcast ? sc(scPit, id, 'ev95percent', 1) : null,

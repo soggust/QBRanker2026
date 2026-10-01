@@ -298,6 +298,17 @@ const HARD_HIT_ALLOWED_STAT: SkillStat = { key: 'hardHitAllowed', label: 'Hard-H
 
 const PITCHER_GAMES_STAT: SkillStat = { ...GAMES_STAT, label: 'Games', description: 'Appearances (for context; not part of the ranking)' };
 
+// A pitcher's fielding percentage, on the mound only
+const PITCHER_FIELDING_STAT: SkillStat = {
+  key: 'fieldingPct',
+  label: 'FLD %',
+  name: 'Fielding Percentage (min 10 chances)',
+  description: "Plays made per chance on the mound (putouts and assists over chances; a pitcher sees few, so it's a small sample; 10+ chances)",
+  kind: 'efficiency',
+  format: 'avg3',
+  missingIsAverage: true,
+};
+
 export const SKILL_STATS: Record<SkillPosition, SkillStat[]> = {
   C: HITTER_STATS,
   '1B': HITTER_STATS,
@@ -316,6 +327,7 @@ export const SKILL_STATS: Record<SkillPosition, SkillStat[]> = {
     K_STAT,
     WHIP_STAT,
     HR9_STAT,
+    PITCHER_FIELDING_STAT,
     FIP_STAT,
     XFIP_STAT,
     { key: 'xera', label: 'xERA', description: 'Expected ERA from quality of contact allowed (Statcast, 2015 on; lower is better)', kind: 'efficiency', format: 'dec2', negative: true, missingIsAverage: true },
@@ -337,6 +349,7 @@ export const SKILL_STATS: Record<SkillPosition, SkillStat[]> = {
     IP_STAT,
     K_STAT,
     WHIP_STAT,
+    PITCHER_FIELDING_STAT,
     FIP_STAT,
     XFIP_STAT,
     KPCT_STAT,
