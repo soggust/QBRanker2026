@@ -85,7 +85,7 @@
           >
           <!-- The badge through the name opens the player card -->
           <p class="player-name card-target" (click)="openCard(player)">
-            <strong class="card-link" role="button" tabindex="0" (keydown.enter)="openCard(player)">{{ player.name }}</strong>
+            <strong class="card-link" role="button" tabindex="0" [attr.data-name]="player.name" (keydown.enter)="openCard(player)">{{ player.name }}</strong>
             @if (player.injured) {
               <mat-icon
                 aria-hidden="false"
@@ -413,7 +413,7 @@
         <p class="hero-kicker">
           <span class="season-chip">{{ c.seasonLabel }}</span>
         </p>
-        <h2>{{ c.name }}</h2>
+        <h2 [attr.data-name]="c.name">{{ c.name }}</h2>
         <!-- Position (yellow) • team -->
         <p class="hero-team">
           <span class="hero-position">{{ c.positionName }}</span>
