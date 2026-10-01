@@ -1962,10 +1962,13 @@ section ul li.player:not(.header-row) {
   height: var(--row-h);
 }
 
-// The header bar too (it was 42.28px), so the rows under it start on a whole pixel
+// The header bar too (it was 42.28px), so the rows under it start on a whole pixel. As wide as all its
+// columns, like the rows: its scoreboard panel otherwise stopped partway when scrolled sideways, with the
+// labels and tints carrying on past it.
 section ul li.player.header-row {
   box-sizing: border-box;
   height: 42px;
+  min-width: max-content;
 }
 
 section ul li.player:not(.header-row):not(.cdk-drag-preview) {
