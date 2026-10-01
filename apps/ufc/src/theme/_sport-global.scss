@@ -251,3 +251,17 @@ section footer .mat-mdc-select.season-select,
 .sidebar .filters .mat-mdc-select {
   padding-inline: 18px !important;
 }
+
+// The footer dropdown's group headers (Current, All-Time): small red capitals above their options
+.mdc-menu-surface.mat-mdc-select-panel .mat-mdc-optgroup-label {
+  min-height: 30px;
+
+  &,
+  .mdc-list-item__primary-text {
+    color: var(--scoreboard-led) !important;
+    font-size: 10px !important;
+    font-weight: 500 !important;
+    letter-spacing: 1.5px !important;
+    text-transform: uppercase;
+  }
+}

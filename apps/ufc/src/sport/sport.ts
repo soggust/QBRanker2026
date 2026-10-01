@@ -1,5 +1,5 @@
 import type { CardFlag, FlagContext, HistoryRow, SportConfig } from '@ranker/engine/sport';
-import { WOMENS_DIVISIONS, type Position } from './positions';
+import { WOMENS_DIVISIONS, allTime, womens, type Position } from './positions';
 import { seasonName } from './awards';
 
 // (head to head counts for meetings since this date)
@@ -120,25 +120,22 @@ export const SPORT: SportConfig = {
     {
       key: 'era',
       label: 'Fighters',
-      title: "Today's roster, or every era: All-Time adds the retired fighters (6+ UFC fights), the legends ranked on the same stats",
-      options: { current: 'Current Fighters', alltime: 'All-Time Fighters' },
+      title: "Today's roster or every era (All-Time adds the retired fighters, 6+ UFC fights, ranked on the same stats), the men's tabs or the women's",
+      options: { current: 'Current MMA', currentW: 'Current WMMA', alltime: 'All-Time MMA', alltimeW: 'All-Time WMMA' },
+      optionGroups: [
+        { label: 'Current', options: { current: "Men's", currentW: "Women's" } },
+        { label: 'All-Time', options: { alltime: "Men's", alltimeW: "Women's" } },
+      ],
       default: 'current',
       slot: 'footer',
     },
-    {
-      key: 'women',
-      label: "Women's Divisions",
-      title: "On: the women's tabs (pound-for-pound, bantamweight, flyweight and strawweight) in place of the men's",
-      default: false,
-      slot: 'displayEnd',
-    },
   ],
   // (the women's tabs or the men's, one set at a time)
-  tabVisible: (position, settings) => WOMENS_DIVISIONS.includes(position as Position) === !!settings['women'],
+  tabVisible: (position, settings) => WOMENS_DIVISIONS.includes(position as Position) === womens(settings),
   // Current fighters: today's roster, each in the division he's in now (Jon Jones at heavyweight, not
   // light heavyweight); all-time: the retired fighters too, and everyone in every division he's had 3+
   // fights in
-  rowVisible: (player, settings) => settings['era'] === 'alltime' || (!player.retired && !player.pastDivision),
+  rowVisible: (player, settings) => allTime(settings) || (!player.retired && !player.pastDivision),
   // The UFC's rank in the ranking: a division's champion as #0 (above #1), an unranked fighter as #16
   // (just past the top 15). Unknown (average) for a retired fighter, and for one unranked after a year
   // without a fight: the UFC drops fighters from its rankings for inactivity, so that says nothing

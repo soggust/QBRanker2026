@@ -62,6 +62,9 @@ export interface SportSetting {
   title: string;
   // A choice cycled by clicking ("Fantasy Scoring: PPR"), or an on/off switch when there are no options
   options?: Record<string, string>;
+  // A footer dropdown's options under headers, each with a shorter label there (the UFC: Current, with
+  // Men's and Women's under it); the closed dropdown still shows the full label from options
+  optionGroups?: { label: string; options: Record<string, string> }[];
   default: string | boolean;
   // Where it sits: the Format section's top, after Stat Totals, among the Display switches (before
   // Injured Players), at the bottom of the menu, or (a choice) as the footer's dropdown in the year

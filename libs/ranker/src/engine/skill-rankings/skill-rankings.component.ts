@@ -253,6 +253,14 @@ export class SkillRankingsComponent implements OnChanges {
     return Object.entries(setting.options ?? {}).map(([value, label]) => ({ value, label }));
   }
 
+  // ...or under headers, when the setting groups them
+  settingGroups(setting: SportSetting): { label: string; options: { value: string; label: string }[] }[] {
+    return (setting.optionGroups ?? []).map((group) => ({
+      label: group.label,
+      options: Object.entries(group.options).map(([value, label]) => ({ value, label })),
+    }));
+  }
+
   // Combined pairs as one total column (SPORT.combined)
   get combineStats(): boolean {
     return this.positionService.settings.combineStats;

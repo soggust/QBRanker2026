@@ -220,8 +220,18 @@
         (valueChange)="setSportSetting(setting.key, $event)"
       >
         <mat-select-trigger>{{ sportSettingText(setting) }}</mat-select-trigger>
-        @for (option of settingOptions(setting); track option.value) {
-          <mat-option [value]="option.value">{{ option.label }}</mat-option>
+        @if (setting.optionGroups) {
+          @for (group of settingGroups(setting); track group.label) {
+            <mat-optgroup [label]="group.label">
+              @for (option of group.options; track option.value) {
+                <mat-option [value]="option.value">{{ option.label }}</mat-option>
+              }
+            </mat-optgroup>
+          }
+        } @else {
+          @for (option of settingOptions(setting); track option.value) {
+            <mat-option [value]="option.value">{{ option.label }}</mat-option>
+          }
         }
       </mat-select>
     }

@@ -12,6 +12,11 @@ export type SkillPosition = Position;
 export const POSITIONS: Position[] = ['P4P', 'HW', 'LHW', 'MW', 'WW', 'LW', 'FW', 'BW', 'FLW', 'WP4P', 'WBW', 'WFLW', 'WSW'];
 export const WOMENS_DIVISIONS: Position[] = ['WP4P', 'WBW', 'WFLW', 'WSW'];
 
+// The footer dropdown's choice (the 'era' setting): today's roster or every era, men's or women's
+// ("current", "currentW", "alltime", "alltimeW")
+export const allTime = (settings: SportSettings) => String(settings['era']).startsWith('alltime');
+export const womens = (settings: SportSettings) => String(settings['era']).endsWith('W');
+
 // Keys of the stats object in skill-players.json (scripts/update-data.mjs): his UFC career
 export type SkillStatKey =
   // Record (wins-losses-draws, draws including no contests), and how his fights end
@@ -194,7 +199,7 @@ const UFC_STATS: SkillStat[] = [
   { key: 'games', label: 'Fights', description: 'UFC fights (for context; not part of the ranking)', kind: 'efficiency', format: 'int', infoOnly: true },
   { key: 'winPct', label: 'Record', description: 'His UFC record, wins-losses-draws (draws include no contests; ranked on win percentage)', kind: 'efficiency', format: 'record' },
   { key: 'recent', label: 'Recent', description: 'His last five UFC fights, newest first (ranked on a recency-weighted win rate); counts double behind its slider', kind: 'efficiency', format: 'recent', boost: 2 },
-  { key: 'officialRank', label: 'UFC Rank', description: "UFC.com's official rank in his division, or pound-for-pound on those tabs (a division's champion is #0, above #1; unranked fighters as #16; retired ones as average); counts 15x behind its slider among current fighters, 3x in the all-time lists", kind: 'efficiency', format: 'rank', negative: true, missingIsAverage: true, scale: [0, 16], settled: true, boost: (settings) => (settings['era'] === 'alltime' ? 3 : 15) },
+  { key: 'officialRank', label: 'UFC Rank', description: "UFC.com's official rank in his division, or pound-for-pound on those tabs (a division's champion is #0, above #1; unranked fighters as #16; retired ones as average); counts 15x behind its slider among current fighters, 3x in the all-time lists", kind: 'efficiency', format: 'rank', negative: true, missingIsAverage: true, scale: [0, 16], settled: true, boost: (settings) => (allTime(settings) ? 3 : 15) },
   // (the title ones and Elo count double behind their sliders: the clearest marks of an elite career)
   { key: 'titleDefenses', label: 'Title Defenses', description: 'Successful UFC title defenses, across every reign (from Wikipedia\'s list of UFC champions); counts double behind its slider; scored in proportion, 0 to 10 (most fighters have none, so against the list one defense would score like ten)', kind: 'volume', format: 'int', boost: 2, scale: [10, 0] },
   { key: 'titleWins', label: 'Title Wins', description: 'UFC title fight wins: winning a belt (interim ones too) and each defense; counts double behind its slider; scored in proportion, 0 to 10', kind: 'volume', format: 'int', boost: 2, scale: [10, 0] },
