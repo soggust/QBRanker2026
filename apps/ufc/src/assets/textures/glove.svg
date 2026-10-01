@@ -9,13 +9,13 @@
       <stop offset="1" stop-color="#c98d64"/>
     </linearGradient>
     <linearGradient id="pad" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#ff5a50"/>
-      <stop offset="0.6" stop-color="#c8141c"/>
-      <stop offset="1" stop-color="#7a0a10"/>
+      <stop offset="0" stop-color="#ff7a6e"/>
+      <stop offset="0.6" stop-color="#e02a30"/>
+      <stop offset="1" stop-color="#a3141a"/>
     </linearGradient>
     <linearGradient id="back" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#b3121a"/>
-      <stop offset="1" stop-color="#6e0a0e"/>
+      <stop offset="0" stop-color="#d42027"/>
+      <stop offset="1" stop-color="#9c1418"/>
     </linearGradient>
   </defs>
   <!-- The bare fingertips, out of the open finger holes (the middle two longest) -->
@@ -31,11 +31,11 @@
   <path d="M12 24 H52 V40 C52 45 48 48 43 48 H21 C16 48 12 45 12 40 Z" fill="url(#back)" stroke="#3a0406" stroke-width="1.4"/>
   <!-- The thin knuckle pad, with a seam between each finger hole -->
   <rect x="11" y="20" width="42" height="11" rx="5.5" fill="url(#pad)" stroke="#3a0406" stroke-width="1.4"/>
-  <path d="M22.7 21.5 V29.5 M32.2 21.5 V29.5 M41.7 21.5 V29.5" stroke="#5a060a" stroke-width="1.1" opacity="0.7"/>
+  <path d="M22.7 21.5 V29.5 M32.2 21.5 V29.5 M41.7 21.5 V29.5" stroke="#7a0c12" stroke-width="1.1" opacity="0.7"/>
   <!-- The thumb loop -->
-  <path d="M12 31 C8 32 7 37 10 40 L13 39 Z" fill="#c8141c" stroke="#3a0406" stroke-width="1.2"/>
+  <path d="M12 31 C8 32 7 37 10 40 L13 39 Z" fill="#e02a30" stroke="#3a0406" stroke-width="1.2"/>
   <!-- The wrist strap: a darker red cuff, a brighter velcro band, a white tab -->
-  <rect x="14" y="46" width="36" height="13" rx="4" fill="#7a0a10" stroke="#3a0406" stroke-width="1.4"/>
-  <rect x="14" y="49.5" width="36" height="6" fill="#d61a1f"/>
+  <rect x="14" y="46" width="36" height="13" rx="4" fill="#a3141a" stroke="#3a0406" stroke-width="1.4"/>
+  <rect x="14" y="49.5" width="36" height="6" fill="#f0333a"/>
   <rect x="38" y="48.5" width="9" height="8" rx="1.5" fill="#f4f1ec" stroke="#1a1a1a" stroke-width="1"/>
 </svg>
