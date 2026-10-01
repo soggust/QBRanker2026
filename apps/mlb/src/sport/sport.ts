@@ -103,6 +103,10 @@ export const SPORT: SportConfig = {
     volumeOverEfficiency: 'Big counting stats, below-average rates: a compiler',
     efficiencyOverVolume: 'Productive in a limited role: earning more playing time',
     winsOverPlay: 'Winning more than the pitching says (run support)',
+    injuryTitle: (player) => `On the injured list${player.injuryStatus ? ` (${player.injuryStatus})` : ''}`,
+    injuredHelp: 'Off: hide players on the injured list (this season), and leave them out of the rankings',
+    lowerIsBetterExample: 'ERA',
+    groupLine: 'A chalk line',
     playOverWins: 'Pitching better than the record shows',
   },
 };

@@ -6,17 +6,19 @@ copy of all of that. A sport is a small folder of configuration and a theme.
 
 ```
 libs/ranker/
-  src/core/       used by every app, the NFL too
-    analytics.ts, clipboard.ts, value-tint.ts, types.ts
+  src/core/       small utilities the engine and apps share
+    analytics.ts, clipboard.ts, value-tint.ts
     column-drag.directive.ts, column-highlight.directive.ts   (the column headers' drag and hover)
     sports.ts     the sport bar's list (from /sports.json)
-  src/engine/     the ranker app (MLB, NBA and every sport added from here on)
-    sport.ts      the contract: SportConfig (what a sport hands the engine), CardFlag, StatFormat
+  src/engine/     the ranker app, for every sport
+    sport.ts      the contract: SportConfig (what a sport hands the engine, optional features
+                  included), CardFlag, StatFormat
     app.module.ts, app.component.*                 the shell: sport bar, position tabs, filter menu
     skill-rankings/                                 the table, settings menu and player card
     sidebar/                                        the filter menu (presets, sliders, groups)
     position.service.ts                            sliders, settings, orders, the current tab
-    unit-scoring.ts                                the ranking math (normalize, then weigh)
+    unit-scoring.ts                                the ranking math (normalize, then weigh), and a
+                                                   stat's value (data, or worked out in the app)
     data.ts                                         loading a season's JSON
     skills.ts, awards.ts                           shapes a sport's skills and awards follow
   src/styles/     the look
@@ -55,6 +57,29 @@ that app's partial.
 | `logo-eras.ts` | `logoForSeason`: a team's logo as it looked that season |
 | `about/` | The About panel (its sections' content; the styles are shared) |
 
+A sport can add files of its own beside these for its optional features (below): the NFL has
+`qb-rows.ts` (the QBs tab, built from its game results), `team-grades.ts` (fantasy points, unit ranks
+and the team grades the tabs give each other) and `blocking.ts` (the card's run blocking).
+
+### Optional features (`SportConfig`'s optional fields)
+
+Everything here is off unless a sport's `SPORT` sets it; the NFL uses all of it.
+
+| Field | What it turns on |
+| --- | --- |
+| `dataFiles`, `extraRows` | More files per season (read into `DATA`), and tabs built from them rather than read from `skill-players.json` |
+| `settings` | The sport's own settings-menu entries: a choice cycled by clicking, or an on/off switch, in a given spot. Their values reach `unitStat`, `computedValue`, `statLabel` and `statName` |
+| `computedValue`, `tableSeasonOnly` | Values worked out in the app (fantasy points, league ranks, grades from other tabs), and which of them only the table's season has |
+| `connect` | Called once at startup with the engine's rankings of every tab (`rankedUnits`), so tabs can grade each other; what it returns re-sorts the table when those grades change |
+| `combined` | Pairs of stats shown as one total column (rushing + receiving yards), with a parent slider in the filter menu and a Combine switch in the settings |
+| `statLabel`, `statName` | A column's label and hover name under the sport's settings ("Off Rank (Pts)") |
+| `cardFlagsLast`, `cardExtras` | Card takes after the engine's own, and more for the card once it's open (a skill on the radar, takes, an archetype; the NFL reads run blocking from a file per season) |
+| `teamTabs`, `rowHeader`, `teamName` | Tabs whose rows are teams, the name column's header per tab, and the card's team name |
+| `playingTime.seasonLength`, `playingTime.everyone` | What the Min setting's share is of, and tabs with no minimum |
+
+Stat formats the engine draws for any sport: `recent` (the last five results as dots, from a row's
+`lastFive`) and `rank` (a league rank with a dimmed "#" and a "(t)" for ties).
+
 ### Its look (`apps/<sport>/src/theme/`)
 
 | Partial | What it holds |
@@ -76,8 +101,9 @@ rebases and bundles them.
   path the sport's `logo-eras.ts` and `team-colors.ts` understand. This season goes to `StaticData/`,
   finished ones (`SEASON=<year>`, `ALL=1`) to `StaticData/seasons/<year>/`. Use only Node's built-ins
   and `libs/ranker/scripts`: the nightly workflow runs it without installing packages.
-- `build-comps.mjs` calls the shared `buildComps` with the sport's minimum games, writing the player
-  card's similar seasons and careers.
+- `build-comps.mjs` calls the shared `buildComps` with the sport's minimum games (and its
+  `dataFiles`, and which stats seasons are compared on, if they differ), writing the player card's
+  similar seasons and careers.
 
 ## Adding a sport
 
@@ -94,14 +120,6 @@ rebases and bundles them.
 5. Set the similar-seasons minimums in `scripts/build-comps.mjs` and run `npm run nhl:build-comps`.
 6. Turn on the nightly schedule in `.github/workflows/nhl-update-data.yml`, and add the sport's yearly
    rollover (bumping `currentSeason` in `sport.ts` and `CURRENT_SEASON` in the data script).
-
-## The NFL app
-
-The NFL app (`apps/nfl`) uses the shared core and styles, but still runs its own copy of the app code.
-It has features the engine doesn't: fantasy scoring, garbage time, unit ranks, team tabs (defenses,
-offensive lines, head coaches) that grade each other, and preseason-blended support grades. Moving it
-onto the engine means adding those as optional engine features (hooks in `SportConfig`); until then, a
-change to the table, card or menus that should reach the NFL too is made in both places.
 
 ## Checking a change
 

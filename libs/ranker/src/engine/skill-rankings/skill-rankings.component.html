@@ -10,7 +10,7 @@
       <div class="player-info">
         <!-- Plain labels over the rank and name columns -->
         <p class="stat-label header-rank">Rank</p>
-        <p class="stat-label header-name">Player</p>
+        <p class="stat-label header-name">{{ rowHeader }}</p>
       </div>
       @for (group of groups; track group.id) {
         <div class="col-group" [ngClass]="'group-' + group.id">
@@ -26,12 +26,24 @@
             </div>
           } @else {
             @for (stat of group.stats; track stat.key; let first = $first) {
+              @if (stat.format === 'recent') {
+                <div class="box support-box recent-box" [columnDrag]="{ list: position + '.' + group.id, id: columnId(stat) }">
+                  @if (first) {
+                    <mat-icon class="group-icon" [fontIcon]="group.icon" [title]="group.title"></mat-icon>
+                  }
+                  <div class="last-five">
+                    <div></div>
+                    <p class="stat-label" [title]="labelTitle(stat)">{{ labelParts(stat)[0] }}@if (labelParts(stat)[1]; as tag) {<span class="label-tag">{{ ' ' + tag }}</span>}</p>
+                  </div>
+                </div>
+              } @else {
                 <div [columnDrag]="{ list: position + '.' + group.id, id: columnId(stat) }">
                   @if (first) {
                     <mat-icon class="group-icon" [fontIcon]="group.icon" [title]="group.title"></mat-icon>
                   }
                   <p class="stat-label" [title]="labelTitle(stat)">{{ labelParts(stat)[0] }}@if (labelParts(stat)[1]; as tag) {<span class="label-tag">{{ ' ' + tag }}</span>}</p>
                 </div>
+              }
             }
           }
         </div>
@@ -79,14 +91,17 @@
                 [title]="injuryTitle(player)"
               ></mat-icon>
             }
-            <!-- The season's awards: icons in a metal (a gold cup for the champion, a silver cup or flag for
-                 the league titles, a bronze star for an All-Star: the sport's AWARD_INFO) and plaques for
-                 the rest; hover one for the award written out -->
+            <!-- The season's awards: the trophy (the NFL's Lombardi), icons in a metal (a gold cup for the
+                 champion, a silver cup or flag for the league titles, a bronze star for an All-Star: the
+                 sport's AWARD_INFO) and plaques for the rest; hover one for the award written out -->
             @if (awards(player); as won) {
               @if (won.length) {
                 <span class="player-awards">
                   @for (award of won; track award.id) {
-                    @if (awardInfo[award.id].icon; as icon) {
+                    @if (awardInfo[award.id].icon?.name === 'trophy') {
+                      <span class="lombardi award-trophy" [title]="award.title"></span
+                      ><span class="visually-hidden">{{ awardInfo[award.id].short }}</span>
+                    } @else if (awardInfo[award.id].icon; as icon) {
                       <mat-icon class="award-cup" [ngClass]="'award-' + (icon.metal ?? 'silver')" [fontIcon]="icon.name" [title]="award.title"></mat-icon
                       ><span class="visually-hidden">{{ awardInfo[award.id].short }}</span>
                     } @else {
@@ -115,12 +130,39 @@
               </div>
             } @else {
               @for (stat of group.stats; track stat.key) {
+                @if (stat.format === 'recent') {
+                  <!-- Last five results as dots, newest first; empty slots for games not played yet -->
+                  <div class="box support-box recent-box">
+                    <div class="last-five">
+                      <div>
+                        @for (result of lastFive(player); track $index) {
+                          <p [ngClass]="result === 1 ? 'green' : result === 0.5 ? 'tie' : 'red'">
+                            {{ result === 1 ? 'W' : result === 0.5 ? 'T' : 'L' }}
+                          </p>
+                        }
+                        @for (slot of unplayed(player); track $index) {
+                          <p class="unplayed">-</p>
+                        }
+                      </div>
+                      <p class="stat-label" [title]="valueTitle(player, stat)">{{ statLabel(stat) }}</p>
+                    </div>
+                  </div>
+                } @else if (stat.format === 'rank' && value(player, stat) !== null) {
+                  <!-- League rank: a small dimmed "#" and a small "(t)" for ties, so the number reads first -->
+                  <div>
+                    <p class="rank-value" [style.color]="valueColor(player, stat)"
+                      ><span class="rank-hash">#</span>{{ value(player, stat) }}@if (rankTied(player, stat)) {<span class="rank-tie">(t)</span>}</p
+                    >
+                    <p class="stat-label" [title]="valueTitle(player, stat)">{{ statLabel(stat) }}</p>
+                  </div>
+                } @else {
                   <div>
                     <p [style.color]="gradeColor(player, stat) ?? valueColor(player, stat)">{{ format(player, stat) }}</p>
                     <p class="stat-label" [title]="valueTitle(player, stat)">
                       {{ statLabel(stat) }}
                     </p>
                   </div>
+                }
               }
             }
           </div>
@@ -202,8 +244,22 @@
 
     <!-- Menu -->
     <mat-menu #menu="matMenu" class="settings-menu">
+    <!-- A sport setting that cycles through choices ("Fantasy Scoring: PPR") -->
+    <ng-template #choice let-setting>
+      <div mat-menu-item [title]="setting.title" (click)="$event.stopPropagation(); stepSportSetting(setting.key)">
+        @if (setting.iconClass) {
+          <span class="menu-icon" [ngClass]="setting.iconClass" aria-hidden="true"></span>
+        } @else {
+          <mat-icon class="menu-icon unit-rank-icon" [fontIcon]="setting.icon" aria-hidden="true"></mat-icon>
+        }
+        <span>{{ setting.label }}: <span class="menu-value">{{ sportSettingText(setting) }}</span></span>
+      </div>
+    </ng-template>
       <!-- Format: how the stats are counted and shown -->
       <div class="menu-section section-stats" (click)="$event.stopPropagation()">Format</div>
+      @for (setting of sportSettingsAt('formatTop'); track setting.key) {
+        <ng-container *ngTemplateOutlet="choice; context: { $implicit: setting }"></ng-container>
+      }
       <div
         mat-menu-item
         [title]="statBasisTitle"
@@ -212,6 +268,9 @@
         <mat-icon class="menu-icon unit-rank-icon" fontIcon="functions" aria-hidden="true"></mat-icon>
         <span>Stat Totals: <span class="menu-value">{{ statBasisLabels[statBasis] }}</span></span>
       </div>
+      @for (setting of sportSettingsAt('formatMid'); track setting.key) {
+        <ng-container *ngTemplateOutlet="choice; context: { $implicit: setting }"></ng-container>
+      }
       <div
         mat-menu-item
         class="min-games-item"
@@ -228,7 +287,7 @@
 
       <!-- Display: what the table shows -->
       <div class="menu-section section-display" (click)="$event.stopPropagation()">Display</div>
-      <div mat-menu-item title="A chalk line before each stat group in the rows, in the same color as its filter card" (click)="$event.stopPropagation(); categoryColors = !categoryColors">
+      <div mat-menu-item [title]="sport.copy.groupLine + ' before each stat group in the rows, in the same color as its filter card'" (click)="$event.stopPropagation(); categoryColors = !categoryColors">
         <mat-slide-toggle hideIcon
           color="accent"
           class="slide-toggle"
@@ -237,7 +296,7 @@
         ></mat-slide-toggle>
         <span>Category Dividers</span>
       </div>
-      <div mat-menu-item title="Tint each value green above the list average and red below it, stronger the further out (flipped for lower-is-better stats like ERA)" (click)="$event.stopPropagation(); colorValues = !colorValues">
+      <div mat-menu-item [title]="'Tint each value green above the list average and red below it, stronger the further out (flipped for lower-is-better stats like ' + sport.copy.lowerIsBetterExample + ')'" (click)="$event.stopPropagation(); colorValues = !colorValues">
         <mat-slide-toggle hideIcon
           color="accent"
           class="slide-toggle"
@@ -246,9 +305,32 @@
         ></mat-slide-toggle>
         <span>Color-Coded Values</span>
       </div>
+      @if (sport.combined; as combined) {
+        <div mat-menu-item [title]="combined.title" (click)="$event.stopPropagation(); combineStats = !combineStats">
+          <mat-slide-toggle hideIcon
+            color="accent"
+            [(ngModel)]="combineStats"
+            class="slide-toggle"
+            (click)="$event.stopPropagation()"
+          ></mat-slide-toggle>
+          <span>{{ combined.label }}</span>
+        </div>
+      }
+      @for (setting of sportSettingsAt('display'); track setting.key) {
+        <div mat-menu-item [title]="setting.title" (click)="$event.stopPropagation(); stepSportSetting(setting.key)">
+          <mat-slide-toggle hideIcon
+            color="accent"
+            class="slide-toggle"
+            [ngModel]="!!sportSettings[setting.key]"
+            (ngModelChange)="stepSportSetting(setting.key)"
+            (click)="$event.stopPropagation()"
+          ></mat-slide-toggle>
+          <span>{{ setting.label }}</span>
+        </div>
+      }
       <div
         mat-menu-item
-        title="Off: hide players on the injured list (this season), and leave them out of the rankings"
+        [title]="sport.copy.injuredHelp"
         (click)="
           $event.stopPropagation(); showInjured = !showInjured; sortPlayers()
         "
@@ -315,7 +397,9 @@
         @if (c.awards.length) {
           <span class="player-awards">
             @for (award of c.awards; track award.id) {
-              @if (awardInfo[award.id].icon; as icon) {
+              @if (awardInfo[award.id].icon?.name === 'trophy') {
+                <span class="lombardi award-trophy" [title]="award.title"></span>
+              } @else if (awardInfo[award.id].icon; as icon) {
                 <mat-icon class="award-cup" [ngClass]="'award-' + (icon.metal ?? 'silver')" [fontIcon]="icon.name" [title]="award.title"></mat-icon>
               } @else {
                 <span class="award-badge" [ngClass]="'award-' + award.id" [title]="award.title">{{ awardInfo[award.id].short }}</span>

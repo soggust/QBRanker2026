@@ -3,7 +3,7 @@ import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { SKILL_PRESETS, SkillPresetDef } from '@sport/skill-presets';
 import { PositionService } from '@ranker/engine/position.service';
 import { SPORT } from '@sport/sport';
-import { statIsEmpty } from '@ranker/engine/unit-scoring';
+import { combinedFor, statIsEmpty } from '@ranker/engine/unit-scoring';
 
 import {
   POSITIONS,
@@ -103,12 +103,27 @@ export class SidebarComponent {
     return [...group.stats].sort((a, b) => order.indexOf(a.key) - order.indexOf(b.key));
   }
 
-  // A card's rows: one slider per stat (stats not recorded in the loaded season, like Statcast's
-  // before 2015, have none)
+  // A card's rows: one slider per stat, and a combined pair (SPORT.combined: Total Yds) as one parent
+  // row where the first of the two sits
   skillRows(group: SkillStatGroup): SkillRow[] {
-    return this.orderedStats(group)
-      .filter((stat) => !statIsEmpty(this.position, stat.key))
-      .map((stat) => ({ key: stat.key, label: stat.label, description: stat.description, stat }));
+    // Stats not recorded in the loaded season (Statcast's before 2015, drops before 2018) have no slider
+    const stats = this.orderedStats(group).filter((stat) => !statIsEmpty(this.position, stat.key));
+    const pairs = combinedFor(this.position);
+    const rows: SkillRow[] = [];
+    const used = new Set<string>();
+    for (const stat of stats) {
+      if (used.has(stat.key)) continue;
+      const pair = pairs.find(({ parts }) => (parts as string[]).includes(stat.key) && parts.every((p) => stats.some((s) => s.key === p)));
+      if (pair) {
+        const children = stats.filter((s) => (pair.parts as string[]).includes(s.key));
+        children.forEach((child) => used.add(child.key));
+        rows.push({ key: pair.stat.key, label: pair.stat.label, description: pair.stat.description, children });
+      } else {
+        const label = SPORT.statLabel?.(stat, this.positionService.settings.sport) ?? stat.label;
+        rows.push({ key: stat.key, label, description: stat.description, stat });
+      }
+    }
+    return rows;
   }
 
   // Moving a parent row moves its breakdown's columns together
@@ -186,10 +201,13 @@ export class SidebarComponent {
     this.saveSkillWeights();
   }
 
-  // Every slider to 0%
+  // Every slider to 0%, combined pairs' parent sliders included
   clearAll(): void {
     this.skillPresets[this.position] = 'custom';
-    this.skillWeights = Object.fromEntries(this.skillStats.map((stat) => [stat.key, 0]));
+    this.skillWeights = {
+      ...Object.fromEntries(this.skillStats.map((stat) => [stat.key, 0])),
+      ...Object.fromEntries(combinedFor(this.position).map(({ stat }) => [stat.key, 0])),
+    };
     this.saveSkillWeights();
   }
 }

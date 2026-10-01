@@ -1,9 +1,10 @@
 import { SPORT } from '@sport/sport';
 import { CURRENT_SEASON, dataSeason, loadData } from '@ranker/engine/data';
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
-import { rebuildUnits } from '@ranker/engine/unit-scoring';
-import { POSITIONS, Position, StatBasis, SkillPosition, SkillWeights, StatGroupId, presetWeights } from '@sport/positions';
+import { BehaviorSubject, EMPTY, Observable, combineLatest, distinctUntilChanged, map } from 'rxjs';
+import { DEFAULT_SPORT_SETTINGS, SKILL_UNITS, defaultRanking, rebuildUnits } from '@ranker/engine/unit-scoring';
+import type { SportSettings } from '@ranker/engine/sport';
+import { POSITIONS, Position, StatBasis, SkillPlayer, SkillPosition, SkillWeights, StatGroupId, presetWeights } from '@sport/positions';
 
 // Groups switched off with the sidebar eye, per position (every group is on at each page load)
 export type HiddenGroups = Partial<Record<SkillPosition, Partial<Record<StatGroupId, boolean>>>>;
@@ -19,8 +20,12 @@ export interface RankerSettings {
   minShare: number;
   // Tint values green / red by how far above / below the list average they are
   colorValues: boolean;
-  // Carry each stat group's color down the rows (a chalk line before each group)
+  // Carry each stat group's color down the rows (a line before each group)
   categoryColors: boolean;
+  // Show each combined pair (SPORT.combined: rushing + receiving yards) as one total column
+  combineStats: boolean;
+  // The sport's own settings (SPORT.settings), by key
+  sport: SportSettings;
 }
 
 // The Min setting: a share of the season so far, in steps of MIN_SHARE_STEP (0 is 1, everyone)
@@ -32,6 +37,8 @@ const DEFAULT_SETTINGS: RankerSettings = {
   minShare: 10,
   colorValues: true,
   categoryColors: true,
+  combineStats: true,
+  sport: DEFAULT_SPORT_SETTINGS,
 };
 
 // Open the tab from a shared link, e.g. ?pos=SS
@@ -201,6 +208,36 @@ export class PositionService {
     this.aboutOpenSubject.next(open);
   }
 
+  // The sport's settings as they change (only when one does)
+  public sportSettings$: Observable<SportSettings> = this.settingsSubject.pipe(
+    map((settings) => settings.sport),
+    distinctUntilChanged(),
+  );
+
+  // A tab's list as last shown (drags included), or its default slider ranking before it's been
+  // opened, best first. Each tab only re-sorts while it's on screen, so tabs can grade each other
+  // (SPORT.connect) without looping.
+  rankedUnits(position: SkillPosition): Observable<SkillPlayer[]> {
+    return combineLatest([this.weightsSubject, this.unitOrdersSubject, this.sportSettings$]).pipe(
+      map(([weights, orders, settings]) => {
+        const order = orders[position];
+        if (!order) return defaultRanking(position, weights[position], SKILL_UNITS, settings);
+        const byId = new Map(SKILL_UNITS[position].map((unit) => [unit.gsisId, unit]));
+        return order.ids.map((id) => byId.get(id)).filter((unit) => !!unit);
+      }),
+    );
+  }
+
+  // The sport's values from other tabs (SPORT.connect), hooked up once: fires when they change. Hooked
+  // up before any page, so the values are current when the pages hear about a change.
+  public sportChanged$: Observable<unknown> =
+    SPORT.connect?.({
+      settings$: this.sportSettings$,
+      rankedUnits: (position) => this.rankedUnits(position as SkillPosition),
+      rows: () => SKILL_UNITS,
+    }) ??
+    EMPTY;
+
   get settings(): RankerSettings {
     return this.settingsSubject.value;
   }
@@ -237,6 +274,16 @@ export class PositionService {
     const current = this.skillHiddenSubject.value;
     const next = { ...current, [position]: { ...current[position], [id]: hidden } };
     this.skillHiddenSubject.next(next);
+  }
+
+  // A sport setting: the next of its options, or flipped
+  stepSportSetting(key: string): void {
+    const setting = SPORT.settings?.find((s) => s.key === key);
+    if (!setting) return;
+    const value = this.settings.sport[key];
+    const options = setting.options ? Object.keys(setting.options) : null;
+    const next = options ? options[(options.indexOf(value as string) + 1) % options.length] : !value;
+    this.updateSettings({ sport: { ...this.settings.sport, [key]: next } });
   }
 
   // Cycle Season Totals -> Per Game -> Full-Season Pace

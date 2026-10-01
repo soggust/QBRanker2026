@@ -21,6 +21,17 @@ export interface Archetype {
   test: (s: Record<string, number>, overall: number) => boolean;
 }
 
+// A skill on the card: a percentile in the list, in words, with the stats behind it and where they rank
+export interface CardSkill {
+  id: string;
+  name: string;
+  short: string;
+  pct: number;
+  tier: string;
+  standing: string;
+  evidence: { label: string; rank: number; of: number }[];
+}
+
 // How good a skill is, in words
 export function tierWord(pct: number): string {
   if (pct >= 0.9) return 'Elite';

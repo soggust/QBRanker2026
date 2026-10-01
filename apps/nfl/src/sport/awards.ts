@@ -1,4 +1,5 @@
-import type { SkillPlayer, SkillPosition } from 'app/positions';
+import type { AwardInfo } from '@ranker/engine/awards';
+import type { SkillPlayer, SkillPosition } from '@sport/positions';
 import ALL_PRO from './all-pro.json';
 import PRO_BOWL from './pro-bowl.json';
 
@@ -24,16 +25,16 @@ export type AwardId =
   | 'ap2'
   | 'pb';
 
-export const AWARD_INFO: Record<AwardId, { name: string; short: string }> = {
+export const AWARD_INFO: Record<AwardId, AwardInfo> = {
   mvp: { name: 'Most Valuable Player', short: 'MVP' },
   opoy: { name: 'Offensive Player of the Year', short: 'OPOY' },
   oroy: { name: 'Offensive Rookie of the Year', short: 'OROY' },
   cpoy: { name: 'Comeback Player of the Year', short: 'CPOY' },
   sbmvp: { name: 'Super Bowl MVP', short: 'SB MVP' },
   // Shown as the Lombardi Trophy (the rank column's trophy); the rest as labeled gold plaques
-  sb: { name: 'Super Bowl Champion', short: 'SB Champ' },
+  sb: { name: 'Super Bowl Champion', short: 'SB Champ', icon: { name: 'trophy' } },
   // A silver cup for both conference champions (the Super Bowl's two teams); named per conference
-  conf: { name: 'Conference Champion', short: 'Conf Champ' },
+  conf: { name: 'Conference Champion', short: 'Conf Champ', icon: { name: 'emoji_events' } },
   coy: { name: 'Coach of the Year', short: 'COY' },
   dpoy: { name: 'Defensive Player of the Year', short: 'DPOY' },
   droy: { name: 'Defensive Rookie of the Year', short: 'DROY' },

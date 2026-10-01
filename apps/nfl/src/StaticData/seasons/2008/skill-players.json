@@ -4,7 +4,7 @@
       "id": null,
       "gsisId": "DEF-ARI",
       "name": "Arizona Cardinals",
-      "teamLogo": "../assets/NFL_Icons/Cardinals.png",
+      "teamLogo": "assets/NFL_Icons/Cardinals.png",
       "games": 16,
       "stats": {
         "epaAllowed": 0.027,
@@ -36,7 +36,7 @@
       "id": null,
       "gsisId": "DEF-ATL",
       "name": "Atlanta Falcons",
-      "teamLogo": "../assets/NFL_Icons/Falcons.png",
+      "teamLogo": "assets/NFL_Icons/Falcons.png",
       "games": 16,
       "stats": {
         "epaAllowed": 0.014,
@@ -68,7 +68,7 @@
       "id": null,
       "gsisId": "DEF-BAL",
       "name": "Baltimore Ravens",
-      "teamLogo": "../assets/NFL_Icons/Ravens.png",
+      "teamLogo": "assets/NFL_Icons/Ravens.png",
       "games": 16,
       "stats": {
         "epaAllowed": -0.217,
@@ -100,7 +100,7 @@
       "id": null,
       "gsisId": "DEF-BUF",
       "name": "Buffalo Bills",
-      "teamLogo": "../assets/NFL_Icons/Bills.png",
+      "teamLogo": "assets/NFL_Icons/Bills.png",
       "games": 16,
       "stats": {
         "epaAllowed": -0.005,
@@ -132,7 +132,7 @@
       "id": null,
       "gsisId": "DEF-CAR",
       "name": "Carolina Panthers",
-      "teamLogo": "../assets/NFL_Icons/Panthers.png",
+      "teamLogo": "assets/NFL_Icons/Panthers.png",
       "games": 16,
       "stats": {
         "epaAllowed": -0.033,
@@ -164,7 +164,7 @@
       "id": null,
       "gsisId": "DEF-CHI",
       "name": "Chicago Bears",
-      "teamLogo": "../assets/NFL_Icons/Bears.png",
+      "teamLogo": "assets/NFL_Icons/Bears.png",
       "games": 16,
       "stats": {
         "epaAllowed": -0.064,
@@ -196,7 +196,7 @@
       "id": null,
       "gsisId": "DEF-CIN",
       "name": "Cincinnati Bengals",
-      "teamLogo": "../assets/NFL_Icons/Bengals.png",
+      "teamLogo": "assets/NFL_Icons/Bengals.png",
       "games": 16,
       "stats": {
         "epaAllowed": -0.002,
@@ -228,7 +228,7 @@
       "id": null,
       "gsisId": "DEF-CLE",
       "name": "Cleveland Browns",
-      "teamLogo": "../assets/NFL_Icons/Browns.png",
+      "teamLogo": "assets/NFL_Icons/Browns.png",
       "games": 16,
       "stats": {
         "epaAllowed": 0.034,
@@ -260,7 +260,7 @@
       "id": null,
       "gsisId": "DEF-DAL",
       "name": "Dallas Cowboys",
-      "teamLogo": "../assets/NFL_Icons/Cowboys.png",
+      "teamLogo": "assets/NFL_Icons/Cowboys.png",
       "games": 16,
       "stats": {
         "epaAllowed": -0.032,
@@ -292,7 +292,7 @@
       "id": null,
       "gsisId": "DEF-DEN",
       "name": "Denver Broncos",
-      "teamLogo": "../assets/NFL_Icons/Broncos.png",
+      "teamLogo": "assets/NFL_Icons/Broncos.png",
       "games": 16,
       "stats": {
         "epaAllowed": 0.146,
@@ -324,7 +324,7 @@
       "id": null,
       "gsisId": "DEF-DET",
       "name": "Detroit Lions",
-      "teamLogo": "../assets/NFL_Icons/Lions.png",
+      "teamLogo": "assets/NFL_Icons/Lions.png",
       "games": 16,
       "stats": {
         "epaAllowed": 0.176,
@@ -356,7 +356,7 @@
       "id": null,
       "gsisId": "DEF-GB",
       "name": "Green Bay Packers",
-      "teamLogo": "../assets/NFL_Icons/Packers.png",
+      "teamLogo": "assets/NFL_Icons/Packers.png",
       "games": 16,
       "stats": {
         "epaAllowed": -0.023,
@@ -388,7 +388,7 @@
       "id": null,
       "gsisId": "DEF-HOU",
       "name": "Houston Texans",
-      "teamLogo": "../assets/NFL_Icons/Texans.png",
+      "teamLogo": "assets/NFL_Icons/Texans.png",
       "games": 16,
       "stats": {
         "epaAllowed": 0.054,
@@ -420,7 +420,7 @@
       "id": null,
       "gsisId": "DEF-IND",
       "name": "Indianapolis Colts",
-      "teamLogo": "../assets/NFL_Icons/Colts.png",
+      "teamLogo": "assets/NFL_Icons/Colts.png",
       "games": 16,
       "stats": {
         "epaAllowed": -0.012,
@@ -452,7 +452,7 @@
       "id": null,
       "gsisId": "DEF-JAX",
       "name": "Jacksonville Jaguars",
-      "teamLogo": "../assets/NFL_Icons/Jaguars.png",
+      "teamLogo": "assets/NFL_Icons/Jaguars.png",
       "games": 16,
       "stats": {
         "epaAllowed": 0.068,
@@ -484,7 +484,7 @@
       "id": null,
       "gsisId": "DEF-KC",
       "name": "Kansas City Chiefs",
-      "teamLogo": "../assets/NFL_Icons/Chiefs.png",
+      "teamLogo": "assets/NFL_Icons/Chiefs.png",
       "games": 16,
       "stats": {
         "epaAllowed": 0.076,
@@ -516,7 +516,7 @@
       "id": null,
       "gsisId": "DEF-LV",
       "name": "Las Vegas Raiders",
-      "teamLogo": "../assets/NFL_Icons/Raiders.png",
+      "teamLogo": "assets/NFL_Icons/Raiders.png",
       "games": 16,
       "stats": {
         "epaAllowed": 0.059,
@@ -548,7 +548,7 @@
       "id": null,
       "gsisId": "DEF-LAC",
       "name": "Los Angeles Chargers",
-      "teamLogo": "../assets/NFL_Icons/Chargers.png",
+      "teamLogo": "assets/NFL_Icons/Chargers.png",
       "games": 16,
       "stats": {
         "epaAllowed": 0.033,
@@ -580,7 +580,7 @@
       "id": null,
       "gsisId": "DEF-LA",
       "name": "Los Angeles Rams",
-      "teamLogo": "../assets/NFL_Icons/Rams.png",
+      "teamLogo": "assets/NFL_Icons/Rams.png",
       "games": 16,
       "stats": {
         "epaAllowed": 0.07,
@@ -612,7 +612,7 @@
       "id": null,
       "gsisId": "DEF-MIA",
       "name": "Miami Dolphins",
-      "teamLogo": "../assets/NFL_Icons/Dolphins.png",
+      "teamLogo": "assets/NFL_Icons/Dolphins.png",
       "games": 16,
       "stats": {
         "epaAllowed": 0.009,
@@ -644,7 +644,7 @@
       "id": null,
       "gsisId": "DEF-MIN",
       "name": "Minnesota Vikings",
-      "teamLogo": "../assets/NFL_Icons/Vikings.png",
+      "teamLogo": "assets/NFL_Icons/Vikings.png",
       "games": 16,
       "stats": {
         "epaAllowed": -0.108,
@@ -676,7 +676,7 @@
       "id": null,
       "gsisId": "DEF-NE",
       "name": "New England Patriots",
-      "teamLogo": "../assets/NFL_Icons/Patriots.png",
+      "teamLogo": "assets/NFL_Icons/Patriots.png",
       "games": 16,
       "stats": {
         "epaAllowed": 0.01,
@@ -708,7 +708,7 @@
       "id": null,
       "gsisId": "DEF-NO",
       "name": "New Orleans Saints",
-      "teamLogo": "../assets/NFL_Icons/Saints.png",
+      "teamLogo": "assets/NFL_Icons/Saints.png",
       "games": 16,
       "stats": {
         "epaAllowed": 0.042,
@@ -740,7 +740,7 @@
       "id": null,
       "gsisId": "DEF-NYG",
       "name": "New York Giants",
-      "teamLogo": "../assets/NFL_Icons/Giants.png",
+      "teamLogo": "assets/NFL_Icons/Giants.png",
       "games": 16,
       "stats": {
         "epaAllowed": -0.054,
@@ -772,7 +772,7 @@
       "id": null,
       "gsisId": "DEF-NYJ",
       "name": "New York Jets",
-      "teamLogo": "../assets/NFL_Icons/Jets.png",
+      "teamLogo": "assets/NFL_Icons/Jets.png",
       "games": 16,
       "stats": {
         "epaAllowed": -0.025,
@@ -804,7 +804,7 @@
       "id": null,
       "gsisId": "DEF-PHI",
       "name": "Philadelphia Eagles",
-      "teamLogo": "../assets/NFL_Icons/Eagles.png",
+      "teamLogo": "assets/NFL_Icons/Eagles.png",
       "games": 16,
       "stats": {
         "epaAllowed": -0.158,
@@ -836,7 +836,7 @@
       "id": null,
       "gsisId": "DEF-PIT",
       "name": "Pittsburgh Steelers",
-      "teamLogo": "../assets/NFL_Icons/Steelers.png",
+      "teamLogo": "assets/NFL_Icons/Steelers.png",
       "games": 16,
       "stats": {
         "epaAllowed": -0.19,
@@ -868,7 +868,7 @@
       "id": null,
       "gsisId": "DEF-SF",
       "name": "San Francisco 49ers",
-      "teamLogo": "../assets/NFL_Icons/49ers.png",
+      "teamLogo": "assets/NFL_Icons/49ers.png",
       "games": 16,
       "stats": {
         "epaAllowed": 0.025,
@@ -900,7 +900,7 @@
       "id": null,
       "gsisId": "DEF-SEA",
       "name": "Seattle Seahawks",
-      "teamLogo": "../assets/NFL_Icons/Seahawks.png",
+      "teamLogo": "assets/NFL_Icons/Seahawks.png",
       "games": 16,
       "stats": {
         "epaAllowed": 0.069,
@@ -932,7 +932,7 @@
       "id": null,
       "gsisId": "DEF-TB",
       "name": "Tampa Bay Buccaneers",
-      "teamLogo": "../assets/NFL_Icons/Bucs.png",
+      "teamLogo": "assets/NFL_Icons/Bucs.png",
       "games": 16,
       "stats": {
         "epaAllowed": -0.082,
@@ -964,7 +964,7 @@
       "id": null,
       "gsisId": "DEF-TEN",
       "name": "Tennessee Titans",
-      "teamLogo": "../assets/NFL_Icons/Titans.png",
+      "teamLogo": "assets/NFL_Icons/Titans.png",
       "games": 16,
       "stats": {
         "epaAllowed": -0.116,
@@ -996,7 +996,7 @@
       "id": null,
       "gsisId": "DEF-WAS",
       "name": "Washington Commanders",
-      "teamLogo": "../assets/NFL_Icons/Commanders.png",
+      "teamLogo": "assets/NFL_Icons/Commanders.png",
       "games": 16,
       "stats": {
         "epaAllowed": -0.028,
@@ -1030,7 +1030,7 @@
       "id": null,
       "gsisId": "HC-Andy Reid",
       "name": "Andy Reid",
-      "teamLogo": "../assets/NFL_Icons/Eagles.png",
+      "teamLogo": "assets/NFL_Icons/Eagles.png",
       "games": 16,
       "stats": {
         "wins": 9,
@@ -1063,7 +1063,7 @@
       "id": null,
       "gsisId": "HC-Bill Belichick",
       "name": "Bill Belichick",
-      "teamLogo": "../assets/NFL_Icons/Patriots.png",
+      "teamLogo": "assets/NFL_Icons/Patriots.png",
       "games": 16,
       "stats": {
         "wins": 11,
@@ -1096,7 +1096,7 @@
       "id": null,
       "gsisId": "HC-Brad Childress",
       "name": "Brad Childress",
-      "teamLogo": "../assets/NFL_Icons/Vikings.png",
+      "teamLogo": "assets/NFL_Icons/Vikings.png",
       "games": 16,
       "stats": {
         "wins": 10,
@@ -1129,7 +1129,7 @@
       "id": null,
       "gsisId": "HC-Dick Jauron",
       "name": "Dick Jauron",
-      "teamLogo": "../assets/NFL_Icons/Bills.png",
+      "teamLogo": "assets/NFL_Icons/Bills.png",
       "games": 16,
       "stats": {
         "wins": 7,
@@ -1162,7 +1162,7 @@
       "id": null,
       "gsisId": "HC-Eric Mangini",
       "name": "Eric Mangini",
-      "teamLogo": "../assets/NFL_Icons/Jets.png",
+      "teamLogo": "assets/NFL_Icons/Jets.png",
       "games": 16,
       "stats": {
         "wins": 9,
@@ -1195,7 +1195,7 @@
       "id": null,
       "gsisId": "HC-Gary Kubiak",
       "name": "Gary Kubiak",
-      "teamLogo": "../assets/NFL_Icons/Texans.png",
+      "teamLogo": "assets/NFL_Icons/Texans.png",
       "games": 16,
       "stats": {
         "wins": 8,
@@ -1228,7 +1228,7 @@
       "id": null,
       "gsisId": "HC-Herm Edwards",
       "name": "Herm Edwards",
-      "teamLogo": "../assets/NFL_Icons/Chiefs.png",
+      "teamLogo": "assets/NFL_Icons/Chiefs.png",
       "games": 16,
       "stats": {
         "wins": 2,
@@ -1261,7 +1261,7 @@
       "id": null,
       "gsisId": "HC-Jack Del Rio",
       "name": "Jack Del Rio",
-      "teamLogo": "../assets/NFL_Icons/Jaguars.png",
+      "teamLogo": "assets/NFL_Icons/Jaguars.png",
       "games": 16,
       "stats": {
         "wins": 5,
@@ -1294,7 +1294,7 @@
       "id": null,
       "gsisId": "HC-Jeff Fisher",
       "name": "Jeff Fisher",
-      "teamLogo": "../assets/NFL_Icons/Titans.png",
+      "teamLogo": "assets/NFL_Icons/Titans.png",
       "games": 16,
       "stats": {
         "wins": 13,
@@ -1327,7 +1327,7 @@
       "id": null,
       "gsisId": "HC-Jim Haslett",
       "name": "Jim Haslett",
-      "teamLogo": "../assets/NFL_Icons/Rams.png",
+      "teamLogo": "assets/NFL_Icons/Rams.png",
       "games": 16,
       "stats": {
         "wins": 2,
@@ -1360,7 +1360,7 @@
       "id": null,
       "gsisId": "HC-Jim Zorn",
       "name": "Jim Zorn",
-      "teamLogo": "../assets/NFL_Icons/Commanders.png",
+      "teamLogo": "assets/NFL_Icons/Commanders.png",
       "games": 16,
       "stats": {
         "wins": 8,
@@ -1393,7 +1393,7 @@
       "id": null,
       "gsisId": "HC-John Fox",
       "name": "John Fox",
-      "teamLogo": "../assets/NFL_Icons/Panthers.png",
+      "teamLogo": "assets/NFL_Icons/Panthers.png",
       "games": 16,
       "stats": {
         "wins": 12,
@@ -1426,7 +1426,7 @@
       "id": null,
       "gsisId": "HC-John Harbaugh",
       "name": "John Harbaugh",
-      "teamLogo": "../assets/NFL_Icons/Ravens.png",
+      "teamLogo": "assets/NFL_Icons/Ravens.png",
       "games": 16,
       "stats": {
         "wins": 11,
@@ -1459,7 +1459,7 @@
       "id": null,
       "gsisId": "HC-Jon Gruden",
       "name": "Jon Gruden",
-      "teamLogo": "../assets/NFL_Icons/Bucs.png",
+      "teamLogo": "assets/NFL_Icons/Bucs.png",
       "games": 16,
       "stats": {
         "wins": 9,
@@ -1492,7 +1492,7 @@
       "id": null,
       "gsisId": "HC-Ken Whisenhunt",
       "name": "Ken Whisenhunt",
-      "teamLogo": "../assets/NFL_Icons/Cardinals.png",
+      "teamLogo": "assets/NFL_Icons/Cardinals.png",
       "games": 16,
       "stats": {
         "wins": 9,
@@ -1525,7 +1525,7 @@
       "id": null,
       "gsisId": "HC-Lovie Smith",
       "name": "Lovie Smith",
-      "teamLogo": "../assets/NFL_Icons/Bears.png",
+      "teamLogo": "assets/NFL_Icons/Bears.png",
       "games": 16,
       "stats": {
         "wins": 9,
@@ -1558,7 +1558,7 @@
       "id": null,
       "gsisId": "HC-Marvin Lewis",
       "name": "Marvin Lewis",
-      "teamLogo": "../assets/NFL_Icons/Bengals.png",
+      "teamLogo": "assets/NFL_Icons/Bengals.png",
       "games": 16,
       "stats": {
         "wins": 4,
@@ -1591,7 +1591,7 @@
       "id": null,
       "gsisId": "HC-Mike Holmgren",
       "name": "Mike Holmgren",
-      "teamLogo": "../assets/NFL_Icons/Seahawks.png",
+      "teamLogo": "assets/NFL_Icons/Seahawks.png",
       "games": 16,
       "stats": {
         "wins": 4,
@@ -1624,7 +1624,7 @@
       "id": null,
       "gsisId": "HC-Mike McCarthy",
       "name": "Mike McCarthy",
-      "teamLogo": "../assets/NFL_Icons/Packers.png",
+      "teamLogo": "assets/NFL_Icons/Packers.png",
       "games": 16,
       "stats": {
         "wins": 6,
@@ -1657,7 +1657,7 @@
       "id": null,
       "gsisId": "HC-Mike Shanahan",
       "name": "Mike Shanahan",
-      "teamLogo": "../assets/NFL_Icons/Broncos.png",
+      "teamLogo": "assets/NFL_Icons/Broncos.png",
       "games": 16,
       "stats": {
         "wins": 8,
@@ -1690,7 +1690,7 @@
       "id": null,
       "gsisId": "HC-Mike Singletary",
       "name": "Mike Singletary",
-      "teamLogo": "../assets/NFL_Icons/49ers.png",
+      "teamLogo": "assets/NFL_Icons/49ers.png",
       "games": 16,
       "stats": {
         "wins": 7,
@@ -1723,7 +1723,7 @@
       "id": null,
       "gsisId": "HC-Mike Smith",
       "name": "Mike Smith",
-      "teamLogo": "../assets/NFL_Icons/Falcons.png",
+      "teamLogo": "assets/NFL_Icons/Falcons.png",
       "games": 16,
       "stats": {
         "wins": 11,
@@ -1756,7 +1756,7 @@
       "id": null,
       "gsisId": "HC-Mike Tomlin",
       "name": "Mike Tomlin",
-      "teamLogo": "../assets/NFL_Icons/Steelers.png",
+      "teamLogo": "assets/NFL_Icons/Steelers.png",
       "games": 16,
       "stats": {
         "wins": 12,
@@ -1789,7 +1789,7 @@
       "id": null,
       "gsisId": "HC-Norv Turner",
       "name": "Norv Turner",
-      "teamLogo": "../assets/NFL_Icons/Chargers.png",
+      "teamLogo": "assets/NFL_Icons/Chargers.png",
       "games": 16,
       "stats": {
         "wins": 8,
@@ -1822,7 +1822,7 @@
       "id": null,
       "gsisId": "HC-Rod Marinelli",
       "name": "Rod Marinelli",
-      "teamLogo": "../assets/NFL_Icons/Lions.png",
+      "teamLogo": "assets/NFL_Icons/Lions.png",
       "games": 16,
       "stats": {
         "wins": 0,
@@ -1855,7 +1855,7 @@
       "id": null,
       "gsisId": "HC-Romeo Crennel",
       "name": "Romeo Crennel",
-      "teamLogo": "../assets/NFL_Icons/Browns.png",
+      "teamLogo": "assets/NFL_Icons/Browns.png",
       "games": 16,
       "stats": {
         "wins": 4,
@@ -1888,7 +1888,7 @@
       "id": null,
       "gsisId": "HC-Sean Payton",
       "name": "Sean Payton",
-      "teamLogo": "../assets/NFL_Icons/Saints.png",
+      "teamLogo": "assets/NFL_Icons/Saints.png",
       "games": 16,
       "stats": {
         "wins": 8,
@@ -1921,7 +1921,7 @@
       "id": null,
       "gsisId": "HC-Tom Cable",
       "name": "Tom Cable",
-      "teamLogo": "../assets/NFL_Icons/Raiders.png",
+      "teamLogo": "assets/NFL_Icons/Raiders.png",
       "games": 16,
       "stats": {
         "wins": 5,
@@ -1954,7 +1954,7 @@
       "id": null,
       "gsisId": "HC-Tom Coughlin",
       "name": "Tom Coughlin",
-      "teamLogo": "../assets/NFL_Icons/Giants.png",
+      "teamLogo": "assets/NFL_Icons/Giants.png",
       "games": 16,
       "stats": {
         "wins": 12,
@@ -1987,7 +1987,7 @@
       "id": null,
       "gsisId": "HC-Tony Dungy",
       "name": "Tony Dungy",
-      "teamLogo": "../assets/NFL_Icons/Colts.png",
+      "teamLogo": "assets/NFL_Icons/Colts.png",
       "games": 16,
       "stats": {
         "wins": 12,
@@ -2020,7 +2020,7 @@
       "id": null,
       "gsisId": "HC-Tony Sparano",
       "name": "Tony Sparano",
-      "teamLogo": "../assets/NFL_Icons/Dolphins.png",
+      "teamLogo": "assets/NFL_Icons/Dolphins.png",
       "games": 16,
       "stats": {
         "wins": 11,
@@ -2053,7 +2053,7 @@
       "id": null,
       "gsisId": "HC-Wade Phillips",
       "name": "Wade Phillips",
-      "teamLogo": "../assets/NFL_Icons/Cowboys.png",
+      "teamLogo": "assets/NFL_Icons/Cowboys.png",
       "games": 16,
       "stats": {
         "wins": 9,
@@ -2088,7 +2088,7 @@
       "id": null,
       "gsisId": "OL-ARI",
       "name": "Arizona Cardinals",
-      "teamLogo": "../assets/NFL_Icons/Cardinals.png",
+      "teamLogo": "assets/NFL_Icons/Cardinals.png",
       "games": 16,
       "stats": {
         "sacksAllowed": 28,
@@ -2120,7 +2120,7 @@
       "id": null,
       "gsisId": "OL-ATL",
       "name": "Atlanta Falcons",
-      "teamLogo": "../assets/NFL_Icons/Falcons.png",
+      "teamLogo": "assets/NFL_Icons/Falcons.png",
       "games": 16,
       "stats": {
         "sacksAllowed": 17,
@@ -2152,7 +2152,7 @@
       "id": null,
       "gsisId": "OL-BAL",
       "name": "Baltimore Ravens",
-      "teamLogo": "../assets/NFL_Icons/Ravens.png",
+      "teamLogo": "assets/NFL_Icons/Ravens.png",
       "games": 16,
       "stats": {
         "sacksAllowed": 34,
@@ -2184,7 +2184,7 @@
       "id": null,
       "gsisId": "OL-BUF",
       "name": "Buffalo Bills",
-      "teamLogo": "../assets/NFL_Icons/Bills.png",
+      "teamLogo": "assets/NFL_Icons/Bills.png",
       "games": 16,
       "stats": {
         "sacksAllowed": 38,
@@ -2216,7 +2216,7 @@
       "id": null,
       "gsisId": "OL-CAR",
       "name": "Carolina Panthers",
-      "teamLogo": "../assets/NFL_Icons/Panthers.png",
+      "teamLogo": "assets/NFL_Icons/Panthers.png",
       "games": 16,
       "stats": {
         "sacksAllowed": 20,
@@ -2248,7 +2248,7 @@
       "id": null,
       "gsisId": "OL-CHI",
       "name": "Chicago Bears",
-      "teamLogo": "../assets/NFL_Icons/Bears.png",
+      "teamLogo": "assets/NFL_Icons/Bears.png",
       "games": 16,
       "stats": {
         "sacksAllowed": 29,
@@ -2280,7 +2280,7 @@
       "id": null,
       "gsisId": "OL-CIN",
       "name": "Cincinnati Bengals",
-      "teamLogo": "../assets/NFL_Icons/Bengals.png",
+      "teamLogo": "assets/NFL_Icons/Bengals.png",
       "games": 16,
       "stats": {
         "sacksAllowed": 51,
@@ -2312,7 +2312,7 @@
       "id": null,
       "gsisId": "OL-CLE",
       "name": "Cleveland Browns",
-      "teamLogo": "../assets/NFL_Icons/Browns.png",
+      "teamLogo": "assets/NFL_Icons/Browns.png",
       "games": 16,
       "stats": {
         "sacksAllowed": 25,
@@ -2344,7 +2344,7 @@
       "id": null,
       "gsisId": "OL-DAL",
       "name": "Dallas Cowboys",
-      "teamLogo": "../assets/NFL_Icons/Cowboys.png",
+      "teamLogo": "assets/NFL_Icons/Cowboys.png",
       "games": 16,
       "stats": {
         "sacksAllowed": 31,
@@ -2376,7 +2376,7 @@
       "id": null,
       "gsisId": "OL-DEN",
       "name": "Denver Broncos",
-      "teamLogo": "../assets/NFL_Icons/Broncos.png",
+      "teamLogo": "assets/NFL_Icons/Broncos.png",
       "games": 16,
       "stats": {
         "sacksAllowed": 12,
@@ -2408,7 +2408,7 @@
       "id": null,
       "gsisId": "OL-DET",
       "name": "Detroit Lions",
-      "teamLogo": "../assets/NFL_Icons/Lions.png",
+      "teamLogo": "assets/NFL_Icons/Lions.png",
       "games": 16,
       "stats": {
         "sacksAllowed": 52,
@@ -2440,7 +2440,7 @@
       "id": null,
       "gsisId": "OL-GB",
       "name": "Green Bay Packers",
-      "teamLogo": "../assets/NFL_Icons/Packers.png",
+      "teamLogo": "assets/NFL_Icons/Packers.png",
       "games": 16,
       "stats": {
         "sacksAllowed": 34,
@@ -2472,7 +2472,7 @@
       "id": null,
       "gsisId": "OL-HOU",
       "name": "Houston Texans",
-      "teamLogo": "../assets/NFL_Icons/Texans.png",
+      "teamLogo": "assets/NFL_Icons/Texans.png",
       "games": 16,
       "stats": {
         "sacksAllowed": 32,
@@ -2504,7 +2504,7 @@
       "id": null,
       "gsisId": "OL-IND",
       "name": "Indianapolis Colts",
-      "teamLogo": "../assets/NFL_Icons/Colts.png",
+      "teamLogo": "assets/NFL_Icons/Colts.png",
       "games": 16,
       "stats": {
         "sacksAllowed": 14,
@@ -2536,7 +2536,7 @@
       "id": null,
       "gsisId": "OL-JAX",
       "name": "Jacksonville Jaguars",
-      "teamLogo": "../assets/NFL_Icons/Jaguars.png",
+      "teamLogo": "assets/NFL_Icons/Jaguars.png",
       "games": 16,
       "stats": {
         "sacksAllowed": 42,
@@ -2568,7 +2568,7 @@
       "id": null,
       "gsisId": "OL-KC",
       "name": "Kansas City Chiefs",
-      "teamLogo": "../assets/NFL_Icons/Chiefs.png",
+      "teamLogo": "assets/NFL_Icons/Chiefs.png",
       "games": 16,
       "stats": {
         "sacksAllowed": 37,
@@ -2600,7 +2600,7 @@
       "id": null,
       "gsisId": "OL-LV",
       "name": "Las Vegas Raiders",
-      "teamLogo": "../assets/NFL_Icons/Raiders.png",
+      "teamLogo": "assets/NFL_Icons/Raiders.png",
       "games": 16,
       "stats": {
         "sacksAllowed": 39,
@@ -2632,7 +2632,7 @@
       "id": null,
       "gsisId": "OL-LAC",
       "name": "Los Angeles Chargers",
-      "teamLogo": "../assets/NFL_Icons/Chargers.png",
+      "teamLogo": "assets/NFL_Icons/Chargers.png",
       "games": 16,
       "stats": {
         "sacksAllowed": 25,
@@ -2664,7 +2664,7 @@
       "id": null,
       "gsisId": "OL-LA",
       "name": "Los Angeles Rams",
-      "teamLogo": "../assets/NFL_Icons/Rams.png",
+      "teamLogo": "assets/NFL_Icons/Rams.png",
       "games": 16,
       "stats": {
         "sacksAllowed": 45,
@@ -2696,7 +2696,7 @@
       "id": null,
       "gsisId": "OL-MIA",
       "name": "Miami Dolphins",
-      "teamLogo": "../assets/NFL_Icons/Dolphins.png",
+      "teamLogo": "assets/NFL_Icons/Dolphins.png",
       "games": 16,
       "stats": {
         "sacksAllowed": 24,
@@ -2728,7 +2728,7 @@
       "id": null,
       "gsisId": "OL-MIN",
       "name": "Minnesota Vikings",
-      "teamLogo": "../assets/NFL_Icons/Vikings.png",
+      "teamLogo": "assets/NFL_Icons/Vikings.png",
       "games": 16,
       "stats": {
         "sacksAllowed": 44,
@@ -2760,7 +2760,7 @@
       "id": null,
       "gsisId": "OL-NE",
       "name": "New England Patriots",
-      "teamLogo": "../assets/NFL_Icons/Patriots.png",
+      "teamLogo": "assets/NFL_Icons/Patriots.png",
       "games": 16,
       "stats": {
         "sacksAllowed": 45,
@@ -2792,7 +2792,7 @@
       "id": null,
       "gsisId": "OL-NO",
       "name": "New Orleans Saints",
-      "teamLogo": "../assets/NFL_Icons/Saints.png",
+      "teamLogo": "assets/NFL_Icons/Saints.png",
       "games": 16,
       "stats": {
         "sacksAllowed": 13,
@@ -2824,7 +2824,7 @@
       "id": null,
       "gsisId": "OL-NYG",
       "name": "New York Giants",
-      "teamLogo": "../assets/NFL_Icons/Giants.png",
+      "teamLogo": "assets/NFL_Icons/Giants.png",
       "games": 16,
       "stats": {
         "sacksAllowed": 28,
@@ -2856,7 +2856,7 @@
       "id": null,
       "gsisId": "OL-NYJ",
       "name": "New York Jets",
-      "teamLogo": "../assets/NFL_Icons/Jets.png",
+      "teamLogo": "assets/NFL_Icons/Jets.png",
       "games": 16,
       "stats": {
         "sacksAllowed": 30,
@@ -2888,7 +2888,7 @@
       "id": null,
       "gsisId": "OL-PHI",
       "name": "Philadelphia Eagles",
-      "teamLogo": "../assets/NFL_Icons/Eagles.png",
+      "teamLogo": "assets/NFL_Icons/Eagles.png",
       "games": 16,
       "stats": {
         "sacksAllowed": 24,
@@ -2920,7 +2920,7 @@
       "id": null,
       "gsisId": "OL-PIT",
       "name": "Pittsburgh Steelers",
-      "teamLogo": "../assets/NFL_Icons/Steelers.png",
+      "teamLogo": "assets/NFL_Icons/Steelers.png",
       "games": 16,
       "stats": {
         "sacksAllowed": 50,
@@ -2952,7 +2952,7 @@
       "id": null,
       "gsisId": "OL-SF",
       "name": "San Francisco 49ers",
-      "teamLogo": "../assets/NFL_Icons/49ers.png",
+      "teamLogo": "assets/NFL_Icons/49ers.png",
       "games": 16,
       "stats": {
         "sacksAllowed": 55,
@@ -2984,7 +2984,7 @@
       "id": null,
       "gsisId": "OL-SEA",
       "name": "Seattle Seahawks",
-      "teamLogo": "../assets/NFL_Icons/Seahawks.png",
+      "teamLogo": "assets/NFL_Icons/Seahawks.png",
       "games": 16,
       "stats": {
         "sacksAllowed": 36,
@@ -3016,7 +3016,7 @@
       "id": null,
       "gsisId": "OL-TB",
       "name": "Tampa Bay Buccaneers",
-      "teamLogo": "../assets/NFL_Icons/Bucs.png",
+      "teamLogo": "assets/NFL_Icons/Bucs.png",
       "games": 16,
       "stats": {
         "sacksAllowed": 33,
@@ -3048,7 +3048,7 @@
       "id": null,
       "gsisId": "OL-TEN",
       "name": "Tennessee Titans",
-      "teamLogo": "../assets/NFL_Icons/Titans.png",
+      "teamLogo": "assets/NFL_Icons/Titans.png",
       "games": 16,
       "stats": {
         "sacksAllowed": 12,
@@ -3080,7 +3080,7 @@
       "id": null,
       "gsisId": "OL-WAS",
       "name": "Washington Commanders",
-      "teamLogo": "../assets/NFL_Icons/Commanders.png",
+      "teamLogo": "assets/NFL_Icons/Commanders.png",
       "games": 16,
       "stats": {
         "sacksAllowed": 38,
@@ -3114,7 +3114,7 @@
       "id": 10452,
       "gsisId": "00-0025394",
       "name": "Adrian Peterson",
-      "teamLogo": "../assets/NFL_Icons/Vikings.png",
+      "teamLogo": "assets/NFL_Icons/Vikings.png",
       "games": 16,
       "stats": {
         "carries": 364,
@@ -3156,7 +3156,7 @@
       "id": 10693,
       "gsisId": "00-0025637",
       "name": "Ahmad Bradshaw",
-      "teamLogo": "../assets/NFL_Icons/Giants.png",
+      "teamLogo": "assets/NFL_Icons/Giants.png",
       "games": 15,
       "stats": {
         "carries": 67,
@@ -3198,7 +3198,7 @@
       "id": 1432,
       "gsisId": "00-0006305",
       "name": "Ahman Green",
-      "teamLogo": "../assets/NFL_Icons/Texans.png",
+      "teamLogo": "assets/NFL_Icons/Texans.png",
       "games": 8,
       "stats": {
         "carries": 74,
@@ -3240,7 +3240,7 @@
       "id": 10551,
       "gsisId": "00-0025494",
       "name": "Antonio Pittman",
-      "teamLogo": "../assets/NFL_Icons/Rams.png",
+      "teamLogo": "assets/NFL_Icons/Rams.png",
       "games": 9,
       "stats": {
         "carries": 78,
@@ -3282,7 +3282,7 @@
       "id": 10507,
       "gsisId": "00-0025450",
       "name": "Brandon Jackson",
-      "teamLogo": "../assets/NFL_Icons/Packers.png",
+      "teamLogo": "assets/NFL_Icons/Packers.png",
       "games": 13,
       "stats": {
         "carries": 45,
@@ -3324,7 +3324,7 @@
       "id": 8524,
       "gsisId": "00-0023545",
       "name": "Brandon Jacobs",
-      "teamLogo": "../assets/NFL_Icons/Giants.png",
+      "teamLogo": "assets/NFL_Icons/Giants.png",
       "games": 13,
       "stats": {
         "carries": 219,
@@ -3366,7 +3366,7 @@
       "id": 3619,
       "gsisId": "00-0021216",
       "name": "Brian Westbrook",
-      "teamLogo": "../assets/NFL_Icons/Eagles.png",
+      "teamLogo": "assets/NFL_Icons/Eagles.png",
       "games": 14,
       "stats": {
         "carries": 233,
@@ -3408,7 +3408,7 @@
       "id": 8419,
       "gsisId": "00-0023439",
       "name": "Cedric Benson",
-      "teamLogo": "../assets/NFL_Icons/Bengals.png",
+      "teamLogo": "assets/NFL_Icons/Bengals.png",
       "games": 12,
       "stats": {
         "carries": 214,
@@ -3450,7 +3450,7 @@
       "id": 3784,
       "gsisId": "00-0021314",
       "name": "Chester Taylor",
-      "teamLogo": "../assets/NFL_Icons/Vikings.png",
+      "teamLogo": "assets/NFL_Icons/Vikings.png",
       "games": 16,
       "stats": {
         "carries": 101,
@@ -3492,7 +3492,7 @@
       "id": 11258,
       "gsisId": "00-0026164",
       "name": "Chris Johnson",
-      "teamLogo": "../assets/NFL_Icons/Titans.png",
+      "teamLogo": "assets/NFL_Icons/Titans.png",
       "games": 15,
       "stats": {
         "carries": 251,
@@ -3534,7 +3534,7 @@
       "id": 5551,
       "gsisId": "00-0022926",
       "name": "Chris Perry",
-      "teamLogo": "../assets/NFL_Icons/Bengals.png",
+      "teamLogo": "assets/NFL_Icons/Bengals.png",
       "games": 11,
       "stats": {
         "carries": 102,
@@ -3576,7 +3576,7 @@
       "id": 3579,
       "gsisId": "00-0021179",
       "name": "Clinton Portis",
-      "teamLogo": "../assets/NFL_Icons/Commanders.png",
+      "teamLogo": "assets/NFL_Icons/Commanders.png",
       "games": 16,
       "stats": {
         "carries": 342,
@@ -3618,7 +3618,7 @@
       "id": 2670,
       "gsisId": "00-0020270",
       "name": "Correll Buckhalter",
-      "teamLogo": "../assets/NFL_Icons/Eagles.png",
+      "teamLogo": "assets/NFL_Icons/Eagles.png",
       "games": 14,
       "stats": {
         "carries": 76,
@@ -3660,7 +3660,7 @@
       "id": 11238,
       "gsisId": "00-0026144",
       "name": "Darren McFadden",
-      "teamLogo": "../assets/NFL_Icons/Raiders.png",
+      "teamLogo": "assets/NFL_Icons/Raiders.png",
       "games": 13,
       "stats": {
         "carries": 113,
@@ -3702,7 +3702,7 @@
       "id": 8544,
       "gsisId": "00-0023564",
       "name": "Darren Sproles",
-      "teamLogo": "../assets/NFL_Icons/Chargers.png",
+      "teamLogo": "assets/NFL_Icons/Chargers.png",
       "games": 16,
       "stats": {
         "carries": 61,
@@ -3744,7 +3744,7 @@
       "id": 9613,
       "gsisId": "00-0024242",
       "name": "DeAngelo Williams",
-      "teamLogo": "../assets/NFL_Icons/Panthers.png",
+      "teamLogo": "assets/NFL_Icons/Panthers.png",
       "games": 16,
       "stats": {
         "carries": 274,
@@ -3786,7 +3786,7 @@
       "id": 5760,
       "gsisId": "00-0022770",
       "name": "Derrick Ward",
-      "teamLogo": "../assets/NFL_Icons/Giants.png",
+      "teamLogo": "assets/NFL_Icons/Giants.png",
       "games": 16,
       "stats": {
         "carries": 182,
@@ -3828,7 +3828,7 @@
       "id": 3562,
       "gsisId": "00-0021164",
       "name": "DeShaun Foster",
-      "teamLogo": "../assets/NFL_Icons/49ers.png",
+      "teamLogo": "assets/NFL_Icons/49ers.png",
       "games": 11,
       "stats": {
         "carries": 76,
@@ -3870,7 +3870,7 @@
       "id": 2571,
       "gsisId": "00-0020527",
       "name": "Deuce McAllister",
-      "teamLogo": "../assets/NFL_Icons/Saints.png",
+      "teamLogo": "assets/NFL_Icons/Saints.png",
       "games": 13,
       "stats": {
         "carries": 107,
@@ -3912,7 +3912,7 @@
       "id": 2893,
       "gsisId": "00-0019863",
       "name": "Dominic Rhodes",
-      "teamLogo": "../assets/NFL_Icons/Colts.png",
+      "teamLogo": "assets/NFL_Icons/Colts.png",
       "games": 15,
       "stats": {
         "carries": 152,
@@ -3954,7 +3954,7 @@
       "id": 4950,
       "gsisId": "00-0021755",
       "name": "Earnest Graham",
-      "teamLogo": "../assets/NFL_Icons/Bucs.png",
+      "teamLogo": "assets/NFL_Icons/Bucs.png",
       "games": 10,
       "stats": {
         "carries": 132,
@@ -3996,7 +3996,7 @@
       "id": 1755,
       "gsisId": "00-0008241",
       "name": "Edgerrin James",
-      "teamLogo": "../assets/NFL_Icons/Cardinals.png",
+      "teamLogo": "assets/NFL_Icons/Cardinals.png",
       "games": 13,
       "stats": {
         "carries": 133,
@@ -4038,7 +4038,7 @@
       "id": 8479,
       "gsisId": "00-0023500",
       "name": "Frank Gore",
-      "teamLogo": "../assets/NFL_Icons/49ers.png",
+      "teamLogo": "assets/NFL_Icons/49ers.png",
       "games": 14,
       "stats": {
         "carries": 240,
@@ -4080,7 +4080,7 @@
       "id": 10195,
       "gsisId": "00-0024204",
       "name": "Fred Jackson",
-      "teamLogo": "../assets/NFL_Icons/Bills.png",
+      "teamLogo": "assets/NFL_Icons/Bills.png",
       "games": 15,
       "stats": {
         "carries": 129,
@@ -4122,7 +4122,7 @@
       "id": 1430,
       "gsisId": "00-0016098",
       "name": "Fred Taylor",
-      "teamLogo": "../assets/NFL_Icons/Jaguars.png",
+      "teamLogo": "assets/NFL_Icons/Jaguars.png",
       "games": 13,
       "stats": {
         "carries": 143,
@@ -4164,7 +4164,7 @@
       "id": 8458,
       "gsisId": "00-0023479",
       "name": "J.J. Arrington",
-      "teamLogo": "../assets/NFL_Icons/Cardinals.png",
+      "teamLogo": "assets/NFL_Icons/Cardinals.png",
       "games": 11,
       "stats": {
         "carries": 30,
@@ -4206,7 +4206,7 @@
       "id": 11303,
       "gsisId": "00-0026209",
       "name": "Jacob Hester",
-      "teamLogo": "../assets/NFL_Icons/Chargers.png",
+      "teamLogo": "assets/NFL_Icons/Chargers.png",
       "games": 14,
       "stats": {
         "carries": 19,
@@ -4248,7 +4248,7 @@
       "id": 11307,
       "gsisId": "00-0026213",
       "name": "Jamaal Charles",
-      "teamLogo": "../assets/NFL_Icons/Chiefs.png",
+      "teamLogo": "assets/NFL_Icons/Chiefs.png",
       "games": 16,
       "stats": {
         "carries": 67,
@@ -4290,7 +4290,7 @@
       "id": 2136,
       "gsisId": "00-0019693",
       "name": "Jamal Lewis",
-      "teamLogo": "../assets/NFL_Icons/Browns.png",
+      "teamLogo": "assets/NFL_Icons/Browns.png",
       "games": 16,
       "stats": {
         "carries": 279,
@@ -4332,7 +4332,7 @@
       "id": 8401,
       "gsisId": "00-0022288",
       "name": "Jason Wright",
-      "teamLogo": "../assets/NFL_Icons/Browns.png",
+      "teamLogo": "assets/NFL_Icons/Browns.png",
       "games": 13,
       "stats": {
         "carries": 23,
@@ -4374,7 +4374,7 @@
       "id": 9665,
       "gsisId": "00-0024294",
       "name": "Jerious Norwood",
-      "teamLogo": "../assets/NFL_Icons/Falcons.png",
+      "teamLogo": "assets/NFL_Icons/Falcons.png",
       "games": 16,
       "stats": {
         "carries": 94,
@@ -4416,7 +4416,7 @@
       "id": 9731,
       "gsisId": "00-0024359",
       "name": "Jerome Harrison",
-      "teamLogo": "../assets/NFL_Icons/Browns.png",
+      "teamLogo": "assets/NFL_Icons/Browns.png",
       "games": 15,
       "stats": {
         "carries": 34,
@@ -4458,7 +4458,7 @@
       "id": 11247,
       "gsisId": "00-0026153",
       "name": "Jonathan Stewart",
-      "teamLogo": "../assets/NFL_Icons/Panthers.png",
+      "teamLogo": "assets/NFL_Icons/Panthers.png",
       "games": 16,
       "stats": {
         "carries": 183,
@@ -4500,7 +4500,7 @@
       "id": 9616,
       "gsisId": "00-0024245",
       "name": "Joseph Addai",
-      "teamLogo": "../assets/NFL_Icons/Colts.png",
+      "teamLogo": "assets/NFL_Icons/Colts.png",
       "games": 12,
       "stats": {
         "carries": 155,
@@ -4542,7 +4542,7 @@
       "id": 5568,
       "gsisId": "00-0022840",
       "name": "Julius Jones",
-      "teamLogo": "../assets/NFL_Icons/Seahawks.png",
+      "teamLogo": "assets/NFL_Icons/Seahawks.png",
       "games": 14,
       "stats": {
         "carries": 158,
@@ -4584,7 +4584,7 @@
       "id": 4554,
       "gsisId": "00-0022093",
       "name": "Justin Fargas",
-      "teamLogo": "../assets/NFL_Icons/Raiders.png",
+      "teamLogo": "assets/NFL_Icons/Raiders.png",
       "games": 14,
       "stats": {
         "carries": 219,
@@ -4626,7 +4626,7 @@
       "id": 10689,
       "gsisId": "00-0025633",
       "name": "Kenneth Darby",
-      "teamLogo": "../assets/NFL_Icons/Rams.png",
+      "teamLogo": "assets/NFL_Icons/Rams.png",
       "games": 7,
       "stats": {
         "carries": 32,
@@ -4668,7 +4668,7 @@
       "id": 1798,
       "gsisId": "00-0005091",
       "name": "Kevin Faulk",
-      "teamLogo": "../assets/NFL_Icons/Patriots.png",
+      "teamLogo": "assets/NFL_Icons/Patriots.png",
       "games": 15,
       "stats": {
         "carries": 83,
@@ -4710,7 +4710,7 @@
       "id": 11298,
       "gsisId": "00-0026204",
       "name": "Kevin Smith",
-      "teamLogo": "../assets/NFL_Icons/Lions.png",
+      "teamLogo": "assets/NFL_Icons/Lions.png",
       "games": 16,
       "stats": {
         "carries": 239,
@@ -4752,7 +4752,7 @@
       "id": 2553,
       "gsisId": "00-0020536",
       "name": "LaDainian Tomlinson",
-      "teamLogo": "../assets/NFL_Icons/Chargers.png",
+      "teamLogo": "assets/NFL_Icons/Chargers.png",
       "games": 16,
       "stats": {
         "carries": 292,
@@ -4794,7 +4794,7 @@
       "id": 3584,
       "gsisId": "00-0021184",
       "name": "Ladell Betts",
-      "teamLogo": "../assets/NFL_Icons/Commanders.png",
+      "teamLogo": "assets/NFL_Icons/Commanders.png",
       "games": 13,
       "stats": {
         "carries": 61,
@@ -4836,7 +4836,7 @@
       "id": 2597,
       "gsisId": "00-0020462",
       "name": "LaMont Jordan",
-      "teamLogo": "../assets/NFL_Icons/Patriots.png",
+      "teamLogo": "assets/NFL_Icons/Patriots.png",
       "games": 8,
       "stats": {
         "carries": 80,
@@ -4878,7 +4878,7 @@
       "id": 4485,
       "gsisId": "00-0021976",
       "name": "Larry Johnson",
-      "teamLogo": "../assets/NFL_Icons/Chiefs.png",
+      "teamLogo": "assets/NFL_Icons/Chiefs.png",
       "games": 12,
       "stats": {
         "carries": 193,
@@ -4920,7 +4920,7 @@
       "id": 9631,
       "gsisId": "00-0024260",
       "name": "LenDale White",
-      "teamLogo": "../assets/NFL_Icons/Titans.png",
+      "teamLogo": "assets/NFL_Icons/Titans.png",
       "games": 16,
       "stats": {
         "carries": 200,
@@ -4962,7 +4962,7 @@
       "id": 9703,
       "gsisId": "00-0024332",
       "name": "Leon Washington",
-      "teamLogo": "../assets/NFL_Icons/Jets.png",
+      "teamLogo": "assets/NFL_Icons/Jets.png",
       "games": 16,
       "stats": {
         "carries": 76,
@@ -5004,7 +5004,7 @@
       "id": 8523,
       "gsisId": "00-0023544",
       "name": "Marion Barber",
-      "teamLogo": "../assets/NFL_Icons/Cowboys.png",
+      "teamLogo": "assets/NFL_Icons/Cowboys.png",
       "games": 15,
       "stats": {
         "carries": 238,
@@ -5046,7 +5046,7 @@
       "id": 10456,
       "gsisId": "00-0025399",
       "name": "Marshawn Lynch",
-      "teamLogo": "../assets/NFL_Icons/Bills.png",
+      "teamLogo": "assets/NFL_Icons/Bills.png",
       "games": 15,
       "stats": {
         "carries": 251,
@@ -5088,7 +5088,7 @@
       "id": 11278,
       "gsisId": "00-0026184",
       "name": "Matt Forte",
-      "teamLogo": "../assets/NFL_Icons/Bears.png",
+      "teamLogo": "assets/NFL_Icons/Bears.png",
       "games": 16,
       "stats": {
         "carries": 315,
@@ -5130,7 +5130,7 @@
       "id": 9646,
       "gsisId": "00-0024275",
       "name": "Maurice Jones-Drew",
-      "teamLogo": "../assets/NFL_Icons/Jaguars.png",
+      "teamLogo": "assets/NFL_Icons/Jaguars.png",
       "games": 16,
       "stats": {
         "carries": 197,
@@ -5172,7 +5172,7 @@
       "id": 3582,
       "gsisId": "00-0021182",
       "name": "Maurice Morris",
-      "teamLogo": "../assets/NFL_Icons/Seahawks.png",
+      "teamLogo": "assets/NFL_Icons/Seahawks.png",
       "games": 13,
       "stats": {
         "carries": 132,
@@ -5214,7 +5214,7 @@
       "id": 5644,
       "gsisId": "00-0022217",
       "name": "Mewelde Moore",
-      "teamLogo": "../assets/NFL_Icons/Steelers.png",
+      "teamLogo": "assets/NFL_Icons/Steelers.png",
       "games": 16,
       "stats": {
         "carries": 140,
@@ -5256,7 +5256,7 @@
       "id": 10544,
       "gsisId": "00-0025487",
       "name": "Michael Bush",
-      "teamLogo": "../assets/NFL_Icons/Raiders.png",
+      "teamLogo": "assets/NFL_Icons/Raiders.png",
       "games": 11,
       "stats": {
         "carries": 94,
@@ -5298,7 +5298,7 @@
       "id": 1497,
       "gsisId": "00-0013013",
       "name": "Michael Pittman",
-      "teamLogo": "../assets/NFL_Icons/Broncos.png",
+      "teamLogo": "assets/NFL_Icons/Broncos.png",
       "games": 8,
       "stats": {
         "carries": 76,
@@ -5340,7 +5340,7 @@
       "id": 5679,
       "gsisId": "00-0022821",
       "name": "Michael Turner",
-      "teamLogo": "../assets/NFL_Icons/Falcons.png",
+      "teamLogo": "assets/NFL_Icons/Falcons.png",
       "games": 16,
       "stats": {
         "carries": 377,
@@ -5382,7 +5382,7 @@
       "id": 9902,
       "gsisId": "00-0024172",
       "name": "Patrick Cobbs",
-      "teamLogo": "../assets/NFL_Icons/Dolphins.png",
+      "teamLogo": "assets/NFL_Icons/Dolphins.png",
       "games": 13,
       "stats": {
         "carries": 12,
@@ -5424,7 +5424,7 @@
       "id": 11461,
       "gsisId": "00-0026367",
       "name": "Peyton Hillis",
-      "teamLogo": "../assets/NFL_Icons/Broncos.png",
+      "teamLogo": "assets/NFL_Icons/Broncos.png",
       "games": 10,
       "stats": {
         "carries": 68,
@@ -5466,7 +5466,7 @@
       "id": 10713,
       "gsisId": "00-0024813",
       "name": "Pierre Thomas",
-      "teamLogo": "../assets/NFL_Icons/Saints.png",
+      "teamLogo": "assets/NFL_Icons/Saints.png",
       "games": 15,
       "stats": {
         "carries": 129,
@@ -5508,7 +5508,7 @@
       "id": 11289,
       "gsisId": "00-0026195",
       "name": "Ray Rice",
-      "teamLogo": "../assets/NFL_Icons/Ravens.png",
+      "teamLogo": "assets/NFL_Icons/Ravens.png",
       "games": 12,
       "stats": {
         "carries": 107,
@@ -5550,7 +5550,7 @@
       "id": 9588,
       "gsisId": "00-0024217",
       "name": "Reggie Bush",
-      "teamLogo": "../assets/NFL_Icons/Saints.png",
+      "teamLogo": "assets/NFL_Icons/Saints.png",
       "games": 10,
       "stats": {
         "carries": 106,
@@ -5592,7 +5592,7 @@
       "id": 1756,
       "gsisId": "00-0017915",
       "name": "Ricky Williams",
-      "teamLogo": "../assets/NFL_Icons/Dolphins.png",
+      "teamLogo": "assets/NFL_Icons/Dolphins.png",
       "games": 16,
       "stats": {
         "carries": 161,
@@ -5634,7 +5634,7 @@
       "id": 8417,
       "gsisId": "00-0023437",
       "name": "Ronnie Brown",
-      "teamLogo": "../assets/NFL_Icons/Dolphins.png",
+      "teamLogo": "assets/NFL_Icons/Dolphins.png",
       "games": 16,
       "stats": {
         "carries": 214,
@@ -5676,7 +5676,7 @@
       "id": 2649,
       "gsisId": "00-0020407",
       "name": "Rudi Johnson",
-      "teamLogo": "../assets/NFL_Icons/Lions.png",
+      "teamLogo": "assets/NFL_Icons/Lions.png",
       "games": 13,
       "stats": {
         "carries": 76,
@@ -5718,7 +5718,7 @@
       "id": 9475,
       "gsisId": "00-0022984",
       "name": "Ryan Grant",
-      "teamLogo": "../assets/NFL_Icons/Packers.png",
+      "teamLogo": "assets/NFL_Icons/Packers.png",
       "games": 16,
       "stats": {
         "carries": 312,
@@ -5760,7 +5760,7 @@
       "id": 2287,
       "gsisId": "00-0019484",
       "name": "Sammy Morris",
-      "teamLogo": "../assets/NFL_Icons/Patriots.png",
+      "teamLogo": "assets/NFL_Icons/Patriots.png",
       "games": 13,
       "stats": {
         "carries": 156,
@@ -5802,7 +5802,7 @@
       "id": 10896,
       "gsisId": "00-0024549",
       "name": "Selvin Young",
-      "teamLogo": "../assets/NFL_Icons/Broncos.png",
+      "teamLogo": "assets/NFL_Icons/Broncos.png",
       "games": 8,
       "stats": {
         "carries": 61,
@@ -5844,7 +5844,7 @@
       "id": 11323,
       "gsisId": "00-0026229",
       "name": "Steve Slaton",
-      "teamLogo": "../assets/NFL_Icons/Texans.png",
+      "teamLogo": "assets/NFL_Icons/Texans.png",
       "games": 16,
       "stats": {
         "carries": 268,
@@ -5886,7 +5886,7 @@
       "id": 5549,
       "gsisId": "00-0022736",
       "name": "Steven Jackson",
-      "teamLogo": "../assets/NFL_Icons/Rams.png",
+      "teamLogo": "assets/NFL_Icons/Rams.png",
       "games": 12,
       "stats": {
         "carries": 254,
@@ -5928,7 +5928,7 @@
       "id": 11359,
       "gsisId": "00-0026262",
       "name": "Tashard Choice",
-      "teamLogo": "../assets/NFL_Icons/Cowboys.png",
+      "teamLogo": "assets/NFL_Icons/Cowboys.png",
       "games": 12,
       "stats": {
         "carries": 92,
@@ -5970,7 +5970,7 @@
       "id": 2138,
       "gsisId": "00-0019641",
       "name": "Thomas Jones",
-      "teamLogo": "../assets/NFL_Icons/Jets.png",
+      "teamLogo": "assets/NFL_Icons/Jets.png",
       "games": 16,
       "stats": {
         "carries": 290,
@@ -6012,7 +6012,7 @@
       "id": 11383,
       "gsisId": "00-0026289",
       "name": "Tim Hightower",
-      "teamLogo": "../assets/NFL_Icons/Cardinals.png",
+      "teamLogo": "assets/NFL_Icons/Cardinals.png",
       "games": 16,
       "stats": {
         "carries": 143,
@@ -6054,7 +6054,7 @@
       "id": 1175,
       "gsisId": "00-0004640",
       "name": "Warrick Dunn",
-      "teamLogo": "../assets/NFL_Icons/Bucs.png",
+      "teamLogo": "assets/NFL_Icons/Bucs.png",
       "games": 15,
       "stats": {
         "carries": 186,
@@ -6096,7 +6096,7 @@
       "id": 5880,
       "gsisId": "00-0022250",
       "name": "Willie Parker",
-      "teamLogo": "../assets/NFL_Icons/Steelers.png",
+      "teamLogo": "assets/NFL_Icons/Steelers.png",
       "games": 11,
       "stats": {
         "carries": 209,
@@ -6138,7 +6138,7 @@
       "id": 4481,
       "gsisId": "00-0022178",
       "name": "Willis McGahee",
-      "teamLogo": "../assets/NFL_Icons/Ravens.png",
+      "teamLogo": "assets/NFL_Icons/Ravens.png",
       "games": 13,
       "stats": {
         "carries": 170,
@@ -6182,7 +6182,7 @@
       "id": 941,
       "gsisId": "00-0016550",
       "name": "Amani Toomer",
-      "teamLogo": "../assets/NFL_Icons/Giants.png",
+      "teamLogo": "assets/NFL_Icons/Giants.png",
       "games": 15,
       "stats": {
         "carries": 0,
@@ -6224,7 +6224,7 @@
       "id": 4461,
       "gsisId": "00-0022044",
       "name": "Andre Johnson",
-      "teamLogo": "../assets/NFL_Icons/Texans.png",
+      "teamLogo": "assets/NFL_Icons/Texans.png",
       "games": 16,
       "stats": {
         "carries": 0,
@@ -6266,7 +6266,7 @@
       "id": 4512,
       "gsisId": "00-0022084",
       "name": "Anquan Boldin",
-      "teamLogo": "../assets/NFL_Icons/Cardinals.png",
+      "teamLogo": "assets/NFL_Icons/Cardinals.png",
       "games": 12,
       "stats": {
         "carries": 9,
@@ -6308,7 +6308,7 @@
       "id": 10476,
       "gsisId": "00-0025419",
       "name": "Anthony Gonzalez",
-      "teamLogo": "../assets/NFL_Icons/Colts.png",
+      "teamLogo": "assets/NFL_Icons/Colts.png",
       "games": 16,
       "stats": {
         "carries": 0,
@@ -6350,7 +6350,7 @@
       "id": 3591,
       "gsisId": "00-0021191",
       "name": "Antonio Bryant",
-      "teamLogo": "../assets/NFL_Icons/Bucs.png",
+      "teamLogo": "assets/NFL_Icons/Bucs.png",
       "games": 15,
       "stats": {
         "carries": 2,
@@ -6392,7 +6392,7 @@
       "id": 3590,
       "gsisId": "00-0021190",
       "name": "Antwaan Randle El",
-      "teamLogo": "../assets/NFL_Icons/Commanders.png",
+      "teamLogo": "assets/NFL_Icons/Commanders.png",
       "games": 16,
       "stats": {
         "carries": 1,
@@ -6434,7 +6434,7 @@
       "id": 5603,
       "gsisId": "00-0022807",
       "name": "Bernard Berrian",
-      "teamLogo": "../assets/NFL_Icons/Vikings.png",
+      "teamLogo": "assets/NFL_Icons/Vikings.png",
       "games": 15,
       "stats": {
         "carries": 4,
@@ -6476,7 +6476,7 @@
       "id": 937,
       "gsisId": "00-0004915",
       "name": "Bobby Engram",
-      "teamLogo": "../assets/NFL_Icons/Seahawks.png",
+      "teamLogo": "assets/NFL_Icons/Seahawks.png",
       "games": 13,
       "stats": {
         "carries": 0,
@@ -6518,7 +6518,7 @@
       "id": 4597,
       "gsisId": "00-0022144",
       "name": "Bobby Wade",
-      "teamLogo": "../assets/NFL_Icons/Vikings.png",
+      "teamLogo": "assets/NFL_Icons/Vikings.png",
       "games": 16,
       "stats": {
         "carries": 0,
@@ -6560,7 +6560,7 @@
       "id": 8510,
       "gsisId": "00-0023531",
       "name": "Brandon Jones",
-      "teamLogo": "../assets/NFL_Icons/Titans.png",
+      "teamLogo": "assets/NFL_Icons/Titans.png",
       "games": 16,
       "stats": {
         "carries": 2,
@@ -6602,7 +6602,7 @@
       "id": 9705,
       "gsisId": "00-0024334",
       "name": "Brandon Marshall",
-      "teamLogo": "../assets/NFL_Icons/Broncos.png",
+      "teamLogo": "assets/NFL_Icons/Broncos.png",
       "games": 15,
       "stats": {
         "carries": 2,
@@ -6644,7 +6644,7 @@
       "id": 1858,
       "gsisId": "00-0015754",
       "name": "Brandon Stokley",
-      "teamLogo": "../assets/NFL_Icons/Broncos.png",
+      "teamLogo": "assets/NFL_Icons/Broncos.png",
       "games": 15,
       "stats": {
         "carries": 0,
@@ -6686,7 +6686,7 @@
       "id": 8418,
       "gsisId": "00-0023438",
       "name": "Braylon Edwards",
-      "teamLogo": "../assets/NFL_Icons/Browns.png",
+      "teamLogo": "assets/NFL_Icons/Browns.png",
       "games": 16,
       "stats": {
         "carries": 0,
@@ -6728,7 +6728,7 @@
       "id": 4475,
       "gsisId": "00-0022156",
       "name": "Bryant Johnson",
-      "teamLogo": "../assets/NFL_Icons/49ers.png",
+      "teamLogo": "assets/NFL_Icons/49ers.png",
       "games": 13,
       "stats": {
         "carries": 0,
@@ -6770,7 +6770,7 @@
       "id": 10447,
       "gsisId": "00-0025389",
       "name": "Calvin Johnson",
-      "teamLogo": "../assets/NFL_Icons/Lions.png",
+      "teamLogo": "assets/NFL_Icons/Lions.png",
       "games": 16,
       "stats": {
         "carries": 3,
@@ -6812,7 +6812,7 @@
       "id": 2584,
       "gsisId": "00-0020397",
       "name": "Chad Johnson",
-      "teamLogo": "../assets/NFL_Icons/Bengals.png",
+      "teamLogo": "assets/NFL_Icons/Bengals.png",
       "games": 13,
       "stats": {
         "carries": 0,
@@ -6854,7 +6854,7 @@
       "id": 2600,
       "gsisId": "00-0020446",
       "name": "Chris Chambers",
-      "teamLogo": "../assets/NFL_Icons/Chargers.png",
+      "teamLogo": "assets/NFL_Icons/Chargers.png",
       "games": 13,
       "stats": {
         "carries": 1,
@@ -6896,7 +6896,7 @@
       "id": 11678,
       "gsisId": "00-0026000",
       "name": "Davone Bess",
-      "teamLogo": "../assets/NFL_Icons/Dolphins.png",
+      "teamLogo": "assets/NFL_Icons/Dolphins.png",
       "games": 16,
       "stats": {
         "carries": 1,
@@ -6938,7 +6938,7 @@
       "id": 3593,
       "gsisId": "00-0021192",
       "name": "Deion Branch",
-      "teamLogo": "../assets/NFL_Icons/Seahawks.png",
+      "teamLogo": "assets/NFL_Icons/Seahawks.png",
       "games": 8,
       "stats": {
         "carries": 0,
@@ -6980,7 +6980,7 @@
       "id": 2163,
       "gsisId": "00-0019650",
       "name": "Dennis Northcutt",
-      "teamLogo": "../assets/NFL_Icons/Jaguars.png",
+      "teamLogo": "assets/NFL_Icons/Jaguars.png",
       "games": 14,
       "stats": {
         "carries": 1,
@@ -7022,7 +7022,7 @@
       "id": 1263,
       "gsisId": "00-0010500",
       "name": "Derrick Mason",
-      "teamLogo": "../assets/NFL_Icons/Ravens.png",
+      "teamLogo": "assets/NFL_Icons/Ravens.png",
       "games": 16,
       "stats": {
         "carries": 1,
@@ -7064,7 +7064,7 @@
       "id": 11283,
       "gsisId": "00-0026189",
       "name": "DeSean Jackson",
-      "teamLogo": "../assets/NFL_Icons/Eagles.png",
+      "teamLogo": "assets/NFL_Icons/Eagles.png",
       "games": 16,
       "stats": {
         "carries": 17,
@@ -7106,7 +7106,7 @@
       "id": 5575,
       "gsisId": "00-0022929",
       "name": "Devery Henderson",
-      "teamLogo": "../assets/NFL_Icons/Saints.png",
+      "teamLogo": "assets/NFL_Icons/Saints.png",
       "games": 15,
       "stats": {
         "carries": 4,
@@ -7148,7 +7148,7 @@
       "id": 9643,
       "gsisId": "00-0024272",
       "name": "Devin Hester",
-      "teamLogo": "../assets/NFL_Icons/Bears.png",
+      "teamLogo": "assets/NFL_Icons/Bears.png",
       "games": 15,
       "stats": {
         "carries": 5,
@@ -7190,7 +7190,7 @@
       "id": 9716,
       "gsisId": "00-0024345",
       "name": "Domenik Hixon",
-      "teamLogo": "../assets/NFL_Icons/Giants.png",
+      "teamLogo": "assets/NFL_Icons/Giants.png",
       "games": 16,
       "stats": {
         "carries": 2,
@@ -7232,7 +7232,7 @@
       "id": 1966,
       "gsisId": "00-0004541",
       "name": "Donald Driver",
-      "teamLogo": "../assets/NFL_Icons/Packers.png",
+      "teamLogo": "assets/NFL_Icons/Packers.png",
       "games": 16,
       "stats": {
         "carries": 2,
@@ -7274,7 +7274,7 @@
       "id": 11267,
       "gsisId": "00-0026173",
       "name": "Donnie Avery",
-      "teamLogo": "../assets/NFL_Icons/Rams.png",
+      "teamLogo": "assets/NFL_Icons/Rams.png",
       "games": 15,
       "stats": {
         "carries": 9,
@@ -7316,7 +7316,7 @@
       "id": 10467,
       "gsisId": "00-0025410",
       "name": "Dwayne Bowe",
-      "teamLogo": "../assets/NFL_Icons/Chiefs.png",
+      "teamLogo": "assets/NFL_Icons/Chiefs.png",
       "games": 16,
       "stats": {
         "carries": 0,
@@ -7358,7 +7358,7 @@
       "id": 11276,
       "gsisId": "00-0026182",
       "name": "Eddie Royal",
-      "teamLogo": "../assets/NFL_Icons/Broncos.png",
+      "teamLogo": "assets/NFL_Icons/Broncos.png",
       "games": 15,
       "stats": {
         "carries": 11,
@@ -7400,7 +7400,7 @@
       "id": 9495,
       "gsisId": "00-0023408",
       "name": "Greg Camarillo",
-      "teamLogo": "../assets/NFL_Icons/Dolphins.png",
+      "teamLogo": "assets/NFL_Icons/Dolphins.png",
       "games": 11,
       "stats": {
         "carries": 2,
@@ -7442,7 +7442,7 @@
       "id": 9638,
       "gsisId": "00-0024267",
       "name": "Greg Jennings",
-      "teamLogo": "../assets/NFL_Icons/Packers.png",
+      "teamLogo": "assets/NFL_Icons/Packers.png",
       "games": 16,
       "stats": {
         "carries": 0,
@@ -7484,7 +7484,7 @@
       "id": 9859,
       "gsisId": "00-0024013",
       "name": "Hank Baskett",
-      "teamLogo": "../assets/NFL_Icons/Eagles.png",
+      "teamLogo": "assets/NFL_Icons/Eagles.png",
       "games": 13,
       "stats": {
         "carries": 0,
@@ -7526,7 +7526,7 @@
       "id": 1494,
       "gsisId": "00-0017162",
       "name": "Hines Ward",
-      "teamLogo": "../assets/NFL_Icons/Steelers.png",
+      "teamLogo": "assets/NFL_Icons/Steelers.png",
       "games": 16,
       "stats": {
         "carries": 0,
@@ -7568,7 +7568,7 @@
       "id": 1181,
       "gsisId": "00-0007468",
       "name": "Ike Hilliard",
-      "teamLogo": "../assets/NFL_Icons/Bucs.png",
+      "teamLogo": "assets/NFL_Icons/Bucs.png",
       "games": 15,
       "stats": {
         "carries": 1,
@@ -7610,7 +7610,7 @@
       "id": 658,
       "gsisId": "00-0002099",
       "name": "Isaac Bruce",
-      "teamLogo": "../assets/NFL_Icons/49ers.png",
+      "teamLogo": "assets/NFL_Icons/49ers.png",
       "games": 15,
       "stats": {
         "carries": 1,
@@ -7652,7 +7652,7 @@
       "id": 3561,
       "gsisId": "00-0021163",
       "name": "Jabar Gaffney",
-      "teamLogo": "../assets/NFL_Icons/Patriots.png",
+      "teamLogo": "assets/NFL_Icons/Patriots.png",
       "games": 11,
       "stats": {
         "carries": 0,
@@ -7694,7 +7694,7 @@
       "id": 9695,
       "gsisId": "00-0024324",
       "name": "Jason Avant",
-      "teamLogo": "../assets/NFL_Icons/Eagles.png",
+      "teamLogo": "assets/NFL_Icons/Eagles.png",
       "games": 13,
       "stats": {
         "carries": 0,
@@ -7736,7 +7736,7 @@
       "id": 5286,
       "gsisId": "00-0021647",
       "name": "Jerheme Urban",
-      "teamLogo": "../assets/NFL_Icons/Cardinals.png",
+      "teamLogo": "assets/NFL_Icons/Cardinals.png",
       "games": 14,
       "stats": {
         "carries": 0,
@@ -7778,7 +7778,7 @@
       "id": 5633,
       "gsisId": "00-0022811",
       "name": "Jerricho Cotchery",
-      "teamLogo": "../assets/NFL_Icons/Jets.png",
+      "teamLogo": "assets/NFL_Icons/Jets.png",
       "games": 16,
       "stats": {
         "carries": 2,
@@ -7820,7 +7820,7 @@
       "id": 10543,
       "gsisId": "00-0025486",
       "name": "Johnnie Lee Higgins",
-      "teamLogo": "../assets/NFL_Icons/Raiders.png",
+      "teamLogo": "assets/NFL_Icons/Raiders.png",
       "games": 16,
       "stats": {
         "carries": 3,
@@ -7862,7 +7862,7 @@
       "id": 11270,
       "gsisId": "00-0026176",
       "name": "Jordy Nelson",
-      "teamLogo": "../assets/NFL_Icons/Packers.png",
+      "teamLogo": "assets/NFL_Icons/Packers.png",
       "games": 16,
       "stats": {
         "carries": 0,
@@ -7904,7 +7904,7 @@
       "id": 3564,
       "gsisId": "00-0021166",
       "name": "Josh Reed",
-      "teamLogo": "../assets/NFL_Icons/Bills.png",
+      "teamLogo": "assets/NFL_Icons/Bills.png",
       "games": 13,
       "stats": {
         "carries": 0,
@@ -7946,7 +7946,7 @@
       "id": 4601,
       "gsisId": "00-0021982",
       "name": "Justin Gage",
-      "teamLogo": "../assets/NFL_Icons/Titans.png",
+      "teamLogo": "assets/NFL_Icons/Titans.png",
       "games": 11,
       "stats": {
         "carries": 0,
@@ -7988,7 +7988,7 @@
       "id": 2673,
       "gsisId": "00-0020381",
       "name": "Justin McCareins",
-      "teamLogo": "../assets/NFL_Icons/Titans.png",
+      "teamLogo": "assets/NFL_Icons/Titans.png",
       "games": 12,
       "stats": {
         "carries": 1,
@@ -8030,7 +8030,7 @@
       "id": 4532,
       "gsisId": "00-0022001",
       "name": "Kevin Curtis",
-      "teamLogo": "../assets/NFL_Icons/Eagles.png",
+      "teamLogo": "assets/NFL_Icons/Eagles.png",
       "games": 9,
       "stats": {
         "carries": 0,
@@ -8072,7 +8072,7 @@
       "id": 4713,
       "gsisId": "00-0021931",
       "name": "Kevin Walter",
-      "teamLogo": "../assets/NFL_Icons/Texans.png",
+      "teamLogo": "assets/NFL_Icons/Texans.png",
       "games": 16,
       "stats": {
         "carries": 3,
@@ -8114,7 +8114,7 @@
       "id": 2557,
       "gsisId": "00-0020490",
       "name": "Koren Robinson",
-      "teamLogo": "../assets/NFL_Icons/Seahawks.png",
+      "teamLogo": "assets/NFL_Icons/Seahawks.png",
       "games": 11,
       "stats": {
         "carries": 1,
@@ -8156,7 +8156,7 @@
       "id": 9400,
       "gsisId": "00-0023310",
       "name": "Lance Moore",
-      "teamLogo": "../assets/NFL_Icons/Saints.png",
+      "teamLogo": "assets/NFL_Icons/Saints.png",
       "games": 16,
       "stats": {
         "carries": 0,
@@ -8198,7 +8198,7 @@
       "id": 5528,
       "gsisId": "00-0022921",
       "name": "Larry Fitzgerald",
-      "teamLogo": "../assets/NFL_Icons/Cardinals.png",
+      "teamLogo": "assets/NFL_Icons/Cardinals.png",
       "games": 16,
       "stats": {
         "carries": 0,
@@ -8240,7 +8240,7 @@
       "id": 2209,
       "gsisId": "00-0018958",
       "name": "Laveranues Coles",
-      "teamLogo": "../assets/NFL_Icons/Jets.png",
+      "teamLogo": "assets/NFL_Icons/Jets.png",
       "games": 16,
       "stats": {
         "carries": 2,
@@ -8282,7 +8282,7 @@
       "id": 5538,
       "gsisId": "00-0022910",
       "name": "Lee Evans",
-      "teamLogo": "../assets/NFL_Icons/Bills.png",
+      "teamLogo": "assets/NFL_Icons/Bills.png",
       "games": 16,
       "stats": {
         "carries": 1,
@@ -8324,7 +8324,7 @@
       "id": 6016,
       "gsisId": "00-0022414",
       "name": "Malcom Floyd",
-      "teamLogo": "../assets/NFL_Icons/Chargers.png",
+      "teamLogo": "assets/NFL_Icons/Chargers.png",
       "games": 10,
       "stats": {
         "carries": 0,
@@ -8366,7 +8366,7 @@
       "id": 8453,
       "gsisId": "00-0023474",
       "name": "Mark Bradley",
-      "teamLogo": "../assets/NFL_Icons/Chiefs.png",
+      "teamLogo": "assets/NFL_Icons/Chiefs.png",
       "games": 9,
       "stats": {
         "carries": 0,
@@ -8408,7 +8408,7 @@
       "id": 8437,
       "gsisId": "00-0023457",
       "name": "Mark Clayton",
-      "teamLogo": "../assets/NFL_Icons/Ravens.png",
+      "teamLogo": "assets/NFL_Icons/Ravens.png",
       "games": 16,
       "stats": {
         "carries": 6,
@@ -8450,7 +8450,7 @@
       "id": 9838,
       "gsisId": "00-0024466",
       "name": "Marques Colston",
-      "teamLogo": "../assets/NFL_Icons/Saints.png",
+      "teamLogo": "assets/NFL_Icons/Saints.png",
       "games": 10,
       "stats": {
         "carries": 0,
@@ -8492,7 +8492,7 @@
       "id": 939,
       "gsisId": "00-0007024",
       "name": "Marvin Harrison",
-      "teamLogo": "../assets/NFL_Icons/Colts.png",
+      "teamLogo": "assets/NFL_Icons/Colts.png",
       "games": 15,
       "stats": {
         "carries": 0,
@@ -8534,7 +8534,7 @@
       "id": 8436,
       "gsisId": "00-0023456",
       "name": "Matt Jones",
-      "teamLogo": "../assets/NFL_Icons/Jaguars.png",
+      "teamLogo": "assets/NFL_Icons/Jaguars.png",
       "games": 12,
       "stats": {
         "carries": 0,
@@ -8576,7 +8576,7 @@
       "id": 5540,
       "gsisId": "00-0022725",
       "name": "Michael Clayton",
-      "teamLogo": "../assets/NFL_Icons/Bucs.png",
+      "teamLogo": "assets/NFL_Icons/Bucs.png",
       "games": 14,
       "stats": {
         "carries": 2,
@@ -8618,7 +8618,7 @@
       "id": 5554,
       "gsisId": "00-0022781",
       "name": "Michael Jenkins",
-      "teamLogo": "../assets/NFL_Icons/Falcons.png",
+      "teamLogo": "assets/NFL_Icons/Falcons.png",
       "games": 15,
       "stats": {
         "carries": 0,
@@ -8660,7 +8660,7 @@
       "id": 936,
       "gsisId": "00-0011795",
       "name": "Muhsin Muhammad",
-      "teamLogo": "../assets/NFL_Icons/Panthers.png",
+      "teamLogo": "assets/NFL_Icons/Panthers.png",
       "games": 16,
       "stats": {
         "carries": 0,
@@ -8702,7 +8702,7 @@
       "id": 9307,
       "gsisId": "00-0023367",
       "name": "Nate Washington",
-      "teamLogo": "../assets/NFL_Icons/Steelers.png",
+      "teamLogo": "assets/NFL_Icons/Steelers.png",
       "games": 14,
       "stats": {
         "carries": 5,
@@ -8744,7 +8744,7 @@
       "id": 5741,
       "gsisId": "00-0022766",
       "name": "Patrick Crayton",
-      "teamLogo": "../assets/NFL_Icons/Cowboys.png",
+      "teamLogo": "assets/NFL_Icons/Cowboys.png",
       "games": 15,
       "stats": {
         "carries": 1,
@@ -8786,7 +8786,7 @@
       "id": 2139,
       "gsisId": "00-0019642",
       "name": "Plaxico Burress",
-      "teamLogo": "../assets/NFL_Icons/Giants.png",
+      "teamLogo": "assets/NFL_Icons/Giants.png",
       "games": 9,
       "stats": {
         "carries": 0,
@@ -8828,7 +8828,7 @@
       "id": 1433,
       "gsisId": "00-0011754",
       "name": "Randy Moss",
-      "teamLogo": "../assets/NFL_Icons/Patriots.png",
+      "teamLogo": "assets/NFL_Icons/Patriots.png",
       "games": 16,
       "stats": {
         "carries": 2,
@@ -8870,7 +8870,7 @@
       "id": 9268,
       "gsisId": "00-0023429",
       "name": "Rashied Davis",
-      "teamLogo": "../assets/NFL_Icons/Bears.png",
+      "teamLogo": "assets/NFL_Icons/Bears.png",
       "games": 16,
       "stats": {
         "carries": 3,
@@ -8912,7 +8912,7 @@
       "id": 2578,
       "gsisId": "00-0020498",
       "name": "Reggie Wayne",
-      "teamLogo": "../assets/NFL_Icons/Colts.png",
+      "teamLogo": "assets/NFL_Icons/Colts.png",
       "games": 16,
       "stats": {
         "carries": 0,
@@ -8954,7 +8954,7 @@
       "id": 5534,
       "gsisId": "00-0022889",
       "name": "Reggie Williams",
-      "teamLogo": "../assets/NFL_Icons/Jaguars.png",
+      "teamLogo": "assets/NFL_Icons/Jaguars.png",
       "games": 14,
       "stats": {
         "carries": 1,
@@ -8996,7 +8996,7 @@
       "id": 8442,
       "gsisId": "00-0023462",
       "name": "Roddy White",
-      "teamLogo": "../assets/NFL_Icons/Falcons.png",
+      "teamLogo": "assets/NFL_Icons/Falcons.png",
       "games": 16,
       "stats": {
         "carries": 2,
@@ -9038,7 +9038,7 @@
       "id": 5532,
       "gsisId": "00-0022909",
       "name": "Roy Williams",
-      "teamLogo": "../assets/NFL_Icons/Cowboys.png",
+      "teamLogo": "assets/NFL_Icons/Cowboys.png",
       "games": 14,
       "stats": {
         "carries": 1,
@@ -9080,7 +9080,7 @@
       "id": 2564,
       "gsisId": "00-0020494",
       "name": "Santana Moss",
-      "teamLogo": "../assets/NFL_Icons/Commanders.png",
+      "teamLogo": "assets/NFL_Icons/Commanders.png",
       "games": 15,
       "stats": {
         "carries": 1,
@@ -9122,7 +9122,7 @@
       "id": 9611,
       "gsisId": "00-0024240",
       "name": "Santonio Holmes",
-      "teamLogo": "../assets/NFL_Icons/Steelers.png",
+      "teamLogo": "assets/NFL_Icons/Steelers.png",
       "games": 15,
       "stats": {
         "carries": 2,
@@ -9164,7 +9164,7 @@
       "id": 10585,
       "gsisId": "00-0025529",
       "name": "Steve Breaston",
-      "teamLogo": "../assets/NFL_Icons/Cardinals.png",
+      "teamLogo": "assets/NFL_Icons/Cardinals.png",
       "games": 16,
       "stats": {
         "carries": 2,
@@ -9206,7 +9206,7 @@
       "id": 2622,
       "gsisId": "00-0020337",
       "name": "Steve Smith",
-      "teamLogo": "../assets/NFL_Icons/Panthers.png",
+      "teamLogo": "assets/NFL_Icons/Panthers.png",
       "games": 14,
       "stats": {
         "carries": 5,
@@ -9248,7 +9248,7 @@
       "id": 10495,
       "gsisId": "00-0025438",
       "name": "Steve Smith",
-      "teamLogo": "../assets/NFL_Icons/Giants.png",
+      "teamLogo": "assets/NFL_Icons/Giants.png",
       "games": 16,
       "stats": {
         "carries": 0,
@@ -9290,7 +9290,7 @@
       "id": 2753,
       "gsisId": "00-0020438",
       "name": "T.J. Houshmandzadeh",
-      "teamLogo": "../assets/NFL_Icons/Bengals.png",
+      "teamLogo": "assets/NFL_Icons/Bengals.png",
       "games": 14,
       "stats": {
         "carries": 1,
@@ -9332,7 +9332,7 @@
       "id": 10453,
       "gsisId": "00-0025396",
       "name": "Ted Ginn",
-      "teamLogo": "../assets/NFL_Icons/Dolphins.png",
+      "teamLogo": "assets/NFL_Icons/Dolphins.png",
       "games": 16,
       "stats": {
         "carries": 5,
@@ -9374,7 +9374,7 @@
       "id": 1056,
       "gsisId": "00-0012478",
       "name": "Terrell Owens",
-      "teamLogo": "../assets/NFL_Icons/Cowboys.png",
+      "teamLogo": "assets/NFL_Icons/Cowboys.png",
       "games": 16,
       "stats": {
         "carries": 7,
@@ -9416,7 +9416,7 @@
       "id": 1757,
       "gsisId": "00-0007681",
       "name": "Torry Holt",
-      "teamLogo": "../assets/NFL_Icons/Rams.png",
+      "teamLogo": "assets/NFL_Icons/Rams.png",
       "games": 16,
       "stats": {
         "carries": 0,
@@ -9458,7 +9458,7 @@
       "id": 8475,
       "gsisId": "00-0023496",
       "name": "Vincent Jackson",
-      "teamLogo": "../assets/NFL_Icons/Chargers.png",
+      "teamLogo": "assets/NFL_Icons/Chargers.png",
       "games": 15,
       "stats": {
         "carries": 4,
@@ -9500,7 +9500,7 @@
       "id": 5941,
       "gsisId": "00-0022427",
       "name": "Wes Welker",
-      "teamLogo": "../assets/NFL_Icons/Patriots.png",
+      "teamLogo": "assets/NFL_Icons/Patriots.png",
       "games": 16,
       "stats": {
         "carries": 2,
@@ -9544,7 +9544,7 @@
       "id": 8485,
       "gsisId": "00-0023506",
       "name": "Alex Smith",
-      "teamLogo": "../assets/NFL_Icons/Bucs.png",
+      "teamLogo": "assets/NFL_Icons/Bucs.png",
       "games": 11,
       "stats": {
         "carries": 0,
@@ -9586,7 +9586,7 @@
       "id": 2583,
       "gsisId": "00-0020285",
       "name": "Alge Crumpler",
-      "teamLogo": "../assets/NFL_Icons/Titans.png",
+      "teamLogo": "assets/NFL_Icons/Titans.png",
       "games": 12,
       "stats": {
         "carries": 0,
@@ -9628,7 +9628,7 @@
       "id": 9639,
       "gsisId": "00-0024268",
       "name": "Anthony Fasano",
-      "teamLogo": "../assets/NFL_Icons/Dolphins.png",
+      "teamLogo": "assets/NFL_Icons/Dolphins.png",
       "games": 13,
       "stats": {
         "carries": 0,
@@ -9670,7 +9670,7 @@
       "id": 5362,
       "gsisId": "00-0021547",
       "name": "Antonio Gates",
-      "teamLogo": "../assets/NFL_Icons/Chargers.png",
+      "teamLogo": "assets/NFL_Icons/Chargers.png",
       "games": 16,
       "stats": {
         "carries": 0,
@@ -9712,7 +9712,7 @@
       "id": 5557,
       "gsisId": "00-0022943",
       "name": "Benjamin Watson",
-      "teamLogo": "../assets/NFL_Icons/Patriots.png",
+      "teamLogo": "assets/NFL_Icons/Patriots.png",
       "games": 12,
       "stats": {
         "carries": 0,
@@ -9754,7 +9754,7 @@
       "id": 1971,
       "gsisId": "00-0011236",
       "name": "Billy Miller",
-      "teamLogo": "../assets/NFL_Icons/Saints.png",
+      "teamLogo": "assets/NFL_Icons/Saints.png",
       "games": 12,
       "stats": {
         "carries": 0,
@@ -9796,7 +9796,7 @@
       "id": 8593,
       "gsisId": "00-0023612",
       "name": "Bo Scaife",
-      "teamLogo": "../assets/NFL_Icons/Titans.png",
+      "teamLogo": "assets/NFL_Icons/Titans.png",
       "games": 16,
       "stats": {
         "carries": 0,
@@ -9838,7 +9838,7 @@
       "id": 10605,
       "gsisId": "00-0025549",
       "name": "Brent Celek",
-      "teamLogo": "../assets/NFL_Icons/Eagles.png",
+      "teamLogo": "assets/NFL_Icons/Eagles.png",
       "games": 11,
       "stats": {
         "carries": 0,
@@ -9880,7 +9880,7 @@
       "id": 3616,
       "gsisId": "00-0021213",
       "name": "Chris Baker",
-      "teamLogo": "../assets/NFL_Icons/Jets.png",
+      "teamLogo": "assets/NFL_Icons/Jets.png",
       "games": 13,
       "stats": {
         "carries": 0,
@@ -9922,7 +9922,7 @@
       "id": 5606,
       "gsisId": "00-0022738",
       "name": "Chris Cooley",
-      "teamLogo": "../assets/NFL_Icons/Commanders.png",
+      "teamLogo": "assets/NFL_Icons/Commanders.png",
       "games": 16,
       "stats": {
         "carries": 0,
@@ -9964,7 +9964,7 @@
       "id": 4482,
       "gsisId": "00-0022165",
       "name": "Dallas Clark",
-      "teamLogo": "../assets/NFL_Icons/Colts.png",
+      "teamLogo": "assets/NFL_Icons/Colts.png",
       "games": 15,
       "stats": {
         "carries": 0,
@@ -10006,7 +10006,7 @@
       "id": 3549,
       "gsisId": "00-0021154",
       "name": "Daniel Graham",
-      "teamLogo": "../assets/NFL_Icons/Broncos.png",
+      "teamLogo": "assets/NFL_Icons/Broncos.png",
       "games": 14,
       "stats": {
         "carries": 0,
@@ -10048,7 +10048,7 @@
       "id": 10598,
       "gsisId": "00-0025542",
       "name": "Dante Rosario",
-      "teamLogo": "../assets/NFL_Icons/Panthers.png",
+      "teamLogo": "assets/NFL_Icons/Panthers.png",
       "games": 9,
       "stats": {
         "carries": 0,
@@ -10090,7 +10090,7 @@
       "id": 2747,
       "gsisId": "00-0020332",
       "name": "David Martin",
-      "teamLogo": "../assets/NFL_Icons/Dolphins.png",
+      "teamLogo": "assets/NFL_Icons/Dolphins.png",
       "games": 15,
       "stats": {
         "carries": 0,
@@ -10132,7 +10132,7 @@
       "id": 9761,
       "gsisId": "00-0024389",
       "name": "Delanie Walker",
-      "teamLogo": "../assets/NFL_Icons/49ers.png",
+      "teamLogo": "assets/NFL_Icons/49ers.png",
       "games": 14,
       "stats": {
         "carries": 2,
@@ -10174,7 +10174,7 @@
       "id": 10665,
       "gsisId": "00-0025609",
       "name": "Derek Schouman",
-      "teamLogo": "../assets/NFL_Icons/Bills.png",
+      "teamLogo": "assets/NFL_Icons/Bills.png",
       "games": 9,
       "stats": {
         "carries": 0,
@@ -10216,7 +10216,7 @@
       "id": 1932,
       "gsisId": "00-0003035",
       "name": "Desmond Clark",
-      "teamLogo": "../assets/NFL_Icons/Bears.png",
+      "teamLogo": "assets/NFL_Icons/Bears.png",
       "games": 16,
       "stats": {
         "carries": 0,
@@ -10258,7 +10258,7 @@
       "id": 4614,
       "gsisId": "00-0021929",
       "name": "Donald Lee",
-      "teamLogo": "../assets/NFL_Icons/Packers.png",
+      "teamLogo": "assets/NFL_Icons/Packers.png",
       "games": 14,
       "stats": {
         "carries": 0,
@@ -10300,7 +10300,7 @@
       "id": 11264,
       "gsisId": "00-0026170",
       "name": "Dustin Keller",
-      "teamLogo": "../assets/NFL_Icons/Jets.png",
+      "teamLogo": "assets/NFL_Icons/Jets.png",
       "games": 16,
       "stats": {
         "carries": 0,
@@ -10342,7 +10342,7 @@
       "id": 10965,
       "gsisId": "00-0024529",
       "name": "Gijon Robinson",
-      "teamLogo": "../assets/NFL_Icons/Colts.png",
+      "teamLogo": "assets/NFL_Icons/Colts.png",
       "games": 9,
       "stats": {
         "carries": 0,
@@ -10384,7 +10384,7 @@
       "id": 10475,
       "gsisId": "00-0025418",
       "name": "Greg Olsen",
-      "teamLogo": "../assets/NFL_Icons/Bears.png",
+      "teamLogo": "assets/NFL_Icons/Bears.png",
       "games": 15,
       "stats": {
         "carries": 0,
@@ -10426,7 +10426,7 @@
       "id": 8444,
       "gsisId": "00-0023465",
       "name": "Heath Miller",
-      "teamLogo": "../assets/NFL_Icons/Steelers.png",
+      "teamLogo": "assets/NFL_Icons/Steelers.png",
       "games": 13,
       "stats": {
         "carries": 0,
@@ -10468,7 +10468,7 @@
       "id": 4527,
       "gsisId": "00-0022127",
       "name": "Jason Witten",
-      "teamLogo": "../assets/NFL_Icons/Cowboys.png",
+      "teamLogo": "assets/NFL_Icons/Cowboys.png",
       "games": 16,
       "stats": {
         "carries": 0,
@@ -10510,7 +10510,7 @@
       "id": 9741,
       "gsisId": "00-0024369",
       "name": "Jeff King",
-      "teamLogo": "../assets/NFL_Icons/Panthers.png",
+      "teamLogo": "assets/NFL_Icons/Panthers.png",
       "games": 13,
       "stats": {
         "carries": 0,
@@ -10552,7 +10552,7 @@
       "id": 3542,
       "gsisId": "00-0021148",
       "name": "Jeremy Shockey",
-      "teamLogo": "../assets/NFL_Icons/Saints.png",
+      "teamLogo": "assets/NFL_Icons/Saints.png",
       "games": 12,
       "stats": {
         "carries": 0,
@@ -10594,7 +10594,7 @@
       "id": 3556,
       "gsisId": "00-0021159",
       "name": "Jerramy Stevens",
-      "teamLogo": "../assets/NFL_Icons/Bucs.png",
+      "teamLogo": "assets/NFL_Icons/Bucs.png",
       "games": 11,
       "stats": {
         "carries": 0,
@@ -10636,7 +10636,7 @@
       "id": 11272,
       "gsisId": "00-0026178",
       "name": "John Carlson",
-      "teamLogo": "../assets/NFL_Icons/Seahawks.png",
+      "teamLogo": "assets/NFL_Icons/Seahawks.png",
       "games": 15,
       "stats": {
         "carries": 0,
@@ -10678,7 +10678,7 @@
       "id": 3773,
       "gsisId": "00-0021304",
       "name": "John Gilmore",
-      "teamLogo": "../assets/NFL_Icons/Bucs.png",
+      "teamLogo": "assets/NFL_Icons/Bucs.png",
       "games": 11,
       "stats": {
         "carries": 0,
@@ -10720,7 +10720,7 @@
       "id": 3631,
       "gsisId": "00-0021227",
       "name": "Justin Peelle",
-      "teamLogo": "../assets/NFL_Icons/Falcons.png",
+      "teamLogo": "assets/NFL_Icons/Falcons.png",
       "games": 12,
       "stats": {
         "carries": 0,
@@ -10762,7 +10762,7 @@
       "id": 5531,
       "gsisId": "00-0022922",
       "name": "Kellen Winslow",
-      "teamLogo": "../assets/NFL_Icons/Browns.png",
+      "teamLogo": "assets/NFL_Icons/Browns.png",
       "games": 10,
       "stats": {
         "carries": 0,
@@ -10804,7 +10804,7 @@
       "id": 10596,
       "gsisId": "00-0025540",
       "name": "Kevin Boss",
-      "teamLogo": "../assets/NFL_Icons/Giants.png",
+      "teamLogo": "assets/NFL_Icons/Giants.png",
       "games": 12,
       "stats": {
         "carries": 0,
@@ -10846,7 +10846,7 @@
       "id": 4519,
       "gsisId": "00-0022126",
       "name": "L.J. Smith",
-      "teamLogo": "../assets/NFL_Icons/Eagles.png",
+      "teamLogo": "assets/NFL_Icons/Eagles.png",
       "games": 12,
       "stats": {
         "carries": 0,
@@ -10888,7 +10888,7 @@
       "id": 9614,
       "gsisId": "00-0024243",
       "name": "Marcedes Lewis",
-      "teamLogo": "../assets/NFL_Icons/Jaguars.png",
+      "teamLogo": "assets/NFL_Icons/Jaguars.png",
       "games": 15,
       "stats": {
         "carries": 0,
@@ -10930,7 +10930,7 @@
       "id": 11295,
       "gsisId": "00-0026201",
       "name": "Martellus Bennett",
-      "teamLogo": "../assets/NFL_Icons/Cowboys.png",
+      "teamLogo": "assets/NFL_Icons/Cowboys.png",
       "games": 12,
       "stats": {
         "carries": 0,
@@ -10972,7 +10972,7 @@
       "id": 10521,
       "gsisId": "00-0025464",
       "name": "Matt Spaeth",
-      "teamLogo": "../assets/NFL_Icons/Steelers.png",
+      "teamLogo": "assets/NFL_Icons/Steelers.png",
       "games": 9,
       "stats": {
         "carries": 0,
@@ -11014,7 +11014,7 @@
       "id": 5757,
       "gsisId": "00-0022706",
       "name": "Michael Gaines",
-      "teamLogo": "../assets/NFL_Icons/Lions.png",
+      "teamLogo": "assets/NFL_Icons/Lions.png",
       "games": 12,
       "stats": {
         "carries": 0,
@@ -11056,7 +11056,7 @@
       "id": 9684,
       "gsisId": "00-0024313",
       "name": "Owen Daniels",
-      "teamLogo": "../assets/NFL_Icons/Texans.png",
+      "teamLogo": "assets/NFL_Icons/Texans.png",
       "games": 16,
       "stats": {
         "carries": 0,
@@ -11098,7 +11098,7 @@
       "id": 3642,
       "gsisId": "00-0021236",
       "name": "Randy McMichael",
-      "teamLogo": "../assets/NFL_Icons/Rams.png",
+      "teamLogo": "assets/NFL_Icons/Rams.png",
       "games": 4,
       "stats": {
         "carries": 0,
@@ -11140,7 +11140,7 @@
       "id": 1794,
       "gsisId": "00-0009119",
       "name": "Reggie Kelly",
-      "teamLogo": "../assets/NFL_Icons/Bengals.png",
+      "teamLogo": "assets/NFL_Icons/Bengals.png",
       "games": 13,
       "stats": {
         "carries": 0,
@@ -11182,7 +11182,7 @@
       "id": 3688,
       "gsisId": "00-0021273",
       "name": "Robert Royal",
-      "teamLogo": "../assets/NFL_Icons/Bills.png",
+      "teamLogo": "assets/NFL_Icons/Bills.png",
       "games": 13,
       "stats": {
         "carries": 0,
@@ -11224,7 +11224,7 @@
       "id": 1822,
       "gsisId": "00-0007213",
       "name": "Steve Heiden",
-      "teamLogo": "../assets/NFL_Icons/Browns.png",
+      "teamLogo": "assets/NFL_Icons/Browns.png",
       "games": 9,
       "stats": {
         "carries": 0,
@@ -11266,7 +11266,7 @@
       "id": 2579,
       "gsisId": "00-0020516",
       "name": "Todd Heap",
-      "teamLogo": "../assets/NFL_Icons/Ravens.png",
+      "teamLogo": "assets/NFL_Icons/Ravens.png",
       "games": 16,
       "stats": {
         "carries": 0,
@@ -11308,7 +11308,7 @@
       "id": 1231,
       "gsisId": "00-0006101",
       "name": "Tony Gonzalez",
-      "teamLogo": "../assets/NFL_Icons/Chiefs.png",
+      "teamLogo": "assets/NFL_Icons/Chiefs.png",
       "games": 16,
       "stats": {
         "carries": 0,
@@ -11350,7 +11350,7 @@
       "id": 9647,
       "gsisId": "00-0024276",
       "name": "Tony Scheffler",
-      "teamLogo": "../assets/NFL_Icons/Broncos.png",
+      "teamLogo": "assets/NFL_Icons/Broncos.png",
       "games": 13,
       "stats": {
         "carries": 1,
@@ -11392,7 +11392,7 @@
       "id": 9450,
       "gsisId": "00-0023210",
       "name": "Tory Humphrey",
-      "teamLogo": "../assets/NFL_Icons/Packers.png",
+      "teamLogo": "assets/NFL_Icons/Packers.png",
       "games": 8,
       "stats": {
         "carries": 0,
@@ -11434,7 +11434,7 @@
       "id": 9592,
       "gsisId": "00-0024221",
       "name": "Vernon Davis",
-      "teamLogo": "../assets/NFL_Icons/49ers.png",
+      "teamLogo": "assets/NFL_Icons/49ers.png",
       "games": 14,
       "stats": {
         "carries": 1,
@@ -11476,7 +11476,7 @@
       "id": 4549,
       "gsisId": "00-0022054",
       "name": "Visanthe Shiancoe",
-      "teamLogo": "../assets/NFL_Icons/Vikings.png",
+      "teamLogo": "assets/NFL_Icons/Vikings.png",
       "games": 16,
       "stats": {
         "carries": 0,
@@ -11518,7 +11518,7 @@
       "id": 10482,
       "gsisId": "00-0025425",
       "name": "Zach Miller",
-      "teamLogo": "../assets/NFL_Icons/Raiders.png",
+      "teamLogo": "assets/NFL_Icons/Raiders.png",
       "games": 15,
       "stats": {
         "carries": 0,
@@ -11562,7 +11562,7 @@
       "id": 1097,
       "gsisId": "00-0016919",
       "name": "Adam Vinatieri",
-      "teamLogo": "../assets/NFL_Icons/Colts.png",
+      "teamLogo": "assets/NFL_Icons/Colts.png",
       "games": 16,
       "stats": {
         "fgMade": 20,
@@ -11584,7 +11584,7 @@
       "id": 11737,
       "gsisId": "00-0026138",
       "name": "Connor Barth",
-      "teamLogo": "../assets/NFL_Icons/Chiefs.png",
+      "teamLogo": "assets/NFL_Icons/Chiefs.png",
       "games": 10,
       "stats": {
         "fgMade": 10,
@@ -11606,7 +11606,7 @@
       "id": 11688,
       "gsisId": "00-0026003",
       "name": "Dan Carpenter",
-      "teamLogo": "../assets/NFL_Icons/Dolphins.png",
+      "teamLogo": "assets/NFL_Icons/Dolphins.png",
       "games": 16,
       "stats": {
         "fgMade": 21,
@@ -11628,7 +11628,7 @@
       "id": 1716,
       "gsisId": "00-0000108",
       "name": "David Akers",
-      "teamLogo": "../assets/NFL_Icons/Eagles.png",
+      "teamLogo": "assets/NFL_Icons/Eagles.png",
       "games": 16,
       "stats": {
         "fgMade": 33,
@@ -11650,7 +11650,7 @@
       "id": 11543,
       "gsisId": "00-0025824",
       "name": "Garrett Hartley",
-      "teamLogo": "../assets/NFL_Icons/Saints.png",
+      "teamLogo": "assets/NFL_Icons/Saints.png",
       "games": 8,
       "stats": {
         "fgMade": 13,
@@ -11672,7 +11672,7 @@
       "id": 453,
       "gsisId": "00-0004811",
       "name": "Jason Elam",
-      "teamLogo": "../assets/NFL_Icons/Falcons.png",
+      "teamLogo": "assets/NFL_Icons/Falcons.png",
       "games": 16,
       "stats": {
         "fgMade": 29,
@@ -11694,7 +11694,7 @@
       "id": 286,
       "gsisId": "00-0006800",
       "name": "Jason Hanson",
-      "teamLogo": "../assets/NFL_Icons/Lions.png",
+      "teamLogo": "assets/NFL_Icons/Lions.png",
       "games": 16,
       "stats": {
         "fgMade": 21,
@@ -11716,7 +11716,7 @@
       "id": 2548,
       "gsisId": "00-0019770",
       "name": "Jay Feely",
-      "teamLogo": "../assets/NFL_Icons/Jets.png",
+      "teamLogo": "assets/NFL_Icons/Jets.png",
       "games": 15,
       "stats": {
         "fgMade": 24,
@@ -11738,7 +11738,7 @@
       "id": 4399,
       "gsisId": "00-0020737",
       "name": "Jeff Reed",
-      "teamLogo": "../assets/NFL_Icons/Steelers.png",
+      "teamLogo": "assets/NFL_Icons/Steelers.png",
       "games": 16,
       "stats": {
         "fgMade": 27,
@@ -11760,7 +11760,7 @@
       "id": 982,
       "gsisId": "00-0011970",
       "name": "Joe Nedney",
-      "teamLogo": "../assets/NFL_Icons/49ers.png",
+      "teamLogo": "assets/NFL_Icons/49ers.png",
       "games": 16,
       "stats": {
         "fgMade": 29,
@@ -11782,7 +11782,7 @@
       "id": 43,
       "gsisId": "00-0002655",
       "name": "John Carney",
-      "teamLogo": "../assets/NFL_Icons/Giants.png",
+      "teamLogo": "assets/NFL_Icons/Giants.png",
       "games": 15,
       "stats": {
         "fgMade": 35,
@@ -11804,7 +11804,7 @@
       "id": 139,
       "gsisId": "00-0009028",
       "name": "John Kasay",
-      "teamLogo": "../assets/NFL_Icons/Panthers.png",
+      "teamLogo": "assets/NFL_Icons/Panthers.png",
       "games": 16,
       "stats": {
         "fgMade": 28,
@@ -11826,7 +11826,7 @@
       "id": 4680,
       "gsisId": "00-0021940",
       "name": "Josh Brown",
-      "teamLogo": "../assets/NFL_Icons/Rams.png",
+      "teamLogo": "assets/NFL_Icons/Rams.png",
       "games": 16,
       "stats": {
         "fgMade": 31,
@@ -11848,7 +11848,7 @@
       "id": 5662,
       "gsisId": "00-0022874",
       "name": "Josh Scobee",
-      "teamLogo": "../assets/NFL_Icons/Jaguars.png",
+      "teamLogo": "assets/NFL_Icons/Jaguars.png",
       "games": 16,
       "stats": {
         "fgMade": 19,
@@ -11870,7 +11870,7 @@
       "id": 1981,
       "gsisId": "00-0001980",
       "name": "Kris Brown",
-      "teamLogo": "../assets/NFL_Icons/Texans.png",
+      "teamLogo": "assets/NFL_Icons/Texans.png",
       "games": 16,
       "stats": {
         "fgMade": 29,
@@ -11892,7 +11892,7 @@
       "id": 10636,
       "gsisId": "00-0025580",
       "name": "Mason Crosby",
-      "teamLogo": "../assets/NFL_Icons/Packers.png",
+      "teamLogo": "assets/NFL_Icons/Packers.png",
       "games": 16,
       "stats": {
         "fgMade": 27,
@@ -11914,7 +11914,7 @@
       "id": 4333,
       "gsisId": "00-0020578",
       "name": "Matt Bryant",
-      "teamLogo": "../assets/NFL_Icons/Bucs.png",
+      "teamLogo": "assets/NFL_Icons/Bucs.png",
       "games": 16,
       "stats": {
         "fgMade": 32,
@@ -11936,7 +11936,7 @@
       "id": 11122,
       "gsisId": "00-0023853",
       "name": "Matt Prater",
-      "teamLogo": "../assets/NFL_Icons/Broncos.png",
+      "teamLogo": "assets/NFL_Icons/Broncos.png",
       "games": 16,
       "stats": {
         "fgMade": 25,
@@ -11958,7 +11958,7 @@
       "id": 129,
       "gsisId": "00-0015784",
       "name": "Matt Stover",
-      "teamLogo": "../assets/NFL_Icons/Ravens.png",
+      "teamLogo": "assets/NFL_Icons/Ravens.png",
       "games": 16,
       "stats": {
         "fgMade": 27,
@@ -11980,7 +11980,7 @@
       "id": 5590,
       "gsisId": "00-0022737",
       "name": "Nate Kaeding",
-      "teamLogo": "../assets/NFL_Icons/Chargers.png",
+      "teamLogo": "assets/NFL_Icons/Chargers.png",
       "games": 16,
       "stats": {
         "fgMade": 27,
@@ -12002,7 +12002,7 @@
       "id": 2300,
       "gsisId": "00-0019676",
       "name": "Neil Rackers",
-      "teamLogo": "../assets/NFL_Icons/Cardinals.png",
+      "teamLogo": "assets/NFL_Icons/Cardinals.png",
       "games": 16,
       "stats": {
         "fgMade": 25,
@@ -12024,7 +12024,7 @@
       "id": 10621,
       "gsisId": "00-0025565",
       "name": "Nick Folk",
-      "teamLogo": "../assets/NFL_Icons/Cowboys.png",
+      "teamLogo": "assets/NFL_Icons/Cowboys.png",
       "games": 16,
       "stats": {
         "fgMade": 20,
@@ -12046,7 +12046,7 @@
       "id": 1170,
       "gsisId": "00-0010373",
       "name": "Olindo Mare",
-      "teamLogo": "../assets/NFL_Icons/Seahawks.png",
+      "teamLogo": "assets/NFL_Icons/Seahawks.png",
       "games": 16,
       "stats": {
         "fgMade": 24,
@@ -12068,7 +12068,7 @@
       "id": 1440,
       "gsisId": "00-0004091",
       "name": "Phil Dawson",
-      "teamLogo": "../assets/NFL_Icons/Browns.png",
+      "teamLogo": "assets/NFL_Icons/Browns.png",
       "games": 16,
       "stats": {
         "fgMade": 30,
@@ -12090,7 +12090,7 @@
       "id": 2489,
       "gsisId": "00-0019310",
       "name": "Rian Lindell",
-      "teamLogo": "../assets/NFL_Icons/Bills.png",
+      "teamLogo": "assets/NFL_Icons/Bills.png",
       "games": 16,
       "stats": {
         "fgMade": 30,
@@ -12112,7 +12112,7 @@
       "id": 9235,
       "gsisId": "00-0020962",
       "name": "Rob Bironas",
-      "teamLogo": "../assets/NFL_Icons/Titans.png",
+      "teamLogo": "assets/NFL_Icons/Titans.png",
       "games": 16,
       "stats": {
         "fgMade": 29,
@@ -12134,7 +12134,7 @@
       "id": 9354,
       "gsisId": "00-0023252",
       "name": "Robbie Gould",
-      "teamLogo": "../assets/NFL_Icons/Bears.png",
+      "teamLogo": "assets/NFL_Icons/Bears.png",
       "games": 16,
       "stats": {
         "fgMade": 26,
@@ -12156,7 +12156,7 @@
       "id": 1328,
       "gsisId": "00-0010072",
       "name": "Ryan Longwell",
-      "teamLogo": "../assets/NFL_Icons/Vikings.png",
+      "teamLogo": "assets/NFL_Icons/Vikings.png",
       "games": 16,
       "stats": {
         "fgMade": 29,
@@ -12178,7 +12178,7 @@
       "id": 2148,
       "gsisId": "00-0019646",
       "name": "Sebastian Janikowski",
-      "teamLogo": "../assets/NFL_Icons/Raiders.png",
+      "teamLogo": "assets/NFL_Icons/Raiders.png",
       "games": 16,
       "stats": {
         "fgMade": 24,
@@ -12200,7 +12200,7 @@
       "id": 9361,
       "gsisId": "00-0023001",
       "name": "Shaun Suisham",
-      "teamLogo": "../assets/NFL_Icons/Commanders.png",
+      "teamLogo": "assets/NFL_Icons/Commanders.png",
       "games": 16,
       "stats": {
         "fgMade": 26,
@@ -12222,7 +12222,7 @@
       "id": 3504,
       "gsisId": "00-0019536",
       "name": "Shayne Graham",
-      "teamLogo": "../assets/NFL_Icons/Bengals.png",
+      "teamLogo": "assets/NFL_Icons/Bengals.png",
       "games": 14,
       "stats": {
         "fgMade": 21,
@@ -12244,7 +12244,7 @@
       "id": 9704,
       "gsisId": "00-0024333",
       "name": "Stephen Gostkowski",
-      "teamLogo": "../assets/NFL_Icons/Patriots.png",
+      "teamLogo": "assets/NFL_Icons/Patriots.png",
       "games": 16,
       "stats": {
         "fgMade": 36,
@@ -12268,7 +12268,7 @@
       "id": 10545,
       "gsisId": "00-0025488",
       "name": "Adam Podlesh",
-      "teamLogo": "../assets/NFL_Icons/Jaguars.png",
+      "teamLogo": "assets/NFL_Icons/Jaguars.png",
       "games": 11,
       "stats": {
         "punts": 46,
@@ -12287,7 +12287,7 @@
       "id": 5713,
       "gsisId": "00-0022824",
       "name": "Andy Lee",
-      "teamLogo": "../assets/NFL_Icons/49ers.png",
+      "teamLogo": "assets/NFL_Icons/49ers.png",
       "games": 16,
       "stats": {
         "punts": 66,
@@ -12306,7 +12306,7 @@
       "id": 1252,
       "gsisId": "00-0010609",
       "name": "Brad Maynard",
-      "teamLogo": "../assets/NFL_Icons/Bears.png",
+      "teamLogo": "assets/NFL_Icons/Bears.png",
       "games": 16,
       "stats": {
         "punts": 96,
@@ -12325,7 +12325,7 @@
       "id": 10668,
       "gsisId": "00-0025612",
       "name": "Brandon Fields",
-      "teamLogo": "../assets/NFL_Icons/Dolphins.png",
+      "teamLogo": "assets/NFL_Icons/Dolphins.png",
       "games": 16,
       "stats": {
         "punts": 74,
@@ -12344,7 +12344,7 @@
       "id": 11555,
       "gsisId": "00-0025825",
       "name": "Brett Kern",
-      "teamLogo": "../assets/NFL_Icons/Broncos.png",
+      "teamLogo": "assets/NFL_Icons/Broncos.png",
       "games": 15,
       "stats": {
         "punts": 46,
@@ -12363,7 +12363,7 @@
       "id": 2797,
       "gsisId": "00-0011626",
       "name": "Brian Moorman",
-      "teamLogo": "../assets/NFL_Icons/Bills.png",
+      "teamLogo": "assets/NFL_Icons/Bills.png",
       "games": 16,
       "stats": {
         "punts": 58,
@@ -12382,7 +12382,7 @@
       "id": 2043,
       "gsisId": "00-0006799",
       "name": "Chris Hanson",
-      "teamLogo": "../assets/NFL_Icons/Patriots.png",
+      "teamLogo": "assets/NFL_Icons/Patriots.png",
       "games": 16,
       "stats": {
         "punts": 49,
@@ -12401,7 +12401,7 @@
       "id": 9296,
       "gsisId": "00-0023060",
       "name": "Chris Kluwe",
-      "teamLogo": "../assets/NFL_Icons/Vikings.png",
+      "teamLogo": "assets/NFL_Icons/Vikings.png",
       "games": 16,
       "stats": {
         "punts": 73,
@@ -12420,7 +12420,7 @@
       "id": 538,
       "gsisId": "00-0007308",
       "name": "Craig Hentrich",
-      "teamLogo": "../assets/NFL_Icons/Titans.png",
+      "teamLogo": "assets/NFL_Icons/Titans.png",
       "games": 16,
       "stats": {
         "punts": 87,
@@ -12439,7 +12439,7 @@
       "id": 3640,
       "gsisId": "00-0021235",
       "name": "Dave Zastudil",
-      "teamLogo": "../assets/NFL_Icons/Browns.png",
+      "teamLogo": "assets/NFL_Icons/Browns.png",
       "games": 15,
       "stats": {
         "punts": 75,
@@ -12458,7 +12458,7 @@
       "id": 5481,
       "gsisId": "00-0021500",
       "name": "Derrick Frost",
-      "teamLogo": "../assets/NFL_Icons/Packers.png",
+      "teamLogo": "assets/NFL_Icons/Packers.png",
       "games": 12,
       "stats": {
         "punts": 48,
@@ -12477,7 +12477,7 @@
       "id": 4341,
       "gsisId": "00-0008484",
       "name": "Dirk Johnson",
-      "teamLogo": "../assets/NFL_Icons/Cardinals.png",
+      "teamLogo": "assets/NFL_Icons/Cardinals.png",
       "games": 12,
       "stats": {
         "punts": 40,
@@ -12496,7 +12496,7 @@
       "id": 5749,
       "gsisId": "00-0022684",
       "name": "Donnie Jones",
-      "teamLogo": "../assets/NFL_Icons/Rams.png",
+      "teamLogo": "assets/NFL_Icons/Rams.png",
       "games": 16,
       "stats": {
         "punts": 82,
@@ -12515,7 +12515,7 @@
       "id": 8513,
       "gsisId": "00-0023534",
       "name": "Dustin Colquitt",
-      "teamLogo": "../assets/NFL_Icons/Chiefs.png",
+      "teamLogo": "assets/NFL_Icons/Chiefs.png",
       "games": 14,
       "stats": {
         "punts": 70,
@@ -12534,7 +12534,7 @@
       "id": 1963,
       "gsisId": "00-0015194",
       "name": "Hunter Smith",
-      "teamLogo": "../assets/NFL_Icons/Colts.png",
+      "teamLogo": "assets/NFL_Icons/Colts.png",
       "games": 16,
       "stats": {
         "punts": 53,
@@ -12553,7 +12553,7 @@
       "id": 2845,
       "gsisId": "00-0019921",
       "name": "Jason Baker",
-      "teamLogo": "../assets/NFL_Icons/Panthers.png",
+      "teamLogo": "assets/NFL_Icons/Panthers.png",
       "games": 16,
       "stats": {
         "punts": 73,
@@ -12572,7 +12572,7 @@
       "id": 26,
       "gsisId": "00-0005113",
       "name": "Jeff Feagles",
-      "teamLogo": "../assets/NFL_Icons/Giants.png",
+      "teamLogo": "assets/NFL_Icons/Giants.png",
       "games": 16,
       "stats": {
         "punts": 64,
@@ -12591,7 +12591,7 @@
       "id": 10238,
       "gsisId": "00-0023742",
       "name": "Jon Ryan",
-      "teamLogo": "../assets/NFL_Icons/Seahawks.png",
+      "teamLogo": "assets/NFL_Icons/Seahawks.png",
       "games": 15,
       "stats": {
         "punts": 78,
@@ -12610,7 +12610,7 @@
       "id": 1886,
       "gsisId": "00-0001231",
       "name": "Josh Bidwell",
-      "teamLogo": "../assets/NFL_Icons/Bucs.png",
+      "teamLogo": "assets/NFL_Icons/Bucs.png",
       "games": 16,
       "stats": {
         "punts": 77,
@@ -12629,7 +12629,7 @@
       "id": 6265,
       "gsisId": "00-0022589",
       "name": "Kyle Larson",
-      "teamLogo": "../assets/NFL_Icons/Bengals.png",
+      "teamLogo": "assets/NFL_Icons/Bengals.png",
       "games": 16,
       "stats": {
         "punts": 100,
@@ -12648,7 +12648,7 @@
       "id": 838,
       "gsisId": "00-0016689",
       "name": "Matt Turk",
-      "teamLogo": "../assets/NFL_Icons/Texans.png",
+      "teamLogo": "assets/NFL_Icons/Texans.png",
       "games": 16,
       "stats": {
         "punts": 53,
@@ -12667,7 +12667,7 @@
       "id": 9263,
       "gsisId": "00-0023234",
       "name": "Michael Koenen",
-      "teamLogo": "../assets/NFL_Icons/Falcons.png",
+      "teamLogo": "assets/NFL_Icons/Falcons.png",
       "games": 16,
       "stats": {
         "punts": 63,
@@ -12686,7 +12686,7 @@
       "id": 4607,
       "gsisId": "00-0022017",
       "name": "Mike Scifres",
-      "teamLogo": "../assets/NFL_Icons/Chargers.png",
+      "teamLogo": "assets/NFL_Icons/Chargers.png",
       "games": 16,
       "stats": {
         "punts": 51,
@@ -12705,7 +12705,7 @@
       "id": 619,
       "gsisId": "00-0001157",
       "name": "Mitch Berger",
-      "teamLogo": "../assets/NFL_Icons/Steelers.png",
+      "teamLogo": "assets/NFL_Icons/Steelers.png",
       "games": 13,
       "stats": {
         "punts": 66,
@@ -12724,7 +12724,7 @@
       "id": 2669,
       "gsisId": "00-0020267",
       "name": "Nick Harris",
-      "teamLogo": "../assets/NFL_Icons/Lions.png",
+      "teamLogo": "assets/NFL_Icons/Lions.png",
       "games": 16,
       "stats": {
         "punts": 90,
@@ -12743,7 +12743,7 @@
       "id": 8624,
       "gsisId": "00-0023642",
       "name": "Reggie Hodges",
-      "teamLogo": "../assets/NFL_Icons/Jets.png",
+      "teamLogo": "assets/NFL_Icons/Jets.png",
       "games": 12,
       "stats": {
         "punts": 44,
@@ -12762,7 +12762,7 @@
       "id": 9825,
       "gsisId": "00-0024453",
       "name": "Ryan Plackemeier",
-      "teamLogo": "../assets/NFL_Icons/Commanders.png",
+      "teamLogo": "assets/NFL_Icons/Commanders.png",
       "games": 11,
       "stats": {
         "punts": 66,
@@ -12781,7 +12781,7 @@
       "id": 9789,
       "gsisId": "00-0024417",
       "name": "Sam Koch",
-      "teamLogo": "../assets/NFL_Icons/Ravens.png",
+      "teamLogo": "assets/NFL_Icons/Ravens.png",
       "games": 16,
       "stats": {
         "punts": 84,
@@ -12800,7 +12800,7 @@
       "id": 11223,
       "gsisId": "00-0025728",
       "name": "Sam Paulescu",
-      "teamLogo": "../assets/NFL_Icons/Cowboys.png",
+      "teamLogo": "assets/NFL_Icons/Cowboys.png",
       "games": 10,
       "stats": {
         "punts": 53,
@@ -12819,7 +12819,7 @@
       "id": 10441,
       "gsisId": "00-0024515",
       "name": "Sav Rocca",
-      "teamLogo": "../assets/NFL_Icons/Eagles.png",
+      "teamLogo": "assets/NFL_Icons/Eagles.png",
       "games": 16,
       "stats": {
         "punts": 77,
@@ -12838,7 +12838,7 @@
       "id": 2273,
       "gsisId": "00-0019714",
       "name": "Shane Lechler",
-      "teamLogo": "../assets/NFL_Icons/Raiders.png",
+      "teamLogo": "assets/NFL_Icons/Raiders.png",
       "games": 16,
       "stats": {
         "punts": 90,
@@ -12857,7 +12857,7 @@
       "id": 10127,
       "gsisId": "00-0024110",
       "name": "Steve Weatherford",
-      "teamLogo": "../assets/NFL_Icons/Jaguars.png",
+      "teamLogo": "assets/NFL_Icons/Jaguars.png",
       "games": 14,
       "stats": {
         "punts": 59,

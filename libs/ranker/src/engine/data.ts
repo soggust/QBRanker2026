@@ -5,8 +5,10 @@ import { SPORT } from '@sport/sport';
 // being bundled into it. main.ts
 // loads a season before starting the app, so everything that reads DATA can use it right away; the
 // year selector loads another season in place (see PositionService.setSeason).
+// (skill-players.json, plus any files the sport lists in SPORT.dataFiles, under their keys)
 export interface AppData {
   skillPlayers: unknown;
+  [key: string]: unknown;
 }
 
 export const DATA = {} as AppData;
@@ -25,8 +27,9 @@ export const isLiveSeason = (season: number) => season === CURRENT_SEASON && SEA
 export let dataSeason = CURRENT_SEASON;
 export let dataVersion = 0;
 
-const FILES: Record<keyof AppData, string> = {
+const FILES: Record<string, string> = {
   skillPlayers: 'skill-players.json',
+  ...SPORT.dataFiles,
 };
 
 // A season from a shared link (?season=2024), if it's one we have. Refreshing the page goes back to

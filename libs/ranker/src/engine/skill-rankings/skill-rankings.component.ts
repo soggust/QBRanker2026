@@ -15,7 +15,6 @@ import {
   SkillStatGroup,
   SkillStatKey,
   StatGroupId,
-  unitStat,
   skillGroups,
   statGroup,
   headlineStats,
@@ -23,14 +22,24 @@ import {
 } from '@sport/positions';
 import { MIN_SHARE_STEP, PositionService } from '@ranker/engine/position.service';
 import { copyRankingsToClipboard } from '@ranker/core/clipboard';
-import { SKILL_UNITS, defaultRanking, statIsEmpty, unitsForSeason, weightedTotals } from '@ranker/engine/unit-scoring';
+import {
+  SKILL_UNITS,
+  DEFAULT_SPORT_SETTINGS,
+  combinedFor,
+  combinedWeights,
+  defaultRanking,
+  statIsEmpty,
+  statValue,
+  unitsForSeason,
+  weightedTotals,
+} from '@ranker/engine/unit-scoring';
 import { CURRENT_SEASON, SEASONS, dataSeason, dataVersion, fetchSeason, fetchSeasonFile, isLiveSeason } from '@ranker/engine/data';
 import { AWARD_INFO, AwardWin, awardsFor } from '@sport/awards';
 import { SPORT } from '@sport/sport';
-import { CardFlag } from '@ranker/engine/sport';
+import { CardFlag, FlagContext, SportSetting, SportSettings, ValueContext } from '@ranker/engine/sport';
 import { TintScale, tintFrom, tintScale } from '@ranker/core/value-tint';
 import { ARCHETYPES, SKILLS, VOLUME_VS_EFFICIENCY, WINS_VS_PLAY, fallbackArchetype } from '@sport/skills';
-import { standing, tierWord } from '@ranker/engine/skills';
+import { CardSkill, standing, tierWord } from '@ranker/engine/skills';
 import { badgeColor, whiteLogo } from '@sport/team-colors';
 import { logoForSeason } from '@sport/logo-eras';
 
@@ -59,19 +68,8 @@ export interface CardStat {
 
 type CardTab = 'overview' | 'stats' | 'seasons';
 
-// Overview: a skill (several related stats rolled up) as a percentile in the list, with the stats
-// behind it and where they rank
-export interface CardSkill {
-  id: string;
-  name: string;
-  short: string;
-  pct: number;
-  tier: string;
-  standing: string;
-  evidence: { label: string; rank: number; of: number }[];
-}
-
-export type { CardFlag };
+// Overview: a skill (several related stats rolled up) as a percentile in the list (engine/skills.ts)
+export type { CardFlag, CardSkill };
 
 // The radar: an axis per skill (line end, label spot), rings, and the shapes (this season, and last
 // season's as a ghost once it loads)
@@ -219,9 +217,34 @@ export class SkillRankingsComponent implements OnChanges {
     this.positionService.updateSettings({ showInjured: value });
   }
 
-  // Bandage hover: the injured list status (this season only)
+  // Bandage hover: the injury status (the sport's wording)
   injuryTitle(player: SkillPlayer): string {
-    return `On the injured list${player.injuryStatus ? ` (${player.injuryStatus})` : ''}`;
+    return SPORT.copy.injuryTitle(player, dataSeason === CURRENT_SEASON);
+  }
+
+  // The sport's own settings (settings menu: SPORT.settings), by where they sit, and their values
+  sportSettingsAt(slot: SportSetting['slot']): SportSetting[] {
+    return (SPORT.settings ?? []).filter((setting) => setting.slot === slot);
+  }
+
+  get sportSettings(): SportSettings {
+    return this.positionService.settings.sport;
+  }
+
+  sportSettingText(setting: SportSetting): string {
+    return setting.options?.[this.sportSettings[setting.key] as string] ?? '';
+  }
+
+  stepSportSetting(key: string) {
+    this.positionService.stepSportSetting(key);
+  }
+
+  // Combined pairs as one total column (SPORT.combined)
+  get combineStats(): boolean {
+    return this.positionService.settings.combineStats;
+  }
+  set combineStats(value: boolean) {
+    this.positionService.updateSettings({ combineStats: value });
   }
 
   // Footer year dropdown: every season we have, newest first
@@ -251,9 +274,19 @@ export class SkillRankingsComponent implements OnChanges {
     return this.positionService.settings.minShare;
   }
 
-  // What the share is of (the most playing time anyone on the tab has)
+  // What the share is of (the most playing time anyone on the tab has, or the sport's season length)
   get minTotal(): number {
-    return Math.max(1, ...(SKILL_UNITS[this.position] ?? []).map((p) => SPORT.playingTime.of(p)));
+    return this.seasonLength(SKILL_UNITS);
+  }
+
+  private seasonLength(rows: Record<string, SkillPlayer[]>): number {
+    const length = SPORT.playingTime.seasonLength;
+    return length ? length(rows, this.position) : Math.max(1, ...(rows[this.position] ?? []).map((p) => SPORT.playingTime.of(p)));
+  }
+
+  // The tab has a minimum (not the sport's team tabs, where everyone plays every game)
+  private get hasMin(): boolean {
+    return !SPORT.playingTime.everyone?.includes(this.position);
   }
 
   // The cutoff: the share of a total, rounded (never under 1)
@@ -294,9 +327,15 @@ export class SkillRankingsComponent implements OnChanges {
 
   // The players this tab lists: injured players only with Show Injured on, and enough playing time
   private listedPlayers(): SkillPlayer[] {
+    const min = this.hasMin ? this.minCount : 0;
     return SKILL_UNITS[this.position].filter(
-      (player) => (this.showInjured || !player.injured) && SPORT.playingTime.of(player) >= this.minCount,
+      (player) => (this.showInjured || !player.injured) && SPORT.playingTime.of(player) >= min,
     );
+  }
+
+  // The name column's header
+  get rowHeader(): string {
+    return SPORT.rowHeader?.(this.position) ?? 'Player';
   }
 
   get categoryColors(): boolean {
@@ -315,7 +354,7 @@ export class SkillRankingsComponent implements OnChanges {
 
   // Settings: color-coded values (records and grades keep their own coloring; Games is context only)
   valueColor(player: SkillPlayer, stat: SkillStat): string | null {
-    if (!this.colorValues || stat.infoOnly || stat.format === 'record' || stat.format === 'grade') return null;
+    if (!this.colorValues || stat.infoOnly || ['grade', 'record', 'recent'].includes(stat.format)) return null;
     return tintFrom(this.rateValue(player, stat), this.columnScale(stat, 'rate'), !!stat.negative);
   }
 
@@ -331,7 +370,7 @@ export class SkillRankingsComponent implements OnChanges {
       const list = this.other.list;
       return tintScale(list.map((p) => (basis === 'shown' ? this.value(p, stat) : this.rateValue(p, stat))));
     }
-    const inputs = [this.playerList, this.dataVersion, this.statBasis];
+    const inputs = [this.playerList, this.dataVersion, this.positionService.settings];
     if (!this.scalesFor || inputs.some((v, i) => v !== this.scalesFor![i])) {
       this.scales.clear();
       this.scalesFor = inputs;
@@ -391,6 +430,36 @@ export class SkillRankingsComponent implements OnChanges {
       if (changed && this.position) this.ngOnChanges();
     });
     this.positionService.seasonLoading$.subscribe((loading) => (this.seasonLoading = loading));
+
+    // The sport's values from other tabs changed (SPORT.connect: the NFL's team grades)
+    this.positionService.sportChanged$.subscribe(() => this.refresh());
+  }
+
+  // Changes from other tabs re-sort this tab unless its order was dragged by hand; the new values
+  // still show either way
+  private refresh() {
+    this.dataVersion++;
+    if (!this.position) return;
+    if (!this.positionService.unitOrder(this.position)?.manual) this.sortPlayers();
+  }
+
+  // The last five results (newest first; 1 win, 0.5 tie, 0 loss), for a sport with a 'recent' stat
+  lastFive(player: SkillPlayer): number[] {
+    return (player as { lastFive?: number[] }).lastFive ?? [];
+  }
+
+  // Empty Recent slots for games not played yet (up to five)
+  unplayed(player: SkillPlayer): null[] {
+    return Array(Math.max(0, 5 - this.lastFive(player).length)).fill(null);
+  }
+
+  // Another row shares this rank (a small "(t)" in the cell, "#7 (tied)" in hover and copy text)
+  rankTied(player: SkillPlayer, stat: SkillStat): boolean {
+    if (stat.format !== 'rank') return false;
+    const rank = this.value(player, stat);
+    if (rank === null) return false;
+    const rows = (this.other ? this.other.rows : SKILL_UNITS)[this.position] ?? [];
+    return rows.some((other) => other !== player && this.value(other, stat) === rank);
   }
 
   ngOnChanges(): void {
@@ -456,9 +525,10 @@ export class SkillRankingsComponent implements OnChanges {
     return avg === null ? name : `${name} (Avg: ${avg})`;
   }
 
-  // The list average of what a column shows, formatted like its values (none for records)
+  // The list average of what a column shows, formatted like its values (none for records, recent
+  // results and ranks)
   averageText(stat: SkillStat): string | null {
-    if (stat.format === 'record' || stat.format === 'rank') return null;
+    if (stat.format === 'record' || stat.format === 'recent' || stat.format === 'rank') return null;
     const avg = this.columnScale(stat, 'shown')?.mean ?? null;
     if (avg === null) return null;
     let shown: string;
@@ -496,7 +566,7 @@ export class SkillRankingsComponent implements OnChanges {
   // Column label, switched to its per-game name (or tagged with the pace, "162G") when the column
   // shows rates
   statLabel(stat: SkillStat): string {
-    const label = stat.label;
+    const label = SPORT.statLabel?.(stat, this.sportSettings) ?? stat.label;
     if (!this.showsPerGame(stat)) return label;
     return this.statBasis === 'pace17' ? `${label} (${PACE_GAMES[this.position]}G)` : (PER_GAME_LABELS[stat.key] ?? `${label} / Game`);
   }
@@ -511,7 +581,7 @@ export class SkillRankingsComponent implements OnChanges {
 
   // The stat written out in full
   statName(stat: SkillStat): string {
-    const name = stat.name ?? STAT_NAMES[stat.key] ?? stat.label;
+    const name = SPORT.statName?.(stat, this.position, this.sportSettings) ?? stat.name ?? STAT_NAMES[stat.key] ?? stat.label;
     if (!this.showsPerGame(stat)) return name;
     return this.statBasis === 'pace17' ? `${name} (${PACE_GAMES[this.position]}-game pace)` : `${name} per Game`;
   }
@@ -546,8 +616,20 @@ export class SkillRankingsComponent implements OnChanges {
     return wins;
   }
 
+  // A stat's value from the data, or worked out in the app (see statValue); another season's while a
+  // card for it is being built
   rawValue(player: SkillPlayer, stat: SkillStat): number | null {
-    return stat.key === 'games' ? player.games : unitStat(player, stat.key as SkillStatKey);
+    return statValue(player, stat, this.valueContext());
+  }
+
+  private valueContext(): ValueContext {
+    return {
+      position: this.position,
+      settings: this.sportSettings,
+      rows: this.other ? this.other.rows : SKILL_UNITS,
+      tableSeason: !this.other,
+      defaults: false,
+    };
   }
 
   // Groups shown in the grid, each with the stats that have a column
@@ -559,7 +641,7 @@ export class SkillRankingsComponent implements OnChanges {
       .filter((group) => !this.hidden[group.id])
       .map((group) => ({
         ...group,
-        stats: this.ordered(group).filter((stat) => this.isShown(stat)),
+        stats: this.combine(this.ordered(group)).filter((stat) => this.isShown(stat)),
       }))
       .filter((group) => group.stats.length);
   }
@@ -574,18 +656,41 @@ export class SkillRankingsComponent implements OnChanges {
     return [...group.stats].sort((a, b) => order.indexOf(a.key) - order.indexOf(b.key));
   }
 
-  // Column id for header dragging
+  // Column id for header dragging: a combined column stands in for the stat whose spot it took
   columnId(stat: SkillStat): string {
-    return stat.key;
+    return this.combinedSpot[stat.key] ?? stat.key;
   }
 
-  // Switched off with its sidebar eye: hidden and out of the ranking, whatever Unweighted Stats says
+  // Which stat's spot each combined column took (the pair's first one in the current order)
+  private combinedSpot: Partial<Record<string, string>> = {};
+
+  // Combine setting: a pair (rushing + receiving yards) shows as one total column where the first of
+  // the two sits, when the tab has both
+  private combine(stats: SkillStat[]): SkillStat[] {
+    if (!this.combineStats) return stats;
+    let out = stats;
+    for (const { stat: total, parts } of combinedFor(this.position)) {
+      const at = out.findIndex((stat) => (parts as string[]).includes(stat.key));
+      if (at === -1 || !parts.every((part) => out.some((stat) => stat.key === part))) continue;
+      this.combinedSpot[total.key] = out[at].key;
+      out = out.flatMap((stat, i) => (i === at ? [total] : (parts as string[]).includes(stat.key) ? [] : [stat]));
+    }
+    return out;
+  }
+
+  // Switched off with its sidebar eye (or its combined pair's parent eye): hidden and out of the
+  // ranking, whatever Unweighted Stats says
   private statHidden(key: string): boolean {
-    return this.positionService.isStatHidden(this.position, key);
+    const parent = combinedFor(this.position).find(({ parts }) => (parts as string[]).includes(key));
+    return (
+      this.positionService.isStatHidden(this.position, key) ||
+      (!!parent && this.positionService.isStatHidden(this.position, parent.stat.key))
+    );
   }
 
+  // Slider weights with each combined pair's parts scaled by their parent slider
   private effectiveWeights(): SkillWeights {
-    return { ...this.weights };
+    return combinedWeights(this.position, this.weights);
   }
 
   // The eye decides first; Unweighted Stats only decides whether a 0% stat shows
@@ -593,6 +698,12 @@ export class SkillRankingsComponent implements OnChanges {
     const weights = this.effectiveWeights();
     const empty = (key: string) => (this.other ? this.other.empty(key) : statIsEmpty(this.position, key));
     if (this.statHidden(stat.key)) return false;
+    // A combined column shows if either of its stats would
+    const combined = combinedFor(this.position).find((c) => c.stat.key === stat.key);
+    if (combined) {
+      const parts = combined.parts.filter((key) => !this.statHidden(key) && !empty(key));
+      return parts.length > 0 && (this.showUnused || parts.some((key) => !!weights[key as keyof SkillWeights]));
+    }
     // Not recorded that season
     if (empty(stat.key)) return false;
     // Display-only columns (Games, PA) have no weight, so they show unless their eye is off
@@ -610,10 +721,10 @@ export class SkillRankingsComponent implements OnChanges {
       case 'grade':
         return this.grade(value);
       case 'rank':
-        return `#${value}`;
+        return this.rankTied(player, stat) ? `#${value} (tied)` : `#${value}`;
       case 'record': {
-        const { wins, losses } = player.stats;
-        return `${wins}-${losses}`;
+        const { wins, losses, ties } = player.stats as Record<string, number | null>;
+        return ties ? `${wins}-${losses}-${ties}` : `${wins}-${losses}`;
       }
       case 'avg3':
         return this.avg3(value);
@@ -884,17 +995,24 @@ export class SkillRankingsComponent implements OnChanges {
     season: number,
     overall: number,
     scores: Record<string, number>,
-    _context: SeasonContext | null,
+    context: SeasonContext | null,
   ): CardFlag[] {
-    // The sport's own takes (apps/<sport>/src/sport/sport.ts), then the profile's shape below
-    const flags: CardFlag[] = SPORT.cardFlags({
+    // The sport's own takes (apps/<sport>/src/sport/sport.ts), then the profile's shape below, then
+    // the sport's last ones
+    const flagContext: FlagContext = {
       player,
       season,
       position: this.position,
       current: isLiveSeason(season),
       ordinal: (n) => this.ordinal(n),
       innings: (v) => this.innings(v),
-    });
+      overall,
+      tableSeason: !context,
+      stats: this.stats,
+      value: (stat) => this.rawValue(player, stat),
+      grade: (v) => this.grade(v),
+    };
+    const flags: CardFlag[] = SPORT.cardFlags(flagContext);
 
     // The shape of the profile: no holes, or one skill carrying the rest
     const pcts = Object.values(scores);
@@ -924,6 +1042,7 @@ export class SkillRankingsComponent implements OnChanges {
         flags.push({ icon: 'bolt', tone: 'good', text: SPORT.copy.efficiencyOverVolume });
       }
     }
+    flags.push(...(SPORT.cardFlagsLast?.(flagContext) ?? []));
     return flags;
   }
 
@@ -972,7 +1091,7 @@ export class SkillRankingsComponent implements OnChanges {
   // Career to date: this season and the ones before it (never later ones, so a 2021 card reads like it
   // did in 2021). Players and coaches only: a defense or O-line turns over too much year to year.
   private async loadHistory(card: PlayerCard): Promise<void> {
-    if (['DEF', 'OL'].includes(this.position) || !card.seasons) return;
+    if (SPORT.teamTabs?.includes(this.position) || !card.seasons) return;
     const upTo = card.seasons.filter((s) => s.season <= card.season);
     try {
       const entries = (await Promise.all(upTo.map((s) => this.careerSeason(card, s.season)))).filter(
@@ -989,8 +1108,8 @@ export class SkillRankingsComponent implements OnChanges {
   // their calling card and a long-running issue, and a change of profile
   private buildHistory(card: PlayerCard, played: number[], entries: CareerSeason[]): CardFlag[] {
     const n = played.length;
-    // (the data starts in 2000: a player already in it then wasn't necessarily a rookie)
-    const known = played[0] > 2000;
+    // (a player already in the data's first season wasn't necessarily a rookie)
+    const known = played[0] > SPORT.firstSeason;
     const now = entries.find((e) => e.season === card.season)!;
     const prior = entries.filter((e) => e.season < card.season);
     const avg = (v: number[]) => v.reduce((a, x) => a + x, 0) / v.length;
@@ -1147,7 +1266,7 @@ export class SkillRankingsComponent implements OnChanges {
         shape: this.radarShape(overview.skills.map((s) => byId.get(s.id) ?? s.pct)),
       };
       // (players and coaches get these against their whole career instead, in the history)
-      if (!['DEF', 'OL'].includes(this.position)) return;
+      if (!SPORT.teamTabs?.includes(this.position)) return;
       const moves = overview.skills
         .filter((s) => byId.has(s.id))
         .map((s) => ({ skill: s, delta: s.pct - byId.get(s.id)! }));
@@ -1220,7 +1339,7 @@ export class SkillRankingsComponent implements OnChanges {
   // Another season's list: the same filters as the table, ranked with the current sliders
   private seasonContext(season: number, rows: Record<SkillPosition, SkillPlayer[]>): SeasonContext {
     const units = rows[this.position];
-    const min = this.minCountFor(Math.max(1, ...units.map((p) => SPORT.playingTime.of(p))));
+    const min = this.hasMin ? this.minCountFor(this.seasonLength({ [this.position]: units })) : 0;
     const context: SeasonContext = {
       season,
       rows,
@@ -1322,7 +1441,10 @@ export class SkillRankingsComponent implements OnChanges {
           id: group.id,
           title: group.title,
           icon: group.icon,
-          stats: group.stats.map((stat) => this.cardStat(player, stat, list, group.id)),
+          // (another season's card leaves out the values from other tabs, which are the table's season's)
+          stats: group.stats
+            .filter((stat) => !context || !SPORT.tableSeasonOnly?.(stat))
+            .map((stat) => this.cardStat(player, stat, list, group.id)),
         }))
         .filter((group) => group.stats.length);
       const photo = this.headshot(player, 440);
@@ -1334,7 +1456,7 @@ export class SkillRankingsComponent implements OnChanges {
         name: player.name,
         positionName: POSITION_NAMES[this.position],
         seasonLabel: isLiveSeason(season) ? 'This Season' : SPORT.seasonText(season),
-        teamName: player.teamName ?? null,
+        teamName: SPORT.teamName ? SPORT.teamName(player, this.position, context ? context.rows : SKILL_UNITS) : ((player as { teamName?: string | null }).teamName ?? null),
         logo: logoForSeason(player.teamLogo, season),
         color: this.teamBadge(player),
         whiteLogo: this.teamLogoWhite(player),
@@ -1386,8 +1508,9 @@ export class SkillRankingsComponent implements OnChanges {
       const now = rows.find((p) => p.gsisId === id);
       let seasons = past;
       if (now) {
-        const ranked = defaultRanking(this.position, presetWeights(this.position, 'default'), rows);
-        const stats = headline.map((stat) => unitStat(now, stat.key as SkillStatKey));
+        const ranked = defaultRanking(this.position, presetWeights(this.position, 'default'), current);
+        const context: ValueContext = { position: this.position, settings: DEFAULT_SPORT_SETTINGS, rows: current, tableSeason: false, defaults: true };
+        const stats = headline.map((stat) => statValue(now, stat, context));
         seasons = [...past, line(CURRENT_SEASON, now.teamLogo, now.games, ranked.indexOf(now) + 1, ranked.length, stats)];
       }
       // Each headline stat's best finished season lit (lowest for a stat that counts against them; a few games into this
@@ -1410,6 +1533,7 @@ export class SkillRankingsComponent implements OnChanges {
       // (the Overview's career history reads those seasons too)
       if (this.cardTab === 'seasons') this.rankCareer(card);
       this.loadHistory(card);
+      this.loadExtras(card);
     } catch (err) {
       console.error(err);
     }
@@ -1443,9 +1567,9 @@ export class SkillRankingsComponent implements OnChanges {
   }
 
   private cardStat(player: SkillPlayer, stat: SkillStat, list: SkillPlayer[], group: string): CardStat {
-    // Lower is better for stats that count against a player (support grades read higher is better: a
-    // better lineup is a better lineup)
-    const lowerBetter = !!stat.negative && !stat.support;
+    // Lower is better for ranks and stats that count against a player (support grades read higher is
+    // better: a better lineup is a better lineup)
+    const lowerBetter = stat.format === 'rank' || (!!stat.negative && !stat.support);
     const values = list.map((p) => this.value(p, stat)).filter((v): v is number => v !== null);
     const value = this.value(player, stat);
     // (display-only stats like Games aren't ranked)
@@ -1460,6 +1584,7 @@ export class SkillRankingsComponent implements OnChanges {
       display: this.format(player, stat),
       rank,
       tied: value !== null && values.filter((v) => v === value).length > 1,
+      dots: stat.format === 'recent' ? [...this.lastFive(player)].reverse() : undefined,
       of,
       pct: rank === null ? null : of > 1 ? (of - rank) / (of - 1) : 1,
       avg: this.averageText(stat),
@@ -1467,6 +1592,55 @@ export class SkillRankingsComponent implements OnChanges {
       // (against that season's list: the value helpers read it while the card is built)
       tint: this.valueColor(player, stat),
     };
+  }
+
+  // The sport's card extras (SPORT.cardExtras: the NFL's run blocking), once the seasons are in
+  private async loadExtras(card: PlayerCard): Promise<void> {
+    if (!SPORT.cardExtras || !card.seasons) return;
+    const overview = card.overview;
+    const redraw = () => {
+      overview.radar = this.radar(overview.skills);
+      overview.report = this.reportFor(overview.skills).report;
+      if (overview.prev) overview.prev.shape = this.radarShape(overview.skills.map((s) => overview.prev!.pcts.get(s.id) ?? s.pct));
+    };
+    try {
+      await SPORT.cardExtras({
+        player: card.player,
+        season: card.season,
+        position: this.position,
+        seasons: card.seasons.filter((s) => s.season <= card.season).map((s) => s.season),
+        open: () => this.card === card,
+        tabRows: (season) => this.tabRowsFor(season),
+        seasonFile: (season, file) => this.seasonFile(season, file),
+        skills: () => overview.skills,
+        addSkill: (skill: CardSkill) => {
+          overview.skills = [...overview.skills.filter((s) => s.id !== skill.id), skill];
+          redraw();
+        },
+        addFlags: (flags) => (overview.flags = [...overview.flags, ...flags]),
+        setArchetype: (name) => {
+          overview.archetype = name;
+          overview.blockingArchetype = true;
+          // (a "new profile" note compared archetypes worked out without it, so it no longer applies)
+          overview.flags = overview.flags.filter((f) => !f.text.startsWith('New profile'));
+        },
+      });
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  // A season's extra file (one fetch each; missing reads as empty: not every season has one)
+  private seasonFiles = new Map<string, Promise<unknown>>();
+
+  private seasonFile<T>(season: number, file: string): Promise<T> {
+    const key = `${season}/${file}`;
+    let data = this.seasonFiles.get(key);
+    if (!data) {
+      data = season === CURRENT_SEASON ? Promise.resolve({}) : fetchSeasonFile(season, file).catch(() => ({}));
+      this.seasonFiles.set(key, data);
+    }
+    return data as Promise<T>;
   }
 
   // A headline stat on the Seasons tab: season totals, formatted like the table ("4,183")

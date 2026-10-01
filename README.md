@@ -11,16 +11,15 @@ in common. How the pieces fit, and how to add a sport: [libs/ranker/README.md](l
 
 ```
 libs/ranker/            the shared library (one copy of everything the sports share)
-  src/core/             utilities every app uses (the NFL app too): copy, value tints, column
-                        directives, analytics, the sport bar's list
+  src/core/             small shared utilities: copy, value tints, column directives, analytics,
+                        the sport bar's list
   src/engine/           the ranker app itself (table, player card, filter menu, settings, scoring,
-                        data loading), for every sport but the NFL (see the library README)
+                        data loading), for every sport (see the library README)
   src/styles/           the look: base styles, variables, Material theme, each component's styles
   src/assets/           shared textures (leather grain, chalk dust)
   scripts/              shared data-script pieces: the similar-seasons builder, the grade curve
 apps/
-  nfl/                  the NFL app (its own app code, on the shared core and styles)
-  mlb/  nba/            sports on the engine:
+  nfl/  mlb/  nba/      one per sport, each on the engine:
     src/sport/          what makes the sport: SPORT (sport.ts), positions and stats, presets, skills
                         and archetypes, awards, team colors, logo eras, the About panel
     src/theme/          its look on top of the shared styles (textures, knobs, accent, lines)

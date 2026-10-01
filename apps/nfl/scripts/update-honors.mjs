@@ -1,7 +1,7 @@
 // Rebuilds the honors behind the badges beside a player's name, from Wikipedia:
-//   src/app/all-pro.json   AP All-Pro first and second teams ("<year> All-Pro Team" pages; the AP picks
+//   src/sport/all-pro.json   AP All-Pro first and second teams ("<year> All-Pro Team" pages; the AP picks
 //                          are tagged "AP" / "AP-t" for first team, "AP-2" / "AP-2t" for second)
-//   src/app/pro-bowl.json  Pro Bowl selections ("<year+1> Pro Bowl", "Pro Bowl Games" from the 2022
+//   src/sport/pro-bowl.json  Pro Bowl selections ("<year+1> Pro Bowl", "Pro Bowl Games" from the 2022
 //                          season on): starters and reserves, including those who sat out injured or
 //                          for the Super Bowl, plus alternates named as replacements; the way Pro
 //                          Football Reference and the teams count Pro Bowl nods. The 2013-2015
@@ -20,8 +20,8 @@ import { readFile, writeFile } from 'node:fs/promises';
 const FIRST_SEASON = Number(process.env.FROM ?? 2000);
 const LAST_SEASON = 2025;
 const SEASONS_DIR = new URL('../src/StaticData/seasons/', import.meta.url);
-const ALL_PRO_FILE = new URL('../src/app/all-pro.json', import.meta.url);
-const PRO_BOWL_FILE = new URL('../src/app/pro-bowl.json', import.meta.url);
+const ALL_PRO_FILE = new URL('../src/sport/all-pro.json', import.meta.url);
+const PRO_BOWL_FILE = new URL('../src/sport/pro-bowl.json', import.meta.url);
 const USER_AGENT = 'NFLRanker-data-script/1.0 (https://qbranker2026.web.app)';
 
 // Wikipedia's name -> the name in our data, where they differ beyond spacing and punctuation

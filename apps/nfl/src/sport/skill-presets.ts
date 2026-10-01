@@ -1,4 +1,4 @@
-import type { SkillPosition, SkillWeights } from 'app/positions';
+import type { SkillPosition, SkillWeights } from '@sport/positions';
 
 // Presets for every tab, one set per position, each built around a real player / unit type.
 // A preset sets the stats it's named for (75-100); every other stat stays in at 25 as a tiebreaker,

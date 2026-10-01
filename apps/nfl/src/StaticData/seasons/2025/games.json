@@ -3,7 +3,7 @@
     "id": 8439,
     "name": "Aaron Rodgers",
     "team": "Pittsburgh Steelers",
-    "teamLogo": "../assets/NFL_Icons/Steelers.png",
+    "teamLogo": "assets/NFL_Icons/Steelers.png",
     "wins": 9,
     "losses": 6,
     "ties": 0,
@@ -15,7 +15,7 @@
       1
     ],
     "starts": {
-      "../assets/NFL_Icons/Steelers.png": 15
+      "assets/NFL_Icons/Steelers.png": 15
     },
     "advanced": {
       "pressureToSack": 0.341,
@@ -55,7 +55,7 @@
     "id": 4260394,
     "name": "Aidan O'Connell",
     "team": "Las Vegas Raiders",
-    "teamLogo": "../assets/NFL_Icons/Raiders.png",
+    "teamLogo": "assets/NFL_Icons/Raiders.png",
     "wins": 1,
     "losses": 0,
     "ties": 0,
@@ -63,7 +63,7 @@
       1
     ],
     "starts": {
-      "../assets/NFL_Icons/Raiders.png": 1
+      "assets/NFL_Icons/Raiders.png": 1
     },
     "advanced": {
       "pressureToSack": 0.333,
@@ -103,7 +103,7 @@
     "id": 14012,
     "name": "Andy Dalton",
     "team": "Carolina Panthers",
-    "teamLogo": "../assets/NFL_Icons/Panthers.png",
+    "teamLogo": "assets/NFL_Icons/Panthers.png",
     "wins": 0,
     "losses": 1,
     "ties": 0,
@@ -111,7 +111,7 @@
       0
     ],
     "starts": {
-      "../assets/NFL_Icons/Panthers.png": 1
+      "assets/NFL_Icons/Panthers.png": 1
     },
     "advanced": {
       "pressureToSack": 0.727,
@@ -151,7 +151,7 @@
     "id": 3052587,
     "name": "Baker Mayfield",
     "team": "Tampa Bay Buccaneers",
-    "teamLogo": "../assets/NFL_Icons/Bucs.png",
+    "teamLogo": "assets/NFL_Icons/Bucs.png",
     "wins": 8,
     "losses": 9,
     "ties": 0,
@@ -163,7 +163,7 @@
       0
     ],
     "starts": {
-      "../assets/NFL_Icons/Bucs.png": 17
+      "assets/NFL_Icons/Bucs.png": 17
     },
     "advanced": {
       "pressureToSack": 0.391,
@@ -203,7 +203,7 @@
     "id": 4426338,
     "name": "Bo Nix",
     "team": "Denver Broncos",
-    "teamLogo": "../assets/NFL_Icons/Broncos.png",
+    "teamLogo": "assets/NFL_Icons/Broncos.png",
     "wins": 14,
     "losses": 3,
     "ties": 0,
@@ -215,7 +215,7 @@
       1
     ],
     "starts": {
-      "../assets/NFL_Icons/Broncos.png": 17
+      "assets/NFL_Icons/Broncos.png": 17
     },
     "advanced": {
       "pressureToSack": 0.172,
@@ -255,7 +255,7 @@
     "id": 4429435,
     "name": "Brady Cook",
     "team": "New York Jets",
-    "teamLogo": "../assets/NFL_Icons/Jets.png",
+    "teamLogo": "assets/NFL_Icons/Jets.png",
     "wins": 0,
     "losses": 5,
     "ties": 0,
@@ -267,7 +267,7 @@
       0
     ],
     "starts": {
-      "../assets/NFL_Icons/Jets.png": 5
+      "assets/NFL_Icons/Jets.png": 5
     },
     "advanced": {
       "pressureToSack": 0.475,
@@ -307,7 +307,7 @@
     "id": 2574511,
     "name": "Brandon Allen",
     "team": "Tennessee Titans",
-    "teamLogo": "../assets/NFL_Icons/Titans.png",
+    "teamLogo": "assets/NFL_Icons/Titans.png",
     "wins": 0,
     "losses": 1,
     "ties": 0,
@@ -315,7 +315,7 @@
       0
     ],
     "starts": {
-      "../assets/NFL_Icons/Titans.png": 1
+      "assets/NFL_Icons/Titans.png": 1
     },
     "advanced": {
       "pressureToSack": 0.111,
@@ -355,7 +355,7 @@
     "id": 4361741,
     "name": "Brock Purdy",
     "team": "San Francisco 49ers",
-    "teamLogo": "../assets/NFL_Icons/49ers.png",
+    "teamLogo": "assets/NFL_Icons/49ers.png",
     "wins": 7,
     "losses": 2,
     "ties": 0,
@@ -367,7 +367,7 @@
       1
     ],
     "starts": {
-      "../assets/NFL_Icons/49ers.png": 9
+      "assets/NFL_Icons/49ers.png": 9
     },
     "advanced": {
       "pressureToSack": 0.167,
@@ -407,7 +407,7 @@
     "id": 4685720,
     "name": "Bryce Young",
     "team": "Carolina Panthers",
-    "teamLogo": "../assets/NFL_Icons/Panthers.png",
+    "teamLogo": "assets/NFL_Icons/Panthers.png",
     "wins": 8,
     "losses": 8,
     "ties": 0,
@@ -419,7 +419,7 @@
       1
     ],
     "starts": {
-      "../assets/NFL_Icons/Panthers.png": 16
+      "assets/NFL_Icons/Panthers.png": 16
     },
     "advanced": {
       "pressureToSack": 0.209,
@@ -459,7 +459,7 @@
     "id": 4432577,
     "name": "C.J. Stroud",
     "team": "Houston Texans",
-    "teamLogo": "../assets/NFL_Icons/Texans.png",
+    "teamLogo": "assets/NFL_Icons/Texans.png",
     "wins": 9,
     "losses": 4,
     "ties": 0,
@@ -471,7 +471,7 @@
       1
     ],
     "starts": {
-      "../assets/NFL_Icons/Texans.png": 13
+      "assets/NFL_Icons/Texans.png": 13
     },
     "advanced": {
       "pressureToSack": 0.221,
@@ -511,7 +511,7 @@
     "id": 4431611,
     "name": "Caleb Williams",
     "team": "Chicago Bears",
-    "teamLogo": "../assets/NFL_Icons/Bears.png",
+    "teamLogo": "assets/NFL_Icons/Bears.png",
     "wins": 11,
     "losses": 6,
     "ties": 0,
@@ -523,7 +523,7 @@
       0
     ],
     "starts": {
-      "../assets/NFL_Icons/Bears.png": 17
+      "assets/NFL_Icons/Bears.png": 17
     },
     "advanced": {
       "pressureToSack": 0.159,
@@ -563,7 +563,7 @@
     "id": 4688380,
     "name": "Cam Ward",
     "team": "Tennessee Titans",
-    "teamLogo": "../assets/NFL_Icons/Titans.png",
+    "teamLogo": "assets/NFL_Icons/Titans.png",
     "wins": 3,
     "losses": 13,
     "ties": 0,
@@ -575,7 +575,7 @@
       0
     ],
     "starts": {
-      "../assets/NFL_Icons/Titans.png": 16
+      "assets/NFL_Icons/Titans.png": 16
     },
     "advanced": {
       "pressureToSack": 0.322,
@@ -615,7 +615,7 @@
     "id": 2573079,
     "name": "Carson Wentz",
     "team": "Minnesota Vikings",
-    "teamLogo": "../assets/NFL_Icons/Vikings.png",
+    "teamLogo": "assets/NFL_Icons/Vikings.png",
     "wins": 2,
     "losses": 3,
     "ties": 0,
@@ -627,7 +627,7 @@
       1
     ],
     "starts": {
-      "../assets/NFL_Icons/Vikings.png": 5
+      "assets/NFL_Icons/Vikings.png": 5
     },
     "advanced": {
       "pressureToSack": 0.396,
@@ -667,7 +667,7 @@
     "id": 4044111,
     "name": "Chris Oladokun",
     "team": "Kansas City Chiefs",
-    "teamLogo": "../assets/NFL_Icons/Chiefs.png",
+    "teamLogo": "assets/NFL_Icons/Chiefs.png",
     "wins": 0,
     "losses": 3,
     "ties": 0,
@@ -677,7 +677,7 @@
       0
     ],
     "starts": {
-      "../assets/NFL_Icons/Chiefs.png": 3
+      "assets/NFL_Icons/Chiefs.png": 3
     },
     "advanced": {
       "pressureToSack": 0.471,
@@ -717,7 +717,7 @@
     "id": 4360175,
     "name": "Clayton Tune",
     "team": "Green Bay Packers",
-    "teamLogo": "../assets/NFL_Icons/Packers.png",
+    "teamLogo": "assets/NFL_Icons/Packers.png",
     "wins": 0,
     "losses": 1,
     "ties": 0,
@@ -725,7 +725,7 @@
       0
     ],
     "starts": {
-      "../assets/NFL_Icons/Packers.png": 1
+      "assets/NFL_Icons/Packers.png": 1
     },
     "advanced": {
       "pressureToSack": 0.625,
@@ -765,7 +765,7 @@
     "id": 2972515,
     "name": "Cooper Rush",
     "team": "Baltimore Ravens",
-    "teamLogo": "../assets/NFL_Icons/Ravens.png",
+    "teamLogo": "assets/NFL_Icons/Ravens.png",
     "wins": 0,
     "losses": 2,
     "ties": 0,
@@ -774,7 +774,7 @@
       0
     ],
     "starts": {
-      "../assets/NFL_Icons/Ravens.png": 2
+      "assets/NFL_Icons/Ravens.png": 2
     },
     "advanced": {
       "pressureToSack": 0.111,
@@ -814,7 +814,7 @@
     "id": 2577417,
     "name": "Dak Prescott",
     "team": "Dallas Cowboys",
-    "teamLogo": "../assets/NFL_Icons/Cowboys.png",
+    "teamLogo": "assets/NFL_Icons/Cowboys.png",
     "wins": 7,
     "losses": 8,
     "ties": 1,
@@ -826,7 +826,7 @@
       1
     ],
     "starts": {
-      "../assets/NFL_Icons/Cowboys.png": 16
+      "assets/NFL_Icons/Cowboys.png": 16
     },
     "advanced": {
       "pressureToSack": 0.244,
@@ -866,7 +866,7 @@
     "id": 3917792,
     "name": "Daniel Jones",
     "team": "Indianapolis Colts",
-    "teamLogo": "../assets/NFL_Icons/Colts.png",
+    "teamLogo": "assets/NFL_Icons/Colts.png",
     "wins": 8,
     "losses": 4,
     "ties": 0,
@@ -878,7 +878,7 @@
       1
     ],
     "starts": {
-      "../assets/NFL_Icons/Colts.png": 12
+      "assets/NFL_Icons/Colts.png": 12
     },
     "advanced": {
       "pressureToSack": 0.253,
@@ -918,7 +918,7 @@
     "id": 4242546,
     "name": "Davis Mills",
     "team": "Houston Texans",
-    "teamLogo": "../assets/NFL_Icons/Texans.png",
+    "teamLogo": "assets/NFL_Icons/Texans.png",
     "wins": 3,
     "losses": 1,
     "ties": 0,
@@ -929,7 +929,7 @@
       0
     ],
     "starts": {
-      "../assets/NFL_Icons/Texans.png": 4
+      "assets/NFL_Icons/Texans.png": 4
     },
     "advanced": {
       "pressureToSack": 0.276,
@@ -969,7 +969,7 @@
     "id": 4427238,
     "name": "Dillon Gabriel",
     "team": "Cleveland Browns",
-    "teamLogo": "../assets/NFL_Icons/Browns.png",
+    "teamLogo": "assets/NFL_Icons/Browns.png",
     "wins": 1,
     "losses": 4,
     "ties": 0,
@@ -981,7 +981,7 @@
       0
     ],
     "starts": {
-      "../assets/NFL_Icons/Browns.png": 5
+      "assets/NFL_Icons/Browns.png": 5
     },
     "advanced": {
       "pressureToSack": 0.429,
@@ -1021,7 +1021,7 @@
     "id": 4431452,
     "name": "Drake Maye",
     "team": "New England Patriots",
-    "teamLogo": "../assets/NFL_Icons/Patriots.png",
+    "teamLogo": "assets/NFL_Icons/Patriots.png",
     "wins": 14,
     "losses": 3,
     "ties": 0,
@@ -1033,7 +1033,7 @@
       1
     ],
     "starts": {
-      "../assets/NFL_Icons/Patriots.png": 17
+      "assets/NFL_Icons/Patriots.png": 17
     },
     "advanced": {
       "pressureToSack": 0.356,
@@ -1073,7 +1073,7 @@
     "id": 15864,
     "name": "Geno Smith",
     "team": "Las Vegas Raiders",
-    "teamLogo": "../assets/NFL_Icons/Raiders.png",
+    "teamLogo": "assets/NFL_Icons/Raiders.png",
     "wins": 2,
     "losses": 13,
     "ties": 0,
@@ -1085,7 +1085,7 @@
       0
     ],
     "starts": {
-      "../assets/NFL_Icons/Raiders.png": 15
+      "assets/NFL_Icons/Raiders.png": 15
     },
     "advanced": {
       "pressureToSack": 0.462,
@@ -1125,7 +1125,7 @@
     "id": 4433970,
     "name": "J.J. McCarthy",
     "team": "Minnesota Vikings",
-    "teamLogo": "../assets/NFL_Icons/Vikings.png",
+    "teamLogo": "assets/NFL_Icons/Vikings.png",
     "wins": 6,
     "losses": 4,
     "ties": 0,
@@ -1137,7 +1137,7 @@
       0
     ],
     "starts": {
-      "../assets/NFL_Icons/Vikings.png": 10
+      "assets/NFL_Icons/Vikings.png": 10
     },
     "advanced": {
       "pressureToSack": 0.351,
@@ -1177,7 +1177,7 @@
     "id": 2578570,
     "name": "Jacoby Brissett",
     "team": "Arizona Cardinals",
-    "teamLogo": "../assets/NFL_Icons/Cardinals.png",
+    "teamLogo": "assets/NFL_Icons/Cardinals.png",
     "wins": 1,
     "losses": 11,
     "ties": 0,
@@ -1189,7 +1189,7 @@
       0
     ],
     "starts": {
-      "../assets/NFL_Icons/Cardinals.png": 12
+      "assets/NFL_Icons/Cardinals.png": 12
     },
     "advanced": {
       "pressureToSack": 0.285,
@@ -1229,7 +1229,7 @@
     "id": 3886812,
     "name": "Jake Browning",
     "team": "Cincinnati Bengals",
-    "teamLogo": "../assets/NFL_Icons/Bengals.png",
+    "teamLogo": "assets/NFL_Icons/Bengals.png",
     "wins": 1,
     "losses": 3,
     "ties": 0,
@@ -1240,7 +1240,7 @@
       1
     ],
     "starts": {
-      "../assets/NFL_Icons/Bengals.png": 4
+      "assets/NFL_Icons/Bengals.png": 4
     },
     "advanced": {
       "pressureToSack": 0.25,
@@ -1280,7 +1280,7 @@
     "id": 4040715,
     "name": "Jalen Hurts",
     "team": "Philadelphia Eagles",
-    "teamLogo": "../assets/NFL_Icons/Eagles.png",
+    "teamLogo": "assets/NFL_Icons/Eagles.png",
     "wins": 11,
     "losses": 5,
     "ties": 0,
@@ -1292,7 +1292,7 @@
       0
     ],
     "starts": {
-      "../assets/NFL_Icons/Eagles.png": 16
+      "assets/NFL_Icons/Eagles.png": 16
     },
     "advanced": {
       "pressureToSack": 0.32,
@@ -1332,7 +1332,7 @@
     "id": 2969939,
     "name": "Jameis Winston",
     "team": "New York Giants",
-    "teamLogo": "../assets/NFL_Icons/Giants.png",
+    "teamLogo": "assets/NFL_Icons/Giants.png",
     "wins": 0,
     "losses": 2,
     "ties": 0,
@@ -1341,7 +1341,7 @@
       0
     ],
     "starts": {
-      "../assets/NFL_Icons/Giants.png": 2
+      "assets/NFL_Icons/Giants.png": 2
     },
     "advanced": {
       "pressureToSack": 0.136,
@@ -1381,7 +1381,7 @@
     "id": 3046779,
     "name": "Jared Goff",
     "team": "Detroit Lions",
-    "teamLogo": "../assets/NFL_Icons/Lions.png",
+    "teamLogo": "assets/NFL_Icons/Lions.png",
     "wins": 9,
     "losses": 8,
     "ties": 0,
@@ -1393,7 +1393,7 @@
       1
     ],
     "starts": {
-      "../assets/NFL_Icons/Lions.png": 17
+      "assets/NFL_Icons/Lions.png": 17
     },
     "advanced": {
       "pressureToSack": 0.253,
@@ -1433,7 +1433,7 @@
     "id": 4689114,
     "name": "Jaxson Dart",
     "team": "New York Giants",
-    "teamLogo": "../assets/NFL_Icons/Giants.png",
+    "teamLogo": "assets/NFL_Icons/Giants.png",
     "wins": 4,
     "losses": 8,
     "ties": 0,
@@ -1445,7 +1445,7 @@
       0
     ],
     "starts": {
-      "../assets/NFL_Icons/Giants.png": 12
+      "assets/NFL_Icons/Giants.png": 12
     },
     "advanced": {
       "pressureToSack": 0.365,
@@ -1485,7 +1485,7 @@
     "id": 4426348,
     "name": "Jayden Daniels",
     "team": "Washington Commanders",
-    "teamLogo": "../assets/NFL_Icons/Commanders.png",
+    "teamLogo": "assets/NFL_Icons/Commanders.png",
     "wins": 2,
     "losses": 5,
     "ties": 0,
@@ -1497,7 +1497,7 @@
       1
     ],
     "starts": {
-      "../assets/NFL_Icons/Commanders.png": 7
+      "assets/NFL_Icons/Commanders.png": 7
     },
     "advanced": {
       "pressureToSack": 0.439,
@@ -1537,7 +1537,7 @@
     "id": 3915511,
     "name": "Joe Burrow",
     "team": "Cincinnati Bengals",
-    "teamLogo": "../assets/NFL_Icons/Bengals.png",
+    "teamLogo": "assets/NFL_Icons/Bengals.png",
     "wins": 4,
     "losses": 3,
     "ties": 0,
@@ -1549,7 +1549,7 @@
       0
     ],
     "starts": {
-      "../assets/NFL_Icons/Bengals.png": 7
+      "assets/NFL_Icons/Bengals.png": 7
     },
     "advanced": {
       "pressureToSack": 0.309,
@@ -1589,7 +1589,7 @@
     "id": 11252,
     "name": "Joe Flacco",
     "team": "Cincinnati Bengals",
-    "teamLogo": "../assets/NFL_Icons/Bengals.png",
+    "teamLogo": "assets/NFL_Icons/Bengals.png",
     "wins": 2,
     "losses": 8,
     "ties": 0,
@@ -1601,8 +1601,8 @@
       1
     ],
     "starts": {
-      "../assets/NFL_Icons/Browns.png": 4,
-      "../assets/NFL_Icons/Bengals.png": 6
+      "assets/NFL_Icons/Browns.png": 4,
+      "assets/NFL_Icons/Bengals.png": 6
     },
     "advanced": {
       "pressureToSack": 0.198,
@@ -1642,7 +1642,7 @@
     "id": 4360698,
     "name": "Joe Milton III",
     "team": "Dallas Cowboys",
-    "teamLogo": "../assets/NFL_Icons/Cowboys.png",
+    "teamLogo": "assets/NFL_Icons/Cowboys.png",
     "wins": 0,
     "losses": 1,
     "ties": 0,
@@ -1650,7 +1650,7 @@
       0
     ],
     "starts": {
-      "../assets/NFL_Icons/Cowboys.png": 1
+      "assets/NFL_Icons/Cowboys.png": 1
     },
     "advanced": {
       "pressureToSack": 0,
@@ -1690,7 +1690,7 @@
     "id": 4036378,
     "name": "Jordan Love",
     "team": "Green Bay Packers",
-    "teamLogo": "../assets/NFL_Icons/Packers.png",
+    "teamLogo": "assets/NFL_Icons/Packers.png",
     "wins": 9,
     "losses": 5,
     "ties": 1,
@@ -1702,7 +1702,7 @@
       1
     ],
     "starts": {
-      "../assets/NFL_Icons/Packers.png": 15
+      "assets/NFL_Icons/Packers.png": 15
     },
     "advanced": {
       "pressureToSack": 0.208,
@@ -1742,7 +1742,7 @@
     "id": 3918298,
     "name": "Josh Allen",
     "team": "Buffalo Bills",
-    "teamLogo": "../assets/NFL_Icons/Bills.png",
+    "teamLogo": "assets/NFL_Icons/Bills.png",
     "wins": 11,
     "losses": 5,
     "ties": 0,
@@ -1754,7 +1754,7 @@
       1
     ],
     "starts": {
-      "../assets/NFL_Icons/Bills.png": 16
+      "assets/NFL_Icons/Bills.png": 16
     },
     "advanced": {
       "pressureToSack": 0.404,
@@ -1794,7 +1794,7 @@
     "id": 11394,
     "name": "Josh Johnson",
     "team": "Washington Commanders",
-    "teamLogo": "../assets/NFL_Icons/Commanders.png",
+    "teamLogo": "assets/NFL_Icons/Commanders.png",
     "wins": 1,
     "losses": 1,
     "ties": 0,
@@ -1803,7 +1803,7 @@
       0
     ],
     "starts": {
-      "../assets/NFL_Icons/Commanders.png": 2
+      "assets/NFL_Icons/Commanders.png": 2
     },
     "advanced": {
       "pressureToSack": 0.167,
@@ -1843,7 +1843,7 @@
     "id": 4362887,
     "name": "Justin Fields",
     "team": "New York Jets",
-    "teamLogo": "../assets/NFL_Icons/Jets.png",
+    "teamLogo": "assets/NFL_Icons/Jets.png",
     "wins": 2,
     "losses": 5,
     "ties": 0,
@@ -1855,7 +1855,7 @@
       0
     ],
     "starts": {
-      "../assets/NFL_Icons/Jets.png": 7
+      "assets/NFL_Icons/Jets.png": 7
     },
     "advanced": {
       "pressureToSack": 0.391,
@@ -1895,7 +1895,7 @@
     "id": 4038941,
     "name": "Justin Herbert",
     "team": "Los Angeles Chargers",
-    "teamLogo": "../assets/NFL_Icons/Chargers.png",
+    "teamLogo": "assets/NFL_Icons/Chargers.png",
     "wins": 11,
     "losses": 5,
     "ties": 0,
@@ -1907,7 +1907,7 @@
       1
     ],
     "starts": {
-      "../assets/NFL_Icons/Chargers.png": 16
+      "assets/NFL_Icons/Chargers.png": 16
     },
     "advanced": {
       "pressureToSack": 0.297,
@@ -1947,7 +1947,7 @@
     "id": 4240703,
     "name": "Kenny Pickett",
     "team": "Las Vegas Raiders",
-    "teamLogo": "../assets/NFL_Icons/Raiders.png",
+    "teamLogo": "assets/NFL_Icons/Raiders.png",
     "wins": 0,
     "losses": 1,
     "ties": 0,
@@ -1955,7 +1955,7 @@
       0
     ],
     "starts": {
-      "../assets/NFL_Icons/Raiders.png": 1
+      "assets/NFL_Icons/Raiders.png": 1
     },
     "advanced": {
       "pressureToSack": 0.571,
@@ -1995,7 +1995,7 @@
     "id": 14880,
     "name": "Kirk Cousins",
     "team": "Atlanta Falcons",
-    "teamLogo": "../assets/NFL_Icons/Falcons.png",
+    "teamLogo": "assets/NFL_Icons/Falcons.png",
     "wins": 5,
     "losses": 3,
     "ties": 0,
@@ -2007,7 +2007,7 @@
       0
     ],
     "starts": {
-      "../assets/NFL_Icons/Falcons.png": 8
+      "assets/NFL_Icons/Falcons.png": 8
     },
     "advanced": {
       "pressureToSack": 0.203,
@@ -2047,7 +2047,7 @@
     "id": 3917315,
     "name": "Kyler Murray",
     "team": "Arizona Cardinals",
-    "teamLogo": "../assets/NFL_Icons/Cardinals.png",
+    "teamLogo": "assets/NFL_Icons/Cardinals.png",
     "wins": 2,
     "losses": 3,
     "ties": 0,
@@ -2059,7 +2059,7 @@
       1
     ],
     "starts": {
-      "../assets/NFL_Icons/Cardinals.png": 5
+      "assets/NFL_Icons/Cardinals.png": 5
     },
     "advanced": {
       "pressureToSack": 0.5,
@@ -2099,7 +2099,7 @@
     "id": 3916387,
     "name": "Lamar Jackson",
     "team": "Baltimore Ravens",
-    "teamLogo": "../assets/NFL_Icons/Ravens.png",
+    "teamLogo": "assets/NFL_Icons/Ravens.png",
     "wins": 6,
     "losses": 7,
     "ties": 0,
@@ -2111,7 +2111,7 @@
       0
     ],
     "starts": {
-      "../assets/NFL_Icons/Ravens.png": 13
+      "assets/NFL_Icons/Ravens.png": 13
     },
     "advanced": {
       "pressureToSack": 0.439,
@@ -2151,7 +2151,7 @@
     "id": 4241464,
     "name": "Mac Jones",
     "team": "San Francisco 49ers",
-    "teamLogo": "../assets/NFL_Icons/49ers.png",
+    "teamLogo": "assets/NFL_Icons/49ers.png",
     "wins": 5,
     "losses": 3,
     "ties": 0,
@@ -2163,7 +2163,7 @@
       0
     ],
     "starts": {
-      "../assets/NFL_Icons/49ers.png": 8
+      "assets/NFL_Icons/49ers.png": 8
     },
     "advanced": {
       "pressureToSack": 0.286,
@@ -2203,7 +2203,7 @@
     "id": 4242512,
     "name": "Malik Willis",
     "team": "Green Bay Packers",
-    "teamLogo": "../assets/NFL_Icons/Packers.png",
+    "teamLogo": "assets/NFL_Icons/Packers.png",
     "wins": 0,
     "losses": 1,
     "ties": 0,
@@ -2211,7 +2211,7 @@
       0
     ],
     "starts": {
-      "../assets/NFL_Icons/Packers.png": 1
+      "assets/NFL_Icons/Packers.png": 1
     },
     "advanced": {
       "pressureToSack": 0.6,
@@ -2251,7 +2251,7 @@
     "id": 2576980,
     "name": "Marcus Mariota",
     "team": "Washington Commanders",
-    "teamLogo": "../assets/NFL_Icons/Commanders.png",
+    "teamLogo": "assets/NFL_Icons/Commanders.png",
     "wins": 2,
     "losses": 6,
     "ties": 0,
@@ -2263,7 +2263,7 @@
       0
     ],
     "starts": {
-      "../assets/NFL_Icons/Commanders.png": 8
+      "assets/NFL_Icons/Commanders.png": 8
     },
     "advanced": {
       "pressureToSack": 0.314,
@@ -2303,7 +2303,7 @@
     "id": 3116407,
     "name": "Mason Rudolph",
     "team": "Pittsburgh Steelers",
-    "teamLogo": "../assets/NFL_Icons/Steelers.png",
+    "teamLogo": "assets/NFL_Icons/Steelers.png",
     "wins": 1,
     "losses": 1,
     "ties": 0,
@@ -2312,7 +2312,7 @@
       1
     ],
     "starts": {
-      "../assets/NFL_Icons/Steelers.png": 2
+      "assets/NFL_Icons/Steelers.png": 2
     },
     "advanced": {
       "pressureToSack": 0.333,
@@ -2352,7 +2352,7 @@
     "id": 12483,
     "name": "Matthew Stafford",
     "team": "Los Angeles Rams",
-    "teamLogo": "../assets/NFL_Icons/Rams.png",
+    "teamLogo": "assets/NFL_Icons/Rams.png",
     "wins": 12,
     "losses": 5,
     "ties": 0,
@@ -2364,7 +2364,7 @@
       1
     ],
     "starts": {
-      "../assets/NFL_Icons/Rams.png": 17
+      "assets/NFL_Icons/Rams.png": 17
     },
     "advanced": {
       "pressureToSack": 0.197,
@@ -2404,7 +2404,7 @@
     "id": 4573398,
     "name": "Max Brosmer",
     "team": "Minnesota Vikings",
-    "teamLogo": "../assets/NFL_Icons/Vikings.png",
+    "teamLogo": "assets/NFL_Icons/Vikings.png",
     "wins": 1,
     "losses": 1,
     "ties": 0,
@@ -2413,7 +2413,7 @@
       0
     ],
     "starts": {
-      "../assets/NFL_Icons/Vikings.png": 2
+      "assets/NFL_Icons/Vikings.png": 2
     },
     "advanced": {
       "pressureToSack": 0.583,
@@ -2453,7 +2453,7 @@
     "id": 4360423,
     "name": "Michael Penix Jr.",
     "team": "Atlanta Falcons",
-    "teamLogo": "../assets/NFL_Icons/Falcons.png",
+    "teamLogo": "assets/NFL_Icons/Falcons.png",
     "wins": 3,
     "losses": 6,
     "ties": 0,
@@ -2465,7 +2465,7 @@
       1
     ],
     "starts": {
-      "../assets/NFL_Icons/Falcons.png": 9
+      "assets/NFL_Icons/Falcons.png": 9
     },
     "advanced": {
       "pressureToSack": 0.26,
@@ -2505,7 +2505,7 @@
     "id": 3039707,
     "name": "Mitchell Trubisky",
     "team": "Buffalo Bills",
-    "teamLogo": "../assets/NFL_Icons/Bills.png",
+    "teamLogo": "assets/NFL_Icons/Bills.png",
     "wins": 1,
     "losses": 0,
     "ties": 0,
@@ -2513,7 +2513,7 @@
       1
     ],
     "starts": {
-      "../assets/NFL_Icons/Bills.png": 1
+      "assets/NFL_Icons/Bills.png": 1
     },
     "advanced": {
       "pressureToSack": null,
@@ -2553,7 +2553,7 @@
     "id": 3139477,
     "name": "Patrick Mahomes",
     "team": "Kansas City Chiefs",
-    "teamLogo": "../assets/NFL_Icons/Chiefs.png",
+    "teamLogo": "assets/NFL_Icons/Chiefs.png",
     "wins": 6,
     "losses": 8,
     "ties": 0,
@@ -2565,7 +2565,7 @@
       0
     ],
     "starts": {
-      "../assets/NFL_Icons/Chiefs.png": 14
+      "assets/NFL_Icons/Chiefs.png": 14
     },
     "advanced": {
       "pressureToSack": 0.288,
@@ -2605,7 +2605,7 @@
     "id": 5529,
     "name": "Philip Rivers",
     "team": "Indianapolis Colts",
-    "teamLogo": "../assets/NFL_Icons/Colts.png",
+    "teamLogo": "assets/NFL_Icons/Colts.png",
     "wins": 0,
     "losses": 3,
     "ties": 0,
@@ -2615,7 +2615,7 @@
       0
     ],
     "starts": {
-      "../assets/NFL_Icons/Colts.png": 3
+      "assets/NFL_Icons/Colts.png": 3
     },
     "advanced": {
       "pressureToSack": 0.278,
@@ -2655,7 +2655,7 @@
     "id": 4889929,
     "name": "Quinn Ewers",
     "team": "Miami Dolphins",
-    "teamLogo": "../assets/NFL_Icons/Dolphins.png",
+    "teamLogo": "assets/NFL_Icons/Dolphins.png",
     "wins": 1,
     "losses": 2,
     "ties": 0,
@@ -2665,7 +2665,7 @@
       0
     ],
     "starts": {
-      "../assets/NFL_Icons/Dolphins.png": 3
+      "assets/NFL_Icons/Dolphins.png": 3
     },
     "advanced": {
       "pressureToSack": 0.364,
@@ -2705,7 +2705,7 @@
     "id": 4683423,
     "name": "Riley Leonard",
     "team": "Indianapolis Colts",
-    "teamLogo": "../assets/NFL_Icons/Colts.png",
+    "teamLogo": "assets/NFL_Icons/Colts.png",
     "wins": 0,
     "losses": 2,
     "ties": 0,
@@ -2714,7 +2714,7 @@
       0
     ],
     "starts": {
-      "../assets/NFL_Icons/Colts.png": 2
+      "assets/NFL_Icons/Colts.png": 2
     },
     "advanced": {
       "pressureToSack": 0.2,
@@ -2754,7 +2754,7 @@
     "id": 14881,
     "name": "Russell Wilson",
     "team": "New York Giants",
-    "teamLogo": "../assets/NFL_Icons/Giants.png",
+    "teamLogo": "assets/NFL_Icons/Giants.png",
     "wins": 0,
     "losses": 3,
     "ties": 0,
@@ -2764,7 +2764,7 @@
       0
     ],
     "starts": {
-      "../assets/NFL_Icons/Giants.png": 3
+      "assets/NFL_Icons/Giants.png": 3
     },
     "advanced": {
       "pressureToSack": 0.278,
@@ -2804,7 +2804,7 @@
     "id": 3912547,
     "name": "Sam Darnold",
     "team": "Seattle Seahawks",
-    "teamLogo": "../assets/NFL_Icons/Seahawks.png",
+    "teamLogo": "assets/NFL_Icons/Seahawks.png",
     "wins": 14,
     "losses": 3,
     "ties": 0,
@@ -2816,7 +2816,7 @@
       1
     ],
     "starts": {
-      "../assets/NFL_Icons/Seahawks.png": 17
+      "assets/NFL_Icons/Seahawks.png": 17
     },
     "advanced": {
       "pressureToSack": 0.248,
@@ -2856,7 +2856,7 @@
     "id": 4432762,
     "name": "Shedeur Sanders",
     "team": "Cleveland Browns",
-    "teamLogo": "../assets/NFL_Icons/Browns.png",
+    "teamLogo": "assets/NFL_Icons/Browns.png",
     "wins": 3,
     "losses": 5,
     "ties": 0,
@@ -2868,7 +2868,7 @@
       0
     ],
     "starts": {
-      "../assets/NFL_Icons/Browns.png": 8
+      "assets/NFL_Icons/Browns.png": 8
     },
     "advanced": {
       "pressureToSack": 0.223,
@@ -2908,7 +2908,7 @@
     "id": 4426339,
     "name": "Spencer Rattler",
     "team": "New Orleans Saints",
-    "teamLogo": "../assets/NFL_Icons/Saints.png",
+    "teamLogo": "assets/NFL_Icons/Saints.png",
     "wins": 1,
     "losses": 6,
     "ties": 0,
@@ -2920,7 +2920,7 @@
       0
     ],
     "starts": {
-      "../assets/NFL_Icons/Saints.png": 7
+      "assets/NFL_Icons/Saints.png": 7
     },
     "advanced": {
       "pressureToSack": 0.353,
@@ -2960,7 +2960,7 @@
     "id": 4685201,
     "name": "Tanner McKee",
     "team": "Philadelphia Eagles",
-    "teamLogo": "../assets/NFL_Icons/Eagles.png",
+    "teamLogo": "assets/NFL_Icons/Eagles.png",
     "wins": 0,
     "losses": 1,
     "ties": 0,
@@ -2968,7 +2968,7 @@
       0
     ],
     "starts": {
-      "../assets/NFL_Icons/Eagles.png": 1
+      "assets/NFL_Icons/Eagles.png": 1
     },
     "advanced": {
       "pressureToSack": 0.273,
@@ -3008,7 +3008,7 @@
     "id": 4360310,
     "name": "Trevor Lawrence",
     "team": "Jacksonville Jaguars",
-    "teamLogo": "../assets/NFL_Icons/Jaguars.png",
+    "teamLogo": "assets/NFL_Icons/Jaguars.png",
     "wins": 13,
     "losses": 4,
     "ties": 0,
@@ -3020,7 +3020,7 @@
       1
     ],
     "starts": {
-      "../assets/NFL_Icons/Jaguars.png": 17
+      "assets/NFL_Icons/Jaguars.png": 17
     },
     "advanced": {
       "pressureToSack": 0.293,
@@ -3060,7 +3060,7 @@
     "id": 4383351,
     "name": "Trey Lance",
     "team": "Los Angeles Chargers",
-    "teamLogo": "../assets/NFL_Icons/Chargers.png",
+    "teamLogo": "assets/NFL_Icons/Chargers.png",
     "wins": 0,
     "losses": 1,
     "ties": 0,
@@ -3068,7 +3068,7 @@
       0
     ],
     "starts": {
-      "../assets/NFL_Icons/Chargers.png": 1
+      "assets/NFL_Icons/Chargers.png": 1
     },
     "advanced": {
       "pressureToSack": 0.5,
@@ -3108,7 +3108,7 @@
     "id": 4241479,
     "name": "Tua Tagovailoa",
     "team": "Miami Dolphins",
-    "teamLogo": "../assets/NFL_Icons/Dolphins.png",
+    "teamLogo": "assets/NFL_Icons/Dolphins.png",
     "wins": 6,
     "losses": 8,
     "ties": 0,
@@ -3120,7 +3120,7 @@
       1
     ],
     "starts": {
-      "../assets/NFL_Icons/Dolphins.png": 14
+      "assets/NFL_Icons/Dolphins.png": 14
     },
     "advanced": {
       "pressureToSack": 0.323,
@@ -3160,7 +3160,7 @@
     "id": 4035671,
     "name": "Tyler Huntley",
     "team": "Baltimore Ravens",
-    "teamLogo": "../assets/NFL_Icons/Ravens.png",
+    "teamLogo": "assets/NFL_Icons/Ravens.png",
     "wins": 2,
     "losses": 0,
     "ties": 0,
@@ -3169,7 +3169,7 @@
       1
     ],
     "starts": {
-      "../assets/NFL_Icons/Ravens.png": 2
+      "assets/NFL_Icons/Ravens.png": 2
     },
     "advanced": {
       "pressureToSack": 0.421,
@@ -3209,7 +3209,7 @@
     "id": 4360689,
     "name": "Tyler Shough",
     "team": "New Orleans Saints",
-    "teamLogo": "../assets/NFL_Icons/Saints.png",
+    "teamLogo": "assets/NFL_Icons/Saints.png",
     "wins": 5,
     "losses": 5,
     "ties": 0,
@@ -3221,7 +3221,7 @@
       1
     ],
     "starts": {
-      "../assets/NFL_Icons/Saints.png": 10
+      "assets/NFL_Icons/Saints.png": 10
     },
     "advanced": {
       "pressureToSack": 0.419,
@@ -3261,7 +3261,7 @@
     "id": 14163,
     "name": "Tyrod Taylor",
     "team": "New York Jets",
-    "teamLogo": "../assets/NFL_Icons/Jets.png",
+    "teamLogo": "assets/NFL_Icons/Jets.png",
     "wins": 1,
     "losses": 4,
     "ties": 0,
@@ -3273,7 +3273,7 @@
       0
     ],
     "starts": {
-      "../assets/NFL_Icons/Jets.png": 5
+      "assets/NFL_Icons/Jets.png": 5
     },
     "advanced": {
       "pressureToSack": 0.311,

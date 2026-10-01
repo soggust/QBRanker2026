@@ -94,8 +94,8 @@ export interface SkillPlayer {
   awards?: string[];
 }
 
-// A player's stat (no garbage-time split in the NBA data; the flag stays for the shared code)
-export function unitStat(unit: SkillPlayer, key: SkillStatKey, _garbageTime?: boolean): number | null {
+// A player's stat (the engine passes the sport's settings; basketball has none that change a value)
+export function unitStat(unit: SkillPlayer, key: SkillStatKey, _settings?: unknown): number | null {
   return unit.stats[key] ?? null;
 }
 

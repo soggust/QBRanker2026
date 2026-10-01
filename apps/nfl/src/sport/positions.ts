@@ -1,4 +1,5 @@
-import { SKILL_PRESETS } from 'app/skill-presets';
+import type { SportSettings, StatFormat } from '@ranker/engine/sport';
+import { SKILL_PRESETS } from '@sport/skill-presets';
 
 export type Position = 'QB' | 'RB' | 'WR' | 'TE' | 'OL' | 'K' | 'P' | 'DEF' | 'HC';
 // Every tab uses the same config-driven table, sidebar and scoring below (OL rows are team offensive
@@ -156,6 +157,9 @@ export const STAT_BASIS_LABELS: Record<StatBasis, string> = {
   pace17: '17-Game Pace',
 };
 
+// A full season's games, for the 17-Game Pace (every tab)
+export const PACE_GAMES: Record<Position, number> = { QB: 17, RB: 17, WR: 17, TE: 17, OL: 17, K: 17, P: 17, DEF: 17, HC: 17 };
+
 export const RANK_BASIS_LABELS: Record<RankBasis, string> = {
   points: 'Points',
   yards: 'Yards',
@@ -201,8 +205,8 @@ export interface SkillPlayer {
 
 // A unit's stat, without garbage time when the Garbage Time Stats setting is off (stats that aren't
 // built from play-by-play have no filtered copy and stay the same)
-export function unitStat(unit: SkillPlayer, key: SkillStatKey, garbageTime: boolean): number | null {
-  if (!garbageTime && unit.competitive && key in unit.competitive) return unit.competitive[key] ?? null;
+export function unitStat(unit: SkillPlayer, key: SkillStatKey, settings: SportSettings = {}): number | null {
+  if (settings['garbageTime'] === false && unit.competitive && key in unit.competitive) return unit.competitive[key] ?? null;
   return unit.stats[key];
 }
 
@@ -216,7 +220,7 @@ export interface SkillStat {
   // 'recent' shows the last five results as dots while ranking on the recency-weighted win rate
   // pct: a 0-1 share shown as a whole percent; pctPoints: already in percentage points (1 decimal)
   // 'rank' shows #1-#32 (lower is better)
-  format: 'int' | 'dec1' | 'dec2' | 'pct' | 'pctPoints' | 'grade' | 'record' | 'recent' | 'rank';
+  format: StatFormat;
   // Full name for hover text, when STAT_NAMES' name for the key doesn't fit this tab
   name?: string;
   // Counts against the player (e.g. fumbles)
@@ -1150,10 +1154,6 @@ export const SKILL_STATS: Record<SkillPosition, SkillStat[]> = {
     DEFENSE_STAT,
   ],
 };
-
-export function hasFantasy(position: SkillPosition): boolean {
-  return SKILL_STATS[position].some((stat) => stat.key === 'fantasy');
-}
 
 // Default: everything at 50 (Run Block EPA and Pass Pro at 10). A preset (skill-presets.ts) sets the stats it's named for, keeps every
 // other stat at 25, and leaves support grades and the parent Total Yds / Total TDs sliders at 50.

@@ -109,8 +109,8 @@ export interface SkillPlayer {
   awards?: string[];
 }
 
-// A player's stat (the MLB data has no garbage-time split; the flag stays for the shared code)
-export function unitStat(unit: SkillPlayer, key: SkillStatKey, _garbageTime?: boolean): number | null {
+// A player's stat (the engine passes the sport's settings; baseball has none that change a value)
+export function unitStat(unit: SkillPlayer, key: SkillStatKey, _settings?: unknown): number | null {
   return unit.stats[key] ?? null;
 }
 

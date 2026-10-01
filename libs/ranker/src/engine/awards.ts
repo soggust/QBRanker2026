@@ -4,5 +4,5 @@
 export interface AwardInfo {
   name: string;
   short: string;
-  icon?: { name: 'emoji_events' | 'flag' | 'star'; metal?: 'gold' | 'silver' | 'bronze' };
+  icon?: { name: 'trophy' | 'emoji_events' | 'flag' | 'star'; metal?: 'gold' | 'silver' | 'bronze' };
 }

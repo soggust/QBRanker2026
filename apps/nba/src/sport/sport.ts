@@ -104,6 +104,7 @@ export const SPORT: SportConfig = {
     HC: 'Head Coaches',
   },
   coachTab: 'HC',
+  rowHeader: (position) => (position === 'HC' ? 'Coach' : 'Player'),
   roleWord: () => 'regular',
   playingTime: {
     label: 'Games',
@@ -123,6 +124,10 @@ export const SPORT: SportConfig = {
     volumeOverEfficiency: 'Big numbers, below-average efficiency: empty stats',
     efficiencyOverVolume: 'Productive in a limited role: earning more minutes',
     winsOverPlay: 'Winning more than the play says',
+    injuryTitle: (player) => `On the injured list${player.injuryStatus ? ` (${player.injuryStatus})` : ''}`,
+    injuredHelp: 'Off: hide players on the injured list (this season), and leave them out of the rankings',
+    lowerIsBetterExample: 'turnovers',
+    groupLine: 'A chalk line',
     playOverWins: 'Playing better than the record shows',
   },
 };

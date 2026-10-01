@@ -20,15 +20,20 @@ import os from 'node:os';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 
-const FILES = {
-  skillPlayers: 'skill-players.json',
-};
 const Z_CAP = 3;
 const COMPS = 3;
 
 // app: the sport's app folder (apps/<sport>). minGames(position, season): the fewest games a season
-// needs to get similar seasons (subject) and to be one (pool), in that tab's games.
-export async function buildComps({ app, minGames }) {
+// needs to get similar seasons (subject) and to be one (pool), in that tab's games. dataFiles: the
+// sport's other season files (its SPORT.dataFiles). scored(stat): the stats seasons are compared on
+// (default: every ranked stat but support grades and records).
+export async function buildComps({
+  app,
+  minGames,
+  dataFiles = {},
+  scored: isScored = (stat) => !stat.infoOnly && !stat.support && stat.format !== 'record',
+}) {
+  const FILES = { skillPlayers: 'skill-players.json', ...dataFiles };
   const ROOT = path.resolve(app);
   const STATIC = path.join(ROOT, 'src/StaticData');
   const SEASONS_DIR = path.join(STATIC, 'seasons');
@@ -61,7 +66,7 @@ export async function buildComps({ app, minGames }) {
   );
   fs.rmSync(bundle);
 
-  const logoKey = (teamLogo) => teamLogo.split('/').pop().replace('.svg', '');
+  const logoKey = (teamLogo) => teamLogo.split('/').pop().replace(/\.\w+$/, '');
 
   // Every unit-season: { season, gsisId, name, id, logo, games, z: {stat: z-score} }
   const entries = {};
@@ -77,9 +82,7 @@ export async function buildComps({ app, minGames }) {
     }
     for (const [position, stats] of Object.entries(SKILL_STATS)) {
       const rows = units[position] ?? [];
-      const scored = stats.filter(
-        (stat) => !stat.infoOnly && !stat.support && stat.format !== 'record',
-      );
+      const scored = stats.filter(isScored);
       const value = (unit, stat) => {
         const raw = unitStat(unit, stat.key);
         if (raw === null || raw === undefined || Number.isNaN(raw)) return null;
@@ -98,7 +101,7 @@ export async function buildComps({ app, minGames }) {
       }
       // The Seasons tab's line for each: games, rank with the default sliders (the list as the table
       // first shows it), and the headline stats as season totals
-      const ranked = defaultRanking(position, presetWeights(position, 'default'), rows);
+      const ranked = defaultRanking(position, presetWeights(position, 'default'), units);
       const headline = headlineStats(position);
       for (const unit of rows) {
         const stats = headline.map((stat) => {

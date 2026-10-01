@@ -1,7 +1,59 @@
-import type { SkillPlayer } from 'app/positions';
-import { QbBoxStats, QbPlayByPlay, StaticPlayerData } from '@ranker/core/types';
-import { DATA } from './data';
+import type { SkillPlayer } from '@sport/positions';
+import { DATA } from '@ranker/engine/data';
 
+// A QB's play-by-play stats (the ones the Garbage Time Stats setting can filter)
+export interface QbPlayByPlay {
+  epaPerPlay: number | null;
+  cpoe: number | null;
+  successRate: number | null;
+}
+
+// A QB's ESPN season box stats (the update script fetches them each night with the results)
+export interface QbBoxStats {
+  games: number;
+  fumLost: number;
+  passYards: number;
+  passTd: number;
+  ints: number;
+  compPercent: number;
+  ypa: number;
+  rating: number;
+  rushYards: number;
+  rushTd: number;
+}
+
+// Static Player Data
+export interface StaticPlayerData {
+  name: string;
+  teamLogo: string;
+  wins: number;
+  losses: number;
+  ties?: number;
+  id: number;
+  lastFive: number[];
+  injured: boolean;
+  // ESPN injury report status (Out, Doubtful, Injured Reserve)
+  injuryStatus?: string;
+  responsibility: number;
+  epaPerPlay: number | null;
+  cpoe: number | null;
+  successRate: number | null;
+  fantasyStd: number | null;
+  receptions: number;
+  pressureToSack: number | null;
+  badThrowPct: number | null;
+  timeToThrow: number | null;
+  adot: number | null;
+  aggressiveness: number | null;
+  // EPA / CPOE / success without garbage time (null: not in the data yet)
+  competitive: QbPlayByPlay | null;
+  // Starts per team, keyed by team logo path
+  starts: Record<string, number>;
+  // ESPN season box stats from the nightly update (null: no stats this season yet)
+  box: QbBoxStats | null;
+}
+
+// The QBs tab, built from the season's files (SPORT.extraRows) rather than read from skill-players.json.
 // games.json is generated from ESPN box scores by `npm run update-data` — don't edit it by hand.
 // team-grades.json holds the preseason team grades (0 = F ... 12 = A+), keyed by team logo name.
 // subjective.json holds preseason per-QB scores, keyed by ESPN player id.
@@ -48,16 +100,16 @@ export interface TeamGrades {
 type SubjectiveScores = Pick<StaticPlayerData, 'responsibility'> & { name?: string; injured?: boolean };
 
 // Read from DATA on every call, since the year selector can load another season (see data.ts)
-const games = () => DATA.games as GameData[];
-const scores = () => DATA.subjective as Record<string, SubjectiveScores>;
-const teamGrades = () => DATA.teamGrades as Record<string, TeamGrades>;
+const games = () => DATA['games'] as GameData[];
+const scores = () => DATA['subjective'] as Record<string, SubjectiveScores>;
+const teamGrades = () => DATA['teamGrades'] as Record<string, TeamGrades>;
 
 interface DataGrades {
   // newCoach: a first-year head coach (no NFL head-coaching games before this season)
   teams: Record<string, { games: number; oline: number; weapons: number; newCoach?: boolean }>;
   qbs: Record<string, { games: number; responsibility: number }>;
 }
-const dataGrades = () => DATA.dataGrades as DataGrades;
+const dataGrades = () => DATA['dataGrades'] as DataGrades;
 
 // Share of a grade that comes from this season's stats, rising to all of it by 14 games:
 // 17% after 1 game, 35% after 3, 56% after 6, 68% after 8, 80% after 10, 90% after 12, 100% at 14+.
