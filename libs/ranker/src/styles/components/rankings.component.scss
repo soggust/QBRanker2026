@@ -2182,9 +2182,9 @@ section.rankings-wrapper {
   > footer {
     height: auto;
     margin-bottom: 12px;
-    // (out a pixel on the left and two on the right: the buttons' borders then line up with the rows'
+    // (out a pixel on the left and three on the right: the buttons' borders then line up with the rows'
     // edges)
-    margin-inline: -1px -2px;
+    margin-inline: -1px -3px;
     order: -1;
   }
 }
@@ -2220,10 +2220,10 @@ section.rankings-wrapper > footer {
 // margin gives way to it)
 @media (max-width: 1199px) {
   section.rankings-wrapper > footer {
-    // (the same pixel out on the left and two on the right as on large screens; stretched, since the
+    // (the same pixel out on the left and three on the right as on large screens; stretched, since the
     // column centers its children and uneven margins would only shift it)
     align-self: stretch;
-    margin: 8px -2px 12px -1px;
+    margin: 8px -3px 12px -1px;
     width: auto;
   }
 
