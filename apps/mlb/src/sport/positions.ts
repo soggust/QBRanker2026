@@ -298,7 +298,7 @@ const HARD_HIT_ALLOWED_STAT: SkillStat = { key: 'hardHitAllowed', label: 'Hard-H
 
 const PITCHER_GAMES_STAT: SkillStat = { ...GAMES_STAT, label: 'Games', description: 'Appearances (for context; not part of the ranking)' };
 
-// A pitcher's fielding percentage, on the mound only
+// A starter's fielding percentage, on the mound only (not relievers: too few chances to say anything)
 const PITCHER_FIELDING_STAT: SkillStat = {
   key: 'fieldingPct',
   label: 'FLD %',
@@ -349,7 +349,6 @@ export const SKILL_STATS: Record<SkillPosition, SkillStat[]> = {
     IP_STAT,
     K_STAT,
     WHIP_STAT,
-    PITCHER_FIELDING_STAT,
     FIP_STAT,
     XFIP_STAT,
     KPCT_STAT,
