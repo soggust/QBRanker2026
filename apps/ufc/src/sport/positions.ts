@@ -83,6 +83,10 @@ export interface SkillPlayer {
   careerGames?: number;
   // The division the row's belt and stats are for (his own, or the one he holds, on pound-for-pound)
   division?: string;
+  // A division he's fought in (3+ fights) but isn't in now (shown among all-time fighters only)
+  pastDivision?: boolean;
+  // No UFC fight in the last year (out of the UFC's rankings for that: no rank counts as average)
+  inactive?: boolean;
   // The champion of this tab's division (his UFC rank counts as #0)
   titleHolder?: boolean;
   stats: Record<SkillStatKey, number | null>;

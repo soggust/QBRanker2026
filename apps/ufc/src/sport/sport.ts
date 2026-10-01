@@ -131,13 +131,18 @@ export const SPORT: SportConfig = {
     },
   ],
   tabVisible: (position, settings) => !WOMENS_DIVISIONS.includes(position as Position) || !!settings['women'],
-  rowVisible: (player, settings) => !player.retired || settings['era'] === 'alltime',
+  // Current fighters: today's roster, each in the division he's in now (Jon Jones at heavyweight, not
+  // light heavyweight); all-time: the retired fighters too, and everyone in every division he's had 3+
+  // fights in
+  rowVisible: (player, settings) => settings['era'] === 'alltime' || (!player.retired && !player.pastDivision),
   // The UFC's rank in the ranking: a division's champion as #0 (above #1), an unranked fighter as #16
-  // (just past the top 15), a retired one as average (the lists are today's)
+  // (just past the top 15). Unknown (average) for a retired fighter, and for one unranked after a year
+  // without a fight: the UFC drops fighters from its rankings for inactivity, so that says nothing
+  // about how good he is.
   scoreValue: (player, stat, shown) => {
     if (stat.key !== 'officialRank') return undefined;
     if (player.titleHolder) return 0;
-    if (player.retired) return null;
+    if (shown == null && (player.retired || player.inactive)) return null;
     return shown ?? 16;
   },
   // A fighter's rates rest on few fights early on: 4 UFC fights count half, 12 count three-quarters

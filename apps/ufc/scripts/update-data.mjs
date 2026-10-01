@@ -440,6 +440,7 @@ const strength = new Map(
 );
 
 const debutCutoff = new Date(Date.now() - 365 * 864e5).toISOString().slice(0, 10);
+const yearAgo = debutCutoff;
 const WOMENS = ['WBW', 'WFLW', 'WSW'];
 const out = Object.fromEntries(['P4P', 'HW', 'LHW', 'MW', 'WW', 'LW', 'FW', 'BW', 'FLW', 'WP4P', 'WBW', 'WFLW', 'WSW'].map((tab) => [tab, []]));
 for (const id of active) {
@@ -484,6 +485,10 @@ for (const id of active) {
     const titles = tab === p4pTab ? title : (title.by[tab] ?? { reigns: 0, defenses: 0 });
     return {
     division: tab === p4pTab ? (champion ?? home) : tab,
+    // (a division he's fought in but isn't in now: listed there among all-time fighters only)
+    pastDivision: tab !== p4pTab && tab !== home,
+    // (no fight in a year: the UFC drops fighters from its rankings for that, so no rank says nothing)
+    inactive: fights[0].date < yearAgo,
     titleHolder: champion === tab,
     id: Number(id),
     gsisId: id,
