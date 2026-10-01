@@ -179,6 +179,10 @@ export interface PlayerCard {
 
 const POSITION_NAMES = SPORT.positionNames as Record<SkillPosition, string>;
 
+// Numbers with thousands commas ("4,183"): one formatter, reused (toLocaleString builds a new one per
+// call, and the table formats every cell on every re-rank)
+const NUMBER = new Intl.NumberFormat('en-US');
+
 @Component({
   selector: 'skill-rankings',
   templateUrl: './skill-rankings.component.html',
@@ -608,7 +612,7 @@ export class SkillRankingsComponent implements OnChanges {
         break;
       default:
         // (a full-season pace reads in whole numbers, like its column)
-        shown = this.statBasis === 'pace17' && stat.kind === 'volume' ? Math.round(avg).toLocaleString('en-US') : avg.toFixed(1);
+        shown = this.statBasis === 'pace17' && stat.kind === 'volume' ? NUMBER.format(Math.round(avg)) : avg.toFixed(1);
     }
     return shown;
   }
@@ -796,7 +800,7 @@ export class SkillRankingsComponent implements OnChanges {
         return (Number(value.toFixed(2)) + 0).toFixed(2);
       default:
         if (perGameVolume) return value.toFixed(SPORT.perGameDecimals);
-        return (paceVolume ? Math.round(value) : value).toLocaleString('en-US');
+        return NUMBER.format(paceVolume ? Math.round(value) : value);
     }
   }
 
@@ -1731,7 +1735,7 @@ export class SkillRankingsComponent implements OnChanges {
         shown = `#${value}`;
         break;
       default:
-        shown = Math.round(value).toLocaleString('en-US');
+        shown = NUMBER.format(Math.round(value));
     }
     return shown;
   }

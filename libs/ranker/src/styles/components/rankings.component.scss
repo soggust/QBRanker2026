@@ -2397,3 +2397,10 @@ section ul li.player .player-name .player-awards .award-cup.award-gold,
 
 // The sport's own touches (apps/<sport>/src/theme/_sport-rankings.scss)
 @include meta.load-css("sport-rankings");
+
+// Rows off screen skip layout and paint (they keep their height, so the scrollbar and dragging are
+// unchanged): re-ranking while a slider moves only redraws the rows you can see
+section ul li.player:not(.header-row) {
+  content-visibility: auto;
+  contain-intrinsic-block-size: auto 59px;
+}
