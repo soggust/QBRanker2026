@@ -125,8 +125,28 @@ section footer .info-toggle,
 section footer .mat-mdc-select.season-select,
 .sidebar .filters .mat-mdc-select,
 .mdc-menu-surface.mat-mdc-select-panel {
-  border: 1.5px solid #1a120c !important;
+  border: 1px solid #1a120c !important;
   border-radius: 10px !important;
+}
+
+// (1.5px in all: browsers round a border to whole screen pixels, so a 1.5px border draws as 1px on a
+// standard screen. The extra half pixel is a ring outside the border, which isn't rounded.)
+section footer .filter-toggle,
+section footer .settings-toggle,
+section footer .copy-toggle,
+section footer .info-toggle,
+section footer .mat-mdc-select.season-select,
+.sidebar .filters .mat-mdc-select {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    0 0 0 0.5px #1a120c,
+    1px 1px 1px rgba(0, 0, 0, 0.6) !important;
+}
+
+.mdc-menu-surface.mat-mdc-select-panel {
+  box-shadow:
+    0 0 0 0.5px #1a120c,
+    0 0 1em rgba(0, 0, 0, 0.4) !important;
 }
 
 .mat-mdc-menu-panel .min-games-stepper button {

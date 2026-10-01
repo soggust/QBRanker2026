@@ -2404,3 +2404,10 @@ section ul li.player:not(.header-row) {
   content-visibility: auto;
   contain-intrinsic-block-size: auto 59px;
 }
+
+// Headshots keep their own shape: ESPN's cutouts (NFL, NBA) are as wide as the box and fill it, while
+// MLB's and the NHL's are square, so they sit bottom-center in it rather than being stretched wide
+section ul li.player:not(.header-row) .badge-slot .headshot {
+  object-fit: contain;
+  object-position: 50% 100%;
+}

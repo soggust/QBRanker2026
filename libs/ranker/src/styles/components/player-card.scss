@@ -1422,3 +1422,11 @@
 
 // The sport's own touches (apps/<sport>/src/theme/_sport-card.scss)
 @include meta.load-css("sport-card");
+
+// Headshots keep their own shape: ESPN's cutouts (NFL, NBA) are as wide as the box and fill it, while
+// MLB's and the NHL's are square, so they sit bottom-center in it rather than being stretched wide
+.hero-photo,
+.comp-photo {
+  object-fit: contain;
+  object-position: 50% 100%;
+}
