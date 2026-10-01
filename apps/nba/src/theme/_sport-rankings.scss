@@ -3,10 +3,14 @@
 // NBA grid touches: painted court lines, All-NBA plaques in gold / silver / bronze and All-Defensive
 // in steel
 
-// The rows: no line between them, one board
+// The rows: no line between them (not even the category-colored ones), one board
 section ul li.player:not(.header-row):not(.cdk-drag-preview) {
   background: rgba(0, 0, 0, 0.1);
   border-bottom: none;
+}
+
+section.category-colors ul li.player:not(.header-row) > .col-group > div::after {
+  display: none;
 }
 
 section ul li.player .player-name .player-awards,

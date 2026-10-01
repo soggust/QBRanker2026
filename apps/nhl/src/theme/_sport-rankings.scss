@@ -14,6 +14,16 @@ section ul li.player .player-name .player-awards,
   }
 }
 
+// The rows: no line between them (not even the category-colored ones), one sheet
+section ul li.player:not(.header-row):not(.cdk-drag-preview) {
+  background: rgba(0, 0, 0, 0.1);
+  border-bottom: none;
+}
+
+section.category-colors ul li.player:not(.header-row) > .col-group > div::after {
+  display: none;
+}
+
 // NHL: the category lines are painted rink lines: a solid stripe of the category's color (lifted with
 // a little white, like paint under the ice) with a faint sheen down its middle, carried down the rows
 // from the header, where it replaces the plain line

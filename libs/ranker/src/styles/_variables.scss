@@ -9,8 +9,9 @@ $font-heading: "Zain", cursive;
 // The active tab / item on a scoreboard panel: a lit-up panel whose bottom row of dots glows in the
 // accent color. Its dots are counted up from the bottom edge (not down from the top) so the lit row is
 // always one whole row of dots, whatever the element's height.
-@mixin lit-dots($panel: #1f1f1f) {
-  background: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1.3px) 0 100% / 4px 4px, $panel;
+// The panel itself is pressed in: its own background under a faint dark shade (not a lighter panel).
+@mixin lit-dots($panel: null) {
+  box-shadow: inset 0 0 0 100vmax rgba(0, 0, 0, 0.1);
   // (bold where the sport's settings say so)
   @if sport.$lit-label-weight {
     font-weight: sport.$lit-label-weight !important;

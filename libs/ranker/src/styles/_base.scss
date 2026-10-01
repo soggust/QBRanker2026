@@ -264,6 +264,11 @@ html .mat-mdc-slide-toggle.mat-accent {
   color: #fff !important;
 }
 
+// No halo around a slider's knob (Material's hover, focus and drag ripples): the ball alone
+.mat-mdc-slider .mat-ripple {
+  display: none;
+}
+
 // Rolling balls: a slider's knob turns with its value (each slider sets --knob-roll), so the ball
 // rolls along the track as it slides, and a settings switch's ball rolls across when it's flipped.
 // (A sport whose ball shouldn't spin turns it off in its theme: the NFL's football.)

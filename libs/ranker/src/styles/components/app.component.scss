@@ -291,8 +291,10 @@ main {
 .position-bar button:not(.collapse-toggle) {
   background: var(--scoreboard-dots), var(--scoreboard);
 
+  // (pressed in, a faint dark shade)
   &:hover:not(.active) {
-    background: var(--scoreboard-dots), #1d1d1d;
+    background: var(--scoreboard-dots), var(--scoreboard);
+    box-shadow: inset 0 0 0 100vmax rgba(0, 0, 0, 0.1);
   }
 }
 
