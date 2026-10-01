@@ -1408,9 +1408,9 @@ section.category-colors
     linear-gradient(var(--group-color), var(--group-color)) left / 3px 100% no-repeat,
     repeating-linear-gradient(180deg, transparent 0 calc(var(--hash-gap) - 0.5px), var(--group-color) calc(var(--hash-gap) - 0.5px) var(--hash-gap)) left top / 8px calc(4 * var(--hash-gap) + 0.5px) no-repeat;
   // Space between hash marks: the room between two yard lines (a row less its 0.5px line) split in five
-  --hash-gap: calc((59px - 0.5px) / 5);
+  --hash-gap: calc((var(--row-h) - 0.5px) / 5);
   content: "";
-  height: 59px;
+  height: var(--row-h);
   left: -0.5em;
   opacity: 0.4;
   pointer-events: none;
@@ -1956,7 +1956,7 @@ section ul li.player:not(.header-row) .count .lombardi {
 // boundary and they all look the same thickness (on half-pixel rows a 1px line smeared over two)
 section ul li.player:not(.header-row) {
   box-sizing: border-box;
-  height: 59px;
+  height: var(--row-h);
 }
 
 // The header bar too (it was 42.28px), so the rows under it start on a whole pixel
@@ -2410,7 +2410,7 @@ section ul li.player .player-name .player-awards .award-cup.award-gold,
 // unchanged): re-ranking while a slider moves only redraws the rows you can see
 section ul li.player:not(.header-row) {
   content-visibility: auto;
-  contain-intrinsic-block-size: auto 59px;
+  contain-intrinsic-block-size: auto var(--row-h);
 }
 
 // The empty list: one line where the rows would be (on the board itself: no row fill or hover; kept
@@ -2436,4 +2436,50 @@ section ul li.empty-list {
 section ul li.player:not(.header-row) .badge-slot .headshot {
   object-fit: contain;
   object-position: 50% 100%;
+}
+
+// ===========================================================================
+// Phones: a compact grid, so more rows fit (44px rows, --row-h in _base.scss; everything in a row is
+// sized in em, so an 11px base scales it all down together, and the team card and the name, sized in
+// px, step down with it), slimmer footer buttons, less room between the bars. Last in the file so it
+// wins over the sports' own styles above.
+// ===========================================================================
+@media (max-width: 575px) {
+  section.rankings-wrapper > footer {
+    margin-bottom: 8px;
+  }
+
+  section footer .filter-toggle,
+  section footer .settings-toggle,
+  section footer .copy-toggle,
+  section footer .info-toggle {
+    height: 36px;
+    min-width: 36px;
+    width: 36px;
+  }
+
+  section footer .mat-mdc-select.season-select {
+    height: 36px;
+  }
+
+  section ul li.player.header-row {
+    height: 36px;
+  }
+
+  section ul li.player {
+    font-size: 11px;
+  }
+
+  section ul li.player:not(.header-row) .badge-slot {
+    --card-w: 50px;
+    --card-h: 34px;
+    --card-r: 8px;
+    --shot-h: 43px;
+    --shot-hang: 11px;
+    margin-right: 1.2em;
+  }
+
+  section ul li.player:not(.header-row) .player-name strong {
+    font-size: 15px;
+  }
 }

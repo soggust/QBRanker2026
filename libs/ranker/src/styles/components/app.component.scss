@@ -491,3 +491,16 @@ main .content {
   }
 }
 
+
+// Phones: the sport bar's names a size down to suit its slimmer height, and a slimmer position
+// dropdown (more of the list on screen)
+@media (max-width: 575px) {
+  .sport-bar a {
+    font-size: 11px;
+    padding: 0 10px;
+  }
+
+  .position-bar {
+    height: 36px;
+  }
+}

@@ -1366,3 +1366,27 @@
 
 // The sport's own touches (apps/<sport>/src/theme/_sport-sidebar.scss)
 @include meta.load-css("sport-sidebar");
+
+// Phones: the menu's header and footer slimmer (more room for the sliders): less padding around the
+// logo and a size smaller, a shorter footer and room above the presets. Last in the file so it wins over
+// the sports' own touches.
+@media (max-width: 575px) {
+  .sidebar .logo {
+    padding-bottom: 1.1em;
+    padding-top: 1.1em;
+
+    h1 {
+      font-size: 1.15em;
+    }
+  }
+
+  .sidebar footer {
+    height: auto;
+    padding: 0.6em 1em;
+  }
+
+  .sidebar .filters > div > .mat-mdc-select {
+    margin-bottom: 1.4em;
+    margin-top: 1.2em;
+  }
+}

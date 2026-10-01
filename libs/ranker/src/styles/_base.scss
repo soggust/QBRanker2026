@@ -124,8 +124,9 @@ html .mat-mdc-slide-toggle.mat-accent {
 // Turf theme: field turf background, scoreboard panels
 // ===========================================================================
 :root {
-  // The sport bar across the top of the page (the page below shrinks by it)
+  // The sport bar across the top of the page (the page below shrinks by it), and a grid row's height
   --sport-bar-height: 38px;
+  --row-h: 59px;
   --scoreboard: #121212;
   --scoreboard-led: #ffb300;
   --scoreboard-glow: 0 0 6px rgba(255, 179, 0, 0.55);
@@ -602,3 +603,11 @@ section footer .mat-mdc-select.season-select {
 }
 
 
+
+// Phones: a slimmer sport bar and shorter grid rows, so more of the list fits on screen
+@media (max-width: 575px) {
+  :root {
+    --sport-bar-height: 32px;
+    --row-h: 44px;
+  }
+}

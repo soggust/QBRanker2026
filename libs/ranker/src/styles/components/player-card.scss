@@ -33,12 +33,14 @@
   display: flex;
   flex-direction: column;
   font-family: v.$font-base;
-  // A fixed height, so switching tabs doesn't make the card jump
-  height: min(860px, calc(100vh - 48px));
+  // A fixed height, so switching tabs doesn't make the card jump. It fits the visible screen below the
+  // sport bar (dvh: a phone's browser bars don't count), centered there, so the sport bar never covers
+  // its top (the close button)
+  height: min(860px, calc(100dvh - var(--sport-bar-height) - 24px));
   left: 50%;
   overflow: hidden;
   position: fixed;
-  top: 50%;
+  top: calc(50% + var(--sport-bar-height) / 2);
   transform: translate(-50%, -50%);
   width: min(880px, calc(100vw - 32px));
   z-index: 1001;
@@ -1318,8 +1320,9 @@
 
 // Phones: the hero stacks (card, then name, with the rank tile beside the name)
 @media (max-width: 640px) {
+  // (the visible screen below the sport bar, less a small margin)
   .player-card {
-    height: calc(100vh - 24px);
+    height: calc(100dvh - var(--sport-bar-height) - 12px);
     width: calc(100vw - 16px);
   }
 
