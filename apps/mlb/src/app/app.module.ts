@@ -11,10 +11,11 @@ import { DragDropModule } from '@angular/cdk/drag-drop';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { SkillRankingsComponent } from './skill-rankings/skill-rankings.component';
-import { ColumnHighlightDirective } from './utils/column-highlight.directive';
-import { ColumnDragDirective } from './utils/column-drag.directive';
+import { ColumnHighlightDirective } from '@ranker/core/column-highlight.directive';
+import { COLUMN_MOVER, ColumnDragDirective } from '@ranker/core/column-drag.directive';
 import { MatMenuModule } from '@angular/material/menu';
 import { AboutComponent } from './about/about.component';
+import { PositionService } from './services/position.service';
 
 @NgModule({
   declarations: [
@@ -26,6 +27,8 @@ import { AboutComponent } from './about/about.component';
     AboutComponent,
   ],
   bootstrap: [AppComponent],
+  // (the column headers' drag and drop reorders columns through the position service)
+  providers: [{ provide: COLUMN_MOVER, useExisting: PositionService }],
   imports: [
     BrowserModule,
     BrowserAnimationsModule,

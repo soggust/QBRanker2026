@@ -1,5 +1,5 @@
 import type { SkillPlayer } from 'app/positions';
-import { QbBoxStats, QbPlayByPlay, StaticPlayerData } from 'app/types';
+import { QbBoxStats, QbPlayByPlay, StaticPlayerData } from '@ranker/core/types';
 import { DATA } from './data';
 
 // games.json is generated from ESPN box scores by `npm run update-data` — don't edit it by hand.

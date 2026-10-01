@@ -1,5 +1,11 @@
-import { Directive, ElementRef, HostBinding, Input, NgZone, OnDestroy, OnInit } from '@angular/core';
-import { PositionService } from 'app/services/position.service';
+import { Directive, ElementRef, HostBinding, Inject, InjectionToken, Input, NgZone, OnDestroy, OnInit } from '@angular/core';
+
+// What a drop does: moves a column within its list (each app provides its PositionService, which
+// keeps the column orders, as COLUMN_MOVER in its module)
+export interface ColumnMover {
+  moveColumn(list: string, id: string, targetId: string, after: boolean): void;
+}
+export const COLUMN_MOVER = new InjectionToken<ColumnMover>('COLUMN_MOVER');
 
 // Which list (tab + stat group, e.g. "QB.box") a header cell belongs to, and its column id
 export interface ColumnDragTarget {
@@ -33,7 +39,7 @@ export class ColumnDragDirective implements OnInit, OnDestroy {
 
   constructor(
     private element: ElementRef<HTMLElement>,
-    private positionService: PositionService,
+    @Inject(COLUMN_MOVER) private mover: ColumnMover,
     private zone: NgZone,
   ) {}
 
@@ -96,7 +102,7 @@ export class ColumnDragDirective implements OnInit, OnDestroy {
     const after = this.dropsAfter(event);
     this.clearDropMarker();
     // Back into Angular so the table re-renders in the new order
-    this.zone.run(() => this.positionService.moveColumn(target.list, dragging.id, target.id, after));
+    this.zone.run(() => this.mover.moveColumn(target.list, dragging.id, target.id, after));
   }
 
   private onDragEnd() {

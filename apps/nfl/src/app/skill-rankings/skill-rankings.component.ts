@@ -30,7 +30,7 @@ import {
   presetWeights,
 } from 'app/positions';
 import { MAX_MIN_GAMES, MIN_SHARE_STEP, PositionService } from 'app/services/position.service';
-import { copyRankingsToClipboard } from 'app/utils/clipboard';
+import { copyRankingsToClipboard } from '@ranker/core/clipboard';
 import {
   SKILL_UNITS,
   UnitRankKey,
@@ -43,7 +43,7 @@ import {
 } from 'app/utils/unit-scoring';
 import { CURRENT_SEASON, SEASONS, dataSeason, dataVersion, fetchSeason, fetchSeasonFile } from 'StaticData/data';
 import { AWARD_INFO, AwardWin, awardsFor } from 'app/awards';
-import { TintScale, tintFrom, tintScale } from 'app/utils/value-tint';
+import { TintScale, tintFrom, tintScale } from '@ranker/core/value-tint';
 import {
   ARCHETYPES,
   CAST_GRADES,

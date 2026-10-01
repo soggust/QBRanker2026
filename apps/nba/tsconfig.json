@@ -2,7 +2,11 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "baseUrl": "./src"
+    "baseUrl": "./src",
+    // The shared ranker library (libs/ranker/src)
+    "paths": {
+      "@ranker/*": ["../../../libs/ranker/src/*"]
+    }
   },
   "include": ["src/**/*.ts", "scripts/**/*.ts"]
 }

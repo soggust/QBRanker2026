@@ -1,7 +1,7 @@
 import { provideZoneChangeDetection } from '@angular/core';
 import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
 import { linkedSeason, loadData } from './StaticData/data';
-import { startAnalyticsWhenIdle } from './app/utils/analytics';
+import { startAnalyticsWhenIdle } from '@ranker/core/analytics';
 
 // Load the ranking data (this season, or the one a shared link names), then the app, then analytics once the page is up. The app's code reads the
 // data as soon as it runs, so it must not be imported (executed) until the data is in; the prefetch

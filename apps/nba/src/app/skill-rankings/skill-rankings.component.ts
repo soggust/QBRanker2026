@@ -22,11 +22,11 @@ import {
   presetWeights,
 } from 'app/positions';
 import { MIN_SHARE_STEP, PositionService } from 'app/services/position.service';
-import { copyRankingsToClipboard } from 'app/utils/clipboard';
+import { copyRankingsToClipboard } from '@ranker/core/clipboard';
 import { SKILL_UNITS, defaultRanking, statIsEmpty, unitsForSeason, weightedTotals } from 'app/utils/unit-scoring';
 import { CURRENT_SEASON, SEASONS, dataSeason, dataVersion, fetchSeason, fetchSeasonFile } from 'StaticData/data';
 import { AWARD_INFO, AwardWin, awardsFor, seasonName } from 'app/awards';
-import { TintScale, tintFrom, tintScale } from 'app/utils/value-tint';
+import { TintScale, tintFrom, tintScale } from '@ranker/core/value-tint';
 import {
   ARCHETYPES,
   SKILLS,
