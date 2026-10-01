@@ -406,9 +406,10 @@ export class SkillRankingsComponent implements OnChanges {
     this.positionService.updateSettings({ colorValues: value });
   }
 
-  // Settings: color-coded values (records and grades keep their own coloring; Games is context only)
+  // Settings: color-coded values (records tint by win percentage; grades and recent results keep their
+  // own coloring; Games and other display-only columns stay plain)
   valueColor(player: SkillPlayer, stat: SkillStat): string | null {
-    if (!this.colorValues || stat.infoOnly || ['grade', 'record', 'recent'].includes(stat.format)) return null;
+    if (!this.colorValues || stat.infoOnly || ['grade', 'recent'].includes(stat.format)) return null;
     return tintFrom(this.rateValue(player, stat), this.columnScale(stat, 'rate'), !!stat.negative);
   }
 
