@@ -134,7 +134,8 @@ export interface SkillStat {
   // have none
   boost?: number | ((settings: SportSettings) => number);
   // Scored on a fixed scale, best to worst, rather than against the list (the UFC's rank: #0, the
-  // champion, to #16, unranked)
+  // champion, to #16, unranked; title wins and defenses: 10 to 0, since with most fighters at none, one
+  // would score like ten against the list)
   scale?: [best: number, worst: number];
   // Not a rate resting on his fights, so not scaled by how many he's had (the UFC's rank)
   settled?: boolean;
@@ -195,8 +196,8 @@ const UFC_STATS: SkillStat[] = [
   { key: 'recent', label: 'Recent', description: 'His last five UFC fights, newest first (ranked on a recency-weighted win rate); counts double behind its slider', kind: 'efficiency', format: 'recent', boost: 2 },
   { key: 'officialRank', label: 'UFC Rank', description: "UFC.com's official rank in his division, or pound-for-pound on those tabs (a division's champion is #0, above #1; unranked fighters as #16; retired ones as average); counts 15x behind its slider among current fighters, 3x in the all-time lists", kind: 'efficiency', format: 'rank', negative: true, missingIsAverage: true, scale: [0, 16], settled: true, boost: (settings) => (settings['era'] === 'alltime' ? 3 : 15) },
   // (the title ones and Elo count double behind their sliders: the clearest marks of an elite career)
-  { key: 'titleDefenses', label: 'Title Defenses', description: 'Successful UFC title defenses, across every reign (from Wikipedia\'s list of UFC champions); counts double behind its slider', kind: 'volume', format: 'int', boost: 2 },
-  { key: 'titleWins', label: 'Title Wins', description: 'UFC title fight wins: winning a belt (interim ones too) and each defense; counts double behind its slider', kind: 'volume', format: 'int', boost: 2 },
+  { key: 'titleDefenses', label: 'Title Defenses', description: 'Successful UFC title defenses, across every reign (from Wikipedia\'s list of UFC champions); counts double behind its slider; scored in proportion, 0 to 10 (most fighters have none, so against the list one defense would score like ten)', kind: 'volume', format: 'int', boost: 2, scale: [10, 0] },
+  { key: 'titleWins', label: 'Title Wins', description: 'UFC title fight wins: winning a belt (interim ones too) and each defense; counts double behind its slider; scored in proportion, 0 to 10', kind: 'volume', format: 'int', boost: 2, scale: [10, 0] },
   // (the competition ones: results weighed by whom they came against)
   { key: 'elo', label: 'Elo', description: "A rating built from every UFC fight since 2001: each result moves it by how surprising it was, so beating a highly rated opponent is worth far more than beating a low one (1500 to start); counts double behind its slider", kind: 'efficiency', format: 'int', boost: 2 },
   { key: 'peakElo', label: 'Peak Elo', description: 'His best Elo rating at any point in his UFC career', kind: 'efficiency', format: 'int' },
