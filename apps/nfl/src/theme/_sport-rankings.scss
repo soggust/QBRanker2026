@@ -15,11 +15,10 @@ section ul li.player .player-name .player-awards,
   }
 }
 
-// (trying it out) Player names in Permanent Marker instead of Cabin Sketch: solid marker strokes, easier on the eyes than the chalk texture. It has one
-// weight, so no faked bold.
+// (trying it out) Player names in Kalam instead of Cabin Sketch: neat handwriting with solid strokes (no chalk texture to strain the eyes), in its real bold
 section ul li.player:not(.header-row) .player-name strong {
-  font-family: "Permanent Marker", cursive !important;
-  font-size: 16px !important;
+  font-family: "Kalam", cursive !important;
+  font-size: 18px !important;
   font-synthesis: none;
-  font-weight: 400 !important;
+  font-weight: 700 !important;
 }
