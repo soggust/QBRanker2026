@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- The #1 trophy and the champions' badge (used as a mask, so only its shape matters): a
+       championship belt seen from the front, its big center plate (an octagon, with a cut-out ring
+       around a center stone), two side plates, and the strap running off both ends. The file keeps
+       its name so the shared styles find it. -->
+  <defs>
+    <mask id="plate">
+      <rect width="32" height="32" fill="#fff"/>
+      <path d="M12.9 10.4 H19.1 L21.6 12.9 V19.1 L19.1 21.6 H12.9 L10.4 19.1 V12.9 Z" fill="none" stroke="#000" stroke-width="0.9"/>
+      <circle cx="16" cy="16" r="2.3" fill="#000"/>
+      <circle cx="16" cy="16" r="1.3" fill="#fff"/>
+      <path d="M5.4 13.6 V18.4 M26.6 13.6 V18.4" stroke="#000" stroke-width="0.7"/>
+    </mask>
+  </defs>
+  <g mask="url(#plate)">
+    <!-- The strap -->
+    <path d="M0 13.2 H32 V18.8 H0 Z"/>
+    <!-- The side plates -->
+    <rect x="3.4" y="11.8" width="4" height="8.4" rx="0.8"/>
+    <rect x="24.6" y="11.8" width="4" height="8.4" rx="0.8"/>
+    <!-- The center plate: an octagon -->
+    <path d="M12.2 7.6 H19.8 L24.4 12.2 V19.8 L19.8 24.4 H12.2 L7.6 19.8 V12.2 Z"/>
+  </g>
+</svg>

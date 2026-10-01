@@ -249,6 +249,10 @@ export class PositionService {
     this.settingsSubject.next({ ...this.settingsSubject.value, ...changes });
   }
 
+  get position(): Position {
+    return this.positionSubject.value;
+  }
+
   setPosition(position: Position): void {
     this.positionSubject.next(position);
 

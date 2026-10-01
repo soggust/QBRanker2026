@@ -82,6 +82,15 @@ export interface CombinedStat {
   parts: [string, string];
 }
 
+// A line of a card's history tab (SportConfig.cardHistory): a result, what it was, where and when, and
+// a detail at the end ("W", "vs. Max Holloway", "UFC 300 · Apr 13, 2024", "R3 4:51")
+export interface HistoryRow {
+  result: 'W' | 'L' | 'D';
+  main: string;
+  sub: string;
+  detail: string;
+}
+
 // What the engine gives a sport's connect hook (SportConfig.connect)
 export interface EngineHost {
   // The sport's settings as they change
@@ -177,7 +186,15 @@ export interface SportConfig {
   // More for the card once it's open (the NFL's run blocking, read from a file per season)
   cardExtras?: (card: CardHost) => Promise<void>;
 
-  // --- Optional data and features (the NFL uses them) ---
+  // --- Optional data and features (the NFL uses most of them; the UFC the career-only ones) ---
+  // One career table rather than seasons: no season dropdown, the card reads "Career" and has no
+  // season-by-season tab, history takes or similar seasons
+  careerOnly?: boolean;
+  // A tab the sport's settings can hide (the UFC's women's divisions, until switched on)
+  tabVisible?: (position: string, settings: SportSettings) => boolean;
+  // A history tab on the card in place of the seasons one (the UFC's fights): its title and icon, and a
+  // player's rows, newest first
+  cardHistory?: { title: string; icon: string; rows: (player: SkillPlayer) => HistoryRow[] };
   // More files in each season's folder (key -> file), read into DATA beside skill-players.json
   dataFiles?: Record<string, string>;
   // Tabs built in the app from DATA rather than read from skill-players.json (the NFL's QBs)

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- The octagon (the filter menu's logo, the favicon and the loading screen): the cage seen from
+       above, a black fence ring with its padded red top rail around the white canvas -->
+  <path d="M20 2 H44 L62 20 V44 L44 62 H20 L2 44 V20 Z" fill="#111"/>
+  <path d="M21.6 6 H42.4 L58 21.6 V42.4 L42.4 58 H21.6 L6 42.4 V21.6 Z" fill="none" stroke="#d61a1f" stroke-width="3"/>
+  <path d="M23.2 10 H40.8 L54 23.2 V40.8 L40.8 54 H23.2 L10 40.8 V23.2 Z" fill="#ece7dd"/>
+  <path d="M27 18 H37 L46 27 V37 L37 46 H27 L18 37 V27 Z" fill="none" stroke="#d61a1f" stroke-width="1.6" opacity="0.55"/>
+</svg>

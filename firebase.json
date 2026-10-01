@@ -38,6 +38,14 @@
       {
         "source": "/nhl/**",
         "destination": "/nhl/index.html"
+      },
+      {
+        "source": "/ufc",
+        "destination": "/ufc/index.html"
+      },
+      {
+        "source": "/ufc/**",
+        "destination": "/ufc/index.html"
       }
     ],
     "headers": [
@@ -88,6 +96,15 @@
       },
       {
         "source": "/nhl/",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache"
+          }
+        ]
+      },
+      {
+        "source": "/ufc/",
         "headers": [
           {
             "key": "Cache-Control",

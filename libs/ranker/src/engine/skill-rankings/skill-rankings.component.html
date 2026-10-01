@@ -200,7 +200,8 @@
       ></mat-icon>
     </button>
 
-    <!-- Year: another season's stats with the same sliders -->
+    <!-- Year: another season's stats with the same sliders (not for a career-only sport) -->
+    @if (!sport.careerOnly) {
     <mat-select
       class="season-select"
       aria-label="Season"
@@ -217,6 +218,7 @@
         <mat-option [value]="year">{{ isLive(year) ? 'CURRENT' : seasonText(year) }}</mat-option>
       }
     </mat-select>
+    }
 
     <!-- About / FAQ -->
     <button
@@ -549,7 +551,7 @@
                   }
                 </svg>
                 <div class="ov-legend">
-                  <span><i class="key now"></i>{{ isLive(c.season) ? 'This Season' : seasonText(c.season) }}</span>
+                  <span><i class="key now"></i>{{ sport.careerOnly ? 'Career' : isLive(c.season) ? 'This Season' : seasonText(c.season) }}</span>
                   @if (o.prev) {
                     <span><i class="key prev"></i>{{ seasonText(o.prev.season) }}</span>
                   }
@@ -608,6 +610,26 @@
               </div>
             </div>
           }
+        }
+
+        <!-- The sport's history (SPORT.cardHistory: a fighter's fights), newest first -->
+        @case ('history') {
+          <div class="card-group card-history">
+            <h3><mat-icon [fontIcon]="sport.cardHistory?.icon ?? 'history'"></mat-icon>{{ sport.cardHistory?.title }}</h3>
+            @let rows = historyRows(c);
+            @if (!rows.length) {
+              <p class="card-note">Nothing yet.</p>
+            }
+            <div class="history-list">
+              @for (r of rows; track $index) {
+                <div class="history-row">
+                  <span class="history-result" [ngClass]="r.result === 'W' ? 'win' : r.result === 'L' ? 'loss' : 'draw'">{{ r.result }}</span>
+                  <span class="history-main">{{ r.main }}<small>{{ r.sub }}</small></span>
+                  <span class="history-detail">{{ r.detail }}</span>
+                </div>
+              }
+            </div>
+          </div>
         }
 
         <!-- Every season they're in: each opens that season's card (the table stays as it is) -->

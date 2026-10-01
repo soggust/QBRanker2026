@@ -66,7 +66,7 @@ export interface CardStat {
   tint: string | null;
 }
 
-type CardTab = 'overview' | 'stats' | 'seasons';
+type CardTab = 'overview' | 'stats' | 'seasons' | 'history';
 
 // Overview: a skill (several related stats rolled up) as a percentile in the list (engine/skills.ts)
 export type { CardFlag, CardSkill };
@@ -939,9 +939,18 @@ export class SkillRankingsComponent implements OnChanges {
     { id: 'seasons', title: 'Seasons' },
   ];
 
-  // Seasons only when they're in more than one (shown while loading)
+  // Seasons only when they're in more than one (shown while loading; never for a career-only sport),
+  // and the sport's history tab when it has one (SPORT.cardHistory: the UFC's fights)
   cardTabs(card: PlayerCard): { id: CardTab; title: string }[] {
-    return this.allCardTabs.filter((tab) => tab.id !== 'seasons' || !card.seasons || card.seasons.length > 1);
+    const tabs = this.allCardTabs.filter(
+      (tab) => tab.id !== 'seasons' || (!SPORT.careerOnly && (!card.seasons || card.seasons.length > 1)),
+    );
+    return SPORT.cardHistory ? [...tabs, { id: 'history', title: SPORT.cardHistory.title }] : tabs;
+  }
+
+  // The card's history rows (SPORT.cardHistory), newest first
+  historyRows(card: PlayerCard) {
+    return SPORT.cardHistory?.rows(card.player) ?? [];
   }
 
   // While a card for a season other than the table's is being built: that season's rows, list (ranked
@@ -1567,7 +1576,7 @@ export class SkillRankingsComponent implements OnChanges {
         context,
         name: player.name,
         positionName: POSITION_NAMES[this.position],
-        seasonLabel: isLiveSeason(season) ? 'This Season' : SPORT.seasonText(season),
+        seasonLabel: SPORT.careerOnly ? 'Career' : isLiveSeason(season) ? 'This Season' : SPORT.seasonText(season),
         teamName: SPORT.teamName ? SPORT.teamName(player, this.position, context ? context.rows : SKILL_UNITS) : ((player as { teamName?: string | null }).teamName ?? null),
         logo: logoForSeason(player.teamLogo, season),
         color: this.teamBadge(player),
@@ -1589,6 +1598,8 @@ export class SkillRankingsComponent implements OnChanges {
 
   // The card's season links (every season they're in) and similar seasons (finished seasons only)
   private async loadCardLinks(card: PlayerCard): Promise<void> {
+    // (a career-only sport has no seasons to link, and no similar seasons)
+    if (SPORT.careerOnly) return;
     const id = card.player.gsisId;
     try {
       // (checked with the server each visit: it changes once a year, at the season rollover)

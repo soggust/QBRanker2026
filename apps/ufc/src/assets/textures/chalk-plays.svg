@@ -1,0 +1,13 @@
+<svg xmlns='http://www.w3.org/2000/svg' width='1400' height='720' fill='none' stroke='white' stroke-linecap='round' stroke-linejoin='round' opacity='0.035'>
+<!-- The cage (the grid, card and About backgrounds, in place of the other sports' chalk plays): the
+     octagon's chain-link fence, barely there. Each wire zigzags down and hooks into its neighbors,
+     making the fence's diamonds; a faint roughness keeps it from looking printed. -->
+<filter id='c'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' seed='5' result='t'/><feDisplacementMap in='SourceGraphic' in2='t' scale='1.6'/></filter>
+<defs>
+<pattern id='mesh' width='28' height='28' patternUnits='userSpaceOnUse'>
+<path d='M0 14 L14 0 L28 14 L14 28 Z' stroke-width='2.2'/>
+<path d='M12.6 1.4 C13.4 0.4 14.6 0.4 15.4 1.4 M12.6 26.6 C13.4 27.6 14.6 27.6 15.4 26.6' stroke-width='1.4'/>
+</pattern>
+</defs>
+<g filter='url(#c)'><rect width='1400' height='720' fill='url(#mesh)' stroke='none'/></g>
+</svg>

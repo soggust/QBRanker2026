@@ -18,14 +18,24 @@ export class AppComponent {
 
   position$ = this.positionService.position$;
   aboutOpen$ = this.positionService.aboutOpen$;
-  positions = POSITIONS;
+  // The tabs (the sport's settings can hide some: SPORT.tabVisible)
+  get positions(): Position[] {
+    const settings = this.positionService.settings.sport;
+    return POSITIONS.filter((tab) => SPORT.tabVisible?.(tab, settings) ?? true);
+  }
   positionNames = SPORT.tabNames as Record<Position, string>;
 
   // Below 1200px the filters are a slide-out menu (menu-open); above, a sidebar that collapses. Both
   // follow the one open / closed state (the footer's filter button and the menu's X).
   private readonly smallScreen = window.matchMedia('(max-width: 1199px)');
 
-  constructor(private positionService: PositionService) {}
+  constructor(private positionService: PositionService) {
+    // A tab hidden while it's open (its setting switched off): back to the first tab
+    this.positionService.sportSettings$.subscribe((settings) => {
+      const open = this.positionService.position;
+      if (open && SPORT.tabVisible && !SPORT.tabVisible(open, settings)) this.positionService.setPosition(POSITIONS[0]);
+    });
+  }
 
   get menuOpen(): boolean {
     return this.smallScreen.matches && this.positionService.filtersOpen;

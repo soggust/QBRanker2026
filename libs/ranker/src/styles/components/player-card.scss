@@ -1423,6 +1423,69 @@
 // The sport's own touches (apps/<sport>/src/theme/_sport-card.scss)
 @include meta.load-css("sport-card");
 
+// The history tab (a fighter's fights): a line each, newest first: a result tile (green win, red loss,
+// gray draw), what it was with where and when under it, and a detail at the end
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.history-row {
+  align-items: center;
+  background: rgba(0, 0, 0, 0.18);
+  border-radius: 6px;
+  display: grid;
+  gap: 14px;
+  grid-template-columns: 30px 1fr auto;
+  padding: 8px 12px;
+}
+
+.history-result {
+  border-radius: 4px;
+  color: #111;
+  font-family: "Orbitron", sans-serif;
+  font-size: 13px;
+  font-weight: 900;
+  line-height: 26px;
+  text-align: center;
+
+  &.win {
+    background: #3ecf6e;
+  }
+
+  &.loss {
+    background: #ff5a4f;
+  }
+
+  &.draw {
+    background: #9aa0a6;
+  }
+}
+
+.history-main {
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  font-size: 15px;
+  font-weight: 700;
+  min-width: 0;
+
+  small {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 12px;
+    font-weight: 500;
+  }
+}
+
+.history-detail {
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 13px;
+  font-weight: 700;
+  text-align: right;
+  white-space: nowrap;
+}
+
 // Headshots keep their own shape: ESPN's cutouts (NFL, NBA) are as wide as the box and fill it, while
 // MLB's and the NHL's are square, so they sit bottom-center in it rather than being stretched wide
 .hero-photo,

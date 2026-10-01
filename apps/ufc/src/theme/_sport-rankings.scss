@@ -1,0 +1,53 @@
+@use "variables" as v;
+
+// UFC grid touches: no lines between the rows (one board, like the cage's fence behind them), the
+// category lines painted on the canvas, and the pound-for-pound plaques in gold
+
+section ul li.player:not(.header-row):not(.cdk-drag-preview) {
+  background: rgba(0, 0, 0, 0.1);
+  border-bottom: none;
+}
+
+section.category-colors ul li.player:not(.header-row) > .col-group > div::after {
+  display: none;
+}
+
+// The header row sits on a red line, the cage's top rail
+section ul li.player.header-row {
+  border-bottom: 2px solid rgba(214, 26, 31, 0.6);
+}
+
+// The category lines: a solid stripe of the category's color (lifted with a little white) with a faint
+// sheen down its middle, carried down the rows from the header
+$mat-line:
+  linear-gradient(90deg, transparent 35%, rgba(255, 255, 255, 0.35) 50%, transparent 65%),
+  color-mix(in srgb, var(--group-color) 85%, #fff);
+
+section.category-colors
+  ul
+  li.player:not(.header-row)
+  > .col-group
+  > div:first-child::before {
+  background: $mat-line;
+  left: calc(-0.5em + 1px);
+  opacity: 0.75;
+  width: 3px;
+}
+
+section ul li.player.header-row > .col-group > div:first-child {
+  &::after {
+    border-left: none;
+  }
+
+  &::before {
+    background: $mat-line;
+    bottom: -0.68em;
+    content: "";
+    left: calc(-0.5em);
+    pointer-events: none;
+    position: absolute;
+    top: -0.68em;
+    width: 3px;
+    z-index: 1;
+  }
+}

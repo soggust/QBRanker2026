@@ -490,6 +490,128 @@
           }
         }
       }
+    },
+    "ufc": {
+      "projectType": "application",
+      "schematics": {
+        "@schematics/angular:component": {
+          "style": "scss"
+        }
+      },
+      "root": "apps/ufc",
+      "sourceRoot": "apps/ufc/src",
+      "prefix": "app",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-angular:browser",
+          "options": {
+            "outputPath": "dist/site/ufc",
+            "index": "apps/ufc/src/index.html",
+            "main": "apps/ufc/src/main.ts",
+            "polyfills": [
+              "zone.js"
+            ],
+            "tsConfig": "apps/ufc/tsconfig.app.json",
+            "inlineStyleLanguage": "scss",
+            "assets": [
+              "apps/ufc/src/favicon.png",
+              "apps/ufc/src/favicon.svg",
+              "apps/ufc/src/assets",
+              {
+                "glob": "**/*.json",
+                "input": "apps/ufc/src/StaticData",
+                "output": "data"
+              },
+              {
+                "glob": "**/*",
+                "input": "libs/ranker/src/assets",
+                "output": "assets"
+              }
+            ],
+            "styles": [
+              "apps/ufc/src/styles.scss"
+            ],
+            "scripts": [],
+            "baseHref": "/ufc/",
+            "stylePreprocessorOptions": {
+              "includePaths": [
+                "libs/ranker/src/styles",
+                "apps/ufc/src/theme"
+              ]
+            }
+          },
+          "configurations": {
+            "production": {
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "1.5mb",
+                  "maximumError": "3mb"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "60kb",
+                  "maximumError": "100kb"
+                }
+              ],
+              "outputHashing": "all"
+            },
+            "development": {
+              "buildOptimizer": false,
+              "optimization": false,
+              "vendorChunk": true,
+              "extractLicenses": false,
+              "sourceMap": true,
+              "namedChunks": true
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "serve": {
+          "builder": "@angular-devkit/build-angular:dev-server",
+          "configurations": {
+            "production": {
+              "buildTarget": "ufc:build:production"
+            },
+            "development": {
+              "buildTarget": "ufc:build:development"
+            }
+          },
+          "defaultConfiguration": "development"
+        },
+        "extract-i18n": {
+          "builder": "@angular-devkit/build-angular:extract-i18n",
+          "options": {
+            "buildTarget": "ufc:build"
+          }
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "polyfills": [
+              "zone.js",
+              "zone.js/testing"
+            ],
+            "tsConfig": "apps/ufc/tsconfig.spec.json",
+            "inlineStyleLanguage": "scss",
+            "assets": [
+              "apps/ufc/src/favicon.png",
+              "apps/ufc/src/favicon.svg",
+              "apps/ufc/src/assets"
+            ],
+            "styles": [
+              "apps/ufc/src/styles.scss"
+            ],
+            "scripts": [],
+            "stylePreprocessorOptions": {
+              "includePaths": [
+                "libs/ranker/src/styles",
+                "apps/ufc/src/theme"
+              ]
+            }
+          }
+        }
+      }
     }
   },
   "schematics": {
