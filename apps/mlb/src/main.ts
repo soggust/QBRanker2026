@@ -1,6 +1,6 @@
 import { provideZoneChangeDetection } from '@angular/core';
 import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
-import { linkedSeason, loadData } from './StaticData/data';
+import { linkedSeason, loadData } from '@ranker/engine/data';
 import { startAnalyticsWhenIdle } from '@ranker/core/analytics';
 
 // Load the ranking data (this season, or the one a shared link names), then the app, then analytics once the page is up. The app's code reads the
@@ -8,7 +8,7 @@ import { startAnalyticsWhenIdle } from '@ranker/core/analytics';
 // hint still downloads its chunk in parallel so it's ready (or cached) by then. Until the app
 // starts, index.html shows a loading screen (replaced by the app, or by an error message here).
 loadData(linkedSeason())
-  .then(() => import(/* webpackPrefetch: true */ './app/app.module'))
+  .then(() => import(/* webpackPrefetch: true */ '@ranker/engine/app.module'))
   .then(({ AppModule }) =>
     platformBrowserDynamic().bootstrapModule(AppModule, { applicationProviders: [provideZoneChangeDetection()] }),
   )

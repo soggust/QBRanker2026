@@ -1,11 +1,13 @@
-/* The NFL app: imports resolve from src/ (app/..., StaticData/...). The build and test configs extend this. */
+/* The MLB app: imports resolve from src/ (app/..., StaticData/...). The build and test configs extend this. */
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "baseUrl": "./src",
-    // The shared ranker library (libs/ranker/src)
+    // The shared ranker library (libs/ranker/src), and this sport's half of the engine's contract
+    // (src/sport: SPORT, positions, presets, skills, awards, team colors, logo eras, About)
     "paths": {
-      "@ranker/*": ["../../../libs/ranker/src/*"]
+      "@ranker/*": ["../../../libs/ranker/src/*"],
+      "@sport/*": ["sport/*"]
     }
   },
   "include": ["src/**/*.ts", "scripts/**/*.ts"]
