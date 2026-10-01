@@ -1192,10 +1192,14 @@ section ul li.player > .col-group > div {
   width: 6em;
 }
 
-// Wide enough for the longest 11px header labels (e.g. "Pressure → Sack", "Total TDs / Game")
+// Wide enough for the longest 11px header labels (e.g. "Pressure → Sack", "Total TDs / Game"). The
+// minimum width says the same as the flex size: Safari works a row's width out from its cells' minimums
+// (Chrome from their flex sizes), so with the old 6em minimum its rows and header came out ~700px short
+// of their columns and the header's panel stopped partway when scrolled sideways.
 section.spread ul li.player > .col-group {
   > div {
     flex: 1 0 8.5em;
+    min-width: 8.5em;
   }
 
   > div:not(.box) {
@@ -1204,6 +1208,7 @@ section.spread ul li.player > .col-group {
 
   > div.box {
     flex: 0 0 auto;
+    min-width: 6em;
   }
 }
 
