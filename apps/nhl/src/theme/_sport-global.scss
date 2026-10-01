@@ -1,0 +1,227 @@
+:root {
+  // This sport's chalkboard plays (the grid, card and About backgrounds: hockey diagrams) and #1
+  // trophy (the Stanley Cup)
+  --tex-chalk-plays: url("../assets/textures/chalk-plays.svg");
+  --trophy-mask: url("../assets/lombardi.svg");
+}
+
+// ===========================================================================
+// NHL theme (this app only): a sheet of rink ice instead of turf, and pucks instead of footballs on
+// the slider knobs, the settings switches, the logo and the buttons. Kept in one block so it's easy
+// to find and change; the rest of the styles are the shared look.
+// ===========================================================================
+// Rink ice: the ice texture (textures/ice.svg: a pale sheet with skate marks) under the arena lights
+// (a bright pool across the middle), with the same soft vignette as the turf
+body {
+  background-color: #e6eff5;
+  background-image:
+    radial-gradient(ellipse at 50% 30%, transparent 45%, rgba(10, 30, 50, 0.32)),
+    radial-gradient(ellipse 70% 45% at 50% 35%, rgba(255, 255, 255, 0.35), transparent 70%),
+    url("../assets/textures/ice.svg");
+  background-size: cover, cover, 800px;
+}
+
+// A puck (textures/puck.svg, also the favicon), seen from above. On the dark menus it glows ice blue,
+// like the TV broadcasts' glowing puck, so it reads on any background.
+$puck: url("../assets/textures/puck.svg");
+$puck-glow: drop-shadow(0 0 3px rgba(90, 190, 255, 0.85)) drop-shadow(0 1px 1px rgba(0, 0, 0, 0.6));
+$ice-text: #e9f6ff;
+
+.mdc-slider__thumb-knob {
+  --mat-slider-handle-width: 20px;
+  --mat-slider-handle-height: 20px;
+  background-blend-mode: normal !important;
+  background-color: transparent !important;
+  background-image: $puck !important;
+  // (sized against the whole knob: Material draws it with a thick border)
+  background-origin: border-box !important;
+  background-size: 100% 100% !important;
+  border-color: transparent !important;
+  border-radius: 50% !important;
+  box-shadow: none !important;
+  filter: $puck-glow;
+  height: 20px !important;
+  width: 20px !important;
+
+  // (no laces)
+  &::after {
+    display: none !important;
+  }
+}
+
+html .mat-mdc-slide-toggle.mat-accent {
+  --mat-slide-toggle-handle-width: 16px;
+
+  .mdc-switch__handle {
+    height: 16px !important;
+    width: 16px !important;
+
+    &::after {
+      background: $puck center / 100% 100% no-repeat !important;
+      background-blend-mode: normal !important;
+      border: none !important;
+      filter: $puck-glow;
+    }
+  }
+}
+
+// (no yard lines or hashes over the slider track: a plain painted line, like a rink's)
+.mat-mdc-slider .mdc-slider__track::after {
+  display: none;
+}
+
+// NHL: the leather buttons are puck rubber instead (same shapes): a face of black vulcanized rubber,
+// lit from the top left, framed by the puck's knurled grip band (a fine diagonal crosshatch in the
+// border), with ice-white icons and text. Hovering one, or a footer button's "open" state, lights it
+// up with the glowing puck's blue halo.
+$rubber: radial-gradient(ellipse 120% 140% at 30% 10%, #3a3d42, #16171a 60%, #0a0a0c);
+$knurl: repeating-linear-gradient(45deg, #34373d 0 1.5px, #0e0f11 1.5px 3px);
+$rubber-edge:
+  inset 0 1px 0 rgba(255, 255, 255, 0.08),
+  inset 0 -3px 4px rgba(0, 0, 0, 0.5),
+  0 1px 2px rgba(0, 0, 0, 0.55);
+$blue-halo: 0 0 0 1px rgba(120, 200, 255, 0.55), 0 0 10px rgba(90, 190, 255, 0.75);
+
+@mixin puck-rubber {
+  background: $rubber padding-box, $knurl border-box !important;
+  border: 3px solid transparent !important;
+  border-radius: 10px !important;
+  box-shadow: $rubber-edge !important;
+  color: $ice-text !important;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.8) !important;
+}
+
+section footer .filter-toggle,
+section footer .settings-toggle,
+section footer .copy-toggle,
+section footer .info-toggle,
+.sidebar footer button,
+.sidebar footer button.negative,
+.sidebar footer button:hover,
+.sidebar footer button.negative:hover {
+  @include puck-rubber;
+  font-weight: 800 !important;
+
+  .mat-icon {
+    color: $ice-text !important;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.8) !important;
+  }
+}
+
+section footer .filter-toggle.open .mat-icon,
+section footer .info-toggle.open .mat-icon,
+section footer .settings-toggle[aria-expanded="true"] .mat-icon {
+  color: var(--scoreboard-led) !important;
+}
+
+section footer .filter-toggle.open,
+section footer .info-toggle.open,
+section footer .settings-toggle[aria-expanded="true"],
+section footer .filter-toggle:hover,
+section footer .copy-toggle:hover,
+section footer .info-toggle:hover,
+section footer .settings-toggle:hover,
+.sidebar footer button:hover {
+  box-shadow: $rubber-edge, $blue-halo !important;
+  filter: none !important;
+}
+
+// (the little stepper buttons: tiny pucks)
+.mat-mdc-menu-panel .min-games-stepper button {
+  background: $puck center / 100% 100% no-repeat;
+  border: none;
+  color: $ice-text;
+  filter: $puck-glow;
+  text-shadow: none;
+}
+
+// The year dropdown and the filter menu's presets dropdown in puck rubber, like the footer buttons
+// (instead of scoreboard panels): ice-white text and caret, the blue halo on hover
+section footer .mat-mdc-select.season-select,
+.sidebar .filters .mat-mdc-select {
+  @include puck-rubber;
+
+  .mat-mdc-select-value,
+  .mat-mdc-select-value-text,
+  .mat-mdc-select-placeholder,
+  .mat-mdc-select-arrow {
+    color: $ice-text !important;
+    font-weight: 800 !important;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.8) !important;
+  }
+
+  &:hover {
+    box-shadow: $rubber-edge, $blue-halo !important;
+  }
+}
+
+// Their open lists in the same rubber, ice-white options on a blue-lit band when hovered or picked,
+// and the page's 10px scrollbar in ice blue
+.mdc-menu-surface.mat-mdc-select-panel {
+  @include puck-rubber;
+
+  .mat-mdc-option span {
+    color: $ice-text !important;
+    font-weight: 800 !important;
+  }
+
+  .mat-mdc-option.mdc-list-item--selected,
+  .mat-mdc-option:not(.mdc-list-item--disabled):hover {
+    background: rgba(90, 190, 255, 0.18) !important;
+  }
+
+  .mat-mdc-option.mdc-list-item--selected span {
+    color: var(--scoreboard-led) !important;
+  }
+
+  &::-webkit-scrollbar {
+    height: 10px;
+    width: 10px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background-color: rgba(0, 0, 0, 0.3) !important;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: var(--scoreboard-led) !important;
+    background-clip: padding-box !important;
+  }
+
+  &::-webkit-scrollbar-thumb:hover,
+  &::-webkit-scrollbar-thumb:active {
+    background: #fff !important;
+  }
+}
+
+// The year dropdown and every open list letter like the filter menu's presets dropdown: capitals at
+// 0.85em (of the page's 13px), no extra letter spacing, bold
+section footer .mat-mdc-select.season-select,
+.mdc-menu-surface.mat-mdc-select-panel .mat-mdc-option {
+  &,
+  .mat-mdc-select-value-text,
+  .mdc-list-item__primary-text {
+    font-size: 11.05px !important;
+    font-weight: 800 !important;
+    letter-spacing: normal !important;
+    text-transform: uppercase !important;
+  }
+}
+
+// The open list's check mark in the accent
+.mdc-menu-surface.mat-mdc-select-panel .mat-pseudo-checkbox-minimal.mat-pseudo-checkbox-checked::after {
+  color: var(--scoreboard-led) !important;
+}
+
+// The NHL's accent is ice blue (the glowing puck's halo): the scoreboard lettering, menu highlights,
+// sliders and scrollbars all read this. A bright blue so text reads on the dark panels.
+:root {
+  --scoreboard-led: #4cc3ff;
+  --scoreboard-glow: 0 0 6px rgba(76, 195, 255, 0.6);
+}
+
+// Both dropdowns: a little more room on each side, inside the band
+section footer .mat-mdc-select.season-select,
+.sidebar .filters .mat-mdc-select {
+  padding-inline: 18px !important;
+}

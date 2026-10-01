@@ -1,0 +1,10 @@
+// NHL player card touches: painted stat-group lines
+
+// NHL: the stat groups' edges are painted rink lines (solid, like the table's) instead of sidelines
+// with hash marks
+.stat-group .card-stats {
+  background:
+    linear-gradient(color-mix(in srgb, var(--group-color, #fff) 85%, #fff), color-mix(in srgb, var(--group-color, #fff) 85%, #fff)) left top / 3px 100% no-repeat,
+    linear-gradient(color-mix(in srgb, var(--group-color, #fff) 85%, #fff), color-mix(in srgb, var(--group-color, #fff) 85%, #fff)) right top / 3px 100% no-repeat;
+  opacity: 1;
+}

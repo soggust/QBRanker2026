@@ -30,6 +30,14 @@
       {
         "source": "/nba/**",
         "destination": "/nba/index.html"
+      },
+      {
+        "source": "/nhl",
+        "destination": "/nhl/index.html"
+      },
+      {
+        "source": "/nhl/**",
+        "destination": "/nhl/index.html"
       }
     ],
     "headers": [
@@ -71,6 +79,15 @@
       },
       {
         "source": "/nba/",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache"
+          }
+        ]
+      },
+      {
+        "source": "/nhl/",
         "headers": [
           {
             "key": "Cache-Control",

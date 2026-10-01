@@ -1,7 +1,7 @@
-# Sports Ranker (NFL, MLB, NBA)
+# Sports Ranker (NFL, MLB, NBA, NHL)
 
 Rank players your way: every stat is normalized to the same scale, then your sliders decide what
-matters. Live at https://qbranker2026.web.app/ (`/nfl/`, `/mlb/`, `/nba/`; the bare address redirects
+matters. Live at https://qbranker2026.web.app/ (`/nfl/`, `/mlb/`, `/nba/`, `/nhl/`; the bare address redirects
 to the NFL).
 
 ## Layout
@@ -19,7 +19,7 @@ libs/ranker/            the shared library (one copy of everything the sports sh
   src/assets/           shared textures (leather grain, chalk dust)
   scripts/              shared data-script pieces: the similar-seasons builder, the grade curve
 apps/
-  nfl/  mlb/  nba/      one per sport, each on the engine:
+  nfl/  mlb/  nba/  nhl/  one per sport, each on the engine:
     src/sport/          what makes the sport: SPORT (sport.ts), positions and stats, presets, skills
                         and archetypes, awards, team colors, logo eras, the About panel
     src/theme/          its look on top of the shared styles (textures, knobs, accent, lines)
@@ -37,9 +37,9 @@ scripts/new-sport.mjs   `npm run new-sport`: scaffolds a sport
 
 | Command | What it does |
 | --- | --- |
-| `npm run dev` | Every app at once, all at http://localhost:4200 (`/nfl/`, `/mlb/`, `/nba/`; the bare address redirects to `/nfl/`) so the sport bar works like the live site, each with live reload (`PORT=4300 npm run dev` if 4200 is taken) |
-| `npm start` / `npm run start:mlb` / `npm run start:nba` | Just one app's dev server (the sport bar's other links won't work) |
-| `npm run build` | Production build of every app into `dist/site` (`nfl/`, `mlb/`, `nba/`) |
+| `npm run dev` | Every app at once, all at http://localhost:4200 (`/nfl/`, `/mlb/`, `/nba/`, `/nhl/`; the bare address redirects to `/nfl/`) so the sport bar works like the live site, each with live reload (`PORT=4300 npm run dev` if 4200 is taken) |
+| `npm start` / `npm run start:mlb` / `npm run start:nba` / `npm run start:nhl` | Just one app's dev server (the sport bar's other links won't work) |
+| `npm run build` | Production build of every app into `dist/site` (`nfl/`, `mlb/`, `nba/`, `nhl/`) |
 | `npm run new-sport -- <id> <LABEL>` | Scaffold a sport (`npm run new-sport -- nhl NHL`): see the library README |
 | `npm run update-data` | NFL: pull the current season (`SEASON=2025` for a past one) |
 | `npm run update-honors` | NFL: All-Pro and Pro Bowl lists from Wikipedia |
@@ -49,3 +49,5 @@ scripts/new-sport.mjs   `npm run new-sport`: scaffolds a sport
 | `npm run mlb:build-comps` | MLB: the player card's similar seasons and season history |
 | `npm run nba:update-data` | NBA: pull this season (`SEASON=2019` for a past one, named for the year it ends in; `ALL=1` for 2000-01 on; about 15 minutes, Basketball-Reference allows 20 requests a minute) |
 | `npm run nba:build-comps` | NBA: the player card's similar seasons and season history |
+| `npm run nhl:update-data` | NHL: pull this season from the NHL's stats API and MoneyPuck (`SEASON=2019` for a past one, named for the year it ends in; `ALL=1` for 2008-09 on, a few minutes) |
+| `npm run nhl:build-comps` | NHL: the player card's similar seasons and season history |

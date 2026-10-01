@@ -368,6 +368,128 @@
           }
         }
       }
+    },
+    "nhl": {
+      "projectType": "application",
+      "schematics": {
+        "@schematics/angular:component": {
+          "style": "scss"
+        }
+      },
+      "root": "apps/nhl",
+      "sourceRoot": "apps/nhl/src",
+      "prefix": "app",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-angular:browser",
+          "options": {
+            "outputPath": "dist/site/nhl",
+            "index": "apps/nhl/src/index.html",
+            "main": "apps/nhl/src/main.ts",
+            "polyfills": [
+              "zone.js"
+            ],
+            "tsConfig": "apps/nhl/tsconfig.app.json",
+            "inlineStyleLanguage": "scss",
+            "assets": [
+              "apps/nhl/src/favicon.png",
+              "apps/nhl/src/favicon.svg",
+              "apps/nhl/src/assets",
+              {
+                "glob": "**/*.json",
+                "input": "apps/nhl/src/StaticData",
+                "output": "data"
+              },
+              {
+                "glob": "**/*",
+                "input": "libs/ranker/src/assets",
+                "output": "assets"
+              }
+            ],
+            "styles": [
+              "apps/nhl/src/styles.scss"
+            ],
+            "scripts": [],
+            "baseHref": "/nhl/",
+            "stylePreprocessorOptions": {
+              "includePaths": [
+                "libs/ranker/src/styles",
+                "apps/nhl/src/theme"
+              ]
+            }
+          },
+          "configurations": {
+            "production": {
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "1.5mb",
+                  "maximumError": "3mb"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "60kb",
+                  "maximumError": "100kb"
+                }
+              ],
+              "outputHashing": "all"
+            },
+            "development": {
+              "buildOptimizer": false,
+              "optimization": false,
+              "vendorChunk": true,
+              "extractLicenses": false,
+              "sourceMap": true,
+              "namedChunks": true
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "serve": {
+          "builder": "@angular-devkit/build-angular:dev-server",
+          "configurations": {
+            "production": {
+              "buildTarget": "nhl:build:production"
+            },
+            "development": {
+              "buildTarget": "nhl:build:development"
+            }
+          },
+          "defaultConfiguration": "development"
+        },
+        "extract-i18n": {
+          "builder": "@angular-devkit/build-angular:extract-i18n",
+          "options": {
+            "buildTarget": "nhl:build"
+          }
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "polyfills": [
+              "zone.js",
+              "zone.js/testing"
+            ],
+            "tsConfig": "apps/nhl/tsconfig.spec.json",
+            "inlineStyleLanguage": "scss",
+            "assets": [
+              "apps/nhl/src/favicon.png",
+              "apps/nhl/src/favicon.svg",
+              "apps/nhl/src/assets"
+            ],
+            "styles": [
+              "apps/nhl/src/styles.scss"
+            ],
+            "scripts": [],
+            "stylePreprocessorOptions": {
+              "includePaths": [
+                "libs/ranker/src/styles",
+                "apps/nhl/src/theme"
+              ]
+            }
+          }
+        }
+      }
     }
   },
   "schematics": {

@@ -5,7 +5,7 @@
     "ng": "ng",
     "dev": "node dev.mjs",
     "start": "ng serve nfl",
-    "build": "ng build nfl && ng build mlb && ng build nba",
+    "build": "ng build nfl && ng build mlb && ng build nba && ng build nhl",
     "watch": "ng build nfl --watch --configuration development",
     "test": "ng test nfl",
     "update-data": "node apps/nfl/scripts/update-data.mjs",
@@ -18,7 +18,10 @@
     "start:nba": "ng serve nba",
     "nba:update-data": "node apps/nba/scripts/update-data.mjs",
     "nba:build-comps": "node apps/nba/scripts/build-comps.mjs",
-    "new-sport": "node scripts/new-sport.mjs"
+    "new-sport": "node scripts/new-sport.mjs",
+    "start:nhl": "ng serve nhl",
+    "nhl:update-data": "node apps/nhl/scripts/update-data.mjs",
+    "nhl:build-comps": "node apps/nhl/scripts/build-comps.mjs"
   },
   "private": true,
   "dependencies": {

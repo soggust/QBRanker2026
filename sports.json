@@ -1,5 +1,6 @@
 [
   { "id": "nfl", "label": "NFL", "devPort": 4200 },
   { "id": "mlb", "label": "MLB", "devPort": 4201 },
-  { "id": "nba", "label": "NBA", "devPort": 4202 }
+  { "id": "nba", "label": "NBA", "devPort": 4202 },
+  { "id": "nhl", "label": "NHL", "devPort": 4203 }
 ]

@@ -1,0 +1,43 @@
+<svg xmlns='http://www.w3.org/2000/svg' width='1400' height='720' fill='none' stroke='white' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round' opacity='0.03'><filter id='c'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' seed='11' result='t'/><feDisplacementMap in='SourceGraphic' in2='t' scale='2.6'/></filter><g filter='url(#c)'>
+<!-- Left: an offensive zone (the goal line at the left, the blue line at the right) and a cycle play:
+     C wins the draw back to D, the D walks the line and shoots, LW crashes the net for the rebound, RW
+     rotates high, and the pass (dashed) from the half wall to the slot -->
+<path d='M80 120 H660 M80 640 H660'/>
+<path d='M80 120 C40 120 40 160 40 200 V560 C40 600 40 640 80 640'/>
+<path d='M120 120 V640'/>
+<path d='M660 120 V640' stroke-width='4'/>
+<path d='M120 340 h22 a40 40 0 0 1 0 80 h-22 Z'/>
+<path d='M104 356 V404 M104 356 H120 M104 404 H120'/>
+<circle cx='300' cy='230' r='70'/><circle cx='300' cy='230' r='5'/>
+<circle cx='300' cy='530' r='70'/><circle cx='300' cy='530' r='5'/>
+<path d='M286 214 l-10 -10 M314 214 l10 -10 M286 246 l-10 10 M314 246 l10 10'/>
+<path d='M336 222 l8 -6 l8 6 M342 216 v16' />
+<path d='M318 236 l-8 8 m0 -8 l8 8'/>
+<path d='M560 220 c-8 -10 10 -14 10 -2 c0 8 -12 10 -12 18 h14'/>
+<path d='M300 230 C340 220 450 200 560 220'/><path d='M546 212 L562 222 L548 232'/>
+<path d='M576 230 C580 300 560 380 520 440'/><path d='M512 426 L518 444 L530 432'/>
+<path d='M520 460 C450 450 300 400 170 384'/><path d='M184 374 L166 384 L182 396' />
+<path d='M372 520 l12 12 m0 -12 l-12 12'/>
+<path d='M378 520 C330 480 240 430 176 400'/><path d='M188 392 L172 400 L188 408' />
+<path d='M440 300 l10 10 m0 -10 l-10 10'/>
+<path d='M444 316 C450 380 470 430 470 520'/><path d='M460 506 L470 524 L480 508'/>
+<path d='M470 530 C420 540 330 520 260 470' stroke-dasharray='10 9'/><path d='M272 466 L256 468 L264 482'/>
+<!-- Right: a breakout from the defensive zone: D1 retrieves behind the net, a reverse to D2, a pass
+     to the strong-side winger on the wall, a chip to the center in stride through the neutral zone -->
+<path d='M760 120 H1340 M760 640 H1340'/>
+<path d='M1340 120 C1380 120 1380 160 1380 200 V560 C1380 600 1380 640 1340 640'/>
+<path d='M1300 120 V640'/>
+<path d='M760 120 V640' stroke-width='4'/>
+<path d='M1300 340 h-22 a40 40 0 0 0 0 80 h22 Z'/>
+<path d='M1316 356 V404 M1316 356 H1300 M1316 404 H1300'/>
+<circle cx='1120' cy='230' r='70'/><circle cx='1120' cy='530' r='70'/>
+<path d='M1340 300 l10 10 m0 -10 l-10 10'/>
+<path d='M1344 316 C1360 360 1360 420 1330 460'/><path d='M1338 446 L1328 464 L1320 448'/>
+<path d='M1320 470 C1280 520 1240 560 1200 580' stroke-dasharray='10 9'/><path d='M1214 572 L1196 582 L1212 590'/>
+<path d='M1186 576 c-6 -8 8 -12 8 -2 c0 6 -10 8 -10 14 h12'/>
+<path d='M1180 600 C1100 620 980 620 880 600' stroke-dasharray='10 9'/><path d='M894 592 L878 600 L892 610'/>
+<path d='M866 590 l10 10 m0 -10 l-10 10'/>
+<path d='M1040 340 l-8 8 l8 8 l8 -8 Z'/>
+<path d='M1036 360 C1000 440 940 520 880 580'/><path d='M884 564 L878 584 L896 576'/>
+<path d='M860 580 C820 540 800 460 790 380'/><path d='M782 394 L790 376 L800 392'/>
+</g></svg>

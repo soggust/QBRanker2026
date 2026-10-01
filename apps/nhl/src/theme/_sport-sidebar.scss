@@ -1,0 +1,28 @@
+// NHL filter menu touches: a puck logo, blue-line edges
+
+// NHL: the logo's ball is a puck (seen from above), glowing ice blue
+.sidebar .logo h1 .logo-puck {
+  // (the app's puck, like the favicon and the slider knobs)
+  background: url("../assets/textures/puck.svg") center / 100% 100% no-repeat;
+  background-blend-mode: normal;
+  filter: drop-shadow(0 0 3px rgba(90, 190, 255, 0.85));
+  height: 18px;
+  transform: none;
+  width: 18px;
+
+  &::before,
+  &::after {
+    display: none;
+  }
+}
+
+// NHL: the header's and footer's edges are painted blue lines, like a rink's (solid, with a faint
+// sheen down the middle), instead of a football sideline with hash marks
+.sidebar .logo::after,
+.sidebar footer::before {
+  background:
+    linear-gradient(transparent 30%, rgba(255, 255, 255, 0.4) 50%, transparent 70%) 0 var(--hash-edge) / 100% 3px no-repeat,
+    linear-gradient(#2a6fd6, #2a6fd6) 0 var(--hash-edge) / 100% 3px no-repeat;
+  height: 3px;
+  opacity: 0.45;
+}

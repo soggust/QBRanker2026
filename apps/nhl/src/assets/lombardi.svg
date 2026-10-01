@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 32">
+  <!-- The #1 trophy (used as a mask, so only its shape matters): the Stanley Cup, the small bowl on top,
+       the collar and flared upper barrel, then the stacked rings of the tall barrel widening to the
+       base. The bands between the rings are cut out so they read at small sizes. The file keeps its name
+       so the shared styles find it. -->
+  <defs>
+    <mask id="bands">
+      <rect width="24" height="32" fill="#fff"/>
+      <g fill="none" stroke="#000" stroke-width="0.55">
+        <path d="M7.6 19.6 H16.4"/>
+        <path d="M7.1 22.4 H16.9"/>
+        <path d="M6.6 25.2 H17.4"/>
+        <path d="M6.1 28 H17.9"/>
+      </g>
+    </mask>
+  </defs>
+  <!-- The bowl -->
+  <path d="M7.6 2 H16.4 C16.4 5.4 14.6 7 12 7 C9.4 7 7.6 5.4 7.6 2 Z"/>
+  <!-- Its stem and collar -->
+  <rect x="10.9" y="6.6" width="2.2" height="1.8"/>
+  <rect x="8.4" y="8.2" width="7.2" height="1.4" rx="0.5"/>
+  <!-- The upper barrel, flaring out -->
+  <path d="M9 9.6 H15 L16 16.8 H8 Z"/>
+  <!-- The barrel's rings, wider toward the base -->
+  <path d="M7.8 16.8 H16.2 L18.4 30.8 H5.6 Z" mask="url(#bands)"/>
+  <rect x="5" y="30.4" width="14" height="1.4" rx="0.5"/>
+</svg>
