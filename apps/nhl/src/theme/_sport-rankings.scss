@@ -21,15 +21,22 @@ $rink-line:
   linear-gradient(90deg, transparent 35%, rgba(255, 255, 255, 0.35) 50%, transparent 65%),
   color-mix(in srgb, var(--group-color) 85%, #fff);
 
+// (softened, like paint seen through the ice)
 section.category-colors
   ul
   li.player:not(.header-row)
   > .col-group
   > div:first-child::before {
   background: $rink-line;
+  filter: blur(0.4px);
   left: calc(-0.5em + 1px);
-  opacity: 0.8;
+  opacity: 0.7;
   width: 3px;
+}
+
+// The header row sits on a thin red goal line
+section ul li.player.header-row {
+  border-bottom: 2px solid rgba(208, 33, 58, 0.55);
 }
 
 section ul li.player.header-row > .col-group > div:first-child {

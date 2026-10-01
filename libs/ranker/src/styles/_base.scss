@@ -267,9 +267,11 @@ html .mat-mdc-slide-toggle.mat-accent {
 // Rolling balls: a slider's knob turns with its value (each slider sets --knob-roll), so the ball
 // rolls along the track as it slides, and a settings switch's ball rolls across when it's flipped.
 // (A sport whose ball shouldn't spin turns it off in its theme: the NFL's football.)
+// (turned inside the knob's own transform, after the translate Material centers it with: turning it
+// with the rotate property would swing it around off its spot)
 .mdc-slider__thumb-knob {
-  rotate: var(--knob-roll, 0deg);
-  transition: rotate 0.12s ease-out;
+  transform: translate(-50%, -50%) rotate(var(--knob-roll, 0deg)) !important;
+  transition: transform 0.12s ease-out;
 }
 
 html .mat-mdc-slide-toggle .mdc-switch__handle::after {
@@ -281,7 +283,10 @@ html .mat-mdc-slide-toggle .mdc-switch--selected .mdc-switch__handle::after {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .mdc-slider__thumb-knob,
+  .mdc-slider__thumb-knob {
+    transform: translate(-50%, -50%) !important;
+  }
+
   html .mat-mdc-slide-toggle .mdc-switch__handle::after {
     rotate: none !important;
   }

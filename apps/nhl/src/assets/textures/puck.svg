@@ -1,28 +1,29 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
   <!-- A hockey puck seen from above (the slider knobs, the switches, the filter menu's logo and the
-       favicon): vulcanized black rubber with the knurled grip band around its edge, a soft sheen from
-       the light, and the raised center face -->
+       favicon): a flat disc of matte black rubber (an even face with only a faint sheen across it, so
+       it reads as a disc rather than a ball), the knurled grip band around its edge, and the game
+       puck's embossed logo ring in the middle -->
   <defs>
-    <radialGradient id="rubber" cx="38%" cy="32%" r="75%">
-      <stop offset="0" stop-color="#3a3d42"/>
-      <stop offset="0.55" stop-color="#18191c"/>
-      <stop offset="1" stop-color="#050506"/>
-    </radialGradient>
-    <radialGradient id="face" cx="40%" cy="35%" r="70%">
-      <stop offset="0" stop-color="#2c2e33"/>
-      <stop offset="1" stop-color="#0d0e10"/>
-    </radialGradient>
+    <linearGradient id="face" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#2a2c30"/>
+      <stop offset="0.45" stop-color="#1b1c1f"/>
+      <stop offset="1" stop-color="#141517"/>
+    </linearGradient>
     <pattern id="knurl" width="4" height="4" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
-      <rect width="4" height="4" fill="#111215"/>
-      <rect width="2" height="2" fill="#2e3036"/>
+      <rect width="4" height="4" fill="#141518"/>
+      <rect width="2" height="2" fill="#6a6e78"/>
     </pattern>
   </defs>
-  <circle cx="32" cy="32" r="31" fill="url(#rubber)"/>
+  <circle cx="32" cy="32" r="31" fill="#0b0b0c"/>
   <!-- The knurled band -->
-  <circle cx="32" cy="32" r="28.5" fill="none" stroke="url(#knurl)" stroke-width="5"/>
-  <circle cx="32" cy="32" r="25.6" fill="none" stroke="#000" stroke-opacity="0.6" stroke-width="0.8"/>
+  <circle cx="32" cy="32" r="28" fill="none" stroke="url(#knurl)" stroke-width="5.5"/>
   <!-- The face -->
-  <circle cx="32" cy="32" r="25" fill="url(#face)"/>
-  <ellipse cx="25" cy="21" rx="13" ry="7" fill="#fff" opacity="0.09" transform="rotate(-25 25 21)"/>
-  <circle cx="32" cy="32" r="31" fill="none" stroke="#000" stroke-width="1.4"/>
+  <circle cx="32" cy="32" r="24.6" fill="url(#face)"/>
+  <circle cx="32" cy="32" r="24.6" fill="none" stroke="#000" stroke-opacity="0.7" stroke-width="1"/>
+  <!-- The embossed logo ring and shield -->
+  <circle cx="32" cy="32" r="13" fill="none" stroke="#fff" stroke-opacity="0.13" stroke-width="1.6"/>
+  <path d="M26 25 H38 V33 C38 37 35 39.5 32 40.5 C29 39.5 26 37 26 33 Z" fill="none" stroke="#fff" stroke-opacity="0.13" stroke-width="1.4"/>
+  <circle cx="32" cy="32" r="30.4" fill="none" stroke="#7a7f8a" stroke-opacity="0.55" stroke-width="1.4"/>
+  <!-- The rim catching the light -->
+  <path d="M10 22 A24 24 0 0 1 22 9" fill="none" stroke="#fff" stroke-opacity="0.18" stroke-width="1.2" stroke-linecap="round"/>
 </svg>

@@ -16,13 +16,25 @@
   }
 }
 
-// NHL: the header's and footer's edges are painted blue lines, like a rink's (solid, with a faint
-// sheen down the middle), instead of a football sideline with hash marks
+// NHL: the header's and footer's edges are a rink's painted lines (solid, with a faint sheen down the
+// middle) instead of a football sideline with hash marks: the red center line, with the blue
+// center-ice faceoff dot on it, under the header, and a blue line over the footer
 .sidebar .logo::after,
 .sidebar footer::before {
   background:
     linear-gradient(transparent 30%, rgba(255, 255, 255, 0.4) 50%, transparent 70%) 0 var(--hash-edge) / 100% 3px no-repeat,
     linear-gradient(#2a6fd6, #2a6fd6) 0 var(--hash-edge) / 100% 3px no-repeat;
   height: 3px;
-  opacity: 0.45;
+  opacity: 0.55;
+}
+
+.sidebar .logo::after {
+  background:
+    radial-gradient(circle, #2a6fd6 0 5px, transparent 5.5px) 50% 50% / 12px 12px no-repeat,
+    linear-gradient(transparent 30%, rgba(255, 255, 255, 0.4) 50%, transparent 70%) 0 50% / 100% 3px no-repeat,
+    linear-gradient(#d0213a, #d0213a) 0 50% / 100% 3px no-repeat;
+  height: 12px;
+  // (the line stays where it was, the dot centered on it)
+  margin-top: -4.5px;
+  opacity: 0.6;
 }

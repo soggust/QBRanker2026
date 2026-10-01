@@ -27,14 +27,14 @@ export class AboutComponent implements AfterViewInit {
 
   // Glossary entries: stat, what it means
   glossary: [string, string][] = [
-    ["G / A / PTS", "Goals, assists and points: season totals to start, or per game or an 82-game pace (Stat Totals in the settings)."],
+    ["Goals / Assists / Points", "Goals, assists and points: season totals to start, or per game or an 82-game pace (Stat Totals in the settings)."],
     ["+/-", "Plus/minus: goals for minus goals against while he is on the ice at even strength or shorthanded. Noisy: it depends on his linemates and his goalie."],
-    ["PPP", "Power-play points."],
-    ["SOG / SH %", "Shots on goal, and goals per shot on goal (20+ shots to show)."],
+    ["PP Points", "Power-play points."],
+    ["Shots / Shooting %", "Shots on goal, and goals per shot on goal (20+ shots to show)."],
     ["GWG", "Game-winning goals."],
-    ["Hits / BLK / TK / GV", "Hits, shots blocked, takeaways and giveaways (lower is better)."],
+    ["Hits / Blocks / Takeaways / Giveaways", "Hits, shots blocked, takeaways and giveaways (lower is better)."],
     ["PIM", "Penalty minutes (lower is better)."],
-    ["FO %", "Faceoffs won, for centers (50+ faceoffs to show)."],
+    ["Faceoff %", "Faceoffs won, for centers (50+ faceoffs to show)."],
     ["TOI", "Time on ice per game, in minutes: his role (for context; not part of the ranking)."],
     ["Game Score", "MoneyPuck's one-number season: goals, assists, shots, blocks, penalties, faceoffs and his line's shots and goals, each weighted by what it's worth."],
     ["xGF % / CF %", "His team's share of the expected goals (chance quality) and of all shot attempts (Corsi: who has the puck) while he's on the ice at 5-on-5. 50% is even."],
@@ -42,9 +42,9 @@ export class AboutComponent implements AfterViewInit {
     ["ixG / G - xG", "Expected goals from his own shots (what his chances were worth), and goals beyond that: finishing skill, and over one season a lot of luck."],
     ["HD Shots", "High-danger shots: from the slot and in close, where most goals come from."],
     ["Record", "His team's record, wins-losses-overtime losses, ranked on points percentage (a goalie: his own decisions)."],
-    ["SV % / GAA", "Save percentage (50+ shots) and goals against per 60 minutes (lower is better)."],
+    ["Save % / GAA", "Save percentage (50+ shots) and goals against per 60 minutes (lower is better)."],
     ["GSAx / GSAx / 60", "Goals saved above expected: the goals an average goalie would have allowed on his shots, by their quality, minus the goals he allowed. Per 60 minutes too (300+ minutes)."],
-    ["HD SV %", "Save percentage on high-danger shots (20+ of them)."],
+    ["HD Save %", "Save percentage on high-danger shots (20+ of them)."],
     ["Linemates / Defense", "Support grades, F to A+: how good his team was without him (its expected-goals share with him on the bench), and for goalies the defense in front of him (the quality of the shots he faced). Better support counts slightly against a player."],
   ];
 

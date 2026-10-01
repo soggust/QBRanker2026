@@ -161,14 +161,16 @@ export const STAT_NAMES: Partial<Record<SkillColumnKey, string>> = {
 
 // Per-game column labels, when Stat Totals is on Per Game
 export const PER_GAME_LABELS: Partial<Record<SkillColumnKey, string>> = {
-  goals: 'G / GP',
-  assists: 'A / GP',
-  points: 'P / GP',
-  shots: 'SOG / GP',
+  goals: 'Goals / GP',
+  assists: 'Assists / GP',
+  points: 'Points / GP',
+  shots: 'Shots / GP',
   hits: 'Hits / GP',
-  blocks: 'BLK / GP',
+  blocks: 'Blocks / GP',
+  takeaways: 'Takeaways / GP',
+  giveaways: 'Giveaways / GP',
   pim: 'PIM / GP',
-  saves: 'SV / GP',
+  saves: 'Saves / GP',
 };
 
 export type SkillWeights = Partial<Record<SkillColumnKey, number>>;
@@ -190,20 +192,20 @@ const SKATER_STATS: SkillStat[] = [
   GAMES_STAT,
   { key: 'toi', label: 'TOI', description: 'Time on ice per game, in minutes (for context: his role; not part of the ranking)', kind: 'efficiency', format: 'dec1', infoOnly: true },
   RECORD_STAT,
-  { key: 'goals', label: 'G', description: 'Goals', kind: 'volume', format: 'int' },
-  { key: 'assists', label: 'A', description: 'Assists', kind: 'volume', format: 'int' },
-  { key: 'points', label: 'PTS', description: 'Points (goals + assists)', kind: 'volume', format: 'int' },
+  { key: 'goals', label: 'Goals', description: 'Goals', kind: 'volume', format: 'int' },
+  { key: 'assists', label: 'Assists', description: 'Assists', kind: 'volume', format: 'int' },
+  { key: 'points', label: 'Points', description: 'Points (goals + assists)', kind: 'volume', format: 'int' },
   { key: 'plusMinus', label: '+/-', description: "Even-strength and shorthanded goals for minus against while he's on the ice", kind: 'volume', format: 'int' },
-  { key: 'ppPoints', label: 'PPP', description: 'Power-play points', kind: 'volume', format: 'int' },
-  { key: 'shots', label: 'SOG', description: 'Shots on goal', kind: 'volume', format: 'int' },
-  { key: 'shootingPct', label: 'SH %', description: 'Goals per shot on goal (20+ shots)', kind: 'efficiency', format: 'pct', missingIsAverage: true },
+  { key: 'ppPoints', label: 'PP Points', description: 'Power-play points', kind: 'volume', format: 'int' },
+  { key: 'shots', label: 'Shots', description: 'Shots on goal', kind: 'volume', format: 'int' },
+  { key: 'shootingPct', label: 'Shooting %', description: 'Goals per shot on goal (20+ shots)', kind: 'efficiency', format: 'pct', missingIsAverage: true },
   { key: 'gwg', label: 'GWG', description: 'Game-winning goals', kind: 'volume', format: 'int' },
   { key: 'hits', label: 'Hits', description: 'Hits', kind: 'volume', format: 'int' },
-  { key: 'blocks', label: 'BLK', description: 'Shots blocked', kind: 'volume', format: 'int' },
-  { key: 'takeaways', label: 'TK', description: 'Takeaways', kind: 'volume', format: 'int' },
-  { key: 'giveaways', label: 'GV', description: 'Giveaways (lower is better)', kind: 'volume', format: 'int', negative: true },
+  { key: 'blocks', label: 'Blocks', description: 'Shots blocked', kind: 'volume', format: 'int' },
+  { key: 'takeaways', label: 'Takeaways', description: 'Takeaways', kind: 'volume', format: 'int' },
+  { key: 'giveaways', label: 'Giveaways', description: 'Giveaways (lower is better)', kind: 'volume', format: 'int', negative: true },
   { key: 'pim', label: 'PIM', description: 'Penalty minutes (lower is better)', kind: 'volume', format: 'int', negative: true },
-  { key: 'faceoffPct', label: 'FO %', description: 'Faceoffs won (50+ faceoffs)', kind: 'efficiency', format: 'pct', missingIsAverage: true },
+  { key: 'faceoffPct', label: 'Faceoff %', description: 'Faceoffs won (50+ faceoffs)', kind: 'efficiency', format: 'pct', missingIsAverage: true },
   // (Game Score stays a season total under Per Game: a season's value, like WAR)
   { key: 'gameScore', label: 'Game Score', description: "His season in one number: goals, assists, shots, blocks, penalties, faceoffs and his line's shots and goals, weighted by what they're worth (MoneyPuck)", kind: 'efficiency', format: 'dec1', missingIsAverage: true },
   { key: 'xgfPct', label: 'xGF %', description: "His team's share of the expected goals while he's on the ice at 5-on-5 (shot quality, not just shots)", kind: 'efficiency', format: 'pct', missingIsAverage: true },
@@ -221,7 +223,7 @@ const NO_FACEOFFS = SKATER_STATS.filter((stat) => stat.key !== 'faceoffPct');
 // Goalies: their own decisions, the box score, and how they did against the shots they faced
 const GOALIE_STATS: SkillStat[] = [
   GAMES_STAT,
-  { key: 'gamesStarted', label: 'GS', description: 'Games started (for context; not part of the ranking)', kind: 'efficiency', format: 'int', infoOnly: true },
+  { key: 'gamesStarted', label: 'Starts', description: 'Games started (for context; not part of the ranking)', kind: 'efficiency', format: 'int', infoOnly: true },
   {
     key: 'winPct',
     label: 'Record',
@@ -230,14 +232,14 @@ const GOALIE_STATS: SkillStat[] = [
     kind: 'efficiency',
     format: 'record',
   },
-  { key: 'savePct', label: 'SV %', description: 'Saves per shot on goal (50+ shots)', kind: 'efficiency', format: 'avg3', missingIsAverage: true },
+  { key: 'savePct', label: 'Save %', description: 'Saves per shot on goal (50+ shots)', kind: 'efficiency', format: 'avg3', missingIsAverage: true },
   { key: 'gaa', label: 'GAA', description: 'Goals against per 60 minutes (lower is better)', kind: 'efficiency', format: 'dec2', negative: true },
-  { key: 'shutouts', label: 'SO', description: 'Shutouts', kind: 'volume', format: 'int' },
+  { key: 'shutouts', label: 'Shutouts', description: 'Shutouts', kind: 'volume', format: 'int' },
   { key: 'saves', label: 'Saves', description: 'Saves', kind: 'volume', format: 'int' },
   // (GSAx stays a season total under Per Game: a season's value)
   { key: 'gsax', label: 'GSAx', description: "Goals saved above expected: the goals an average goalie would have allowed on his shots (by their quality), minus the goals he allowed (MoneyPuck)", kind: 'efficiency', format: 'dec1', missingIsAverage: true },
   { key: 'gsaxPer60', label: 'GSAx / 60', description: 'Goals saved above expected per 60 minutes (300+ minutes)', kind: 'efficiency', format: 'dec2', missingIsAverage: true },
-  { key: 'hdSavePct', label: 'HD SV %', description: 'Saves on high-danger shots, from the slot and in close (20+ of them)', kind: 'efficiency', format: 'avg3', missingIsAverage: true },
+  { key: 'hdSavePct', label: 'HD Save %', description: 'Saves on high-danger shots, from the slot and in close (20+ of them)', kind: 'efficiency', format: 'avg3', missingIsAverage: true },
   {
     key: 'defense',
     label: 'Defense',

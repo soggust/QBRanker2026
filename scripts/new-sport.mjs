@@ -2,7 +2,7 @@
 //
 // Copies the NBA app (apps/nba) to apps/<id> as a working starting point (it builds and runs, still
 // showing basketball until you replace it), and wires it in everywhere a sport is listed:
-//   - sports.json          the sport bar, `npm run dev` and its proxy (the next free dev port)
+//   - sports.json          the sport bar and `npm run dev`
 //   - angular.json         its project (built to dist/site/<id>, served at /<id>/)
 //   - package.json         `npm run build` builds it; start:<id>, <id>:update-data, <id>:build-comps
 //   - firebase.json        /<id>/ serves it
@@ -44,9 +44,9 @@ for (const f of ['scripts/update-data.mjs', 'scripts/build-comps.mjs']) {
   edit(`apps/${id}/${f}`, (s) => s.split(`npm run ${FROM}:`).join(`npm run ${id}:`));
 }
 
-// sports.json: the sport bar, `npm run dev` and its proxy
+// sports.json: the sport bar and `npm run dev`
 const sports = json('sports.json');
-sports.push({ id, label, devPort: Math.max(...sports.map((s) => s.devPort)) + 1 });
+sports.push({ id, label });
 writeFileSync(at('sports.json'), '[\n' + sports.map((s) => '  ' + JSON.stringify(s).replace(/,"/g, ', "').replace(/":/g, '": ').replace('{', '{ ').replace(/}$/, ' }')).join(',\n') + '\n]\n');
 
 // angular.json: a project like the NBA app's, pointed at apps/<id>

@@ -24,7 +24,7 @@ body {
 // A puck (textures/puck.svg, also the favicon), seen from above. On the dark menus it glows ice blue,
 // like the TV broadcasts' glowing puck, so it reads on any background.
 $puck: url("../assets/textures/puck.svg");
-$puck-glow: drop-shadow(0 0 3px rgba(90, 190, 255, 0.85)) drop-shadow(0 1px 1px rgba(0, 0, 0, 0.6));
+$puck-glow: drop-shadow(0 0 2px rgba(120, 205, 255, 0.95)) drop-shadow(0 0 5px rgba(90, 190, 255, 0.7));
 $ice-text: #e9f6ff;
 
 .mdc-slider__thumb-knob {
@@ -74,13 +74,17 @@ html .mat-mdc-slide-toggle.mat-accent {
 // lit from the top left, framed by the puck's knurled grip band (a fine diagonal crosshatch in the
 // border), with ice-white icons and text. Hovering one, or a footer button's "open" state, lights it
 // up with the glowing puck's blue halo.
-$rubber: radial-gradient(ellipse 120% 140% at 30% 10%, #3a3d42, #16171a 60%, #0a0a0c);
-$knurl: repeating-linear-gradient(45deg, #34373d 0 1.5px, #0e0f11 1.5px 3px);
+// (on the dark menus black rubber would sink into the panel: the knurled band is lighter, and a faint
+// ice-blue rim, the glowing puck's halo turned down, always outlines it)
+$rubber: linear-gradient(160deg, #34373d, #1c1d21 55%, #121316);
+$knurl: repeating-linear-gradient(45deg, #5a5e67 0 1.5px, #15161a 1.5px 3px);
 $rubber-edge:
-  inset 0 1px 0 rgba(255, 255, 255, 0.08),
+  inset 0 1px 0 rgba(255, 255, 255, 0.1),
   inset 0 -3px 4px rgba(0, 0, 0, 0.5),
+  0 0 0 1px rgba(140, 205, 255, 0.3),
+  0 0 6px rgba(90, 190, 255, 0.22),
   0 1px 2px rgba(0, 0, 0, 0.55);
-$blue-halo: 0 0 0 1px rgba(120, 200, 255, 0.55), 0 0 10px rgba(90, 190, 255, 0.75);
+$blue-halo: 0 0 0 1px rgba(120, 200, 255, 0.6), 0 0 12px rgba(90, 190, 255, 0.75);
 
 @mixin puck-rubber {
   background: $rubber padding-box, $knurl border-box !important;

@@ -108,7 +108,10 @@ section footer .mat-mdc-select.season-select {
 }
 
 // (the football knob and switch don't roll like the round balls in the other sports)
-.mdc-slider__thumb-knob,
+.mdc-slider__thumb-knob {
+  transform: translate(-50%, -50%) !important;
+}
+
 html .mat-mdc-slide-toggle .mdc-switch__handle::after {
   rotate: none !important;
 }
