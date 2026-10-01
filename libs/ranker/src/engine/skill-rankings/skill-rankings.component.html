@@ -49,6 +49,10 @@
         </div>
       }
     </li>
+    <!-- Nobody listed (every row filtered out by the settings) -->
+    @if (!playerList.length) {
+      <li class="empty-list">{{ sport.copy.noneFound ?? 'No Players Found' }}</li>
+    }
     @for (player of playerList; track player.gsisId; let i = $index) {
       <li cdkDrag cdkDragPreviewContainer="parent" class="player" [attr.data-id]="player.gsisId">
         <mat-icon
@@ -368,6 +372,18 @@
         ></mat-slide-toggle>
         <span>Unweighted Stats</span>
       </div>
+      @for (setting of sportSettingsAt('displayEnd'); track setting.key) {
+        <div mat-menu-item [title]="setting.title" (click)="$event.stopPropagation(); stepSportSetting(setting.key)">
+          <mat-slide-toggle hideIcon
+            color="accent"
+            class="slide-toggle"
+            [ngModel]="!!sportSettings[setting.key]"
+            (ngModelChange)="stepSportSetting(setting.key)"
+            (click)="$event.stopPropagation()"
+          ></mat-slide-toggle>
+          <span>{{ setting.label }}</span>
+        </div>
+      }
     </mat-menu>
   </footer>
 </section>

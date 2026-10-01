@@ -1,5 +1,6 @@
-// Builds the UFC app's data: every active fighter's UFC career, by division. A fighter is active with a
-// UFC fight in the last two years.
+// Builds the UFC app's data: every active fighter's UFC career, by division (a fighter is active with a
+// UFC fight in the last two years), and the retired ones with 6+ UFC fights (the Retired Fighters
+// setting). Every fighter also gets an Elo rating, worked out over every UFC bout since 2001.
 //
 // - ESPN's UFC scoreboards (one request a year, 2001 on): every bout, its fighters, the winner, the
 //   division, and the round and time it ended (a fight that reaches the final bell is a decision)
@@ -112,6 +113,7 @@ async function bouts() {
           seconds: (period - 1) * ROUND + clock,
           // (the final bell: a decision; anything sooner, a finish)
           decision: period >= periods && clock >= ROUND,
+          rounds: periods,
           period,
           clock,
           fighters: c.competitors.map((p) => ({ id: String(p.id), name: p.athlete?.displayName ?? '', winner: !!p.winner })),
@@ -279,11 +281,45 @@ for (const b of all) for (const f of b.fighters) (byFighter.get(f.id) ?? byFight
 for (const list of byFighter.values()) list.sort((a, b) => b.date.localeCompare(a.date));
 
 const cutoff = new Date(Date.now() - ACTIVE_DAYS * 864e5).toISOString().slice(0, 10);
-const active = [...byFighter].filter(([, list]) => list[0].date >= cutoff).map(([id]) => id);
-// Everyone whose stats are needed: the active fighters, and every opponent they've had in the UFC
-const activeSet = new Set(active);
+const activeSet = new Set([...byFighter].filter(([, list]) => list[0].date >= cutoff).map(([id]) => id));
+// The retired fighters worth listing: 6+ UFC fights
+const RETIRED_MIN_FIGHTS = 6;
+const active = [...byFighter].filter(([id, list]) => activeSet.has(id) || list.length >= RETIRED_MIN_FIGHTS).map(([id]) => id);
+// Everyone whose stats are needed: the listed fighters, and every opponent they've had in the UFC
+const listedSet = new Set(active);
 const needed = new Set(active);
 for (const id of active) for (const b of byFighter.get(id)) for (const f of b.fighters) needed.add(f.id);
+
+// Elo ratings over every UFC bout, oldest first: everyone starts at 1500, and a fight moves both
+// fighters by how surprising the result was (K = 32), so a win over a highly rated opponent is worth far
+// more than one over a low one. A draw splits the difference; a no contest (no winner before the final
+// bell) counts for nothing. Each bout keeps both fighters' ratings going in.
+const ELO_START = 1500;
+const ELO_K = 32;
+const elo = new Map();
+const eloBefore = new Map();
+const peakElo = new Map();
+for (const b of [...all].sort((x, y) => x.date.localeCompare(y.date))) {
+  const [a, c] = b.fighters;
+  const ra = elo.get(a.id) ?? ELO_START;
+  const rc = elo.get(c.id) ?? ELO_START;
+  eloBefore.set(`${b.id}/${a.id}`, ra);
+  eloBefore.set(`${b.id}/${c.id}`, rc);
+  const noContest = !a.winner && !c.winner && !b.decision;
+  if (noContest) continue;
+  const expected = 1 / (1 + 10 ** ((rc - ra) / 400));
+  const score = a.winner ? 1 : c.winner ? 0 : 0.5;
+  const move = ELO_K * (score - expected);
+  elo.set(a.id, ra + move);
+  elo.set(c.id, rc - move);
+  peakElo.set(a.id, Math.max(peakElo.get(a.id) ?? ELO_START, ra + move));
+  peakElo.set(c.id, Math.max(peakElo.get(c.id) ?? ELO_START, rc - move));
+}
+// A quality win: over an opponent rated in the top fifth of the fighters going in (at that point in
+// the UFC's history, among everyone with 3+ fights)
+const ratedPool = [...elo].filter(([id]) => byFighter.get(id).length >= 3).map(([, r]) => r).sort((x, y) => x - y);
+const QUALITY_ELO = ratedPool[Math.floor(ratedPool.length * 0.8)];
+console.log(`Elo: ${elo.size} fighters rated; a quality win is over ${Math.round(QUALITY_ELO)}+`);
 
 let cache = {};
 try {
@@ -301,7 +337,8 @@ for (const id of needed) {
     entry.last = last;
     fetched++;
   }
-  if (activeSet.has(id) && (!entry.bio || (entry.bioAt ?? 0) < weekAgo)) {
+  // (bios: the active fighters' weekly, a retired fighter's once)
+  if (listedSet.has(id) && (!entry.bio || (activeSet.has(id) && (entry.bioAt ?? 0) < weekAgo))) {
     entry.bio = (await bio(id).catch(() => null)) ?? entry.bio ?? null;
     entry.bioAt = Date.now();
     fetched++;
@@ -340,6 +377,9 @@ for (const id of active) {
     else break;
   }
   const opponents = fights.map((f) => strength.get(f.fighters.find((x) => x.id !== id).id) ?? 0.5);
+  const won = fights.filter((f) => f.fighters.find((x) => x.id === id).winner);
+  const qualityWins = won.filter((f) => (eloBefore.get(`${f.id}/${f.fighters.find((x) => x.id !== id).id}`) ?? ELO_START) >= QUALITY_ELO).length;
+  const mainEventWins = won.filter((f) => f.rounds >= 5).length;
   const champion = ranked.champions.get(key);
   const p4p = ranked.p4p.get(key);
   out[tab].push({
@@ -351,11 +391,17 @@ for (const id of active) {
     country: b?.country ?? null,
     games: fights.length,
     rookie: fights[fights.length - 1].date >= debutCutoff,
+    // (no UFC fight in two years: listed with the Retired Fighters setting on)
+    retired: !activeSet.has(id),
     lastFive: results.slice(0, 5),
     stats: {
       ...c,
       streak,
       schedule: round(opponents.reduce((s, v) => s + v, 0) / opponents.length),
+      elo: Math.round(elo.get(id) ?? ELO_START),
+      peakElo: Math.round(peakElo.get(id) ?? ELO_START),
+      qualityWins,
+      mainEventWins,
       officialRank: champion === tab ? null : (ranked.ranks.get(key) ?? null),
       age: b?.age ?? null,
       reach: b?.reach ?? null,

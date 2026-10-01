@@ -2405,6 +2405,24 @@ section ul li.player:not(.header-row) {
   contain-intrinsic-block-size: auto 59px;
 }
 
+// The empty list: one line where the rows would be (on the board itself: no row fill or hover; kept
+// to the visible width, and stuck there, since the list scrolls sideways)
+section ul li.empty-list {
+  background: none !important;
+  border: none;
+  color: rgba(255, 255, 255, 0.75);
+  display: block;
+  left: 0;
+  position: sticky;
+  width: min(100%, calc(100vw - 80px));
+  font-family: "Orbitron", sans-serif;
+  font-size: 14px;
+  letter-spacing: 2px;
+  padding: 48px 16px;
+  text-align: center;
+  text-transform: uppercase;
+}
+
 // Headshots keep their own shape: ESPN's cutouts (NFL, NBA) are as wide as the box and fill it, while
 // MLB's and the NHL's are square, so they sit bottom-center in it rather than being stretched wide
 section ul li.player:not(.header-row) .badge-slot .headshot {

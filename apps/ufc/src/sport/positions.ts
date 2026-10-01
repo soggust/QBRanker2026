@@ -37,6 +37,12 @@ export type SkillStatKey =
   | 'tdDef'
   | 'sub15'
   | 'adv15'
+  // Competition: an Elo rating over every UFC bout (now, and his best), wins over highly rated
+  // opponents, and wins in five-round fights (title fights and main events)
+  | 'elo'
+  | 'peakElo'
+  | 'qualityWins'
+  | 'mainEventWins'
   // Context
   | 'schedule'
   | 'officialRank'
@@ -72,6 +78,8 @@ export interface SkillPlayer {
   stats: Record<SkillStatKey, number | null>;
   // His UFC debut came in the last year (the Rookies Only setting: the newcomers)
   rookie?: boolean;
+  // No UFC fight in two years (listed with the Retired Fighters setting on)
+  retired?: boolean;
   // His last five UFC results, newest first (1 win, 0.5 draw or no contest, 0 loss)
   lastFive?: number[];
   // His whole pro record ("27-1-0")
@@ -133,12 +141,18 @@ export const STAT_NAMES: Partial<Record<SkillColumnKey, string>> = {
   sub15: 'Submission Attempts per 15 Minutes',
   adv15: 'Ground Advances per 15 Minutes',
   schedule: "Strength of Schedule (his UFC opponents' win percentage)",
+  elo: 'Elo Rating (now)',
+  peakElo: 'Peak Elo Rating',
+  qualityWins: 'Quality Wins (over opponents rated in the top fifth going in)',
+  mainEventWins: 'Five-Round Wins (title fights and main events)',
   officialRank: "UFC's Official Division Rank",
   age: 'Age',
   reach: 'Reach (inches)',
 };
 
 export const PER_GAME_LABELS: Partial<Record<SkillColumnKey, string>> = {
+  qualityWins: 'Quality Wins / Fight',
+  mainEventWins: '5-Rd Wins / Fight',
   finishes: 'Finishes / Fight',
   finished: 'Finished / Fight',
 };
@@ -152,6 +166,11 @@ const UFC_STATS: SkillStat[] = [
   { key: 'winPct', label: 'Record', description: 'His UFC record, wins-losses-draws (draws include no contests; ranked on win percentage)', kind: 'efficiency', format: 'record' },
   { key: 'recent', label: 'Recent', description: 'His last five UFC fights, newest first (ranked on a recency-weighted win rate)', kind: 'efficiency', format: 'recent' },
   { key: 'officialRank', label: 'UFC Rank', description: "UFC.com's official rank in his division (for context; not part of the ranking; the champion wears the belt)", kind: 'efficiency', format: 'rank', infoOnly: true },
+  // (the competition ones: results weighed by whom they came against)
+  { key: 'elo', label: 'Elo', description: "A rating built from every UFC fight since 2001: each result moves it by how surprising it was, so beating a highly rated opponent is worth far more than beating a low one (1500 to start)", kind: 'efficiency', format: 'int' },
+  { key: 'peakElo', label: 'Peak Elo', description: 'His best Elo rating at any point in his UFC career', kind: 'efficiency', format: 'int' },
+  { key: 'qualityWins', label: 'Quality Wins', description: 'Wins over opponents rated in the top fifth of UFC fighters (by Elo) going into the fight', kind: 'volume', format: 'int' },
+  { key: 'mainEventWins', label: '5-Rd Wins', description: 'Wins in five-round fights: title fights and main events', kind: 'volume', format: 'int' },
   { key: 'streak', label: 'Streak', description: 'His current run: +3 is three straight wins, -2 two straight losses', kind: 'efficiency', format: 'int' },
   { key: 'finishRate', label: 'Finish %', description: 'Share of his UFC wins that ended inside the distance (knockout or submission)', kind: 'efficiency', format: 'pct', missingIsAverage: true },
   { key: 'finishes', label: 'Finishes', description: 'UFC wins inside the distance', kind: 'volume', format: 'int' },
@@ -204,7 +223,20 @@ export const STAT_GROUP_INFO: { id: StatGroupId; title: string; icon: string }[]
   { id: 'support', title: 'Context', icon: 'insights' },
 ];
 
-const RESULTS_STATS = new Set<SkillColumnKey>(['games', 'winPct', 'recent', 'officialRank', 'streak', 'finishRate', 'finishes', 'finished']);
+const RESULTS_STATS = new Set<SkillColumnKey>([
+  'games',
+  'winPct',
+  'recent',
+  'officialRank',
+  'elo',
+  'peakElo',
+  'qualityWins',
+  'mainEventWins',
+  'streak',
+  'finishRate',
+  'finishes',
+  'finished',
+]);
 const STRIKING_STATS = new Set<SkillColumnKey>(['slpm', 'strAcc', 'sapm', 'strDef', 'kd15', 'strDiff', 'kdAgainst']);
 const GRAPPLING_STATS = new Set<SkillColumnKey>(['td15', 'tdAcc', 'tdDef', 'sub15', 'adv15']);
 

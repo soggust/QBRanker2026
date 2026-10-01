@@ -12,7 +12,8 @@ const UFC_SKILLS: SkillDef[] = [
   { id: 'takedown-defense', name: 'Takedown Defense', short: 'TD Defense', parts: [['tdDef', 1]] },
   { id: 'grappling', name: 'Grappling', short: 'Grappling', parts: [['sub15', 1], ['adv15', 1]] },
   { id: 'durability', name: 'Durability', short: 'Chin', parts: [['kdAgainst', -1], ['finished', -1]] },
-  { id: 'winning', name: 'Winning', short: 'Winning', parts: [['winPct', 1], ['recent', 1], ['schedule', 1]] },
+  { id: 'winning', name: 'Winning', short: 'Winning', parts: [['winPct', 1], ['recent', 1], ['elo', 1]] },
+  { id: 'competition', name: 'Level of Competition', short: 'Competition', parts: [['qualityWins', 1], ['mainEventWins', 1], ['schedule', 1], ['peakElo', 1]] },
 ];
 
 export const SKILLS: Record<SkillPosition, SkillDef[]> = Object.fromEntries(POSITIONS.map((p) => [p, UFC_SKILLS])) as Record<

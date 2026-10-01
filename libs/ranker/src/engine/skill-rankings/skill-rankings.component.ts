@@ -335,7 +335,10 @@ export class SkillRankingsComponent implements OnChanges {
     const min = this.hasMin ? this.minCount : 0;
     return SKILL_UNITS[this.position].filter(
       (player) =>
-        (this.showInjured || !player.injured) && SPORT.playingTime.of(player) >= min && this.rookieOk(player, this.season),
+        (this.showInjured || !player.injured) &&
+        SPORT.playingTime.of(player) >= min &&
+        this.rookieOk(player, this.season) &&
+        (SPORT.rowVisible?.(player, this.sportSettings) ?? true),
     );
   }
 
@@ -1467,7 +1470,11 @@ export class SkillRankingsComponent implements OnChanges {
         units.some((p) => key in p.stats) && units.every((p) => p.stats[key as SkillStatKey] == null),
     };
     const listed = units.filter(
-      (p) => (this.showInjured || !p.injured) && SPORT.playingTime.of(p) >= min && this.rookieOk(p, season),
+      (p) =>
+        (this.showInjured || !p.injured) &&
+        SPORT.playingTime.of(p) >= min &&
+        this.rookieOk(p, season) &&
+        (SPORT.rowVisible?.(p, this.sportSettings) ?? true),
     );
     // That season's list as dragged by hand this visit, if it was; otherwise ranked by the sliders
     const saved = this.positionService.seasonUnitOrder(season, this.position);

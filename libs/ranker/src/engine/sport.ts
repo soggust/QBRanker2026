@@ -63,9 +63,9 @@ export interface SportSetting {
   // A choice cycled by clicking ("Fantasy Scoring: PPR"), or an on/off switch when there are no options
   options?: Record<string, string>;
   default: string | boolean;
-  // Where it sits: the Format section's top, after Stat Totals, or among the Display switches (before
-  // Injured Players)
-  slot: 'formatTop' | 'formatMid' | 'display';
+  // Where it sits: the Format section's top, after Stat Totals, among the Display switches (before
+  // Injured Players), or at the bottom of the menu
+  slot: 'formatTop' | 'formatMid' | 'display' | 'displayEnd';
   // Its menu icon (a cycled choice): a Material icon, or a class the styles draw ('lombardi')
   icon?: string;
   iconClass?: string;
@@ -190,6 +190,8 @@ export interface SportConfig {
   // One career table rather than seasons: no season dropdown, the card reads "Career" and has no
   // season-by-season tab, history takes or similar seasons
   careerOnly?: boolean;
+  // Rows the sport's settings can hide (the UFC's retired fighters, until switched on)
+  rowVisible?: (player: SkillPlayer, settings: SportSettings) => boolean;
   // A tab the sport's settings can hide (the UFC's women's divisions, until switched on)
   tabVisible?: (position: string, settings: SportSettings) => boolean;
   // A history tab on the card in place of the seasons one (the UFC's fights): its title and icon, and a
@@ -232,5 +234,7 @@ export interface SportConfig {
     // Dividers draws ("A chalk line")
     lowerIsBetterExample: string;
     groupLine: string;
+    // The empty list's message ("No Fighters Found"; "No Players Found" unless given)
+    noneFound?: string;
   };
 }

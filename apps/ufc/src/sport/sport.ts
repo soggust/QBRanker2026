@@ -110,14 +110,22 @@ export const SPORT: SportConfig = {
   cardFlags,
   settings: [
     {
+      key: 'retired',
+      label: 'Retired Fighters',
+      title: 'On: add the fighters without a UFC fight in two years (those with 6+ UFC fights): the legends, ranked on the same stats',
+      default: false,
+      slot: 'displayEnd',
+    },
+    {
       key: 'women',
       label: "Women's Divisions",
       title: "On: add the women's divisions (strawweight, flyweight and bantamweight) to the tabs",
       default: false,
-      slot: 'display',
+      slot: 'displayEnd',
     },
   ],
   tabVisible: (position, settings) => !WOMENS_DIVISIONS.includes(position as Position) || !!settings['women'],
+  rowVisible: (player, settings) => !player.retired || !!settings['retired'],
   cardHistory: { title: 'Fights', icon: 'sports_mma', rows: (player) => fightRows(player) },
   copy: {
     noHolesIcon: 'verified',
@@ -129,5 +137,6 @@ export const SPORT: SportConfig = {
     injuredHelp: 'Off: hide injured fighters, and leave them out of the rankings',
     lowerIsBetterExample: 'strikes absorbed',
     groupLine: 'A painted mat line',
+    noneFound: 'No Fighters Found',
   },
 };
