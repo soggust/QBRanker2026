@@ -284,3 +284,16 @@ section footer .mat-mdc-select.season-select,
 .mdc-switch.mdc-switch--selected:enabled:active .mdc-switch__track::after {
   background: $white-text !important;
 }
+
+
+// The switch's ball reaches over the ends of its track: a pointed ball (or a glove) leaves the track's
+// rounded end showing past it at the end of its travel
+// (translate, not transform: Material positions the handle with its own transform)
+html .mat-mdc-slide-toggle.mat-accent .mdc-switch__handle {
+  transition: translate 0.15s ease;
+  translate: -3px 0;
+}
+
+html .mat-mdc-slide-toggle.mat-accent .mdc-switch--selected .mdc-switch__handle {
+  translate: 3px 0;
+}

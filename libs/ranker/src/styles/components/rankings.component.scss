@@ -2182,8 +2182,9 @@ section.rankings-wrapper {
   > footer {
     height: auto;
     margin-bottom: 12px;
-    // (a pixel out on each side: the buttons' borders then line up with the rows' edges)
-    margin-inline: -1px;
+    // (out a pixel on the left and two on the right: the buttons' borders then line up with the rows'
+    // edges)
+    margin-inline: -1px -2px;
     order: -1;
   }
 }
@@ -2219,7 +2220,11 @@ section.rankings-wrapper > footer {
 // margin gives way to it)
 @media (max-width: 1199px) {
   section.rankings-wrapper > footer {
-    margin: 8px 0 12px;
+    // (the same pixel out on the left and two on the right as on large screens; stretched, since the
+    // column centers its children and uneven margins would only shift it)
+    align-self: stretch;
+    margin: 8px -2px 12px -1px;
+    width: auto;
   }
 
   section.rankings-wrapper ul {
@@ -2412,10 +2417,20 @@ section ul li.player .player-name .player-awards .award-cup.award-gold,
 @include meta.load-css("sport-rankings");
 
 // Rows off screen skip layout and paint (they keep their height, so the scrollbar and dragging are
-// unchanged): re-ranking while a slider moves only redraws the rows you can see
+// unchanged): re-ranking while a slider moves only redraws the rows you can see. That also clips a row's
+// painting to its own box, so a row is always as wide as all its columns (otherwise the last stats,
+// scrolled to sideways, were cut off: an empty, tinted column). Touch screens don't skip any: there the
+// sideways scroll is what you do most, and phones' browsers clipped rows anyway.
 section ul li.player:not(.header-row) {
   content-visibility: auto;
   contain-intrinsic-block-size: auto var(--row-h);
+  min-width: max-content;
+}
+
+@media (pointer: coarse) {
+  section ul li.player:not(.header-row) {
+    content-visibility: visible;
+  }
 }
 
 // The empty list: one line where the rows would be (on the board itself: no row fill or hover; kept
