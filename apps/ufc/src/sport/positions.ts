@@ -92,6 +92,9 @@ export interface SkillPlayer {
   pastDivision?: boolean;
   // No UFC fight in the last year (out of the UFC's rankings for that: no rank counts as average)
   inactive?: boolean;
+  // Pound-for-pound rows: what his rank counts as in the ranking, 0-16 (the P4P top 15, then his
+  // division rank behind them; null: neither)
+  rankScore?: number | null;
   // The champion of this tab's division (his UFC rank counts as #0)
   titleHolder?: boolean;
   stats: Record<SkillStatKey, number | null>;

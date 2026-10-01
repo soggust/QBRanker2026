@@ -143,9 +143,13 @@ export const SPORT: SportConfig = {
   scoreValue: (player, stat, shown) => {
     if (stat.key !== 'officialRank') return undefined;
     if (player.titleHolder) return 0;
-    if (shown == null && (player.retired || player.inactive)) return null;
-    return shown ?? 16;
+    // (pound-for-pound: the P4P top 15, then the division ranks behind them)
+    const rank = player.rankScore !== undefined ? player.rankScore : shown;
+    if (rank == null && (player.retired || player.inactive)) return null;
+    return rank ?? 16;
   },
+  // The pound-for-pound tabs: the top 30
+  listLimit: (position) => (position === 'P4P' || position === 'WP4P' ? 30 : undefined),
   // Head to head: he won their latest meeting, in the last two years (fights are newest first)
   beat: (a, b) => {
     const meeting = a.fights?.find((f) => f[1] === b.name);

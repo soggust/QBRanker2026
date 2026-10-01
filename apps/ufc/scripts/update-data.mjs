@@ -481,6 +481,8 @@ for (const id of active) {
   const champion = ranked.champions.get(key);
   const p4pTab = WOMENS.includes(home) ? 'WP4P' : 'P4P';
   const p4p = ranked[WOMENS.includes(home) ? 'wp4p' : 'p4p'].get(key);
+  // (his rank in his division: 0 for a champion)
+  const divisionRank = champion ? 0 : (ranked.ranks.get(`${home}/${key}`) ?? null);
   // (Wikipedia may write a name surname-first: "Weili Zhang" for Zhang Weili)
   const title = titleHistory.get(key) ?? titleHistory.get(nameKey(name.split(' ').reverse().join(' '))) ?? { reigns: 0, defenses: 0, by: {} };
   const row = (tab) => {
@@ -493,6 +495,10 @@ for (const id of active) {
     division: tab === p4pTab ? (champion ?? home) : tab,
     // (a division he's fought in but isn't in now: listed there among all-time fighters only)
     pastDivision: tab !== p4pTab && tab !== home,
+    // (pound-for-pound: what his rank counts as in the ranking, on the division tabs' 0-16 scale: the
+    // P4P top 15 first (#1 = 0.5 ... #15 = 7.5), then his division rank behind them (its champion 7.5,
+    // #1 = 8 ... #15 = 15), so a ranked contender stays above the unranked; null: neither)
+    ...(tab === p4pTab ? { rankScore: p4p ? p4p / 2 : divisionRank != null ? (15 + divisionRank) / 2 : null } : {}),
     // (no fight in a year: the UFC drops fighters from its rankings for that, so no rank says nothing)
     inactive: fights[0].date < yearAgo,
     titleHolder: champion === tab,

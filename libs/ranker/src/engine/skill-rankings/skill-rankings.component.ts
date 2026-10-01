@@ -555,11 +555,17 @@ export class SkillRankingsComponent implements OnChanges {
     else this.sortPlayers();
   }
 
+  // The tab's top rows only, when the sport caps it (SPORT.listLimit)
+  private limited(list: SkillPlayer[]): SkillPlayer[] {
+    const limit = SPORT.listLimit?.(this.position);
+    return limit ? list.slice(0, limit) : list;
+  }
+
   // Put the list back in a saved order (units that have since appeared go at the end)
   private restoreOrder(ids: string[]) {
     const players = this.listedPlayers();
     const rank = new Map(ids.map((id, i) => [id, i]));
-    this.playerList = [...players].sort((a, b) => (rank.get(a.gsisId) ?? Infinity) - (rank.get(b.gsisId) ?? Infinity));
+    this.playerList = this.limited([...players].sort((a, b) => (rank.get(a.gsisId) ?? Infinity) - (rank.get(b.gsisId) ?? Infinity)));
   }
 
   // Remember this tab's order for when you come back
@@ -622,7 +628,7 @@ export class SkillRankingsComponent implements OnChanges {
       undefined,
       this.sportSettings,
     );
-    this.playerList = headToHead([...players].sort((a, b) => (totals.get(b) ?? 0) - (totals.get(a) ?? 0)));
+    this.playerList = this.limited(headToHead([...players].sort((a, b) => (totals.get(b) ?? 0) - (totals.get(a) ?? 0))));
     this.publishOrder(false);
     this.glide(from);
   }

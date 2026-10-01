@@ -201,6 +201,8 @@ export interface SportConfig {
   // Head to head: a beat b in their latest meeting (recent enough to count). After the weighted sort, a
   // row placed right below one it beat moves above it (the UFC: Pimblett over Saint Denis).
   beat?: (a: SkillPlayer, b: SkillPlayer) => boolean;
+  // How many rows a tab lists at most, its top ones (the UFC's pound-for-pound tabs: 30); none: all
+  listLimit?: (position: string) => number | undefined;
   // Rows the sport's settings can hide (the UFC's retired fighters, until switched on)
   rowVisible?: (player: SkillPlayer, settings: SportSettings) => boolean;
   // A tab the sport's settings can hide (the UFC's women's divisions, until switched on)
