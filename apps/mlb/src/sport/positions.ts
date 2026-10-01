@@ -160,7 +160,7 @@ export const STAT_NAMES: Partial<Record<SkillColumnKey, string>> = {
   hardHitPct: 'Hard-Hit Rate (95+ mph)',
   sprintSpeed: 'Sprint Speed (ft/sec)',
   fieldingPct: 'Fielding Percentage',
-  rangeFactor: 'Range Factor (plays per 9 innings)',
+  rangeFactor: 'Range Factor (min 50 innings)',
   oaa: 'Outs Above Average (Statcast)',
   gamesStarted: 'Games Started',
   winPct: 'Win-Loss Record',
