@@ -429,7 +429,7 @@ for (const id of [...activeSet]) {
   if (/^(Retired|Not Fighting)$/i.test(entry.status ?? '')) activeSet.delete(id);
 }
 // Retirements UFC.com hasn't caught up with yet (still "Active" there): by name
-const RETIRED = ['Jon Jones', 'Dustin Poirier', 'Rafael Dos Anjos'];
+const RETIRED = ['Jon Jones', 'Dustin Poirier'];
 for (const id of [...activeSet]) {
   const name = cache[id]?.bio?.name ?? byFighter.get(id)[0].fighters.find((f) => f.id === id).name;
   if (RETIRED.includes(name)) activeSet.delete(id);
