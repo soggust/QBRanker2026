@@ -151,6 +151,27 @@ export function weightedTotals<T>(
   return totals;
 }
 
+// The sport's head-to-head rule (SPORT.beat) over a sorted list: a row right below one it beat in their
+// latest meeting moves above it, down the list again until nothing moves (bounded, so a cycle of wins
+// can't loop)
+export function headToHead<T>(sorted: T[]): T[] {
+  const beat = SPORT.beat as ((a: T, b: T) => boolean) | undefined;
+  if (!beat) return sorted;
+  const list = [...sorted];
+  for (let pass = 0; pass < 10; pass++) {
+    let moved = false;
+    for (let i = 0; i + 1 < list.length; i++) {
+      if (beat(list[i + 1], list[i])) {
+        [list[i], list[i + 1]] = [list[i + 1], list[i]];
+        moved = true;
+        i++;
+      }
+    }
+    if (!moved) break;
+  }
+  return list;
+}
+
 // A tab's default ranking (its sliders, before it's been opened), best first: combined pairs' parts
 // scaled by their parent sliders, the sport's settings as given (their defaults unless), and grades
 // from other tabs as average. The loaded season's rows unless given another season's.
@@ -170,5 +191,5 @@ export function defaultRanking(
     undefined,
     settings,
   );
-  return [...units].sort((a, b) => (totals.get(b) ?? 0) - (totals.get(a) ?? 0));
+  return headToHead([...units].sort((a, b) => (totals.get(b) ?? 0) - (totals.get(a) ?? 0)));
 }
