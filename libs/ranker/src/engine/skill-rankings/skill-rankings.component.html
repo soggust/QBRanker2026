@@ -50,7 +50,7 @@
       }
     </li>
     @for (player of playerList; track player.gsisId; let i = $index) {
-      <li cdkDrag cdkDragPreviewContainer="parent" class="player">
+      <li cdkDrag cdkDragPreviewContainer="parent" class="player" [attr.data-id]="player.gsisId">
         <mat-icon
           cdkDragHandle
           aria-hidden="false"

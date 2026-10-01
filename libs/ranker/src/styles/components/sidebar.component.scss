@@ -390,8 +390,9 @@
     text-transform: uppercase;
     width: 100%;
 
+    // (pressed in, a faint dark shade)
     &:hover {
-      background: rgba(255, 255, 255, 0.08);
+      background: rgba(0, 0, 0, 0.1);
 
       .group-chevron {
         color: var(--scoreboard-led);
@@ -652,8 +653,9 @@
   display: flex;
   padding: 0 0.4em 0 0;
 
+  // (pressed in, a faint dark shade)
   &:hover {
-    background: rgba(255, 255, 255, 0.08);
+    background: rgba(0, 0, 0, 0.1);
   }
 
   button {

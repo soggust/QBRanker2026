@@ -546,8 +546,48 @@ export class SkillRankingsComponent implements OnChanges {
     this.positionService.setUnitOrder(this.position, this.playerList.map((player) => player.gsisId), manual);
   }
 
+  // When the list re-ranks, the rows on screen glide from where they were to their new places (a
+  // quick slide, transforms only) instead of jumping. Rows are measured before the sort and again once
+  // it's drawn. Only for a re-rank that comes on its own (a preset, a setting, a click on a slider's
+  // track): while a slider is being dragged the list re-ranks many times a second, and gliding every
+  // one of those would cost the smoothness the drag needs.
+  private lastSort = 0;
+
+  private glideFrom(): Map<string, number> | null {
+    const now = performance.now();
+    const steady = now - this.lastSort > 300;
+    this.lastSort = now;
+    const list = this.rankingsList?.nativeElement;
+    if (!list || !steady || matchMedia('(prefers-reduced-motion: reduce)').matches) return null;
+    const top = list.scrollTop - 200;
+    const bottom = list.scrollTop + list.clientHeight + 200;
+    const at = new Map<string, number>();
+    for (const row of Array.from(list.querySelectorAll<HTMLElement>(':scope > li.player[data-id]'))) {
+      if (row.offsetTop < top || row.offsetTop > bottom) continue;
+      at.set(row.dataset['id']!, row.getBoundingClientRect().top);
+    }
+    return at;
+  }
+
+  private glide(from: Map<string, number> | null): void {
+    if (!from?.size) return;
+    requestAnimationFrame(() => {
+      const list = this.rankingsList?.nativeElement;
+      if (!list) return;
+      for (const row of Array.from(list.querySelectorAll<HTMLElement>(':scope > li.player[data-id]'))) {
+        const was = from.get(row.dataset['id']!);
+        if (was === undefined) continue;
+        row.getAnimations().forEach((a) => a.cancel());
+        const dy = was - row.getBoundingClientRect().top;
+        if (Math.abs(dy) < 1) continue;
+        row.animate([{ transform: `translateY(${dy}px)` }, { transform: 'none' }], { duration: 260, easing: 'cubic-bezier(0.2, 0.8, 0.2, 1)' });
+      }
+    });
+  }
+
   // Sort Players By Weighted Total
   sortPlayers() {
+    const from = this.glideFrom();
     // Injured players drop out unless the settings menu's Show Injured is on, and so do players under
     // the Min Games setting
     const players = this.listedPlayers();
@@ -560,6 +600,7 @@ export class SkillRankingsComponent implements OnChanges {
       (a, b) => (totals.get(b) ?? 0) - (totals.get(a) ?? 0),
     );
     this.publishOrder(false);
+    this.glide(from);
   }
 
   // Drop Event

@@ -107,6 +107,12 @@ section footer .mat-mdc-select.season-select {
   padding-inline: 22px !important;
 }
 
+// (the football knob and switch don't roll like the round balls in the other sports)
+.mdc-slider__thumb-knob,
+html .mat-mdc-slide-toggle .mdc-switch__handle::after {
+  rotate: none !important;
+}
+
 // Inputs: the thick dark edge the NBA app's ball panels have (like the black channel around a panel of
 // a basketball, here a dark leather welt), with the same rounder corners
 section footer .filter-toggle,
@@ -116,12 +122,12 @@ section footer .info-toggle,
 section footer .mat-mdc-select.season-select,
 .sidebar .filters .mat-mdc-select,
 .mdc-menu-surface.mat-mdc-select-panel {
-  border: 2.5px solid #1a120c !important;
+  border: 1.5px solid #1a120c !important;
   border-radius: 10px !important;
 }
 
 .mat-mdc-menu-panel .min-games-stepper button {
-  border: 2px solid #1a120c !important;
+  border: 1px solid #1a120c !important;
 }
 
 // White on leather, as readable as it gets: a firm drop shadow plus a soft dark halo behind the

@@ -113,7 +113,7 @@
                         {{ row.label }}
                         <mat-icon [fontIcon]="skillRowIsOpen(row.key) ? 'expand_less' : 'expand_more'"></mat-icon>
                       </button>
-                      <mat-slider min="0" max="100" step="5" color="accent">
+                      <mat-slider min="0" max="100" step="5" color="accent" [style.--knob-roll]="(skillWeights[row.key] ?? 0) * 12 + 'deg'">
                         <input
                           matSliderThumb
                           [(ngModel)]="skillWeights[row.key]"
@@ -137,7 +137,7 @@
                         @for (child of row.children; track child.key) {
                           <div class="slider-row" [class.disabled]="skillRowOff(child.key, row.key)" [title]="child.description">
                             <p class="slider-label">{{ child.label }}</p>
-                            <mat-slider min="0" max="100" step="5" color="accent">
+                            <mat-slider min="0" max="100" step="5" color="accent" [style.--knob-roll]="(skillWeights[child.key] ?? 0) * 12 + 'deg'">
                               <input
                                 matSliderThumb
                                 [(ngModel)]="skillWeights[child.key]"
@@ -177,7 +177,7 @@
                   } @else {
                     <div class="slider-row" [class.disabled]="skillRowOff(row.key)" [title]="row.description">
                       <p class="slider-label">{{ row.label }}</p>
-                      <mat-slider min="0" max="100" step="5" color="accent">
+                      <mat-slider min="0" max="100" step="5" color="accent" [style.--knob-roll]="(skillWeights[row.key] ?? 0) * 12 + 'deg'">
                         <input
                           matSliderThumb
                           [(ngModel)]="skillWeights[row.key]"

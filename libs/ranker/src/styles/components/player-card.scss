@@ -1266,6 +1266,43 @@
   min-height: 1em;
 }
 
+// The radar grows out from its center when the card opens, and the skill and stat bars fill in from
+// the left
+.ov-radar .shape,
+.ov-radar .ghost,
+.ov-radar .dot {
+  animation: radar-grow 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  transform-box: view-box;
+  transform-origin: 0 0;
+}
+
+.stat-bar i {
+  animation: bar-fill 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  transform-origin: left center;
+}
+
+@keyframes radar-grow {
+  from {
+    opacity: 0;
+    transform: scale(0.1);
+  }
+}
+
+@keyframes bar-fill {
+  from {
+    transform: scaleX(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ov-radar .shape,
+  .ov-radar .ghost,
+  .ov-radar .dot,
+  .stat-bar i {
+    animation: none;
+  }
+}
+
 @keyframes card-fade {
   from {
     opacity: 0;
