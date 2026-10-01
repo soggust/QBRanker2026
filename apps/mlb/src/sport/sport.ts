@@ -88,6 +88,10 @@ export const SPORT: SportConfig = {
   },
   defaultStatBasis: 'season',
   perGameDecimals: 2,
+  statBasisHelp: {
+    examples: 'home runs, RBI, strikeouts, innings...',
+    pace: '162 games for hitters, 32 starts for starters, 65 appearances for relievers',
+  },
   teamLogo: (key) => `assets/MLB_Icons/${key}.svg`,
   // MLB's headshot cutouts (square)
   headshot: (id, w) => `https://img.mlbstatic.com/mlb-photos/image/upload/w_${w},q_auto:best/v1/people/${id}/headshot/silo/current`,

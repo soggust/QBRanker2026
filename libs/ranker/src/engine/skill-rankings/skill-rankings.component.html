@@ -206,7 +206,7 @@
       <div class="menu-section section-stats" (click)="$event.stopPropagation()">Format</div>
       <div
         mat-menu-item
-        title="Click to switch how counting stats (home runs, RBI, strikeouts, innings...) are shown and ranked: season totals, per game (fairer to anyone who missed time), or a full season's pace (162 games for hitters, 32 starts for starters, 65 appearances for relievers)"
+        [title]="statBasisTitle"
         (click)="$event.stopPropagation(); cycleStatBasis()"
       >
         <mat-icon class="menu-icon unit-rank-icon" fontIcon="functions" aria-hidden="true"></mat-icon>

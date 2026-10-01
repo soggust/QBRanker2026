@@ -111,6 +111,7 @@ export const SPORT: SportConfig = {
   // (NBA stats read per game)
   defaultStatBasis: 'perGame',
   perGameDecimals: 1,
+  statBasisHelp: { examples: 'points, rebounds, assists, 3s...', pace: '82 games' },
   teamLogo: (key) => `assets/NBA_Icons/${key}.svg`,
   // ESPN's headshot cutouts (the NFL app's shape)
   headshot: (id, w) => `https://a.espncdn.com/combiner/i?img=/i/headshots/nba/players/full/${id}.png&w=${w}&h=${Math.round(w * 0.725)}`,

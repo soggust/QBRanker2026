@@ -276,6 +276,11 @@ export class SkillRankingsComponent implements OnChanges {
   // The sport (its names and wording, for the template)
   readonly sport = SPORT;
 
+  // The Stat Totals setting's hover text, in the sport's terms
+  readonly statBasisTitle =
+    `Click to switch how counting stats (${SPORT.statBasisHelp.examples}) are shown and ranked: season totals, ` +
+    `per game (fairer to anyone who missed time), or a full season's pace (${SPORT.statBasisHelp.pace})`;
+
   // How a season reads ("2025", or "2024-25" for a sport named for the year it ends in)
   seasonText(season: number): string {
     return SPORT.seasonText(season);

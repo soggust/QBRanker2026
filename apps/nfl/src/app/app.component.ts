@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { SPORT_LINKS } from '@ranker/core/sports';
 import { PositionService } from './services/position.service';
 import { POSITIONS, Position } from './positions';
 
@@ -12,11 +13,7 @@ export class AppComponent {
   // The sport bar across the top: each sport is its own app on the same site (apps/<sport>, served at
   // /<sport>/); this one is lit
   readonly sport = 'nfl';
-  readonly sports = [
-    { id: 'nfl', label: 'NFL' },
-    { id: 'mlb', label: 'MLB' },
-    { id: 'nba', label: 'NBA' },
-  ];
+  readonly sports = SPORT_LINKS;
 
   position$ = this.positionService.position$;
   aboutOpen$ = this.positionService.aboutOpen$;

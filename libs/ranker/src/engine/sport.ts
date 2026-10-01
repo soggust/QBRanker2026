@@ -52,9 +52,11 @@ export interface SportConfig {
   roleWord: (position: string) => string;
   // The Min setting's measure of playing time: its label, hover text and each player's amount
   playingTime: { label: string; title: string; of: (player: SkillPlayer) => number };
-  // How counting stats read to start, and their decimals per game
+  // How counting stats read to start, their decimals per game, and the Stat Totals setting's hover
+  // text: example counting stats, and what a full season's pace is
   defaultStatBasis: StatBasis;
   perGameDecimals: number;
+  statBasisHelp: { examples: string; pace: string };
   // A team's logo file from its key ("NYK" -> "assets/NBA_Icons/NYK.svg"), and a player's headshot
   teamLogo: (key: string) => string;
   headshot: (id: number, width: number) => string;
