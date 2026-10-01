@@ -4,7 +4,7 @@
       "games": 3,
       "newCoach": true,
       "coach": "Mike LaFleur",
-      "oline": 7.4,
+      "oline": 7.7,
       "weapons": 3.1,
       "metrics": {
         "pressureRate": 0.22,
@@ -22,7 +22,7 @@
       "games": 3,
       "newCoach": false,
       "coach": "Kevin Stefanski",
-      "oline": 8.5,
+      "oline": 8.9,
       "weapons": 10.8,
       "metrics": {
         "pressureRate": 0.187,
@@ -40,7 +40,7 @@
       "games": 3,
       "newCoach": true,
       "coach": "Jesse Minter",
-      "oline": 9.7,
+      "oline": 10.1,
       "weapons": 10.5,
       "metrics": {
         "pressureRate": 0.216,
@@ -50,7 +50,7 @@
         "separation": 3.251,
         "yacOverExpected": 1.992,
         "dropRate": 0.039,
-        "rushOverExpected": 0.521,
+        "rushOverExpected": 0.478,
         "brokenTackles": 0.053
       }
     },
@@ -76,7 +76,7 @@
       "games": 3,
       "newCoach": false,
       "coach": "Dave Canales",
-      "oline": 1.5,
+      "oline": 1.9,
       "weapons": 10.1,
       "metrics": {
         "pressureRate": 0.341,
@@ -94,18 +94,18 @@
       "games": 3,
       "newCoach": false,
       "coach": "Ben Johnson",
-      "oline": 10.5,
+      "oline": 7.4,
       "weapons": 8.9,
       "metrics": {
-        "pressureRate": 0.237,
+        "pressureRate": 0.263,
         "sackRate": 0.053,
-        "yardsBeforeContact": 3.329,
+        "yardsBeforeContact": 2.857,
         "stuffRate": 0.198,
         "separation": 2.974,
         "yacOverExpected": 0.474,
-        "dropRate": 0.051,
+        "dropRate": 0.061,
         "rushOverExpected": 0.642,
-        "brokenTackles": 0.081
+        "brokenTackles": 0.088
       }
     },
     "Bengals": {
@@ -148,8 +148,8 @@
       "games": 3,
       "newCoach": false,
       "coach": "Brian Schottenheimer",
-      "oline": 10.1,
-      "weapons": 6.2,
+      "oline": 10.5,
+      "weapons": 6.6,
       "metrics": {
         "pressureRate": 0.22,
         "sackRate": 0.025,
@@ -191,7 +191,7 @@
         "sackRate": 0.058,
         "yardsBeforeContact": 3.036,
         "stuffRate": 0.259,
-        "separation": 3.226,
+        "separation": 3.183,
         "yacOverExpected": -0.071,
         "dropRate": 0.037,
         "rushOverExpected": 0.49,
@@ -274,7 +274,7 @@
       "games": 3,
       "newCoach": false,
       "coach": "Andy Reid",
-      "oline": 8.9,
+      "oline": 9.3,
       "weapons": 12,
       "metrics": {
         "pressureRate": 0.183,
@@ -293,7 +293,7 @@
       "newCoach": false,
       "coach": "Sean McVay",
       "oline": 11.6,
-      "weapons": 5.4,
+      "weapons": 5.8,
       "metrics": {
         "pressureRate": 0.21,
         "sackRate": 0.042,
@@ -335,7 +335,7 @@
         "sackRate": 0.049,
         "yardsBeforeContact": 1.495,
         "stuffRate": 0.259,
-        "separation": 2.769,
+        "separation": 2.763,
         "yacOverExpected": 0.058,
         "dropRate": 0.032,
         "rushOverExpected": -0.245,
@@ -346,14 +346,14 @@
       "games": 3,
       "newCoach": true,
       "coach": "Jeff Hafley",
-      "oline": 2.3,
+      "oline": 3.1,
       "weapons": 3.5,
       "metrics": {
         "pressureRate": 0.271,
         "sackRate": 0.084,
         "yardsBeforeContact": 2.833,
         "stuffRate": 0.243,
-        "separation": 3.141,
+        "separation": 3.105,
         "yacOverExpected": 0.887,
         "dropRate": 0.07,
         "rushOverExpected": -0.59,
@@ -364,7 +364,7 @@
       "games": 3,
       "newCoach": false,
       "coach": "Kevin O'Connell",
-      "oline": 3.5,
+      "oline": 4.3,
       "weapons": 0.4,
       "metrics": {
         "pressureRate": 0.225,
@@ -382,8 +382,8 @@
       "games": 3,
       "newCoach": false,
       "coach": "Mike Vrabel",
-      "oline": 1.9,
-      "weapons": 5.8,
+      "oline": 1.5,
+      "weapons": 6.2,
       "metrics": {
         "pressureRate": 0.226,
         "sackRate": 0.085,
@@ -400,7 +400,7 @@
       "games": 3,
       "newCoach": false,
       "coach": "Kellen Moore",
-      "oline": 7.7,
+      "oline": 8.5,
       "weapons": 8.1,
       "metrics": {
         "pressureRate": 0.197,
@@ -436,8 +436,8 @@
       "games": 3,
       "newCoach": false,
       "coach": "Aaron Glenn",
-      "oline": 3.1,
-      "weapons": 7,
+      "oline": 3.5,
+      "weapons": 7.4,
       "metrics": {
         "pressureRate": 0.192,
         "sackRate": 0.075,
@@ -454,18 +454,18 @@
       "games": 3,
       "newCoach": false,
       "coach": "Nick Sirianni",
-      "oline": 4.3,
-      "weapons": 7.4,
+      "oline": 2.3,
+      "weapons": 5.4,
       "metrics": {
-        "pressureRate": 0.17,
+        "pressureRate": 0.236,
         "sackRate": 0.075,
-        "yardsBeforeContact": 1.877,
+        "yardsBeforeContact": 2.461,
         "stuffRate": 0.275,
         "separation": 2.675,
         "yacOverExpected": 0.459,
-        "dropRate": 0.023,
+        "dropRate": 0.034,
         "rushOverExpected": 1.141,
-        "brokenTackles": 0.027
+        "brokenTackles": 0.023
       }
     },
     "Steelers": {
@@ -491,7 +491,7 @@
       "newCoach": false,
       "coach": "Mike Macdonald",
       "oline": 5.8,
-      "weapons": 6.6,
+      "weapons": 7,
       "metrics": {
         "pressureRate": 0.248,
         "sackRate": 0.03,
@@ -562,7 +562,7 @@
       "games": 3,
       "newCoach": false,
       "coach": "Dan Quinn",
-      "oline": 9.3,
+      "oline": 9.7,
       "weapons": 0,
       "metrics": {
         "pressureRate": 0.259,

@@ -462,8 +462,8 @@
       "assets/NFL_Icons/Bears.png": 1
     },
     "advanced": {
-      "pressureToSack": null,
-      "badThrowPct": null,
+      "pressureToSack": 0,
+      "badThrowPct": 0.088,
       "timeToThrow": 2.41,
       "adot": 6.4,
       "aggressiveness": 14.7,
@@ -910,8 +910,8 @@
       "assets/NFL_Icons/Eagles.png": 3
     },
     "advanced": {
-      "pressureToSack": 0.333,
-      "badThrowPct": 0.126,
+      "pressureToSack": 0.32,
+      "badThrowPct": 0.172,
       "timeToThrow": 3.26,
       "adot": 8.7,
       "aggressiveness": 8,
@@ -1013,7 +1013,7 @@
       "badThrowPct": 0.119,
       "timeToThrow": 2.82,
       "adot": 7.2,
-      "aggressiveness": 21.1,
+      "aggressiveness": 22,
       "epaPerPlay": 0.298,
       "cpoe": 3.052,
       "successRate": 0.524,
@@ -1286,7 +1286,7 @@
       "rushYards": 114,
       "rushTd": 6
     },
-    "injuryStatus": "Questionable",
+    "injuryStatus": "Active",
     "injured": false
   },
   {
@@ -1484,7 +1484,7 @@
       "rushYards": 124,
       "rushTd": 1
     },
-    "injuryStatus": "Active",
+    "injuryStatus": "Questionable",
     "injured": false
   },
   {
@@ -1507,7 +1507,7 @@
       "pressureToSack": 0.31,
       "badThrowPct": 0.198,
       "timeToThrow": 2.93,
-      "adot": 10.1,
+      "adot": 10.3,
       "aggressiveness": 20.9,
       "epaPerPlay": -0.024,
       "cpoe": -8.052,
