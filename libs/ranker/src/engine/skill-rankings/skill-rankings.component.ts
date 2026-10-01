@@ -605,8 +605,13 @@ export class SkillRankingsComponent implements OnChanges {
     const players = this.listedPlayers();
     // Switched-off groups don't count
     const counted = this.stats.filter((stat) => !this.hidden[statGroup(stat)] && !this.statHidden(stat.key));
-    const totals = weightedTotals(players, counted, this.effectiveWeights(), (player, stat) =>
-      this.value(player, stat),
+    const totals = weightedTotals(
+      players,
+      counted,
+      this.effectiveWeights(),
+      (player, stat) => this.value(player, stat),
+      undefined,
+      this.sportSettings,
     );
     this.playerList = [...players].sort(
       (a, b) => (totals.get(b) ?? 0) - (totals.get(a) ?? 0),
@@ -1563,7 +1568,7 @@ export class SkillRankingsComponent implements OnChanges {
     this.other = context;
     try {
       const counted = this.stats.filter((stat) => !this.hidden[statGroup(stat)] && !this.statHidden(stat.key));
-      const totals = weightedTotals(players, counted, this.effectiveWeights(), (player, stat) => this.value(player, stat));
+      const totals = weightedTotals(players, counted, this.effectiveWeights(), (player, stat) => this.value(player, stat), undefined, this.sportSettings);
       return [...players].sort((a, b) => (totals.get(b) ?? 0) - (totals.get(a) ?? 0));
     } finally {
       this.other = null;

@@ -216,6 +216,9 @@ export interface SportConfig {
   // A value worked out in the app (fantasy points in the chosen scoring, a league rank, a grade from
   // another tab's ranking); undefined reads the data
   computedValue?: (player: SkillPlayer, stat: SkillStat, context: ValueContext) => number | null | undefined;
+  // What a stat counts as in the ranking when that isn't the number shown (the UFC's rank: the champion
+  // as 0, an unranked fighter as 16th); undefined: the shown value
+  scoreValue?: (player: SkillPlayer, stat: SkillStat, shown: number | null, settings: SportSettings) => number | null | undefined;
   // Stats worked out from the table's season's other tabs: left off another season's card
   tableSeasonOnly?: (stat: SkillStat) => boolean;
   // Called once at startup with the engine's rankings (for grades from other tabs); what it returns

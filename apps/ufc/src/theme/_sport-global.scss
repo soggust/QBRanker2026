@@ -153,16 +153,32 @@ section footer .settings-toggle:hover,
   text-shadow: none;
 }
 
-// The year dropdown's place and the filter menu's presets dropdown: octagon-cut, white text, a red caret
+// The footer's Current / All-Time dropdown and the filter menu's presets dropdown: octagon-cut, the same
+// height, white text in the sport and weight bars' lettering (Nunito capitals, spaced out, light), a red
+// caret. The presets one centered.
 section footer .mat-mdc-select.season-select,
 .sidebar .filters .mat-mdc-select {
   @include octagon;
+  align-items: center;
+  box-sizing: border-box;
+  display: flex;
+  height: 42px;
+  padding-block: 0 !important;
 
+  .mat-mdc-select-trigger {
+    width: 100%;
+  }
+
+  &,
   .mat-mdc-select-value,
   .mat-mdc-select-value-text,
   .mat-mdc-select-placeholder {
     color: $white-text !important;
-    font-weight: 800 !important;
+    font-family: "Nunito", sans-serif !important;
+    font-size: 12px !important;
+    font-weight: 500 !important;
+    letter-spacing: 1.5px !important;
+    text-transform: uppercase;
   }
 
   .mat-mdc-select-arrow {

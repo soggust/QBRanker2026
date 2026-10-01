@@ -127,6 +127,14 @@ export const SPORT: SportConfig = {
   ],
   tabVisible: (position, settings) => !WOMENS_DIVISIONS.includes(position as Position) || !!settings['women'],
   rowVisible: (player, settings) => !player.retired || settings['era'] === 'alltime',
+  // The UFC's rank in the ranking: the champion as #0 (above #1), an unranked fighter as #16 (just
+  // past the top 15), a retired one as average (the lists are today's)
+  scoreValue: (player, stat, shown) => {
+    if (stat.key !== 'officialRank') return undefined;
+    if (player.awards?.includes('champ')) return 0;
+    if (player.retired) return null;
+    return shown ?? 16;
+  },
   // A fighter's rates rest on few fights early on: 4 UFC fights count half, 12 count three-quarters
   reliability: (player) => player.games / (player.games + 4),
   cardHistory: { title: 'Fights', icon: 'sports_mma', rows: (player) => fightRows(player) },

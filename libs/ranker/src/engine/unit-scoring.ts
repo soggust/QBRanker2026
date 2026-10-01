@@ -105,13 +105,18 @@ export function weightedTotals<T>(
   weights: SkillWeights,
   value: (unit: T, stat: SkillStat) => number | null,
   reliability: ((unit: T) => number) | null = (SPORT.reliability as ((unit: T) => number) | undefined) ?? null,
+  settings: SportSettings = DEFAULT_SPORT_SETTINGS,
 ): Map<T, number> {
   const totals = new Map<T, number>(units.map((unit) => [unit, 0]));
   for (const stat of stats) {
     const weight = weights[stat.key] ?? 0;
     if (!weight || stat.infoOnly) continue;
 
-    const raw = units.map((unit) => value(unit, stat));
+    const raw = units.map((unit) => {
+      const shown = value(unit, stat);
+      const scored = SPORT.scoreValue?.(unit as SkillPlayer, stat, shown, settings);
+      return scored === undefined ? shown : scored;
+    });
     const known = raw.filter((v): v is number => v !== null);
     if (known.length < 2) continue;
     const mean = known.reduce((a, b) => a + b, 0) / known.length;
@@ -122,8 +127,10 @@ export function weightedTotals<T>(
     const better = stat.support ? (stat.supportHelps ? 1 : -1) : stat.negative ? -1 : 1;
     const score = (v: number) => better * Math.max(-MAX_Z, Math.min(MAX_Z, (v - mean) / sd));
     const worst = Math.min(...known.map(score));
-    // (a sport can boost a stat behind its slider: the same 0-100% range, more effect at every step)
-    const boost = (stat as { boost?: number }).boost ?? 1;
+    // (a sport can boost a stat behind its slider: the same 0-100% range, more effect at every step;
+    // the boost can depend on the sport's settings)
+    const given = (stat as { boost?: number | ((settings: SportSettings) => number) }).boost;
+    const boost = typeof given === 'function' ? given(settings) : (given ?? 1);
     const strength = (weight / 50) * boost * (stat.support ? 0.2 : 1);
 
     units.forEach((unit, i) => {
@@ -147,8 +154,13 @@ export function defaultRanking(
 ): SkillPlayer[] {
   const units = rows[position] ?? [];
   const context: ValueContext = { position, settings, rows, tableSeason: false, defaults: true };
-  const totals = weightedTotals(units, SKILL_STATS[position], combinedWeights(position, weights), (unit, stat) =>
-    statValue(unit, stat, context),
+  const totals = weightedTotals(
+    units,
+    SKILL_STATS[position],
+    combinedWeights(position, weights),
+    (unit, stat) => statValue(unit, stat, context),
+    undefined,
+    settings,
   );
   return [...units].sort((a, b) => (totals.get(b) ?? 0) - (totals.get(a) ?? 0));
 }
