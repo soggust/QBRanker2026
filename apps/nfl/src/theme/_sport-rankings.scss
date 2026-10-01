@@ -15,11 +15,11 @@ section ul li.player .player-name .player-awards,
   }
 }
 
-// (trying it out) Player names in Gochi Hand instead of Cabin Sketch: a looser marker hand. It has one
+// (trying it out) Player names in Permanent Marker instead of Cabin Sketch: solid marker strokes, easier on the eyes than the chalk texture. It has one
 // weight, so no faked bold.
 section ul li.player:not(.header-row) .player-name strong {
-  font-family: "Gochi Hand", cursive !important;
-  font-size: 19px !important;
+  font-family: "Permanent Marker", cursive !important;
+  font-size: 16px !important;
   font-synthesis: none;
   font-weight: 400 !important;
 }
