@@ -111,8 +111,8 @@ export const SPORT: SportConfig = {
   settings: [
     {
       key: 'retired',
-      label: 'Retired Fighters',
-      title: 'On: add the fighters without a UFC fight in two years (those with 6+ UFC fights): the legends, ranked on the same stats',
+      label: 'All-Time Fighters',
+      title: "On: every era, not just today's roster: add the retired fighters (6+ UFC fights) to the lists, the legends ranked on the same stats",
       default: false,
       slot: 'displayEnd',
     },

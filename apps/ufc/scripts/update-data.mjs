@@ -9,6 +9,10 @@
 //   stats fight by fight (strikes, knockdowns, takedowns, submission attempts, ground advances).
 //   Opponents' stats are fetched too, so what a fighter absorbs is counted, not only what he lands.
 // - UFC.com's rankings page: each division's champion and top 15, and the pound-for-pound lists
+// - UFC.com's fighter pages, for the fighters without a fight in six months: their status there
+//   ("Retired" or "Not Fighting" moves them to the retired fighters; checked monthly, cached)
+// - Wikipedia's List of UFC champions: every title reign (interim ones too) and its successful
+//   defenses, for each fighter's title fight wins and title defenses
 //
 // Usage: npm run ufc:update-data
 //
@@ -24,6 +28,7 @@ const CACHE = path.join(import.meta.dirname, 'cache.json');
 const SITE = 'https://site.api.espn.com/apis/site/v2/sports/mma/ufc';
 const COMMON = 'https://site.web.api.espn.com/apis/common/v3/sports/mma/athletes';
 const RANKINGS = 'https://www.ufc.com/rankings';
+const CHAMPIONS = 'https://en.wikipedia.org/w/index.php?title=List_of_UFC_champions&action=raw';
 const FIRST_YEAR = 2001;
 const THIS_YEAR = new Date().getUTCFullYear();
 const ACTIVE_DAYS = 730;
@@ -200,7 +205,52 @@ async function rankings() {
     const tab = RANKING_DIVISIONS[head];
     if (!tab) continue;
     if (champion) out.champions.set(nameKey(champion), tab);
-    ranked.forEach((key, i) => out.ranks.set(key, i + 1));
+    ranked.forEach((key, i) => out.ranks.set(`${tab}/${key}`, i + 1));
+  }
+  return out;
+}
+
+// ---------------------------------------------------------------------------
+// A fighter's status on UFC.com ("Active", "Retired", "Not Fighting"...): his page's hero tags, the
+// page found by his name ("Stipe Miocic" -> /athlete/stipe-miocic). null when there's no such page.
+// ---------------------------------------------------------------------------
+const ATHLETE = 'https://www.ufc.com/athlete/';
+async function ufcStatus(name) {
+  const slug = name
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/['.]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '');
+  const html = await get(ATHLETE + slug, 'text').catch(() => null);
+  if (!html) return null;
+  const tags = [...html.matchAll(/hero-profile__tag">\s*([^<]*)/g)].map((m) => m[1].trim());
+  return tags.find((t) => /^(Active|Retired|Not Fighting)$/i.test(t)) ?? (tags.length ? 'Active' : null);
+}
+
+// ---------------------------------------------------------------------------
+// Title history: Wikipedia's championship tables (each division's reigns, interim ones included, with
+// a line per successful defense). A reign is a title fight win, and so is each defense. By name.
+// ---------------------------------------------------------------------------
+async function titles() {
+  const text = (await get(CHAMPIONS, 'text')) ?? '';
+  const out = new Map();
+  // (the championship histories, men's and women's, the defunct women's featherweight title too; not
+  // the symbolic BMF belt or the tournaments)
+  const start = text.indexOf("==Men's championship history==");
+  const end = text.indexOf('==Symbolic titles==');
+  const defunct = text.slice(text.indexOf('==Defunct titles=='), text.indexOf('==Tournament winners=='));
+  const tables = text.slice(start, end) + defunct.slice(defunct.indexOf("===Women's Featherweight"));
+  for (const row of tables.split(/\n\|-/)) {
+    // A reign: its number (or "—"), the champion's flag and name, the event
+    const champ = row.match(/\{\{flagicon\|[^}]*\}\}\s*\[\[([^\]|]+)(?:\|([^\]]+))?\]\]/);
+    if (!champ || !/\[\[UFC|\[\[The Ultimate Fighter|\[\[UFC on/.test(row)) continue;
+    const key = nameKey(champ[2] ?? champ[1].replace(/\s*\(.*\)$/, ''));
+    const t = out.get(key) ?? { reigns: 0, defenses: 0 };
+    t.reigns++;
+    t.defenses += (row.match(/\d+\.\s*def\./g) ?? []).length;
+    out.set(key, t);
   }
   return out;
 }
@@ -274,6 +324,8 @@ function career(id, fights, stats, cache) {
 // ---------------------------------------------------------------------------
 const all = await bouts();
 const ranked = await rankings();
+const titleHistory = await titles();
+console.log(`Title history: ${titleHistory.size} champions, ${[...titleHistory.values()].reduce((s, t) => s + t.defenses, 0)} defenses`);
 console.log(`${all.length} UFC bouts ${FIRST_YEAR}-${THIS_YEAR}; ${ranked.champions.size} champions, ${ranked.ranks.size} ranked`);
 
 const byFighter = new Map();
@@ -347,6 +399,25 @@ for (const id of needed) {
 }
 await writeFile(CACHE, JSON.stringify(cache));
 
+// Retired by the UFC's own word: a fighter without a fight in six months whose UFC.com page says
+// "Retired" or "Not Fighting" (Stipe Miocic, Chris Weidman...) isn't active, whatever the two-year rule
+// says. Checked monthly per fighter.
+const sixMonths = new Date(Date.now() - 182 * 864e5).toISOString().slice(0, 10);
+const monthAgo = Date.now() - 30 * 864e5;
+let statuses = 0;
+for (const id of [...activeSet]) {
+  if (byFighter.get(id)[0].date >= sixMonths) continue;
+  const entry = (cache[id] ??= {});
+  if (!entry.statusAt || entry.statusAt < monthAgo) {
+    entry.status = await ufcStatus(entry.bio?.name ?? byFighter.get(id)[0].fighters.find((f) => f.id === id).name);
+    entry.statusAt = Date.now();
+    statuses++;
+  }
+  if (/^(Retired|Not Fighting)$/i.test(entry.status ?? '')) activeSet.delete(id);
+}
+await writeFile(CACHE, JSON.stringify(cache));
+console.log(`UFC.com statuses: ${statuses} checked; ${activeSet.size} active`);
+
 // Opponents' strength: each fighter's UFC win percentage (3+ fights; others count as .500)
 const strength = new Map(
   [...byFighter].map(([id, list]) => {
@@ -361,10 +432,15 @@ for (const id of active) {
   const fights = byFighter.get(id);
   const b = cache[id]?.bio;
   const name = b?.name ?? fights[0].fighters.find((f) => f.id === id).name;
-  // His division: ESPN's for him, else his last fight's (not a catchweight)
+  // His divisions: ESPN's for him (else his last fight's, not a catchweight), and every other division
+  // he's had 3+ UFC fights in (Alex Pereira at middleweight, light heavyweight and heavyweight), listed
+  // in each with his whole UFC career
   const lastDivision = fights.find((f) => DIVISIONS[f.division])?.division;
-  const tab = DIVISIONS[b?.division] ?? DIVISIONS[lastDivision];
-  if (!tab) continue;
+  const home = DIVISIONS[b?.division] ?? DIVISIONS[lastDivision];
+  if (!home) continue;
+  const perDivision = new Map();
+  for (const f of fights) if (DIVISIONS[f.division]) perDivision.set(DIVISIONS[f.division], (perDivision.get(DIVISIONS[f.division]) ?? 0) + 1);
+  const tabs = new Set([home, ...[...perDivision].filter(([, n]) => n >= 3).map(([t]) => t)]);
   const key = nameKey(name);
   const c = career(id, fights, cache[id]?.stats ?? {}, cache);
   // Results newest first: 1 a win, 0.5 a draw or no contest, 0 a loss
@@ -382,7 +458,9 @@ for (const id of active) {
   const mainEventWins = won.filter((f) => f.rounds >= 5).length;
   const champion = ranked.champions.get(key);
   const p4p = ranked.p4p.get(key);
-  out[tab].push({
+  // (Wikipedia may write a name surname-first: "Weili Zhang" for Zhang Weili)
+  const title = titleHistory.get(key) ?? titleHistory.get(nameKey(name.split(' ').reverse().join(' '))) ?? { reigns: 0, defenses: 0 };
+  const row = (tab) => ({
     id: Number(id),
     gsisId: id,
     name,
@@ -402,7 +480,9 @@ for (const id of active) {
       peakElo: Math.round(peakElo.get(id) ?? ELO_START),
       qualityWins,
       mainEventWins,
-      officialRank: champion === tab ? null : (ranked.ranks.get(key) ?? null),
+      titleWins: title.reigns + title.defenses,
+      titleDefenses: title.defenses,
+      officialRank: champion === tab ? null : (ranked.ranks.get(`${tab}/${key}`) ?? null),
       age: b?.age ?? null,
       reach: b?.reach ?? null,
     },
@@ -419,10 +499,11 @@ for (const id of active) {
       return [f.date, opp.name, result, how, f.event];
     }),
   });
+  for (const tab of tabs) out[tab].push(row(tab));
 }
 for (const tab of Object.keys(out)) out[tab].sort((a, b) => a.name.localeCompare(b.name));
 await mkdir(STATIC, { recursive: true });
 await writeFile(path.join(STATIC, 'skill-players.json'), JSON.stringify(out));
 console.log(
-  `${Object.entries(out).map(([tab, rows]) => `${rows.length} ${tab}`).join(', ')} (${active.length} active; fetched ${fetched}; champions ${Object.values(out).flat().filter((u) => u.awards.includes('champ')).length})`,
+  `${Object.entries(out).map(([tab, rows]) => `${rows.length} ${tab}`).join(', ')} (${active.length} fighters, ${activeSet.size} active; fetched ${fetched}; champions ${Object.values(out).flat().filter((u) => u.awards.includes('champ')).length})`,
 );

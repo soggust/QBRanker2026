@@ -30,10 +30,17 @@ export class AppComponent {
   private readonly smallScreen = window.matchMedia('(max-width: 1199px)');
 
   constructor(private positionService: PositionService) {
-    // A tab hidden while it's open (its setting switched off): back to the first tab
+    // A setting that shows new tabs (the UFC's women's divisions) opens the first of them; one that
+    // hides the open tab goes back to the first tab
+    let shown = POSITIONS.filter((tab) => SPORT.tabVisible?.(tab, this.positionService.settings.sport) ?? true);
     this.positionService.sportSettings$.subscribe((settings) => {
+      if (!SPORT.tabVisible) return;
+      const now = POSITIONS.filter((tab) => SPORT.tabVisible!(tab, settings));
+      const added = now.filter((tab) => !shown.includes(tab));
+      shown = now;
       const open = this.positionService.position;
-      if (open && SPORT.tabVisible && !SPORT.tabVisible(open, settings)) this.positionService.setPosition(POSITIONS[0]);
+      if (added.length) this.positionService.setPosition(added[0]);
+      else if (open && !now.includes(open)) this.positionService.setPosition(POSITIONS[0]);
     });
   }
 

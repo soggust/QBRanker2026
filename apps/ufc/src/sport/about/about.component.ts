@@ -30,6 +30,7 @@ export class AboutComponent implements AfterViewInit {
     ["Record", "His UFC record, wins-losses-draws (draws include no contests)."],
     ["Recent", "His last five UFC fights as dots, newest first."],
     ["UFC Rank", "UFC.com's official rank in his division (context only: the ranking here is yours)."],
+    ["Title Defenses / Title Wins", "Successful UFC title defenses across every reign, and title fight wins (winning a belt, interim ones too, and each defense), from Wikipedia's list of UFC champions. These two start at double weight (100%): the one exception to every slider starting at 50%."],
     ["Elo / Peak Elo", "A rating built from every UFC fight since 2001 (everyone starts at 1500): each result moves it by how surprising it was, so beating a highly rated opponent is worth far more than beating a low one. Now, and his best ever."],
     ["Quality Wins", "Wins over opponents rated in the top fifth of UFC fighters (by Elo) going into the fight."],
     ["5-Rd Wins", "Wins in five-round fights: title fights and main events."],

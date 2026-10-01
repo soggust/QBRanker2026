@@ -43,6 +43,9 @@ export type SkillStatKey =
   | 'peakElo'
   | 'qualityWins'
   | 'mainEventWins'
+  // Title fights: wins (taking a belt, interim ones too, and each defense) and successful defenses
+  | 'titleWins'
+  | 'titleDefenses'
   // Context
   | 'schedule'
   | 'officialRank'
@@ -114,6 +117,8 @@ export interface SkillStat {
   supportHelps?: boolean;
   // Shown for context only: no slider and no weight in the ranking
   infoOnly?: boolean;
+  // Its slider's starting point when it isn't 50% (title defenses and title fight wins: 100%, asked for)
+  defaultWeight?: number;
   // A missing value ("-") means too small a sample, so it scores as the league average, not the worst
   missingIsAverage?: boolean;
 }
@@ -145,6 +150,8 @@ export const STAT_NAMES: Partial<Record<SkillColumnKey, string>> = {
   peakElo: 'Peak Elo Rating',
   qualityWins: 'Quality Wins (over opponents rated in the top fifth going in)',
   mainEventWins: 'Five-Round Wins (title fights and main events)',
+  titleWins: 'Title Fight Wins (winning a belt, interim ones too, and each defense)',
+  titleDefenses: 'Successful Title Defenses',
   officialRank: "UFC's Official Division Rank",
   age: 'Age',
   reach: 'Reach (inches)',
@@ -152,6 +159,8 @@ export const STAT_NAMES: Partial<Record<SkillColumnKey, string>> = {
 
 export const PER_GAME_LABELS: Partial<Record<SkillColumnKey, string>> = {
   qualityWins: 'Quality Wins / Fight',
+  titleWins: 'Title Wins / Fight',
+  titleDefenses: 'Defenses / Fight',
   mainEventWins: '5-Rd Wins / Fight',
   finishes: 'Finishes / Fight',
   finished: 'Finished / Fight',
@@ -166,6 +175,9 @@ const UFC_STATS: SkillStat[] = [
   { key: 'winPct', label: 'Record', description: 'His UFC record, wins-losses-draws (draws include no contests; ranked on win percentage)', kind: 'efficiency', format: 'record' },
   { key: 'recent', label: 'Recent', description: 'His last five UFC fights, newest first (ranked on a recency-weighted win rate)', kind: 'efficiency', format: 'recent' },
   { key: 'officialRank', label: 'UFC Rank', description: "UFC.com's official rank in his division (for context; not part of the ranking; the champion wears the belt)", kind: 'efficiency', format: 'rank', infoOnly: true },
+  // (the title ones start at double weight: the clearest mark of an elite career)
+  { key: 'titleDefenses', label: 'Title Defenses', description: 'Successful UFC title defenses, across every reign (from Wikipedia\'s list of UFC champions); starts at double weight', kind: 'volume', format: 'int', defaultWeight: 100 },
+  { key: 'titleWins', label: 'Title Wins', description: 'UFC title fight wins: winning a belt (interim ones too) and each defense; starts at double weight', kind: 'volume', format: 'int', defaultWeight: 100 },
   // (the competition ones: results weighed by whom they came against)
   { key: 'elo', label: 'Elo', description: "A rating built from every UFC fight since 2001: each result moves it by how surprising it was, so beating a highly rated opponent is worth far more than beating a low one (1500 to start)", kind: 'efficiency', format: 'int' },
   { key: 'peakElo', label: 'Peak Elo', description: 'His best Elo rating at any point in his UFC career', kind: 'efficiency', format: 'int' },
@@ -206,7 +218,7 @@ export function presetWeights(position: SkillPosition, preset: SkillPreset): Ski
   const weights: SkillWeights = {};
   for (const stat of SKILL_STATS[position]) {
     if (stat.infoOnly) continue;
-    weights[stat.key] = def && !stat.support ? 25 : 50;
+    weights[stat.key] = def && !stat.support ? 25 : (stat.defaultWeight ?? 50);
   }
   return { ...weights, ...(def?.weights ?? {}) };
 }
@@ -232,6 +244,8 @@ const RESULTS_STATS = new Set<SkillColumnKey>([
   'peakElo',
   'qualityWins',
   'mainEventWins',
+  'titleWins',
+  'titleDefenses',
   'streak',
   'finishRate',
   'finishes',

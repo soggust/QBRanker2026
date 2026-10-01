@@ -1,7 +1,7 @@
 import type { AwardInfo } from '@ranker/engine/awards';
 import type { SkillPlayer, SkillPosition } from '@sport/positions';
 
-// A fighter's honors under his name: the championship belt (the #1 rank's trophy) for his division's
+// A fighter's honors under his name (his title history counts in the table: Title Wins, Title Defenses): the championship belt (the #1 rank's trophy) for his division's
 // champion, and a plaque for his pound-for-pound rank (UFC.com's rankings, read by the data script)
 export type AwardId = 'champ' | `p4p${number}`;
 

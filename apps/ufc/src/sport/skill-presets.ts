@@ -14,7 +14,7 @@ const PRESETS: SkillPresetDef[] = [
     key: 'resume',
     label: 'Resume',
     description: "Who he's beaten: his Elo, quality wins, five-round wins, the record and the strength of his schedule",
-    weights: { elo: 100, qualityWins: 100, mainEventWins: 80, peakElo: 70, winPct: 70, schedule: 70, recent: 50 },
+    weights: { titleDefenses: 100, titleWins: 100, elo: 90, qualityWins: 100, mainEventWins: 80, peakElo: 80, winPct: 70, schedule: 70 },
   },
   {
     key: 'striker',
