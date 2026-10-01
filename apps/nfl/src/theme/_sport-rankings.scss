@@ -15,10 +15,10 @@ section ul li.player .player-name .player-awards,
   }
 }
 
-// (trying it out) Player names in Kalam instead of Cabin Sketch: neat handwriting with solid strokes (no chalk texture to strain the eyes), in its real bold
+// (trying it out) Player names in Patrick Hand instead of Cabin Sketch: clean, even handwriting with solid strokes (no chalk texture to strain the eyes). One weight, so no faked bold
 section ul li.player:not(.header-row) .player-name strong {
-  font-family: "Kalam", cursive !important;
-  font-size: 18px !important;
+  font-family: "Patrick Hand", cursive !important;
+  font-size: 19px !important;
   font-synthesis: none;
-  font-weight: 700 !important;
+  font-weight: 400 !important;
 }
