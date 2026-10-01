@@ -111,17 +111,36 @@ async function statsFor(season, group, type) {
   return new Map(splits.map((s) => [s.player.id, s]));
 }
 
-// Fielding percentage over every position a player fielded: (putouts + assists) / chances, with 20+
-// chances (fewer says little); by MLBAM id
+// Fielding over every position a player fielded, by MLBAM id: fielding percentage, (putouts +
+// assists) / chances, with 20+ chances (fewer says little); and range factor, (putouts + assists) per 9
+// innings in the field, with 50+ innings (pitching left out: a two-way player's range is his fielding)
+const outsOf = (innings) => {
+  const [whole, thirds = '0'] = String(innings ?? '0').split('.');
+  return Number(whole) * 3 + Number(thirds);
+};
 async function fieldingFor(season) {
   const url = `${API}/stats?stats=season&group=fielding&season=${season}&sportId=1&playerPool=all&limit=5000`;
   const totals = new Map();
   for (const s of (await json(url)).stats?.[0]?.splits ?? []) {
-    const t = totals.get(s.player.id) ?? { made: 0, chances: 0 };
+    const t = totals.get(s.player.id) ?? { made: 0, chances: 0, fieldMade: 0, outs: 0 };
     const made = (s.stat.putOuts ?? 0) + (s.stat.assists ?? 0);
-    totals.set(s.player.id, { made: t.made + made, chances: t.chances + made + (s.stat.errors ?? 0) });
+    const pitching = s.position?.abbreviation === 'P';
+    totals.set(s.player.id, {
+      made: t.made + made,
+      chances: t.chances + made + (s.stat.errors ?? 0),
+      fieldMade: t.fieldMade + (pitching ? 0 : made),
+      outs: t.outs + (pitching ? 0 : outsOf(s.stat.innings)),
+    });
   }
-  return new Map([...totals].filter(([, t]) => t.chances >= 20).map(([id, t]) => [id, Math.round((t.made / t.chances) * 1000) / 1000]));
+  return new Map(
+    [...totals].map(([id, t]) => [
+      id,
+      {
+        pct: t.chances >= 20 ? Math.round((t.made / t.chances) * 1000) / 1000 : null,
+        range: t.outs >= 150 ? Math.round(((t.fieldMade * 27) / t.outs) * 100) / 100 : null,
+      },
+    ]),
+  );
 }
 
 async function awardsFor(season) {
@@ -235,7 +254,8 @@ async function buildSeason(season) {
         barrelPct: statcast ? sc(scBat, id, 'brl_percent', 1) : null,
         hardHitPct: statcast ? sc(scBat, id, 'ev95percent', 1) : null,
         sprintSpeed: statcast ? sc(sprint, id, 'sprint_speed', 1) : null,
-        fieldingPct: fielding.get(id) ?? null,
+        fieldingPct: fielding.get(id)?.pct ?? null,
+        rangeFactor: fielding.get(id)?.range ?? null,
         oaa: season >= 2016 ? sc(oaa, id, 'outs_above_average', 0) : null,
       },
     });

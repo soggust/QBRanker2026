@@ -12,7 +12,7 @@ const HITTER_SKILLS: SkillDef[] = [
   { id: 'hitting', name: 'Hitting', short: 'Hitting', parts: [['wrcPlus', 1], ['xwoba', 1]] },
   { id: 'production', name: 'Run Production', short: 'Production', parts: [['rbi', 1], ['runs', 1]] },
   { id: 'speed', name: 'Speed', short: 'Speed', parts: [['stolenBases', 1], ['sprintSpeed', 1], ['bsr', 1]] },
-  { id: 'defense', name: 'Defense', short: 'Defense', parts: [['defRuns', 1], ['oaa', 1], ['fieldingPct', 1]] },
+  { id: 'defense', name: 'Defense', short: 'Defense', parts: [['defRuns', 1], ['oaa', 1], ['fieldingPct', 1], ['rangeFactor', 1]] },
   { id: 'value', name: 'Overall Value', short: 'Value', parts: [['war', 1]] },
 ];
 

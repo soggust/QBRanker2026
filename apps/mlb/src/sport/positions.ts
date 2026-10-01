@@ -37,6 +37,7 @@ export type SkillStatKey =
   | 'hardHitPct'
   | 'sprintSpeed'
   | 'fieldingPct'
+  | 'rangeFactor'
   | 'oaa'
   // Pitchers
   | 'gamesStarted'
@@ -159,6 +160,7 @@ export const STAT_NAMES: Partial<Record<SkillColumnKey, string>> = {
   hardHitPct: 'Hard-Hit Rate (95+ mph)',
   sprintSpeed: 'Sprint Speed (ft/sec)',
   fieldingPct: 'Fielding Percentage',
+  rangeFactor: 'Range Factor (plays per 9 innings)',
   oaa: 'Outs Above Average (Statcast)',
   gamesStarted: 'Games Started',
   winPct: 'Win-Loss Record',
@@ -268,6 +270,7 @@ const HITTER_STATS: SkillStat[] = [
   { key: 'kPct', label: 'K %', description: 'Strikeouts per plate appearance (lower is better)', kind: 'efficiency', format: 'pct', negative: true },
   { key: 'wrcPlus', label: 'wRC+', description: 'Runs created per plate appearance, park and league adjusted (100 = average)', kind: 'efficiency', format: 'int' },
   { key: 'xwoba', label: 'xwOBA', description: 'Expected wOBA from quality of contact, walks and strikeouts (Statcast, 2015 on)', kind: 'efficiency', format: 'avg3', missingIsAverage: true },
+  { key: 'rangeFactor', label: 'RF/9', description: 'Range factor: plays made (putouts + assists) per 9 innings in the field, at every position he played (it sees the balls a fielder gets to, but leans on his pitchers and position; 50+ innings)', kind: 'efficiency', format: 'dec2', missingIsAverage: true },
   { key: 'barrelPct', label: 'Barrel %', description: 'Batted balls hit at an ideal speed and angle (Statcast, 2015 on)', kind: 'efficiency', format: 'pctPoints', missingIsAverage: true },
   { key: 'hardHitPct', label: 'Hard-Hit %', description: 'Batted balls hit 95+ mph (Statcast, 2015 on)', kind: 'efficiency', format: 'pctPoints', missingIsAverage: true },
   { key: 'sprintSpeed', label: 'Sprint Speed', description: 'Top running speed in feet per second (Statcast, 2015 on)', kind: 'efficiency', format: 'dec1', missingIsAverage: true },
@@ -303,7 +306,7 @@ export const SKILL_STATS: Record<SkillPosition, SkillStat[]> = {
   SS: HITTER_STATS,
   OF: HITTER_STATS,
   // (a DH doesn't field: no defense column)
-  DH: HITTER_STATS.filter((stat) => !['defRuns', 'fieldingPct', 'oaa'].includes(stat.key)),
+  DH: HITTER_STATS.filter((stat) => !['defRuns', 'fieldingPct', 'rangeFactor', 'oaa'].includes(stat.key)),
   SP: [
     PITCHER_GAMES_STAT,
     WAR_STAT,
