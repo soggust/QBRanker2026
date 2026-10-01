@@ -838,6 +838,8 @@ export class SkillRankingsComponent implements OnChanges {
       case 'grade':
         return this.grade(value);
       case 'rank':
+        // (rank 0, above #1: the champion)
+        if (value === 0) return 'Champion';
         return this.rankTied(player, stat) ? `#${value} (tied)` : `#${value}`;
       case 'record': {
         const { wins, losses, ties } = player.stats as Record<string, number | null>;

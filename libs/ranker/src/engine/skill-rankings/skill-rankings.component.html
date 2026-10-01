@@ -151,6 +151,12 @@
                       <p class="stat-label" [title]="valueTitle(player, stat)">{{ statLabel(stat) }}</p>
                     </div>
                   </div>
+                } @else if (stat.format === 'rank' && value(player, stat) === 0) {
+                  <!-- Rank 0, above #1: the champion (the UFC's), shown as the sport's trophy -->
+                  <div>
+                    <p class="rank-value"><span class="lombardi rank-champ" title="Champion"></span></p>
+                    <p class="stat-label" [title]="valueTitle(player, stat)">{{ statLabel(stat) }}</p>
+                  </div>
                 } @else if (stat.format === 'rank' && value(player, stat) !== null) {
                   <!-- League rank: a small dimmed "#" and a small "(t)" for ties, so the number reads first -->
                   <div>

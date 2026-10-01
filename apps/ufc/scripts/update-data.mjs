@@ -428,6 +428,12 @@ for (const id of [...activeSet]) {
   }
   if (/^(Retired|Not Fighting)$/i.test(entry.status ?? '')) activeSet.delete(id);
 }
+// Retirements UFC.com hasn't caught up with yet (still "Active" there): by name
+const RETIRED = ['Jon Jones'];
+for (const id of [...activeSet]) {
+  const name = cache[id]?.bio?.name ?? byFighter.get(id)[0].fighters.find((f) => f.id === id).name;
+  if (RETIRED.includes(name)) activeSet.delete(id);
+}
 await writeFile(CACHE, JSON.stringify(cache));
 console.log(`UFC.com statuses: ${statuses} checked; ${activeSet.size} active`);
 
@@ -514,7 +520,8 @@ for (const id of active) {
       titleWins: titles.reigns + titles.defenses,
       titleDefenses: titles.defenses,
       // (the division's top 15, the champion above it; pound-for-pound on that tab)
-      officialRank: tab === p4pTab ? (p4p ?? null) : champion === tab ? null : (ranked.ranks.get(`${tab}/${key}`) ?? null),
+      // (a champion is #0, above #1: UFC.com lists him above the rankings rather than in them)
+      officialRank: tab === p4pTab ? (p4p ?? null) : champion === tab ? 0 : (ranked.ranks.get(`${tab}/${key}`) ?? null),
       age: b?.age ?? null,
       reach: b?.reach ?? null,
     },
