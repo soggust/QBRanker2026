@@ -38,7 +38,7 @@ edit(`apps/${id}/src/sport/sport.ts`, (s) =>
     .replace(`appName: 'NBA Ranker',`, `appName: '${label} Ranker',`)
     .replace('// NBA: what the engine needs to know about basketball', `// ${label} (scaffolded from the NBA app: replace the basketball): what the engine needs to know`),
 );
-edit(`apps/${id}/src/index.html`, (s) => s.replace('<title>NBA Ranker</title>', `<title>${label} Ranker</title>`));
+edit(`apps/${id}/src/index.html`, (s) => s.replace('<title>Season Ranker | NBA</title>', `<title>Season Ranker | ${label}</title>`));
 edit(`apps/${id}/tsconfig.json`, (s) => s.replace(/\/\* The [A-Z]+ app:/, `/* The ${label} app:`));
 for (const f of ['scripts/update-data.mjs', 'scripts/build-comps.mjs']) {
   edit(`apps/${id}/${f}`, (s) => s.split(`npm run ${FROM}:`).join(`npm run ${id}:`));
