@@ -84,6 +84,8 @@ export const SPORT: SportConfig = {
   // (a season is named for the year it ends in: 2026 is 2025-26)
   currentSeason: 2026,
   firstSeason: 2001,
+  // (after the Finals: 2025-26 is over; 2026-27 becomes current at the October rollover)
+  currentSeasonEnds: '2026-06-30',
   seasonText: seasonName,
   positionNames: {
     PG: 'Point Guard',

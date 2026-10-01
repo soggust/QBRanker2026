@@ -7,14 +7,14 @@ import type { SkillPlayer, SkillPosition } from '@sport/positions';
 export type AwardId = 'ws' | 'pennant' | 'mvp' | 'cy' | 'roy' | 'gg' | 'ss' | 'as';
 
 export const AWARD_INFO: Record<AwardId, AwardInfo> = {
-  ws: { name: 'World Series Champion', short: 'WS Champ', icon: { name: 'emoji_events', gold: true } },
+  ws: { name: 'World Series Champion', short: 'WS Champ', icon: { name: 'emoji_events', metal: 'gold' } },
   pennant: { name: 'Pennant Winner', short: 'Pennant', icon: { name: 'flag' } },
   mvp: { name: 'Most Valuable Player', short: 'MVP' },
   cy: { name: 'Cy Young Award', short: 'CY' },
   roy: { name: 'Rookie of the Year', short: 'ROY' },
   gg: { name: 'Gold Glove', short: 'GG' },
   ss: { name: 'Silver Slugger', short: 'SS' },
-  as: { name: 'All-Star', short: 'AS' },
+  as: { name: 'All-Star', short: 'AS', icon: { name: 'star', metal: 'bronze' } },
 };
 
 // World Series [champion, runner-up] by season, as MLB team ids (the franchise's current id: the

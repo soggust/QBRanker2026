@@ -2371,6 +2371,17 @@ section ul li.player:not(.header-row) .player-info {
   }
 }
 
+// An award icon in bronze (an All-Star's star)
+section ul li.player .player-name .player-awards .award-cup.award-bronze,
+.player-card .player-awards .award-cup.award-bronze {
+  background:
+    linear-gradient(105deg, transparent 40%, rgba(255, 255, 255, 0.95) 50%, transparent 60%) 150% 0 / 300% 100% no-repeat,
+    linear-gradient(180deg, #f3c79a, #c07a3e 55%, #8f5424);
+  -webkit-background-clip: text;
+  background-clip: text;
+  filter: drop-shadow(0 0 3px rgba(192, 122, 62, 0.45));
+}
+
 // A champion's cup in gold (the cup is silver otherwise, like a conference or league title's)
 section ul li.player .player-name .player-awards .award-cup.award-gold,
 .player-card .player-awards .award-cup.award-gold {

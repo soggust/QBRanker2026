@@ -54,6 +54,8 @@ export const SPORT: SportConfig = {
   logoClass: 'logo-baseball',
   currentSeason: 2026,
   firstSeason: 2000,
+  // (after the World Series)
+  currentSeasonEnds: '2026-11-10',
   seasonText: (season) => `${season}`,
   positionNames: {
     C: 'Catcher',

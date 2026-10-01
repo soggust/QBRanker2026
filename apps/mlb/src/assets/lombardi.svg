@@ -1,14 +1,21 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 32">
-  <!-- The #1 trophy (used as a mask, so only its shape matters): a baseball on a flared cup and base,
-       in place of the NFL app's Lombardi. The file keeps its name so the shared styles find it. -->
+  <!-- The #1 trophy (used as a mask, so only its shape matters): the Commissioner's Trophy, a ring of
+       pennant flags standing up around a ball marked with latitude and longitude lines and flaring out
+       into a crown, on a two-step base. The file keeps its name so the shared styles find it. -->
   <defs>
-    <mask id="seams">
+    <mask id="lines">
       <rect width="24" height="32" fill="#fff"/>
-      <path d="M8.6 3.2 C10.2 5.2 10.2 8.8 8.6 10.8 M15.4 3.2 C13.8 5.2 13.8 8.8 15.4 10.8" fill="none" stroke="#000" stroke-width="0.9" stroke-linecap="round"/>
+      <g fill="none" stroke="#000" stroke-width="0.45">
+        <ellipse cx="12" cy="15" rx="1.7" ry="3.9"/>
+        <path d="M8.2 13.6 H15.8 M8.2 16.4 H15.8"/>
+      </g>
     </mask>
   </defs>
-  <circle cx="12" cy="7" r="5.2" mask="url(#seams)"/>
-  <path d="M5 12.6 H19 C19 17.6 16.4 20.4 13.4 21.2 V24.4 H10.6 V21.2 C7.6 20.4 5 17.6 5 12.6 Z"/>
-  <path d="M8.2 25.4 H15.8 L16.8 28.2 H7.2 Z"/>
+  <path d="M6 23 L3.00 6.52 M7.5 23 L5.25 6.04 M9 23 L7.50 5.56 M10.5 23 L9.75 5.08 M12 23 L12.00 4.60 M13.5 23 L14.25 5.08 M15 23 L16.50 5.56 M16.5 23 L18.75 6.04 M18 23 L21.00 6.52" fill="none" stroke="#000" stroke-width="0.8" stroke-linecap="round"/>
+  <path d="M3.00 6.37 q-1.05 -0.6 -2.10 -0.05 l0 1.4 q1.05 -0.45 2.1 0.1 Z M5.25 5.89 q-1.05 -0.6 -2.10 -0.05 l0 1.4 q1.05 -0.45 2.1 0.1 Z M7.50 5.41 q-1.05 -0.6 -2.10 -0.05 l0 1.4 q1.05 -0.45 2.1 0.1 Z M9.75 4.93 q-1.05 -0.6 -2.10 -0.05 l0 1.4 q1.05 -0.45 2.1 0.1 Z M12.00 4.45 q1.05 -0.6 2.10 -0.05 l0 1.4 q-1.05 -0.45 -2.1 0.1 Z M14.25 4.93 q1.05 -0.6 2.10 -0.05 l0 1.4 q-1.05 -0.45 -2.1 0.1 Z M16.50 5.41 q1.05 -0.6 2.10 -0.05 l0 1.4 q-1.05 -0.45 -2.1 0.1 Z M18.75 5.89 q1.05 -0.6 2.10 -0.05 l0 1.4 q-1.05 -0.45 -2.1 0.1 Z M21.00 6.37 q1.05 -0.6 2.10 -0.05 l0 1.4 q-1.05 -0.45 -2.1 0.1 Z"/>
+  <circle cx="12" cy="15" r="4" mask="url(#lines)"/>
+  <ellipse cx="12" cy="23.2" rx="6.6" ry="1.1"/>
+  <path d="M9.6 24 H14.4 L14.8 25.6 H9.2 Z"/>
+  <path d="M8.2 25.9 H15.8 L16.8 28.3 H7.2 Z"/>
   <rect x="5.8" y="28.6" width="12.4" height="2.4" rx="0.6"/>
 </svg>

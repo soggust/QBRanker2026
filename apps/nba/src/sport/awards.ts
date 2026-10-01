@@ -22,7 +22,7 @@ export type AwardId =
   | 'coy';
 
 export const AWARD_INFO: Record<AwardId, AwardInfo> = {
-  champ: { name: 'NBA Champion', short: 'Champ', icon: { name: 'emoji_events', gold: true } },
+  champ: { name: 'NBA Champion', short: 'Champ', icon: { name: 'emoji_events', metal: 'gold' } },
   conf: { name: 'Conference Champion', short: 'Conf', icon: { name: 'emoji_events' } },
   mvp: { name: 'Most Valuable Player', short: 'MVP' },
   dpoy: { name: 'Defensive Player of the Year', short: 'DPOY' },
@@ -35,7 +35,7 @@ export const AWARD_INFO: Record<AwardId, AwardInfo> = {
   nba3: { name: 'All-NBA Third Team', short: 'NBA3' },
   def1: { name: 'All-Defensive First Team', short: 'DEF1' },
   def2: { name: 'All-Defensive Second Team', short: 'DEF2' },
-  as: { name: 'All-Star', short: 'AS' },
+  as: { name: 'All-Star', short: 'AS', icon: { name: 'star', metal: 'bronze' } },
   coy: { name: 'Coach of the Year', short: 'COY' },
 };
 

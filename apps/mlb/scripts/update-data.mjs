@@ -111,6 +111,19 @@ async function statsFor(season, group, type) {
   return new Map(splits.map((s) => [s.player.id, s]));
 }
 
+// Fielding percentage over every position a player fielded: (putouts + assists) / chances, with 20+
+// chances (fewer says little); by MLBAM id
+async function fieldingFor(season) {
+  const url = `${API}/stats?stats=season&group=fielding&season=${season}&sportId=1&playerPool=all&limit=5000`;
+  const totals = new Map();
+  for (const s of (await json(url)).stats?.[0]?.splits ?? []) {
+    const t = totals.get(s.player.id) ?? { made: 0, chances: 0 };
+    const made = (s.stat.putOuts ?? 0) + (s.stat.assists ?? 0);
+    totals.set(s.player.id, { made: t.made + made, chances: t.chances + made + (s.stat.errors ?? 0) });
+  }
+  return new Map([...totals].filter(([, t]) => t.chances >= 20).map(([id, t]) => [id, Math.round((t.made / t.chances) * 1000) / 1000]));
+}
+
 async function awardsFor(season) {
   const out = new Map();
   for (const [badge, ids] of Object.entries(AWARDS)) {
@@ -142,11 +155,12 @@ async function injuredList() {
 
 async function buildSeason(season) {
   const current = season === CURRENT_SEASON;
-  const [hitting, pitching, sabH, sabP, awards, injured] = await Promise.all([
+  const [hitting, pitching, sabH, sabP, fielding, awards, injured] = await Promise.all([
     statsFor(season, 'hitting', 'season'),
     statsFor(season, 'pitching', 'season'),
     statsFor(season, 'hitting', 'sabermetrics'),
     statsFor(season, 'pitching', 'sabermetrics'),
+    fieldingFor(season),
     awardsFor(season),
     current ? injuredList() : Promise.resolve(new Map()),
   ]);
@@ -163,6 +177,11 @@ async function buildSeason(season) {
         savant(`${SAVANT}/custom?year=${season}&type=pitcher&filter=&min=1&selections=whiff_percent&csv=true`),
       ])
     : [new Map(), new Map(), new Map(), new Map(), new Map(), new Map()];
+  // Outs Above Average (Statcast's fielding range, 2016 on; fielders, not catchers)
+  const oaa =
+    season >= 2016
+      ? await savant(`${SAVANT}/outs_above_average?type=Fielder&startYear=${season}&endYear=${season}&split=no&team=&range=year&min=1&pos=&roles=&viz=hide&csv=true`)
+      : new Map();
 
   // Everyone with a plate appearance (hitters) or a batter faced (pitchers); the app's Min PA setting
   // narrows it from there
@@ -216,6 +235,8 @@ async function buildSeason(season) {
         barrelPct: statcast ? sc(scBat, id, 'brl_percent', 1) : null,
         hardHitPct: statcast ? sc(scBat, id, 'ev95percent', 1) : null,
         sprintSpeed: statcast ? sc(sprint, id, 'sprint_speed', 1) : null,
+        fieldingPct: fielding.get(id) ?? null,
+        oaa: season >= 2016 ? sc(oaa, id, 'outs_above_average', 0) : null,
       },
     });
   }

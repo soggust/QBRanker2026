@@ -34,7 +34,7 @@ const HITTER_PRESETS: SkillPresetDef[] = [
     key: 'speed',
     label: 'Speed & Glove',
     description: 'Legs and leather: stolen bases, sprint speed, baserunning and defense',
-    weights: { stolenBases: 90, sprintSpeed: 90, bsr: 90, defRuns: 100, runs: 50 },
+    weights: { stolenBases: 90, sprintSpeed: 90, bsr: 90, defRuns: 100, oaa: 90, fieldingPct: 60, runs: 50 },
   },
   {
     key: 'saber',

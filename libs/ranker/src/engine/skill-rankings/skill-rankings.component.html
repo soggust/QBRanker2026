@@ -79,15 +79,15 @@
                 [title]="injuryTitle(player)"
               ></mat-icon>
             }
-            <!-- The season's awards: icons for titles (a gold cup for the champion, a silver cup or flag for
-                 the runner-up's league: the sport's AWARD_INFO) and plaques for the rest; hover one for the
-                 award written out -->
+            <!-- The season's awards: icons in a metal (a gold cup for the champion, a silver cup or flag for
+                 the league titles, a bronze star for an All-Star: the sport's AWARD_INFO) and plaques for
+                 the rest; hover one for the award written out -->
             @if (awards(player); as won) {
               @if (won.length) {
                 <span class="player-awards">
                   @for (award of won; track award.id) {
                     @if (awardInfo[award.id].icon; as icon) {
-                      <mat-icon class="award-cup" [class.award-gold]="icon.gold" [fontIcon]="icon.name" [title]="award.title"></mat-icon
+                      <mat-icon class="award-cup" [ngClass]="'award-' + (icon.metal ?? 'silver')" [fontIcon]="icon.name" [title]="award.title"></mat-icon
                       ><span class="visually-hidden">{{ awardInfo[award.id].short }}</span>
                     } @else {
                       <span class="award-badge" [ngClass]="'award-' + award.id" [title]="award.title"
@@ -169,10 +169,10 @@
     >
       <!-- "2019 SEASON" (just the year on narrow screens), or "CURRENT SEASON" for this one -->
       <mat-select-trigger
-        >{{ season === currentSeason ? 'CURRENT' : seasonText(season) }}<span class="season-word"> SEASON</span></mat-select-trigger
+        >{{ isLive(season) ? 'CURRENT' : seasonText(season) }}<span class="season-word"> SEASON</span></mat-select-trigger
       >
       @for (year of seasons; track year) {
-        <mat-option [value]="year">{{ year === currentSeason ? 'CURRENT' : seasonText(year) }}</mat-option>
+        <mat-option [value]="year">{{ isLive(year) ? 'CURRENT' : seasonText(year) }}</mat-option>
       }
     </mat-select>
 
@@ -316,7 +316,7 @@
           <span class="player-awards">
             @for (award of c.awards; track award.id) {
               @if (awardInfo[award.id].icon; as icon) {
-                <mat-icon class="award-cup" [class.award-gold]="icon.gold" [fontIcon]="icon.name" [title]="award.title"></mat-icon>
+                <mat-icon class="award-cup" [ngClass]="'award-' + (icon.metal ?? 'silver')" [fontIcon]="icon.name" [title]="award.title"></mat-icon>
               } @else {
                 <span class="award-badge" [ngClass]="'award-' + award.id" [title]="award.title">{{ awardInfo[award.id].short }}</span>
               }
@@ -456,7 +456,7 @@
                   }
                 </svg>
                 <div class="ov-legend">
-                  <span><i class="key now"></i>{{ c.season === currentSeason ? 'This Season' : seasonText(c.season) }}</span>
+                  <span><i class="key now"></i>{{ isLive(c.season) ? 'This Season' : seasonText(c.season) }}</span>
                   @if (o.prev) {
                     <span><i class="key prev"></i>{{ seasonText(o.prev.season) }}</span>
                   }
@@ -557,7 +557,7 @@
                     (click)="s.season !== c.season && openSeasonCard(s.season, c.player.gsisId)"
                   >
                     <img [src]="s.logo" alt="" [class.white-logo]="teamLogoWhite({ teamLogo: s.teamLogo })" />
-                    <span class="season-year">{{ s.season === currentSeason ? 'This Season' : seasonText(s.season) }}</span>
+                    <span class="season-year">{{ isLive(s.season) ? 'This Season' : seasonText(s.season) }}</span>
                     <span class="season-games">{{ s.games }} G</span>
                     <!-- Headline stats as readouts: value, a bar against their best season, label; best lit -->
                     @for (h of s.stats; track h.label) {

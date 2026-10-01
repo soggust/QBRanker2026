@@ -41,6 +41,9 @@ export interface SportConfig {
   // The season updated every night, and the first one kept (finished seasons in StaticData/seasons)
   currentSeason: number;
   firstSeason: number;
+  // A date safely after the current season's last game ("2026-06-30"): until then it reads as the
+  // current season ("CURRENT", "This Season", "so far"); after, by its name, like a finished one
+  currentSeasonEnds: string;
   // How a season reads ("2025", or "2024-25" for a sport named for the year it ends in)
   seasonText: (season: number) => string;
   // Each tab's name: one of them (the card's "Point Guard"), and the tab ("Point Guards")

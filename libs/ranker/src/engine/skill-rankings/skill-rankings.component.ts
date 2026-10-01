@@ -24,7 +24,7 @@ import {
 import { MIN_SHARE_STEP, PositionService } from '@ranker/engine/position.service';
 import { copyRankingsToClipboard } from '@ranker/core/clipboard';
 import { SKILL_UNITS, defaultRanking, statIsEmpty, unitsForSeason, weightedTotals } from '@ranker/engine/unit-scoring';
-import { CURRENT_SEASON, SEASONS, dataSeason, dataVersion, fetchSeason, fetchSeasonFile } from '@ranker/engine/data';
+import { CURRENT_SEASON, SEASONS, dataSeason, dataVersion, fetchSeason, fetchSeasonFile, isLiveSeason } from '@ranker/engine/data';
 import { AWARD_INFO, AwardWin, awardsFor } from '@sport/awards';
 import { SPORT } from '@sport/sport';
 import { CardFlag } from '@ranker/engine/sport';
@@ -284,6 +284,12 @@ export class SkillRankingsComponent implements OnChanges {
   // How a season reads ("2025", or "2024-25" for a sport named for the year it ends in)
   seasonText(season: number): string {
     return SPORT.seasonText(season);
+  }
+
+  // The season is still being played (the current one, before its end date): it reads as "CURRENT" /
+  // "This Season" rather than by its name
+  isLive(season: number): boolean {
+    return isLiveSeason(season);
   }
 
   // The players this tab lists: injured players only with Show Injured on, and enough playing time
@@ -885,7 +891,7 @@ export class SkillRankingsComponent implements OnChanges {
       player,
       season,
       position: this.position,
-      current: season === CURRENT_SEASON,
+      current: isLiveSeason(season),
       ordinal: (n) => this.ordinal(n),
       innings: (v) => this.innings(v),
     });
@@ -1327,7 +1333,7 @@ export class SkillRankingsComponent implements OnChanges {
         context,
         name: player.name,
         positionName: POSITION_NAMES[this.position],
-        seasonLabel: season === CURRENT_SEASON ? 'This Season' : SPORT.seasonText(season),
+        seasonLabel: isLiveSeason(season) ? 'This Season' : SPORT.seasonText(season),
         teamName: player.teamName ?? null,
         logo: logoForSeason(player.teamLogo, season),
         color: this.teamBadge(player),
@@ -1386,7 +1392,7 @@ export class SkillRankingsComponent implements OnChanges {
       }
       // Each headline stat's best finished season lit (lowest for a stat that counts against them; a few games into this
       // season, a hot start would take it)
-      const finished = seasons.filter((s) => s.season !== CURRENT_SEASON);
+      const finished = seasons.filter((s) => !isLiveSeason(s.season));
       headline.forEach((stat, i) => {
         const values = seasons.map((s) => s.stats[i].value).filter((v): v is number => v !== null);
         const done = finished.map((s) => s.stats[i].value).filter((v): v is number => v !== null);
@@ -1395,7 +1401,7 @@ export class SkillRankingsComponent implements OnChanges {
         for (const s of seasons) {
           const v = s.stats[i].value;
           if (v === null) continue;
-          s.stats[i].best = done.length > 1 && s.season !== CURRENT_SEASON && v === best;
+          s.stats[i].best = done.length > 1 && !isLiveSeason(s.season) && v === best;
         }
       });
       if (this.card !== card) return;

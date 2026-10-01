@@ -16,6 +16,11 @@ export const DATA = {} as AppData;
 export const CURRENT_SEASON = SPORT.currentSeason;
 export const SEASONS = Array.from({ length: CURRENT_SEASON - SPORT.firstSeason + 1 }, (_, i) => CURRENT_SEASON - i);
 
+// The current season is still being played (until the sport's currentSeasonEnds date). Once it's over
+// it reads like any finished season, by its name, until the yearly rollover makes the next one current.
+export const SEASON_LIVE = Date.now() < new Date(SPORT.currentSeasonEnds + 'T00:00:00').getTime();
+export const isLiveSeason = (season: number) => season === CURRENT_SEASON && SEASON_LIVE;
+
 // The season DATA holds, and a count that goes up with every load (for caches keyed on the data)
 export let dataSeason = CURRENT_SEASON;
 export let dataVersion = 0;

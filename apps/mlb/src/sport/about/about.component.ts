@@ -36,6 +36,8 @@ export class AboutComponent implements AfterViewInit {
     ["Hard-Hit %", "Batted balls hit 95 mph or harder. For pitchers, lower is better."],
     ["Sprint Speed", "Feet per second in his fastest one-second window on competitive runs (27 is average, 30 elite)."],
     ["Def Runs", "Fielding runs saved compared with an average fielder at his position."],
+    ["FLD %", "Fielding percentage: plays made per chance (putouts and assists over chances), at every position he played. It only counts errors, so it can't see the balls a slow fielder never gets to."],
+    ["OAA", "Outs Above Average (Statcast, 2016 on): the plays a fielder made beyond what an average one would, weighing how hard each one was. Catchers aren't measured."],
     ["BsR", "Baserunning runs above average: stolen bases, caught stealing and taking extra bases."],
     ["ERA / WHIP", "Earned runs per 9 innings, and walks plus hits per inning."],
     ["FIP / xFIP", "Fielding Independent Pitching: an ERA built only from what the pitcher controls (strikeouts, walks, home runs). xFIP swaps in a league-average home run rate."],
