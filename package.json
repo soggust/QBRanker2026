@@ -17,7 +17,8 @@
     "mlb:build-comps": "node apps/mlb/scripts/build-comps.mjs",
     "start:nba": "ng serve nba",
     "nba:update-data": "node apps/nba/scripts/update-data.mjs",
-    "nba:build-comps": "node apps/nba/scripts/build-comps.mjs"
+    "nba:build-comps": "node apps/nba/scripts/build-comps.mjs",
+    "new-sport": "node scripts/new-sport.mjs"
   },
   "private": true,
   "dependencies": {
