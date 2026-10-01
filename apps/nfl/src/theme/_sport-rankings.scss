@@ -15,10 +15,10 @@ section ul li.player .player-name .player-awards,
   }
 }
 
-// (trying it out) Player names in Patrick Hand instead of Cabin Sketch: clean, even handwriting with solid strokes (no chalk texture to strain the eyes). One weight, so no faked bold
+// (trying it out) Player names in Covered By Your Grace instead of Cabin Sketch: the closest to real chalk on a board, airy and tall, with solid strokes (no chalk texture to strain the eyes). One weight, so no faked bold; thin, so a size up
 section ul li.player:not(.header-row) .player-name strong {
-  font-family: "Patrick Hand", cursive !important;
-  font-size: 19px !important;
+  font-family: "Covered By Your Grace", cursive !important;
+  font-size: 21px !important;
   font-synthesis: none;
   font-weight: 400 !important;
 }
