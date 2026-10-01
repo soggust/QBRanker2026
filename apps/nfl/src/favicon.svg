@@ -1,11 +1,57 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <!-- The app's football (logo, slider thumbs): brown leather, white laces, tilted like the logo -->
-  <g transform="translate(32 32) scale(1.15) rotate(-40) translate(-32 -32)">
-    <ellipse cx="32" cy="32" rx="30" ry="19" fill="#a8602f" stroke="#5a3016" stroke-width="2.5" />
-    <rect x="19" y="30.25" width="26" height="3.5" rx="1" fill="#fff" />
-    <rect x="22" y="25.5" width="3" height="13" rx="1" fill="#fff" />
-    <rect x="28" y="25.5" width="3" height="13" rx="1" fill="#fff" />
-    <rect x="34" y="25.5" width="3" height="13" rx="1" fill="#fff" />
-    <rect x="40" y="25.5" width="3" height="13" rx="1" fill="#fff" />
-  </g>
+  <!-- The app's football (the favicon): the detailed ball from assets/textures/football.svg, tilted like
+       the menu logo -->
+  <g transform="translate(32 32) rotate(-40) scale(1.02) translate(-32 -20)">
+    <defs>
+        <radialGradient id="leather" cx="38%" cy="28%" r="80%">
+          <stop offset="0" stop-color="#d0864c"/>
+          <stop offset="0.45" stop-color="#a8602f"/>
+          <stop offset="1" stop-color="#5e2e10"/>
+        </radialGradient>
+        <linearGradient id="sheen" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#fff" stop-opacity="0.45"/>
+          <stop offset="1" stop-color="#fff" stop-opacity="0"/>
+        </linearGradient>
+        <filter id="pebble" x="0" y="0" width="100%" height="100%">
+          <feTurbulence type="fractalNoise" baseFrequency="1.6" numOctaves="1" seed="4"/>
+          <feColorMatrix values="0 0 0 0 0.2  0 0 0 0 0.1  0 0 0 0 0.03  0 0 0 0.9 -0.35"/>
+        </filter>
+        <clipPath id="ball">
+          <path d="M2 20 C11 3.5 53 3.5 62 20 C53 36.5 11 36.5 2 20 Z"/>
+        </clipPath>
+      </defs>
+      <!-- The ball, its grain, and the sheen -->
+      <path d="M2 20 C11 3.5 53 3.5 62 20 C53 36.5 11 36.5 2 20 Z" fill="url(#leather)"/>
+      <g clip-path="url(#ball)">
+        <rect width="64" height="40" filter="url(#pebble)" opacity="0.55"/>
+        <ellipse cx="27" cy="11" rx="21" ry="5.5" fill="url(#sheen)"/>
+        <!-- The panel seams, tip to tip -->
+        <path d="M4 20 C14 9.5 50 9.5 60 20 M4 20 C14 30.5 50 30.5 60 20" fill="none" stroke="#3d1d08" stroke-width="0.9" opacity="0.55"/>
+      </g>
+      <!-- The center seam the laces sit on -->
+      <path d="M18 19.5 H46" stroke="#3d1d08" stroke-width="1.2" opacity="0.6"/>
+      <!-- The laces: the long lace, then eight cross laces with a shadow under each -->
+      <g fill="#3d1d08" opacity="0.45">
+        <rect x="18.5" y="19.3" width="27" height="2.6" rx="1.2"/>
+        <rect x="21.2" y="15.4" width="2" height="9" rx="1"/>
+        <rect x="24.8" y="15" width="2" height="9.8" rx="1"/>
+        <rect x="28.4" y="14.8" width="2" height="10.2" rx="1"/>
+        <rect x="32" y="14.7" width="2" height="10.4" rx="1"/>
+        <rect x="35.6" y="14.8" width="2" height="10.2" rx="1"/>
+        <rect x="39.2" y="15" width="2" height="9.8" rx="1"/>
+        <rect x="42.8" y="15.4" width="2" height="9" rx="1"/>
+      </g>
+      <g fill="#fbf8f2" stroke="#c9bfae" stroke-width="0.35">
+        <rect x="18" y="18.6" width="27" height="2.6" rx="1.2"/>
+        <rect x="20.7" y="14.7" width="2" height="9" rx="1"/>
+        <rect x="24.3" y="14.3" width="2" height="9.8" rx="1"/>
+        <rect x="27.9" y="14.1" width="2" height="10.2" rx="1"/>
+        <rect x="31.5" y="14" width="2" height="10.4" rx="1"/>
+        <rect x="35.1" y="14.1" width="2" height="10.2" rx="1"/>
+        <rect x="38.7" y="14.3" width="2" height="9.8" rx="1"/>
+        <rect x="42.3" y="14.7" width="2" height="9" rx="1"/>
+      </g>
+      <!-- The edge -->
+      <path d="M2 20 C11 3.5 53 3.5 62 20 C53 36.5 11 36.5 2 20 Z" fill="none" stroke="#3a1c08" stroke-width="1.4"/>
+      </g>
 </svg>

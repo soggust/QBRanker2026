@@ -107,13 +107,50 @@ section footer .mat-mdc-select.season-select {
   padding-inline: 22px !important;
 }
 
-// (the football knob and switch don't roll like the round balls in the other sports)
+// The football (textures/football.svg: shaded, pebbled leather, seams, stitched laces) on the slider
+// knobs and the settings switches, in place of the shared leather-and-laces drawing. A football
+// doesn't roll like the round balls in the other sports.
+$football: url("../assets/textures/football.svg");
+
 .mdc-slider__thumb-knob {
+  background: $football center / 100% 100% no-repeat !important;
+  // (sized against the whole knob: Material draws it with a thick border)
+  background-clip: border-box !important;
+  background-origin: border-box !important;
+  border-color: transparent !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  filter: drop-shadow(0 1px 1.5px rgba(0, 0, 0, 0.7));
   transform: translate(-50%, -50%) !important;
+
+  // (its own laces)
+  &::after {
+    display: none !important;
+  }
 }
 
-html .mat-mdc-slide-toggle .mdc-switch__handle::after {
-  rotate: none !important;
+html .mat-mdc-slide-toggle.mat-accent .mdc-switch__handle {
+  border-radius: 0 !important;
+
+  // (no white knob round the ball)
+  &::before {
+    background: transparent !important;
+    border-color: transparent !important;
+  }
+
+  &::after {
+    background: $football center / 100% 100% no-repeat !important;
+    background-blend-mode: normal !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.6));
+    rotate: none !important;
+  }
+}
+
+html .mat-mdc-slide-toggle .mdc-switch__shadow {
+  box-shadow: none !important;
 }
 
 // Inputs: the thick dark edge the NBA app's ball panels have (like the black channel around a panel of
