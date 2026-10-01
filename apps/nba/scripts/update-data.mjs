@@ -15,6 +15,7 @@
 // "kerrst01c"); id is ESPN's (headshots; none for coaches).
 import { writeFile, mkdir } from 'node:fs/promises';
 import path from 'node:path';
+import { curve } from '../../../libs/ranker/scripts/grades.mjs';
 
 const CURRENT_SEASON = 2026;
 const FIRST_SEASON = 2001;
@@ -103,13 +104,6 @@ const num = (v) => (v === undefined || v === null || v === '' ? null : Number.is
 const round = (v, d = 1) => (v === null || !Number.isFinite(v) ? null : Math.round(v * 10 ** d) / 10 ** d);
 // ".473" -> 47.3 (percentage points)
 const pct = (v) => (num(v) === null ? null : round(num(v) * 100, 1));
-
-// Grades on a curve (0 = F ... 12 = A+) from scores (higher = better), like the other apps' support grades
-function curve(scores) {
-  const ranked = [...scores].filter(([, v]) => Number.isFinite(v)).sort((a, b) => b[1] - a[1]);
-  const last = Math.max(ranked.length - 1, 1);
-  return new Map(ranked.map(([key], rank) => [key, Math.round(12 * (1 - rank / last) * 10) / 10]));
-}
 
 // ESPN's athletes for a season (id and name), for headshots: name -> id
 const norm = (name) =>

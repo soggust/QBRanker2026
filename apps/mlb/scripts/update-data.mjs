@@ -11,6 +11,7 @@
 // gsisId is "H-<id>" for hitters and "P-<id>" for pitchers (a two-way player is on both sides).
 import { writeFile, mkdir } from 'node:fs/promises';
 import path from 'node:path';
+import { curve } from '../../../libs/ranker/scripts/grades.mjs';
 
 const CURRENT_SEASON = 2026;
 const FIRST_SEASON = 2000;
@@ -102,13 +103,6 @@ async function parkFactors(season) {
   } catch {
     return new Map();
   }
-}
-
-// Grades on a curve (0 = F ... 12 = A+) from scores (higher = better), like the NFL app's support grades
-function curve(scores) {
-  const ranked = [...scores].filter(([, v]) => Number.isFinite(v)).sort((a, b) => b[1] - a[1]);
-  const last = Math.max(ranked.length - 1, 1);
-  return new Map(ranked.map(([key], rank) => [key, Math.round(12 * (1 - rank / last) * 10) / 10]));
 }
 
 async function statsFor(season, group, type) {
