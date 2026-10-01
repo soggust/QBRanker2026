@@ -14,3 +14,12 @@ section ul li.player .player-name .player-awards,
     }
   }
 }
+
+// (trying it out) Player names in Gochi Hand instead of Cabin Sketch: a looser marker hand. It has one
+// weight, so no faked bold.
+section ul li.player:not(.header-row) .player-name strong {
+  font-family: "Gochi Hand", cursive !important;
+  font-size: 19px !important;
+  font-synthesis: none;
+  font-weight: 400 !important;
+}
