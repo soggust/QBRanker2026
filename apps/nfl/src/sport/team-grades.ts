@@ -107,14 +107,15 @@ const WEAPONS_SHARES: [SkillPosition, number, (player: SkillPlayer) => number][]
 ];
 
 // The O-line grade's two leans, from the Offensive Lines tab's sliders: for QBs pass protection counts
-// three times run blocking, for RBs the reverse (penalties count the same either way); head coaches
-// get the balanced grade
+// five times run blocking, for RBs the reverse (penalties count the same either way); head coaches
+// get the balanced grade. OLINE_LEAN: which, by tab (the column reads "O-Line (Pass)").
 const PASS_PRO = ['sacksAllowed', 'qbHitsAllowed', 'pressureRate', 'sackRate'];
 const RUN_BLOCKING = ['ypc', 'stuffRate', 'shortYardagePct', 'runEpa', 'runSuccess', 'yardsBeforeContact'];
 const lean = (more: string[], less: string[]) =>
-  Object.fromEntries([...more.map((key) => [key, 1.5]), ...less.map((key) => [key, 0.5])]);
+  Object.fromEntries([...more.map((key) => [key, 1.5]), ...less.map((key) => [key, 0.3])]);
 const PASS_LEAN = lean(PASS_PRO, RUN_BLOCKING);
 const RUN_LEAN = lean(RUN_BLOCKING, PASS_PRO);
+export const OLINE_LEAN: Record<string, 'Pass' | 'Run'> = { QB: 'Pass', RB: 'Run' };
 
 // The grades every tab reads (team logo -> 0-12), kept current by connectTeamGrades
 let defenseGrades = new Map<string, number>();
@@ -240,7 +241,8 @@ export function computedValue(player: SkillPlayer, stat: SkillStat, context: Val
   switch (stat.key) {
     // (a QB's leans on pass protection, a back's on run blocking)
     case 'oline': {
-      const curve = context.position === 'QB' ? olinePassCurve : context.position === 'RB' ? olineRunCurve : olineCurve;
+      const lean = OLINE_LEAN[context.position];
+      const curve = lean === 'Pass' ? olinePassCurve : lean === 'Run' ? olineRunCurve : olineCurve;
       return Math.round(curve.get(team) ?? 6);
     }
     case 'weapons':

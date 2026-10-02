@@ -725,7 +725,7 @@ export class SkillRankingsComponent implements OnChanges {
   // Column label, switched to its per-game name (or tagged with the pace, "162G") when the column
   // shows rates
   statLabel(stat: SkillStat): string {
-    const label = SPORT.statLabel?.(stat, this.sportSettings) ?? stat.label;
+    const label = SPORT.statLabel?.(stat, this.sportSettings, this.position) ?? stat.label;
     if (!this.showsPerGame(stat)) return label;
     return this.statBasis === 'pace17' ? `${label} (${PACE_GAMES[this.position]}G)` : (PER_GAME_LABELS[stat.key] ?? `${label} / Game`);
   }

@@ -119,7 +119,7 @@ export class SidebarComponent {
         children.forEach((child) => used.add(child.key));
         rows.push({ key: pair.stat.key, label: pair.stat.label, description: pair.stat.description, children });
       } else {
-        const label = SPORT.statLabel?.(stat, this.positionService.settings.sport) ?? stat.label;
+        const label = SPORT.statLabel?.(stat, this.positionService.settings.sport, this.position) ?? stat.label;
         rows.push({ key: stat.key, label, description: stat.description, stat });
       }
     }

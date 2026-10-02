@@ -224,7 +224,7 @@ export interface SportConfig {
   // Pairs of stats a tab can show as one total column, and the setting that turns it on
   combined?: { label: string; title: string; stats: (position: string) => CombinedStat[] };
   // A stat's label and full name under the sport's settings ("Off Rank (Pts)"; undefined: the usual)
-  statLabel?: (stat: SkillStat, settings: SportSettings) => string;
+  statLabel?: (stat: SkillStat, settings: SportSettings, position: string) => string;
   statName?: (stat: SkillStat, position: string, settings: SportSettings) => string | undefined;
   // A value worked out in the app (fantasy points in the chosen scoring, a league rank, a grade from
   // another tab's ranking); undefined reads the data

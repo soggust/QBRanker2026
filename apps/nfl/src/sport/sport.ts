@@ -14,7 +14,7 @@ import {
 } from './positions';
 import { CAST_GRADES, GARBAGE_TIME_STAT } from './skills';
 import { buildQbUnits } from './qb-rows';
-import { computedValue, connectTeamGrades, fromOtherTabs } from './team-grades';
+import { OLINE_LEAN, computedValue, connectTeamGrades, fromOtherTabs } from './team-grades';
 import { blockingExtras } from './blocking';
 
 // NFL: what the engine needs to know about football (the rest is beside this file: positions,
@@ -184,8 +184,13 @@ export const SPORT: SportConfig = {
   },
   // The unit ranks say what they're ranked on ("Off Rank (Pts)", "Offensive Rank (by Points)"), and
   // fantasy points in which scoring (kickers and defenses have their own fixed scoring)
-  statLabel: (stat, settings) => statLabelFor(stat, settings['rankBasis'] as RankBasis),
+  // (and the O-Line grade's lean on the QB and RB tabs: team-grades)
+  statLabel: (stat, settings, position) =>
+    stat.key === 'oline' && OLINE_LEAN[position] ? `O-Line (${OLINE_LEAN[position]})` : statLabelFor(stat, settings['rankBasis'] as RankBasis),
   statName: (stat, position, settings) => {
+    if (stat.key === 'oline' && OLINE_LEAN[position]) {
+      return `Offensive Line Grade (${OLINE_LEAN[position] === 'Pass' ? 'pass protection' : 'run blocking'} first)`;
+    }
     if (stat.key === 'fantasy' && !['K', 'DEF'].includes(position)) {
       return `${FANTASY_SCORING_LABELS[settings['fantasyScoring'] as FantasyScoring]} Fantasy Points`;
     }
