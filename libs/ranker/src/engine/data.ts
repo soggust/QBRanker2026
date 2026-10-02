@@ -57,6 +57,22 @@ export async function loadData(season = CURRENT_SEASON): Promise<void> {
   dataVersion++;
 }
 
+// Run fn with another season's files in DATA, and dataSeason saying so (a sport building another
+// season's rows reads both: the NFL only blends preseason grades into the season being played), then
+// put the loaded season back
+export function withSeason<T>(season: number, data: AppData, fn: () => T): T {
+  const loaded = { ...DATA };
+  const loadedSeason = dataSeason;
+  Object.assign(DATA, data);
+  dataSeason = season;
+  try {
+    return fn();
+  } finally {
+    Object.assign(DATA, loaded);
+    dataSeason = loadedSeason;
+  }
+}
+
 // A season's files, without loading them into DATA (the player card reads other seasons this way,
 // leaving the table on its own)
 export async function fetchSeason(season: number): Promise<AppData> {

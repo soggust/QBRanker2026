@@ -1,5 +1,5 @@
 import type { SkillPlayer } from '@sport/positions';
-import { DATA } from '@ranker/engine/data';
+import { DATA, dataSeason, isLiveSeason } from '@ranker/engine/data';
 
 // A QB's play-by-play stats (the ones the Garbage Time Stats setting can filter)
 export interface QbPlayByPlay {
@@ -115,8 +115,11 @@ const dataGrades = () => DATA['dataGrades'] as DataGrades;
 // 32% after 1 game, 45% after 2, 55% after 3, 63% after 4, 77% after 6, 89% after 8, 100% at 10+.
 // ((games / 10) ^ 0.5: the season takes over by about a quarter of the way in, while a single game
 // can't swing a grade on its own. It was (games / 14) ^ 0.68, still mostly preseason after 4 games.)
+// Only the season being played blends: a finished season (a past one, or this one once it's over) is
+// all its own results, however few games a team or a backup QB played.
 const FULL_WEIGHT_GAMES = 10;
 export function dataWeight(games: number): number {
+  if (!isLiveSeason(dataSeason)) return 1;
   return games > 0 ? Math.min(1, (games / FULL_WEIGHT_GAMES) ** 0.5) : 0;
 }
 

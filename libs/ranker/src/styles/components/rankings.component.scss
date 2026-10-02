@@ -2152,6 +2152,11 @@ section ul li.player.header-row div .stat-label .label-tag {
   white-space: pre;
 }
 
+// (in a grade box's header the label sits differently: there the tag reads low, so it goes up)
+section ul li.player.header-row div.box .stat-label .label-tag {
+  transform: translateY(-0.5px);
+}
+
 // The footer's year dropdown: a scoreboard panel the height of the leather buttons, the year in the
 // position tabs' lettering (Nunito, spaced out) with a white caret
 section footer .mat-mdc-select.season-select {

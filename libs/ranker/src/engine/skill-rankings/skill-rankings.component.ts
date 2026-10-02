@@ -1509,7 +1509,7 @@ export class SkillRankingsComponent implements OnChanges {
   private rowsFor(season: number): Promise<Record<SkillPosition, SkillPlayer[]>> {
     let rows = this.seasonRows.get(season);
     if (!rows) {
-      rows = fetchSeason(season).then(unitsForSeason);
+      rows = fetchSeason(season).then((data) => unitsForSeason(data, season));
       rows.catch(() => this.seasonRows.delete(season));
       this.seasonRows.set(season, rows);
     }

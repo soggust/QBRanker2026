@@ -1,4 +1,4 @@
-import { AppData, DATA, dataVersion } from '@ranker/engine/data';
+import { AppData, DATA, dataVersion, withSeason } from '@ranker/engine/data';
 import type { SportSettings, ValueContext } from '@ranker/engine/sport';
 import { SKILL_STATS, SkillPlayer, SkillPosition, SkillStat, SkillStatKey, SkillWeights, unitStat } from '@sport/positions';
 import { SPORT } from '@sport/sport';
@@ -13,18 +13,12 @@ export function rebuildUnits(): void {
 }
 rebuildUnits();
 
-// Another season's rows, from its files, without touching the loaded season (DATA is swapped just
-// while the sport builds its own tabs, then put back)
-export function unitsForSeason(data: AppData): Record<SkillPosition, SkillPlayer[]> {
+// Another season's rows, from its files, without touching the loaded season (DATA and dataSeason are
+// swapped just while the sport builds its own tabs, then put back)
+export function unitsForSeason(data: AppData, season: number): Record<SkillPosition, SkillPlayer[]> {
   const rows = data.skillPlayers as Record<SkillPosition, SkillPlayer[]>;
   if (!SPORT.extraRows) return rows;
-  const loaded = { ...DATA };
-  Object.assign(DATA, data);
-  try {
-    return { ...rows, ...SPORT.extraRows() };
-  } finally {
-    Object.assign(DATA, loaded);
-  }
+  return withSeason(season, data, () => ({ ...rows, ...SPORT.extraRows!() }));
 }
 
 // The sport's settings at their defaults
