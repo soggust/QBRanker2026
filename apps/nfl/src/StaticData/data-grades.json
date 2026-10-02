@@ -59,7 +59,7 @@
       "newCoach": true,
       "coach": "Joe Brady",
       "oline": 11.2,
-      "weapons": 11.2,
+      "weapons": 11.6,
       "metrics": {
         "pressureRate": 0.235,
         "sackRate": 0.078,
@@ -76,7 +76,7 @@
       "games": 3,
       "newCoach": false,
       "coach": "Dave Canales",
-      "oline": 1.9,
+      "oline": 2.3,
       "weapons": 10.1,
       "metrics": {
         "pressureRate": 0.341,
@@ -94,7 +94,7 @@
       "games": 3,
       "newCoach": false,
       "coach": "Ben Johnson",
-      "oline": 7.4,
+      "oline": 7,
       "weapons": 8.9,
       "metrics": {
         "pressureRate": 0.263,
@@ -112,7 +112,7 @@
       "games": 3,
       "newCoach": false,
       "coach": "Zac Taylor",
-      "oline": 7,
+      "oline": 6.6,
       "weapons": 4.6,
       "metrics": {
         "pressureRate": 0.239,
@@ -127,21 +127,21 @@
       }
     },
     "Browns": {
-      "games": 3,
+      "games": 4,
       "newCoach": true,
       "coach": "Todd Monken",
-      "oline": 0.4,
-      "weapons": 11.6,
+      "oline": 5,
+      "weapons": 11.2,
       "metrics": {
-        "pressureRate": 0.24,
-        "sackRate": 0.087,
+        "pressureRate": 0.177,
+        "sackRate": 0.078,
         "yardsBeforeContact": 1.907,
-        "stuffRate": 0.238,
-        "separation": 3.886,
-        "yacOverExpected": 1.275,
-        "dropRate": 0.036,
-        "rushOverExpected": -0.528,
-        "brokenTackles": 0.091
+        "stuffRate": 0.198,
+        "separation": 3.791,
+        "yacOverExpected": 1.466,
+        "dropRate": 0.026,
+        "rushOverExpected": -0.509,
+        "brokenTackles": 0.077
       }
     },
     "Cowboys": {
@@ -166,7 +166,7 @@
       "games": 3,
       "newCoach": false,
       "coach": "Sean Payton",
-      "oline": 6.2,
+      "oline": 5.8,
       "weapons": 2.7,
       "metrics": {
         "pressureRate": 0.228,
@@ -184,7 +184,7 @@
       "games": 3,
       "newCoach": false,
       "coach": "Dan Campbell",
-      "oline": 6.6,
+      "oline": 6.2,
       "weapons": 9.3,
       "metrics": {
         "pressureRate": 0.223,
@@ -220,7 +220,7 @@
       "games": 3,
       "newCoach": false,
       "coach": "DeMeco Ryans",
-      "oline": 1.2,
+      "oline": 0.8,
       "weapons": 4.3,
       "metrics": {
         "pressureRate": 0.224,
@@ -238,7 +238,7 @@
       "games": 3,
       "newCoach": false,
       "coach": "Shane Steichen",
-      "oline": 5,
+      "oline": 4.6,
       "weapons": 1.2,
       "metrics": {
         "pressureRate": 0.204,
@@ -310,7 +310,7 @@
       "games": 3,
       "newCoach": false,
       "coach": "Jim Harbaugh",
-      "oline": 2.7,
+      "oline": 3.1,
       "weapons": 7.7,
       "metrics": {
         "pressureRate": 0.298,
@@ -328,7 +328,7 @@
       "games": 3,
       "newCoach": true,
       "coach": "Klint Kubiak",
-      "oline": 3.9,
+      "oline": 3.5,
       "weapons": 3.9,
       "metrics": {
         "pressureRate": 0.206,
@@ -346,7 +346,7 @@
       "games": 3,
       "newCoach": true,
       "coach": "Jeff Hafley",
-      "oline": 3.1,
+      "oline": 2.7,
       "weapons": 3.5,
       "metrics": {
         "pressureRate": 0.271,
@@ -364,7 +364,7 @@
       "games": 3,
       "newCoach": false,
       "coach": "Kevin O'Connell",
-      "oline": 4.3,
+      "oline": 3.9,
       "weapons": 0.4,
       "metrics": {
         "pressureRate": 0.225,
@@ -382,7 +382,7 @@
       "games": 3,
       "newCoach": false,
       "coach": "Mike Vrabel",
-      "oline": 1.5,
+      "oline": 1.2,
       "weapons": 6.2,
       "metrics": {
         "pressureRate": 0.226,
@@ -418,7 +418,7 @@
       "games": 3,
       "newCoach": false,
       "coach": "John Harbaugh",
-      "oline": 4.6,
+      "oline": 4.3,
       "weapons": 1.5,
       "metrics": {
         "pressureRate": 0.237,
@@ -436,7 +436,7 @@
       "games": 3,
       "newCoach": false,
       "coach": "Aaron Glenn",
-      "oline": 3.5,
+      "oline": 1.9,
       "weapons": 7.4,
       "metrics": {
         "pressureRate": 0.192,
@@ -454,7 +454,7 @@
       "games": 3,
       "newCoach": false,
       "coach": "Nick Sirianni",
-      "oline": 2.3,
+      "oline": 1.5,
       "weapons": 5.4,
       "metrics": {
         "pressureRate": 0.236,
@@ -469,28 +469,28 @@
       }
     },
     "Steelers": {
-      "games": 3,
+      "games": 4,
       "newCoach": false,
       "coach": "Mike McCarthy",
-      "oline": 5.4,
+      "oline": 7.4,
       "weapons": 9.7,
       "metrics": {
-        "pressureRate": 0.256,
-        "sackRate": 0.064,
+        "pressureRate": 0.187,
+        "sackRate": 0.076,
         "yardsBeforeContact": 2.224,
-        "stuffRate": 0.169,
-        "separation": 2.801,
-        "yacOverExpected": 0.585,
-        "dropRate": 0.043,
-        "rushOverExpected": 1.796,
-        "brokenTackles": 0.083
+        "stuffRate": 0.175,
+        "separation": 2.525,
+        "yacOverExpected": 1.35,
+        "dropRate": 0.032,
+        "rushOverExpected": 1.454,
+        "brokenTackles": 0.071
       }
     },
     "Seahawks": {
       "games": 3,
       "newCoach": false,
       "coach": "Mike Macdonald",
-      "oline": 5.8,
+      "oline": 5.4,
       "weapons": 7,
       "metrics": {
         "pressureRate": 0.248,
@@ -526,7 +526,7 @@
       "games": 3,
       "newCoach": false,
       "coach": "Todd Bowles",
-      "oline": 0.8,
+      "oline": 0.4,
       "weapons": 5,
       "metrics": {
         "pressureRate": 0.238,
@@ -579,11 +579,11 @@
   },
   "qbs": {
     "8439": {
-      "games": 3,
-      "responsibility": 8.4,
+      "games": 4,
+      "responsibility": 9.7,
       "metrics": {
-        "playShare": 0.629,
-        "yardShare": 0.784
+        "playShare": 0.638,
+        "yardShare": 0.795
       }
     },
     "12483": {
@@ -612,7 +612,7 @@
     },
     "15864": {
       "games": 3,
-      "responsibility": 9.1,
+      "responsibility": 8.8,
       "metrics": {
         "playShare": 0.601,
         "yardShare": 0.829
@@ -636,7 +636,7 @@
     },
     "2577417": {
       "games": 3,
-      "responsibility": 9.7,
+      "responsibility": 9.4,
       "metrics": {
         "playShare": 0.636,
         "yardShare": 0.795
@@ -683,11 +683,11 @@
       }
     },
     "3122840": {
-      "games": 3,
-      "responsibility": 11,
+      "games": 4,
+      "responsibility": 10.7,
       "metrics": {
-        "playShare": 0.64,
-        "yardShare": 0.866
+        "playShare": 0.641,
+        "yardShare": 0.839
       }
     },
     "3139477": {
@@ -780,7 +780,7 @@
     },
     "4242512": {
       "games": 3,
-      "responsibility": 8.8,
+      "responsibility": 8.4,
       "metrics": {
         "playShare": 0.596,
         "yardShare": 0.835
@@ -852,7 +852,7 @@
     },
     "4432577": {
       "games": 3,
-      "responsibility": 10.7,
+      "responsibility": 11,
       "metrics": {
         "playShare": 0.637,
         "yardShare": 0.867
@@ -860,7 +860,7 @@
     },
     "4685720": {
       "games": 3,
-      "responsibility": 9.4,
+      "responsibility": 9.1,
       "metrics": {
         "playShare": 0.622,
         "yardShare": 0.808
