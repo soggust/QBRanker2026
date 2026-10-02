@@ -335,9 +335,34 @@ function career(id, fights, stats, cache) {
 }
 
 // ---------------------------------------------------------------------------
+let cache = {};
+try {
+  cache = JSON.parse(await readFile(CACHE, 'utf8'));
+} catch {
+  // (a first run: everything is fetched)
+}
+
+// UFC.com and Wikipedia can turn a request from a data center away (GitHub's runners, where the
+// nightly update runs). Then the last good copy, kept in cache.json under _<name>, stands in, so the
+// night's fights and stats still update; a fetch that comes back empty counts as turned away too.
+async function lastGood(name, fetchIt, isEmpty, toJson, fromJson) {
+  try {
+    const value = await fetchIt();
+    if (isEmpty(value)) throw new Error('nothing found');
+    cache[`_${name}`] = toJson(value);
+    return value;
+  } catch (err) {
+    if (!cache[`_${name}`]) throw err;
+    console.warn(`${name}: ${err.message}; using the last good copy`);
+    return fromJson(cache[`_${name}`]);
+  }
+}
+const mapsToJson = (maps) => Object.fromEntries(Object.entries(maps).map(([k, m]) => [k, [...m]]));
+const mapsFromJson = (json) => Object.fromEntries(Object.entries(json).map(([k, entries]) => [k, new Map(entries)]));
+
 const all = await bouts();
-const ranked = await rankings();
-const titleHistory = await titles();
+const ranked = await lastGood('rankings', rankings, (r) => !r.champions.size, mapsToJson, mapsFromJson);
+const titleHistory = await lastGood('titles', titles, (t) => !t.size, (t) => [...t], (json) => new Map(json));
 console.log(`Title history: ${titleHistory.size} champions, ${[...titleHistory.values()].reduce((s, t) => s + t.defenses, 0)} defenses`);
 console.log(`${all.length} UFC bouts ${FIRST_YEAR}-${THIS_YEAR}; ${ranked.champions.size} champions, ${ranked.ranks.size} ranked`);
 
@@ -386,12 +411,6 @@ const ratedPool = [...elo].filter(([id]) => byFighter.get(id).length >= 3).map((
 const QUALITY_ELO = ratedPool[Math.floor(ratedPool.length * 0.8)];
 console.log(`Elo: ${elo.size} fighters rated; a quality win is over ${Math.round(QUALITY_ELO)}+`);
 
-let cache = {};
-try {
-  cache = JSON.parse(await readFile(CACHE, 'utf8'));
-} catch {
-  // (a first run: everything is fetched)
-}
 const weekAgo = Date.now() - 7 * 864e5;
 let fetched = 0;
 for (const id of needed) {
