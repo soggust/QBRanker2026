@@ -5,44 +5,45 @@
     "team": "Pittsburgh Steelers",
     "teamLogo": "assets/NFL_Icons/Steelers.png",
     "wins": 2,
-    "losses": 1,
+    "losses": 2,
     "ties": 0,
     "lastFive": [
+      0,
       1,
       0,
       1
     ],
     "starts": {
-      "assets/NFL_Icons/Steelers.png": 3
+      "assets/NFL_Icons/Steelers.png": 4
     },
     "advanced": {
       "pressureToSack": 0.258,
-      "badThrowPct": 0.186,
-      "timeToThrow": 2.89,
-      "adot": 8.3,
-      "aggressiveness": 14.2,
-      "epaPerPlay": -0.126,
-      "cpoe": -2.436,
-      "successRate": 0.439,
-      "plays": 132,
-      "realGames": 3,
-      "fantasyStd": 39.2,
+      "badThrowPct": 0.137,
+      "timeToThrow": 2.87,
+      "adot": 8.7,
+      "aggressiveness": 17.6,
+      "epaPerPlay": -0.048,
+      "cpoe": -3.516,
+      "successRate": 0.454,
+      "plays": 183,
+      "realGames": 4,
+      "fantasyStd": 61.16,
       "receptions": 0,
       "competitive": {
-        "epaPerPlay": -0.086,
-        "cpoe": -3.502,
-        "successRate": 0.43
+        "epaPerPlay": -0.065,
+        "cpoe": -5.701,
+        "successRate": 0.435
       }
     },
     "box": {
-      "games": 3,
+      "games": 4,
       "fumLost": 1,
-      "passYards": 700,
-      "passTd": 4,
-      "ints": 2,
-      "compPercent": 58.4,
-      "ypa": 6.2,
-      "rating": 81,
+      "passYards": 999,
+      "passTd": 7,
+      "ints": 4,
+      "compPercent": 57.5,
+      "ypa": 6.53,
+      "rating": 81.6,
       "rushYards": 12,
       "rushTd": 0
     },
@@ -649,46 +650,47 @@
     "name": "Deshaun Watson",
     "team": "Cleveland Browns",
     "teamLogo": "assets/NFL_Icons/Browns.png",
-    "wins": 2,
+    "wins": 3,
     "losses": 1,
     "ties": 0,
     "lastFive": [
       1,
       1,
+      1,
       0
     ],
     "starts": {
-      "assets/NFL_Icons/Browns.png": 3
+      "assets/NFL_Icons/Browns.png": 4
     },
     "advanced": {
       "pressureToSack": 0.36,
-      "badThrowPct": 0.159,
-      "timeToThrow": 2.91,
+      "badThrowPct": 0.113,
+      "timeToThrow": 2.79,
       "adot": 6.6,
-      "aggressiveness": 12.2,
-      "epaPerPlay": 0.119,
-      "cpoe": 0.292,
-      "successRate": 0.483,
-      "plays": 120,
-      "realGames": 3,
-      "fantasyStd": 53.98,
+      "aggressiveness": 13.9,
+      "epaPerPlay": 0.133,
+      "cpoe": 1.299,
+      "successRate": 0.506,
+      "plays": 162,
+      "realGames": 4,
+      "fantasyStd": 66.9,
       "receptions": 0,
       "competitive": {
-        "epaPerPlay": 0.114,
-        "cpoe": -3.338,
-        "successRate": 0.473
+        "epaPerPlay": 0.199,
+        "cpoe": -0.935,
+        "successRate": 0.516
       }
     },
     "box": {
-      "games": 3,
-      "fumLost": 0,
-      "passYards": 587,
-      "passTd": 5,
-      "ints": 1,
-      "compPercent": 68.3,
-      "ypa": 7.16,
-      "rating": 104.1,
-      "rushYards": 105,
+      "games": 4,
+      "fumLost": 1,
+      "passYards": 855,
+      "passTd": 6,
+      "ints": 2,
+      "compPercent": 69.6,
+      "ypa": 7.43,
+      "rating": 101.2,
+      "rushYards": 127,
       "rushTd": 0
     },
     "injuryStatus": "Active",
@@ -1484,7 +1486,7 @@
       "rushYards": 124,
       "rushTd": 1
     },
-    "injuryStatus": "Questionable",
+    "injuryStatus": "Active",
     "injured": false
   },
   {
