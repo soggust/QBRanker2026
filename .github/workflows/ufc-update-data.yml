@@ -2,11 +2,11 @@ name: UFC - Update Game Data
 
 on:
   schedule:
-    # Nightly at 10:07 UTC (5:07 AM CDT): after a night's card is final, and clear of the other sports'
-    # updates (they share one queue, see concurrency). The 12:37 UTC run is a backup for a delayed or
+    # Nightly at 12:07 UTC (7:07 AM CDT): after a night's card is final, and clear of the other sports'
+    # updates (they share one queue, see concurrency). The 14:37 UTC run is a backup for a delayed or
     # dropped one; a run with nothing new is a no-op (no commit, no deploy).
-    - cron: "7 10 * * *"
-    - cron: "37 12 * * *"
+    - cron: "7 12 * * *"
+    - cron: "37 14 * * *"
   workflow_dispatch:
 
 # One update at a time: a run that starts while another is still going waits for it

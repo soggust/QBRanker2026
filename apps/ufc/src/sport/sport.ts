@@ -105,9 +105,11 @@ export const SPORT: SportConfig = {
   roleWord: () => 'fighter',
   playingTime: {
     label: 'Fights',
-    title: 'Leave out fighters with fewer UFC fights than this share of the most anyone in the division has (1 shows everyone); the number is the fights it takes',
+    title: 'Leave out fighters with fewer UFC fights than this (1 shows everyone)',
     // (his whole UFC career: a champion new to a division is still listed there)
     of: (player) => player.careerGames ?? player.games ?? 0,
+    // (a count, not a share of the most anyone has: 10 to start, 2 a click)
+    fixed: { default: 10, step: 2 },
   },
   defaultStatBasis: 'season',
   perGameDecimals: 2,

@@ -173,6 +173,9 @@ export interface SportConfig {
     of: (player: SkillPlayer) => number;
     seasonLength?: (rows: Record<string, SkillPlayer[]>, position: string) => number;
     everyone?: string[];
+    // A fixed count instead of a share (the UFC's fights: careers don't grow through a season), its
+    // starting value and how far each click moves it
+    fixed?: { default: number; step: number };
   };
   // How counting stats read to start, their decimals per game, and the Stat Totals setting's hover
   // text: example counting stats, and what a full season's pace is

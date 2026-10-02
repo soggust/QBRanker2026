@@ -311,18 +311,47 @@ export class SkillRankingsComponent implements OnChanges {
     return !SPORT.playingTime.everyone?.includes(this.position);
   }
 
-  // The cutoff: the share of a total, rounded (never under 1)
+  // The cutoff: the share of a total, rounded (never under 1), or the sport's fixed count
   minCountFor(total: number): number {
+    const fixed = SPORT.playingTime.fixed;
+    if (fixed) return this.positionService.settings.minCount ?? fixed.default;
     const share = this.positionService.settings.minShare;
     return share ? Math.max(1, Math.round((share / 100) * total)) : 1;
+  }
+
+  // The stepper's own reading: the share (1 when it's everyone), or the fixed count
+  get minLabel(): string {
+    if (SPORT.playingTime.fixed) return `${this.minCount}`;
+    return this.minShare ? `${Math.round(this.minShare)}%` : '1';
+  }
+
+  get canLowerMin(): boolean {
+    return SPORT.playingTime.fixed ? this.minCount > 1 : this.minShare > 0;
+  }
+
+  get canRaiseMin(): boolean {
+    return SPORT.playingTime.fixed ? this.minCount < this.minTotal : this.minShare < 100;
   }
 
   get minCount(): number {
     return this.minCountFor(this.minTotal);
   }
 
+  // A click moves the cutoff by MIN_SHARE_STEP of the season, or a whole game when that's less (early
+  // in a season 10% is under a game, and it took several clicks to move it at all); the setting stays
+  // a share, so it keeps scaling as the season goes. A fixed count moves by its own step.
   stepMinShare(step: number) {
-    const next = Math.min(100, Math.max(0, this.minShare + Math.sign(step) * MIN_SHARE_STEP));
+    const fixed = SPORT.playingTime.fixed;
+    if (fixed) {
+      const next = Math.min(this.minTotal, Math.max(1, this.minCount + Math.sign(step) * fixed.step));
+      if (next === this.minCount) return;
+      this.positionService.updateSettings({ minCount: next });
+      this.sortPlayers();
+      return;
+    }
+    const total = this.minTotal;
+    const count = Math.min(total, Math.max(1, this.minCount + Math.sign(step) * Math.max(1, Math.round((total * MIN_SHARE_STEP) / 100))));
+    const next = count <= 1 ? 0 : Math.min(100, (count / total) * 100);
     if (next === this.minShare) return;
     this.positionService.updateSettings({ minShare: next });
     this.sortPlayers();

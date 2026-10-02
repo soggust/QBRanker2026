@@ -2,12 +2,12 @@ name: MLB - Update Game Data
 
 on:
   schedule:
-    # Nightly at 08:33 UTC (3:33 AM CDT): after the last West Coast games are final and the MLB Stats
+    # Nightly at 10:33 UTC (5:33 AM CDT): after the last West Coast games are final and the MLB Stats
     # API and Baseball Savant have caught up, and clear of the NFL update (they share one queue, see
-    # concurrency). The 11:07 UTC run is a backup for a delayed or dropped one; a run with nothing new
+    # concurrency). The 13:07 UTC run is a backup for a delayed or dropped one; a run with nothing new
     # is a no-op (no commit, no deploy).
-    - cron: "33 8 * * *"
-    - cron: "7 11 * * *"
+    - cron: "33 10 * * *"
+    - cron: "7 13 * * *"
   workflow_dispatch:
 
 # One update at a time: a run that starts while another is still going waits for it

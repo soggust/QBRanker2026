@@ -2,12 +2,12 @@ name: NHL - Update Game Data
 
 on:
   schedule:
-    # Nightly at 09:37 UTC (4:37 AM CDT): after the last West Coast games are final and MoneyPuck has
+    # Nightly at 11:37 UTC (6:37 AM CDT): after the last West Coast games are final and MoneyPuck has
     # posted the night, and clear of the other sports' updates (they share one queue, see
-    # concurrency). The 12:07 UTC run is a backup for a delayed or dropped one; a run with nothing new
+    # concurrency). The 14:07 UTC run is a backup for a delayed or dropped one; a run with nothing new
     # (the offseason, or no games that night) is a no-op (no commit, no deploy).
-    - cron: "37 9 * * *"
-    - cron: "7 12 * * *"
+    - cron: "37 11 * * *"
+    - cron: "7 14 * * *"
   workflow_dispatch:
 
 # One update at a time: a run that starts while another is still going waits for it

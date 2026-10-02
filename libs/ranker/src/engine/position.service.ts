@@ -18,6 +18,8 @@ export interface RankerSettings {
   // Players with less than this share of the season's playing time are left out (0-100; 0 is
   // everyone; the sport's measure: SPORT.playingTime)
   minShare: number;
+  // ...or this many, when the sport's minimum is a fixed count (SPORT.playingTime.fixed; null: its default)
+  minCount: number | null;
   // Tint values green / red by how far above / below the list average they are
   colorValues: boolean;
   // Carry each stat group's color down the rows (a line before each group)
@@ -30,13 +32,15 @@ export interface RankerSettings {
   sport: SportSettings;
 }
 
-// The Min setting: a share of the season so far, in steps of MIN_SHARE_STEP (0 is 1, everyone)
+// The Min setting: a share of the season so far, in steps of MIN_SHARE_STEP, or a whole game when that's
+// less than one (0 is 1, everyone)
 export const MIN_SHARE_STEP = 10;
 const DEFAULT_SETTINGS: RankerSettings = {
   statBasis: SPORT.defaultStatBasis,
   showUnused: false,
   showInjured: true,
   minShare: 10,
+  minCount: null,
   colorValues: true,
   categoryColors: true,
   combineStats: true,

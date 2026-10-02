@@ -2,12 +2,12 @@ name: NBA - Update Game Data
 
 on:
   schedule:
-    # Nightly at 09:17 UTC (4:17 AM CDT): after the last West Coast games are final and
+    # Nightly at 11:17 UTC (6:17 AM CDT): after the last West Coast games are final and
     # Basketball-Reference has caught up, and clear of the NFL and MLB updates (they share one queue, see
-    # concurrency). The 11:47 UTC run is a backup for a delayed or dropped one; a run with nothing new
+    # concurrency). The 13:47 UTC run is a backup for a delayed or dropped one; a run with nothing new
     # (the offseason, or no games that night) is a no-op (no commit, no deploy).
-    - cron: "17 9 * * *"
-    - cron: "47 11 * * *"
+    - cron: "17 11 * * *"
+    - cron: "47 13 * * *"
   workflow_dispatch:
 
 # One update at a time: a run that starts while another is still going waits for it

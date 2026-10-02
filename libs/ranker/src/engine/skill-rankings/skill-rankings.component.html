@@ -316,9 +316,9 @@
         (click)="$event.stopPropagation()"
       >
         <span class="min-games-stepper" (click)="$event.stopPropagation()">
-          <button type="button" aria-label="Lower" [disabled]="minShare <= 0" (click)="stepMinShare(-1)">−</button>
-          <span class="min-games-value">{{ minShare ? minShare + '%' : 1 }}</span>
-          <button type="button" aria-label="Higher" [disabled]="minShare >= 100" (click)="stepMinShare(1)">+</button>
+          <button type="button" aria-label="Lower" [disabled]="!canLowerMin" (click)="stepMinShare(-1)">−</button>
+          <span class="min-games-value">{{ minLabel }}</span>
+          <button type="button" aria-label="Higher" [disabled]="!canRaiseMin" (click)="stepMinShare(1)">+</button>
         </span>
         <span>Min {{ sport.playingTime.label }}: <span class="menu-value">{{ minCount }}</span></span>
       </div>
