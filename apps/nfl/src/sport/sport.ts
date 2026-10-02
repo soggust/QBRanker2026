@@ -189,7 +189,7 @@ export const SPORT: SportConfig = {
     stat.key === 'oline' && OLINE_LEAN[position] ? `O-Line (${OLINE_LEAN[position]})` : statLabelFor(stat, settings['rankBasis'] as RankBasis),
   statName: (stat, position, settings) => {
     if (stat.key === 'oline' && OLINE_LEAN[position]) {
-      return `Offensive Line Grade (${OLINE_LEAN[position] === 'Pass' ? 'pass protection' : 'run blocking'} first)`;
+      return `Offensive Line Grade (${OLINE_LEAN[position] === 'Pass' ? 'Pass Pro' : 'Run Block'} Weighted)`;
     }
     if (stat.key === 'fantasy' && !['K', 'DEF'].includes(position)) {
       return `${FANTASY_SCORING_LABELS[settings['fantasyScoring'] as FantasyScoring]} Fantasy Points`;
