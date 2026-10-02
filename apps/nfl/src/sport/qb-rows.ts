@@ -111,12 +111,13 @@ interface DataGrades {
 }
 const dataGrades = () => DATA['dataGrades'] as DataGrades;
 
-// Share of a grade that comes from this season's stats, rising to all of it by 14 games:
-// 17% after 1 game, 35% after 3, 56% after 6, 68% after 8, 80% after 10, 90% after 12, 100% at 14+.
-// (A gentle curve, (games / 14) ^ 0.68, so the preseason view still leads early in the season.)
-const FULL_WEIGHT_GAMES = 14;
+// Share of a grade that comes from this season's stats, rising to all of it by 10 games:
+// 32% after 1 game, 45% after 2, 55% after 3, 63% after 4, 77% after 6, 89% after 8, 100% at 10+.
+// ((games / 10) ^ 0.5: the season takes over by about a quarter of the way in, while a single game
+// can't swing a grade on its own. It was (games / 14) ^ 0.68, still mostly preseason after 4 games.)
+const FULL_WEIGHT_GAMES = 10;
 export function dataWeight(games: number): number {
-  return games > 0 ? Math.min(1, (games / FULL_WEIGHT_GAMES) ** 0.68) : 0;
+  return games > 0 ? Math.min(1, (games / FULL_WEIGHT_GAMES) ** 0.5) : 0;
 }
 
 // Preseason grade blended with the stats grade, before rounding (it's curved next)

@@ -282,8 +282,8 @@ export const SKILL_PRESETS: Record<SkillPosition, SkillPresetDef[]> = {
     {
       key: 'passPro',
       label: 'Pass Pro',
-      description: 'Keeps the QB clean: pressure rate, sack rate, sacks and hits allowed',
-      weights: { pressureRate: 100, sackRate: 100, sacksAllowed: 75, qbHitsAllowed: 75 },
+      description: 'Keeps the QB clean: pressure rate, sack rate, sacks and hits allowed (with the time the QB holds it)',
+      weights: { pressureRate: 100, sackRate: 100, sacksAllowed: 75, qbHitsAllowed: 75, timeToThrow: 75 },
     },
     {
       key: 'maulers',

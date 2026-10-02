@@ -1035,10 +1035,9 @@ export const SKILL_STATS: Record<SkillPosition, SkillStat[]> = {
     {
       key: 'timeToThrow',
       label: 'Time to Throw',
-      description: 'QB seconds from snap to throw: quick passers make a line look better (for context; not part of the ranking)',
+      description: "QB seconds from snap to throw. Longer counts in the line's favor: a QB who holds the ball takes sacks and hits that aren't all the line's fault, and a quick one hides a weak line",
       kind: 'efficiency',
       format: 'dec2',
-      infoOnly: true,
     },
     QB_PLAY_STAT,
     RB_PLAY_STAT,

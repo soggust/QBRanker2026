@@ -109,7 +109,7 @@ const WEAPONS_SHARES: [SkillPosition, number, (player: SkillPlayer) => number][]
 // The O-line grade's two leans, from the Offensive Lines tab's sliders: for QBs pass protection counts
 // five times run blocking, for RBs the reverse (penalties count the same either way); head coaches
 // get the balanced grade. OLINE_LEAN: which, by tab (the column reads "O-Line (Pass)").
-const PASS_PRO = ['sacksAllowed', 'qbHitsAllowed', 'pressureRate', 'sackRate'];
+const PASS_PRO = ['sacksAllowed', 'qbHitsAllowed', 'pressureRate', 'sackRate', 'timeToThrow'];
 const RUN_BLOCKING = ['ypc', 'stuffRate', 'shortYardagePct', 'runEpa', 'runSuccess', 'yardsBeforeContact'];
 const lean = (more: string[], less: string[]) =>
   Object.fromEntries([...more.map((key) => [key, 1.5]), ...less.map((key) => [key, 0.3])]);
