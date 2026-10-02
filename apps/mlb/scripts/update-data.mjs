@@ -12,6 +12,7 @@
 import { writeFile, mkdir } from 'node:fs/promises';
 import path from 'node:path';
 import { curve } from '../../../libs/ranker/scripts/grades.mjs';
+import { blendWithLastSeason } from '../../../libs/ranker/scripts/early-season.mjs';
 
 const CURRENT_SEASON = 2026;
 const FIRST_SEASON = 2000;
@@ -342,6 +343,9 @@ async function buildSeason(season) {
     unit.stats.defense = defense.get(teamOf(unit)) ?? null;
     unit.stats.park = pitcherPark.get(teamOf(unit)) ?? null;
   }
+  // (early in the season, Lineup and Defense start from the team's last season: libs/ranker/scripts/early-season;
+  // the Stadium is a three-year park factor already)
+  if (current) console.log(await blendWithLastSeason({ staticDir: STATIC, season, rows: out, keys: ['lineup', 'defense'], fullAt: 40 }));
 
   for (const tab of TABS) out[tab].sort((a, b) => a.name.localeCompare(b.name));
   const dir = current ? STATIC : path.join(STATIC, 'seasons', String(season));

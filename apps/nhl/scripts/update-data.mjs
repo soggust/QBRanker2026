@@ -18,6 +18,7 @@
 import { writeFile, mkdir, access } from 'node:fs/promises';
 import path from 'node:path';
 import { curve } from '../../../libs/ranker/scripts/grades.mjs';
+import { blendWithLastSeason } from '../../../libs/ranker/scripts/early-season.mjs';
 
 const CURRENT_SEASON = 2026;
 // MoneyPuck's season files start with 2008-09
@@ -308,6 +309,8 @@ async function buildSeason(season) {
     g.stats.defense = defense.get(g.gsisId) ?? null;
     delete g._faced;
   }
+  // (early in the season, Linemates and Defense start from the team's last season: libs/ranker/scripts/early-season)
+  if (current) console.log(await blendWithLastSeason({ staticDir: STATIC, season, rows: out, keys: ['linemates', 'defense'], fullAt: 20 }));
 
   for (const tab of Object.keys(out)) out[tab].sort((a, b) => a.name.localeCompare(b.name));
   const dir = current ? STATIC : path.join(STATIC, 'seasons', String(season));

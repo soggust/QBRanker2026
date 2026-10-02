@@ -45,7 +45,7 @@ export class AboutComponent implements AfterViewInit {
     ["Save % / GAA", "Save percentage (50+ shots) and goals against per 60 minutes (lower is better)."],
     ["GSAx / GSAx / 60", "Goals saved above expected: the goals an average goalie would have allowed on his shots, by their quality, minus the goals he allowed. Per 60 minutes too (300+ minutes)."],
     ["HD Save %", "Save percentage on high-danger shots (20+ of them)."],
-    ["Linemates / Defense", "Support grades, F to A+: how good his team was without him (its expected-goals share with him on the bench), and for goalies the defense in front of him (the quality of the shots he faced). Better support counts slightly against a player."],
+    ["Linemates / Defense", "Support grades, F to A+: how good his team was without him (its expected-goals share with him on the bench), and for goalies the defense in front of him (the quality of the shots he faced). Better support counts slightly against a player. Early in a season a few games barely measure a team, so each grade starts from the team's grade last season and gives way to this season's: about half this season by 5 games, all of it from game 20 of 82 on (a past season is all its own results)."],
   ];
 
   ngAfterViewInit(): void {

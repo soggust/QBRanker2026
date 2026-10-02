@@ -16,6 +16,7 @@
 import { writeFile, mkdir } from 'node:fs/promises';
 import path from 'node:path';
 import { curve } from '../../../libs/ranker/scripts/grades.mjs';
+import { blendWithLastSeason } from '../../../libs/ranker/scripts/early-season.mjs';
 
 const CURRENT_SEASON = 2026;
 const FIRST_SEASON = 2001;
@@ -379,6 +380,8 @@ async function buildSeason(season) {
     delete unit._team;
   }
   for (const c of coaches) delete c._team;
+  // (early in the season, Teammates and Coaching start from the team's last season: libs/ranker/scripts/early-season)
+  if (current) console.log(await blendWithLastSeason({ staticDir: STATIC, season, rows: out, keys: ['teammates', 'coaching'], fullAt: 20 }));
   out.HC = coaches;
 
   for (const tab of [...TABS, 'HC']) out[tab].sort((a, b) => a.name.localeCompare(b.name));

@@ -46,7 +46,7 @@ export class AboutComponent implements AfterViewInit {
     ["K-BB %", "Strikeout rate minus walk rate: one of the best single measures of a pitcher."],
     ["Whiff %", "Swings that miss, per swing (Statcast)."],
     ["HR / 9", "Home runs allowed per 9 innings."],
-    ["Lineup / Defense / Stadium", "Support grades, F to A+: the rest of a hitter's lineup, the fielding behind a pitcher, and how his home park plays (for hitters or for pitchers). Better support counts slightly against a player."],
+    ["Lineup / Defense / Stadium", "Support grades, F to A+: the rest of a hitter's lineup, the fielding behind a pitcher, and how his home park plays (for hitters or for pitchers). Better support counts slightly against a player. Early in a season a few games barely measure a team, so each grade starts from the team's grade last season and gives way to this season's: about half this season by 10 games, all of it from game 40 of 162 on (a past season is all its own results)."],
     ["IP", "Innings pitched, in baseball notation: 175.1 is 175 and a third."],
   ];
 

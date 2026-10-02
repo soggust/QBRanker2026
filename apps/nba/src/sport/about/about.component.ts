@@ -40,7 +40,7 @@ export class AboutComponent implements AfterViewInit {
     ["AST % / TOV %","Assist rate: teammates' baskets he assisted while on the floor. Turnover rate: turnovers per 100 of his plays (lower is better)."],
     ["REB % / STL % / BLK %","The share of available rebounds he grabbed, of opponents' possessions he ended with a steal, and of their 2-point shots he blocked, while on the floor."],
     ["Record","His team's win-loss record (a traded player: his last team's)."],
-    ["Teammates / Coaching","Support grades, F to A+: how good the rest of his team was (their minutes-weighted BPM, without him) and his team's coaching lift. Better support counts slightly against a player."],
+    ["Teammates / Coaching","Support grades, F to A+: how good the rest of his team was (their minutes-weighted BPM, without him) and his team's coaching lift. Better support counts slightly against a player. Early in a season a few games barely measure a team, so each grade starts from the team's grade last season and gives way to this season's: about half this season by 5 games, all of it from game 20 of 82 on (a past season is all its own results)."],
     ["Net Rtg / Off Rank / Def Rank","A team's points scored minus allowed per 100 possessions, and where its offense (points scored per 100) and defense (points allowed per 100) ranked in the league (Head Coaches tab)."],
     ["Coaching Lift","Net rating over what the roster's talent predicted (last season's BPM of the players he used, by their minutes): how much more a coach got from his roster."],
     ["W vs Pt Diff","Wins beyond (or short of) what the point differential implies: mostly close games."],
