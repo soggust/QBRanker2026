@@ -106,12 +106,24 @@ const WEAPONS_SHARES: [SkillPosition, number, (player: SkillPlayer) => number][]
   ['TE', 0.2, (p) => looks(p)],
 ];
 
+// The O-line grade's two leans, from the Offensive Lines tab's sliders: for QBs pass protection counts
+// three times run blocking, for RBs the reverse (penalties count the same either way); head coaches
+// get the balanced grade
+const PASS_PRO = ['sacksAllowed', 'qbHitsAllowed', 'pressureRate', 'sackRate'];
+const RUN_BLOCKING = ['ypc', 'stuffRate', 'shortYardagePct', 'runEpa', 'runSuccess', 'yardsBeforeContact'];
+const lean = (more: string[], less: string[]) =>
+  Object.fromEntries([...more.map((key) => [key, 1.5]), ...less.map((key) => [key, 0.5])]);
+const PASS_LEAN = lean(PASS_PRO, RUN_BLOCKING);
+const RUN_LEAN = lean(RUN_BLOCKING, PASS_PRO);
+
 // The grades every tab reads (team logo -> 0-12), kept current by connectTeamGrades
 let defenseGrades = new Map<string, number>();
 let qbPlayGrades = new Map<string, number>();
 let rbPlayGrades = new Map<string, number>();
 // Preseason blended with the Offensive Lines / RB, WR and TE / Head Coaches rankings, then curved
 let olineCurve = new Map<string, number>();
+let olinePassCurve = new Map<string, number>();
+let olineRunCurve = new Map<string, number>();
 let weaponsCurve = new Map<string, number>();
 let coachingCurve = new Map<string, number>();
 
@@ -142,6 +154,8 @@ export function connectTeamGrades(host: EngineHost): Observable<unknown> {
   const defense$ = teamGradesFrom('DEF');
   const coaching$ = teamGradesFrom('HC');
   const oline$ = teamGradesFrom('OL');
+  const olinePass$ = host.rankedUnits('OL', PASS_LEAN).pipe(map(gradesByRank), distinctGrades());
+  const olineRun$ = host.rankedUnits('OL', RUN_LEAN).pipe(map(gradesByRank), distinctGrades());
 
   // QB Play: each QB graded by his spot in the QB rankings (#1 = 12, last = 0), averaged per team by
   // his starts there, then curved
@@ -191,12 +205,14 @@ export function connectTeamGrades(host: EngineHost): Observable<unknown> {
   );
 
   oline$.subscribe((grades) => (olineCurve = blendedCurve(preseasonOline, grades)));
+  olinePass$.subscribe((grades) => (olinePassCurve = blendedCurve(preseasonOline, grades)));
+  olineRun$.subscribe((grades) => (olineRunCurve = blendedCurve(preseasonOline, grades)));
   weapons$.subscribe((grades) => (weaponsCurve = blendedCurve(preseasonWeapons, grades)));
   coaching$.subscribe((grades) => (coachingCurve = blendedCurve(preseasonCoaching, grades)));
   defense$.subscribe((grades) => (defenseGrades = grades));
   qbPlay$.subscribe((grades) => (qbPlayGrades = grades));
   rbPlay$.subscribe((grades) => (rbPlayGrades = grades));
-  return merge(defense$, coaching$, qbPlay$, oline$, weapons$, rbPlay$);
+  return merge(defense$, coaching$, qbPlay$, oline$, olinePass$, olineRun$, weapons$, rbPlay$);
 }
 
 // The grades from other tabs (support stats but a QB's own Responsibility): the table's season only
@@ -222,8 +238,11 @@ export function computedValue(player: SkillPlayer, stat: SkillStat, context: Val
   if (context.defaults || !context.tableSeason) return null;
   const team = player.teamLogo;
   switch (stat.key) {
-    case 'oline':
-      return Math.round(olineCurve.get(team) ?? 6);
+    // (a QB's leans on pass protection, a back's on run blocking)
+    case 'oline': {
+      const curve = context.position === 'QB' ? olinePassCurve : context.position === 'RB' ? olineRunCurve : olineCurve;
+      return Math.round(curve.get(team) ?? 6);
+    }
     case 'weapons':
       return Math.round(weaponsCurve.get(team) ?? 6);
     case 'coaching':

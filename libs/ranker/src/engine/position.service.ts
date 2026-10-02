@@ -224,10 +224,15 @@ export class PositionService {
   // A tab's list as last shown (drags included), or its default slider ranking before it's been
   // opened, best first. Each tab only re-sorts while it's on screen, so tabs can grade each other
   // (SPORT.connect) without looping.
-  rankedUnits(position: SkillPosition): Observable<SkillPlayer[]> {
+  rankedUnits(position: SkillPosition, emphasis?: Record<string, number>): Observable<SkillPlayer[]> {
     return combineLatest([this.weightsSubject, this.unitOrdersSubject, this.sportSettings$]).pipe(
       map(([weights, orders, settings]) => {
         const order = orders[position];
+        if (emphasis && !order?.manual) {
+          const tab = weights[position] ?? {};
+          const leaned = Object.fromEntries(Object.entries(tab).map(([key, weight]) => [key, weight * (emphasis[key] ?? 1)]));
+          return defaultRanking(position, leaned, SKILL_UNITS, settings);
+        }
         if (!order) return defaultRanking(position, weights[position], SKILL_UNITS, settings);
         const byId = new Map(SKILL_UNITS[position].map((unit) => [unit.gsisId, unit]));
         return order.ids.map((id) => byId.get(id)).filter((unit) => !!unit);
@@ -240,7 +245,7 @@ export class PositionService {
   public sportChanged$: Observable<unknown> =
     SPORT.connect?.({
       settings$: this.sportSettings$,
-      rankedUnits: (position) => this.rankedUnits(position as SkillPosition),
+      rankedUnits: (position, emphasis) => this.rankedUnits(position as SkillPosition, emphasis),
       rows: () => SKILL_UNITS,
     }) ??
     EMPTY;

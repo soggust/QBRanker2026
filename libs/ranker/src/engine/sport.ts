@@ -100,8 +100,10 @@ export interface EngineHost {
   // The sport's settings as they change
   settings$: Observable<SportSettings>;
   // A tab's list as last shown (dragged or sorted by its sliders), or its default ranking before it's
-  // been opened, best first
-  rankedUnits(position: string): Observable<SkillPlayer[]>;
+  // been opened, best first. With an emphasis (stat key -> multiplier on its slider), its sliders'
+  // ranking with those stats counting for more or less (the NFL's O-line grade for QBs leans on pass
+  // protection); a hand-dragged order stays as dragged.
+  rankedUnits(position: string, emphasis?: Record<string, number>): Observable<SkillPlayer[]>;
   // The loaded season's rows, every tab's
   rows(): Record<string, SkillPlayer[]>;
 }

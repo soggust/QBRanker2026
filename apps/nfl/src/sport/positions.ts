@@ -457,7 +457,7 @@ const QB_PLAY_STAT: SkillStat = {
 const OLINE_STAT: SkillStat = {
   key: 'oline',
   label: 'O-Line',
-  description: 'Team O-line grade (preseason blended with the Offensive Lines rankings)',
+  description: 'Team O-line grade (preseason blended with the Offensive Lines rankings; for QBs leaning on pass protection, for RBs on run blocking)',
   kind: 'efficiency',
   format: 'grade',
   support: true,
