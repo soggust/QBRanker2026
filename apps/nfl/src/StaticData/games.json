@@ -346,7 +346,7 @@
       "rushYards": 107,
       "rushTd": 2
     },
-    "injuryStatus": "Doubtful",
+    "injuryStatus": "Out",
     "injured": true
   },
   {
@@ -1138,8 +1138,8 @@
       "rushYards": 100,
       "rushTd": 0
     },
-    "injuryStatus": "Questionable",
-    "injured": false
+    "injuryStatus": "Out",
+    "injured": true
   },
   {
     "id": 3915511,
