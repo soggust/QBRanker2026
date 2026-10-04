@@ -240,8 +240,8 @@
         "ptsAllowedPerGame": 23.8,
         "fantasyStd": 21,
         "receptions": 0,
-        "pressureRate": 0.138,
-        "missedTacklePct": 0.137,
+        "pressureRate": 0.194,
+        "missedTacklePct": 0.119,
         "thirdDownPct": 0.37,
         "redZoneTdPct": 0.5
       },
@@ -848,7 +848,7 @@
         "ptsAllowedPerGame": 21.8,
         "fantasyStd": 35,
         "receptions": 0,
-        "pressureRate": 0.177,
+        "pressureRate": 0.208,
         "missedTacklePct": 0.126,
         "thirdDownPct": 0.348,
         "redZoneTdPct": 0.6
@@ -2317,11 +2317,11 @@
       "stats": {
         "sacksAllowed": 11,
         "qbHitsAllowed": 24,
-        "pressureRate": 0.177,
+        "pressureRate": 0.206,
         "sackRate": 0.078,
         "ypc": 3.19,
         "stuffRate": 0.198,
-        "yardsBeforeContact": 1.91,
+        "yardsBeforeContact": 1.59,
         "runEpa": -0.308,
         "runSuccess": 0.326,
         "shortYardagePct": 0.286,
@@ -2925,11 +2925,11 @@
       "stats": {
         "sacksAllowed": 13,
         "qbHitsAllowed": 31,
-        "pressureRate": 0.187,
+        "pressureRate": 0.24,
         "sackRate": 0.076,
         "ypc": 4.58,
         "stuffRate": 0.175,
-        "yardsBeforeContact": 2.22,
+        "yardsBeforeContact": 2.24,
         "runEpa": -0.024,
         "runSuccess": 0.388,
         "shortYardagePct": 1,
@@ -4515,7 +4515,7 @@
         "epaPerCarry": -0.445,
         "epaPerTarget": -0.08
       },
-      "injuryStatus": "Out",
+      "injuryStatus": "Injured Reserve",
       "injured": true
     },
     {
@@ -4675,8 +4675,8 @@
         "epaPerCarry": 0.028,
         "epaPerTarget": -0.147,
         "ryoePerAtt": 1.45,
-        "yacoPerCarry": 2.13,
-        "brokenTackles": 5,
+        "yacoPerCarry": 2.96,
+        "brokenTackles": 6,
         "snapShare": 0.738,
         "separation": null,
         "yacOverExp": null,
@@ -5599,8 +5599,8 @@
         "epaPerCarry": -0.289,
         "epaPerTarget": 0.276,
         "ryoePerAtt": -0.51,
-        "yacoPerCarry": 0.97,
-        "brokenTackles": 5,
+        "yacoPerCarry": 1.59,
+        "brokenTackles": 7,
         "snapShare": 0.623,
         "separation": null,
         "yacOverExp": null,
@@ -5687,7 +5687,7 @@
         "epaPerCarry": -0.043,
         "epaPerTarget": 0.023,
         "ryoePerAtt": null,
-        "yacoPerCarry": 1.33,
+        "yacoPerCarry": 2.5,
         "brokenTackles": 1,
         "snapShare": 0.328,
         "separation": null,
@@ -10105,7 +10105,7 @@
         "epaPerCarry": 0,
         "epaPerTarget": 0.447
       },
-      "injuryStatus": "Doubtful",
+      "injuryStatus": "Out",
       "injured": true
     },
     {

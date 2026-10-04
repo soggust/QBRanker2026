@@ -76,7 +76,7 @@
       "games": 3,
       "newCoach": false,
       "coach": "Dave Canales",
-      "oline": 2.3,
+      "oline": 1.2,
       "weapons": 10.1,
       "metrics": {
         "pressureRate": 0.341,
@@ -94,7 +94,7 @@
       "games": 3,
       "newCoach": false,
       "coach": "Ben Johnson",
-      "oline": 7,
+      "oline": 7.4,
       "weapons": 8.9,
       "metrics": {
         "pressureRate": 0.263,
@@ -112,7 +112,7 @@
       "games": 3,
       "newCoach": false,
       "coach": "Zac Taylor",
-      "oline": 6.6,
+      "oline": 7,
       "weapons": 4.6,
       "metrics": {
         "pressureRate": 0.239,
@@ -130,12 +130,12 @@
       "games": 4,
       "newCoach": true,
       "coach": "Todd Monken",
-      "oline": 5,
+      "oline": 4.3,
       "weapons": 11.2,
       "metrics": {
-        "pressureRate": 0.177,
+        "pressureRate": 0.206,
         "sackRate": 0.078,
-        "yardsBeforeContact": 1.907,
+        "yardsBeforeContact": 1.588,
         "stuffRate": 0.198,
         "separation": 3.791,
         "yacOverExpected": 1.466,
@@ -166,7 +166,7 @@
       "games": 3,
       "newCoach": false,
       "coach": "Sean Payton",
-      "oline": 5.8,
+      "oline": 6.2,
       "weapons": 2.7,
       "metrics": {
         "pressureRate": 0.228,
@@ -184,7 +184,7 @@
       "games": 3,
       "newCoach": false,
       "coach": "Dan Campbell",
-      "oline": 6.2,
+      "oline": 6.6,
       "weapons": 9.3,
       "metrics": {
         "pressureRate": 0.223,
@@ -238,7 +238,7 @@
       "games": 3,
       "newCoach": false,
       "coach": "Shane Steichen",
-      "oline": 4.6,
+      "oline": 5.4,
       "weapons": 1.2,
       "metrics": {
         "pressureRate": 0.204,
@@ -310,7 +310,7 @@
       "games": 3,
       "newCoach": false,
       "coach": "Jim Harbaugh",
-      "oline": 3.1,
+      "oline": 2.7,
       "weapons": 7.7,
       "metrics": {
         "pressureRate": 0.298,
@@ -328,7 +328,7 @@
       "games": 3,
       "newCoach": true,
       "coach": "Klint Kubiak",
-      "oline": 3.5,
+      "oline": 3.9,
       "weapons": 3.9,
       "metrics": {
         "pressureRate": 0.206,
@@ -346,7 +346,7 @@
       "games": 3,
       "newCoach": true,
       "coach": "Jeff Hafley",
-      "oline": 2.7,
+      "oline": 2.3,
       "weapons": 3.5,
       "metrics": {
         "pressureRate": 0.271,
@@ -364,7 +364,7 @@
       "games": 3,
       "newCoach": false,
       "coach": "Kevin O'Connell",
-      "oline": 3.9,
+      "oline": 3.5,
       "weapons": 0.4,
       "metrics": {
         "pressureRate": 0.225,
@@ -382,7 +382,7 @@
       "games": 3,
       "newCoach": false,
       "coach": "Mike Vrabel",
-      "oline": 1.2,
+      "oline": 1.9,
       "weapons": 6.2,
       "metrics": {
         "pressureRate": 0.226,
@@ -418,7 +418,7 @@
       "games": 3,
       "newCoach": false,
       "coach": "John Harbaugh",
-      "oline": 4.3,
+      "oline": 4.6,
       "weapons": 1.5,
       "metrics": {
         "pressureRate": 0.237,
@@ -436,7 +436,7 @@
       "games": 3,
       "newCoach": false,
       "coach": "Aaron Glenn",
-      "oline": 1.9,
+      "oline": 3.1,
       "weapons": 7.4,
       "metrics": {
         "pressureRate": 0.192,
@@ -472,25 +472,25 @@
       "games": 4,
       "newCoach": false,
       "coach": "Mike McCarthy",
-      "oline": 7.4,
+      "oline": 5,
       "weapons": 9.7,
       "metrics": {
-        "pressureRate": 0.187,
+        "pressureRate": 0.24,
         "sackRate": 0.076,
-        "yardsBeforeContact": 2.224,
+        "yardsBeforeContact": 2.244,
         "stuffRate": 0.175,
         "separation": 2.525,
         "yacOverExpected": 1.35,
         "dropRate": 0.032,
         "rushOverExpected": 1.454,
-        "brokenTackles": 0.071
+        "brokenTackles": 0.069
       }
     },
     "Seahawks": {
       "games": 3,
       "newCoach": false,
       "coach": "Mike Macdonald",
-      "oline": 5.4,
+      "oline": 5.8,
       "weapons": 7,
       "metrics": {
         "pressureRate": 0.248,

@@ -17,8 +17,8 @@
       "assets/NFL_Icons/Steelers.png": 4
     },
     "advanced": {
-      "pressureToSack": 0.258,
-      "badThrowPct": 0.137,
+      "pressureToSack": 0.325,
+      "badThrowPct": 0.203,
       "timeToThrow": 2.87,
       "adot": 8.7,
       "aggressiveness": 17.6,
@@ -663,8 +663,8 @@
       "assets/NFL_Icons/Browns.png": 4
     },
     "advanced": {
-      "pressureToSack": 0.36,
-      "badThrowPct": 0.113,
+      "pressureToSack": 0.379,
+      "badThrowPct": 0.139,
       "timeToThrow": 2.79,
       "adot": 6.6,
       "aggressiveness": 13.9,
@@ -1584,7 +1584,7 @@
       "rushYards": 14,
       "rushTd": 0
     },
-    "injuryStatus": "Active",
+    "injuryStatus": "Questionable",
     "injured": false
   },
   {
