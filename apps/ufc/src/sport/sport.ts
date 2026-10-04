@@ -3,7 +3,7 @@ import { WOMENS_DIVISIONS, allTime, womens, type Position } from './positions';
 import { seasonName } from './awards';
 
 // (head to head counts for meetings since this date)
-const TWO_YEARS_AGO = new Date(Date.now() - 730 * 864e5).toISOString().slice(0, 10);
+const THREE_YEARS_AGO = new Date(Date.now() - 1096 * 864e5).toISOString().slice(0, 10);
 
 // MMA: what the engine needs to know about fighting (the rest is beside this file: positions,
 // skill-presets, skills, awards, team-colors, logo-eras, about/). A career table rather than seasons:
@@ -162,10 +162,10 @@ export const SPORT: SportConfig = {
   },
   // The pound-for-pound tabs: the top 30
   listLimit: (position) => (position === 'P4P' || position === 'WP4P' ? 30 : undefined),
-  // Head to head: he won their latest meeting, in the last two years (fights are newest first)
+  // Head to head: he won their latest meeting, in the last three years (fights are newest first)
   beat: (a, b) => {
     const meeting = a.fights?.find((f) => f[1] === b.name);
-    return !!meeting && meeting[2] === 'W' && meeting[0] >= TWO_YEARS_AGO;
+    return !!meeting && meeting[2] === 'W' && meeting[0] >= THREE_YEARS_AGO;
   },
   // A fighter's rates rest on few fights early on: 4 fights count half, 12 count three-quarters
   reliability: (player) => player.games / (player.games + 4),

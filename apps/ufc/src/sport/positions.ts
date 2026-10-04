@@ -172,27 +172,32 @@ export const PER_GAME_LABELS: Partial<Record<SkillColumnKey, string>> = {
 export type SkillWeights = Partial<Record<SkillColumnKey, number>>;
 export type SkillPreset = string;
 
+// A career total's weight: as given all-time, half in the current lists (where form leads, and a long
+// career's totals shouldn't outweigh who's better now)
+const careerTotal = (allTimeBoost: number) => (settings: SportSettings) => (allTime(settings) ? allTimeBoost : allTimeBoost / 2);
+
 // Every division has the same columns; the presets (skill-presets.ts) weigh them
 const MMA_STATS: SkillStat[] = [
   { key: 'games', label: 'Fights', description: 'Pro fights in the promotions covered: the UFC, PFL, Bellator, Rizin, PRIDE, Strikeforce, WEC, KSW, Cage Warriors and LFA (for context; not part of the ranking)', kind: 'efficiency', format: 'int', infoOnly: true },
   { key: 'winPct', label: 'Record', description: 'His record in the promotions covered, wins-losses-draws (draws include no contests; ranked on win percentage)', kind: 'efficiency', format: 'record' },
   { key: 'recent', label: 'Recent', description: 'His last five fights, newest first (ranked on a recency-weighted win rate); counts double behind its slider in the current lists, not at all in the all-time ones', kind: 'efficiency', format: 'recent', boost: (settings) => (allTime(settings) ? 0 : 2) },
   { key: 'officialRank', label: 'UFC Rank', description: "UFC.com's official rank in his division, or pound-for-pound on those tabs (a division's champion is #0, above #1; unranked UFC fighters as #16; fighters outside the UFC, or retired, as average); counts 6x behind its slider among current fighters, 1x in the all-time lists", kind: 'efficiency', format: 'rank', negative: true, missingIsAverage: true, scale: [0, 16], settled: true, boost: (settings) => (allTime(settings) ? 1 : 6) },
-  // (the title ones count double behind their sliders, the rating and career points 12x: the clearest marks of an elite career)
-  { key: 'titleDefenses', label: 'Title Defenses', description: 'Successful UFC title defenses, across every reign (from Wikipedia\'s list of UFC champions); counts double behind its slider; scored in proportion, 0 to 10 (most fighters have none, so against the list one defense would score like ten)', kind: 'volume', format: 'int', boost: 2, scale: [10, 0] },
-  { key: 'titleWins', label: 'Title Wins', description: 'UFC title fight wins: winning a belt (interim ones too) and each defense; counts double behind its slider; scored in proportion, 0 to 10', kind: 'volume', format: 'int', boost: 2, scale: [10, 0] },
+  // (the title ones count double behind their sliders, the rating and career points 12x: the clearest marks of an elite career.
+  // The career totals count half as much in the current lists, where form leads: careerTotal)
+  { key: 'titleDefenses', label: 'Title Defenses', description: 'Successful UFC title defenses, across every reign (from Wikipedia\'s list of UFC champions); counts double behind its slider (1x in the current lists); scored in proportion, 0 to 10 (most fighters have none, so against the list one defense would score like ten)', kind: 'volume', format: 'int', boost: careerTotal(2), scale: [10, 0] },
+  { key: 'titleWins', label: 'Title Wins', description: 'UFC title fight wins: winning a belt (interim ones too) and each defense; counts double behind its slider (1x in the current lists); scored in proportion, 0 to 10', kind: 'volume', format: 'int', boost: careerTotal(2), scale: [10, 0] },
   // (the competition ones: results weighed by whom they came against. The rating leads the current
   // lists and career points the all-time ones: each counts many times over behind its slider there)
   { key: 'rating', label: 'Rating', description: "The MMA rating: every pro fight since 1997 across the promotions covered, each moving it by how surprising the result was (beating a highly rated opponent is worth far more than beating a low one; a finish counts fully, a split decision for less), shown cautiously (less its uncertainty, which grows while he's out). On pound-for-pound tabs, against his own division's best. Counts 12x behind its slider in the current lists, not at all in the all-time ones (a career is judged by its points and peak, not where it stands today)", kind: 'efficiency', format: 'int', settled: true, boost: (settings) => (allTime(settings) ? 0 : 12) },
   { key: 'careerPoints', label: 'Career Pts', description: 'Points for every month he was ranked in his division by the rating (across every promotion): the most for #1, fewer down to #15, full points only when the division was deep; his whole career, in every division. Counts 12x behind its slider all-time, not at all in the current lists', kind: 'volume', format: 'dec1', boost: (settings) => (allTime(settings) ? 12 : 0) },
   { key: 'peakRating', label: 'Peak', description: 'His best MMA rating at any point (shown cautiously, after 3+ fights); counts 3x behind its slider all-time', kind: 'efficiency', format: 'int', settled: true, boost: (settings) => (allTime(settings) ? 3 : 1) },
   { key: 'bestWin', label: 'Best Win', description: 'The rating of the best opponent he beat, going into the fight', kind: 'efficiency', format: 'int', missingIsAverage: true, settled: true },
-  { key: 'qualityWins', label: 'Quality Wins', description: 'Wins over opponents rated in the top tenth of every rated fighter going in', kind: 'volume', format: 'int' },
-  { key: 'mainEventWins', label: '5-Rd Wins', description: 'Wins in five-round fights: title fights and main events', kind: 'volume', format: 'int' },
+  { key: 'qualityWins', label: 'Quality Wins', description: 'Wins over opponents rated in the top tenth of every rated fighter going in; half as much in the current lists', kind: 'volume', format: 'int', boost: careerTotal(1) },
+  { key: 'mainEventWins', label: '5-Rd Wins', description: 'Wins in five-round fights: title fights and main events; half as much in the current lists', kind: 'volume', format: 'int', boost: careerTotal(1) },
   { key: 'streak', label: 'Streak', description: 'His current run: +3 is three straight wins, -2 two straight losses', kind: 'efficiency', format: 'int' },
   { key: 'finishRate', label: 'Finish %', description: 'Share of his wins that ended inside the distance (knockout or submission)', kind: 'efficiency', format: 'pct', missingIsAverage: true },
-  { key: 'finishes', label: 'Finishes', description: 'Wins inside the distance', kind: 'volume', format: 'int' },
-  { key: 'finished', label: 'Finished', description: 'Losses inside the distance (lower is better)', kind: 'volume', format: 'int', negative: true },
+  { key: 'finishes', label: 'Finishes', description: 'Wins inside the distance; half as much in the current lists', kind: 'volume', format: 'int', boost: careerTotal(1) },
+  { key: 'finished', label: 'Finished', description: 'Losses inside the distance (lower is better); half as much in the current lists', kind: 'volume', format: 'int', negative: true, boost: careerTotal(1) },
   { key: 'slpm', label: 'Strikes / Min', description: 'Significant strikes landed per minute', kind: 'efficiency', format: 'dec2', skipMissing: true },
   { key: 'strAcc', label: 'Strike Acc', description: 'Significant strikes landed per attempt (50+ attempts)', kind: 'efficiency', format: 'pct', skipMissing: true },
   { key: 'sapm', label: 'Absorbed / Min', description: 'Significant strikes absorbed per minute (lower is better)', kind: 'efficiency', format: 'dec2', negative: true, skipMissing: true },
