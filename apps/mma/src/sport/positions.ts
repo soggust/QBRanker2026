@@ -85,8 +85,10 @@ export interface SkillPlayer {
   teamLogo: string;
   teamName?: string | null;
   country?: string | null;
-  // His pro fights in the promotions covered
+  // His pro fights in the promotions covered, and the ones with striking and grappling stats (the UFC's
+  // and PFL's)
   games: number;
+  statFights?: number;
   // The division the row's belt is for (his own, or the one he holds, on pound-for-pound)
   division?: string;
   // No UFC fight in the last year (fighting elsewhere, or out of the UFC's rankings for the layoff: no
@@ -134,8 +136,6 @@ export const STAT_NAMES: Partial<Record<SkillColumnKey, string>> = {
   recent: 'Last Five Fights',
   streak: 'Current Streak (wins +, losses -)',
   finishRate: 'Finish Rate (wins inside the distance)',
-  finishes: 'Finishes (wins inside the distance)',
-  finished: 'Times Finished (losses inside the distance)',
   fightTime: 'Average Fight Time (minutes)',
   slpm: 'Significant Strikes Landed per Minute',
   sapm: 'Significant Strikes Absorbed per Minute',
@@ -155,7 +155,6 @@ export const STAT_NAMES: Partial<Record<SkillColumnKey, string>> = {
   careerPoints: 'Career Points (months ranked, by place and division depth)',
   bestWin: 'Best Win (the highest rated opponent he beat, going in)',
   qualityWins: 'Quality Wins (over opponents rated in the top tenth going in)',
-  mainEventWins: 'Five-Round Wins (title fights and main events)',
   titleWins: 'Title Fight Wins (winning a belt, interim ones too, and each defense)',
   titleDefenses: 'Successful Title Defenses',
   officialRank: "UFC's Official Division Rank",
@@ -167,9 +166,6 @@ export const PER_GAME_LABELS: Partial<Record<SkillColumnKey, string>> = {
   qualityWins: 'Quality Wins / Fight',
   titleWins: 'Title Wins / Fight',
   titleDefenses: 'Defenses / Fight',
-  mainEventWins: '5-Rd Wins / Fight',
-  finishes: 'Finishes / Fight',
-  finished: 'Finished / Fight',
 };
 
 export type SkillWeights = Partial<Record<SkillColumnKey, number>>;
@@ -186,7 +182,7 @@ const MMA_STATS: SkillStat[] = [
   { key: 'recent', label: 'Recent', description: 'His last five fights, newest first (ranked on a recency-weighted win rate); counts double behind its slider in the current lists, not at all in the all-time ones', kind: 'efficiency', format: 'recent', boost: (settings) => (allTime(settings) ? 0 : 2) },
   { key: 'officialRank', label: 'UFC Rank', description: "UFC.com's official rank in his division, or pound-for-pound on those tabs (a division's champion is #0, above #1; unranked UFC fighters as #16; fighters outside the UFC, or retired, as average); counts 6x behind its slider among current fighters, 1x in the all-time lists", kind: 'efficiency', format: 'rank', negative: true, missingIsAverage: true, scale: [0, 16], settled: true, boost: (settings) => (allTime(settings) ? 1 : 6) },
   // (the title ones count double behind their sliders, the rating and career points 12x: the clearest marks of an elite career.
-  // The career totals don't count in the current lists, where form leads: careerTotal)
+  // The career totals (titles, quality wins) don't count in the current lists, where form leads: careerTotal)
   { key: 'titleDefenses', label: 'Title Defenses', description: 'Successful UFC title defenses, across every reign (from Wikipedia\'s list of UFC champions); counts double behind its slider all-time, not at all in the current lists; scored in proportion, 0 to 10 (most fighters have none, so against the list one defense would score like ten)', kind: 'volume', format: 'int', boost: careerTotal(2), scale: [10, 0] },
   { key: 'titleWins', label: 'Title Wins', description: 'UFC title fight wins: winning a belt (interim ones too) and each defense; counts double behind its slider all-time, not at all in the current lists; scored in proportion, 0 to 10', kind: 'volume', format: 'int', boost: careerTotal(2), scale: [10, 0] },
   // (the competition ones: results weighed by whom they came against. The rating leads the current
@@ -196,11 +192,8 @@ const MMA_STATS: SkillStat[] = [
   { key: 'peakRating', label: 'Peak', description: 'His best MMA rating at any point (shown cautiously, after 3+ fights); counts 3x behind its slider all-time', kind: 'efficiency', format: 'int', settled: true, boost: (settings) => (allTime(settings) ? 3 : 1) },
   { key: 'bestWin', label: 'Best Win', description: 'The rating of the best opponent he beat, going into the fight', kind: 'efficiency', format: 'int', missingIsAverage: true, settled: true },
   { key: 'qualityWins', label: 'Quality Wins', description: 'Wins over opponents rated in the top tenth of every rated fighter going in; counts all-time, not in the current lists', kind: 'volume', format: 'int', boost: careerTotal(1) },
-  { key: 'mainEventWins', label: '5-Rd Wins', description: 'Wins in five-round fights: title fights and main events; counts all-time, not in the current lists', kind: 'volume', format: 'int', boost: careerTotal(1) },
   { key: 'streak', label: 'Streak', description: 'His current run: +3 is three straight wins, -2 two straight losses (current form: not counted in the all-time lists)', kind: 'efficiency', format: 'int', boost: (settings) => (allTime(settings) ? 0 : 1) },
   { key: 'finishRate', label: 'Finish %', description: 'Share of his wins that ended inside the distance (knockout or submission)', kind: 'efficiency', format: 'pct', missingIsAverage: true },
-  { key: 'finishes', label: 'Finishes', description: 'Wins inside the distance; counts all-time, not in the current lists', kind: 'volume', format: 'int', boost: careerTotal(1) },
-  { key: 'finished', label: 'Finished', description: 'Losses inside the distance (lower is better); counts all-time, not in the current lists', kind: 'volume', format: 'int', negative: true, boost: careerTotal(1) },
   { key: 'slpm', label: 'Strikes / Min', description: 'Significant strikes landed per minute', kind: 'efficiency', format: 'dec2', skipMissing: true },
   { key: 'strAcc', label: 'Strike Acc', description: 'Significant strikes landed per attempt (50+ attempts)', kind: 'efficiency', format: 'pct', skipMissing: true },
   { key: 'sapm', label: 'Absorbed / Min', description: 'Significant strikes absorbed per minute (lower is better)', kind: 'efficiency', format: 'dec2', negative: true, skipMissing: true },
@@ -257,13 +250,10 @@ const RESULTS_STATS = new Set<SkillColumnKey>([
   'peakRating',
   'bestWin',
   'qualityWins',
-  'mainEventWins',
   'titleWins',
   'titleDefenses',
   'streak',
   'finishRate',
-  'finishes',
-  'finished',
 ]);
 const STRIKING_STATS = new Set<SkillColumnKey>(['slpm', 'strAcc', 'sapm', 'strDef', 'kd15', 'strDiff', 'kdAgainst']);
 const GRAPPLING_STATS = new Set<SkillColumnKey>(['td15', 'tdAcc', 'tdDef', 'sub15', 'adv15']);

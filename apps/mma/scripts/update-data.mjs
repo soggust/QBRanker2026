@@ -528,6 +528,8 @@ for (const id of active) {
       // (a UFC fight in his career: the UFC Fighters Only setting's all-time lists)
       ufcCareer: fights.some((f) => f.league === 'ufc'),
       games: fights.length,
+      // (his own stats or his opponent's: what he absorbs comes from theirs)
+      statFights: fights.filter((f) => cache[id]?.stats?.[f.id] || f.fighters.some((x) => x.id !== id && cache[x.id]?.stats?.[f.id])).length,
       rookie: fights[fights.length - 1].date >= debutCutoff,
       // (no fight in a major promotion in two years: listed with the Retired Fighters setting on)
       retired: !activeSet.has(id),

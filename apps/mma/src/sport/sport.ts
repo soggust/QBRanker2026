@@ -110,7 +110,7 @@ export const SPORT: SportConfig = {
   },
   defaultStatBasis: 'season',
   perGameDecimals: 2,
-  statBasisHelp: { examples: 'finishes and times finished', pace: '10 fights' },
+  statBasisHelp: { examples: 'title wins and quality wins', pace: '10 fights' },
   teamLogo: (key) => key,
   // ESPN's fighter cutouts
   headshot: (id, w) => `https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/${id}.png&w=${w}&h=${Math.round(w * 0.725)}`,
@@ -165,8 +165,13 @@ export const SPORT: SportConfig = {
     const meeting = a.fights?.find((f) => f[1] === b.name);
     return !!meeting && meeting[2] === 'W' && meeting[0] >= THREE_YEARS_AGO;
   },
-  // A fighter's rates rest on few fights early on: 4 fights count half, 12 count three-quarters
-  reliability: (player) => player.games / (player.games + 4),
+  // A fighter's rates rest on few fights early on: 4 fights count half, 12 count three-quarters. The
+  // striking and grappling stats count only the fights they were kept for (the UFC's and PFL's): a
+  // Bellator veteran's few PFL fights are a small sample, however long his career
+  reliability: (player, stat) => {
+    const n = stat.skipMissing ? (player.statFights ?? player.games) : player.games;
+    return n / (n + 4);
+  },
   cardHistory: { title: 'Fights', icon: 'sports_mma', rows: (player) => fightRows(player) },
   copy: {
     noHolesIcon: 'verified',

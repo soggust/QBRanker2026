@@ -247,10 +247,10 @@ export interface SportConfig {
   // One career table rather than seasons: no season dropdown, the card reads "Career" and has no
   // season-by-season tab, history takes or similar seasons
   careerOnly?: boolean;
-  // How much evidence a row's rates rest on, 0-1 (MMA: fights / (fights + 4)): each rate stat's
-  // score in the ranking is scaled by it, so small samples sway the list less. The columns show the
-  // real values either way.
-  reliability?: (player: SkillPlayer) => number;
+  // How much evidence a row's rate stat rests on, 0-1 (MMA: fights / (fights + 4), counting only the
+  // fights a stat was kept for): each rate stat's score in the ranking is scaled by it, so small samples
+  // sway the list less. The columns show the real values either way.
+  reliability?: (player: SkillPlayer, stat: SkillStat) => number;
   // Head to head: a beat b in their latest meeting (recent enough to count). After the weighted sort, a
   // row placed right below one it beat moves above it (MMA: Pimblett over Saint Denis).
   beat?: (a: SkillPlayer, b: SkillPlayer) => boolean;

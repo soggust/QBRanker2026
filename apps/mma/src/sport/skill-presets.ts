@@ -13,8 +13,8 @@ const PRESETS: SkillPresetDef[] = [
   {
     key: 'resume',
     label: 'Resume',
-    description: "Who he's beaten: his belts, the rating, his best win, quality wins, five-round wins, UFC rank, the record and the strength of his schedule",
-    weights: { titleDefenses: 100, titleWins: 100, officialRank: 70, rating: 90, bestWin: 90, qualityWins: 100, mainEventWins: 80, peakRating: 80, winPct: 70, oppRating: 70 },
+    description: "Who he's beaten: his belts, the rating, his best win, quality wins, UFC rank, the record and the strength of his schedule",
+    weights: { titleDefenses: 100, titleWins: 100, officialRank: 70, rating: 90, bestWin: 90, qualityWins: 100, peakRating: 80, winPct: 70, oppRating: 70 },
   },
   {
     key: 'striker',
@@ -25,8 +25,8 @@ const PRESETS: SkillPresetDef[] = [
   {
     key: 'knockout',
     label: 'Knockout Artist',
-    description: 'Power: knockdowns, finishes and a finish rate that ends fights early',
-    weights: { kd15: 100, finishRate: 90, finishes: 80, slpm: 50 },
+    description: 'Power: knockdowns and a finish rate that ends fights early',
+    weights: { kd15: 100, finishRate: 90, slpm: 50 },
   },
   {
     key: 'wrestler',
@@ -37,14 +37,14 @@ const PRESETS: SkillPresetDef[] = [
   {
     key: 'grappler',
     label: 'Submission Artist',
-    description: 'Hunting the finish on the mat: submission attempts, advances and finishes',
+    description: 'Hunting the finish on the mat: submission attempts, advances and the finish rate',
     weights: { sub15: 100, adv15: 80, finishRate: 60, td15: 50 },
   },
   {
     key: 'durable',
     label: 'Hard to Beat',
-    description: 'Defense and durability: strike and takedown defense, rarely knocked down or finished',
-    weights: { strDef: 100, tdDef: 90, kdAgainst: 80, finished: 80, sapm: 70 },
+    description: 'Defense and durability: strike and takedown defense, rarely knocked down',
+    weights: { strDef: 100, tdDef: 90, kdAgainst: 80, sapm: 70 },
   },
   {
     key: 'momentum',

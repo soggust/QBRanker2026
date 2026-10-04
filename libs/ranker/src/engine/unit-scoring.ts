@@ -107,7 +107,7 @@ export function weightedTotals<T>(
   stats: SkillStat[],
   weights: SkillWeights,
   value: (unit: T, stat: SkillStat) => number | null,
-  reliability: ((unit: T) => number) | null = (SPORT.reliability as ((unit: T) => number) | undefined) ?? null,
+  reliability: ((unit: T, stat: SkillStat) => number) | null = (SPORT.reliability as ((unit: T, stat: SkillStat) => number) | undefined) ?? null,
   settings: SportSettings = DEFAULT_SPORT_SETTINGS,
 ): Map<T, number> {
   const totals = new Map<T, number>(units.map((unit) => [unit, 0]));
@@ -152,7 +152,7 @@ export function weightedTotals<T>(
       }
       const scored = v !== null ? score(v) : stat.missingIsAverage || stat.support ? 0 : worst;
       // (a rate that isn't his own sample's, like the UFC's rank, isn't scaled: stat.settled)
-      const trust = reliability && stat.kind === 'efficiency' && !stat.settled ? reliability(unit) : 1;
+      const trust = reliability && stat.kind === 'efficiency' && !stat.settled ? reliability(unit, stat) : 1;
       totals.set(unit, (totals.get(unit) ?? 0) + scored * strength * trust);
       if (stat.skipMissing) {
         skipOf(unit).sum += scored * strength * trust;

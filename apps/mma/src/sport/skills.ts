@@ -11,9 +11,9 @@ const MMA_SKILLS: SkillDef[] = [
   { id: 'wrestling', name: 'Wrestling', short: 'Wrestling', parts: [['td15', 1], ['tdAcc', 1]] },
   { id: 'takedown-defense', name: 'Takedown Defense', short: 'TD Defense', parts: [['tdDef', 1]] },
   { id: 'grappling', name: 'Grappling', short: 'Grappling', parts: [['sub15', 1], ['adv15', 1]] },
-  { id: 'durability', name: 'Durability', short: 'Chin', parts: [['kdAgainst', -1], ['finished', -1]] },
+  { id: 'durability', name: 'Durability', short: 'Chin', parts: [['kdAgainst', -1]] },
   { id: 'winning', name: 'Winning', short: 'Winning', parts: [['winPct', 1], ['recent', 1], ['rating', 1]] },
-  { id: 'competition', name: 'Level of Competition', short: 'Competition', parts: [['titleWins', 1], ['titleDefenses', 1], ['qualityWins', 1], ['mainEventWins', 1], ['bestWin', 1], ['oppRating', 1]] },
+  { id: 'competition', name: 'Level of Competition', short: 'Competition', parts: [['titleWins', 1], ['titleDefenses', 1], ['qualityWins', 1], ['bestWin', 1], ['oppRating', 1]] },
 ];
 
 export const SKILLS: Record<SkillPosition, SkillDef[]> = Object.fromEntries(POSITIONS.map((p) => [p, MMA_SKILLS])) as Record<
