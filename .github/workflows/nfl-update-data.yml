@@ -32,13 +32,18 @@ jobs:
         with:
           node-version: "22"
 
+      # A new season that has begun (yesterday's games on ESPN) becomes current before the night's
+      # update: the finished one is archived as a past season (scripts/rollover.mjs)
+      - name: Roll over to a new season
+        run: node scripts/rollover.mjs nfl --if-due
+
       - name: Pull game results from ESPN
         run: npm run update-data
 
       - name: Commit updated data
         id: commit
         run: |
-          git add apps/nfl/src/StaticData
+          git add apps/nfl/src/StaticData apps/nfl/scripts/update-data.mjs apps/nfl/src/sport/sport.ts
           if git diff --cached --quiet; then
             echo "No data changes"
             echo "changed=false" >> "$GITHUB_OUTPUT"

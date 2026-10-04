@@ -31,13 +31,18 @@ jobs:
         with:
           node-version: "22"
 
+      # A new season that has begun (yesterday's games on ESPN) becomes current before the night's
+      # update: the finished one is archived as a past season (scripts/rollover.mjs)
+      - name: Roll over to a new season
+        run: node scripts/rollover.mjs mlb --if-due
+
       - name: Pull stats from the MLB Stats API and Baseball Savant
         run: npm run mlb:update-data
 
       - name: Commit updated data
         id: commit
         run: |
-          git add apps/mlb/src/StaticData
+          git add apps/mlb/src/StaticData apps/mlb/scripts/update-data.mjs apps/mlb/src/sport/sport.ts
           if git diff --cached --quiet; then
             echo "No data changes"
             echo "changed=false" >> "$GITHUB_OUTPUT"

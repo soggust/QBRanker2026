@@ -121,8 +121,20 @@ rebases and bundles them.
    `sport.ts` (seasons, names, playing time, headshots, the card's takes).
 4. Rework the theme partials and textures, the favicon and the loading screen (`index.html`).
 5. Set the similar-seasons minimums in `scripts/build-comps.mjs` and run `npm run nhl:build-comps`.
-6. Turn on the nightly schedule in `.github/workflows/nhl-update-data.yml`, and add the sport's yearly
-   rollover (bumping `currentSeason` in `sport.ts` and `CURRENT_SEASON` in the data script).
+6. Turn on the nightly schedule in `.github/workflows/nhl-update-data.yml`, with its yearly rollover
+   step (`node scripts/rollover.mjs <sport> --if-due`) before the data pull: it needs ESPN's scoreboard
+   path for the sport in `scripts/rollover.mjs`.
+
+## Yearly rollover
+
+A new season becomes current on its own: each sport's nightly workflow runs
+`node scripts/rollover.mjs <sport> --if-due` first, which rolls over once yesterday's ESPN scoreboard
+is a newer season, in its regular season, with a game finished. It bumps the current season (the data
+script's `CURRENT_SEASON`, and `currentSeason` and `currentSeasonEnds` in `sport.ts`), archives the
+finished season (`SEASON=<year>` run of the data script) and rebuilds the similar seasons, in that order;
+the night's update then fills in the new season. `npm run rollover -- <sport>` does it by hand, and
+`--dry-run` shows what it would change. Still by hand: the NFL's preseason grades for the new season,
+awards lists kept in `awards.ts`, and new team logos.
 
 ## Checking a change
 
