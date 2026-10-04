@@ -567,13 +567,13 @@ for (const id of active) {
   const pflP4p = pflRanked.p4p.get(pflKey) ?? pflRanked.p4p.get(key) ?? null;
   // (the rank shown, and what it counts as in the ranking on the 0-16 scale: the UFC's ranks as they are,
   // the champion #0 and unranked #16; pound-for-pound, the P4P top 15 first (#1 = 0.5 ... #15 = 7.5), then
-  // his division rank behind them (its champion 7.5, #1 = 8 ... #15 = 15). The PFL ranks ten, so its ranks
-  // are stretched to the same scale (#10 = 15))
+  // his division rank behind them (its champion 7.5, #1 = 8 ... #15 = 15). A PFL rank counts five places below
+  // the UFC's, its field being shallower: its champion as the UFC's #5, its #1 as #6 ... its #10 as #15)
   const orgRank = (tab) => {
     if (org === 'pfl') {
       const shown = tab === p4pTab ? pflP4p : pflDivision;
       if (!orgFresh) return { officialRank: shown };
-      const scored = tab === p4pTab ? (pflP4p ? (pflP4p * 1.5) / 2 : pflDivision != null ? (15 + pflDivision * 1.5) / 2 : 16) : shown != null ? shown * 1.5 : 16;
+      const scored = tab === p4pTab ? (pflP4p ? (5 + pflP4p) / 2 : pflDivision != null ? (15 + 5 + pflDivision) / 2 : 16) : shown != null ? 5 + shown : 16;
       return { officialRank: shown, rankScore: scored };
     }
     const shown = tab === p4pTab ? (p4p ?? null) : champion === tab ? 0 : (ranked.ranks.get(`${tab}/${key}`) ?? null);
