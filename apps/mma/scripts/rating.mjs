@@ -155,13 +155,13 @@ export function tabOf(lbs, women) {
 // The rating replayed month by month, for the all-time lists and each fighter's best moments. Every
 // month, each division's fighters (3+ fights, one in the last 450 days: Fight Matrix's rule) are ranked
 // by their cautious rating, across every promotion, and the top 15 earn career points: 1 a month for #1,
-// less down the list (0.85 a place), scaled by how deep the division was then (full points from 30
+// less down the list (0.75 a place: a reign at the top counts for more than years around it), scaled by how deep the division was then (full points from 30
 // ranked fighters up), so ten years at the top of a deep division is worth the most. Also, for each
 // fighter: his peak cautious rating, the best opponent he beat and his quality wins (by the opponent's
 // cautious rating going in), and his opponents' average. A month's points count in full while he fights in
 // a promotion that was the sport's premier competition (the UFC; PRIDE and Strikeforce in their day, and
 // the WEC for the lighter weights), half elsewhere: a long reign over a thinner field is worth less
-export const POINTS = { places: 15, decay: 0.85, depth: 30, activeDays: 450, minFights: 3, qualityTop: 0.1, premier: ['ufc', 'pride', 'strikeforce', 'wec'], elsewhere: 0.5 };
+export const POINTS = { places: 15, decay: 0.75, depth: 30, activeDays: 450, minFights: 3, qualityTop: 0.1, premier: ['ufc', 'pride', 'strikeforce', 'wec'], elsewhere: 0.5 };
 
 export function history(fights, p = PARAMS) {
   const out = new Map();
