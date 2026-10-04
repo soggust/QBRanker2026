@@ -115,7 +115,11 @@ export const ARCHETYPES: Record<SkillPosition, Archetype[]> = {
     { name: 'Winning Ugly', test: (s) => s['close'] >= 0.85 && s['margin'] <= 0.6 },
     { name: 'Better Than the Record', test: (s) => s['close'] <= 0.15 && s['play'] >= 0.6 },
     { name: 'Talent Without Results', test: (s) => s['roster'] >= 0.75 && s['winning'] <= 0.4 },
-    { name: 'Rebuilding', test: (s) => s['winning'] <= 0.2 && s['roster'] <= 0.3 },
+    // (the bottom with little to build on; the rest of the bottom quarter: the fallback's Retooling or Lottery Team)
+    { name: 'Full Rebuild', test: (s) => s['winning'] <= 0.2 && s['roster'] <= 0.3 },
+    // (a losing team's glaring hole)
+    { name: 'Leaky in Net', test: (s) => s['goalies'] <= 0.15 && s['winning'] <= 0.45 },
+    { name: 'Outshot Nightly', test: (s) => s['play'] <= 0.15 && s['winning'] <= 0.45 },
   ],
   HC: [
     { name: 'Jack Adams Type', test: (s) => s['lift'] >= 0.9 && s['winning'] >= 0.7 },

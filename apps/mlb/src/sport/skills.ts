@@ -90,6 +90,8 @@ const HITTER_ARCHETYPES: Archetype[] = [
 
 export const ARCHETYPES: Record<SkillPosition, Archetype[]> = {
   TM: [
+    // (the top few: the title race)
+    { name: 'World Series Favorite', test: (s, o) => o >= 0.9 && s['winning'] >= 0.75 },
     { name: 'Juggernaut', test: (s) => s['margin'] >= 0.9 && s['winning'] >= 0.85 },
     { name: 'Slugging Machine', test: (s) => s['offense'] >= 0.88 && s['prevention'] <= 0.6 },
     { name: 'Pitching and Defense', test: (s) => s['prevention'] >= 0.88 && s['offense'] <= 0.6 },
@@ -97,7 +99,11 @@ export const ARCHETYPES: Record<SkillPosition, Archetype[]> = {
     { name: 'Winning Ugly', test: (s) => s['close'] >= 0.85 && s['margin'] <= 0.6 },
     { name: 'Better Than the Record', test: (s) => s['close'] <= 0.15 && s['margin'] >= 0.5 },
     { name: 'Talent Without Results', test: (s) => s['roster'] >= 0.75 && s['winning'] <= 0.4 },
-    { name: 'Rebuilding', test: (s) => s['winning'] <= 0.2 && s['roster'] <= 0.3 },
+    // (the bottom with little to build on; the rest of the bottom quarter: the fallback's Retooling or Lottery Team)
+    { name: 'Full Rebuild', test: (s) => s['winning'] <= 0.2 && s['roster'] <= 0.3 },
+    // (a losing team's glaring hole)
+    { name: 'Pitching Woes', test: (s) => s['prevention'] <= 0.15 && s['winning'] <= 0.45 },
+    { name: 'Punchless Lineup', test: (s) => s['offense'] <= 0.15 && s['winning'] <= 0.45 },
   ],
   C: HITTER_ARCHETYPES,
   '1B': HITTER_ARCHETYPES,
@@ -127,7 +133,7 @@ export const ARCHETYPES: Record<SkillPosition, Archetype[]> = {
 
 // When no archetype fits: a plain label for where they rank
 export function fallbackArchetype(position: SkillPosition, overall: number, _player?: unknown): string {
-  if (position === 'TM') return overall >= 0.75 ? 'Contender' : overall >= 0.45 ? 'Playoff Team' : overall >= 0.25 ? 'Bubble Team' : 'Rebuilding Team';
+  if (position === 'TM') return overall >= 0.75 ? 'Contender' : overall >= 0.45 ? 'Playoff Team' : overall >= 0.25 ? 'Bubble Team' : 'Retooling';
   const noun: Record<SkillPosition, string> = {
     TM: 'Team',
     C: 'Catcher',
