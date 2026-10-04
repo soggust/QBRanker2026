@@ -876,17 +876,18 @@ section ul li.player.header-row:hover {
     white-space: nowrap;
   }
 
-  // One label over the drag handle, rank, team card and name, centered across them all like the other
-  // columns' labels (centered in the name column, then pulled left by the handle and its gap, 42px:
-  // a negative margin moves the center by half of it)
+  // One label over the drag handle, rank, team card and name, centered across them like the other
+  // columns' labels: from the handle to the end of the longest name showing (--label-at, measured by
+  // the component; until then, the middle of the handle and the name column)
   > div.player-info {
     height: 1.5em;
-    justify-content: center;
+    justify-content: flex-start;
     visibility: visible;
 
     p.stat-label {
       cursor: default;
-      margin: 0 0 0 -42px;
+      margin: 0 0 0 var(--label-at, calc(50% - 21px));
+      transform: translateX(-50%);
     }
   }
 

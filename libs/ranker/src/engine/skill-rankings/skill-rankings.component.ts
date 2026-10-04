@@ -1,4 +1,4 @@
-import { Component, ElementRef, Input, OnChanges, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, HostListener, Input, OnChanges, ViewChild } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import {
@@ -38,7 +38,7 @@ import { RowGlide } from './row-glide';
   styleUrls: ['../../styles/components/rankings.component.scss'],
   standalone: false,
 })
-export class SkillRankingsComponent implements OnChanges, CardHost {
+export class SkillRankingsComponent implements OnChanges, AfterViewInit, CardHost {
   @ViewChild('rankingsList') rankingsList!: ElementRef<HTMLElement>;
 
   @Input({ required: true }) position!: SkillPosition;
@@ -114,6 +114,10 @@ export class SkillRankingsComponent implements OnChanges, CardHost {
     });
   }
 
+  ngAfterViewInit(): void {
+    document.fonts.ready.then(() => this.placeNameLabel());
+  }
+
   ngOnChanges(): void {
     // A new tab starts scrolled to the top-left of its list
     this.rankingsList?.nativeElement.scrollTo({ top: 0, left: 0 });
@@ -152,6 +156,7 @@ export class SkillRankingsComponent implements OnChanges, CardHost {
     this.playerList = this.limited(this.ranked(this.reader, this.listed(SKILL_UNITS, this.season)));
     this.publishOrder(false);
     this.glide.play(() => this.rankingsList?.nativeElement, from);
+    this.placeNameLabel();
   }
 
   // A row dragged to another place: the order is kept, by hand, until the tab re-sorts
@@ -165,6 +170,28 @@ export class SkillRankingsComponent implements OnChanges, CardHost {
     const at = new Map(ids.map((id, i) => [id, i]));
     const players = this.listed(SKILL_UNITS, this.season);
     this.playerList = this.limited(players.sort((a, b) => (at.get(a.gsisId) ?? Infinity) - (at.get(b.gsisId) ?? Infinity)));
+    this.placeNameLabel();
+  }
+
+  // The name column's header label, centered from the drag handle to the end of the longest name showing
+  // (the column is wider than most names, so its own middle reads off to the right). Measured once the
+  // rows are drawn, and again when the names' font has loaded or the window's size changes the type.
+  @HostListener('window:resize')
+  placeNameLabel(): void {
+    requestAnimationFrame(() => {
+      const list = this.rankingsList?.nativeElement;
+      const header = list?.querySelector<HTMLElement>(':scope > li.header-row');
+      const info = header?.querySelector<HTMLElement>('.player-info');
+      const handle = header?.querySelector<HTMLElement>('.drag-indicator');
+      if (!list || !info || !handle) return;
+      let end = 0;
+      for (const name of Array.from(list.querySelectorAll<HTMLElement>(':scope > li.player .player-name strong'))) {
+        end = Math.max(end, name.getBoundingClientRect().right);
+      }
+      if (!end) return;
+      const at = (handle.getBoundingClientRect().left + end) / 2 - info.getBoundingClientRect().left;
+      info.style.setProperty('--label-at', `${Math.round(at)}px`);
+    });
   }
 
   // Remember this tab's order for when you come back
