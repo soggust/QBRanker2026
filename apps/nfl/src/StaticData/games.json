@@ -17,8 +17,8 @@
       "assets/NFL_Icons/Steelers.png": 4
     },
     "advanced": {
-      "pressureToSack": 0.258,
-      "badThrowPct": 0.137,
+      "pressureToSack": 0.325,
+      "badThrowPct": 0.203,
       "timeToThrow": 2.87,
       "adot": 8.7,
       "aggressiveness": 17.6,
@@ -47,6 +47,43 @@
       "rushYards": 12,
       "rushTd": 0
     },
+    "injuryStatus": "Active",
+    "injured": false
+  },
+  {
+    "id": 4432722,
+    "name": "Athan Kaliakmanis",
+    "team": "Washington Commanders",
+    "teamLogo": "assets/NFL_Icons/Commanders.png",
+    "wins": 0,
+    "losses": 1,
+    "ties": 0,
+    "lastFive": [
+      0
+    ],
+    "starts": {
+      "assets/NFL_Icons/Commanders.png": 1
+    },
+    "advanced": {
+      "pressureToSack": null,
+      "badThrowPct": null,
+      "timeToThrow": null,
+      "adot": null,
+      "aggressiveness": null,
+      "epaPerPlay": null,
+      "cpoe": null,
+      "successRate": null,
+      "plays": 0,
+      "realGames": 0,
+      "fantasyStd": 0,
+      "receptions": 0,
+      "competitive": {
+        "epaPerPlay": null,
+        "cpoe": null,
+        "successRate": null
+      }
+    },
+    "box": null,
     "injuryStatus": "Active",
     "injured": false
   },
@@ -600,16 +637,17 @@
     "name": "Daniel Jones",
     "team": "Indianapolis Colts",
     "teamLogo": "assets/NFL_Icons/Colts.png",
-    "wins": 1,
+    "wins": 2,
     "losses": 2,
     "ties": 0,
     "lastFive": [
+      1,
       1,
       0,
       0
     ],
     "starts": {
-      "assets/NFL_Icons/Colts.png": 3
+      "assets/NFL_Icons/Colts.png": 4
     },
     "advanced": {
       "pressureToSack": 0.273,
@@ -631,7 +669,7 @@
       }
     },
     "box": {
-      "games": 3,
+      "games": 4,
       "fumLost": 2,
       "passYards": 611,
       "passTd": 3,
@@ -663,8 +701,8 @@
       "assets/NFL_Icons/Browns.png": 4
     },
     "advanced": {
-      "pressureToSack": 0.36,
-      "badThrowPct": 0.113,
+      "pressureToSack": 0.379,
+      "badThrowPct": 0.139,
       "timeToThrow": 2.79,
       "adot": 6.6,
       "aggressiveness": 13.9,
@@ -1584,8 +1622,8 @@
       "rushYards": 14,
       "rushTd": 0
     },
-    "injuryStatus": "Active",
-    "injured": false
+    "injuryStatus": "Doubtful",
+    "injured": true
   },
   {
     "id": 12483,
