@@ -105,6 +105,8 @@ export interface SkillPlayer {
   // An active fighter's row in only one era's lists: his division now (current) where he fought most in
   // another (all-time)
   only?: 'current' | 'allTime';
+  // A UFC fighter's division rank in UFC.com's Meta Rankings (the Meta Rankings setting; null: unranked)
+  metaRank?: number | null;
   // His promotion now (his last fight's), and whether he's ever fought in the UFC (UFC Fighters Only)
   promotion?: string | null;
   ufcCareer?: boolean;
@@ -123,7 +125,9 @@ export interface SkillPlayer {
 }
 
 // A fighter's stat (the engine passes the sport's settings; none change a value)
-export function unitStat(unit: SkillPlayer, key: SkillStatKey, _settings?: unknown): number | null {
+// (the rank column: UFC.com's Meta Rankings in place of the media panel's with that setting on)
+export function unitStat(unit: SkillPlayer, key: SkillStatKey, settings?: SportSettings): number | null {
+  if (key === 'officialRank' && settings?.['metaRanks'] && unit.metaRank !== undefined) return unit.metaRank;
   return unit.stats[key] ?? null;
 }
 

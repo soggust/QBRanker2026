@@ -135,11 +135,24 @@ export const SPORT: SportConfig = {
       default: false,
       slot: 'display',
     },
+    {
+      key: 'metaRanks',
+      label: 'Meta Rankings',
+      title: "On: the rank column reads UFC.com's Meta Rankings instead of the media panel's (the divisions; pound-for-pound stays the media panel's)",
+      default: false,
+      slot: 'display',
+    },
   ],
   // The rank column: his promotion's (the UFC's or the PFL's), or with UFC Fighters Only on, the UFC's
-  statLabel: (stat, settings) => (stat.key === 'officialRank' && settings['ufcOnly'] ? 'UFC Rank' : stat.label),
-  statName: (stat, _position, settings) =>
-    stat.key === 'officialRank' ? (settings['ufcOnly'] ? "UFC's Official Division Rank" : "His Promotion's Official Rank (UFC or PFL)") : undefined,
+  // (with Meta Rankings on, "(Meta)" after it, on the division tabs: pound-for-pound has no meta list)
+  statLabel: (stat, settings, position) =>
+    stat.key === 'officialRank'
+      ? `${settings['ufcOnly'] ? 'UFC Rank' : stat.label}${settings['metaRanks'] && !position.includes('P4P') ? ' (Meta)' : ''}`
+      : stat.label,
+  statName: (stat, position, settings) =>
+    stat.key === 'officialRank'
+      ? `${settings['ufcOnly'] ? "UFC's Official Division Rank" : "His Promotion's Official Rank (UFC or PFL)"}${settings['metaRanks'] && !position.includes('P4P') ? ": UFC.com's Meta Rankings" : ''}`
+      : undefined,
   // (no injury report, and a rookie season means nothing in a fighting career)
   noSwitches: ['showInjured', 'rookiesOnly'],
   // (the women's tabs or the men's, one set at a time)

@@ -180,16 +180,22 @@ async function bio(id) {
 }
 
 // ---------------------------------------------------------------------------
-// Rankings: UFC.com's champions, top 15s and pound-for-pound lists (by name)
+// Rankings: UFC.com's champions, top 15s and pound-for-pound lists (by name). The page has two sets: the
+// media panel's "All Rankings" (the divisions and the pound-for-pound lists: ranks) and the Meta Rankings
+// (each division's top 15: metaRanks, the Meta Rankings setting's)
 // ---------------------------------------------------------------------------
 async function rankings() {
   const html = (await get(RANKINGS, 'text')) ?? '';
-  const out = { champions: new Map(), ranks: new Map(), p4p: new Map(), wp4p: new Map() };
+  const out = { champions: new Map(), ranks: new Map(), metaRanks: new Map(), p4p: new Map(), wp4p: new Map() };
+  const metaAt = html.indexOf('rankings-meta-rankings');
+  const groups = (part) => part.split('<div class="view-grouping">').slice(1);
+  const meta = metaAt > 0 ? groups(html.slice(metaAt)) : [];
+  const media = groups(metaAt > 0 ? html.slice(0, metaAt) : html);
   const seen = new Set();
-  for (const group of html.split('<div class="view-grouping">').slice(1)) {
+  for (const [group, isMeta] of [...media.map((g) => [g, false]), ...meta.map((g) => [g, true])]) {
     const head = (group.match(/view-grouping-header">([^<]*)/)?.[1] ?? '').replace(/&#0?39;/g, "'").trim();
-    if (seen.has(head)) continue;
-    seen.add(head);
+    if (seen.has((isMeta ? 'meta/' : '') + head)) continue;
+    seen.add((isMeta ? 'meta/' : '') + head);
     const champion = group.match(/<h5>\s*<a[^>]*>([^<]*)<\/a>/)?.[1];
     const ranked = [...group.matchAll(/views-field-title[^>]*>\s*<a[^>]*>([^<]*)<\/a>/g)].map((m) => nameKey(m[1]));
     if (/Pound-for-Pound/.test(head)) {
@@ -198,8 +204,8 @@ async function rankings() {
     }
     const tab = RANKING_DIVISIONS[head];
     if (!tab) continue;
-    if (champion) out.champions.set(nameKey(champion), tab);
-    ranked.forEach((key, i) => out.ranks.set(`${tab}/${key}`, i + 1));
+    if (champion && !isMeta) out.champions.set(nameKey(champion), tab);
+    ranked.forEach((key, i) => out[isMeta ? 'metaRanks' : 'ranks'].set(`${tab}/${key}`, i + 1));
   }
   return out;
 }
@@ -577,13 +583,20 @@ for (const id of active) {
       return { officialRank: shown, rankScore: scored };
     }
     const shown = tab === p4pTab ? (p4p ?? null) : champion === tab ? 0 : (ranked.ranks.get(`${tab}/${key}`) ?? null);
-    return { officialRank: shown, ...(tab === p4pTab ? { rankScore: p4p ? p4p / 2 : divisionRank != null ? (15 + divisionRank) / 2 : null } : {}) };
+    // (the Meta Rankings' division rank too, for that setting; pound-for-pound has none)
+    const meta = tab === p4pTab ? undefined : champion === tab ? 0 : (ranked.metaRanks?.get(`${tab}/${key}`) ?? null);
+    return {
+      officialRank: shown,
+      ...(meta !== undefined && ranked.metaRanks?.size ? { metaRank: meta } : {}),
+      ...(tab === p4pTab ? { rankScore: p4p ? p4p / 2 : divisionRank != null ? (15 + divisionRank) / 2 : null } : {}),
+    };
   };
   const row = (tab) => {
     const rating = tab === p4pTab ? p4pRating(id) : ratingIn(id, tab);
-    const { officialRank, rankScore } = orgRank(tab);
+    const { officialRank, rankScore, metaRank } = orgRank(tab);
     return {
       division: tab === p4pTab ? (champion ?? home) : tab,
+      ...(metaRank !== undefined ? { metaRank } : {}),
       ...(rankScore !== undefined ? { rankScore } : {}),
       inactive: !orgFresh,
       titleHolder: champion === tab,
