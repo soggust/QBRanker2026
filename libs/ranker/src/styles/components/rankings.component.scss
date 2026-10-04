@@ -876,7 +876,9 @@ section ul li.player.header-row:hover {
     white-space: nowrap;
   }
 
-  // One label over the rank, team card and name, centered across them like the other columns' labels
+  // One label over the drag handle, rank, team card and name, centered across them all like the other
+  // columns' labels (centered in the name column, then pulled left by the handle and its gap, 42px:
+  // a negative margin moves the center by half of it)
   > div.player-info {
     height: 1.5em;
     justify-content: center;
@@ -884,7 +886,7 @@ section ul li.player.header-row:hover {
 
     p.stat-label {
       cursor: default;
-      margin: 0;
+      margin: 0 0 0 -42px;
     }
   }
 
