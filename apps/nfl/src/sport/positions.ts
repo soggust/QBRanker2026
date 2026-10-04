@@ -1,12 +1,13 @@
 import type { SportSettings, StatFormat } from '@ranker/engine/sport';
 import { SKILL_PRESETS } from '@sport/skill-presets';
 
-export type Position = 'QB' | 'RB' | 'WR' | 'TE' | 'OL' | 'K' | 'P' | 'DEF' | 'HC';
-// Every tab uses the same config-driven table, sidebar and scoring below (OL rows are team offensive
-// lines, DEF rows team defenses and HC rows head coaches)
+export type Position = 'TM' | 'QB' | 'RB' | 'WR' | 'TE' | 'OL' | 'K' | 'P' | 'DEF' | 'HC';
+// Every tab uses the same config-driven table, sidebar and scoring below (TM rows are teams, built in
+// the app from the head coach rows; OL rows are team offensive lines, DEF rows team defenses and HC
+// rows head coaches)
 export type SkillPosition = Position;
 
-export const POSITIONS: Position[] = ['QB', 'RB', 'WR', 'TE', 'OL', 'K', 'P', 'DEF', 'HC'];
+export const POSITIONS: Position[] = ['TM', 'QB', 'RB', 'WR', 'TE', 'OL', 'K', 'P', 'DEF', 'HC'];
 
 // Keys of the stats object in skill-players.json
 export type SkillStatKey =
@@ -158,7 +159,7 @@ export const STAT_BASIS_LABELS: Record<StatBasis, string> = {
 };
 
 // A full season's games, for the 17-Game Pace (every tab)
-export const PACE_GAMES: Record<Position, number> = { QB: 17, RB: 17, WR: 17, TE: 17, OL: 17, K: 17, P: 17, DEF: 17, HC: 17 };
+export const PACE_GAMES: Record<Position, number> = { TM: 17, QB: 17, RB: 17, WR: 17, TE: 17, OL: 17, K: 17, P: 17, DEF: 17, HC: 17 };
 
 export const RANK_BASIS_LABELS: Record<RankBasis, string> = {
   points: 'Points',
@@ -645,7 +646,93 @@ const RECEIVING_STATS: SkillStat[] = [
   QB_PLAY_STAT,
 ];
 
+// Teams: the season (record, point differential, the offense's and defense's ranks), how it plays (EPA
+// per play on offense, defense and special teams, the turnover battle), close games, and the roster by
+// your own rankings: the team grades each tab gets from the others (QB Play, RB Play, Weapons, O-Line,
+// Defense, Coaching), here as the team's own strengths rather than support
+const TEAM_STATS: SkillStat[] = [
+  { key: 'winPct', label: 'Record', description: 'Win-loss record', kind: 'efficiency', format: 'record' },
+    {
+      key: 'pointDiffPerGame',
+      label: 'Pt Diff / Game',
+      description: 'Average points scored minus points allowed per game',
+      kind: 'efficiency',
+      format: 'dec1',
+    },
+    {
+      key: 'turnoverDiffPerGame',
+      label: 'TO Diff / Game',
+      description: 'Takeaways minus giveaways per game',
+      kind: 'efficiency',
+      format: 'dec1',
+    },
+    {
+      key: 'netEpa',
+      label: 'Net EPA / Play',
+      description: "Offense EPA/play minus defense EPA/play allowed",
+      kind: 'efficiency',
+      format: 'dec2',
+    },
+    {
+      key: 'offEpa',
+      label: 'Off EPA / Play',
+      name: 'Offense Expected Points Added per Play',
+      description: "The offense's EPA per play",
+      kind: 'efficiency',
+      format: 'dec2',
+    },
+    {
+      key: 'defEpaAllowed',
+      label: 'Def EPA / Play',
+      name: 'Defense Expected Points Added per Play Allowed',
+      description: 'EPA per play allowed by the defense (lower is better)',
+      kind: 'efficiency',
+      format: 'dec2',
+      negative: true,
+    },
+    {
+      key: 'stEpaPerGame',
+      label: 'ST EPA / Game',
+      name: 'Special Teams EPA per Game',
+      description: 'Expected Points Added per game on kicks, punts and returns (net of opponents)',
+      kind: 'efficiency',
+      format: 'dec2',
+    },
+  {
+    key: 'offRank',
+    label: 'Off Rank',
+    name: 'Offense Rank',
+    description: "The offense's league rank (by points or yards per game: Unit Ranks setting)",
+    kind: 'efficiency',
+    format: 'rank',
+    negative: true,
+  },
+  {
+    key: 'defRank',
+    label: 'Def Rank',
+    name: 'Defense Rank',
+    description: "The defense's league rank (by points or yards allowed per game: Unit Ranks setting)",
+    kind: 'efficiency',
+    format: 'rank',
+    negative: true,
+  },
+  {
+    key: 'oneScoreWinPct',
+    label: '1-Score Win %',
+    description: 'Win % in games decided by 8 points or fewer (luck as much as clutch)',
+    kind: 'efficiency',
+    format: 'pct',
+  },
+  { ...QB_PLAY_STAT, support: false },
+  { ...RB_PLAY_STAT, support: false },
+  { ...WEAPONS_STAT, support: false },
+  { ...OLINE_STAT, support: false },
+  { ...DEFENSE_STAT, support: false },
+  { ...COACHING_STAT, support: false },
+];
+
 export const SKILL_STATS: Record<SkillPosition, SkillStat[]> = {
+  TM: TEAM_STATS,
   // Record, Recent and ESPN box stats; play-by-play and charting stats (nflverse) in Advanced
   QB: [
     { key: 'winPct', label: 'Record', name: 'Record as Starter', description: 'Win % as a starter', kind: 'efficiency', format: 'record' },
@@ -1079,58 +1166,12 @@ export const SKILL_STATS: Record<SkillPosition, SkillStat[]> = {
       negative: true,
     },
     {
-      key: 'pointDiffPerGame',
-      label: 'Pt Diff / Game',
-      description: 'Average points scored minus points allowed per game',
-      kind: 'efficiency',
-      format: 'dec1',
-    },
-    {
-      key: 'turnoverDiffPerGame',
-      label: 'TO Diff / Game',
-      description: 'Takeaways minus giveaways per game',
-      kind: 'efficiency',
-      format: 'dec1',
-    },
-    {
       key: 'penaltiesPerGame',
       label: 'Penalties / Game',
       description: 'Penalties called on the team per game (lower is better)',
       kind: 'efficiency',
       format: 'dec1',
       negative: true,
-    },
-    {
-      key: 'netEpa',
-      label: 'Net EPA / Play',
-      description: "Team offense EPA/play minus defense EPA/play allowed in the coach's games",
-      kind: 'efficiency',
-      format: 'dec2',
-    },
-    {
-      key: 'offEpa',
-      label: 'Off EPA / Play',
-      name: 'Offense Expected Points Added per Play',
-      description: "The offense's EPA per play",
-      kind: 'efficiency',
-      format: 'dec2',
-    },
-    {
-      key: 'defEpaAllowed',
-      label: 'Def EPA / Play',
-      name: 'Defense Expected Points Added per Play Allowed',
-      description: 'EPA per play allowed by the defense (lower is better)',
-      kind: 'efficiency',
-      format: 'dec2',
-      negative: true,
-    },
-    {
-      key: 'stEpaPerGame',
-      label: 'ST EPA / Game',
-      name: 'Special Teams EPA per Game',
-      description: 'Expected Points Added per game on kicks, punts and returns (net of opponents)',
-      kind: 'efficiency',
-      format: 'dec2',
     },
     {
       key: 'oneScoreWinPct',
@@ -1241,8 +1282,11 @@ const ADVANCED_STATS = new Set<SkillColumnKey>([
 ]);
 
 // Support grades go in Support; everything not listed as results or advanced is a basic stat
+// (the Teams tab's grades sit where the support grades do, under "Roster")
+const ROSTER_STATS = new Set<SkillColumnKey>(['qbPlay', 'rbPlay', 'weapons', 'oline', 'defense', 'coaching']);
+
 export function statGroup(stat: SkillStat): StatGroupId {
-  if (stat.support) return 'support';
+  if (stat.support || ROSTER_STATS.has(stat.key)) return 'support';
   if (RESULTS_STATS.has(stat.key)) return 'results';
   if (ADVANCED_STATS.has(stat.key)) return 'advanced';
   return 'box';
@@ -1276,6 +1320,7 @@ export function skillGroups(position: SkillPosition): SkillStatGroup[] {
     const stats = SKILL_STATS[position].filter((stat) => statGroup(stat) === info.id);
     // Fantasy points always come last in their group
     const fantasy = stats.filter((stat) => stat.key === 'fantasy');
-    return { ...info, stats: [...stats.filter((stat) => stat.key !== 'fantasy'), ...fantasy] };
+    const title = position === 'TM' && info.id === 'support' ? 'Roster' : info.title;
+    return { ...info, title, stats: [...stats.filter((stat) => stat.key !== 'fantasy'), ...fantasy] };
   }).filter((group) => group.stats.length);
 }

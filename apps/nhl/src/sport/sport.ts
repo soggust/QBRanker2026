@@ -1,5 +1,41 @@
 import type { CardFlag, FlagContext, SportConfig } from '@ranker/engine/sport';
+import { DATA } from '@ranker/engine/data';
+import type { SkillPlayer } from './positions';
 import { seasonName } from './awards';
+
+// The Teams tab's rows, built from the season's head coach rows (one per coach and team: a firing
+// splits a season): a team's coaches' records and goals added up; its season stats (every coach row
+// carries them); its playoff wins and Cup and conference badges (the coach who finished the season)
+export function teamRows(): SkillPlayer[] {
+  const coaches = ((DATA.skillPlayers as Record<string, SkillPlayer[]>)['HC'] ?? []) as SkillPlayer[];
+  const teams = new Map<string, SkillPlayer[]>();
+  for (const c of coaches) teams.set(c.teamLogo, [...(teams.get(c.teamLogo) ?? []), c]);
+  return [...teams].map(([logo, list]) => {
+    const sum = (key: string) => list.reduce((a, c) => a + ((c.stats as Record<string, number | null>)[key] ?? 0), 0);
+    const games = list.reduce((a, c) => a + c.games, 0);
+    const wins = sum('wins');
+    const ties = sum('ties');
+    return {
+      id: null,
+      gsisId: `TM-${logo.split('/').pop()!.replace('.svg', '')}`,
+      name: list[0].teamName ?? logo,
+      teamLogo: logo,
+      teamName: list[0].teamName,
+      games,
+      stats: {
+        ...list[0].stats,
+        wins,
+        losses: sum('losses'),
+        ties,
+        winPct: games ? Math.round(((2 * wins + ties) / (2 * games)) * 1000) / 1000 : null,
+        playoffWins: sum('playoffWins'),
+        goalDiff: games ? Math.round((list.reduce((a, c) => a + (c.stats.goalDiff ?? 0) * c.games, 0) / games) * 100) / 100 : null,
+        ptsOver: Math.round(sum('ptsOver') * 10) / 10,
+      },
+      awards: [...new Set(list.flatMap((c) => (c.awards ?? []).filter((a) => a !== 'coy')))],
+    } as SkillPlayer;
+  });
+}
 
 // NHL: what the engine needs to know about hockey (the rest is beside this file: positions,
 // skill-presets, skills, awards, team-colors, logo-eras, about/)
@@ -10,6 +46,43 @@ export function cardFlags({ player, position, current }: FlagContext): CardFlag[
   const st = player.stats;
   const signed = (v: number, d = 1) => (v > 0 ? '+' : '') + v.toFixed(d);
   const games = player.games;
+
+  // Teams: luck (PDO, points against the goal differential) and goaltending
+  if (position === 'TM') {
+    if (st.pdo !== null && st.pdo >= 102) flags.push({ icon: 'casino', tone: 'info', text: `Running hot: a ${st.pdo.toFixed(1)} PDO (shooting plus save %) tends to come back toward 100` });
+    else if (st.pdo !== null && st.pdo <= 98) flags.push({ icon: 'ac_unit', tone: 'info', text: `Running cold: a ${st.pdo.toFixed(1)} PDO (shooting plus save %) tends to come back toward 100` });
+    if (st.gsaxTeam !== null && st.gsaxTeam >= 15) flags.push({ icon: 'shield', tone: 'good', text: `Carried by its goalies: ${signed(st.gsaxTeam)} goals saved above expected` });
+    else if (st.gsaxTeam !== null && st.gsaxTeam <= -15) flags.push({ icon: 'sports_hockey', tone: 'bad', text: `Let down by its goalies: ${signed(st.gsaxTeam)} goals saved above expected` });
+    if (st.ptsOver !== null && Math.abs(st.ptsOver) >= 8) {
+      flags.push(st.ptsOver > 0
+        ? { icon: 'casino', tone: 'info', text: `${st.ptsOver.toFixed(1)} more points than the goal differential says (close games: may not last)` }
+        : { icon: 'sentiment_dissatisfied', tone: 'info', text: `${(-st.ptsOver).toFixed(1)} fewer points than the goal differential says (better than the record)` });
+    }
+    return flags;
+  }
+
+  // Coaches: an interim stint, and how the team played against its roster and its goal differential
+  if (position === 'HC') {
+    if (games < 60 && !current) flags.push({ icon: 'swap_horiz', tone: 'info', text: `Part of the season: ${games} games coached` });
+    if (st.lift !== null && st.lift >= 3) {
+      flags.push({ icon: 'trending_up', tone: 'good', text: `Got more from the roster: ${signed(st.lift)} points of 5-on-5 expected-goal share over its talent` });
+    } else if (st.lift !== null && st.lift <= -3) {
+      flags.push({ icon: 'trending_down', tone: 'bad', text: `Got less from the roster: ${signed(st.lift)} points of 5-on-5 expected-goal share under its talent` });
+    }
+    const units: [string, number | null][] = [['offense', st.offRank], ['defense', st.defRank]];
+    for (const [unit, rank] of units) {
+      if (rank !== null && rank <= 3) flags.push({ icon: 'military_tech', tone: 'good', text: `The league's #${rank} ${unit} by goals per game` });
+      else if (rank !== null && rank >= 30) flags.push({ icon: 'trending_down', tone: 'bad', text: `A bottom-three ${unit} (#${rank})` });
+    }
+    if (st.ptsOver !== null && Math.abs(st.ptsOver) >= 6) {
+      flags.push(
+        st.ptsOver > 0
+          ? { icon: 'casino', tone: 'info', text: `${st.ptsOver.toFixed(1)} more points than the goal differential says (close games, overtime, shootouts)` }
+          : { icon: 'sentiment_dissatisfied', tone: 'info', text: `${(-st.ptsOver).toFixed(1)} fewer points than the goal differential says (close games, overtime, shootouts)` },
+      );
+    }
+    return flags;
+  }
 
   // A small sample: under 20 games
   if (games < 20) {
@@ -70,14 +143,24 @@ export const SPORT: SportConfig = {
   // (after the Final: 2026-27 is over; 2027-28 becomes current at the October rollover)
   currentSeasonEnds: '2027-06-30',
   seasonText: seasonName,
-  positionNames: { C: 'Center', LW: 'Left Wing', RW: 'Right Wing', D: 'Defenseman', G: 'Goalie' },
-  tabNames: { C: 'Centers', LW: 'Left Wings', RW: 'Right Wings', D: 'Defensemen', G: 'Goalies' },
-  coachTab: null,
+  positionNames: { TM: 'Team', C: 'Center', LW: 'Left Wing', RW: 'Right Wing', D: 'Defenseman', G: 'Goalie', HC: 'Head Coach' },
+  tabNames: { TM: 'Teams', C: 'Centers', LW: 'Left Wings', RW: 'Right Wings', D: 'Defensemen', G: 'Goalies', HC: 'Head Coaches' },
+  coachTab: 'HC',
+  rowHeader: (position) => (position === 'HC' ? 'Coach' : position === 'TM' ? 'Team' : 'Player'),
+  extraRows: () => ({ TM: teamRows() }),
+  // The Teams tab's roster grades: each spot by your rankings, weighted by ice time (a goalie by games)
+  rosterGrades: [
+    { key: 'forwards', positions: ['C', 'LW', 'RW'], usage: (p) => (p.stats.toi ?? 0) * p.games },
+    { key: 'blueline', positions: ['D'], usage: (p) => (p.stats.toi ?? 0) * p.games },
+    { key: 'goaltending', positions: ['G'], usage: (p) => p.stats.gamesStarted ?? p.games },
+  ],
   roleWord: (position) => (position === 'G' ? 'starter' : 'regular'),
   playingTime: {
     label: 'Games',
     title: 'Leave out players who played less than this share of the season so far (1 shows everyone); the number is the games it takes',
     of: (player) => player.games ?? 0,
+    // (every team plays every game)
+    everyone: ['TM'],
   },
   defaultStatBasis: 'season',
   perGameDecimals: 2,

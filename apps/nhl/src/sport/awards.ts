@@ -4,7 +4,7 @@ import type { SkillPlayer, SkillPosition } from '@sport/positions';
 // A season's honors under a player's name: the Stanley Cup in gold and both finalists' conference
 // champion cup (a player by the team he finished the season with), then the trophies the data script
 // reads from the NHL's award records (scripts/update-data.mjs).
-export type AwardId = 'cup' | 'conf' | 'hart' | 'vezina' | 'norris' | 'calder' | 'selke' | 'conn' | 'lindsay' | 'rocket' | 'artross';
+export type AwardId = 'cup' | 'conf' | 'hart' | 'vezina' | 'norris' | 'calder' | 'selke' | 'conn' | 'lindsay' | 'rocket' | 'artross' | 'coy';
 
 export const AWARD_INFO: Record<AwardId, AwardInfo> = {
   // (the Stanley Cup itself, the #1 rank's trophy, like the NFL's Lombardi)
@@ -19,6 +19,7 @@ export const AWARD_INFO: Record<AwardId, AwardInfo> = {
   lindsay: { name: 'Ted Lindsay Award (players\' MVP)', short: 'LINDSAY' },
   rocket: { name: 'Rocket Richard Trophy (goals leader)', short: 'ROCKET' },
   artross: { name: 'Art Ross Trophy (points leader)', short: 'ROSS' },
+  coy: { name: 'Jack Adams Award (coach of the year)', short: 'ADAMS' },
 };
 
 // The Western Conference's franchises (Detroit played in the West until 2013-14)
@@ -31,7 +32,7 @@ export interface AwardWin {
 }
 
 // Order the award badges read in
-const ORDER: AwardId[] = ['hart', 'conn', 'vezina', 'norris', 'calder', 'selke', 'lindsay', 'rocket', 'artross'];
+const ORDER: AwardId[] = ['coy', 'hart', 'conn', 'vezina', 'norris', 'calder', 'selke', 'lindsay', 'rocket', 'artross'];
 
 // "assets/NHL_Icons/ATL_19992000-20102011.svg" -> "ATL"
 const teamCode = (teamLogo: string) => teamLogo.split('/').pop()!.replace('.svg', '').split('_')[0];

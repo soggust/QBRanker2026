@@ -6,12 +6,14 @@ import {
   RANK_METRICS,
   RankBasis,
   STAT_NAMES,
+  SkillPlayer,
   SkillPosition,
   SkillStatKey,
   combinedFor,
   statLabelFor,
   unitStat,
 } from './positions';
+import { DATA } from '@ranker/engine/data';
 import { CAST_GRADES, GARBAGE_TIME_STAT } from './skills';
 import { buildQbUnits } from './qb-rows';
 import { OLINE_LEAN, computedValue, connectTeamGrades, fromOtherTabs } from './team-grades';
@@ -23,7 +25,20 @@ import { blockingExtras } from './blocking';
 // grades each tab gets from the others) and blocking (the card's run blocking))
 
 // The defenses, offensive lines and head coaches: rows that are a whole team's
-const TEAM_TABS = ['DEF', 'OL', 'HC'];
+const TEAM_TABS = ['TM', 'DEF', 'OL', 'HC'];
+
+// The Teams tab's rows: the season's head coach rows (one per team, its whole season), named for the
+// team (its defense's row has the team's name)
+function teamRows(): SkillPlayer[] {
+  const rows = DATA.skillPlayers as Record<string, SkillPlayer[]>;
+  const names = new Map((rows['DEF'] ?? []).map((unit) => [unit.teamLogo, unit.name]));
+  return (rows['HC'] ?? []).map((coach) => ({
+    ...coach,
+    id: null,
+    gsisId: `TM-${coach.teamLogo.split('/').pop()!.replace('.png', '')}`,
+    name: names.get(coach.teamLogo) ?? coach.teamLogo.split('/').pop()!.replace('.png', ''),
+  }));
+}
 
 // The card's first NFL takes: a small sample, and garbage-time padding
 function cardFlags({ player, position, current }: FlagContext): CardFlag[] {
@@ -95,6 +110,7 @@ export const SPORT: SportConfig = {
   currentSeasonEnds: '2027-02-20',
   seasonText: String,
   positionNames: {
+    TM: 'Team',
     QB: 'Quarterback',
     RB: 'Running Back',
     WR: 'Wide Receiver',
@@ -106,6 +122,7 @@ export const SPORT: SportConfig = {
     HC: 'Head Coach',
   },
   tabNames: {
+    TM: 'Teams',
     QB: 'Quarterbacks',
     RB: 'Running Backs',
     WR: 'Wide Receivers',
@@ -117,8 +134,8 @@ export const SPORT: SportConfig = {
     HC: 'Head Coaches',
   },
   coachTab: 'HC',
-  teamTabs: ['DEF', 'OL'],
-  rowHeader: (position) => (position === 'DEF' || position === 'OL' ? 'Team' : position === 'HC' ? 'Coach' : 'Player'),
+  teamTabs: ['TM', 'DEF', 'OL'],
+  rowHeader: (position) => (position === 'TM' || position === 'DEF' || position === 'OL' ? 'Team' : position === 'HC' ? 'Coach' : 'Player'),
   roleWord: (position) => (['K', 'P'].includes(position) ? 'specialist' : 'starter'),
   playingTime: {
     label: 'Games',
@@ -137,7 +154,7 @@ export const SPORT: SportConfig = {
   // The team's name, from its defense's row (none on the Defenses tab, or for a team-named row)
   teamName: (player, position, rows) => {
     const team = (rows['DEF'] ?? []).find((unit) => unit.teamLogo === player.teamLogo)?.name ?? null;
-    return position === 'DEF' || team === player.name ? null : team;
+    return position === 'DEF' || position === 'TM' || team === player.name ? null : team;
   },
   cardFlags,
   cardFlagsLast: castFlags,
@@ -149,7 +166,7 @@ export const SPORT: SportConfig = {
     teamGrades: 'team-grades.json',
     dataGrades: 'data-grades.json',
   },
-  extraRows: () => ({ QB: buildQbUnits() }),
+  extraRows: () => ({ QB: buildQbUnits(), TM: teamRows() }),
   settings: [
     {
       key: 'fantasyScoring',

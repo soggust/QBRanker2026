@@ -17,6 +17,15 @@ const HITTER_SKILLS: SkillDef[] = [
 ];
 
 export const SKILLS: Record<SkillPosition, SkillDef[]> = {
+  TM: [
+    { id: 'winning', name: 'Winning', short: 'Winning', parts: [['winPct', 1], ['playoffWins', 1]] },
+    { id: 'margin', name: 'Run Margin', short: 'Margin', parts: [['runDiff', 1]] },
+    { id: 'offense', name: 'Offense', short: 'Offense', parts: [['offRank', -1], ['ops', 1]] },
+    { id: 'prevention', name: 'Run Prevention', short: 'Prevention', parts: [['defRank', -1], ['era', -1]] },
+    { id: 'fielding', name: 'Fielding', short: 'Fielding', parts: [['fieldingRuns', 1]] },
+    { id: 'roster', name: 'Roster', short: 'Roster', parts: [['hitters', 1], ['rotation', 1], ['bullpen', 1]] },
+    { id: 'close', name: 'Close Games', short: 'Close Games', parts: [['pythDiff', 1]] },
+  ],
   C: HITTER_SKILLS,
   '1B': HITTER_SKILLS,
   '2B': HITTER_SKILLS,
@@ -75,6 +84,16 @@ const HITTER_ARCHETYPES: Archetype[] = [
 ];
 
 export const ARCHETYPES: Record<SkillPosition, Archetype[]> = {
+  TM: [
+    { name: 'Juggernaut', test: (s) => s['margin'] >= 0.9 && s['winning'] >= 0.85 },
+    { name: 'Slugging Machine', test: (s) => s['offense'] >= 0.88 && s['prevention'] <= 0.6 },
+    { name: 'Pitching and Defense', test: (s) => s['prevention'] >= 0.88 && s['offense'] <= 0.6 },
+    { name: 'Glove Team', test: (s) => s['fielding'] >= 0.9 },
+    { name: 'Winning Ugly', test: (s) => s['close'] >= 0.85 && s['margin'] <= 0.6 },
+    { name: 'Better Than the Record', test: (s) => s['close'] <= 0.15 && s['margin'] >= 0.5 },
+    { name: 'Talent Without Results', test: (s) => s['roster'] >= 0.75 && s['winning'] <= 0.4 },
+    { name: 'Rebuilding', test: (s) => s['winning'] <= 0.2 && s['roster'] <= 0.3 },
+  ],
   C: HITTER_ARCHETYPES,
   '1B': HITTER_ARCHETYPES,
   '2B': HITTER_ARCHETYPES,
@@ -103,7 +122,9 @@ export const ARCHETYPES: Record<SkillPosition, Archetype[]> = {
 
 // When no archetype fits: a plain label for where they rank
 export function fallbackArchetype(position: SkillPosition, overall: number): string {
+  if (position === 'TM') return overall >= 0.75 ? 'Contender' : overall >= 0.45 ? 'Playoff Team' : overall >= 0.25 ? 'Bubble Team' : 'Rebuilding Team';
   const noun: Record<SkillPosition, string> = {
+    TM: 'Team',
     C: 'Catcher',
     '1B': 'First Baseman',
     '2B': 'Second Baseman',

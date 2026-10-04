@@ -2,6 +2,7 @@ import { AppData, DATA, dataVersion, withSeason } from '@ranker/engine/data';
 import type { SportSettings, ValueContext } from '@ranker/engine/sport';
 import { SKILL_STATS, SkillPlayer, SkillPosition, SkillStat, SkillStatKey, SkillWeights, unitStat } from '@sport/positions';
 import { SPORT } from '@sport/sport';
+import { rosterGradeValue } from '@ranker/engine/roster-grades';
 
 // Every tab's rows for the loaded season, from skill-players.json (and the tabs the sport builds from
 // its other files, SPORT.extraRows). Refilled in place when the year selector loads another season, so
@@ -76,6 +77,8 @@ export function statValue(unit: SkillPlayer, stat: SkillStat, context: ValueCont
     const values = pair.parts.map((part) => unitStat(unit, part as SkillStatKey, context.settings));
     return values.every((v) => v === null) ? null : values.reduce<number>((sum, v) => sum + (v ?? 0), 0);
   }
+  const roster = rosterGradeValue(unit, stat.key, context);
+  if (roster !== undefined) return roster;
   const computed = SPORT.computedValue?.(unit, stat, context);
   if (computed !== undefined) return computed;
   return unitStat(unit, stat.key as SkillStatKey, context.settings);

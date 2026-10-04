@@ -1,13 +1,13 @@
 import type { StatFormat } from '@ranker/engine/sport';
 import { SKILL_PRESETS } from '@sport/skill-presets';
 
-// The NHL tabs: centers, left wings, right wings, defensemen (the position the NHL lists for each
-// player's season) and goalies
-export type Position = 'C' | 'LW' | 'RW' | 'D' | 'G';
+// The NHL tabs: teams (first, and where the app opens), centers, left wings, right wings, defensemen
+// (the position the NHL lists for each player's season), goalies and head coaches
+export type Position = 'TM' | 'C' | 'LW' | 'RW' | 'D' | 'G' | 'HC';
 // Every tab uses the same config-driven table, sidebar and scoring below
 export type SkillPosition = Position;
 
-export const POSITIONS: Position[] = ['C', 'LW', 'RW', 'D', 'G'];
+export const POSITIONS: Position[] = ['TM', 'C', 'LW', 'RW', 'D', 'G', 'HC'];
 
 // Keys of the stats object in skill-players.json (scripts/update-data.mjs)
 export type SkillStatKey =
@@ -51,9 +51,27 @@ export type SkillStatKey =
   | 'gsaxPer60'
   | 'hdSavePct'
   | 'xgaPer60'
+  // Head coaches: his playoff wins, goal differential per game and points over it, and the team's
+  // season (special teams, league ranks, 5-on-5 expected-goal share, Coaching Lift: scripts/coaches.mjs)
+  | 'playoffWins'
+  | 'goalDiff'
+  | 'ptsOver'
+  | 'ppPct'
+  | 'pkPct'
+  | 'offRank'
+  | 'defRank'
+  | 'lift'
+  // Teams: PDO (5-on-5 shooting plus save percentage), the goalies' goals saved above expected, and
+  // roster grades from the position tabs' rankings (engine/roster-grades)
+  | 'pdo'
+  | 'gsaxTeam'
+  | 'forwards'
+  | 'blueline'
+  | 'goaltending'
   // Support grades (0 = F ... 12 = A+, see scripts/update-data.mjs)
   | 'linemates'
-  | 'defense';
+  | 'defense'
+  | 'coaching';
 
 // Columns worked out in the app rather than read from the data
 export type SkillColumnKey = SkillStatKey | 'games';
@@ -69,7 +87,7 @@ export const STAT_BASIS_LABELS: Record<StatBasis, string> = {
 };
 
 // A full season: 82 games at every position
-export const PACE_GAMES: Record<Position, number> = { C: 82, LW: 82, RW: 82, D: 82, G: 82 };
+export const PACE_GAMES: Record<Position, number> = { TM: 82, C: 82, LW: 82, RW: 82, D: 82, G: 82, HC: 82 };
 
 export interface SkillPlayer {
   // The NHL's player id (headshots), and the same as text
@@ -87,7 +105,7 @@ export interface SkillPlayer {
   injured?: boolean;
   injuryStatus?: string;
   // Badges: cup (Stanley Cup), conf (conference champion), hart, vezina, norris, calder, selke, conn,
-  // lindsay, rocket, artross
+  // lindsay, rocket, artross, coy (a coach's Jack Adams Award)
   awards?: string[];
 }
 
@@ -157,6 +175,20 @@ export const STAT_NAMES: Partial<Record<SkillColumnKey, string>> = {
   xgaPer60: 'Expected Goals Against per 60 (the shots he faced)',
   linemates: 'His Linemates (the team without him)',
   defense: 'His Defense (the shots he faced)',
+  coaching: "His Team's Coaching (its Coaching Lift)",
+  playoffWins: 'Playoff Wins',
+  goalDiff: 'Goal Differential per Game',
+  ptsOver: 'Points over Goal Differential',
+  ppPct: 'Power Play Percentage',
+  pkPct: 'Penalty Kill Percentage',
+  offRank: 'Offense Rank (goals for per game)',
+  defRank: 'Defense Rank (goals against per game)',
+  lift: 'Coaching Lift (expected-goal share over the roster)',
+  pdo: 'PDO (5-on-5 shooting % plus save %)',
+  gsaxTeam: "The Goalies' Goals Saved Above Expected",
+  forwards: 'Forwards (by your rankings)',
+  blueline: 'Defensemen (by your rankings)',
+  goaltending: 'Goalies (by your rankings)',
 };
 
 // Per-game column labels, when Stat Totals is on Per Game
@@ -184,6 +216,16 @@ const RECORD_STAT: SkillStat = {
   description: "His team's record, wins-losses-overtime losses (ranked on points percentage; a traded player: his last team's)",
   kind: 'efficiency',
   format: 'record',
+};
+
+// His team's coaching: its Coaching Lift (the Head Coaches tab), graded across the league
+const COACHING_STAT: SkillStat = {
+  key: 'coaching',
+  label: 'Coaching',
+  description: "His team's coaching: how much better it played at 5-on-5 than its roster predicted (the Head Coaches tab's Coaching Lift)",
+  kind: 'efficiency',
+  format: 'grade',
+  support: true,
 };
 
 // Skaters: the same columns at every skater tab; the presets (skill-presets.ts) weigh them by position.
@@ -215,6 +257,7 @@ const SKATER_STATS: SkillStat[] = [
   { key: 'goalsAboveX', label: 'G - xG', description: 'Goals beyond what his chances were worth (finishing; luck over a short season)', kind: 'volume', format: 'dec1', missingIsAverage: true },
   { key: 'hdShots', label: 'HD Shots', description: 'High-danger shots: from the slot and in close', kind: 'volume', format: 'int', missingIsAverage: true },
   { key: 'linemates', label: 'Linemates', description: "The team around him: its expected-goal share at 5-on-5 with him off the ice", kind: 'efficiency', format: 'grade', support: true },
+  COACHING_STAT,
 ];
 
 // Wingers and defensemen take few faceoffs: no column
@@ -248,14 +291,54 @@ const GOALIE_STATS: SkillStat[] = [
     format: 'grade',
     support: true,
   },
+  COACHING_STAT,
+];
+
+// Teams: the season (record, playoff wins, goal differential and the offense's and defense's ranks),
+// how it plays (5-on-5 expected-goal and shot share, special teams, its goalies), points against its goal
+// differential and PDO (the luck), and the roster by your own rankings at each spot, weighted by ice time
+// (engine/roster-grades). Built in the app from the head coach rows (sport.ts).
+const TEAM_STATS: SkillStat[] = [
+  { key: 'games', label: 'Games', description: 'Games played (for context; not part of the ranking)', kind: 'efficiency', format: 'int', infoOnly: true },
+  { key: 'winPct', label: 'Record', name: 'Record', description: 'Wins-losses-overtime losses (ranked on points percentage)', kind: 'efficiency', format: 'record' },
+  { key: 'playoffWins', label: 'Playoff Wins', description: 'Playoff games won (16 is a Cup)', kind: 'efficiency', format: 'int' },
+  { key: 'goalDiff', label: 'Goal Diff / GP', description: 'Goals for minus against per game', kind: 'efficiency', format: 'dec2' },
+  // (ranks rather than goals per game: league scoring drifts over the years, and "3rd" means the same in
+  // any season)
+  { key: 'offRank', label: 'Off Rank', name: 'Offense Rank', description: "The offense's league rank by goals per game", kind: 'efficiency', format: 'rank', negative: true },
+  { key: 'defRank', label: 'Def Rank', name: 'Defense Rank', description: "The defense's league rank by goals against per game", kind: 'efficiency', format: 'rank', negative: true },
+  { key: 'ppPct', label: 'PP %', description: 'Power-play goals per opportunity', kind: 'efficiency', format: 'pct' },
+  { key: 'pkPct', label: 'PK %', description: 'Penalties killed without a goal against', kind: 'efficiency', format: 'pct' },
+  { key: 'xgfPct', label: 'xGF %', description: 'Its share of the expected goals at 5-on-5: it out-chances its opponents', kind: 'efficiency', format: 'pct', missingIsAverage: true },
+  { key: 'cfPct', label: 'CF %', description: 'Its share of the shot attempts at 5-on-5 (Corsi: who has the puck)', kind: 'efficiency', format: 'pct', missingIsAverage: true },
+  { key: 'gsaxTeam', label: 'Goalies GSAx', description: "Its goalies' goals saved above expected: the goals an average goalie would have allowed on its shots against, minus the goals allowed (MoneyPuck)", kind: 'efficiency', format: 'dec1', missingIsAverage: true },
+  { key: 'ptsOver', label: 'Pts vs Goal Diff', name: 'Points over Goal Differential', description: 'Standings points beyond what its goals for and against imply: close games, overtime and shootouts (luck as much as clutch)', kind: 'efficiency', format: 'dec1' },
+  { key: 'pdo', label: 'PDO', description: '5-on-5 shooting % plus save %, 100 is average: well above it is a team riding hot shooting or goaltending, which tends to fade (for context; not part of the ranking)', kind: 'efficiency', format: 'dec1', infoOnly: true },
+  { key: 'forwards', label: 'Forwards', description: 'Its centers and wingers, by your rankings on those tabs, weighted by ice time (A+ is the best)', kind: 'efficiency', format: 'grade' },
+  { key: 'blueline', label: 'Defense', name: 'Defensemen', description: 'Its defensemen, by your rankings on that tab, weighted by ice time', kind: 'efficiency', format: 'grade' },
+  { key: 'goaltending', label: 'Goalies', description: 'Its goalies, by your rankings on that tab, weighted by games', kind: 'efficiency', format: 'grade' },
+];
+
+// Head coaches: his own games (record, playoff wins), the team's offense and defense ranks (the
+// basics), and what's his: how the team played against its roster's talent and in close games
+const COACH_STATS: SkillStat[] = [
+  { key: 'games', label: 'Games', description: 'Games coached (for context; not part of the ranking)', kind: 'efficiency', format: 'int', infoOnly: true },
+  { key: 'winPct', label: 'Record', name: 'His Record', description: 'His record, wins-losses-overtime losses (ranked on points percentage)', kind: 'efficiency', format: 'record' },
+  { key: 'playoffWins', label: 'Playoff Wins', description: 'Playoff games won (16 is a Cup; the coach who finished the season)', kind: 'efficiency', format: 'int' },
+  { key: 'offRank', label: 'Off Rank', name: 'Offense Rank', description: "The offense's league rank by goals per game (the team's season)", kind: 'efficiency', format: 'rank', negative: true },
+  { key: 'defRank', label: 'Def Rank', name: 'Defense Rank', description: "The defense's league rank by goals against per game (the team's season)", kind: 'efficiency', format: 'rank', negative: true },
+  { key: 'lift', label: 'Coaching Lift', description: "The team's 5-on-5 expected-goal share over what its skaters predicted (their share last season, weighted by their ice time), in points", kind: 'efficiency', format: 'dec1', missingIsAverage: true },
+  { key: 'ptsOver', label: 'Pts vs Goal Diff', name: 'Points over Goal Differential', description: 'Standings points beyond what his goals for and against imply (close games, overtime and shootouts)', kind: 'efficiency', format: 'dec1' },
 ];
 
 export const SKILL_STATS: Record<SkillPosition, SkillStat[]> = {
+  TM: TEAM_STATS,
   C: SKATER_STATS,
   LW: NO_FACEOFFS,
   RW: NO_FACEOFFS,
   D: NO_FACEOFFS,
   G: GOALIE_STATS,
+  HC: COACH_STATS,
 };
 
 // Default: everything at 50. A preset (skill-presets.ts) sets the stats it's named for, keeps every
@@ -282,7 +365,7 @@ export const STAT_GROUP_INFO: { id: StatGroupId; title: string; icon: string }[]
   { id: 'support', title: 'Support', icon: 'groups' },
 ];
 
-const RESULTS_STATS = new Set<SkillColumnKey>(['games', 'toi', 'gamesStarted', 'winPct']);
+const RESULTS_STATS = new Set<SkillColumnKey>(['games', 'toi', 'gamesStarted', 'winPct', 'playoffWins']);
 
 // (Game Score and GSAx lead them: each position's all-in-one value number)
 const ADVANCED_STATS = new Set<SkillColumnKey>([
@@ -296,10 +379,17 @@ const ADVANCED_STATS = new Set<SkillColumnKey>([
   'gsax',
   'gsaxPer60',
   'hdSavePct',
+  'lift',
+  'ptsOver',
+  'pdo',
+  'gsaxTeam',
 ]);
 
+// (the Teams tab's roster grades sit where the support grades do, under "Roster")
+const ROSTER_STATS = new Set<SkillColumnKey>(['forwards', 'blueline', 'goaltending']);
+
 export function statGroup(stat: SkillStat): StatGroupId {
-  if (stat.support) return 'support';
+  if (stat.support || ROSTER_STATS.has(stat.key)) return 'support';
   if (RESULTS_STATS.has(stat.key)) return 'results';
   if (ADVANCED_STATS.has(stat.key)) return 'advanced';
   return 'box';
@@ -324,6 +414,7 @@ export interface SkillStatGroup {
 export function skillGroups(position: SkillPosition): SkillStatGroup[] {
   return STAT_GROUP_INFO.map((info) => ({
     ...info,
+    title: position === 'TM' && info.id === 'support' ? 'Roster' : info.title,
     stats: SKILL_STATS[position].filter((stat) => statGroup(stat) === info.id),
   })).filter((group) => group.stats.length);
 }

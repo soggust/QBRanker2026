@@ -1,13 +1,13 @@
 import type { StatFormat } from '@ranker/engine/sport';
 import { SKILL_PRESETS } from '@sport/skill-presets';
 
-// The MLB tabs: hitters by primary position (outfielders together, DH for full-time designated
-// hitters and two-way players' bats), and pitchers by role
-export type Position = 'C' | '1B' | '2B' | '3B' | 'SS' | 'OF' | 'DH' | 'SP' | 'RP';
+// The MLB tabs: teams (first, and where the app opens), hitters by primary position (outfielders
+// together, DH for full-time designated hitters and two-way players' bats), and pitchers by role
+export type Position = 'TM' | 'C' | '1B' | '2B' | '3B' | 'SS' | 'OF' | 'DH' | 'SP' | 'RP';
 // Every tab uses the same config-driven table, sidebar and scoring below
 export type SkillPosition = Position;
 
-export const POSITIONS: Position[] = ['C', '1B', '2B', '3B', 'SS', 'OF', 'DH', 'SP', 'RP'];
+export const POSITIONS: Position[] = ['TM', 'C', '1B', '2B', '3B', 'SS', 'OF', 'DH', 'SP', 'RP'];
 
 export const PITCHER_TABS: Position[] = ['SP', 'RP'];
 export const isPitcherTab = (position: Position) => PITCHER_TABS.includes(position);
@@ -63,7 +63,21 @@ export type SkillStatKey =
   // Support grades (0 = F ... 12 = A+, see scripts/update-data.mjs)
   | 'lineup'
   | 'defense'
-  | 'park';
+  | 'park'
+  // Teams (scripts/update-data.mjs): postseason wins, run differential per game, the offense's and
+  // defense's league ranks, team OPS, fielding runs, wins against the run differential, the park factor,
+  // and roster grades from the position tabs' rankings (engine/roster-grades)
+  | 'playoffWins'
+  | 'runDiff'
+  | 'offRank'
+  | 'defRank'
+  | 'ops'
+  | 'fieldingRuns'
+  | 'pythDiff'
+  | 'parkFactor'
+  | 'hitters'
+  | 'rotation'
+  | 'bullpen';
 
 // Columns worked out in the app rather than read from the data
 export type SkillColumnKey = SkillStatKey | 'games';
@@ -82,6 +96,7 @@ export const STAT_BASIS_LABELS: Record<StatBasis, string> = {
 // A full season, in each tab's games: 162 for hitters, 32 starts for a starter, 65 appearances for a
 // reliever
 export const PACE_GAMES: Record<Position, number> = {
+  TM: 162,
   C: 162,
   '1B': 162,
   '2B': 162,
@@ -309,7 +324,27 @@ const PITCHER_FIELDING_STAT: SkillStat = {
   missingIsAverage: true,
 };
 
+// Teams: the season (record, postseason wins, run differential, the offense's and defense's ranks), how
+// it plays (team OPS and ERA, fielding runs), wins against the run differential (close games), its park,
+// and the roster by your own rankings at each spot, weighted by playing time
+const TEAM_STATS: SkillStat[] = [
+  { key: 'winPct', label: 'Record', name: 'Record', description: 'The win-loss record (ranked on win percentage)', kind: 'efficiency', format: 'record' },
+  { key: 'playoffWins', label: 'Playoff Wins', description: 'Postseason games won (11 or more is usually a title)', kind: 'efficiency', format: 'int' },
+  { key: 'runDiff', label: 'Run Diff / G', name: 'Run Differential per Game', description: 'Runs scored minus allowed per game', kind: 'efficiency', format: 'dec2' },
+  { key: 'offRank', label: 'Off Rank', name: 'Offense Rank', description: "The offense's league rank by runs per game", kind: 'efficiency', format: 'rank', negative: true },
+  { key: 'defRank', label: 'Def Rank', name: 'Run Prevention Rank', description: 'The league rank by runs allowed per game (pitching and defense)', kind: 'efficiency', format: 'rank', negative: true },
+  { key: 'ops', label: 'OPS', name: 'Team OPS', description: "The lineup's on-base plus slugging", kind: 'efficiency', format: 'avg3' },
+  { key: 'era', label: 'ERA', name: 'Team ERA', description: "The staff's earned runs per nine innings (lower is better)", kind: 'efficiency', format: 'dec2', negative: true },
+  { key: 'fieldingRuns', label: 'Fielding Runs', description: 'Runs saved by its fielders (the Stats API), above average', kind: 'efficiency', format: 'dec1', missingIsAverage: true },
+  { key: 'pythDiff', label: 'W vs Run Diff', name: 'Wins over Run Differential', description: 'Wins beyond what the run differential implies: close games, which mostly even out (luck as much as clutch)', kind: 'efficiency', format: 'dec1' },
+  { key: 'parkFactor', label: 'Park', name: 'Park Factor', description: "How its home park plays for hitters, 100 is average (Baseball Savant, three-year; for context; not part of the ranking)", kind: 'efficiency', format: 'int', infoOnly: true },
+  { key: 'hitters', label: 'Hitters', description: 'Its hitters, by your rankings on the hitter tabs, weighted by plate appearances (A+ is the best)', kind: 'efficiency', format: 'grade' },
+  { key: 'rotation', label: 'Rotation', description: 'Its starters, by your rankings on that tab, weighted by innings', kind: 'efficiency', format: 'grade' },
+  { key: 'bullpen', label: 'Bullpen', description: 'Its relievers, by your rankings on that tab, weighted by innings', kind: 'efficiency', format: 'grade' },
+];
+
 export const SKILL_STATS: Record<SkillPosition, SkillStat[]> = {
+  TM: TEAM_STATS,
   C: HITTER_STATS,
   '1B': HITTER_STATS,
   '2B': HITTER_STATS,
@@ -386,7 +421,10 @@ export const STAT_GROUP_INFO: { id: StatGroupId; title: string; icon: string }[]
   { id: 'support', title: 'Support', icon: 'groups' },
 ];
 
-const RESULTS_STATS = new Set<SkillColumnKey>(['games', 'pa', 'winPct', 'saves', 'holds']);
+const RESULTS_STATS = new Set<SkillColumnKey>(['games', 'pa', 'winPct', 'saves', 'holds', 'playoffWins']);
+
+// (the Teams tab's roster grades sit where the support grades do, under "Roster")
+const ROSTER_STATS = new Set<SkillColumnKey>(['hitters', 'rotation', 'bullpen']);
 
 // (WAR leads them: the all-in-one value number, built on the rest)
 const ADVANCED_STATS = new Set<SkillColumnKey>([
@@ -409,11 +447,14 @@ const ADVANCED_STATS = new Set<SkillColumnKey>([
   'xwobaAllowed',
   'hardHitAllowed',
   'barrelAllowed',
+  'fieldingRuns',
+  'pythDiff',
+  'parkFactor',
 ]);
 
 // Hitters' walk and strikeout rates are basic stats; pitchers' are advanced
 export function statGroup(stat: SkillStat): StatGroupId {
-  if (stat.support) return 'support';
+  if (stat.support || ROSTER_STATS.has(stat.key)) return 'support';
   if (RESULTS_STATS.has(stat.key)) return 'results';
   if (ADVANCED_STATS.has(stat.key) && !(HITTER_STATS.includes(stat) && (stat.key === 'kPct' || stat.key === 'bbPct'))) {
     return 'advanced';
@@ -439,6 +480,7 @@ export interface SkillStatGroup {
 export function skillGroups(position: SkillPosition): SkillStatGroup[] {
   return STAT_GROUP_INFO.map((info) => ({
     ...info,
+    title: position === 'TM' && info.id === 'support' ? 'Roster' : info.title,
     stats: SKILL_STATS[position].filter((stat) => statGroup(stat) === info.id),
   })).filter((group) => group.stats.length);
 }

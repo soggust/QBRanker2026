@@ -34,6 +34,23 @@ export const SKILLS: Record<SkillPosition, SkillDef[]> = {
     { id: 'workload', name: 'Workload', short: 'Workload', parts: [['saves', 1], ['shutouts', 1]] },
     { id: 'winning', name: 'Winning', short: 'Winning', parts: [['winPct', 1]] },
   ],
+  TM: [
+    { id: 'winning', name: 'Winning', short: 'Winning', parts: [['winPct', 1], ['playoffWins', 1]] },
+    { id: 'margin', name: 'Goal Margin', short: 'Margin', parts: [['goalDiff', 1]] },
+    { id: 'play', name: 'Driving Play', short: 'Play', parts: [['xgfPct', 1], ['cfPct', 1]] },
+    { id: 'special', name: 'Special Teams', short: 'Special Teams', parts: [['ppPct', 1], ['pkPct', 1]] },
+    { id: 'goalies', name: 'Goaltending', short: 'Goalies', parts: [['gsaxTeam', 1], ['goaltending', 1]] },
+    { id: 'roster', name: 'Roster', short: 'Roster', parts: [['forwards', 1], ['blueline', 1], ['goaltending', 1]] },
+    { id: 'close', name: 'Close Games', short: 'Close Games', parts: [['ptsOver', 1]] },
+  ],
+  HC: [
+    { id: 'winning', name: 'Winning', short: 'Winning', parts: [['winPct', 1]] },
+    { id: 'playoffs', name: 'Playoff Success', short: 'Playoffs', parts: [['playoffWins', 1]] },
+    { id: 'offense', name: 'Offense', short: 'Offense', parts: [['offRank', -1]] },
+    { id: 'defense', name: 'Defense', short: 'Defense', parts: [['defRank', -1]] },
+    { id: 'lift', name: 'Coaching Lift', short: 'Lift', parts: [['lift', 1]] },
+    { id: 'close', name: 'Close Games', short: 'Close Games', parts: [['ptsOver', 1]] },
+  ],
 };
 
 // Volume against efficiency on the card: (counting skill, rate skill)
@@ -89,11 +106,33 @@ export const ARCHETYPES: Record<SkillPosition, Archetype[]> = {
     { name: 'Riding the Team', test: (s) => s['winning'] >= 0.75 && s['stopping'] <= 0.35 },
     { name: 'Steady Backup', test: (s, o) => s['workload'] <= 0.35 && s['stopping'] >= 0.55 && o >= 0.4 },
   ],
+  TM: [
+    { name: 'Cup Favorite', test: (s) => s['margin'] >= 0.9 && s['play'] >= 0.8 },
+    { name: 'Possession Machine', test: (s) => s['play'] >= 0.88 },
+    { name: 'Hot Goalie Team', test: (s) => s['goalies'] >= 0.88 && s['play'] <= 0.5 },
+    { name: 'Special Teams Threat', test: (s) => s['special'] >= 0.88 },
+    { name: 'Winning Ugly', test: (s) => s['close'] >= 0.85 && s['margin'] <= 0.6 },
+    { name: 'Better Than the Record', test: (s) => s['close'] <= 0.15 && s['play'] >= 0.6 },
+    { name: 'Talent Without Results', test: (s) => s['roster'] >= 0.75 && s['winning'] <= 0.4 },
+    { name: 'Rebuilding', test: (s) => s['winning'] <= 0.2 && s['roster'] <= 0.3 },
+  ],
+  HC: [
+    { name: 'Jack Adams Type', test: (s) => s['lift'] >= 0.9 && s['winning'] >= 0.7 },
+    { name: 'Cup Contender', test: (s) => s['playoffs'] >= 0.9 && s['winning'] >= 0.8 },
+    { name: 'Defensive Architect', test: (s) => s['defense'] >= 0.85 && s['offense'] <= 0.6 },
+    { name: 'Run-and-Gun', test: (s) => s['offense'] >= 0.85 && s['defense'] <= 0.6 },
+    { name: 'Overachiever', test: (s) => s['lift'] >= 0.8 },
+    { name: 'Close-Game Closer', test: (s) => s['close'] >= 0.88 },
+    { name: 'Talent Underachiever', test: (s) => s['lift'] <= 0.15 && s['winning'] >= 0.4 },
+    { name: 'Rebuilding Job', test: (s) => s['winning'] <= 0.25 && s['lift'] >= 0.5 },
+  ],
 };
 
 // When no archetype fits: a plain label for where they rank
 export function fallbackArchetype(position: SkillPosition, overall: number): string {
-  const noun: Record<SkillPosition, string> = { C: 'Center', LW: 'Winger', RW: 'Winger', D: 'Defenseman', G: 'Goalie' };
+  if (position === 'TM') return overall >= 0.75 ? 'Contender' : overall >= 0.45 ? 'Playoff Team' : overall >= 0.25 ? 'Bubble Team' : 'Lottery Team';
+  const noun: Record<SkillPosition, string> = { TM: 'Team', C: 'Center', LW: 'Winger', RW: 'Winger', D: 'Defenseman', G: 'Goalie', HC: 'Head Coach' };
+  if (position === 'HC') return `${overall >= 0.75 ? 'High-End' : overall >= 0.45 ? 'Solid' : overall >= 0.25 ? 'Middling' : 'Struggling'} Head Coach`;
   const tier = overall >= 0.75 ? 'Top-Line' : overall >= 0.45 ? 'Solid' : overall >= 0.25 ? 'Depth' : 'Fringe';
   return position === 'G' ? `${overall >= 0.75 ? 'Starting' : overall >= 0.45 ? 'Solid' : overall >= 0.25 ? 'Backup' : 'Fringe'} Goalie` : `${tier} ${noun[position]}`;
 }

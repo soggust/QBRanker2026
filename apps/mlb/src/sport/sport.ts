@@ -6,6 +6,19 @@ import type { CardFlag, FlagContext, SportConfig } from '@ranker/engine/sport';
 export function cardFlags({ player, position, current, ordinal, innings }: FlagContext): CardFlag[] {
   const flags: CardFlag[] = [];
   const st = player.stats;
+  // Teams: the margin, and wins against it
+  if (position === 'TM') {
+    if (st.runDiff !== null && st.runDiff >= 1) flags.push({ icon: 'military_tech', tone: 'good', text: `Dominant: outscored opponents by ${st.runDiff.toFixed(2)} runs a game` });
+    else if (st.runDiff !== null && st.runDiff <= -1) flags.push({ icon: 'trending_down', tone: 'bad', text: `Outscored by ${(-st.runDiff).toFixed(2)} runs a game` });
+    if (st.pythDiff !== null && Math.abs(st.pythDiff) >= 5) {
+      flags.push(
+        st.pythDiff > 0
+          ? { icon: 'casino', tone: 'info', text: `Won ${st.pythDiff.toFixed(1)} more games than the run differential says (close games: may not last)` }
+          : { icon: 'sentiment_dissatisfied', tone: 'info', text: `Won ${(-st.pythDiff).toFixed(1)} fewer games than the run differential says (better than the record)` },
+      );
+    }
+    return flags;
+  }
   const pitcher = position === 'SP' || position === 'RP';
   const fixed = (v: number, d: number) => v.toFixed(d).replace(/^0\./, '.').replace(/^-0\./, '-.');
 
@@ -58,6 +71,7 @@ export const SPORT: SportConfig = {
   currentSeasonEnds: '2026-11-10',
   seasonText: (season) => `${season}`,
   positionNames: {
+    TM: 'Team',
     C: 'Catcher',
     '1B': 'First Baseman',
     '2B': 'Second Baseman',
@@ -69,6 +83,7 @@ export const SPORT: SportConfig = {
     RP: 'Relief Pitcher',
   },
   tabNames: {
+    TM: 'Teams',
     C: 'Catchers',
     '1B': 'First Base',
     '2B': 'Second Base',
@@ -80,6 +95,14 @@ export const SPORT: SportConfig = {
     RP: 'Relief Pitchers',
   },
   coachTab: null,
+  teamTabs: ['TM'],
+  rowHeader: (position) => (position === 'TM' ? 'Team' : 'Player'),
+  // The Teams tab's roster grades: each group by your rankings, weighted by playing time
+  rosterGrades: [
+    { key: 'hitters', positions: ['C', '1B', '2B', '3B', 'SS', 'OF', 'DH'], usage: (p) => p.stats.pa ?? 0 },
+    { key: 'rotation', positions: ['SP'], usage: (p) => p.stats.ip ?? 0 },
+    { key: 'bullpen', positions: ['RP'], usage: (p) => p.stats.ip ?? 0 },
+  ],
   roleWord: (position) => (position === 'SP' ? 'starter' : position === 'RP' ? 'reliever' : 'regular'),
   // Plate appearances (a pitcher's: batters faced, stored as pa)
   playingTime: {
@@ -87,6 +110,8 @@ export const SPORT: SportConfig = {
     title:
       'Leave out players with less than this share of the most plate appearances on the tab (for pitchers, batters faced; 1 shows everyone); the number is the PA it takes',
     of: (player) => player.stats.pa ?? 0,
+    // (every team plays every game)
+    everyone: ['TM'],
   },
   defaultStatBasis: 'season',
   perGameDecimals: 2,

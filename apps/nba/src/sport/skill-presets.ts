@@ -37,6 +37,32 @@ const WINNER: SkillPresetDef = {
 
 // Guards run the offense; wings shoot and defend; bigs rebound, protect the rim and finish
 export const SKILL_PRESETS: Record<SkillPosition, SkillPresetDef[]> = {
+  TM: [
+    {
+      key: 'contender',
+      label: 'Contender',
+      description: 'The best teams: net rating, the record and playoff wins',
+      weights: { netRtg: 100, winPct: 90, playoffWins: 70 },
+    },
+    {
+      key: 'roster',
+      label: 'Best Roster',
+      description: 'The players, by your own rankings at every spot',
+      weights: { backcourt: 100, wings: 100, frontcourt: 100 },
+    },
+    {
+      key: 'offense',
+      label: 'Offense',
+      description: "The offense's rank first, with the guards and wings",
+      weights: { offRank: 100, netRtg: 50, backcourt: 50, wings: 40 },
+    },
+    {
+      key: 'defense',
+      label: 'Defense',
+      description: "The defense's rank first, with the frontcourt",
+      weights: { defRank: 100, netRtg: 50, frontcourt: 50 },
+    },
+  ],
   PG: [
     IMPACT,
     {
@@ -114,25 +140,25 @@ export const SKILL_PRESETS: Record<SkillPosition, SkillPresetDef[]> = {
       key: 'coachingJob',
       label: 'Coaching Job',
       description: 'Getting more from a roster than its talent: the coaching lift and wins over point differential',
-      weights: { lift: 100, pythDiff: 60, netRtg: 50 },
+      weights: { lift: 100, pythDiff: 60 },
     },
     {
       key: 'winner',
       label: 'Winning',
       description: 'Results: the record and playoff wins',
-      weights: { winPct: 100, playoffWins: 100, netRtg: 60 },
+      weights: { winPct: 100, playoffWins: 100 },
     },
     {
       key: 'offense',
       label: 'Offensive Mind',
       description: 'Scheme on offense: the offense\'s rank first',
-      weights: { offRank: 100, netRtg: 50, lift: 40 },
+      weights: { offRank: 100, lift: 40 },
     },
     {
       key: 'defense',
       label: 'Defensive Mind',
       description: 'Scheme on defense: the defense\'s rank first',
-      weights: { defRank: 100, netRtg: 50, lift: 40 },
+      weights: { defRank: 100, lift: 40 },
     },
   ],
   C: [

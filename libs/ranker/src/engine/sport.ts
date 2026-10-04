@@ -1,6 +1,7 @@
 import type { Observable } from 'rxjs';
 import type { SkillPlayer, SkillStat, StatBasis } from '@sport/positions';
 import type { CardSkill } from './skills';
+import type { RosterGrade } from './roster-grades';
 
 // How a stat's value reads (every sport's SkillStat.format is one of these): int, dec1, dec2; avg3, a
 // batting-average style rate (".287"); ip, innings (175.1); pct, a 0-1 share as a whole percent;
@@ -226,6 +227,9 @@ export interface SportConfig {
   // A stat's label and full name under the sport's settings ("Off Rank (Pts)"; undefined: the usual)
   statLabel?: (stat: SkillStat, settings: SportSettings, position: string) => string;
   statName?: (stat: SkillStat, position: string, settings: SportSettings) => string | undefined;
+  // The Teams tab's roster grades: each a position group graded from your rankings of its players,
+  // weighted by playing time (engine/roster-grades)
+  rosterGrades?: RosterGrade[];
   // A value worked out in the app (fantasy points in the chosen scoring, a league rank, a grade from
   // another tab's ranking); undefined reads the data
   computedValue?: (player: SkillPlayer, stat: SkillStat, context: ValueContext) => number | null | undefined;

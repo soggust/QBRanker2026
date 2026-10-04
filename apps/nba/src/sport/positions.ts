@@ -1,13 +1,13 @@
 import type { StatFormat } from '@ranker/engine/sport';
 import { SKILL_PRESETS } from '@sport/skill-presets';
 
-// The NBA tabs: the five positions, as Basketball-Reference lists each player's season (a listed
-// "SG-PG" counts as his first position), and head coaches
-export type Position = 'PG' | 'SG' | 'SF' | 'PF' | 'C' | 'HC';
+// The NBA tabs: teams (first, and where the app opens), the five positions, as Basketball-Reference
+// lists each player's season (a listed "SG-PG" counts as his first position), and head coaches
+export type Position = 'TM' | 'PG' | 'SG' | 'SF' | 'PF' | 'C' | 'HC';
 // Every tab uses the same config-driven table, sidebar and scoring below
 export type SkillPosition = Position;
 
-export const POSITIONS: Position[] = ['PG', 'SG', 'SF', 'PF', 'C', 'HC'];
+export const POSITIONS: Position[] = ['TM', 'PG', 'SG', 'SF', 'PF', 'C', 'HC'];
 
 // Keys of the stats object in skill-players.json (scripts/update-data.mjs)
 export type SkillStatKey =
@@ -55,6 +55,10 @@ export type SkillStatKey =
   | 'pace'
   | 'lift'
   | 'pythDiff'
+  // Teams: roster grades from the position tabs' rankings (engine/roster-grades)
+  | 'backcourt'
+  | 'wings'
+  | 'frontcourt'
   // Support grades (0 = F ... 12 = A+, see scripts/update-data.mjs)
   | 'teammates'
   | 'coaching';
@@ -73,7 +77,7 @@ export const STAT_BASIS_LABELS: Record<StatBasis, string> = {
 };
 
 // A full season: 82 games at every position
-export const PACE_GAMES: Record<Position, number> = { PG: 82, SG: 82, SF: 82, PF: 82, C: 82, HC: 82 };
+export const PACE_GAMES: Record<Position, number> = { TM: 82, PG: 82, SG: 82, SF: 82, PF: 82, C: 82, HC: 82 };
 
 export interface SkillPlayer {
   // ESPN's athlete id (headshots)
@@ -162,6 +166,9 @@ export const STAT_NAMES: Partial<Record<SkillColumnKey, string>> = {
   pace: 'Pace (possessions per 48 minutes)',
   lift: 'Coaching Lift (net rating over the roster\'s talent)',
   pythDiff: 'Wins over Point Differential',
+  backcourt: 'Backcourt (point and shooting guards, by your rankings)',
+  wings: 'Wings (small forwards, by your rankings)',
+  frontcourt: 'Frontcourt (power forwards and centers, by your rankings)',
 };
 
 // Per-game column labels, when Stat Totals is on Per Game
@@ -233,23 +240,39 @@ const NBA_STATS: SkillStat[] = [
   COACHING_STAT,
 ];
 
-// Head coaches: his own record, and the team's season (its ratings, and how it played against its
-// talent and its point differential)
+// Teams: the season (record, playoff wins, net rating and the offense's and defense's ranks), wins
+// against the point differential (luck in close games), and the roster by your own rankings of its
+// players at each spot, weighted by their minutes (engine/roster-grades)
+const TEAM_STATS: SkillStat[] = [
+  { key: 'games', label: 'Games', description: 'Games played (for context; not part of the ranking)', kind: 'efficiency', format: 'int', infoOnly: true },
+  { key: 'winPct', label: 'Record', name: 'Record', description: 'The win-loss record (ranked on win percentage)', kind: 'efficiency', format: 'record' },
+  { key: 'playoffWins', label: 'Playoff Wins', description: 'Playoff games won (16 is a title)', kind: 'efficiency', format: 'int' },
+  { key: 'netRtg', label: 'Net Rtg', description: 'Points scored minus allowed per 100 possessions', kind: 'efficiency', format: 'dec1' },
+  { key: 'offRank', label: 'Off Rank', name: 'Offense Rank', description: "The offense's league rank by offensive rating, points scored per 100 possessions", kind: 'efficiency', format: 'rank', negative: true },
+  { key: 'defRank', label: 'Def Rank', name: 'Defense Rank', description: "The defense's league rank by defensive rating, points allowed per 100 possessions", kind: 'efficiency', format: 'rank', negative: true },
+  { key: 'pythDiff', label: 'W vs Pt Diff', name: 'Wins over Point Differential', description: 'Wins beyond what the point differential implies: close games, which mostly even out (luck as much as clutch)', kind: 'efficiency', format: 'dec1' },
+  { key: 'pace', label: 'Pace', description: 'Possessions per 48 minutes (for context; not part of the ranking)', kind: 'efficiency', format: 'dec1', infoOnly: true },
+  { key: 'backcourt', label: 'Backcourt', description: 'Its point and shooting guards, by your rankings on those tabs, weighted by their minutes (A+ is the best)', kind: 'efficiency', format: 'grade' },
+  { key: 'wings', label: 'Wings', description: 'Its small forwards, by your rankings on that tab, weighted by their minutes', kind: 'efficiency', format: 'grade' },
+  { key: 'frontcourt', label: 'Frontcourt', description: 'Its power forwards and centers, by your rankings on those tabs, weighted by their minutes', kind: 'efficiency', format: 'grade' },
+];
+
+// Head coaches: his own record and playoff wins, the team's offense and defense ranks (the basics), and
+// what's his: how the team played against its talent and in close games
 const COACH_STATS: SkillStat[] = [
   { key: 'games', label: 'Games', description: 'Games coached (for context; not part of the ranking)', kind: 'efficiency', format: 'int', infoOnly: true },
   { key: 'winPct', label: 'Record', description: 'His win-loss record (ranked on win percentage)', kind: 'efficiency', format: 'record' },
   { key: 'playoffWins', label: 'Playoff Wins', description: 'Playoff games won (16 is a title)', kind: 'efficiency', format: 'int' },
-  { key: 'netRtg', label: 'Net Rtg', description: 'Points scored minus allowed per 100 possessions (the team\'s season)', kind: 'efficiency', format: 'dec1' },
   // (ranks rather than the ratings themselves: league scoring drifts over the years, and "3rd" means the
   // same in any season)
   { key: 'offRank', label: 'Off Rank', name: 'Offense Rank', description: 'The offense\'s league rank by offensive rating, points scored per 100 possessions (the team\'s season)', kind: 'efficiency', format: 'rank', negative: true },
   { key: 'defRank', label: 'Def Rank', name: 'Defense Rank', description: 'The defense\'s league rank by defensive rating, points allowed per 100 possessions (the team\'s season)', kind: 'efficiency', format: 'rank', negative: true },
   { key: 'lift', label: 'Coaching Lift', description: 'Net rating over what the roster\'s talent predicted: last season\'s Box Plus/Minus of the players he used, weighted by their minutes', kind: 'efficiency', format: 'dec1', missingIsAverage: true },
   { key: 'pythDiff', label: 'W vs Pt Diff', name: 'Wins over Point Differential', description: 'Wins beyond what the point differential implies (close games; his share of the season)', kind: 'efficiency', format: 'dec1' },
-  { key: 'pace', label: 'Pace', description: 'Possessions per 48 minutes (for context; not part of the ranking)', kind: 'efficiency', format: 'dec1', infoOnly: true },
 ];
 
 export const SKILL_STATS: Record<SkillPosition, SkillStat[]> = {
+  TM: TEAM_STATS,
   PG: NBA_STATS,
   SG: NBA_STATS,
   SF: NBA_STATS,
@@ -301,8 +324,11 @@ const ADVANCED_STATS = new Set<SkillColumnKey>([
   'pythDiff',
 ]);
 
+// (the Teams tab's roster grades sit where the support grades do, under "Roster")
+const ROSTER_STATS = new Set<SkillColumnKey>(['backcourt', 'wings', 'frontcourt']);
+
 export function statGroup(stat: SkillStat): StatGroupId {
-  if (stat.support) return 'support';
+  if (stat.support || ROSTER_STATS.has(stat.key)) return 'support';
   if (RESULTS_STATS.has(stat.key)) return 'results';
   if (ADVANCED_STATS.has(stat.key)) return 'advanced';
   return 'box';
@@ -327,6 +353,7 @@ export interface SkillStatGroup {
 export function skillGroups(position: SkillPosition): SkillStatGroup[] {
   return STAT_GROUP_INFO.map((info) => ({
     ...info,
+    title: position === 'TM' && info.id === 'support' ? 'Roster' : info.title,
     stats: SKILL_STATS[position].filter((stat) => statGroup(stat) === info.id),
   })).filter((group) => group.stats.length);
 }

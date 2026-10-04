@@ -95,10 +95,68 @@ const GOALIE_PRESETS: SkillPresetDef[] = [
   },
 ];
 
+// Teams
+const TEAM_PRESETS: SkillPresetDef[] = [
+  {
+    key: 'contender',
+    label: 'Contender',
+    description: 'The best teams: goal differential, the record, chance share and playoff wins',
+    weights: { goalDiff: 100, winPct: 90, xgfPct: 70, playoffWins: 60 },
+  },
+  {
+    key: 'roster',
+    label: 'Best Roster',
+    description: 'The players, by your own rankings at every spot',
+    weights: { forwards: 100, blueline: 100, goaltending: 100 },
+  },
+  {
+    key: 'analytics',
+    label: 'Analytics',
+    description: 'How it plays, not how it bounced: expected-goal and shot share, special teams, goaltending',
+    weights: { xgfPct: 100, cfPct: 80, ppPct: 50, pkPct: 50, gsaxTeam: 60 },
+  },
+  {
+    key: 'goaltending',
+    label: 'Goaltending',
+    description: 'Its goalies: goals saved above expected and your goalie rankings',
+    weights: { gsaxTeam: 100, goaltending: 100, defRank: 50 },
+  },
+];
+
+// Head coaches
+const COACH_PRESETS: SkillPresetDef[] = [
+  {
+    key: 'coachingJob',
+    label: 'Coaching Job',
+    description: 'Getting more from a roster than its talent: the Coaching Lift and close games',
+    weights: { lift: 100, ptsOver: 50 },
+  },
+  {
+    key: 'winner',
+    label: 'Winning',
+    description: 'Results: the record and playoff wins',
+    weights: { winPct: 100, playoffWins: 100 },
+  },
+  {
+    key: 'offense',
+    label: 'Offensive Mind',
+    description: "The offense's rank first, with the Coaching Lift",
+    weights: { offRank: 100, lift: 40 },
+  },
+  {
+    key: 'defense',
+    label: 'Defensive Mind',
+    description: "The defense's rank first, with the Coaching Lift",
+    weights: { defRank: 100, lift: 40 },
+  },
+];
+
 export const SKILL_PRESETS: Record<SkillPosition, SkillPresetDef[]> = {
+  TM: TEAM_PRESETS,
   C: [IMPACT, PLAYMAKER, SNIPER, TWO_WAY, FACEOFF_CENTER, WINNER],
   LW: [IMPACT, SNIPER, PLAYMAKER, TWO_WAY, ENFORCER, WINNER],
   RW: [IMPACT, SNIPER, PLAYMAKER, TWO_WAY, ENFORCER, WINNER],
   D: [IMPACT, OFFENSIVE_D, SHUTDOWN_D, ENFORCER, WINNER],
   G: GOALIE_PRESETS,
+  HC: COACH_PRESETS,
 };

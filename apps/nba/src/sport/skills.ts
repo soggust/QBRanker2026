@@ -18,6 +18,14 @@ const NBA_SKILLS: SkillDef[] = [
 ];
 
 export const SKILLS: Record<SkillPosition, SkillDef[]> = {
+  TM: [
+    { id: 'winning', name: 'Winning', short: 'Winning', parts: [['winPct', 1], ['playoffWins', 1]] },
+    { id: 'margin', name: 'Point Margin', short: 'Margin', parts: [['netRtg', 1]] },
+    { id: 'offense', name: 'Offense', short: 'Offense', parts: [['offRank', -1]] },
+    { id: 'defense', name: 'Defense', short: 'Defense', parts: [['defRank', -1]] },
+    { id: 'roster', name: 'Roster', short: 'Roster', parts: [['backcourt', 1], ['wings', 1], ['frontcourt', 1]] },
+    { id: 'close', name: 'Close Games', short: 'Close Games', parts: [['pythDiff', 1]] },
+  ],
   PG: NBA_SKILLS,
   SG: NBA_SKILLS,
   SF: NBA_SKILLS,
@@ -52,6 +60,16 @@ const STAR: Archetype[] = [
 ];
 
 export const ARCHETYPES: Record<SkillPosition, Archetype[]> = {
+  TM: [
+    { name: 'Title Favorite', test: (s) => s['margin'] >= 0.9 && s['winning'] >= 0.85 },
+    { name: 'Juggernaut', test: (s) => s['offense'] >= 0.8 && s['defense'] >= 0.8 },
+    { name: 'Offensive Powerhouse', test: (s) => s['offense'] >= 0.88 && s['defense'] <= 0.6 },
+    { name: 'Defensive Wall', test: (s) => s['defense'] >= 0.88 && s['offense'] <= 0.6 },
+    { name: 'Winning Ugly', test: (s) => s['close'] >= 0.85 && s['margin'] <= 0.6 },
+    { name: 'Better Than the Record', test: (s) => s['close'] <= 0.15 && s['margin'] >= 0.5 },
+    { name: 'Talent Without Results', test: (s) => s['roster'] >= 0.75 && s['winning'] <= 0.4 },
+    { name: 'Rebuilding', test: (s) => s['winning'] <= 0.2 && s['roster'] <= 0.3 },
+  ],
   PG: [
     ...STAR,
     { name: 'Floor General', test: (s) => s['playmaking'] >= 0.85 && s['scoring'] <= 0.7 },
@@ -111,7 +129,9 @@ export const ARCHETYPES: Record<SkillPosition, Archetype[]> = {
 
 // When no archetype fits: a plain label for where they rank
 export function fallbackArchetype(position: SkillPosition, overall: number): string {
+  if (position === 'TM') return overall >= 0.75 ? 'Contender' : overall >= 0.45 ? 'Playoff Team' : overall >= 0.25 ? 'Bubble Team' : 'Lottery Team';
   const noun: Record<SkillPosition, string> = {
+    TM: 'Team',
     PG: 'Point Guard',
     SG: 'Shooting Guard',
     SF: 'Small Forward',

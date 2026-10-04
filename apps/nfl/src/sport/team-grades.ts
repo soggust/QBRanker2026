@@ -216,9 +216,11 @@ export function connectTeamGrades(host: EngineHost): Observable<unknown> {
   return merge(defense$, coaching$, qbPlay$, oline$, olinePass$, olineRun$, weapons$, rbPlay$);
 }
 
-// The grades from other tabs (support stats but a QB's own Responsibility): the table's season only
+// The grades from other tabs (support stats but a QB's own Responsibility, and the Teams tab's roster
+// grades, the same grades as the team's own strengths): the table's season only
+const TEAM_GRADES = new Set(['qbPlay', 'rbPlay', 'weapons', 'oline', 'defense', 'coaching']);
 export function fromOtherTabs(stat: SkillStat): boolean {
-  return !!stat.support && stat.key !== 'responsibility';
+  return (!!stat.support && stat.key !== 'responsibility') || TEAM_GRADES.has(stat.key);
 }
 
 // SPORT.computedValue: fantasy points, unit ranks and team grades; undefined reads the data

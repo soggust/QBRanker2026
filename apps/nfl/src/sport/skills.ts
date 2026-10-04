@@ -63,14 +63,22 @@ export const SKILLS: Record<SkillPosition, SkillDef[]> = {
     { id: 'shortYardage', name: 'Short Yardage', short: 'Short Yd', parts: [['shortYardagePct', 1]] },
     { id: 'discipline', name: 'Discipline', short: 'Discipline', parts: [['linePenaltiesPerGame', -1]] },
   ],
+  TM: [
+    { id: 'winning', name: 'Winning', short: 'Winning', parts: [['winPct', 1]] },
+    { id: 'dominance', name: 'Dominance', short: 'Dominance', parts: [['pointDiffPerGame', 1], ['netEpa', 1]] },
+    { id: 'offense', name: 'Offense', short: 'Offense', parts: [['offEpa', 1], ['offRank', -1]] },
+    { id: 'defense', name: 'Defense', short: 'Defense', parts: [['defEpaAllowed', -1], ['defRank', -1]] },
+    { id: 'turnovers', name: 'Turnover Battle', short: 'Turnovers', parts: [['turnoverDiffPerGame', 1]] },
+    { id: 'specialTeams', name: 'Special Teams', short: 'Spec Teams', parts: [['stEpaPerGame', 1]] },
+    { id: 'roster', name: 'Roster', short: 'Roster', parts: [['qbPlay', 1], ['rbPlay', 1], ['weapons', 1], ['oline', 1], ['defense', 1]] },
+    { id: 'close', name: 'Close Games', short: 'Close Games', parts: [['oneScoreWinPct', 1]] },
+  ],
   HC: [
     { id: 'winning', name: 'Winning', short: 'Winning', parts: [['winPct', 1], ['oneScoreWinPct', 1]] },
     { id: 'expectations', name: 'Beating Expectations', short: 'Over Exp', parts: [['winsOverExpected', 1], ['atsPct', 1]] },
-    { id: 'offense', name: 'Offense', short: 'Offense', parts: [['offEpa', 1], ['offRank', -1]] },
-    { id: 'defense', name: 'Defense', short: 'Defense', parts: [['defEpaAllowed', -1], ['defRank', -1]] },
-    { id: 'dominance', name: 'Dominance', short: 'Dominance', parts: [['pointDiffPerGame', 1], ['netEpa', 1]] },
-    { id: 'turnovers', name: 'Turnover Battle', short: 'Turnovers', parts: [['turnoverDiffPerGame', 1]] },
-    { id: 'specialTeams', name: 'Special Teams', short: 'Spec Teams', parts: [['stEpaPerGame', 1]] },
+    { id: 'offense', name: 'Offense', short: 'Offense', parts: [['offRank', -1]] },
+    { id: 'defense', name: 'Defense', short: 'Defense', parts: [['defRank', -1]] },
+    { id: 'aggression', name: 'Aggressiveness', short: 'Aggression', parts: [['fourthDownGoPct', 1]] },
     { id: 'discipline', name: 'Discipline', short: 'Discipline', parts: [['penaltiesPerGame', -1]] },
   ],
 };
@@ -99,7 +107,7 @@ export const CAST_GRADES: Partial<Record<SkillPosition, string[]>> = {
 // the reverse)
 export const WINS_VS_PLAY: Partial<Record<SkillPosition, [results: string, play: string]>> = {
   QB: ['winning', 'efficiency'],
-  HC: ['winning', 'dominance'],
+  TM: ['winning', 'dominance'],
 };
 
 // The stat whose garbage-time share gets flagged
@@ -175,9 +183,19 @@ export const ARCHETYPES: Record<SkillPosition, Archetype[]> = {
     { name: 'Sieve', test: (s) => s['pass'] <= 0.2 },
     { name: 'Flag Magnets', test: (s) => s['discipline'] <= 0.15 },
   ],
+  TM: [
+    { name: 'Juggernaut', test: (s) => s['dominance'] >= 0.9 && s['winning'] >= 0.8 },
+    { name: 'Offensive Powerhouse', test: (s) => s['offense'] >= 0.88 && s['defense'] <= 0.6 },
+    { name: 'Defensive Juggernaut', test: (s) => s['defense'] >= 0.88 && s['offense'] <= 0.6 },
+    { name: 'Turnover Machine', test: (s) => s['turnovers'] >= 0.9 },
+    { name: 'Winning Ugly', test: (s) => s['close'] >= 0.85 && s['dominance'] <= 0.6 },
+    { name: 'Better Than the Record', test: (s) => s['close'] <= 0.15 && s['dominance'] >= 0.5 },
+    { name: 'Talent Without Results', test: (s) => s['roster'] >= 0.75 && s['winning'] <= 0.4 },
+    { name: 'Rebuilding', test: (s) => s['winning'] <= 0.2 && s['roster'] <= 0.3 },
+  ],
   HC: [
-    { name: 'Juggernaut', test: (s) => s['dominance'] >= 0.9 },
     { name: 'Overachiever', test: (s) => s['expectations'] >= 0.85 },
+    { name: 'Riverboat Gambler', test: (s) => s['aggression'] >= 0.9 },
     { name: 'Offensive Mastermind', test: (s) => s['offense'] >= 0.85 },
     { name: 'Defensive Mastermind', test: (s) => s['defense'] >= 0.85 },
     { name: 'Hot Seat', test: (s) => s['winning'] <= 0.15 },
@@ -186,7 +204,9 @@ export const ARCHETYPES: Record<SkillPosition, Archetype[]> = {
 
 // When no archetype fits: a plain label for where they rank
 export function fallbackArchetype(position: SkillPosition, overall: number): string {
+  if (position === 'TM') return overall >= 0.75 ? 'Contender' : overall >= 0.45 ? 'Playoff Team' : overall >= 0.25 ? 'Bubble Team' : 'Rebuilding Team';
   const noun: Record<SkillPosition, string> = {
+    TM: 'Team',
     QB: 'Starter',
     RB: 'Back',
     WR: 'Receiver',

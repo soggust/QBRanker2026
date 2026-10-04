@@ -347,12 +347,77 @@ async function buildSeason(season) {
   // the Stadium is a three-year park factor already)
   if (current) console.log(await blendWithLastSeason({ staticDir: STATIC, season, rows: out, keys: ['lineup', 'defense'], fullAt: 40 }));
 
-  for (const tab of TABS) out[tab].sort((a, b) => a.name.localeCompare(b.name));
+  // Teams (the app's Teams tab, first): the standings (record, runs scored and allowed), postseason
+  // wins, the team's OPS and ERA, its fielding runs, its park, and its wins against what the run
+  // differential implies (a Pythagorean expectation, exponent 1.83: close games)
+  out.TM = await teamRows(season, teamDef, parks, logo);
+
+  for (const tab of [...TABS, 'TM']) out[tab].sort((a, b) => a.name.localeCompare(b.name));
   const dir = current ? STATIC : path.join(STATIC, 'seasons', String(season));
   await mkdir(dir, { recursive: true });
   // (compact: the files are served to the browser as is)
   await writeFile(path.join(dir, 'skill-players.json'), JSON.stringify(out));
-  console.log(`${season}: ${TABS.map((t) => `${out[t].length} ${t}`).join(', ')}`);
+  console.log(`${season}: ${[...TABS, 'TM'].map((t) => `${out[t].length} ${t}`).join(', ')}`);
+}
+
+async function teamRows(season, teamDef, parks, logo) {
+  const [standings, hitting, pitching, postseason] = await Promise.all([
+    json(`${API}/standings?leagueId=103,104&season=${season}&standingsTypes=regularSeason`),
+    json(`${API}/teams/stats?stats=season&group=hitting&season=${season}&sportIds=1`),
+    json(`${API}/teams/stats?stats=season&group=pitching&season=${season}&sportIds=1`),
+    json(`${API}/schedule?sportId=1&season=${season}&gameType=F,D,L,W`).catch(() => ({ dates: [] })),
+  ]);
+  const ops = new Map((hitting.stats?.[0]?.splits ?? []).map((s) => [s.team.id, num(s.stat.ops)]));
+  // (the full name, "Toronto Blue Jays": the standings have just "Blue Jays")
+  const fullName = new Map((hitting.stats?.[0]?.splits ?? []).map((s) => [s.team.id, s.team.name]));
+  const era = new Map((pitching.stats?.[0]?.splits ?? []).map((s) => [s.team.id, num(s.stat.era)]));
+  const playoffWins = new Map();
+  for (const date of postseason.dates ?? []) {
+    for (const game of date.games ?? []) {
+      for (const side of ['home', 'away']) {
+        const t = game.teams?.[side];
+        if (t?.isWinner) playoffWins.set(t.team.id, (playoffWins.get(t.team.id) ?? 0) + 1);
+      }
+    }
+  }
+  const records = (standings.records ?? []).flatMap((r) => r.teamRecords ?? []);
+  const perGame = (t, key) => (t.gamesPlayed ? t[key] / t.gamesPlayed : null);
+  const rankBy = (key, dir) => {
+    const sorted = [...records].sort((a, b) => dir * (perGame(a, key) - perGame(b, key)));
+    return new Map(sorted.map((t, i) => [t.team.id, i + 1]));
+  };
+  const offRank = rankBy('runsScored', -1);
+  const defRank = rankBy('runsAllowed', 1);
+  return records.map((t) => {
+    const id = t.team.id;
+    const gp = t.gamesPlayed || t.wins + t.losses;
+    const rs = t.runsScored ?? 0;
+    const ra = t.runsAllowed ?? 0;
+    const pyth = rs + ra ? rs ** 1.83 / (rs ** 1.83 + ra ** 1.83) : 0.5;
+    return {
+      id: null,
+      gsisId: `TM-${id}`,
+      name: fullName.get(id) ?? t.team.name,
+      teamLogo: logo(t.team),
+      teamName: fullName.get(id) ?? t.team.name,
+      games: gp,
+      stats: {
+        wins: t.wins,
+        losses: t.losses,
+        winPct: gp ? round(t.wins / gp, 3) : null,
+        playoffWins: playoffWins.get(id) ?? 0,
+        runDiff: gp ? round((rs - ra) / gp, 2) : null,
+        offRank: offRank.get(id) ?? null,
+        defRank: defRank.get(id) ?? null,
+        ops: ops.get(id) ?? null,
+        era: era.get(id) ?? null,
+        fieldingRuns: teamDef.has(id) ? round(teamDef.get(id), 1) : null,
+        pythDiff: gp ? round(t.wins - gp * pyth, 1) : null,
+        parkFactor: parks.get(id) ?? null,
+      },
+      awards: [],
+    };
+  });
 }
 
 const seasons = process.env.ALL

@@ -1,5 +1,39 @@
 import type { CardFlag, FlagContext, SportConfig } from '@ranker/engine/sport';
+import { DATA } from '@ranker/engine/data';
+import type { SkillPlayer } from './positions';
 import { seasonName } from './awards';
+
+// The Teams tab's rows, built from the season's head coach rows (one per coach and team): a team's
+// coaches' records added up; the team's ratings, ranks and pace (every coach row carries them); its
+// playoff wins and title badges (the coach who finished the season)
+export function teamRows(): SkillPlayer[] {
+  const coaches = ((DATA.skillPlayers as Record<string, SkillPlayer[]>)['HC'] ?? []) as SkillPlayer[];
+  const teams = new Map<string, SkillPlayer[]>();
+  for (const c of coaches) teams.set(c.teamLogo, [...(teams.get(c.teamLogo) ?? []), c]);
+  return [...teams].map(([logo, list]) => {
+    const st = (key: string) => list.map((c) => c.stats[key as keyof SkillPlayer['stats']] ?? 0).reduce((a, b) => a + (b ?? 0), 0);
+    const wins = st('wins');
+    const losses = st('losses');
+    const first = list[0].stats;
+    return {
+      id: null,
+      gsisId: `TM-${logo.split('/').pop()!.replace('.svg', '')}`,
+      name: list[0].teamName ?? logo,
+      teamLogo: logo,
+      teamName: list[0].teamName,
+      games: list.reduce((a, c) => a + c.games, 0),
+      stats: {
+        ...first,
+        wins,
+        losses,
+        winPct: wins + losses ? Math.round((wins / (wins + losses)) * 1000) / 1000 : null,
+        playoffWins: Math.max(...list.map((c) => c.stats.playoffWins ?? 0)),
+        pythDiff: Math.round(st('pythDiff') * 10) / 10,
+      },
+      awards: [...new Set(list.flatMap((c) => (c.awards ?? []).filter((a) => a !== 'coy')))],
+    } as SkillPlayer;
+  });
+}
 
 // NBA: what the engine needs to know about basketball (the rest is beside this file: positions,
 // skill-presets, skills, awards, team-colors, logo-eras, about/)
@@ -9,6 +43,20 @@ export function cardFlags({ player, position, current, ordinal, innings }: FlagC
   const st = player.stats;
   const fixed = (v: number, d: number) => v.toFixed(d).replace(/^0\./, '.').replace(/^-0\./, '-.');
   const signed = (v: number) => (v > 0 ? '+' : '') + v.toFixed(1);
+
+  // Teams: the margin, and wins against it
+  if (position === 'TM') {
+    if (st.netRtg !== null && st.netRtg >= 8) flags.push({ icon: 'military_tech', tone: 'good', text: `Dominant: ${signed(st.netRtg)} points per 100 possessions` });
+    else if (st.netRtg !== null && st.netRtg <= -8) flags.push({ icon: 'trending_down', tone: 'bad', text: `Outscored badly: ${signed(st.netRtg)} points per 100 possessions` });
+    if (st.pythDiff !== null && Math.abs(st.pythDiff) >= 4) {
+      flags.push(
+        st.pythDiff > 0
+          ? { icon: 'casino', tone: 'info', text: `Won ${fixed(st.pythDiff, 1)} more games than the point differential says (close games: may not last)` }
+          : { icon: 'sentiment_dissatisfied', tone: 'info', text: `Won ${fixed(-st.pythDiff, 1)} fewer games than the point differential says (better than the record)` },
+      );
+    }
+    return flags;
+  }
 
   // Coaches: an interim stint, and how the team played against its talent
   if (position === 'HC') {
@@ -88,6 +136,7 @@ export const SPORT: SportConfig = {
   currentSeasonEnds: '2026-06-30',
   seasonText: seasonName,
   positionNames: {
+    TM: 'Team',
     PG: 'Point Guard',
     SG: 'Shooting Guard',
     SF: 'Small Forward',
@@ -96,6 +145,7 @@ export const SPORT: SportConfig = {
     HC: 'Head Coach',
   },
   tabNames: {
+    TM: 'Teams',
     PG: 'Point Guards',
     SG: 'Shooting Guards',
     SF: 'Small Forwards',
@@ -104,12 +154,21 @@ export const SPORT: SportConfig = {
     HC: 'Head Coaches',
   },
   coachTab: 'HC',
-  rowHeader: (position) => (position === 'HC' ? 'Coach' : 'Player'),
+  rowHeader: (position) => (position === 'HC' ? 'Coach' : position === 'TM' ? 'Team' : 'Player'),
+  extraRows: () => ({ TM: teamRows() }),
+  // The Teams tab's roster grades: each spot by your rankings, weighted by minutes
+  rosterGrades: [
+    { key: 'backcourt', positions: ['PG', 'SG'], usage: (p) => p.stats.minutes ?? 0 },
+    { key: 'wings', positions: ['SF'], usage: (p) => p.stats.minutes ?? 0 },
+    { key: 'frontcourt', positions: ['PF', 'C'], usage: (p) => p.stats.minutes ?? 0 },
+  ],
   roleWord: () => 'regular',
   playingTime: {
     label: 'Games',
     title: 'Leave out players who played less than this share of the season so far (1 shows everyone); the number is the games it takes',
     of: (player) => player.games ?? 0,
+    // (every team plays every game)
+    everyone: ['TM'],
   },
   // (NBA stats read per game)
   defaultStatBasis: 'perGame',

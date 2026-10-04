@@ -51,6 +51,32 @@ const HITTER_PRESETS: SkillPresetDef[] = [
 ];
 
 export const SKILL_PRESETS: Record<SkillPosition, SkillPresetDef[]> = {
+  TM: [
+    {
+      key: 'contender',
+      label: 'Contender',
+      description: 'The best teams: run differential, the record and postseason wins',
+      weights: { runDiff: 100, winPct: 90, playoffWins: 70 },
+    },
+    {
+      key: 'roster',
+      label: 'Best Roster',
+      description: 'The players, by your own rankings at every spot',
+      weights: { hitters: 100, rotation: 100, bullpen: 70 },
+    },
+    {
+      key: 'offense',
+      label: 'Offense',
+      description: 'The lineup: runs per game, OPS and its hitters',
+      weights: { offRank: 100, ops: 90, hitters: 60 },
+    },
+    {
+      key: 'prevention',
+      label: 'Run Prevention',
+      description: 'Pitching and defense: runs allowed, ERA, fielding and the staff',
+      weights: { defRank: 100, era: 90, fieldingRuns: 60, rotation: 50, bullpen: 40 },
+    },
+  ],
   C: HITTER_PRESETS,
   '1B': HITTER_PRESETS,
   '2B': HITTER_PRESETS,

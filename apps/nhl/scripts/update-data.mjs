@@ -19,6 +19,7 @@ import { writeFile, mkdir, access } from 'node:fs/promises';
 import path from 'node:path';
 import { curve } from '../../../libs/ranker/scripts/grades.mjs';
 import { blendWithLastSeason } from '../../../libs/ranker/scripts/early-season.mjs';
+import { coachesFor } from './coaches.mjs';
 
 const CURRENT_SEASON = 2027;
 // MoneyPuck's season files start with 2008-09
@@ -166,6 +167,8 @@ async function buildSeason(season) {
     get(`${STATS}/team`),
   ]);
   const [mpSkaters, mpGoalies] = [await moneypuck('skaters', season), await moneypuck('goalies', season)];
+  // (the head coaches' team expected goals, and last season's skaters for their Coaching Lift)
+  const [mpTeams, priorSkaters] = [await moneypuck('teams', season), await moneypuck('skaters', season - 1)];
   const skaterRookies = await rookies(season, skaterBios, 'skater');
   const goalieRookies = await rookies(season, goalieBios, 'goalie');
 
@@ -224,6 +227,7 @@ async function buildSeason(season) {
       games: row.gamesPlayed,
       rookie: skaterRookies.has(row.playerId),
       _offIce: share(even, 'OffIce'),
+      _team: team.code,
       stats: {
         ...team.record,
         toi: round(row.timeOnIcePerGame / 60, 2),
@@ -271,6 +275,7 @@ async function buildSeason(season) {
       teamName: team.name,
       games: row.gamesPlayed,
       rookie: goalieRookies.has(row.playerId),
+      _team: team.code,
       // (the shot quality he faced: expected goals against per 60 minutes, for his Defense grade)
       _faced: xga !== null && minutes ? (xga * 60) / minutes : null,
       stats: {
@@ -309,8 +314,20 @@ async function buildSeason(season) {
     g.stats.defense = defense.get(g.gsisId) ?? null;
     delete g._faced;
   }
-  // (early in the season, Linemates and Defense start from the team's last season: libs/ranker/scripts/early-season)
-  if (current) console.log(await blendWithLastSeason({ staticDir: STATIC, season, rows: out, keys: ['linemates', 'defense'], fullAt: 20 }));
+
+  // Head coaches (coaches.mjs), and every player's Coaching grade: his team's Coaching Lift, curved
+  // over the teams
+  const coached = await coachesFor({ season, current, get, web: WEB, records: RECORDS, report, teams, logos, teamAwards, mpSkaters, priorSkaters, mpTeams, share });
+  const coaching = curve(coached.lift);
+  for (const u of [...skaterRows, ...out.G]) {
+    u.stats.coaching = coaching.get(u._team) ?? null;
+    delete u._team;
+  }
+  for (const c of coached.rows) delete c._team;
+  out.HC = coached.rows;
+  console.log(coached.log);
+  // (early in the season, Linemates, Defense and Coaching start from the team's last season: libs/ranker/scripts/early-season)
+  if (current) console.log(await blendWithLastSeason({ staticDir: STATIC, season, rows: out, keys: ['linemates', 'defense', 'coaching'], fullAt: 20 }));
 
   for (const tab of Object.keys(out)) out[tab].sort((a, b) => a.name.localeCompare(b.name));
   const dir = current ? STATIC : path.join(STATIC, 'seasons', String(season));

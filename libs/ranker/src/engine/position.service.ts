@@ -1,9 +1,10 @@
 import { SPORT } from '@sport/sport';
 import { CURRENT_SEASON, dataSeason, loadData } from '@ranker/engine/data';
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, EMPTY, Observable, combineLatest, distinctUntilChanged, map } from 'rxjs';
+import { BehaviorSubject, EMPTY, Observable, combineLatest, distinctUntilChanged, map, merge } from 'rxjs';
+import { connectRosterGrades } from '@ranker/engine/roster-grades';
 import { DEFAULT_SPORT_SETTINGS, SKILL_UNITS, defaultRanking, rebuildUnits } from '@ranker/engine/unit-scoring';
-import type { SportSettings } from '@ranker/engine/sport';
+import type { EngineHost, SportSettings } from '@ranker/engine/sport';
 import { POSITIONS, Position, StatBasis, SkillPlayer, SkillPosition, SkillWeights, StatGroupId, presetWeights } from '@sport/positions';
 
 // Groups switched off with the sidebar eye, per position (every group is on at each page load)
@@ -242,13 +243,13 @@ export class PositionService {
 
   // The sport's values from other tabs (SPORT.connect), hooked up once: fires when they change. Hooked
   // up before any page, so the values are current when the pages hear about a change.
-  public sportChanged$: Observable<unknown> =
-    SPORT.connect?.({
-      settings$: this.sportSettings$,
-      rankedUnits: (position, emphasis) => this.rankedUnits(position as SkillPosition, emphasis),
-      rows: () => SKILL_UNITS,
-    }) ??
-    EMPTY;
+  // (and the Teams tab's roster grades from the tabs' rankings: engine/roster-grades)
+  private readonly host: EngineHost = {
+    settings$: this.sportSettings$,
+    rankedUnits: (position, emphasis) => this.rankedUnits(position as SkillPosition, emphasis),
+    rows: () => SKILL_UNITS,
+  };
+  public sportChanged$: Observable<unknown> = merge(SPORT.connect?.(this.host) ?? EMPTY, connectRosterGrades(this.host));
 
   get settings(): RankerSettings {
     return this.settingsSubject.value;

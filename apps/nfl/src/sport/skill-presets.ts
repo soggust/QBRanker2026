@@ -314,8 +314,8 @@ export const SKILL_PRESETS: Record<SkillPosition, SkillPresetDef[]> = {
     {
       key: 'winner',
       label: 'Winner',
-      description: 'Wins, close games and point differential',
-      weights: { winPct: 100, oneScoreWinPct: 80, pointDiffPerGame: 60 },
+      description: 'Wins and close games',
+      weights: { winPct: 100, oneScoreWinPct: 80 },
     },
     {
       key: 'overachiever',
@@ -326,14 +326,40 @@ export const SKILL_PRESETS: Record<SkillPosition, SkillPresetDef[]> = {
     {
       key: 'analytics',
       label: 'Analytics',
-      description: 'Plays the percentages: net EPA, 4th-down aggressiveness, point differential',
-      weights: { netEpa: 100, fourthDownGoPct: 80, pointDiffPerGame: 75 },
+      description: 'Plays the percentages: 4th-down aggressiveness, beating the betting lines',
+      weights: { fourthDownGoPct: 100, winsOverExpected: 60 },
     },
     {
       key: 'discipline',
       label: 'Discipline',
-      description: 'Clean football: few penalties, winning the turnover battle',
-      weights: { penaltiesPerGame: 100, turnoverDiffPerGame: 100 },
+      description: 'Clean football: few penalties',
+      weights: { penaltiesPerGame: 100 },
+    },
+  ],
+  TM: [
+    {
+      key: 'contender',
+      label: 'Contender',
+      description: 'The best teams: point differential, net EPA and the record',
+      weights: { pointDiffPerGame: 100, netEpa: 90, winPct: 80 },
+    },
+    {
+      key: 'roster',
+      label: 'Best Roster',
+      description: 'The players, by your own rankings at every spot',
+      weights: { qbPlay: 100, rbPlay: 60, weapons: 90, oline: 80, defense: 90 },
+    },
+    {
+      key: 'offense',
+      label: 'Offense',
+      description: "The offense: its EPA per play and rank, the QB and weapons",
+      weights: { offEpa: 100, offRank: 70, qbPlay: 60, weapons: 50 },
+    },
+    {
+      key: 'defense',
+      label: 'Defense',
+      description: "The defense: EPA per play allowed, its rank, takeaways",
+      weights: { defEpaAllowed: 100, defRank: 70, defense: 60, turnoverDiffPerGame: 50 },
     },
   ],
 };
