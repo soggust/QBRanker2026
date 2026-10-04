@@ -47,9 +47,12 @@ const MMA_ARCHETYPES: Archetype[] = [
   { name: 'Pound-for-Pound Great', test: (s, _, p) => p4pTop(p) },
   { name: 'Complete Mixed Martial Artist', test: (s) => s['volume'] >= 0.7 && s['wrestling'] >= 0.7 && s['striking-defense'] >= 0.6 && s['takedown-defense'] >= 0.6 },
   { name: 'Knockout Artist', test: (s) => s['power'] >= 0.88 },
-  { name: 'Volume Striker', test: (s) => s['volume'] >= 0.85 && s['power'] <= 0.6 },
+  // (a striker, not a grappler landing from the top: Sterling's output is control, not striking)
+  { name: 'Volume Striker', test: (s) => s['volume'] >= 0.85 && s['power'] <= 0.6 && s['grappling'] < 0.75 && s['wrestling'] < 0.75 },
   { name: 'Sniper', test: (s) => s['accuracy'] >= 0.85 && s['striking-defense'] >= 0.6 },
   { name: 'Smothering Wrestler', test: (s) => s['wrestling'] >= 0.85 && s['grappling'] >= 0.55 },
+  // (control over finishes: top position and the back, rarely a stoppage)
+  { name: 'Control Grappler', test: (s) => s['grappling'] >= 0.8 && s['power'] <= 0.35 },
   { name: 'Submission Specialist', test: (s) => s['grappling'] >= 0.85 },
   { name: 'Counter Striker', test: (s) => s['striking-defense'] >= 0.85 && s['volume'] <= 0.55 },
   { name: 'Sprawl and Brawl', test: (s) => s['takedown-defense'] >= 0.8 && s['volume'] >= 0.6 && s['wrestling'] <= 0.4 },
