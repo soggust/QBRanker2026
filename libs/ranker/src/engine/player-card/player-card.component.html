@@ -13,7 +13,7 @@
       <div class="hero-badge" [class.with-photo]="c.photo">
         <span class="hero-card" [class.white-logo]="c.whiteLogo"><img class="hero-logo" [src]="c.logo" alt="" /></span>
         @if (c.photo) {
-          <img class="hero-photo" [src]="c.photo" alt="" (error)="c.photo = null" />
+          <img class="hero-photo" [src]="c.photo" alt="" (error)="c.photo = cards.nextPhoto(c.player, 440)" />
         }
       </div>
 
@@ -217,7 +217,7 @@
                     <span class="comp-badge" [class.with-photo]="m.photo">
                       <span class="comp-card" [class.white-logo]="m.whiteLogo"><img class="comp-logo" [src]="m.logo" alt="" /></span>
                       @if (m.photo) {
-                        <img class="comp-photo" [src]="m.photo" alt="" (error)="m.photo = null" />
+                        <img class="comp-photo" [src]="m.photo" alt="" (error)="m.photo = cards.nextPhoto({ id: m.espnId }, 240)" />
                       }
                     </span>
                     <span class="comp-text">

@@ -36,6 +36,8 @@ export interface CardHost {
   // The stat groups with columns showing, for that reader's season
   shownGroups(reader: StatReader): SkillStatGroup[];
   headshot(unit: { id?: number | null }, w?: number): string | null;
+  // (one failed to load: the next headshot() is the next place to look)
+  noHeadshot(unit: { id?: number | null }): void;
 }
 
 const TABS: { id: CardTab; title: string }[] = [
@@ -120,6 +122,12 @@ export class PlayerCards {
   selectTab(tab: CardTab): void {
     this.tab = tab;
     if (tab === 'seasons' && this.card) this.rankCareer(this.card);
+  }
+
+  // A headshot that failed to load: the next place to look, or none
+  nextPhoto(unit: { id?: number | null }, w: number): string | null {
+    this.host.noHeadshot(unit);
+    return this.host.headshot(unit, w);
   }
 
   toggleGroup(id: string): void {
@@ -485,6 +493,7 @@ export class PlayerCards {
           logo: logoForSeason(teamLogo, season),
           color: badgeColor(teamLogo),
           whiteLogo: whiteLogo(teamLogo),
+          espnId,
           photo: this.host.headshot({ id: espnId }, 240),
         };
       });

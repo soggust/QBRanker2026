@@ -94,9 +94,11 @@ function castFlags({ position, overall, tableSeason, stats, value, grade }: Flag
   return flags;
 }
 
-// ESPN's headshot cutouts at the card's sizes (160 x 116, 240 x 174, 440 x 320)
-const headshot = (id: number, w: number) =>
-  `https://a.espncdn.com/combiner/i?img=/i/headshots/nfl/players/full/${id}.png&w=${w}&h=${Math.floor(w * 0.7273)}`;
+// ESPN's headshot cutouts at the card's sizes (160 x 116, 240 x 174, 440 x 320); a rookie ESPN has no NFL
+// photo of yet has his college one (its player pages show that too)
+const espnHeadshot = (league: string) => (id: number, w: number) =>
+  `https://a.espncdn.com/combiner/i?img=/i/headshots/${league}/players/full/${id}.png&w=${w}&h=${Math.floor(w * 0.7273)}`;
+const headshot = espnHeadshot('nfl');
 
 export const SPORT: SportConfig = {
   id: 'nfl',
@@ -151,6 +153,7 @@ export const SPORT: SportConfig = {
   statBasisHelp: { examples: 'yards, touchdowns, sacks...', pace: '17 games' },
   teamLogo: (key) => `assets/NFL_Icons/${key}.png`,
   headshot,
+  headshotFallback: espnHeadshot('college-football'),
   // The team's name, from its defense's row (none on the Defenses tab, or for a team-named row)
   teamName: (player, position, rows) => {
     const team = (rows['DEF'] ?? []).find((unit) => unit.teamLogo === player.teamLogo)?.name ?? null;

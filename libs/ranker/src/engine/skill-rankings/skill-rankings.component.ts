@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, HostListener, Input, OnChanges, ViewChild } from '@angular/core';
+import { Component, ElementRef, Input, OnChanges, ViewChild } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import {
@@ -38,7 +38,7 @@ import { RowGlide } from './row-glide';
   styleUrls: ['../../styles/components/rankings.component.scss'],
   standalone: false,
 })
-export class SkillRankingsComponent implements OnChanges, AfterViewInit, CardHost {
+export class SkillRankingsComponent implements OnChanges, CardHost {
   @ViewChild('rankingsList') rankingsList!: ElementRef<HTMLElement>;
 
   @Input({ required: true }) position!: SkillPosition;
@@ -114,10 +114,6 @@ export class SkillRankingsComponent implements OnChanges, AfterViewInit, CardHos
     });
   }
 
-  ngAfterViewInit(): void {
-    document.fonts.ready.then(() => this.placeNameLabel());
-  }
-
   ngOnChanges(): void {
     // A new tab starts scrolled to the top-left of its list
     this.rankingsList?.nativeElement.scrollTo({ top: 0, left: 0 });
@@ -156,7 +152,6 @@ export class SkillRankingsComponent implements OnChanges, AfterViewInit, CardHos
     this.playerList = this.limited(this.ranked(this.reader, this.listed(SKILL_UNITS, this.season)));
     this.publishOrder(false);
     this.glide.play(() => this.rankingsList?.nativeElement, from);
-    this.placeNameLabel();
   }
 
   // A row dragged to another place: the order is kept, by hand, until the tab re-sorts
@@ -170,28 +165,6 @@ export class SkillRankingsComponent implements OnChanges, AfterViewInit, CardHos
     const at = new Map(ids.map((id, i) => [id, i]));
     const players = this.listed(SKILL_UNITS, this.season);
     this.playerList = this.limited(players.sort((a, b) => (at.get(a.gsisId) ?? Infinity) - (at.get(b.gsisId) ?? Infinity)));
-    this.placeNameLabel();
-  }
-
-  // The name column's header label, centered from the drag handle to the end of the longest name showing
-  // (the column is wider than most names, so its own middle reads off to the right). Measured once the
-  // rows are drawn, and again when the names' font has loaded or the window's size changes the type.
-  @HostListener('window:resize')
-  placeNameLabel(): void {
-    requestAnimationFrame(() => {
-      const list = this.rankingsList?.nativeElement;
-      const header = list?.querySelector<HTMLElement>(':scope > li.header-row');
-      const info = header?.querySelector<HTMLElement>('.player-info');
-      const handle = header?.querySelector<HTMLElement>('.drag-indicator');
-      if (!list || !info || !handle) return;
-      let end = 0;
-      for (const name of Array.from(list.querySelectorAll<HTMLElement>(':scope > li.player .player-name strong'))) {
-        end = Math.max(end, name.getBoundingClientRect().right);
-      }
-      if (!end) return;
-      const at = (handle.getBoundingClientRect().left + end) / 2 - info.getBoundingClientRect().left;
-      info.style.setProperty('--label-at', `${Math.round(at)}px`);
-    });
   }
 
   // Remember this tab's order for when you come back
@@ -473,17 +446,20 @@ export class SkillRankingsComponent implements OnChanges, AfterViewInit, CardHos
     return whiteLogo(unit.teamLogo);
   }
 
-  // The player's headshot (a cutout on a clear background, sized for the team card; w: its width), or
-  // null once one failed to load
-  private missingHeadshots = new Set<number>();
+  // The player's headshot (a cutout on a clear background, sized for the team card; w: its width): the
+  // sport's, then its fallback once that fails to load (SPORT.headshotFallback), then none
+  private headshotMisses = new Map<number, number>();
 
   headshot(unit: { id?: number | null }, w = 160): string | null {
-    if (!unit.id || this.missingHeadshots.has(unit.id)) return null;
-    return SPORT.headshot(unit.id, w);
+    if (!unit.id) return null;
+    const misses = this.headshotMisses.get(unit.id) ?? 0;
+    if (misses === 0) return SPORT.headshot(unit.id, w);
+    if (misses === 1 && SPORT.headshotFallback) return SPORT.headshotFallback(unit.id, w);
+    return null;
   }
 
   noHeadshot(unit: { id?: number | null }): void {
-    if (unit.id) this.missingHeadshots.add(unit.id);
+    if (unit.id) this.headshotMisses.set(unit.id, (this.headshotMisses.get(unit.id) ?? 0) + 1);
   }
 
   // ---------------------------------------------------------------------------

@@ -73,6 +73,8 @@ export interface CardComp {
   logo: string;
   color: string;
   whiteLogo: boolean;
+  // The headshot's id, and its URL
+  espnId: number | null;
   photo: string | null;
 }
 

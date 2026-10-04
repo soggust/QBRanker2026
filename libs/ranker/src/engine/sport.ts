@@ -232,6 +232,8 @@ export interface SportConfig {
   // A team's logo file from its key ("NYK" -> "assets/NBA_Icons/NYK.svg"), and a player's headshot
   teamLogo: (key: string) => string;
   headshot: (id: number, width: number) => string;
+  // ...and where else to look when there's none there (the NFL: a rookie ESPN only has a college photo of)
+  headshotFallback?: (id: number, width: number) => string;
   // The card's team name (the player's teamName unless given; rows: that season's)
   teamName?: (player: SkillPlayer, position: string, rows: Record<string, SkillPlayer[]>) => string | null;
   // The card's sport-specific takes: first (the engine adds the profile-shape ones after), and last
