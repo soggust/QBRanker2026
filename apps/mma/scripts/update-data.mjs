@@ -597,6 +597,8 @@ for (const id of active) {
     return {
       division: tab === p4pTab ? (champion ?? home) : tab,
       ...(metaRank !== undefined ? { metaRank } : {}),
+      // (the belt he holds now: the card's archetype)
+      ...(champion ? { belt: 'UFC' } : pflChampion ? { belt: 'PFL' } : {}),
       ...(rankScore !== undefined ? { rankScore } : {}),
       inactive: !orgFresh,
       titleHolder: champion === tab,

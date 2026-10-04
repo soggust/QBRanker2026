@@ -203,7 +203,7 @@ export const ARCHETYPES: Record<SkillPosition, Archetype[]> = {
 };
 
 // When no archetype fits: a plain label for where they rank
-export function fallbackArchetype(position: SkillPosition, overall: number): string {
+export function fallbackArchetype(position: SkillPosition, overall: number, _player?: unknown): string {
   if (position === 'TM') return overall >= 0.75 ? 'Contender' : overall >= 0.45 ? 'Playoff Team' : overall >= 0.25 ? 'Bubble Team' : 'Rebuilding Team';
   const noun: Record<SkillPosition, string> = {
     TM: 'Team',

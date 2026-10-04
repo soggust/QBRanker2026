@@ -1,5 +1,5 @@
-import type { Archetype, SkillDef } from '@ranker/engine/skills';
-import { POSITIONS, SkillPosition } from '@sport/positions';
+import { leagueRank, type Archetype, type SkillDef } from '@ranker/engine/skills';
+import { POSITIONS, SkillPlayer, SkillPosition } from '@sport/positions';
 
 // MMA skills and archetypes for the fighter card (their shapes and the words for them:
 // libs/ranker/src/engine/skills.ts)
@@ -32,8 +32,19 @@ export const WINS_VS_PLAY: Partial<Record<SkillPosition, [results: string, play:
 );
 
 // Most specific first: the first whose test passes names the card
+// (the pound-for-pound top: an active fighter by his rating against his division's best, a retired one
+// by career points; the top 5 men, the top 3 women)
+const p4pTop = (p: SkillPlayer) => {
+  const women = ['WBW', 'WFLW', 'WSW', 'WP4P'].includes(p.division ?? '');
+  const tab = women ? 'WP4P' : 'P4P';
+  const rank = p.retired
+    ? leagueRank(p, [tab], (row) => row.stats['careerPoints'], 'careerPoints')
+    : leagueRank(p, [tab], (row) => (row.retired || row.games < 6 ? null : row.stats['rating']), 'rating');
+  return rank <= (women ? 3 : 5);
+};
+
 const MMA_ARCHETYPES: Archetype[] = [
-  { name: 'Pound-for-Pound Great', test: (s, o) => s['winning'] >= 0.92 && o >= 0.9 && s['volume'] >= 0.6 },
+  { name: 'Pound-for-Pound Great', test: (s, _, p) => p4pTop(p) },
   { name: 'Complete Mixed Martial Artist', test: (s) => s['volume'] >= 0.7 && s['wrestling'] >= 0.7 && s['striking-defense'] >= 0.6 && s['takedown-defense'] >= 0.6 },
   { name: 'Knockout Artist', test: (s) => s['power'] >= 0.88 },
   { name: 'Volume Striker', test: (s) => s['volume'] >= 0.85 && s['power'] <= 0.6 },
@@ -51,7 +62,13 @@ export const ARCHETYPES: Record<SkillPosition, Archetype[]> = Object.fromEntries
   Archetype[]
 >;
 
-// When no archetype fits: a plain label for where they rank
-export function fallbackArchetype(_position: SkillPosition, overall: number): string {
-  return overall >= 0.85 ? 'Title Contender' : overall >= 0.6 ? 'Ranked-Level Fighter' : overall >= 0.3 ? 'Gatekeeper' : 'Prospect or Journeyman';
+// When no archetype fits: his belt (a champion now, or a former UFC champion), or a plain label for
+// where he ranks
+export function fallbackArchetype(_position: SkillPosition, overall: number, player: SkillPlayer): string {
+  if (player.belt) return `${player.belt} Champion`;
+  if ((player.stats['titleWins'] ?? 0) > 0) return 'Former UFC Champion';
+  // (a contender: the top 5 of his own division by rating, among the active; not the top of whatever
+  // list the card was opened from)
+  if (!player.retired && player.division && leagueRank(player, [player.division], (row) => (row.retired || row.only === 'allTime' ? null : row.stats['rating']), `rating/${player.division}`) <= 5) return 'Title Contender';
+  return overall >= 0.6 ? 'Ranked-Level Fighter' : overall >= 0.3 ? 'Gatekeeper' : 'Prospect or Journeyman';
 }

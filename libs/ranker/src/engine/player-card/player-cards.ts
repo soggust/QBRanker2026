@@ -220,7 +220,7 @@ export class PlayerCards {
     const overall = at < 0 || list.length < 2 ? 0.5 : (list.length - 1 - at) / (list.length - 1);
     const { strengths, weaknesses, report } = scoutingReport(skills);
     return {
-      archetype: archetypeFor(this.position, skills, overall),
+      archetype: archetypeFor(this.position, skills, overall, player),
       blurb: overviewBlurb(strengths, [...weaknesses].reverse()),
       skills,
       report,
@@ -475,7 +475,7 @@ export class PlayerCards {
     if (at < 0) return null;
     const skills = this.skillsFor(this.host.readerFor(context), list[at], list);
     const pct = rankPct(at + 1, list.length);
-    return { season, rank: at + 1, of: list.length, pct, skills, archetype: archetypeFor(this.position, skills, pct) };
+    return { season, rank: at + 1, of: list.length, pct, skills, archetype: archetypeFor(this.position, skills, pct, list[at]) };
   }
 
   // The three closest seasons by anyone else (finished seasons only)

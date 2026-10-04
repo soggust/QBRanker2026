@@ -1,4 +1,4 @@
-import type { Archetype, SkillDef } from '@ranker/engine/skills';
+import { leagueRank, type Archetype, type SkillDef } from '@ranker/engine/skills';
 import { SkillPosition } from '@sport/positions';
 
 // NHL skills and archetypes for the player card (their shapes and the words for them:
@@ -67,7 +67,8 @@ export const WINS_VS_PLAY: Partial<Record<SkillPosition, [results: string, play:
 
 // Every skater can be a Hart-level player or a true two-way star
 const STAR: Archetype[] = [
-  { name: 'Hart Candidate', test: (s) => s['value'] >= 0.95 && s['possession'] >= 0.8 },
+  // (and among the league's top 10 scorers: a few per position would be too many)
+  { name: 'Hart Candidate', test: (s, _, p) => s['value'] >= 0.95 && s['possession'] >= 0.8 && leagueRank(p, ['C', 'LW', 'RW', 'D'], (row) => row.stats['points'], 'points') <= 10 },
   { name: 'Two-Way Star', test: (s) => s['value'] >= 0.8 && s['possession'] >= 0.8 && s['defense'] >= 0.7 },
 ];
 const FORWARD: Archetype[] = [
@@ -129,7 +130,7 @@ export const ARCHETYPES: Record<SkillPosition, Archetype[]> = {
 };
 
 // When no archetype fits: a plain label for where they rank
-export function fallbackArchetype(position: SkillPosition, overall: number): string {
+export function fallbackArchetype(position: SkillPosition, overall: number, _player?: unknown): string {
   if (position === 'TM') return overall >= 0.75 ? 'Contender' : overall >= 0.45 ? 'Playoff Team' : overall >= 0.25 ? 'Bubble Team' : 'Lottery Team';
   const noun: Record<SkillPosition, string> = { TM: 'Team', C: 'Center', LW: 'Winger', RW: 'Winger', D: 'Defenseman', G: 'Goalie', HC: 'Head Coach' };
   if (position === 'HC') return `${overall >= 0.75 ? 'High-End' : overall >= 0.45 ? 'Solid' : overall >= 0.25 ? 'Middling' : 'Struggling'} Head Coach`;

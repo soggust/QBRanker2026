@@ -1,4 +1,4 @@
-import type { Archetype, SkillDef } from '@ranker/engine/skills';
+import { leagueRank, type Archetype, type SkillDef } from '@ranker/engine/skills';
 import { SkillPosition } from '@sport/positions';
 
 // MLB skills and archetypes for the player card (their shapes and the words for them:
@@ -69,8 +69,13 @@ export const WINS_VS_PLAY: Partial<Record<SkillPosition, [results: string, play:
   SP: ['winning', 'runPrevention'],
 };
 
+// (the league's top 8 by WAR: an MVP race or a Cy Young race is a handful of players, not a few per
+// position)
+const HITTERS = ['C', '1B', '2B', '3B', 'SS', 'OF', 'DH'];
+const warRank = (player: Parameters<Archetype['test']>[2], tabs: string[]) => leagueRank(player, tabs, (row) => row.stats['war'], 'war');
+
 const HITTER_ARCHETYPES: Archetype[] = [
-  { name: 'MVP Candidate', test: (s) => s['value'] >= 0.92 && s['hitting'] >= 0.8 },
+  { name: 'MVP Candidate', test: (s, _, p) => s['hitting'] >= 0.8 && warRank(p, HITTERS) <= 8 },
   { name: 'Five-Tool Star', test: (s) => s['power'] >= 0.7 && s['contact'] >= 0.65 && s['speed'] >= 0.7 && s['defense'] >= 0.65 },
   { name: 'Three True Outcomes', test: (s) => s['power'] >= 0.75 && s['discipline'] >= 0.55 && s['contact'] <= 0.3 },
   { name: 'Slugger', test: (s) => s['power'] >= 0.85 },
@@ -102,7 +107,7 @@ export const ARCHETYPES: Record<SkillPosition, Archetype[]> = {
   OF: HITTER_ARCHETYPES,
   DH: HITTER_ARCHETYPES.filter((a) => !/Defensive|Glove|Five-Tool/.test(a.name)),
   SP: [
-    { name: 'Ace', test: (s) => s['value'] >= 0.88 && s['runPrevention'] >= 0.8 },
+    { name: 'Ace', test: (s, _, p) => s['runPrevention'] >= 0.8 && warRank(p, ['SP']) <= 8 },
     { name: 'Power Pitcher', test: (s) => s['strikeouts'] >= 0.85 },
     { name: 'Workhorse', test: (s) => s['durability'] >= 0.85 && s['runPrevention'] >= 0.45 },
     { name: 'Control Artist', test: (s) => s['control'] >= 0.85 && s['strikeouts'] <= 0.55 },
@@ -121,7 +126,7 @@ export const ARCHETYPES: Record<SkillPosition, Archetype[]> = {
 };
 
 // When no archetype fits: a plain label for where they rank
-export function fallbackArchetype(position: SkillPosition, overall: number): string {
+export function fallbackArchetype(position: SkillPosition, overall: number, _player?: unknown): string {
   if (position === 'TM') return overall >= 0.75 ? 'Contender' : overall >= 0.45 ? 'Playoff Team' : overall >= 0.25 ? 'Bubble Team' : 'Rebuilding Team';
   const noun: Record<SkillPosition, string> = {
     TM: 'Team',

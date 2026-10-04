@@ -1,6 +1,6 @@
 // The Overview's words: the scouting report, the one-line take, the archetype, and the flags the
 // profile's shape raises
-import { SkillPosition } from '@sport/positions';
+import { SkillPlayer, SkillPosition } from '@sport/positions';
 import { SPORT } from '@sport/sport';
 import { ARCHETYPES, SKILLS, VOLUME_VS_EFFICIENCY, WINS_VS_PLAY, fallbackArchetype } from '@sport/skills';
 import { CardFlag } from '@ranker/engine/sport';
@@ -46,9 +46,9 @@ export function skillScores(position: SkillPosition, skills: CardSkill[]): Recor
 }
 
 // The first of the position's archetypes the skills fit (overall: where they rank, 0 to 1)
-export function archetypeFor(position: SkillPosition, skills: CardSkill[], overall: number): string {
+export function archetypeFor(position: SkillPosition, skills: CardSkill[], overall: number, player: SkillPlayer): string {
   const scores = skillScores(position, skills);
-  return ARCHETYPES[position].find((a) => a.test(scores, overall))?.name ?? fallbackArchetype(position, overall);
+  return ARCHETYPES[position].find((a) => a.test(scores, overall, player))?.name ?? fallbackArchetype(position, overall, player);
 }
 
 // The shape of the profile (no holes, or one skill carrying the rest), and results against the play

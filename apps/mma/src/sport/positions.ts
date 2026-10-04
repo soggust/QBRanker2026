@@ -105,6 +105,8 @@ export interface SkillPlayer {
   // An active fighter's row in only one era's lists: his division now (current) where he fought most in
   // another (all-time)
   only?: 'current' | 'allTime';
+  // The belt he holds now: 'UFC' or 'PFL'
+  belt?: 'UFC' | 'PFL';
   // A UFC fighter's division rank in UFC.com's Meta Rankings (the Meta Rankings setting; null: unranked)
   metaRank?: number | null;
   // His promotion now (his last fight's), and whether he's ever fought in the UFC (UFC Fighters Only)
