@@ -51,8 +51,27 @@ const ROUND = 300;
 // The promotions whose fighters are listed (active: a fight in one in the last two years), and the ones
 // whose veterans are listed among the retired
 const MAJORS = new Set(['ufc', 'pfl', 'bellator', 'rizin']);
-const HISTORIC = new Set([...MAJORS, 'pride', 'strikeforce', 'wec']);
-const PROMOTIONS = { ufc: 'UFC', pfl: 'PFL', bellator: 'Bellator', rizin: 'Rizin', pride: 'PRIDE', strikeforce: 'Strikeforce', wec: 'WEC', ksw: 'KSW', 'cage-warriors': 'Cage Warriors', lfa: 'LFA' };
+const HISTORIC = new Set([...MAJORS, 'pride', 'strikeforce', 'wec', 'dream', 'k1']);
+const PROMOTIONS = {
+  ufc: 'UFC',
+  pfl: 'PFL',
+  bellator: 'Bellator',
+  rizin: 'Rizin',
+  pride: 'PRIDE',
+  strikeforce: 'Strikeforce',
+  wec: 'WEC',
+  ksw: 'KSW',
+  'cage-warriors': 'Cage Warriors',
+  lfa: 'LFA',
+  dream: 'DREAM',
+  'shooto-japan': 'Shooto',
+  pancrase: 'Pancrase',
+  k1: "K-1 HERO'S",
+  m1: 'M-1',
+  affliction: 'Affliction',
+  ifl: 'IFL',
+  proelite: 'EliteXC',
+};
 
 // ESPN's division names -> the app's tabs
 const DIVISIONS = {
@@ -296,9 +315,9 @@ async function ufcStatus(name) {
 // ---------------------------------------------------------------------------
 const titleOf = (out, key) =>
   out.get(key) ?? out.set(key, { reigns: 0, interim: 0, defenses: 0, winScore: 0, defenseScore: 0, promotions: [] }).get(key);
-function addReign(out, key, promotion, interim, defenses) {
+function addReign(out, key, weighAs, interim, defenses, promotion = weighAs) {
   const t = titleOf(out, key);
-  const w = TITLE_WEIGHT[promotion] ?? 0.5;
+  const w = weighAs === 'UFC-equivalent' ? 1 : (TITLE_WEIGHT[weighAs] ?? 0.5);
   t.reigns++;
   if (interim) t.interim++;
   t.defenses += defenses;
@@ -327,7 +346,8 @@ async function otherTitles(out) {
       if (!m) continue;
       const name = (m[2] ?? m[1] ?? m[3] ?? '').replace(/\s*\(.*\)$/, '').trim();
       if (!name) continue;
-      addReign(out, nameKey(name), promotion, INTERIM_ROW.test(row) || /interim/i.test(row.split('\n').slice(0, 3).join(' ')), (row.match(DEFENSE) ?? []).length);
+      // (a women's lightweight title counts in full: no premier promotion held the division)
+      addReign(out, nameKey(name), /Women's Lightweight/i.test(row) ? 'UFC-equivalent' : promotion, INTERIM_ROW.test(row) || /interim/i.test(row.split('\n').slice(0, 3).join(' ')), (row.match(DEFENSE) ?? []).length, promotion);
     }
   }
 }

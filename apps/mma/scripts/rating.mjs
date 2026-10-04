@@ -60,8 +60,18 @@ export function weightOf(fight) {
   const text = (fight.division ?? '').toLowerCase();
   const women = /^(w |women)/.test(text);
   const name = text.replace(/^(w |women'?s )/, '').trim();
-  const lbs = LEAGUE_POUNDS[fight.league]?.[name] ?? POUNDS[name] ?? null;
+  const lbs = earlyUfc(fight, name) ?? LEAGUE_POUNDS[fight.league]?.[name] ?? POUNDS[name] ?? null;
   return { lbs, women };
+}
+
+// The UFC's first weight classes, by today's: its "lightweight" was under 200 in 1997 and under 170 until
+// mid-2000 (Miletich, Hughes: welterweights), its "middleweight" under 200 until May 2001 (Frank
+// Shamrock, Ortiz, Liddell: light heavyweights). ESPN names the fights from June 2000 by today's classes.
+function earlyUfc(fight, name) {
+  if (fight.league !== 'ufc' || !fight.date) return null;
+  if (name === 'lightweight' && fight.date < '2000-06-01') return fight.date < '1998-01-01' ? 205 : 170;
+  if (name === 'middleweight' && fight.date < '2001-05-04') return 205;
+  return null;
 }
 
 // A fight's result for its first fighter: [score, weight], or null for a no contest
@@ -155,13 +165,22 @@ export function tabOf(lbs, women) {
 // The rating replayed month by month, for the all-time lists and each fighter's best moments. Every
 // month, each division's fighters (3+ fights, one in the last 450 days: Fight Matrix's rule) are ranked
 // by their cautious rating, across every promotion, and the top 15 earn career points: 1 a month for #1,
-// less down the list (0.75 a place: a reign at the top counts for more than years around it), scaled by how deep the division was then (full points from 30
+// less down the list (0.75 a place: a reign at the top counts for more than years around it), scaled by how deep the division was then (full points from 15
 // ranked fighters up), so ten years at the top of a deep division is worth the most. Also, for each
 // fighter: his peak cautious rating, the best opponent he beat and his quality wins (by the opponent's
 // cautious rating going in), and his opponents' average. A month's points count in full while he fights in
 // a promotion that was the sport's premier competition (the UFC; PRIDE and Strikeforce in their day, and
 // the WEC for the lighter weights), half elsewhere: a long reign over a thinner field is worth less
-export const POINTS = { places: 15, decay: 0.75, depth: 30, activeDays: 450, minFights: 3, qualityTop: 0.1, premier: ['ufc', 'pride', 'strikeforce', 'wec'], elsewhere: 0.5 };
+// The ratings stretch as the sport grows (the top 10's average was about 1870 in 2004, 2220 by 2025, the
+// median fighter's about 1570 throughout), so a peak, a best win, an opponent's rating and the quality-win
+// bar are each measured against their own month: less the average of the top tenth of the active men (3 to
+// 10 of them; of the women, 2 to 5) at the time, then put on today's scale. A 2005 peak and a 2025 one compare as fairly as
+// two fighters of the same day.
+export const ERA = { men: [3, 10], women: [2, 5] };
+// (the premier competition for a fighter: the premier promotions, or wherever he fought in a division
+// none of them had: women at 155, which the UFC never held, the PFL's women's lightweights the best there was)
+export const premierFor = (s) => POINTS.premier.includes(s.league) || (s.women && s.lbs >= 155);
+export const POINTS = { places: 15, decay: 0.75, depth: 15, activeDays: 450, minFights: 3, qualityTop: 0.1, premier: ['ufc', 'pride', 'strikeforce', 'wec'], elsewhere: 0.5 };
 
 export function history(fights, p = PARAMS) {
   const out = new Map();
@@ -173,21 +192,34 @@ export function history(fights, p = PARAMS) {
   const live = new Map();
   // (each fight's pre-fight cautious ratings, for quality wins; the bar is the top tenth of rated fighters)
   const before = [];
+  const eraBefore = [];
   let month = null;
+  // (the era's anchors, men's and women's: the average of the month's top 10 men, top 5 women)
+  const anchor = { men: null, women: null };
+  const anchorOf = (s) => anchor[s.women ? 'women' : 'men'];
   const snapshot = (endDay) => {
     const tabs = new Map();
+    const pools = { men: [], women: [] };
     for (const [id, s] of live) {
       if (s.fights < POINTS.minFights || endDay - s.last > POINTS.activeDays * 864e5) continue;
+      const c = cautious(s.r, deviationOn(s, endDay, p));
+      pools[s.women ? 'women' : 'men'].push(c);
       const tab = tabOf(s.lbs, s.women);
       if (!tab) continue;
-      (tabs.get(tab) ?? tabs.set(tab, []).get(tab)).push([id, cautious(s.r, deviationOn(s, endDay, p))]);
+      (tabs.get(tab) ?? tabs.set(tab, []).get(tab)).push([id, c]);
+    }
+    for (const g of ['men', 'women']) {
+      // (the top tenth of the active, within the bounds: a small early pool still measured by its few elite)
+      const k = Math.max(ERA[g][0], Math.min(ERA[g][1], Math.round(pools[g].length / 10)));
+      const top = pools[g].sort((x, y) => y - x).slice(0, k);
+      if (top.length >= ERA[g][0]) anchor[g] = top.reduce((sum, v) => sum + v, 0) / top.length;
     }
     for (const [tab, list] of tabs) {
       list.sort((a, b) => b[1] - a[1]);
       const depth = Math.min(1, list.length / POINTS.depth);
       list.slice(0, POINTS.places).forEach(([id], i) => {
         const h = of(id);
-        const pts = ((POINTS.decay ** i * depth) / 12) * (POINTS.premier.includes(live.get(id).league) ? 1 : POINTS.elsewhere);
+        const pts = ((POINTS.decay ** i * depth) / 12) * (premierFor(live.get(id)) ? 1 : POINTS.elsewhere);
         h.points += pts;
         h.byTab[tab] = (h.byTab[tab] ?? 0) + pts;
         if (i === 0) h.months1++;
@@ -214,14 +246,17 @@ export function history(fights, p = PARAMS) {
       const cb = cautious(sb.r, sb.rd);
       before.push(ca, cb);
       const tab = tabOf(weightOf(fight).lbs, weightOf(fight).women);
-      for (const [me, theirs, opp] of [[a, cb, sb], [b, ca, sa]]) {
+      for (const [me, raw, opp] of [[a, cb, sb], [b, ca, sa]]) {
         const h = of(me.id);
-        // (an opponent with no fight before this one is just the starting guess: not counted)
-        if (opp.fights > 0) {
-          h.oppSum += theirs;
-          h.oppN++;
-        }
-        if (me.winner && opp.fights > 0) {
+        // (an opponent with no fight before this one is just the starting guess: not counted; his rating
+        // against his era's anchor)
+        const era = anchorOf(opp);
+        if (opp.fights === 0 || era === null) continue;
+        const theirs = raw - era;
+        eraBefore.push(theirs);
+        h.oppSum += theirs;
+        h.oppN++;
+        if (me.winner) {
           if (h.bestWin === null || theirs > h.bestWin) h.bestWin = theirs;
           h.wins.push([theirs, tab]);
         }
@@ -231,16 +266,26 @@ export function history(fights, p = PARAMS) {
       for (const [f, s] of [[fight.fighters[0], sa], [fight.fighters[1], sb]]) {
         live.set(f.id, s);
         const h = of(f.id);
-        const c = cautious(s.r, s.rd);
-        if (s.fights >= POINTS.minFights && (h.peak === null || c > h.peak)) h.peak = c;
+        // (against his era's anchor)
+        h.women = s.women;
+        const era = anchorOf(s);
+        const c = cautious(s.r, s.rd) - (era ?? 0);
+        if (era !== null && s.fights >= POINTS.minFights && (h.peak === null || c > h.peak)) h.peak = c;
       }
     },
   });
   // (the months since the last fight, up to this one)
   catchUp(new Date().toISOString().slice(0, 7));
-  // (quality wins: over an opponent rated in the top tenth of every pre-fight rating)
-  before.sort((x, y) => x - y);
-  const bar = before[Math.floor(before.length * (1 - POINTS.qualityTop))];
+  // (quality wins: over an opponent rated in the top tenth of every pre-fight rating, each against its era)
+  eraBefore.sort((x, y) => x - y);
+  const bar = eraBefore[Math.floor(eraBefore.length * (1 - POINTS.qualityTop))];
+  // (back on today's scale: the anchors now)
+  for (const h of out.values()) {
+    const now = anchor[h.women ? 'women' : 'men'] ?? 0;
+    if (h.peak !== null) h.peak += now;
+    if (h.bestWin !== null) h.bestWin += now;
+    h.oppSum += now * h.oppN;
+  }
   for (const h of out.values()) {
     for (const [r, tab] of h.wins ?? []) {
       if (r < bar) continue;
@@ -249,5 +294,5 @@ export function history(fights, p = PARAMS) {
     }
     delete h.wins;
   }
-  return { history: out, qualityBar: bar };
+  return { history: out, qualityBar: bar + (anchor.men ?? 0) };
 }

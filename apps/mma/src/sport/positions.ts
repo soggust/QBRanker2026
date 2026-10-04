@@ -188,9 +188,14 @@ export type SkillPreset = string;
 // (and not shown there: shownWhen)
 const careerTotal = (allTimeBoost: number) => (settings: SportSettings) => (allTime(settings) ? allTimeBoost : 0);
 
+// The striking and grappling stats' weight: in full in the current lists, half all-time (where a career
+// is judged on its results; the style behind them a tiebreaker)
+const BOX_ALLTIME = 0.5;
+const boxBoost = (settings: SportSettings) => (allTime(settings) ? BOX_ALLTIME : 1);
+
 // Every division has the same columns; the presets (skill-presets.ts) weigh them
 const MMA_STATS: SkillStat[] = [
-  { key: 'games', label: 'Fights', description: 'Pro fights in the promotions covered: the UFC, PFL, Bellator, Rizin, PRIDE, Strikeforce, WEC, KSW, Cage Warriors and LFA (for context; not part of the ranking)', kind: 'efficiency', format: 'int', infoOnly: true },
+  { key: 'games', label: 'Fights', description: 'Pro fights in the promotions covered: the UFC, PFL, Bellator, Rizin, PRIDE, Strikeforce, WEC, KSW, Cage Warriors, LFA, DREAM, Shooto, Pancrase, K-1 HERO\'S, M-1, Affliction, the IFL and EliteXC (for context; not part of the ranking)', kind: 'efficiency', format: 'int', infoOnly: true },
   { key: 'winPct', label: 'Record', description: 'His whole pro record, wins-losses-draws, the regional fights before the big promotions too (ranked on win percentage; 3x behind its slider all-time)', kind: 'efficiency', format: 'record', boost: (settings) => (allTime(settings) ? 3 : 1) },
   { key: 'recent', label: 'Recent', description: 'His last five fights, newest first (ranked on a recency-weighted win rate); counts double behind its slider in the current lists, not at all in the all-time ones', kind: 'efficiency', format: 'recent', boost: (settings) => (allTime(settings) ? 0 : 2), shownWhen: (settings) => !allTime(settings) },
   { key: 'officialRank', label: 'Org Rank', description: "His promotion's official rank in his division, or pound-for-pound on those tabs: UFC.com's top 15 for a UFC fighter, the PFL's top 10 for a PFL one (counting five places below the UFC's, its field shallower: its champion as the UFC's #5, its #10 as #15). A champion is #0, above #1; an unranked fighter counts as #16; one fighting elsewhere (no rankings), or retired, as average. With UFC Fighters Only on, it's the UFC's rank. Counts 6x behind its slider among current fighters, 1x in the all-time lists", kind: 'efficiency', format: 'rank', negative: true, missingIsAverage: true, scale: [0, 16], settled: true, boost: (settings) => (allTime(settings) ? 1 : 6), shownWhen: (settings) => !allTime(settings) },
@@ -198,7 +203,7 @@ const MMA_STATS: SkillStat[] = [
   // (the title ones count double behind their sliders, the rating and career points 12x: the clearest marks of an elite career.
   // The career totals (titles, quality wins) don't count in the current lists, where form leads: careerTotal)
   { key: 'titleDefenses', label: 'Title Defenses', description: 'Successful title defenses, across every reign, in the UFC, PRIDE, Strikeforce, the WEC, Bellator and the PFL (from Wikipedia\'s lists of champions; a Bellator or PFL defense counts half); counts double behind its slider all-time, not at all in the current lists; scored in proportion, 0 to 10 (most fighters have none, so against the list one defense would score like ten)', kind: 'volume', format: 'int', boost: careerTotal(2), scale: [10, 0], shownWhen: (settings) => allTime(settings) },
-  { key: 'titleWins', label: 'Title Wins', description: 'Title fight wins in the UFC, PRIDE, Strikeforce, the WEC, Bellator and the PFL: winning a belt and each defense (a Bellator or PFL title counts half, an interim one half again); counts double behind its slider all-time, not at all in the current lists; scored in proportion, 0 to 10', kind: 'volume', format: 'int', boost: careerTotal(2), scale: [10, 0], shownWhen: (settings) => allTime(settings) },
+  { key: 'titleWins', label: 'Title Wins', description: 'Title fight wins in the UFC, PRIDE, Strikeforce, the WEC, Bellator and the PFL: winning a belt and each defense (a Bellator or PFL title counts half, an interim one half again); counts double behind its slider all-time, not at all in the current lists; scored in proportion, 0 to 10', kind: 'volume', format: 'int', boost: careerTotal(3), scale: [10, 0], shownWhen: (settings) => allTime(settings) },
   // (the competition ones: results weighed by whom they came against. The rating leads the current
   // lists and career points the all-time ones: each counts many times over behind its slider there)
   { key: 'rating', label: 'Rating', description: "The MMA rating: every pro fight since 1997 across the promotions covered, each moving it by how surprising the result was (beating a highly rated opponent is worth far more than beating a low one; a finish counts fully, a split decision for less), shown cautiously (less its uncertainty, which grows while he's out). On pound-for-pound tabs, against his own division's best. Counts 12x behind its slider in the current lists, not at all in the all-time ones (a career is judged by its points and peak, not where it stands today)", kind: 'efficiency', format: 'int', settled: true, boost: (settings) => (allTime(settings) ? 0 : 12), shownWhen: (settings) => !allTime(settings) },
@@ -208,19 +213,19 @@ const MMA_STATS: SkillStat[] = [
   { key: 'qualityWins', label: 'Quality Wins', description: 'Wins over opponents rated in the top tenth of every rated fighter going in; counts all-time, not in the current lists', kind: 'volume', format: 'int', boost: careerTotal(1), shownWhen: (settings) => allTime(settings) },
   { key: 'streak', label: 'Streak', description: 'His current run: +3 is three straight wins, -2 two straight losses (current form: not counted in the all-time lists)', kind: 'efficiency', format: 'int', boost: (settings) => (allTime(settings) ? 0 : 1), shownWhen: (settings) => !allTime(settings) },
   { key: 'finishRate', label: 'Finish %', description: 'Share of his wins that ended inside the distance (knockout or submission)', kind: 'efficiency', format: 'pct', missingIsAverage: true },
-  { key: 'slpm', label: 'Strikes / Min', description: 'Significant strikes landed per minute', kind: 'efficiency', format: 'dec2', skipMissing: true },
-  { key: 'strAcc', label: 'Strike Acc', description: 'Significant strikes landed per attempt (50+ attempts)', kind: 'efficiency', format: 'pct', skipMissing: true },
-  { key: 'sapm', label: 'Absorbed / Min', description: 'Significant strikes absorbed per minute (lower is better)', kind: 'efficiency', format: 'dec2', negative: true, skipMissing: true },
-  { key: 'strDef', label: 'Strike Def', description: "Opponents' significant strikes he avoided (50+ thrown at him)", kind: 'efficiency', format: 'pct', skipMissing: true },
-  { key: 'kd15', label: 'KD / 15', description: 'Knockdowns per 15 minutes: power', kind: 'efficiency', format: 'dec2', skipMissing: true },
-  { key: 'td15', label: 'TD / 15', description: 'Takedowns landed per 15 minutes', kind: 'efficiency', format: 'dec2', skipMissing: true },
-  { key: 'tdAcc', label: 'TD Acc', description: 'Takedowns landed per attempt (5+ attempts)', kind: 'efficiency', format: 'pct', skipMissing: true },
-  { key: 'tdDef', label: 'TD Def', description: "Opponents' takedowns he stopped (5+ attempted on him)", kind: 'efficiency', format: 'pct', skipMissing: true },
-  { key: 'sub15', label: 'Sub Att / 15', description: 'Submission attempts per 15 minutes', kind: 'efficiency', format: 'dec2', skipMissing: true },
+  { key: 'slpm', label: 'Strikes / Min', description: 'Significant strikes landed per minute', kind: 'efficiency', format: 'dec2', skipMissing: true, boost: boxBoost },
+  { key: 'strAcc', label: 'Strike Acc', description: 'Significant strikes landed per attempt (50+ attempts)', kind: 'efficiency', format: 'pct', skipMissing: true, boost: boxBoost },
+  { key: 'sapm', label: 'Absorbed / Min', description: 'Significant strikes absorbed per minute (lower is better)', kind: 'efficiency', format: 'dec2', negative: true, skipMissing: true, boost: boxBoost },
+  { key: 'strDef', label: 'Strike Def', description: "Opponents' significant strikes he avoided (50+ thrown at him)", kind: 'efficiency', format: 'pct', skipMissing: true, boost: boxBoost },
+  { key: 'kd15', label: 'KD / 15', description: 'Knockdowns per 15 minutes: power', kind: 'efficiency', format: 'dec2', skipMissing: true, boost: boxBoost },
+  { key: 'td15', label: 'TD / 15', description: 'Takedowns landed per 15 minutes', kind: 'efficiency', format: 'dec2', skipMissing: true, boost: boxBoost },
+  { key: 'tdAcc', label: 'TD Acc', description: 'Takedowns landed per attempt (5+ attempts)', kind: 'efficiency', format: 'pct', skipMissing: true, boost: boxBoost },
+  { key: 'tdDef', label: 'TD Def', description: "Opponents' takedowns he stopped (5+ attempted on him)", kind: 'efficiency', format: 'pct', skipMissing: true, boost: boxBoost },
+  { key: 'sub15', label: 'Sub Att / 15', description: 'Submission attempts per 15 minutes', kind: 'efficiency', format: 'dec2', skipMissing: true, boost: boxBoost },
   // (the differential leads the advanced ones: the striking battle in one number)
-  { key: 'strDiff', label: 'Strike Diff', description: 'Significant strikes landed minus absorbed, per minute: who wins the striking', kind: 'efficiency', format: 'dec2', skipMissing: true },
-  { key: 'kdAgainst', label: 'KD Against', description: 'Times knocked down per 15 minutes: his chin (lower is better)', kind: 'efficiency', format: 'dec2', negative: true, skipMissing: true },
-  { key: 'adv15', label: 'Adv / 15', description: 'Ground position advances (to the back, mount, side or half guard) per 15 minutes: control on the mat', kind: 'efficiency', format: 'dec2', skipMissing: true },
+  { key: 'strDiff', label: 'Strike Diff', description: 'Significant strikes landed minus absorbed, per minute: who wins the striking', kind: 'efficiency', format: 'dec2', skipMissing: true, boost: boxBoost },
+  { key: 'kdAgainst', label: 'KD Against', description: 'Times knocked down per 15 minutes: his chin (lower is better)', kind: 'efficiency', format: 'dec2', negative: true, skipMissing: true, boost: boxBoost },
+  { key: 'adv15', label: 'Adv / 15', description: 'Ground position advances (to the back, mount, side or half guard) per 15 minutes: control on the mat', kind: 'efficiency', format: 'dec2', skipMissing: true, boost: boxBoost },
   { key: 'oppRating', label: 'Opp Rating', description: "His opponents' average rating going into their fights: who he's beaten and lost to", kind: 'efficiency', format: 'int', missingIsAverage: true, settled: true },
   { key: 'fightTime', label: 'Avg Time', description: 'Average fight time, in minutes (for context; not part of the ranking)', kind: 'efficiency', format: 'dec1', infoOnly: true },
   { key: 'age', label: 'Age', description: 'Age (for context; not part of the ranking)', kind: 'efficiency', format: 'int', infoOnly: true },

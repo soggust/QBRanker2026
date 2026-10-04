@@ -1,5 +1,6 @@
 // Every pro MMA fight ESPN has, across the promotions it covers: the UFC (1997 on), PRIDE, WEC,
-// Strikeforce, Bellator, the PFL (and the WSOF before it), Rizin, KSW, Cage Warriors and LFA. Kept in
+// Strikeforce, Bellator, the PFL (and the WSOF before it), Rizin, KSW, Cage Warriors, LFA, DREAM, Shooto,
+// Pancrase, K-1 HERO'S, M-1, Affliction, the IFL and EliteXC. Kept in
 // scripts/fights/<promotion>/<year>.json, one row a fight; a finished year is fetched once and kept, so a
 // night's update only refetches this year's scoreboards. Each fight's method (ESPN's core API: KO/TKO,
 // submission, unanimous / split / majority decision, draw...) is fetched once, when the fight is first seen.
@@ -25,6 +26,15 @@ export const LEAGUES = {
   ksw: [2004, null],
   'cage-warriors': [2002, null],
   lfa: [2017, null],
+  // (Japan's and Russia's big shows, and the short-lived American ones between the UFC's eras)
+  dream: [2008, 2012],
+  'shooto-japan': [1997, null],
+  pancrase: [1997, null],
+  k1: [1997, 2010],
+  m1: [1997, null],
+  affliction: [2008, 2009],
+  ifl: [2006, 2009],
+  proelite: [2007, 2014],
 };
 
 // ESPN's methods (its slugs, "kotko", "decision---split", "submission-rear-naked-choke", "tko---doctor's
@@ -38,7 +48,7 @@ export function methodCode(name) {
   if (/^(majority-dra|draw)/.test(m)) return 'DRAW';
   if (/^(md|majority|decision---m)/.test(m)) return 'MD';
   if (/^(dq|disqualification)/.test(m)) return 'DQ';
-  if (/^(nc|no-contest|nocontest|overturned|could-not-co)/.test(m)) return 'NC';
+  if (/^(nc|no-contest|nocontest|overturned|could-not-co|match-cancel)/.test(m)) return 'NC';
   if (/^(dec|decision|technical-de)/.test(m)) return 'DEC';
   return m ? m.toUpperCase().slice(0, 12) : '?';
 }
