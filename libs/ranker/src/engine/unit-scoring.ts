@@ -168,24 +168,39 @@ export function weightedTotals<T>(
 }
 
 // Best first by their weighted totals, then the sport's head-to-head rule
-export function byTotals<T>(units: T[], totals: Map<T, number>): T[] {
-  return headToHead([...units].sort((a, b) => (totals.get(b) ?? 0) - (totals.get(a) ?? 0)));
+export function byTotals<T>(units: T[], totals: Map<T, number>, settings: SportSettings = DEFAULT_SPORT_SETTINGS): T[] {
+  // (head to head only between close scores, when the sport says how close: SPORT.beatGap)
+  const gap = SPORT.beatGap?.(settings);
+  let close: ((a: T, b: T) => boolean) | undefined;
+  if (gap !== undefined && units.length > 1) {
+    const values = units.map((unit) => totals.get(unit) ?? 0);
+    const mean = values.reduce((sum, v) => sum + v, 0) / values.length;
+    const sd = Math.sqrt(values.reduce((sum, v) => sum + (v - mean) ** 2, 0) / values.length);
+    close = (a, b) => Math.abs((totals.get(a) ?? 0) - (totals.get(b) ?? 0)) <= gap * sd;
+  }
+  return headToHead([...units].sort((a, b) => (totals.get(b) ?? 0) - (totals.get(a) ?? 0)), settings, close);
 }
 
-// The sport's head-to-head rule (SPORT.beat) over a sorted list: a row right below one it beat in their
-// latest meeting moves above it, down the list again until nothing moves (bounded, so a cycle of wins
-// can't loop)
-export function headToHead<T>(sorted: T[]): T[] {
-  const beat = SPORT.beat as ((a: T, b: T) => boolean) | undefined;
+// The sport's head-to-head rule (SPORT.beat) over a sorted list: a row below one it beat, within the
+// sport's reach (SPORT.beatReach; 1: right below), moves to just above it, down the list again until
+// nothing moves (bounded, so a cycle of wins can't loop)
+export function headToHead<T>(sorted: T[], settings: SportSettings = DEFAULT_SPORT_SETTINGS, close?: (a: T, b: T) => boolean): T[] {
+  const beat = SPORT.beat as ((a: T, b: T, settings: SportSettings) => boolean) | undefined;
   if (!beat) return sorted;
+  const reach = Math.max(1, SPORT.beatReach?.(settings) ?? 1);
   const list = [...sorted];
   for (let pass = 0; pass < 10; pass++) {
     let moved = false;
     for (let i = 0; i + 1 < list.length; i++) {
-      if (beat(list[i + 1], list[i])) {
-        [list[i], list[i + 1]] = [list[i + 1], list[i]];
-        moved = true;
-        i++;
+      // (the nearest row below, within reach, that beat this one moves just above it)
+      for (let j = i + 1; j <= Math.min(i + reach, list.length - 1); j++) {
+        if (beat(list[j], list[i], settings) && (!close || close(list[j], list[i]))) {
+          const [winner] = list.splice(j, 1);
+          list.splice(i, 0, winner);
+          moved = true;
+          i++;
+          break;
+        }
       }
     }
     if (!moved) break;
@@ -212,5 +227,5 @@ export function defaultRanking(
     undefined,
     settings,
   );
-  return byTotals(units, totals);
+  return byTotals(units, totals, settings);
 }

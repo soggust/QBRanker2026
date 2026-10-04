@@ -203,7 +203,7 @@ export class SkillRankingsComponent implements OnChanges, CardHost {
     const counted = this.stats.filter((stat) => !this.hidden[statGroup(stat)] && !this.statHidden(stat.key));
     const weights = combinedWeights(this.position, this.weights);
     const totals = weightedTotals(players, counted, weights, (player, stat) => reader.value(player, stat), undefined, this.sportSettings);
-    return byTotals(players, totals);
+    return byTotals(players, totals, this.sportSettings);
   }
 
   // Rookies Only (settings menu): players in their first season (first-year head coaches on a coaches'

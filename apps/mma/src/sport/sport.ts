@@ -184,10 +184,20 @@ export const SPORT: SportConfig = {
   // The pound-for-pound tabs: the top 30
   listLimit: (position) => (position === 'P4P' || position === 'WP4P' ? 30 : undefined),
   // Head to head: he won their latest meeting, in the last three years (fights are newest first)
-  beat: (a, b) => {
-    const meeting = a.fights?.find((f) => f[1] === b.name);
-    return !!meeting && meeting[2] === 'W' && meeting[0] >= THREE_YEARS_AGO;
+  // (all-time: the most of their meetings, ever: Stipe 2-1 over Cormier, Makhachev 2-0 over Volkanovski)
+  beat: (a, b, settings) => {
+    const meetings = (a.fights ?? []).filter((f) => f[1] === b.name);
+    if (!meetings.length) return false;
+    if (allTime(settings)) {
+      const won = meetings.filter((f) => f[2] === 'W').length;
+      const lost = meetings.filter((f) => f[2] === 'L').length;
+      return won > lost || (won === lost && meetings[0][2] === 'W');
+    }
+    return meetings[0][2] === 'W' && meetings[0][0] >= THREE_YEARS_AGO;
   },
+  // (all-time, head to head settles close calls only: Weidman's two wins don't put him over Anderson
+  // Silva's career)
+  beatGap: (settings) => (allTime(settings) ? 1 / 3 : undefined),
   // A fighter's rates rest on few fights early on: 4 fights count half, 12 count three-quarters. The
   // striking and grappling stats count only the fights they were kept for (the UFC's and PFL's): a
   // Bellator veteran's few PFL fights are a small sample, however long his career

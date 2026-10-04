@@ -699,7 +699,7 @@ for (const id of active) {
       pro: b?.pro ?? null,
       awards: [...(champion && (champion === tab || tab === p4pTab) ? ['champ'] : []), ...(p4p ? [`p4p${p4p}`] : [])],
       // His fights, newest first (the card's Fights tab): date, opponent, result, how it ended, event
-      fights: fights.slice(0, 15).map((f) => {
+      fights: fights.map((f) => {
         const opp = f.fighters.find((x) => x.id !== id);
         const me = f.fighters.find((x) => x.id === id);
         const result = me.winner ? 'W' : opp.winner ? 'L' : 'D';

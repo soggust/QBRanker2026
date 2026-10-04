@@ -254,9 +254,14 @@ export interface SportConfig {
   // fights a stat was kept for): each rate stat's score in the ranking is scaled by it, so small samples
   // sway the list less. The columns show the real values either way.
   reliability?: (player: SkillPlayer, stat: SkillStat) => number;
-  // Head to head: a beat b in their latest meeting (recent enough to count). After the weighted sort, a
-  // row placed right below one it beat moves above it (MMA: Pimblett over Saint Denis).
-  beat?: (a: SkillPlayer, b: SkillPlayer) => boolean;
+  // Head to head: a beat b (MMA: their latest meeting, recent enough to count; all-time, the most of
+  // their meetings). After the weighted sort, a row placed below one it beat, within beatReach rows (1
+  // if not given: right below), moves above it (MMA: Pimblett over Saint Denis).
+  beat?: (a: SkillPlayer, b: SkillPlayer, settings: SportSettings) => boolean;
+  beatReach?: (settings: SportSettings) => number;
+  // How close the two rows' scores must be for head to head to swap them, in standard deviations of the
+  // list's scores (none: any gap; MMA's all-time lists: a close call, not a career's whole resume)
+  beatGap?: (settings: SportSettings) => number | undefined;
   // How many rows a tab lists at most, its top ones (MMA's pound-for-pound tabs: 30); none: all
   listLimit?: (position: string) => number | undefined;
   // Rows the sport's settings can hide (MMA's retired fighters, until switched on)
