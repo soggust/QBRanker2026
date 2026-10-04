@@ -97,8 +97,9 @@ const MAX_Z = 2.5;
 // the sliders alone decide what matters. The slider multiplies it (50 = 1x, 100 = 2x). Support
 // grades count at a fifth of that strength, against the player (credit for doing more with less) or
 // for them (supportHelps). A missing value (null) scores as the list's worst, or as average for stats
-// flagged missingIsAverage and for support grades; a stat flagged skipMissing is left out of that unit's
-// total instead, the rest of it scaled up to make up its share. Small samples aren't adjusted for unless the sport
+// flagged missingIsAverage and for support grades; a stat flagged skipMissing takes, for that unit, his
+// average over the skipMissing stats he does have (MMA: a fighter's striking stats that weren't kept
+// read as he did in the ones that were), or the list's average if he has none. Small samples aren't adjusted for unless the sport
 // says how much evidence a row's rates rest on (SPORT.reliability, 0-1: MMA's fights): then each
 // rate's score is scaled by it, so a few fights' perfect numbers count less than a long career's.
 export function weightedTotals<T>(
@@ -110,9 +111,9 @@ export function weightedTotals<T>(
   settings: SportSettings = DEFAULT_SPORT_SETTINGS,
 ): Map<T, number> {
   const totals = new Map<T, number>(units.map((unit) => [unit, 0]));
-  // (the strength every unit's total is out of, and what each unit skipped of it)
-  let full = 0;
-  const skipped = new Map<T, number>();
+  // (each unit's skipMissing stats: the strength he's missing, and the score and strength he has)
+  const skipped = new Map<T, { missed: number; sum: number; strength: number }>();
+  const skipOf = (unit: T) => skipped.get(unit) ?? skipped.set(unit, { missed: 0, sum: 0, strength: 0 }).get(unit)!;
   for (const stat of stats) {
     const weight = weights[stat.key] ?? 0;
     if (!weight || stat.infoOnly) continue;
@@ -142,23 +143,26 @@ export function weightedTotals<T>(
     // the boost can depend on the sport's settings)
     const boost = typeof stat.boost === 'function' ? stat.boost(settings) : (stat.boost ?? 1);
     const strength = (weight / 50) * boost * (stat.support ? 0.2 : 1);
-    full += strength;
 
     units.forEach((unit, i) => {
       const v = raw[i];
       if (v === null && stat.skipMissing) {
-        skipped.set(unit, (skipped.get(unit) ?? 0) + strength);
+        skipOf(unit).missed += strength;
         return;
       }
       const scored = v !== null ? score(v) : stat.missingIsAverage || stat.support ? 0 : worst;
       // (a rate that isn't his own sample's, like the UFC's rank, isn't scaled: stat.settled)
       const trust = reliability && stat.kind === 'efficiency' && !stat.settled ? reliability(unit) : 1;
       totals.set(unit, (totals.get(unit) ?? 0) + scored * strength * trust);
+      if (stat.skipMissing) {
+        skipOf(unit).sum += scored * strength * trust;
+        skipOf(unit).strength += strength;
+      }
     });
   }
-  // (a unit that skipped stats: what it has counts for the whole)
-  for (const [unit, missed] of skipped) {
-    if (full > missed) totals.set(unit, (totals.get(unit) ?? 0) * (full / (full - missed)));
+  // (the skipMissing stats a unit is missing: his average over the ones he has)
+  for (const [unit, { missed, sum, strength }] of skipped) {
+    if (missed && strength) totals.set(unit, (totals.get(unit) ?? 0) + (sum / strength) * missed);
   }
   return totals;
 }

@@ -47,8 +47,8 @@ export interface StatDef<Key extends string = string> {
   // A missing value means too small a sample, so it scores as the league average, not the worst
   missingIsAverage?: boolean;
   // A missing value means the stat wasn't recorded for him (MMA's strike stats outside the UFC and
-  // PFL): it's left out of his total, and the stats he has count for its share, so he's judged on what's
-  // known rather than pulled toward the middle
+  // PFL): it takes his average over the other skipMissing stats he has (judged on what's known of that
+  // kind), or the list's average if he has none
   skipMissing?: boolean;
   // Counts for more behind its slider (2: double at every step; 0% still off), or by the sport's settings
   boost?: number | ((settings: SportSettings) => number);

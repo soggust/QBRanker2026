@@ -475,14 +475,17 @@ for (const id of active) {
   const b = cache[id]?.bio;
   const name = b?.name ?? fights[0].fighters.find((f) => f.id === id).name;
   // Listed in one division, and the pound-for-pound tab (men's or women's), with his whole career on both:
-  // an active fighter in his own division, a retired one where he earned the most career points (GSP at
-  // welterweight, not the middleweight of his last fight)
+  // the current lists in his own division now, the all-time ones in the division he fought in most (GSP at
+  // welterweight, not the middleweight of his last fight; Holloway at featherweight, where he's at
+  // lightweight now), ties to the one he earned the most career points in
   const home = homeTab(id);
   if (!home) continue;
   const h = careers.get(id);
   const women = WOMENS.includes(home);
-  const earned = Object.entries(h?.byTab ?? {}).filter(([t]) => WOMENS.includes(t) === women).sort((a, b) => b[1] - a[1]);
-  const listedIn = activeSet.has(id) || !earned.length ? home : earned[0][0];
+  const fought = {};
+  for (const f of fights) if (f.tab && WOMENS.includes(f.tab) === women) fought[f.tab] = (fought[f.tab] ?? 0) + 1;
+  const most = Object.keys(fought).sort((a, b) => fought[b] - fought[a] || (h?.byTab?.[b] ?? 0) - (h?.byTab?.[a] ?? 0) || (b === home) - (a === home))[0] ?? home;
+  const isActive = activeSet.has(id);
   const key = nameKey(name);
   // Results newest first: 1 a win, 0.5 a draw or no contest, 0 a loss
   const results = fights.map((f) => (f.fighters.find((x) => x.id === id).winner ? 1 : f.fighters.find((x) => x.id !== id).winner ? 0 : 0.5));
@@ -568,7 +571,14 @@ for (const id of active) {
       }),
     };
   };
-  for (const tab of [p4pTab, listedIn]) out[tab].push(row(tab));
+  out[p4pTab].push(row(p4pTab));
+  // (an active fighter's two divisions: his own now in the current lists, the one he fought in most in the
+  // all-time lists)
+  if (!isActive || most === home) out[isActive ? home : most].push(row(isActive ? home : most));
+  else {
+    out[home].push({ ...row(home), only: 'current' });
+    out[most].push({ ...row(most), only: 'allTime' });
+  }
 }
 for (const tab of Object.keys(out)) out[tab].sort((a, b) => a.name.localeCompare(b.name));
 await mkdir(STATIC, { recursive: true });

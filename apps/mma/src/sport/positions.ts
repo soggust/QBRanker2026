@@ -100,6 +100,9 @@ export interface SkillPlayer {
   stats: Record<SkillStatKey, number | null>;
   // His pro debut (in the promotions covered) came in the last year
   rookie?: boolean;
+  // An active fighter's row in only one era's lists: his division now (current) where he fought most in
+  // another (all-time)
+  only?: 'current' | 'allTime';
   // His promotion now (his last fight's), and whether he's ever fought in the UFC (UFC Fighters Only)
   promotion?: string | null;
   ufcCareer?: boolean;
@@ -189,12 +192,12 @@ const MMA_STATS: SkillStat[] = [
   // (the competition ones: results weighed by whom they came against. The rating leads the current
   // lists and career points the all-time ones: each counts many times over behind its slider there)
   { key: 'rating', label: 'Rating', description: "The MMA rating: every pro fight since 1997 across the promotions covered, each moving it by how surprising the result was (beating a highly rated opponent is worth far more than beating a low one; a finish counts fully, a split decision for less), shown cautiously (less its uncertainty, which grows while he's out). On pound-for-pound tabs, against his own division's best. Counts 12x behind its slider in the current lists, not at all in the all-time ones (a career is judged by its points and peak, not where it stands today)", kind: 'efficiency', format: 'int', settled: true, boost: (settings) => (allTime(settings) ? 0 : 12) },
-  { key: 'careerPoints', label: 'Career Pts', description: 'Points for every month he was ranked in his division by the rating (across every promotion): the most for #1, fewer down to #15, full points only when the division was deep; his whole career, in every division. Counts 12x behind its slider all-time, not at all in the current lists', kind: 'volume', format: 'dec1', boost: (settings) => (allTime(settings) ? 12 : 0) },
+  { key: 'careerPoints', label: 'Career Pts', description: 'Points for every month he was ranked in his division by the rating (across every promotion): the most for #1, fewer down to #15, full points only when the division was deep; his whole career, in every division. Counts 12x behind its slider all-time, not at all in the current lists; scored in proportion, 0 to 12 (most fighters have next to none, so against the list every great career would score alike)', kind: 'volume', format: 'dec1', scale: [12, 0], boost: (settings) => (allTime(settings) ? 12 : 0) },
   { key: 'peakRating', label: 'Peak', description: 'His best MMA rating at any point (shown cautiously, after 3+ fights); counts 3x behind its slider all-time', kind: 'efficiency', format: 'int', settled: true, boost: (settings) => (allTime(settings) ? 3 : 1) },
   { key: 'bestWin', label: 'Best Win', description: 'The rating of the best opponent he beat, going into the fight', kind: 'efficiency', format: 'int', missingIsAverage: true, settled: true },
   { key: 'qualityWins', label: 'Quality Wins', description: 'Wins over opponents rated in the top tenth of every rated fighter going in; counts all-time, not in the current lists', kind: 'volume', format: 'int', boost: careerTotal(1) },
   { key: 'mainEventWins', label: '5-Rd Wins', description: 'Wins in five-round fights: title fights and main events; counts all-time, not in the current lists', kind: 'volume', format: 'int', boost: careerTotal(1) },
-  { key: 'streak', label: 'Streak', description: 'His current run: +3 is three straight wins, -2 two straight losses', kind: 'efficiency', format: 'int' },
+  { key: 'streak', label: 'Streak', description: 'His current run: +3 is three straight wins, -2 two straight losses (current form: not counted in the all-time lists)', kind: 'efficiency', format: 'int', boost: (settings) => (allTime(settings) ? 0 : 1) },
   { key: 'finishRate', label: 'Finish %', description: 'Share of his wins that ended inside the distance (knockout or submission)', kind: 'efficiency', format: 'pct', missingIsAverage: true },
   { key: 'finishes', label: 'Finishes', description: 'Wins inside the distance; counts all-time, not in the current lists', kind: 'volume', format: 'int', boost: careerTotal(1) },
   { key: 'finished', label: 'Finished', description: 'Losses inside the distance (lower is better); counts all-time, not in the current lists', kind: 'volume', format: 'int', negative: true, boost: careerTotal(1) },

@@ -140,9 +140,9 @@ export const SPORT: SportConfig = {
   noSwitches: ['showInjured', 'rookiesOnly'],
   // (the women's tabs or the men's, one set at a time)
   tabVisible: (position, settings) => WOMENS_DIVISIONS.includes(position as Position) === womens(settings),
-  // Current fighters: today's roster; all-time: the retired fighters too (each listed in one division:
-  // his current one, or for a retired fighter the one he earned the most career points in)
-  rowVisible: (player, settings) => allTime(settings) || !player.retired,
+  // Current fighters: today's roster, each in his division now; all-time: the retired fighters too, each
+  // in the division he fought in most
+  rowVisible: (player, settings) => (allTime(settings) ? player.only !== 'current' : !player.retired && player.only !== 'allTime'),
   // UFC Fighters Only: the others hidden, after the ranking (everyone's still measured against the whole
   // division, so the UFC fighters keep their order)
   rowShown: (player, settings) => !settings['ufcOnly'] || (allTime(settings) ? !!player.ufcCareer : player.promotion === 'UFC'),
