@@ -249,8 +249,18 @@ async function titles() {
   return out;
 }
 
+// His whole pro record (his bio's: the regional fights too) for the Record column, over the one from the
+// promotions covered; that one when the bio has none, or one short of the fights here
+function proRecord(pro, c) {
+  const m = /^(\d+)-(\d+)(?:-(\d+))?/.exec(pro ?? '');
+  if (!m) return {};
+  const [wins, losses, ties] = [+m[1], +m[2], +(m[3] ?? 0)];
+  if (wins < c.wins || losses < c.losses) return {};
+  return { wins, losses, ties, winPct: round((wins + ties / 2) / (wins + losses + ties)) };
+}
+
 // ---------------------------------------------------------------------------
-// A fighter's UFC career, from his bouts and both sides' stats
+// A fighter's career in the promotions covered, from his bouts and both sides' stats
 // ---------------------------------------------------------------------------
 function career(id, fights, stats, cache) {
   const t = { secs: 0, ssl: 0, ssa: 0, kd: 0, tdl: 0, tda: 0, sm: 0, ad: 0, oppSecs: 0, oppSsl: 0, oppSsa: 0, oppKd: 0, oppTdl: 0, oppTda: 0 };
@@ -521,6 +531,7 @@ for (const id of active) {
       lastFive: results.slice(0, 5),
       stats: {
         ...c,
+        ...proRecord(b?.pro, c),
         streak,
         rating: rating === null ? null : Math.round(rating),
         peakRating: h?.peak == null ? null : Math.round(h.peak),

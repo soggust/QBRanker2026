@@ -24,7 +24,7 @@ export class AboutComponent {
 
   // Glossary entries: stat, what it means
   readonly glossary: [string, string][] = [
-    ["Record", "His record in the promotions covered (the UFC, PFL, Bellator, Rizin, PRIDE, Strikeforce, WEC, KSW, Cage Warriors and LFA), wins-losses-draws (draws include no contests)."],
+    ["Record", "His whole pro record, wins-losses-draws: every pro fight, the regional ones before the big promotions too (ranked on win percentage)."],
     ["Recent", "His last five fights as dots, newest first. Counts double behind its slider in the current lists, not at all all-time."],
     ["Rating", "The MMA rating: every pro fight since 1997 across those promotions, in order, each moving both fighters by how surprising the result was (beating a highly rated opponent is worth far more than beating a low one; a finish counts fully, a split decision for less). Shown cautiously: less half its uncertainty, which is wide for a newcomer and grows while a fighter sits out. On the P4P tabs, measured against his own division's best. It leads the current lists (12x behind its slider) and doesn't count all-time."],
     ["Career Pts", "Every month since 1997, each division's fighters (3+ fights, one in the last 450 days) are ranked by the rating across every promotion, and the top 15 earn points: the most for #1, fewer down the list, full points only when the division was deep. His career's total. It leads the all-time lists (12x behind its slider)."],

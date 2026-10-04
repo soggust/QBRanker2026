@@ -26,9 +26,9 @@ export function cardFlags({ player }: FlagContext): CardFlag[] {
     flags.push({ icon: 'trending_down', tone: 'bad', text: `Lost ${-st.streak} straight` });
   }
   // How he wins, and whether he gets finished
-  if (st.finishRate !== null && st.wins !== null && st.wins >= 4 && st.finishRate >= 0.75) {
+  if (st.finishRate !== null && st.finishes !== null && st.finishes >= 3 && st.finishRate >= 0.75) {
     flags.push({ icon: 'bolt', tone: 'good', text: `Finisher: ${pct(st.finishRate)} of his wins came inside the distance` });
-  } else if (st.finishRate !== null && st.wins !== null && st.wins >= 5 && st.finishRate <= 0.2) {
+  } else if (st.finishRate !== null && fights >= 6 && st.finishRate <= 0.2) {
     flags.push({ icon: 'gavel', tone: 'info', text: `Goes to the cards: ${pct(1 - st.finishRate)} of his wins were decisions` });
   }
   if (fights >= 6 && st.finished === 0) {
@@ -45,9 +45,6 @@ export function cardFlags({ player }: FlagContext): CardFlag[] {
   // (the rating's top tenth: a quality win's bar)
   if (st.qualityWins !== null && st.qualityWins >= 3) {
     flags.push({ icon: 'military_tech', tone: 'good', text: `${st.qualityWins} wins over top-tenth opponents` });
-  }
-  if (player.pro) {
-    flags.push({ icon: 'assignment', tone: 'info', text: `Pro record ${player.pro}` });
   }
   return flags;
 }
@@ -145,9 +142,10 @@ export const SPORT: SportConfig = {
   tabVisible: (position, settings) => WOMENS_DIVISIONS.includes(position as Position) === womens(settings),
   // Current fighters: today's roster; all-time: the retired fighters too (each listed in one division:
   // his current one, or for a retired fighter the one he earned the most career points in)
-  rowVisible: (player, settings) =>
-    (allTime(settings) || !player.retired) &&
-    (!settings['ufcOnly'] || (allTime(settings) ? !!player.ufcCareer : player.promotion === 'UFC')),
+  rowVisible: (player, settings) => allTime(settings) || !player.retired,
+  // UFC Fighters Only: the others hidden, after the ranking (everyone's still measured against the whole
+  // division, so the UFC fighters keep their order)
+  rowShown: (player, settings) => !settings['ufcOnly'] || (allTime(settings) ? !!player.ufcCareer : player.promotion === 'UFC'),
   // The UFC's rank in the ranking: a division's champion as #0 (above #1), an unranked fighter as #16
   // (just past the top 15). Unknown (average) for a retired fighter, and for one unranked without a UFC
   // fight in a year (fighting elsewhere, or dropped from the UFC's rankings for the layoff): that says

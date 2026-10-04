@@ -149,7 +149,7 @@ export class SkillRankingsComponent implements OnChanges, CardHost {
   // Sort by the sliders (weighted totals of every stat that counts), then head-to-head among ties
   sortPlayers(): void {
     const from = this.glide.measure(this.rankingsList?.nativeElement);
-    this.playerList = this.limited(this.ranked(this.reader, this.listed(SKILL_UNITS, this.season)));
+    this.playerList = this.limited(this.shown(this.ranked(this.reader, this.listed(SKILL_UNITS, this.season))));
     this.publishOrder(false);
     this.glide.play(() => this.rankingsList?.nativeElement, from);
   }
@@ -163,13 +163,19 @@ export class SkillRankingsComponent implements OnChanges, CardHost {
   // Put the list back in a saved order (players that have since appeared go at the end)
   private restoreOrder(ids: string[]): void {
     const at = new Map(ids.map((id, i) => [id, i]));
-    const players = this.listed(SKILL_UNITS, this.season);
+    const players = this.shown(this.listed(SKILL_UNITS, this.season));
     this.playerList = this.limited(players.sort((a, b) => (at.get(a.gsisId) ?? Infinity) - (at.get(b.gsisId) ?? Infinity)));
   }
 
   // Remember this tab's order for when you come back
   private publishOrder(manual: boolean): void {
     this.positionService.setUnitOrder(this.position, this.playerList.map((player) => player.gsisId), manual);
+  }
+
+  // The ranked rows the sport's view-only filter keeps (SPORT.rowShown)
+  private shown(list: SkillPlayer[]): SkillPlayer[] {
+    const show = SPORT.rowShown;
+    return show ? list.filter((player) => show(player, this.sportSettings)) : list;
   }
 
   // The tab's top rows only, when the sport caps it (SPORT.listLimit)

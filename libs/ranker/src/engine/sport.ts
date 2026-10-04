@@ -258,6 +258,9 @@ export interface SportConfig {
   listLimit?: (position: string) => number | undefined;
   // Rows the sport's settings can hide (the UFC's retired fighters, until switched on)
   rowVisible?: (player: SkillPlayer, settings: SportSettings) => boolean;
+  // Rows the sport's settings hide from view only, after the ranking (MMA's UFC Fighters Only): the
+  // stats are still measured against everyone rowVisible lists, so hiding some doesn't reorder the rest
+  rowShown?: (player: SkillPlayer, settings: SportSettings) => boolean;
   // A tab the sport's settings can hide (the UFC's women's divisions, until switched on)
   tabVisible?: (position: string, settings: SportSettings) => boolean;
   // A history tab on the card in place of the seasons one (the UFC's fights): its title and icon, and a
