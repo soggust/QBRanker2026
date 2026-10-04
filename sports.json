@@ -3,5 +3,5 @@
   { "id": "mlb", "label": "MLB" },
   { "id": "nba", "label": "NBA" },
   { "id": "nhl", "label": "NHL" },
-  { "id": "ufc", "label": "UFC" }
+  { "id": "ufc", "label": "UFC", "devOnly": true }
 ]

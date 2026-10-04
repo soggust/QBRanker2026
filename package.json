@@ -5,7 +5,7 @@
     "ng": "ng",
     "dev": "node dev.mjs",
     "start": "ng serve nfl",
-    "build": "ng build nfl && ng build mlb && ng build nba && ng build nhl && ng build ufc",
+    "build": "ng build nfl && ng build mlb && ng build nba && ng build nhl",
     "rollover": "node scripts/rollover.mjs",
     "watch": "ng build nfl --watch --configuration development",
     "test": "ng test nfl",
