@@ -421,7 +421,7 @@
       "gsisId": "DEF-IND",
       "name": "Indianapolis Colts",
       "teamLogo": "assets/NFL_Icons/Colts.png",
-      "games": 3,
+      "games": 4,
       "stats": {
         "epaAllowed": 0.124,
         "passEpaAllowed": 0.201,
@@ -429,8 +429,8 @@
         "successAllowed": 0.485,
         "sacks": 7,
         "takeaways": 1,
-        "ptsAllowedPerGame": 30.3,
-        "fantasyStd": 5,
+        "ptsAllowedPerGame": 26,
+        "fantasyStd": 9,
         "receptions": 0,
         "pressureRate": 0.189,
         "missedTacklePct": 0.122,
@@ -997,7 +997,7 @@
       "gsisId": "DEF-WAS",
       "name": "Washington Commanders",
       "teamLogo": "assets/NFL_Icons/Commanders.png",
-      "games": 3,
+      "games": 4,
       "stats": {
         "epaAllowed": 0.071,
         "passEpaAllowed": 0.244,
@@ -1005,8 +1005,8 @@
         "successAllowed": 0.474,
         "sacks": 5,
         "takeaways": 3,
-        "ptsAllowedPerGame": 30.7,
-        "fantasyStd": 12,
+        "ptsAllowedPerGame": 30.5,
+        "fantasyStd": 11,
         "receptions": 0,
         "pressureRate": 0.319,
         "missedTacklePct": 0.105,
@@ -1196,26 +1196,26 @@
       "gsisId": "HC-Dan Quinn",
       "name": "Dan Quinn",
       "teamLogo": "assets/NFL_Icons/Commanders.png",
-      "games": 3,
+      "games": 4,
       "stats": {
         "wins": 1,
-        "losses": 2,
+        "losses": 3,
         "ties": 0,
-        "winPct": 0.333,
-        "winsOverExpected": 0.11,
-        "atsPct": 0.667,
-        "pointDiffPerGame": -5.7,
+        "winPct": 0.25,
+        "winsOverExpected": -0.22,
+        "atsPct": 0.5,
+        "pointDiffPerGame": -8.5,
         "netEpa": -0.048,
         "offEpa": 0.023,
         "defEpaAllowed": 0.071,
-        "ptsPerGame": 25,
-        "ptsAllowedPerGame": 30.7,
-        "yardsPerGame": 314.7,
-        "yardsAllowedPerGame": 363,
-        "stEpaPerGame": -2.37,
+        "ptsPerGame": 22,
+        "ptsAllowedPerGame": 30.5,
+        "yardsPerGame": 236,
+        "yardsAllowedPerGame": 272.3,
+        "stEpaPerGame": -1.78,
         "oneScoreWinPct": 0.5,
-        "penaltiesPerGame": 6.7,
-        "turnoverDiffPerGame": 0.7,
+        "penaltiesPerGame": 5,
+        "turnoverDiffPerGame": 0.5,
         "fourthDownGoPct": 0.75
       },
       "competitive": {
@@ -1955,26 +1955,26 @@
       "gsisId": "HC-Shane Steichen",
       "name": "Shane Steichen",
       "teamLogo": "assets/NFL_Icons/Colts.png",
-      "games": 3,
+      "games": 4,
       "stats": {
-        "wins": 1,
+        "wins": 2,
         "losses": 2,
         "ties": 0,
-        "winPct": 0.333,
-        "winsOverExpected": -0.18,
-        "atsPct": 0.667,
-        "pointDiffPerGame": -6.3,
+        "winPct": 0.5,
+        "winsOverExpected": 0.15,
+        "atsPct": 0.75,
+        "pointDiffPerGame": -0.5,
         "netEpa": -0.16,
         "offEpa": -0.036,
         "defEpaAllowed": 0.124,
-        "ptsPerGame": 24,
-        "ptsAllowedPerGame": 30.3,
-        "yardsPerGame": 293.3,
-        "yardsAllowedPerGame": 418.3,
-        "stEpaPerGame": 3.09,
+        "ptsPerGame": 25.5,
+        "ptsAllowedPerGame": 26,
+        "yardsPerGame": 220,
+        "yardsAllowedPerGame": 313.8,
+        "stEpaPerGame": 2.32,
         "oneScoreWinPct": 0.5,
-        "penaltiesPerGame": 5,
-        "turnoverDiffPerGame": -1.7,
+        "penaltiesPerGame": 3.8,
+        "turnoverDiffPerGame": -1.3,
         "fourthDownGoPct": 0.8
       },
       "competitive": {
@@ -2505,7 +2505,7 @@
       "gsisId": "OL-IND",
       "name": "Indianapolis Colts",
       "teamLogo": "assets/NFL_Icons/Colts.png",
-      "games": 3,
+      "games": 4,
       "stats": {
         "sacksAllowed": 6,
         "qbHitsAllowed": 20,
@@ -2517,7 +2517,7 @@
         "runEpa": 0.064,
         "runSuccess": 0.43,
         "shortYardagePct": 0.7,
-        "linePenaltiesPerGame": 2.3,
+        "linePenaltiesPerGame": 1.8,
         "timeToThrow": 2.796
       },
       "competitive": {
@@ -2529,7 +2529,7 @@
         "runEpa": 0.007,
         "runSuccess": 0.394,
         "shortYardagePct": 0.7,
-        "linePenaltiesPerGame": 1.7
+        "linePenaltiesPerGame": 1.3
       }
     },
     {
@@ -3081,7 +3081,7 @@
       "gsisId": "OL-WAS",
       "name": "Washington Commanders",
       "teamLogo": "assets/NFL_Icons/Commanders.png",
-      "games": 3,
+      "games": 4,
       "stats": {
         "sacksAllowed": 3,
         "qbHitsAllowed": 17,
@@ -3093,7 +3093,7 @@
         "runEpa": -0.139,
         "runSuccess": 0.386,
         "shortYardagePct": 0.833,
-        "linePenaltiesPerGame": 2.3,
+        "linePenaltiesPerGame": 1.8,
         "timeToThrow": 3.086
       },
       "competitive": {
@@ -3105,7 +3105,7 @@
         "runEpa": -0.126,
         "runSuccess": 0.365,
         "shortYardagePct": 0.833,
-        "linePenaltiesPerGame": 2.3
+        "linePenaltiesPerGame": 1.8
       }
     }
   ],
@@ -4207,8 +4207,8 @@
         "epaPerCarry": -0.276,
         "epaPerTarget": -1.498
       },
-      "injuryStatus": "Active",
-      "injured": false
+      "injuryStatus": "Out",
+      "injured": true
     },
     {
       "id": 4685116,
@@ -6231,7 +6231,7 @@
         "epaPerCarry": -0.016,
         "epaPerTarget": -0.054
       },
-      "injuryStatus": "Questionable",
+      "injuryStatus": "Active",
       "injured": false
     },
     {
@@ -10457,7 +10457,7 @@
         "epaPerCarry": 1.649,
         "epaPerTarget": 1.682
       },
-      "injuryStatus": "Questionable",
+      "injuryStatus": "Active",
       "injured": false
     }
   ],
@@ -10767,8 +10767,8 @@
         "epaPerCarry": 0,
         "epaPerTarget": -0.133
       },
-      "injuryStatus": "Questionable",
-      "injured": false
+      "injuryStatus": "Out",
+      "injured": true
     },
     {
       "id": 4258595,
@@ -11251,7 +11251,7 @@
         "epaPerCarry": 0,
         "epaPerTarget": 1.507
       },
-      "injuryStatus": "Questionable",
+      "injuryStatus": "Active",
       "injured": false
     },
     {
@@ -11867,7 +11867,7 @@
         "epaPerCarry": 1.24,
         "epaPerTarget": 0.389
       },
-      "injuryStatus": "Questionable",
+      "injuryStatus": "Active",
       "injured": false
     },
     {
