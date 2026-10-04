@@ -1142,6 +1142,15 @@ export const SKILL_STATS: Record<SkillPosition, SkillStat[]> = {
       format: 'rank',
       negative: true,
     },
+    // (special teams, the third phase: the ranks above cover only offense and defense)
+    {
+      key: 'stEpaPerGame',
+      label: 'ST EPA / Game',
+      name: 'Special Teams EPA per Game',
+      description: 'Expected Points Added per game on kicks, punts and returns (net of opponents)',
+      kind: 'efficiency',
+      format: 'dec2',
+    },
     {
       key: 'penaltiesPerGame',
       label: 'Penalties / Game',
