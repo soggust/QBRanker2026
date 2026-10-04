@@ -66,9 +66,10 @@ export const ARCHETYPES: Record<SkillPosition, Archetype[]> = Object.fromEntries
 // where he ranks
 export function fallbackArchetype(_position: SkillPosition, overall: number, player: SkillPlayer): string {
   if (player.belt) return `${player.belt} Champion`;
-  if ((player.stats['titleWins'] ?? 0) > 0) return 'Former UFC Champion';
-  // (a contender: the top 5 of his own division by rating, among the active; not the top of whatever
+  // (a former champion: the UFC's if he held its title, else the first other promotion's he did)
+  if (player.titles?.length) return `Former ${player.titles.includes('UFC') ? 'UFC' : player.titles[0]} Champion`;
+  // (a contender: the top 3 of his own division by rating, among the active; not the top of whatever
   // list the card was opened from)
-  if (!player.retired && player.division && leagueRank(player, [player.division], (row) => (row.retired || row.only === 'allTime' ? null : row.stats['rating']), `rating/${player.division}`) <= 5) return 'Title Contender';
+  if (!player.retired && player.division && leagueRank(player, [player.division], (row) => (row.retired || row.only === 'allTime' ? null : row.stats['rating']), `rating/${player.division}`) <= 3) return 'Title Contender';
   return overall >= 0.6 ? 'Ranked-Level Fighter' : overall >= 0.3 ? 'Gatekeeper' : 'Prospect or Journeyman';
 }

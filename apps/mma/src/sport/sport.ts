@@ -169,6 +169,11 @@ export const SPORT: SportConfig = {
   // fight in a year (fighting elsewhere, or dropped from the UFC's rankings for the layoff): that says
   // nothing about how good he is.
   scoreValue: (player, stat, shown) => {
+    // (never in a monthly top 15: past the end of it)
+    if (stat.key === 'peakRank') return shown ?? 16;
+    // (titles weighed: a Bellator or PFL title half, an interim one half again)
+    if (stat.key === 'titleWins') return player.titleScore?.wins ?? shown;
+    if (stat.key === 'titleDefenses') return player.titleScore?.defenses ?? shown;
     if (stat.key !== 'officialRank') return undefined;
     if (player.titleHolder) return 0;
     // (pound-for-pound: the P4P top 15, then the division ranks behind them)

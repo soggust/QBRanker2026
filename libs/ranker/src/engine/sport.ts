@@ -52,6 +52,9 @@ export interface StatDef<Key extends string = string> {
   skipMissing?: boolean;
   // Counts for more behind its slider (2: double at every step; 0% still off), or by the sport's settings
   boost?: number | ((settings: SportSettings) => number);
+  // Only under some of the sport's settings (MMA: today's rating in the current lists, career points in
+  // the all-time ones): otherwise no column, no slider, and no part in the ranking
+  shownWhen?: (settings: SportSettings) => boolean;
   // Scored on a fixed scale, best to worst, rather than against the list (the UFC's rank: the champion
   // to unranked)
   scale?: [best: number, worst: number];

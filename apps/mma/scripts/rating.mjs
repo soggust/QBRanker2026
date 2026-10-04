@@ -167,7 +167,7 @@ export function history(fights, p = PARAMS) {
   const out = new Map();
   const of = (id) => {
     let h = out.get(id);
-    if (!h) out.set(id, (h = { points: 0, byTab: {}, peak: null, bestWin: null, qualityWins: 0, qualityByTab: {}, oppSum: 0, oppN: 0, months1: 0, wins: [] }));
+    if (!h) out.set(id, (h = { points: 0, byTab: {}, peak: null, bestWin: null, qualityWins: 0, qualityByTab: {}, oppSum: 0, oppN: 0, months1: 0, bestPlace: null, wins: [] }));
     return h;
   };
   const live = new Map();
@@ -191,6 +191,7 @@ export function history(fights, p = PARAMS) {
         h.points += pts;
         h.byTab[tab] = (h.byTab[tab] ?? 0) + pts;
         if (i === 0) h.months1++;
+        if (h.bestPlace === null || i + 1 < h.bestPlace) h.bestPlace = i + 1;
       });
     }
   };

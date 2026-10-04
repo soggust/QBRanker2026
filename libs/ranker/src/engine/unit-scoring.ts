@@ -116,7 +116,7 @@ export function weightedTotals<T>(
   const skipOf = (unit: T) => skipped.get(unit) ?? skipped.set(unit, { missed: 0, sum: 0, strength: 0 }).get(unit)!;
   for (const stat of stats) {
     const weight = weights[stat.key] ?? 0;
-    if (!weight || stat.infoOnly) continue;
+    if (!weight || stat.infoOnly || stat.shownWhen?.(settings) === false) continue;
 
     const raw = units.map((unit) => {
       const shown = value(unit, stat);

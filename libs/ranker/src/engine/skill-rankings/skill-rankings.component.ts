@@ -297,7 +297,7 @@ export class SkillRankingsComponent implements OnChanges, CardHost {
   // The eye decides first; then a stat the season didn't record has no column; then Unweighted Stats
   // decides whether a 0% stat shows (display-only columns like Games always do)
   private isShown(stat: SkillStat, reader: StatReader): boolean {
-    if (this.statHidden(stat.key)) return false;
+    if (this.statHidden(stat.key) || stat.shownWhen?.(this.sportSettings) === false) return false;
     const weights = combinedWeights(this.position, this.weights);
     const showUnused = this.settings.showUnused;
     // A combined column shows if either of its stats would

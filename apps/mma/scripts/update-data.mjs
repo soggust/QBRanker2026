@@ -32,6 +32,20 @@ const COMMON = 'https://site.web.api.espn.com/apis/common/v3/sports/mma/athletes
 const RANKINGS = 'https://www.ufc.com/rankings';
 const PFL_RANKINGS = 'https://pflmma.com/rankings';
 const CHAMPIONS = 'https://en.wikipedia.org/w/index.php?title=List_of_UFC_champions&action=raw';
+// The other big promotions' title histories (Wikipedia), each with the sections its titles are in: the
+// world championship tables (not the regional belts, the records or the minor tournaments; the PFL's
+// season tournaments were its titles until 2025)
+const WIKI_RAW = (page) => `https://en.wikipedia.org/w/index.php?title=${page}&action=raw`;
+const OTHER_TITLES = [
+  { promotion: 'PRIDE', page: 'List_of_Pride_Fighting_Championships_champions', from: /^==World champions==/, to: /^==(?!=)/ },
+  { promotion: 'Strikeforce', page: 'List_of_Strikeforce_champions', from: /^==World champions==/, to: /^==(?!=)/ },
+  { promotion: 'WEC', page: 'List_of_World_Extreme_Cagefighting_champions', from: /^==World Title histories==/, to: /^==(?!=)/ },
+  { promotion: 'Bellator', page: 'List_of_Bellator_MMA_champions', from: /^==(Men's|Women's) championship history==/, to: /^==(?!=)(?!(Men's|Women's) championship history)/ },
+  { promotion: 'PFL', page: 'List_of_Professional_Fighters_League_champions', from: /^==PFL championship history==/, to: /^(==(?!=)|===(European|MENA|Africa) Championship|===Symbolic)/ },
+];
+// (a title counts in full in the premier competition of the day, half in Bellator and the PFL, as
+// career points do; an interim title half again)
+const TITLE_WEIGHT = { UFC: 1, PRIDE: 1, Strikeforce: 1, WEC: 1, Bellator: 0.5, PFL: 0.5 };
 const ACTIVE_DAYS = 730;
 const ROUND = 300;
 // The promotions whose fighters are listed (active: a fight in one in the last two years), and the ones
@@ -276,8 +290,48 @@ async function ufcStatus(name) {
 
 // ---------------------------------------------------------------------------
 // Title history: Wikipedia's championship tables (each division's reigns, interim ones included, with
-// a line per successful defense). A reign is a title fight win, and so is each defense. By name.
+// a line per successful defense). A reign is a title fight win, and so is each defense. By name: his
+// reigns, interim ones among them, defenses, the weighted score of each (TITLE_WEIGHT), and the
+// promotions he held a title in.
 // ---------------------------------------------------------------------------
+const titleOf = (out, key) =>
+  out.get(key) ?? out.set(key, { reigns: 0, interim: 0, defenses: 0, winScore: 0, defenseScore: 0, promotions: [] }).get(key);
+function addReign(out, key, promotion, interim, defenses) {
+  const t = titleOf(out, key);
+  const w = TITLE_WEIGHT[promotion] ?? 0.5;
+  t.reigns++;
+  if (interim) t.interim++;
+  t.defenses += defenses;
+  t.winScore += w * (interim ? 0.5 : 1) + w * defenses;
+  t.defenseScore += w * defenses;
+  if (!t.promotions.includes(promotion)) t.promotions.push(promotion);
+}
+const DEFENSE = /\d+\.(?:''')?\s*def\./g;
+// (a row whose number is a dash: an interim reign)
+const INTERIM_ROW = /^\s*!\s*(—|&mdash;|-)\s*$/m;
+
+async function otherTitles(out) {
+  for (const { promotion, page, from, to } of OTHER_TITLES) {
+    const text = (await get(WIKI_RAW(page), 'text').catch(() => null)) ?? '';
+    const lines = text.split('\n');
+    const kept = [];
+    let on = false;
+    for (const line of lines) {
+      if (from.test(line)) on = true;
+      else if (on && to.test(line)) on = false;
+      if (on) kept.push(line);
+    }
+    for (const row of kept.join('\n').split(/\n\|-/)) {
+      // (the champion: the row's first flag, his linked name or the plain one after it)
+      const m = row.match(/\{\{[Ff]lagicon\|[^}]*\}\}\s*(?:\[\[([^\]|]+)(?:\|([^\]]+))?\]\]|([^\n<{|]+))/);
+      if (!m) continue;
+      const name = (m[2] ?? m[1] ?? m[3] ?? '').replace(/\s*\(.*\)$/, '').trim();
+      if (!name) continue;
+      addReign(out, nameKey(name), promotion, INTERIM_ROW.test(row) || /interim/i.test(row.split('\n').slice(0, 3).join(' ')), (row.match(DEFENSE) ?? []).length);
+    }
+  }
+}
+
 async function titles() {
   const text = (await get(CHAMPIONS, 'text')) ?? '';
   const out = new Map();
@@ -293,11 +347,9 @@ async function titles() {
     const champ = row.match(/\{\{flagicon\|[^}]*\}\}\s*\[\[([^\]|]+)(?:\|([^\]]+))?\]\]/);
     if (!champ || !/\[\[UFC|\[\[The Ultimate Fighter|\[\[UFC on/.test(row)) continue;
     const key = nameKey(champ[2] ?? champ[1].replace(/\s*\(.*\)$/, ''));
-    const t = out.get(key) ?? { reigns: 0, defenses: 0 };
-    t.reigns++;
-    t.defenses += (row.match(/\d+\.\s*def\./g) ?? []).length;
-    out.set(key, t);
+    addReign(out, key, 'UFC', INTERIM_ROW.test(row), (row.match(DEFENSE) ?? []).length);
   }
+  await otherTitles(out);
   return out;
 }
 
@@ -556,7 +608,7 @@ for (const id of active) {
   // (his rank in his division: 0 for a champion)
   const divisionRank = champion ? 0 : (ranked.ranks.get(`${home}/${key}`) ?? null);
   // (Wikipedia may write a name surname-first: "Weili Zhang" for Zhang Weili)
-  const title = titleHistory.get(key) ?? titleHistory.get(nameKey(name.split(' ').reverse().join(' '))) ?? { reigns: 0, defenses: 0 };
+  const title = titleHistory.get(key) ?? titleHistory.get(nameKey(name.split(' ').reverse().join(' '))) ?? { reigns: 0, interim: 0, defenses: 0, winScore: 0, defenseScore: 0, promotions: [] };
   const c = career(id, fights, cache[id]?.stats ?? {}, cache);
   const won = fights.filter((f) => f.fighters.find((x) => x.id === id).winner);
   // His promotion's rank (Org Rank): the UFC's, or the PFL's for a PFL fighter (his last fight's
@@ -597,6 +649,9 @@ for (const id of active) {
     return {
       division: tab === p4pTab ? (champion ?? home) : tab,
       ...(metaRank !== undefined ? { metaRank } : {}),
+      // (his titles weighed, for the ranking: TITLE_WEIGHT; and the promotions he held one in)
+      titleScore: { wins: Math.round((title.winScore ?? title.reigns + title.defenses) * 100) / 100, defenses: Math.round((title.defenseScore ?? title.defenses) * 100) / 100 },
+      titles: title.promotions ?? (title.reigns ? ['UFC'] : []),
       // (the belt he holds now: the card's archetype)
       ...(champion ? { belt: 'UFC' } : pflChampion ? { belt: 'PFL' } : {}),
       ...(rankScore !== undefined ? { rankScore } : {}),
@@ -633,6 +688,8 @@ for (const id of active) {
         mainEventWins: won.filter((f) => f.rounds >= 5).length,
         titleWins: title.reigns + title.defenses,
         titleDefenses: title.defenses,
+        // (his best place in those monthly rankings, or the belt (#0) for anyone who held a title)
+        peakRank: title.reigns || champion || pflChampion ? 0 : (h?.bestPlace ?? null),
         // (his promotion's: the division's top 15 (the PFL's top 10), the champion above it as #0;
         // pound-for-pound on that tab)
         officialRank,
