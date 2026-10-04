@@ -1,38 +1,43 @@
-// Builds the UFC app's data: every active fighter's UFC career, by division (a fighter is active with a
-// UFC fight in the last two years), and the retired ones with 6+ UFC fights (the Retired Fighters
-// setting). Every fighter also gets an Elo rating, worked out over every UFC bout since 2001.
+// Builds the MMA app's data: every active fighter, by division, ranked on the MMA rating (scripts/rating.mjs)
+// over every pro fight ESPN has, across the UFC, PFL, Bellator, Rizin and the promotions before them and
+// beside them (scripts/fights.mjs). A fighter is active with a fight in a major promotion (UFC, PFL,
+// Bellator, Rizin) in the last two years; the retired ones with 6+ fights in the majors (or PRIDE,
+// Strikeforce and WEC) are listed with the Retired Fighters setting.
 //
-// - ESPN's UFC scoreboards (one request a year, 2001 on): every bout, its fighters, the winner, the
-//   division, and the round and time it ended (a fight that reaches the final bell is a decision)
+// - The fights (scripts/fights.mjs, kept in scripts/fights/): every bout, its fighters, the winner, the
+//   division, the round and time it ended, and how
 // - ESPN's fighters (cached in scripts/cache.json, refetched only after a new fight or after a week):
 //   each fighter's bio (division, gender, country flag, headshot, gym, reach, age, pro record) and his
-//   stats fight by fight (strikes, knockdowns, takedowns, submission attempts, ground advances).
-//   Opponents' stats are fetched too, so what a fighter absorbs is counted, not only what he lands.
+//   stats fight by fight (strikes, knockdowns, takedowns, submission attempts, ground advances: the UFC's
+//   and the PFL's fights). Opponents' stats are fetched too, so what a fighter absorbs is counted.
 // - UFC.com's rankings page: each division's champion and top 15, and the pound-for-pound lists
-// - UFC.com's fighter pages, for the fighters without a fight in six months: their status there
+// - UFC.com's fighter pages, for UFC fighters without a fight in six months: their status there
 //   ("Retired" or "Not Fighting" moves them to the retired fighters; checked monthly, cached)
-// - Wikipedia's List of UFC champions: every title reign (interim ones too) and its successful
-//   defenses, for each fighter's title fight wins and title defenses
+// - Wikipedia's List of UFC champions: every UFC title reign (interim ones too) and its defenses
 //
 // Usage: npm run ufc:update-data
 //
-// Writes skill-players.json in the shape the app reads: { HW: [...], ..., WSW: [...] }, each fighter
-// { id, gsisId, name, teamLogo (his country's flag), teamName (his gym), games (UFC fights), stats,
-// awards, rookie (his UFC debut in the last year), lastFive, fights (his UFC fights, newest first) }.
+// Writes skill-players.json in the shape the app reads: { P4P: [...], HW: [...], ..., WSW: [...] }, each
+// fighter { id, gsisId, name, teamLogo (his country's flag), teamName (his gym), games (fights), stats,
+// awards, rookie (his debut in the last year), lastFive, fights (newest first) }.
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import path from 'node:path';
+import { allFights } from './fights.mjs';
+import { PARAMS, cautious, deviationOn, history, rate, tabOf, weightOf } from './rating.mjs';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
 const STATIC = path.join(ROOT, 'src/StaticData');
 const CACHE = path.join(import.meta.dirname, 'cache.json');
-const SITE = 'https://site.api.espn.com/apis/site/v2/sports/mma/ufc';
 const COMMON = 'https://site.web.api.espn.com/apis/common/v3/sports/mma/athletes';
 const RANKINGS = 'https://www.ufc.com/rankings';
 const CHAMPIONS = 'https://en.wikipedia.org/w/index.php?title=List_of_UFC_champions&action=raw';
-const FIRST_YEAR = 2001;
-const THIS_YEAR = new Date().getUTCFullYear();
 const ACTIVE_DAYS = 730;
 const ROUND = 300;
+// The promotions whose fighters are listed (active: a fight in one in the last two years), and the ones
+// whose veterans are listed among the retired
+const MAJORS = new Set(['ufc', 'pfl', 'bellator', 'rizin']);
+const HISTORIC = new Set([...MAJORS, 'pride', 'strikeforce', 'wec']);
+const PROMOTIONS = { ufc: 'UFC', pfl: 'PFL', bellator: 'Bellator', rizin: 'Rizin', pride: 'PRIDE', strikeforce: 'Strikeforce', wec: 'WEC', ksw: 'KSW', 'cage-warriors': 'Cage Warriors', lfa: 'LFA' };
 
 // ESPN's division names -> the app's tabs
 const DIVISIONS = {
@@ -98,35 +103,23 @@ const nameKey = (name) =>
     .replace(/[^a-z]/g, '');
 
 // ---------------------------------------------------------------------------
-// Bouts: every UFC fight from the scoreboards
+// Bouts: every fight in the archive, with its length and whether it went the distance
 // ---------------------------------------------------------------------------
 async function bouts() {
-  const out = [];
-  for (let year = FIRST_YEAR; year <= THIS_YEAR; year++) {
-    const board = await get(`${SITE}/scoreboard?dates=${year}&limit=1000`);
-    for (const event of board?.events ?? []) {
-      for (const c of event.competitions ?? []) {
-        if (!c.status?.type?.completed || c.competitors?.length !== 2) continue;
-        const periods = c.format?.regulation?.periods ?? 3;
-        const period = c.status.period ?? periods;
-        const clock = Math.min(ROUND, c.status.clock ?? ROUND);
-        out.push({
-          id: c.id,
-          event: event.name,
-          date: (c.date ?? event.date).slice(0, 10),
-          division: c.type?.abbreviation ?? '',
-          seconds: (period - 1) * ROUND + clock,
-          // (the final bell: a decision; anything sooner, a finish)
-          decision: period >= periods && clock >= ROUND,
-          rounds: periods,
-          period,
-          clock,
-          fighters: c.competitors.map((p) => ({ id: String(p.id), name: p.athlete?.displayName ?? '', winner: !!p.winner })),
-        });
-      }
-    }
-  }
-  return out;
+  return (await allFights()).map((f) => {
+    const period = f.period ?? f.rounds;
+    const clock = Math.min(ROUND, f.clock ?? ROUND);
+    const { lbs, women } = weightOf(f);
+    return {
+      ...f,
+      tab: tabOf(lbs, women),
+      seconds: (period - 1) * ROUND + clock,
+      // (the final bell: a decision; anything sooner, a finish)
+      decision: /^(UD|SD|MD|DEC|DRAW)$/.test(f.method) || (period >= f.rounds && clock >= ROUND),
+      period,
+      clock,
+    };
+  });
 }
 
 // ---------------------------------------------------------------------------
@@ -231,8 +224,7 @@ async function ufcStatus(name) {
 
 // ---------------------------------------------------------------------------
 // Title history: Wikipedia's championship tables (each division's reigns, interim ones included, with
-// a line per successful defense). A reign is a title fight win, and so is each defense. By name, in
-// all and by division (the defunct women's featherweight title only in all).
+// a line per successful defense). A reign is a title fight win, and so is each defense. By name.
 // ---------------------------------------------------------------------------
 async function titles() {
   const text = (await get(CHAMPIONS, 'text')) ?? '';
@@ -243,26 +235,15 @@ async function titles() {
   const end = text.indexOf('==Symbolic titles==');
   const defunct = text.slice(text.indexOf('==Defunct titles=='), text.indexOf('==Tournament winners=='));
   const tables = text.slice(start, end) + defunct.slice(defunct.indexOf("===Women's Featherweight"));
-  let tab = null;
   for (const chunk of tables.split(/\n\|-/)) {
-    // (a chunk can end a division's table and open the next: its reign is the old division's)
+    // A reign: its number (or "—"), the champion's flag and name, the event, a line per defense
     const row = chunk.split(/\n===/)[0];
-    const heading = chunk.match(/===\s*([^=]+?)\s+Championship\s*===/);
-    const division = tab;
-    if (heading) tab = DIVISIONS[heading[1]] ?? null;
-    // A reign: its number (or "—"), the champion's flag and name, the event
     const champ = row.match(/\{\{flagicon\|[^}]*\}\}\s*\[\[([^\]|]+)(?:\|([^\]]+))?\]\]/);
     if (!champ || !/\[\[UFC|\[\[The Ultimate Fighter|\[\[UFC on/.test(row)) continue;
     const key = nameKey(champ[2] ?? champ[1].replace(/\s*\(.*\)$/, ''));
-    const t = out.get(key) ?? { reigns: 0, defenses: 0, by: {} };
-    const defenses = (row.match(/\d+\.\s*def\./g) ?? []).length;
+    const t = out.get(key) ?? { reigns: 0, defenses: 0 };
     t.reigns++;
-    t.defenses += defenses;
-    if (division) {
-      const d = (t.by[division] ??= { reigns: 0, defenses: 0 });
-      d.reigns++;
-      d.defenses += defenses;
-    }
+    t.defenses += (row.match(/\d+\.\s*def\./g) ?? []).length;
     out.set(key, t);
   }
   return out;
@@ -364,52 +345,46 @@ const all = await bouts();
 const ranked = await lastGood('rankings', rankings, (r) => !r.champions.size, mapsToJson, mapsFromJson);
 const titleHistory = await lastGood('titles', titles, (t) => !t.size, (t) => [...t], (json) => new Map(json));
 console.log(`Title history: ${titleHistory.size} champions, ${[...titleHistory.values()].reduce((s, t) => s + t.defenses, 0)} defenses`);
-console.log(`${all.length} UFC bouts ${FIRST_YEAR}-${THIS_YEAR}; ${ranked.champions.size} champions, ${ranked.ranks.size} ranked`);
+console.log(`${all.length} fights; UFC.com: ${ranked.champions.size} champions, ${ranked.ranks.size} ranked`);
 
+// Each fighter's fights, newest first
 const byFighter = new Map();
 for (const b of all) for (const f of b.fighters) (byFighter.get(f.id) ?? byFighter.set(f.id, []).get(f.id)).push(b);
 for (const list of byFighter.values()) list.sort((a, b) => b.date.localeCompare(a.date));
 
+// Active: a fight in a major promotion in the last two years. Retired fighters worth listing: 6+ fights in
+// the majors, PRIDE, Strikeforce or WEC.
 const cutoff = new Date(Date.now() - ACTIVE_DAYS * 864e5).toISOString().slice(0, 10);
-const activeSet = new Set([...byFighter].filter(([, list]) => list[0].date >= cutoff).map(([id]) => id));
-// The retired fighters worth listing: 6+ UFC fights
+const lastMajor = (list) => list.find((b) => MAJORS.has(b.league));
+const activeSet = new Set([...byFighter].filter(([, list]) => (lastMajor(list)?.date ?? '') >= cutoff).map(([id]) => id));
 const RETIRED_MIN_FIGHTS = 6;
-const active = [...byFighter].filter(([id, list]) => activeSet.has(id) || list.length >= RETIRED_MIN_FIGHTS).map(([id]) => id);
-// Everyone whose stats are needed: the listed fighters, and every opponent they've had in the UFC
+const active = [...byFighter]
+  .filter(([id, list]) => activeSet.has(id) || list.filter((b) => HISTORIC.has(b.league)).length >= RETIRED_MIN_FIGHTS)
+  .map(([id]) => id);
+// Everyone whose stats are needed: the listed fighters, and every opponent they've had in the UFC or PFL
+// (ESPN's stats cover those)
+const STATS_LEAGUES = new Set(['ufc', 'pfl']);
 const listedSet = new Set(active);
 const needed = new Set(active);
-for (const id of active) for (const b of byFighter.get(id)) for (const f of b.fighters) needed.add(f.id);
+for (const id of active) for (const b of byFighter.get(id)) if (STATS_LEAGUES.has(b.league)) for (const f of b.fighters) needed.add(f.id);
 
-// Elo ratings over every UFC bout, oldest first: everyone starts at 1500, and a fight moves both
-// fighters by how surprising the result was (K = 32), so a win over a highly rated opponent is worth far
-// more than one over a low one. A draw splits the difference; a no contest (no winner before the final
-// bell) counts for nothing. Each bout keeps both fighters' ratings going in.
-const ELO_START = 1500;
-const ELO_K = 32;
-const elo = new Map();
-const eloBefore = new Map();
-const peakElo = new Map();
-for (const b of [...all].sort((x, y) => x.date.localeCompare(y.date))) {
-  const [a, c] = b.fighters;
-  const ra = elo.get(a.id) ?? ELO_START;
-  const rc = elo.get(c.id) ?? ELO_START;
-  eloBefore.set(`${b.id}/${a.id}`, ra);
-  eloBefore.set(`${b.id}/${c.id}`, rc);
-  const noContest = !a.winner && !c.winner && !b.decision;
-  if (noContest) continue;
-  const expected = 1 / (1 + 10 ** ((rc - ra) / 400));
-  const score = a.winner ? 1 : c.winner ? 0 : 0.5;
-  const move = ELO_K * (score - expected);
-  elo.set(a.id, ra + move);
-  elo.set(c.id, rc - move);
-  peakElo.set(a.id, Math.max(peakElo.get(a.id) ?? ELO_START, ra + move));
-  peakElo.set(c.id, Math.max(peakElo.get(c.id) ?? ELO_START, rc - move));
-}
-// A quality win: over an opponent rated in the top fifth of the fighters going in (at that point in
-// the UFC's history, among everyone with 3+ fights)
-const ratedPool = [...elo].filter(([id]) => byFighter.get(id).length >= 3).map(([, r]) => r).sort((x, y) => x - y);
-const QUALITY_ELO = ratedPool[Math.floor(ratedPool.length * 0.8)];
-console.log(`Elo: ${elo.size} fighters rated; a quality win is over ${Math.round(QUALITY_ELO)}+`);
+// The MMA rating (scripts/rating.mjs): every fighter's rating now, and his career replayed month by month
+const NOW = Date.now();
+const { state } = rate(all, PARAMS);
+const { history: careers, qualityBar } = history(all, PARAMS);
+// (his cautious rating today in a weight class: his rating, moved a step per class from the one he's rated
+// in, less its deviation grown since his last fight)
+const CLASS_TABS = ['FLW', 'BW', 'FW', 'LW', 'WW', 'MW', 'LHW', 'HW'];
+const WOMEN_TABS = ['WSW', 'WFLW', 'WBW'];
+const ratingIn = (id, tab) => {
+  const s = state.get(id);
+  if (!s) return null;
+  const order = WOMEN_TABS.includes(tab) ? WOMEN_TABS : CLASS_TABS;
+  const own = tabOf(s.lbs, s.women);
+  const steps = own && order.includes(own) && order.includes(tab) ? order.indexOf(tab) - order.indexOf(own) : 0;
+  return cautious(s.r - steps * PARAMS.divisionStep, deviationOn(s, NOW, PARAMS));
+};
+console.log(`Rating: ${state.size} fighters; a quality win is over ${Math.round(qualityBar)}+`);
 
 const weekAgo = Date.now() - 7 * 864e5;
 let fetched = 0;
@@ -431,17 +406,18 @@ for (const id of needed) {
 }
 await writeFile(CACHE, JSON.stringify(cache));
 
-// Retired by the UFC's own word: a fighter without a fight in six months whose UFC.com page says
+// Retired by the UFC's own word: a UFC fighter without a fight in six months whose UFC.com page says
 // "Retired" or "Not Fighting" (Stipe Miocic, Chris Weidman...) isn't active, whatever the two-year rule
 // says. Checked monthly per fighter.
 const sixMonths = new Date(Date.now() - 182 * 864e5).toISOString().slice(0, 10);
 const monthAgo = Date.now() - 30 * 864e5;
 let statuses = 0;
 for (const id of [...activeSet]) {
-  if (byFighter.get(id)[0].date >= sixMonths) continue;
+  const last = byFighter.get(id)[0];
+  if (last.date >= sixMonths || last.league !== 'ufc') continue;
   const entry = (cache[id] ??= {});
   if (!entry.statusAt || entry.statusAt < monthAgo) {
-    entry.status = await ufcStatus(entry.bio?.name ?? byFighter.get(id)[0].fighters.find((f) => f.id === id).name);
+    entry.status = await ufcStatus(entry.bio?.name ?? last.fighters.find((f) => f.id === id).name);
     entry.statusAt = Date.now();
     statuses++;
   }
@@ -456,13 +432,29 @@ for (const id of [...activeSet]) {
 await writeFile(CACHE, JSON.stringify(cache));
 console.log(`UFC.com statuses: ${statuses} checked; ${activeSet.size} active`);
 
-// Opponents' strength: each fighter's UFC win percentage (3+ fights; others count as .500)
-const strength = new Map(
-  [...byFighter].map(([id, list]) => {
-    const w = list.filter((b) => b.fighters.find((f) => f.id === id).winner).length;
-    return [id, list.length >= 3 ? w / list.length : 0.5];
-  }),
-);
+// His division: ESPN's for him, else his last fight's (not a catchweight)
+const homeTab = (id) => DIVISIONS[cache[id]?.bio?.division] ?? byFighter.get(id).find((f) => f.tab)?.tab ?? null;
+
+// Pound-for-pound: each fighter's rating against his own division's best (its active top 10's average), so
+// a fighter well clear of a deep division ranks with one well clear of a shallow one; put back on the
+// rating's scale (the divisions' average best added back)
+const best = new Map();
+for (const id of activeSet) {
+  const tab = homeTab(id);
+  const r = ratingIn(id, tab);
+  if (!tab || r === null || (state.get(id)?.fights ?? 0) < 3) continue;
+  (best.get(tab) ?? best.set(tab, []).get(tab)).push(r);
+}
+const top10 = new Map([...best].map(([tab, list]) => [tab, list.sort((x, y) => y - x).slice(0, 10).reduce((s, v, _, a) => s + v / a.length, 0)]));
+const topAll = [...top10.values()].reduce((s, v, _, a) => s + v / a.length, 0);
+const p4pRating = (id) => {
+  const tab = homeTab(id);
+  const r = ratingIn(id, tab);
+  return r === null || !top10.has(tab) ? r : r - top10.get(tab) + topAll;
+};
+
+// How a fight ended, for the card
+const METHOD = { KO: 'KO/TKO', SUB: 'Submission', UD: 'Unanimous decision', SD: 'Split decision', MD: 'Majority decision', DQ: 'Disqualification' };
 
 const debutCutoff = new Date(Date.now() - 365 * 864e5).toISOString().slice(0, 10);
 const yearAgo = debutCutoff;
@@ -472,22 +464,16 @@ for (const id of active) {
   const fights = byFighter.get(id);
   const b = cache[id]?.bio;
   const name = b?.name ?? fights[0].fighters.find((f) => f.id === id).name;
-  // His divisions: ESPN's for him (else his last fight's, not a catchweight), and every other division
-  // he's had 3+ UFC fights in (Alex Pereira at middleweight, light heavyweight and heavyweight), listed
-  // in each with his fights there (catchweights count in his own); and the pound-for-pound tab (men's
-  // or women's) with his whole UFC career. His form (the last five, the streak) and Elo are his
-  // whole career's everywhere.
-  const lastDivision = fights.find((f) => DIVISIONS[f.division])?.division;
-  const home = DIVISIONS[b?.division] ?? DIVISIONS[lastDivision];
+  // Listed in one division, and the pound-for-pound tab (men's or women's), with his whole career on both:
+  // an active fighter in his own division, a retired one where he earned the most career points (GSP at
+  // welterweight, not the middleweight of his last fight)
+  const home = homeTab(id);
   if (!home) continue;
-  const perDivision = new Map();
-  for (const f of fights) if (DIVISIONS[f.division]) perDivision.set(DIVISIONS[f.division], (perDivision.get(DIVISIONS[f.division]) ?? 0) + 1);
-  const tabs = new Set([home, ...[...perDivision].filter(([, n]) => n >= 3).map(([t]) => t)]);
+  const h = careers.get(id);
+  const women = WOMENS.includes(home);
+  const earned = Object.entries(h?.byTab ?? {}).filter(([t]) => WOMENS.includes(t) === women).sort((a, b) => b[1] - a[1]);
+  const listedIn = activeSet.has(id) || !earned.length ? home : earned[0][0];
   const key = nameKey(name);
-  const inDivision = (tab) => {
-    const own = fights.filter((f) => (DIVISIONS[f.division] ?? home) === tab);
-    return own.length ? own : fights;
-  };
   // Results newest first: 1 a win, 0.5 a draw or no contest, 0 a loss
   const results = fights.map((f) => (f.fighters.find((x) => x.id === id).winner ? 1 : f.fighters.find((x) => x.id !== id).winner ? 0 : 0.5));
   let streak = 0;
@@ -503,68 +489,75 @@ for (const id of active) {
   // (his rank in his division: 0 for a champion)
   const divisionRank = champion ? 0 : (ranked.ranks.get(`${home}/${key}`) ?? null);
   // (Wikipedia may write a name surname-first: "Weili Zhang" for Zhang Weili)
-  const title = titleHistory.get(key) ?? titleHistory.get(nameKey(name.split(' ').reverse().join(' '))) ?? { reigns: 0, defenses: 0, by: {} };
+  const title = titleHistory.get(key) ?? titleHistory.get(nameKey(name.split(' ').reverse().join(' '))) ?? { reigns: 0, defenses: 0 };
+  const c = career(id, fights, cache[id]?.stats ?? {}, cache);
+  const won = fights.filter((f) => f.fighters.find((x) => x.id === id).winner);
   const row = (tab) => {
-    const list = tab === p4pTab ? fights : inDivision(tab);
-    const c = career(id, list, cache[id]?.stats ?? {}, cache);
-    const opponents = list.map((f) => strength.get(f.fighters.find((x) => x.id !== id).id) ?? 0.5);
-    const won = list.filter((f) => f.fighters.find((x) => x.id === id).winner);
-    const titles = tab === p4pTab ? title : (title.by[tab] ?? { reigns: 0, defenses: 0 });
+    const rating = tab === p4pTab ? p4pRating(id) : ratingIn(id, tab);
     return {
-    division: tab === p4pTab ? (champion ?? home) : tab,
-    // (a division he's fought in but isn't in now: listed there among all-time fighters only)
-    pastDivision: tab !== p4pTab && tab !== home,
-    // (pound-for-pound: what his rank counts as in the ranking, on the division tabs' 0-16 scale: the
-    // P4P top 15 first (#1 = 0.5 ... #15 = 7.5), then his division rank behind them (its champion 7.5,
-    // #1 = 8 ... #15 = 15), so a ranked contender stays above the unranked; null: neither)
-    ...(tab === p4pTab ? { rankScore: p4p ? p4p / 2 : divisionRank != null ? (15 + divisionRank) / 2 : null } : {}),
-    // (no fight in a year: the UFC drops fighters from its rankings for that, so no rank says nothing)
-    inactive: fights[0].date < yearAgo,
-    titleHolder: champion === tab,
-    id: Number(id),
-    gsisId: id,
-    name,
-    teamLogo: b?.flag ?? 'assets/textures/octagon.svg',
-    teamName: b?.gym ?? null,
-    country: b?.country ?? null,
-    games: list.length,
-    // (his whole UFC career's fights: the Fights filter's count, so a champion new to a division stays listed)
-    careerGames: fights.length,
-    rookie: fights[fights.length - 1].date >= debutCutoff,
-    // (no UFC fight in two years: listed with the Retired Fighters setting on)
-    retired: !activeSet.has(id),
-    lastFive: results.slice(0, 5),
-    stats: {
-      ...c,
-      streak,
-      schedule: round(opponents.reduce((s, v) => s + v, 0) / opponents.length),
-      elo: Math.round(elo.get(id) ?? ELO_START),
-      peakElo: Math.round(peakElo.get(id) ?? ELO_START),
-      qualityWins: won.filter((f) => (eloBefore.get(`${f.id}/${f.fighters.find((x) => x.id !== id).id}`) ?? ELO_START) >= QUALITY_ELO).length,
-      mainEventWins: won.filter((f) => f.rounds >= 5).length,
-      titleWins: titles.reigns + titles.defenses,
-      titleDefenses: titles.defenses,
-      // (the division's top 15, the champion above it; pound-for-pound on that tab)
-      // (a champion is #0, above #1: UFC.com lists him above the rankings rather than in them)
-      officialRank: tab === p4pTab ? (p4p ?? null) : champion === tab ? 0 : (ranked.ranks.get(`${tab}/${key}`) ?? null),
-      age: b?.age ?? null,
-      reach: b?.reach ?? null,
-    },
-    pro: b?.pro ?? null,
-    awards: [...(champion && (champion === tab || tab === p4pTab) ? ['champ'] : []), ...(p4p ? [`p4p${p4p}`] : [])],
-    // His UFC fights, newest first (the card's Fights tab): date, opponent, result, how it ended, event
-    fights: fights.slice(0, 15).map((f) => {
-      const opp = f.fighters.find((x) => x.id !== id);
-      const me = f.fighters.find((x) => x.id === id);
-      const result = me.winner ? 'W' : opp.winner ? 'L' : 'D';
-      const time = `${Math.floor(f.clock / 60)}:${String(f.clock % 60).padStart(2, '0')}`;
-      // (no winner: a draw at the final bell, a no contest when it ended early)
-      const how = f.decision ? (result === 'D' ? 'Draw' : 'Decision') : result === 'D' ? `No contest · R${f.period} ${time}` : `R${f.period} ${time}`;
-      return [f.date, opp.name, result, how, f.event];
-    }),
+      division: tab === p4pTab ? (champion ?? home) : tab,
+      // (pound-for-pound: what his rank counts as in the ranking, on the division tabs' 0-16 scale: the P4P
+      // top 15 first (#1 = 0.5 ... #15 = 7.5), then his division rank behind them (its champion 7.5, #1 = 8
+      // ... #15 = 15), so a ranked contender stays above the unranked; null: neither)
+      ...(tab === p4pTab ? { rankScore: p4p ? p4p / 2 : divisionRank != null ? (15 + divisionRank) / 2 : null } : {}),
+      // (no UFC fight in a year: fighting elsewhere, or away long enough for the UFC to drop him from its
+      // rankings, so no rank says nothing)
+      inactive: !fights.some((f) => f.league === 'ufc' && f.date >= yearAgo),
+      titleHolder: champion === tab,
+      id: Number(id),
+      gsisId: id,
+      name,
+      teamLogo: b?.flag ?? 'assets/textures/octagon.svg',
+      teamName: b?.gym ?? null,
+      country: b?.country ?? null,
+      // (his promotion now: his last fight's)
+      promotion: PROMOTIONS[fights[0].league] ?? null,
+      // (a UFC fight in his career: the UFC Fighters Only setting's all-time lists)
+      ufcCareer: fights.some((f) => f.league === 'ufc'),
+      games: fights.length,
+      rookie: fights[fights.length - 1].date >= debutCutoff,
+      // (no fight in a major promotion in two years: listed with the Retired Fighters setting on)
+      retired: !activeSet.has(id),
+      lastFive: results.slice(0, 5),
+      stats: {
+        ...c,
+        streak,
+        rating: rating === null ? null : Math.round(rating),
+        peakRating: h?.peak == null ? null : Math.round(h.peak),
+        // (career points: the all-time lists' measure)
+        careerPoints: Math.round((h?.points ?? 0) * 10) / 10,
+        bestWin: h?.bestWin == null ? null : Math.round(h.bestWin),
+        oppRating: h?.oppN ? Math.round(h.oppSum / h.oppN) : null,
+        qualityWins: h?.qualityWins ?? 0,
+        mainEventWins: won.filter((f) => f.rounds >= 5).length,
+        titleWins: title.reigns + title.defenses,
+        titleDefenses: title.defenses,
+        // (UFC.com's: the division's top 15, the champion above it as #0; pound-for-pound on that tab)
+        officialRank: tab === p4pTab ? (p4p ?? null) : champion === tab ? 0 : (ranked.ranks.get(`${tab}/${key}`) ?? null),
+        age: b?.age ?? null,
+        reach: b?.reach ?? null,
+      },
+      pro: b?.pro ?? null,
+      awards: [...(champion && (champion === tab || tab === p4pTab) ? ['champ'] : []), ...(p4p ? [`p4p${p4p}`] : [])],
+      // His fights, newest first (the card's Fights tab): date, opponent, result, how it ended, event
+      fights: fights.slice(0, 15).map((f) => {
+        const opp = f.fighters.find((x) => x.id !== id);
+        const me = f.fighters.find((x) => x.id === id);
+        const result = me.winner ? 'W' : opp.winner ? 'L' : 'D';
+        const time = `${Math.floor(f.clock / 60)}:${String(f.clock % 60).padStart(2, '0')}`;
+        // (no winner: a draw at the final bell, a no contest when it ended early)
+        const how = f.decision
+          ? result === 'D'
+            ? 'Draw'
+            : (METHOD[f.method] ?? 'Decision')
+          : result === 'D'
+            ? `No contest · R${f.period} ${time}`
+            : `${METHOD[f.method] ?? 'Finish'} · R${f.period} ${time}`;
+        return [f.date, opp.name, result, how, f.event];
+      }),
     };
   };
-  for (const tab of [p4pTab, ...tabs]) out[tab].push(row(tab));
+  for (const tab of [p4pTab, listedIn]) out[tab].push(row(tab));
 }
 for (const tab of Object.keys(out)) out[tab].sort((a, b) => a.name.localeCompare(b.name));
 await mkdir(STATIC, { recursive: true });

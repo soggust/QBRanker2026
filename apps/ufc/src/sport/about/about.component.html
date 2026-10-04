@@ -1,4 +1,4 @@
-<about-frame heading="About UFC Ranker" [sections]="sections" (closed)="closed.emit()" #frame>
+<about-frame heading="About MMA Ranker" [sections]="sections" (closed)="closed.emit()" #frame>
   @switch (frame.active) {
     @case ('about') {
       <h3>Your rankings, your rules</h3>
@@ -8,7 +8,7 @@
         you settle it yourself: move the sliders and the list re-ranks instantly.
       </p>
       <p>
-        It covers every current UFC fighter in every division (a UFC fight in the last two years, and not retired by the UFC's word), updated every night. In a division a fighter is ranked on his fights there (Volkanovski at lightweight on his two title shots), listed in every division he's had 3+ fights in; the P4P tab ranks everyone on his whole UFC career and lists the top 30. The dropdown above the list picks <b>Current MMA</b>, <b>Current WMMA</b>, <b>All-Time MMA</b> or
+        It covers every active fighter in the big promotions (a fight in the UFC, PFL, Bellator or Rizin in the last two years), updated every night, rated on every fight of his career across ten promotions since 1997. Each fighter is listed in one division (the one he fights in now), ranked on his whole career; the P4P tab ranks everyone against his own division's best and lists the top 30. <b>UFC Fighters Only</b> in the settings narrows the lists to the UFC's roster. The dropdown above the list picks <b>Current MMA</b>, <b>Current WMMA</b>, <b>All-Time MMA</b> or
         <b>All-Time WMMA</b>: all-time adds the retired legends, and WMMA switches the tabs to the women's.
       </p>
       <div class="callout">
@@ -28,7 +28,7 @@
         <li><b>Head to head</b>: a fighter ranked right below someone he beat in their latest meeting (the last two years) moves above him.</li>
         <li><b>Drag rows</b> to rank by hand. Your order sticks until that division's sliders change.</li>
         <li><b>Hover</b> any column label for the full stat name and the division average.</li>
-        <li><b>Click a name</b> for the fighter card: an overview with a skill radar, archetype and scouting report, every stat as a rank, and his UFC fights.</li>
+        <li><b>Click a name</b> for the fighter card: an overview with a skill radar, archetype and scouting report, every stat as a rank, and his fights.</li>
         <li>
           In the bar above the list: <b>filter</b> opens the filter menu, <b>copy</b> copies your list,
           <b>info</b> opens this panel and the <b>gear</b> has the settings.
@@ -61,32 +61,53 @@
         a sample (a strike accuracy under 50 attempts, a takedown accuracy under 5) shows as "-" and counts
         as average.
       </p>
+      <h4>The rating</h4>
+      <p>
+        At the heart of it is a rating built from every pro fight since 1997 in the UFC, PFL, Bellator,
+        Rizin, PRIDE, Strikeforce, WEC, KSW, Cage Warriors and LFA, in the order they happened. Everyone
+        starts level (a newcomer to the UFC a little higher, as the UFC signs proven fighters), and each
+        result moves both fighters by how surprising it was: beating a highly rated opponent is worth far
+        more than beating a low one, and a finish counts fully where a split decision counts for less. Each
+        rating carries an uncertainty, wide for a newcomer and growing while a fighter sits out, and is
+        shown cautiously (less half of it), so a 3-0 prospect doesn't leap over a proven contender. Tested
+        on every fight since 2020, it picks the winner more often than a plain Elo rating.
+      </p>
+      <h4>Current and all-time</h4>
+      <p>
+        The current lists lead with today's <b>Rating</b> (and UFC.com's own rank, for UFC fighters). The
+        all-time lists lead with <b>Career Pts</b>, built like Fight Matrix's: every month since 1997, each
+        division's active fighters are ranked by the rating, and the top 15 earn points, the most for #1
+        and fewer down the list (full points only when the division was deep). A long reign at the top
+        adds up; a brief spike doesn't. His <b>Peak</b> rating counts too.
+      </p>
       <h4>The career, not a season</h4>
       <p>
-        Fighters fight two or three times a year, so a season says little: everything here is his UFC
-        career. The rates are per minute of fight time (striking) or per 15 minutes (knockdowns,
+        Fighters fight two or three times a year, so a season says little: everything here is his whole
+        career, in every division (the striking and grappling stats from the UFC and the PFL, where they're
+        kept; a fighter without them isn't marked down for it). The rates are per minute of fight time (striking) or per 15 minutes (knockdowns,
         takedowns, submission attempts), so a short night and a 25-minute war count fairly. What he
         absorbs comes from his opponents' numbers in the same fights.
       </p>
       <h4>Who's in each division</h4>
       <p>
-        A fighter is listed in the division ESPN lists him in (his last fight's if not). <b>Min Fights</b>
-        in the settings sets how many UFC fights it takes to be listed, as a share of the most anyone in
-        the division has: 10% to start, in steps of 10%, down to 1 to see everyone. <b>Rookies Only</b>
-        shows just the newcomers: a UFC debut in the last year.
+        A fighter is listed in one division: the one he fights in now, or for a retired fighter the one he
+        earned the most career points in. His stats and record are still his whole career. <b>Min
+        Fights</b> in the settings sets how many pro fights (in the promotions covered) it takes to be
+        listed: 6 to start, in steps of 2, down to 1 to see everyone.
       </p>
       <h4>Small samples</h4>
       <p>
-        A fighter four fights into his UFC run can have perfect numbers that don't mean much yet. So each
+        A fighter four fights into his career can have perfect numbers that don't mean much yet. So each
         rate (accuracy, defense, strikes per minute, the record) counts in the ranking in proportion to the
-        fights behind it: four UFC fights count half, twelve three-quarters, a long career nearly all of it.
+        fights behind it: four fights count half, twelve three-quarters, a long career nearly all of it.
         The columns show his real numbers either way.
       </p>
       <h4>Strength of schedule</h4>
       <p>
-        <b>Schedule</b> is his opponents' UFC win percentage: beating fighters who win a lot means more than
-        beating ones who don't. It counts for him like any stat, so a strong record against a soft schedule
-        is weighed against a lesser one against the best.
+        The rating already weighs whom he beat. <b>Best Win</b> (his best opponent's rating going in), <b>Opp
+        Rating</b> (his opponents' average) and <b>Quality Wins</b> (wins over the top tenth) show it on
+        their own, so a strong record against a soft schedule is weighed against a lesser one against the
+        best.
       </p>
       <h4>Ranking by hand</h4>
       <p>
@@ -109,13 +130,13 @@
           scouting report, strengths first.
         </li>
         <li><b>Stats:</b> every column as a rank in the division, with the division average.</li>
-        <li><b>Fights:</b> his UFC fights, newest first: the result, the opponent, the event, and how it ended (the round and time of a finish, or a decision).</li>
+        <li><b>Fights:</b> his fights in the promotions covered, newest first: the result, the opponent, the event, and how it ended (a knockout, a submission, or the kind of decision).</li>
       </ul>
       <h4>The takes</h4>
       <p>
         The points under the archetype read his career in context: a win or losing streak, how he wins
         (a finisher, or one who goes to the cards), whether he's ever been finished or has chin questions,
-        whether he wins the striking battle, the strength of his schedule, and his whole pro record.
+        whether he wins the striking battle, his quality wins, and his whole pro record.
       </p>
     }
 
@@ -127,7 +148,7 @@
         <li><mat-icon fontIcon="palette"></mat-icon><span><b>Color-coded values</b> are green above the division average and red below it. Hover a column label for the average.</span></li>
         <li><mat-icon fontIcon="emoji_events"></mat-icon><span><b>Rank tiles:</b> the belt for #1, green through 10, white in the middle and red for the bottom 10.</span></li>
         <li><mat-icon fontIcon="female"></mat-icon><span><b>WMMA</b> in the dropdown switches the tabs to the women's: pound-for-pound, bantamweight, flyweight and strawweight.</span></li>
-        <li><mat-icon fontIcon="fiber_new"></mat-icon><span><b>Rookies Only</b> in the settings lists just the newcomers: a UFC debut in the last year.</span></li>
+        <li><mat-icon fontIcon="sports_mma"></mat-icon><span><b>UFC Fighters Only</b> in the settings lists just the UFC's roster (all-time: anyone who's fought there). Everyone is still rated on every promotion.</span></li>
         <li><mat-icon fontIcon="content_copy"></mat-icon><span><b>Copy</b> puts your whole ranked list on the clipboard, ready to paste into a group chat.</span></li>
         <li><mat-icon fontIcon="military_tech"></mat-icon><span>Hover any <b>badge</b> under a name for the title written out.</span></li>
       </ul>
@@ -156,8 +177,9 @@
       <details>
         <summary>Why careers and not seasons?</summary>
         <p>
-          A fighter has two or three fights a year: a season is too small to rank on. His whole UFC career
-          gives the rates enough fight time to mean something.
+          A fighter has two or three fights a year: a season is too small to rank on. His whole career
+          gives the rates enough fight time to mean something, and the rating keeps it current: recent
+          wins and losses move it, and it grows less certain while he sits out.
         </p>
       </details>
       <details>
@@ -171,15 +193,16 @@
       <details>
         <summary>Who counts as active?</summary>
         <p>
-          Anyone with a UFC fight in the last two years. A fighter who left the UFC or hasn't fought in two
-          years drops off the list.
+          Anyone with a fight in the UFC, PFL, Bellator or Rizin in the last two years. A fighter who hasn't
+          fought there in two years moves to the all-time lists (with 6+ fights in the big promotions).
         </p>
       </details>
       <details>
         <summary>What does "-" mean?</summary>
         <p>
           Too small a sample: under 15 minutes of fight time for a rate, or too few attempts for an
-          accuracy. Those count as the division's average.
+          accuracy. Or not kept at all (the striking and grappling stats outside the UFC and PFL). A stat he
+          doesn't have is left out of his score, not counted against him.
         </p>
       </details>
       <details>
@@ -200,13 +223,21 @@
       <h4>Where the numbers come from</h4>
       <ul>
         <li>
-          <a href="https://www.espn.com/mma/" target="_blank" rel="noopener">ESPN</a>: every UFC fight since
-          2001 (the result and when it ended), each fighter's stats fight by fight, bios, flags and
-          headshots.
+          <a href="https://www.espn.com/mma/" target="_blank" rel="noopener">ESPN</a>: every fight since 1997
+          in the UFC, PFL, Bellator, Rizin, PRIDE, Strikeforce, WEC, KSW, Cage Warriors and LFA (the result
+          and how it ended), the UFC and PFL fighters' stats fight by fight, bios, flags and headshots.
         </li>
         <li>
           <a href="https://www.ufc.com/rankings" target="_blank" rel="noopener">UFC.com</a>: the champions and
           the official rankings.
+        </li>
+        <li>
+          <a href="https://en.wikipedia.org/wiki/List_of_UFC_champions" target="_blank" rel="noopener">Wikipedia</a>:
+          the UFC's title history.
+        </li>
+        <li>
+          <a href="https://www.fightmatrix.com" target="_blank" rel="noopener">Fight Matrix</a>: the idea behind
+          career points (no data taken).
         </li>
       </ul>
       <h4>Thanks</h4>

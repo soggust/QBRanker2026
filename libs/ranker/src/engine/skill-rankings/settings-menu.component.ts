@@ -56,8 +56,8 @@ export class SettingsMenuComponent {
     ),
     ...(SPORT.combined ? [this.switch('combineStats', SPORT.combined.label, SPORT.combined.title)] : []),
     ...settingsAt('display').map((setting) => this.sportSwitch(setting)),
-    this.switch('showInjured', 'Injured Players', SPORT.copy.injuredHelp),
-    this.switch('rookiesOnly', 'Rookies Only', this.rookiesTitle),
+    ...(SPORT.noSwitches?.includes('showInjured') ? [] : [this.switch('showInjured', 'Injured Players', SPORT.copy.injuredHelp)]),
+    ...(SPORT.noSwitches?.includes('rookiesOnly') ? [] : [this.switch('rookiesOnly', 'Rookies Only', this.rookiesTitle)]),
     this.switch(
       'showUnused',
       'Unweighted Stats',

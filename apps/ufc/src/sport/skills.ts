@@ -1,9 +1,9 @@
 import type { Archetype, SkillDef } from '@ranker/engine/skills';
 import { POSITIONS, SkillPosition } from '@sport/positions';
 
-// UFC skills and archetypes for the fighter card (their shapes and the words for them:
+// MMA skills and archetypes for the fighter card (their shapes and the words for them:
 // libs/ranker/src/engine/skills.ts)
-const UFC_SKILLS: SkillDef[] = [
+const MMA_SKILLS: SkillDef[] = [
   { id: 'volume', name: 'Striking Output', short: 'Output', parts: [['slpm', 1], ['strDiff', 1]] },
   { id: 'accuracy', name: 'Striking Accuracy', short: 'Accuracy', parts: [['strAcc', 1]] },
   { id: 'striking-defense', name: 'Striking Defense', short: 'Str. Defense', parts: [['strDef', 1], ['sapm', -1]] },
@@ -12,11 +12,11 @@ const UFC_SKILLS: SkillDef[] = [
   { id: 'takedown-defense', name: 'Takedown Defense', short: 'TD Defense', parts: [['tdDef', 1]] },
   { id: 'grappling', name: 'Grappling', short: 'Grappling', parts: [['sub15', 1], ['adv15', 1]] },
   { id: 'durability', name: 'Durability', short: 'Chin', parts: [['kdAgainst', -1], ['finished', -1]] },
-  { id: 'winning', name: 'Winning', short: 'Winning', parts: [['winPct', 1], ['recent', 1], ['elo', 1]] },
-  { id: 'competition', name: 'Level of Competition', short: 'Competition', parts: [['titleWins', 1], ['titleDefenses', 1], ['qualityWins', 1], ['mainEventWins', 1], ['peakElo', 1]] },
+  { id: 'winning', name: 'Winning', short: 'Winning', parts: [['winPct', 1], ['recent', 1], ['rating', 1]] },
+  { id: 'competition', name: 'Level of Competition', short: 'Competition', parts: [['titleWins', 1], ['titleDefenses', 1], ['qualityWins', 1], ['mainEventWins', 1], ['bestWin', 1], ['oppRating', 1]] },
 ];
 
-export const SKILLS: Record<SkillPosition, SkillDef[]> = Object.fromEntries(POSITIONS.map((p) => [p, UFC_SKILLS])) as Record<
+export const SKILLS: Record<SkillPosition, SkillDef[]> = Object.fromEntries(POSITIONS.map((p) => [p, MMA_SKILLS])) as Record<
   SkillPosition,
   SkillDef[]
 >;
@@ -32,7 +32,7 @@ export const WINS_VS_PLAY: Partial<Record<SkillPosition, [results: string, play:
 );
 
 // Most specific first: the first whose test passes names the card
-const UFC_ARCHETYPES: Archetype[] = [
+const MMA_ARCHETYPES: Archetype[] = [
   { name: 'Pound-for-Pound Great', test: (s, o) => s['winning'] >= 0.92 && o >= 0.9 && s['volume'] >= 0.6 },
   { name: 'Complete Mixed Martial Artist', test: (s) => s['volume'] >= 0.7 && s['wrestling'] >= 0.7 && s['striking-defense'] >= 0.6 && s['takedown-defense'] >= 0.6 },
   { name: 'Knockout Artist', test: (s) => s['power'] >= 0.88 },
@@ -46,7 +46,7 @@ const UFC_ARCHETYPES: Archetype[] = [
   { name: 'Grinder', test: (s) => s['wrestling'] >= 0.7 && s['power'] <= 0.4 },
 ];
 
-export const ARCHETYPES: Record<SkillPosition, Archetype[]> = Object.fromEntries(POSITIONS.map((p) => [p, UFC_ARCHETYPES])) as Record<
+export const ARCHETYPES: Record<SkillPosition, Archetype[]> = Object.fromEntries(POSITIONS.map((p) => [p, MMA_ARCHETYPES])) as Record<
   SkillPosition,
   Archetype[]
 >;

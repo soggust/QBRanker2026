@@ -184,7 +184,7 @@ export class SkillRankingsComponent implements OnChanges, CardHost {
     const min = hasMin(this.position) ? minCount(this.settings, seasonLength(rows, this.position)) : 0;
     return (rows[this.position] ?? []).filter(
       (player) =>
-        (this.settings.showInjured || !player.injured) &&
+        (this.settings.showInjured || !player.injured || !!SPORT.noSwitches?.includes('showInjured')) &&
         SPORT.playingTime.of(player) >= min &&
         this.rookieOk(player, season) &&
         (SPORT.rowVisible?.(player, this.sportSettings) ?? true),
@@ -207,7 +207,7 @@ export class SkillRankingsComponent implements OnChanges, CardHost {
   private firstSeasonsLoading = false;
 
   private rookieOk(player: SkillPlayer, season: number): boolean {
-    if (!this.settings.rookiesOnly || SPORT.teamTabs?.includes(this.position)) return true;
+    if (!this.settings.rookiesOnly || SPORT.noSwitches?.includes('rookiesOnly') || SPORT.teamTabs?.includes(this.position)) return true;
     // (a sport whose data says who's a rookie: that decides)
     const flagged = (player as { rookie?: boolean }).rookie;
     if (flagged !== undefined) return flagged;

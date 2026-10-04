@@ -46,6 +46,10 @@ export interface StatDef<Key extends string = string> {
   infoOnly?: boolean;
   // A missing value means too small a sample, so it scores as the league average, not the worst
   missingIsAverage?: boolean;
+  // A missing value means the stat wasn't recorded for him (the MMA's strike stats outside the UFC and
+  // PFL): it's left out of his total, and the stats he has count for its share, so he's judged on what's
+  // known rather than pulled toward the middle
+  skipMissing?: boolean;
   // Counts for more behind its slider (2: double at every step; 0% still off), or by the sport's settings
   boost?: number | ((settings: SportSettings) => number);
   // Scored on a fixed scale, best to worst, rather than against the list (the UFC's rank: the champion
@@ -265,6 +269,9 @@ export interface SportConfig {
   extraRows?: () => Record<string, SkillPlayer[]>;
   // The sport's own settings (settings menu)
   settings?: SportSetting[];
+  // Settings-menu switches a sport has no use for (MMA: no injury report, no rookie seasons), left out
+  // of the menu and of the filtering
+  noSwitches?: ('showInjured' | 'rookiesOnly')[];
   // Pairs of stats a tab can show as one total column, and the setting that turns it on
   combined?: { label: string; title: string; stats: (position: string) => CombinedStat[] };
   // A stat's label and full name under the sport's settings ("Off Rank (Pts)"; undefined: the usual)
