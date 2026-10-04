@@ -40,12 +40,12 @@
         "destination": "/nhl/index.html"
       },
       {
-        "source": "/ufc",
-        "destination": "/ufc/index.html"
+        "source": "/mma",
+        "destination": "/mma/index.html"
       },
       {
-        "source": "/ufc/**",
-        "destination": "/ufc/index.html"
+        "source": "/mma/**",
+        "destination": "/mma/index.html"
       }
     ],
     "headers": [
@@ -104,7 +104,7 @@
         ]
       },
       {
-        "source": "/ufc/",
+        "source": "/mma/",
         "headers": [
           {
             "key": "Cache-Control",

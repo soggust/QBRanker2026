@@ -1,4 +1,4 @@
-name: UFC - Update Game Data
+name: MMA - Update Game Data
 
 on:
   schedule:
@@ -30,13 +30,13 @@ jobs:
         with:
           node-version: "22"
 
-      - name: Pull UFC stats
-        run: npm run ufc:update-data
+      - name: Pull MMA fights and stats
+        run: npm run mma:update-data
 
       - name: Commit updated data
         id: commit
         run: |
-          git add apps/ufc/src/StaticData apps/ufc/scripts/cache.json apps/ufc/scripts/fights
+          git add apps/mma/src/StaticData apps/mma/scripts/cache.json apps/mma/scripts/fights
           if git diff --cached --quiet; then
             echo "No data changes"
             echo "changed=false" >> "$GITHUB_OUTPUT"
@@ -44,7 +44,7 @@ jobs:
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git commit -m "Update UFC data"
+          git commit -m "Update MMA data"
           git pull --rebase
           git push
           echo "changed=true" >> "$GITHUB_OUTPUT"

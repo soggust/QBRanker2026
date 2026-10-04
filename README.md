@@ -1,7 +1,7 @@
-# Sports Ranker (NFL, MLB, NBA, NHL, UFC)
+# Sports Ranker (NFL, MLB, NBA, NHL, MMA)
 
 Rank players your way: every stat is normalized to the same scale, then your sliders decide what
-matters. Live at https://qbranker2026.web.app/ (`/nfl/`, `/mlb/`, `/nba/`, `/nhl/`, `/ufc/`; the bare address redirects
+matters. Live at https://qbranker2026.web.app/ (`/nfl/`, `/mlb/`, `/nba/`, `/nhl/`, `/mma/`; the bare address redirects
 to the NFL).
 
 ## Layout
@@ -19,7 +19,7 @@ libs/ranker/            the shared library (one copy of everything the sports sh
   src/assets/           shared textures (leather grain, chalk dust)
   scripts/              shared data-script pieces: the similar-seasons builder, the grade curve
 apps/
-  nfl/ mlb/ nba/ nhl/ ufc/  one per sport, each on the engine:
+  nfl/ mlb/ nba/ nhl/ mma/  one per sport, each on the engine:
     src/sport/          what makes the sport: SPORT (sport.ts), positions and stats, presets, skills
                         and archetypes, awards, team colors, logo eras, the About panel
     src/theme/          its look on top of the shared styles (textures, knobs, accent, lines)
@@ -37,9 +37,9 @@ scripts/new-sport.mjs   `npm run new-sport`: scaffolds a sport
 
 | Command | What it does |
 | --- | --- |
-| `npm run dev` | Every app at once, all at http://localhost:4200 (`/nfl/`, `/mlb/`, `/nba/`, `/nhl/`, `/ufc/`; the bare address redirects to `/nfl/`) so the sport bar works like the live site and any of them can be open at once. One port: each app builds in watch mode and one small server serves them all, reloading a page when its app rebuilds (`PORT=4300 npm run dev` if 4200 is taken) |
-| `npm start` / `npm run start:mlb` / `npm run start:nba` / `npm run start:nhl` | Just one app's dev server (the sport bar's other links won't work) |
-| `npm run build` | Production build of every app into `dist/site` (`nfl/`, `mlb/`, `nba/`, `nhl/`, `ufc/`) |
+| `npm run dev` | Every app at once, all at http://localhost:4200 (`/nfl/`, `/mlb/`, `/nba/`, `/nhl/`, `/mma/`; the bare address redirects to `/nfl/`) so the sport bar works like the live site and any of them can be open at once. One port: each app builds in watch mode and one small server serves them all, reloading a page when its app rebuilds (`PORT=4300 npm run dev` if 4200 is taken) |
+| `npm start` / `npm run start:mlb` / `npm run start:nba` / `npm run start:nhl` / `npm run start:mma` | Just one app's dev server (the sport bar's other links won't work) |
+| `npm run build` | Production build of every app into `dist/site` (`nfl/`, `mlb/`, `nba/`, `nhl/`, `mma/`) |
 | `npm run new-sport -- <id> <LABEL>` | Scaffold a sport (`npm run new-sport -- nhl NHL`): see the library README |
 | `npm run update-data` | NFL: pull the current season (`SEASON=2025` for a past one) |
 | `npm run update-honors` | NFL: All-Pro and Pro Bowl lists from Wikipedia |
@@ -51,4 +51,4 @@ scripts/new-sport.mjs   `npm run new-sport`: scaffolds a sport
 | `npm run nba:build-comps` | NBA: the player card's similar seasons and season history |
 | `npm run nhl:update-data` | NHL: pull this season from the NHL's stats API and MoneyPuck (`SEASON=2019` for a past one, named for the year it ends in; `ALL=1` for 2008-09 on, a few minutes) |
 | `npm run nhl:build-comps` | NHL: the player card's similar seasons and season history |
-| `npm run ufc:update-data` | UFC: every active fighter's UFC career from ESPN (each fighter cached in `apps/ufc/scripts/cache.json`; the first run fetches about 2,000 fighters, later ones only those with a new fight) and the champions and rankings from UFC.com |
+| `npm run mma:update-data` | MMA: every fight since 1997 in ten promotions from ESPN (archived by year in `apps/mma/scripts/fights/`; later runs fetch only the current year), the rating and career points (`rating.mjs`), each listed fighter's bio and stats (cached in `apps/mma/scripts/cache.json`), and the champions and rankings from UFC.com. `node apps/mma/scripts/backtest.mjs [--tune]` checks and tunes the rating on past fights |

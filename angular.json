@@ -491,35 +491,35 @@
         }
       }
     },
-    "ufc": {
+    "mma": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
           "style": "scss"
         }
       },
-      "root": "apps/ufc",
-      "sourceRoot": "apps/ufc/src",
+      "root": "apps/mma",
+      "sourceRoot": "apps/mma/src",
       "prefix": "app",
       "architect": {
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
-            "outputPath": "dist/site/ufc",
-            "index": "apps/ufc/src/index.html",
-            "main": "apps/ufc/src/main.ts",
+            "outputPath": "dist/site/mma",
+            "index": "apps/mma/src/index.html",
+            "main": "apps/mma/src/main.ts",
             "polyfills": [
               "zone.js"
             ],
-            "tsConfig": "apps/ufc/tsconfig.app.json",
+            "tsConfig": "apps/mma/tsconfig.app.json",
             "inlineStyleLanguage": "scss",
             "assets": [
-              "apps/ufc/src/favicon.png",
-              "apps/ufc/src/favicon.svg",
-              "apps/ufc/src/assets",
+              "apps/mma/src/favicon.png",
+              "apps/mma/src/favicon.svg",
+              "apps/mma/src/assets",
               {
                 "glob": "**/*.json",
-                "input": "apps/ufc/src/StaticData",
+                "input": "apps/mma/src/StaticData",
                 "output": "data"
               },
               {
@@ -529,14 +529,14 @@
               }
             ],
             "styles": [
-              "apps/ufc/src/styles.scss"
+              "apps/mma/src/styles.scss"
             ],
             "scripts": [],
-            "baseHref": "/ufc/",
+            "baseHref": "/mma/",
             "stylePreprocessorOptions": {
               "includePaths": [
                 "libs/ranker/src/styles",
-                "apps/ufc/src/theme"
+                "apps/mma/src/theme"
               ]
             }
           },
@@ -571,10 +571,10 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "ufc:build:production"
+              "buildTarget": "mma:build:production"
             },
             "development": {
-              "buildTarget": "ufc:build:development"
+              "buildTarget": "mma:build:development"
             }
           },
           "defaultConfiguration": "development"
@@ -582,7 +582,7 @@
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "buildTarget": "ufc:build"
+            "buildTarget": "mma:build"
           }
         },
         "test": {
@@ -592,21 +592,21 @@
               "zone.js",
               "zone.js/testing"
             ],
-            "tsConfig": "apps/ufc/tsconfig.spec.json",
+            "tsConfig": "apps/mma/tsconfig.spec.json",
             "inlineStyleLanguage": "scss",
             "assets": [
-              "apps/ufc/src/favicon.png",
-              "apps/ufc/src/favicon.svg",
-              "apps/ufc/src/assets"
+              "apps/mma/src/favicon.png",
+              "apps/mma/src/favicon.svg",
+              "apps/mma/src/assets"
             ],
             "styles": [
-              "apps/ufc/src/styles.scss"
+              "apps/mma/src/styles.scss"
             ],
             "scripts": [],
             "stylePreprocessorOptions": {
               "includePaths": [
                 "libs/ranker/src/styles",
-                "apps/ufc/src/theme"
+                "apps/mma/src/theme"
               ]
             }
           }

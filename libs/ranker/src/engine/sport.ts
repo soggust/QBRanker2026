@@ -46,7 +46,7 @@ export interface StatDef<Key extends string = string> {
   infoOnly?: boolean;
   // A missing value means too small a sample, so it scores as the league average, not the worst
   missingIsAverage?: boolean;
-  // A missing value means the stat wasn't recorded for him (the MMA's strike stats outside the UFC and
+  // A missing value means the stat wasn't recorded for him (MMA's strike stats outside the UFC and
   // PFL): it's left out of his total, and the stats he has count for its share, so he's judged on what's
   // known rather than pulled toward the middle
   skipMissing?: boolean;
@@ -111,13 +111,13 @@ export interface SportSetting {
   title: string;
   // A choice cycled by clicking ("Fantasy Scoring: PPR"), or an on/off switch when there are no options
   options?: Record<string, string>;
-  // A footer dropdown's options under headers, each with a shorter label there (the UFC: Current, with
+  // A footer dropdown's options under headers, each with a shorter label there (MMA: Current, with
   // Men's and Women's under it); the closed dropdown still shows the full label from options
   optionGroups?: { label: string; options: Record<string, string> }[];
   default: string | boolean;
   // Where it sits: the Format section's top, after Stat Totals, among the Display switches (before
   // Injured Players), at the bottom of the menu, or (a choice) as the footer's dropdown in the year
-  // selector's place (the UFC's Current / All-Time)
+  // selector's place (MMA's Current / All-Time)
   slot: 'formatTop' | 'formatMid' | 'display' | 'displayEnd' | 'footer';
   // Its menu icon (a cycled choice): a Material icon, or a class the styles draw ('lombardi')
   icon?: string;
@@ -221,7 +221,7 @@ export interface SportConfig {
     of: (player: SkillPlayer) => number;
     seasonLength?: (rows: Record<string, SkillPlayer[]>, position: string) => number;
     everyone?: string[];
-    // A fixed count instead of a share (the UFC's fights: careers don't grow through a season), its
+    // A fixed count instead of a share (MMA's fights: careers don't grow through a season), its
     // starting value and how far each click moves it
     fixed?: { default: number; step: number };
   };
@@ -243,27 +243,27 @@ export interface SportConfig {
   // More for the card once it's open (the NFL's run blocking, read from a file per season)
   cardExtras?: (card: CardHost) => Promise<void>;
 
-  // --- Optional data and features (the NFL uses most of them; the UFC the career-only ones) ---
+  // --- Optional data and features (the NFL uses most of them; MMA the career-only ones) ---
   // One career table rather than seasons: no season dropdown, the card reads "Career" and has no
   // season-by-season tab, history takes or similar seasons
   careerOnly?: boolean;
-  // How much evidence a row's rates rest on, 0-1 (the UFC: fights / (fights + 4)): each rate stat's
+  // How much evidence a row's rates rest on, 0-1 (MMA: fights / (fights + 4)): each rate stat's
   // score in the ranking is scaled by it, so small samples sway the list less. The columns show the
   // real values either way.
   reliability?: (player: SkillPlayer) => number;
   // Head to head: a beat b in their latest meeting (recent enough to count). After the weighted sort, a
-  // row placed right below one it beat moves above it (the UFC: Pimblett over Saint Denis).
+  // row placed right below one it beat moves above it (MMA: Pimblett over Saint Denis).
   beat?: (a: SkillPlayer, b: SkillPlayer) => boolean;
-  // How many rows a tab lists at most, its top ones (the UFC's pound-for-pound tabs: 30); none: all
+  // How many rows a tab lists at most, its top ones (MMA's pound-for-pound tabs: 30); none: all
   listLimit?: (position: string) => number | undefined;
-  // Rows the sport's settings can hide (the UFC's retired fighters, until switched on)
+  // Rows the sport's settings can hide (MMA's retired fighters, until switched on)
   rowVisible?: (player: SkillPlayer, settings: SportSettings) => boolean;
   // Rows the sport's settings hide from view only, after the ranking (MMA's UFC Fighters Only): the
   // stats are still measured against everyone rowVisible lists, so hiding some doesn't reorder the rest
   rowShown?: (player: SkillPlayer, settings: SportSettings) => boolean;
-  // A tab the sport's settings can hide (the UFC's women's divisions, until switched on)
+  // A tab the sport's settings can hide (MMA's women's divisions, until switched on)
   tabVisible?: (position: string, settings: SportSettings) => boolean;
-  // A history tab on the card in place of the seasons one (the UFC's fights): its title and icon, and a
+  // A history tab on the card in place of the seasons one (MMA's fights): its title and icon, and a
   // player's rows, newest first
   cardHistory?: { title: string; icon: string; rows: (player: SkillPlayer) => HistoryRow[] };
   // More files in each season's folder (key -> file), read into DATA beside skill-players.json

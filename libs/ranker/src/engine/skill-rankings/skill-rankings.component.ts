@@ -487,7 +487,7 @@ export class SkillRankingsComponent implements OnChanges, CardHost {
     this.positionService.setAboutOpen(true);
   }
 
-  // The sport's footer dropdowns (the UFC's Current / All-Time)
+  // The sport's footer dropdowns (MMA's Current / All-Time)
   settingText(setting: SportSetting): string {
     return settingText(setting, this.sportSettings);
   }

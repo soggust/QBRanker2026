@@ -15,7 +15,7 @@
 //   ("Retired" or "Not Fighting" moves them to the retired fighters; checked monthly, cached)
 // - Wikipedia's List of UFC champions: every UFC title reign (interim ones too) and its defenses
 //
-// Usage: npm run ufc:update-data
+// Usage: npm run mma:update-data
 //
 // Writes skill-players.json in the shape the app reads: { P4P: [...], HW: [...], ..., WSW: [...] }, each
 // fighter { id, gsisId, name, teamLogo (his country's flag), teamName (his gym), games (fights), stats,

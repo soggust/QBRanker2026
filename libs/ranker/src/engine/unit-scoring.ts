@@ -99,7 +99,7 @@ const MAX_Z = 2.5;
 // for them (supportHelps). A missing value (null) scores as the list's worst, or as average for stats
 // flagged missingIsAverage and for support grades; a stat flagged skipMissing is left out of that unit's
 // total instead, the rest of it scaled up to make up its share. Small samples aren't adjusted for unless the sport
-// says how much evidence a row's rates rest on (SPORT.reliability, 0-1: the UFC's fights): then each
+// says how much evidence a row's rates rest on (SPORT.reliability, 0-1: MMA's fights): then each
 // rate's score is scaled by it, so a few fights' perfect numbers count less than a long career's.
 export function weightedTotals<T>(
   units: T[],

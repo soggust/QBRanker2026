@@ -67,7 +67,7 @@ export class PlayerCards {
   }
 
   // Seasons only when they're in more than one (shown while loading; never for a career-only sport),
-  // and the sport's history tab when it has one (SPORT.cardHistory: the UFC's fights)
+  // and the sport's history tab when it has one (SPORT.cardHistory: MMA's fights)
   tabsFor(card: PlayerCard): { id: CardTab; title: string }[] {
     const tabs = TABS.filter((tab) => tab.id !== 'seasons' || (!SPORT.careerOnly && (!card.seasons || card.seasons.length > 1)));
     return SPORT.cardHistory ? [...tabs, { id: 'history', title: SPORT.cardHistory.title }] : tabs;

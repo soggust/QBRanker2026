@@ -2,7 +2,7 @@
 // a percent (0 means 1: everyone, then steps of MIN_SHARE_STEP), of the most playing time anyone on the
 // tab has (the sport's measure, SPORT.playingTime: games, plate appearances), so it scales with the
 // season: 10% is a game or two early on and a real cutoff by the end. A sport can make it a fixed count
-// instead (SPORT.playingTime.fixed: the UFC's fights).
+// instead (SPORT.playingTime.fixed: MMA's fights).
 import { SkillPlayer, SkillPosition } from '@sport/positions';
 import { SPORT } from '@sport/sport';
 import { MIN_SHARE_STEP, RankerSettings } from '@ranker/engine/position.service';

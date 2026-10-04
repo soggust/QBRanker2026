@@ -6,7 +6,7 @@ import { SPORT } from '@sport/sport';
 import { SPORT_LINKS } from '@ranker/core/sports';
 import { SportSettings } from '@ranker/engine/sport';
 
-// The tabs the sport's settings show (SPORT.tabVisible: the UFC's divisions, men's or women's)
+// The tabs the sport's settings show (SPORT.tabVisible: MMA's divisions, men's or women's)
 function visibleTabs(settings: SportSettings): Position[] {
   return POSITIONS.filter((tab) => SPORT.tabVisible?.(tab, settings) ?? true);
 }
@@ -37,7 +37,7 @@ export class AppComponent {
   private readonly smallScreen = window.matchMedia('(max-width: 1199px)');
 
   constructor(private positionService: PositionService) {
-    // A setting that shows new tabs (the UFC's women's divisions) opens the first of them; one that
+    // A setting that shows new tabs (MMA's women's divisions) opens the first of them; one that
     // hides the open tab goes back to the first tab
     let shown = this.positions;
     this.positionService.sportSettings$.pipe(takeUntilDestroyed()).subscribe((settings) => {

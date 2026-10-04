@@ -89,9 +89,9 @@ Everything here is off unless a sport's `SPORT` sets it; the NFL uses all of it.
 | `cardFlagsLast`, `cardExtras` | Card takes after the engine's own, and more for the card once it's open (a skill on the radar, takes, an archetype; the NFL reads run blocking from a file per season) |
 | `teamTabs`, `rowHeader`, `teamName` | Tabs whose rows are teams, the name column's header per tab, and the card's team name |
 | `playingTime.seasonLength`, `playingTime.everyone` | What the Min setting's share is of, and tabs with no minimum |
-| `careerOnly` | One career table rather than seasons (the UFC): no season dropdown, the card reads "Career", no seasons tab or similar seasons |
-| `tabVisible` | Tabs a sport setting shows or hides (the UFC's women's divisions) |
-| `cardHistory` | A history tab on the card (the UFC's fights): a result, what it was, where and when, and a detail per line |
+| `careerOnly` | One career table rather than seasons (MMA): no season dropdown, the card reads "Career", no seasons tab or similar seasons |
+| `tabVisible` | Tabs a sport setting shows or hides (MMA's women's divisions) |
+| `cardHistory` | A history tab on the card (MMA's fights): a result, what it was, where and when, and a detail per line |
 
 Stat formats the engine draws for any sport: `recent` (the last five results as dots, from a row's
 `lastFive`) and `rank` (a league rank with a dimmed "#" and a "(t)" for ties).

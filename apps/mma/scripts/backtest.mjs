@@ -3,7 +3,7 @@
 // search on log loss, the measure that rewards confident right calls and punishes confident wrong ones)
 // and reports the test years untouched, against the old UFC-only Elo.
 //
-// Usage: node apps/ufc/scripts/backtest.mjs [--tune]
+// Usage: node apps/mma/scripts/backtest.mjs [--tune]
 import { keptFights } from './fights.mjs';
 import { PARAMS, rate } from './rating.mjs';
 
