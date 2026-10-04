@@ -1,381 +1,355 @@
-<div class="about-backdrop" (click)="close()"></div>
-<div class="about-panel" role="dialog" aria-modal="true" aria-labelledby="about-title">
-  <header>
-    <mat-icon class="about-icon" aria-hidden="true" fontIcon="info"></mat-icon>
-    <h2 id="about-title">About NFL Ranker</h2>
-    <button #closeButton type="button" class="about-close" aria-label="Close" title="Close (Esc)" (click)="close()">
-      <mat-icon fontIcon="close"></mat-icon>
-    </button>
-  </header>
+<about-frame heading="About NFL Ranker" [sections]="sections" (closed)="closed.emit()" #frame>
+  @switch (frame.active) {
+    @case ('about') {
+      <h3>Your rankings, your rules</h3>
+      <p>
+        Every NFL ranking is really an argument about what matters. Is it wins or stats? Volume or
+        efficiency? Did he carry the team, or did the team carry him? This site lets you settle it
+        yourself: move the sliders and the list re-ranks instantly.
+      </p>
+      <p>
+        It covers quarterbacks, running backs, wide receivers, tight ends, offensive lines, kickers,
+        punters, defenses and head coaches, all with this season's stats, updated every night, plus every
+        season back to 2000.
+      </p>
+      <div class="callout">
+        <strong>New here?</strong> Pick a tab up top, then try a preset from the dropdown at the top of the
+        filter menu (the <b>filter</b> button above the list, on the left, opens and closes it). Each preset ranks around a
+        different idea of "best". Then drag a few sliders and watch the list move.
+      </div>
+      <h4>Quick start</h4>
+      <ul>
+        <li><b>Sliders</b> set how much each stat counts. 50% is normal, 100% is double, 0% ignores it.</li>
+        <li>
+          <b>Presets</b> load a ready-made set of sliders built around a style of play; <b>Default</b> puts
+          every slider back at 50%.
+        </li>
+        <li>
+          The <b>season</b> dropdown above the list ranks any year from 2000 on with the same sliders, so
+          you can see how your formula grades another season.
+        </li>
+        <li><b>Drag rows</b> to rank by hand. Your order sticks until that tab's sliders change.</li>
+        <li><b>Hover</b> any column label for the full stat name and the league average.</li>
+        <li>
+          In the bar above the list: <b>filter</b> opens the filter menu, <b>copy</b> copies your list,
+          <b>info</b> opens this panel and the <b>gear</b> has the settings.
+        </li>
+        <li>
+          <b>Badges</b> under a name mark that season's honors: the Super Bowl, conference titles, MVP and the
+          other major awards, All-Pro and Pro Bowl picks (see the FAQ).
+        </li>
+      </ul>
+    }
 
-  <div class="about-layout">
-    <nav aria-label="About sections">
-      @for (section of sections; track section.id) {
-        <button
-          type="button"
-          [class.active]="active === section.id"
-          [attr.aria-current]="active === section.id ? 'true' : null"
-          (click)="show(section.id)"
-        >
-          <span>{{ section.title }}</span>
-        </button>
-      }
-    </nav>
+    @case ('ranking') {
+      <h3>How the rankings work</h3>
+      <p>
+        Every player (or team, or coach) gets a score from the stats you weigh, and the list is sorted by
+        that score. Here's what goes into it:
+      </p>
+      <h4>Sliders and weights</h4>
+      <p>
+        Every stat is first put on the same scale: how far above or below the list's average a player is,
+        measured in standard deviations (so 72% vs. 65% completion counts as much as 10 vs. 5 touchdowns if
+        they're equally far from typical). That score is multiplied by its slider: at 50% a stat counts
+        normally, at 100% twice as much, and at 0% not at all. Nothing is weighted behind the scenes, so the
+        sliders alone decide what matters. A stat's
+        <b>eye</b> switches it off entirely and hides its column. A card's eye does the same for a whole group.
+      </p>
+      <h4>Good and bad stats</h4>
+      <p>
+        Stats where lower is better (turnovers, sacks allowed, points allowed, stuffed runs...) count
+        against a player. Extreme values are capped, so one fluky number (say, 100% on two chances) can't
+        swamp the list, and a stat a player has no data for counts as the list's worst, or as average when
+        "-" just means no chances yet. A stat nobody has that season (it wasn't tracked yet) is left out
+        altogether.
+      </p>
+      <h4>Small samples</h4>
+      <p>
+        Stats aren't adjusted for how many games they come from, so a single stat sorts the list exactly by
+        its numbers, and a fill-in with one great game can rank high on rate stats. Raise <b>Min Games</b>
+        in the settings to leave out players with too few games.
+      </p>
+      <h4>Totals, breakdowns and per game</h4>
+      <p>
+        Paired stats like yards and touchdowns have a total slider with a breakdown underneath (click the
+        label to open it). The total scales both parts. <b>Stat Totals</b> in the settings switches counting
+        stats between season totals, <b>per game</b> (fairer to anyone who missed games) and a
+        <b>17-game pace</b>: per game over a full 17-game season, so a 12-game year or a 16-game era reads like
+        a full modern season. Per game and 17-game pace rank the same; they just read differently. A QB's games
+        are his starts plus any relief appearance with real snaps (10+ dropbacks and runs), so a brief
+        cameo doesn't halve his per-game numbers.
+      </p>
+      <h4>Ranking by hand</h4>
+      <p>
+        Drag a row by its handle to move it. A hand-dragged order stays put when you switch tabs, and
+        is kept until you change that tab's own sliders or settings.
+      </p>
+    }
 
-    <div class="about-body" #body>
-      @switch (active) {
-        @case ('about') {
-          <h3>Your rankings, your rules</h3>
-          <p>
-            Every NFL ranking is really an argument about what matters. Is it wins or stats? Volume or
-            efficiency? Did he carry the team, or did the team carry him? This site lets you settle it
-            yourself: move the sliders and the list re-ranks instantly.
-          </p>
-          <p>
-            It covers quarterbacks, running backs, wide receivers, tight ends, offensive lines, kickers,
-            punters, defenses and head coaches, all with this season's stats, updated every night, plus every
-            season back to 2000.
-          </p>
-          <div class="callout">
-            <strong>New here?</strong> Pick a tab up top, then try a preset from the dropdown at the top of the
-            filter menu (the <b>filter</b> button above the list, on the left, opens and closes it). Each preset ranks around a
-            different idea of "best". Then drag a few sliders and watch the list move.
-          </div>
-          <h4>Quick start</h4>
-          <ul>
-            <li><b>Sliders</b> set how much each stat counts. 50% is normal, 100% is double, 0% ignores it.</li>
-            <li>
-              <b>Presets</b> load a ready-made set of sliders built around a style of play; <b>Default</b> puts
-              every slider back at 50%.
-            </li>
-            <li>
-              The <b>season</b> dropdown above the list ranks any year from 2000 on with the same sliders, so
-              you can see how your formula grades another season.
-            </li>
-            <li><b>Drag rows</b> to rank by hand. Your order sticks until that tab's sliders change.</li>
-            <li><b>Hover</b> any column label for the full stat name and the league average.</li>
-            <li>
-              In the bar above the list: <b>filter</b> opens the filter menu, <b>copy</b> copies your list,
-              <b>info</b> opens this panel and the <b>gear</b> has the settings.
-            </li>
-            <li>
-              <b>Badges</b> under a name mark that season's honors: the Super Bowl, conference titles, MVP and the
-              other major awards, All-Pro and Pro Bowl picks (see the FAQ).
-            </li>
-          </ul>
+    @case ('grades') {
+      <h3>Grades and support</h3>
+      <p>
+        Some columns are letter grades from <b>F</b> to <b>A+</b>. They describe the situation around a
+        player rather than the player himself: the offensive line, the weapons, the coaching, the defense.
+      </p>
+      <p>
+        Every grade is <b>on a curve</b>: teams are ranked by their score, the best grades an A+, the worst an
+        F, and the rest spread evenly in between. So there's always a full range, whatever the scores are.
+      </p>
+      <h4>Why better support counts against a player</h4>
+      <p>
+        It's credit for doing more with less. A QB putting up big numbers behind a bad line, throwing to
+        average receivers, is more impressive than one with every advantage. So better support slightly
+        <em>lowers</em> a player's score. It's a light touch, and you can turn it off with the Support
+        card's eye or by setting the sliders to 0%.
+      </p>
+      <p>
+        The exception is the QB page's <b class="grade-name">Responsibility</b> grade: how much the offense
+        runs through the QB. Carrying the offense counts <em>for</em> him.
+      </p>
+      <h4>How <span class="grade-name">Responsibility</span> is worked out</h4>
+      <ol>
+        <li>Only the games he led count: those where he had the most dropbacks for his team.</li>
+        <li>
+          <b>Play share:</b> his dropbacks (passes, sacks, scrambles) and designed runs, out of all his team's
+          offensive plays in those games. Kneel-downs and spikes are left out.
+        </li>
+        <li><b>Yard share:</b> his passing plus rushing yards, out of all his team's yards in those games.</li>
+        <li>
+          Each share is compared across all the QBs (how far above or below the average he is), the two count
+          equally, and the QBs are ranked on the result: the top one an A+, the bottom one an F.
+        </li>
+        <li>
+          Early in the season that's blended with a preseason grade, leaning on the season more with every
+          game (see below), then curved again so the grades always run the full A+ to F.
+        </li>
+        <li>
+          In the ranking it counts at the same light strength as the other support grades, but in the QB's
+          favor. Its slider sets how much.
+        </li>
+      </ol>
+      <h4>The tabs grade each other</h4>
+      <ul class="tab-grades">
+        <li><b>QB Play</b> comes from the QB tab, weighted by each QB's starts for the team.</li>
+        <li><b>RB Play</b> comes from the RB tab, weighted by each back's carries.</li>
+        <li>
+          <b>Weapons</b> comes from the RB, WR and TE tabs: each player's spot weighted by his targets (and
+          carries for backs), with receivers counting 50%, backs 30% and tight ends 20%.
+        </li>
+        <li><b>O-Line</b> comes from the Offensive Lines tab, with its sliders: for QBs it leans on pass protection (sacks, hits, pressures and the QB's time to throw count five times the run blocking: the column reads O-Line (Pass)), for RBs on run blocking (yards per carry, stuffs, run EPA and success: O-Line (Run)), for head coaches it's the tab's own order.</li>
+        <li><b>Defense</b> comes from the Defenses tab.</li>
+        <li><b>Coaching</b> comes from the Head Coaches tab.</li>
+      </ul>
+      <p>
+        Grades follow each tab's current order, including your drags: move the Packers' line to #1 on the
+        Offensive Lines tab and every Packers QB and RB gets a better O-Line grade. Disagree with a team
+        grade? Re-rank the tab it comes from.
+      </p>
+      <h4>Preseason vs. this season</h4>
+      <p>
+        Early on, a few games isn't much to go on, so Weapons, O-Line and Coaching grades blend a preseason
+        grade (set by AI before the season; see Data &amp; Credits) with this season's results. The season counts for about 32% after 1 game, 55% after 3, 63%
+        after 4, 77% after 6, and completely from game 10 on. The blended scores are then curved like the
+        rest. First-year head coaches start from a neutral C, since there's no track record to grade. A
+        finished season uses its full-season results.
+      </p>
+    }
+
+    @case ('tips') {
+      <h3>Tips &amp; tricks</h3>
+      <ul class="tips">
+        <li><mat-icon fontIcon="drag_indicator"></mat-icon><span><b>Reorder columns</b> by dragging a column header within its group. <b>Reorder groups</b> or <b>stats</b> by dragging the cards and slider rows in the filter menu; the table follows.</span></li>
+        <li><mat-icon fontIcon="visibility"></mat-icon><span><b>Eyes</b> switch a stat or a whole group off: the column hides and it stops counting, but its slider keeps its value.</span></li>
+        <li><mat-icon fontIcon="palette"></mat-icon><span><b>Color-coded values</b> are green above the league average and red below it. Counting stats compare per game, so missed games don't turn a good player red. Hover a column label for the average of what the column shows.</span></li>
+        <li><mat-icon fontIcon="emoji_events"></mat-icon><span><b>Rank tiles:</b> a trophy for #1, green through 10, white in the middle and red for the bottom 10.</span></li>
+        <li><mat-icon fontIcon="content_copy"></mat-icon><span><b>Copy</b> puts your whole ranked list on the clipboard, ready to paste into a group chat.</span></li>
+        <li><mat-icon fontIcon="healing"></mat-icon><span>The <b>bandage</b> marks players ESPN lists as Out, Doubtful or on IR (in a past season, those who finished it on IR). Hide them with <b>Injured Players</b> in the settings.</span></li>
+        <li><mat-icon fontIcon="hourglass_bottom"></mat-icon><span>Turn off <b>Garbage Time Stats</b> to leave out plays run once the game was decided (win probability under 10% or over 90%). Stats padded in blowouts shrink.</span></li>
+        <li><mat-icon fontIcon="leaderboard"></mat-icon><span><b>Unit Ranks</b> in the settings sets what the head coaches' Off and Def Rank columns rank on: points or yards per game.</span></li>
+        <li><mat-icon fontIcon="swap_horiz"></mat-icon><span><b>Combine Rush/Pass Stats</b> shows yards and touchdowns as single totals, leaving more room for other columns.</span></li>
+        <li><mat-icon fontIcon="filter_list"></mat-icon><span><b>Min Games</b> in the settings leaves out players who played less than a share of the season so far, in steps of 10% (the settings show the games it takes). Early on, 10% is a game; set it to 1 to see everyone.</span></li>
+        <li><mat-icon fontIcon="military_tech"></mat-icon><span>Hover any <b>badge</b> under a name for the award written out.</span></li>
+      </ul>
+    }
+
+    @case ('glossary') {
+      <h3>Stat glossary</h3>
+      <p class="muted">Every column label also shows its full name on hover.</p>
+      <dl class="glossary">
+        @for (entry of glossary; track entry[0]) {
+          <dt>{{ entry[0] }}</dt>
+          <dd>{{ entry[1] }}</dd>
         }
+      </dl>
+    }
 
-        @case ('ranking') {
-          <h3>How the rankings work</h3>
-          <p>
-            Every player (or team, or coach) gets a score from the stats you weigh, and the list is sorted by
-            that score. Here's what goes into it:
-          </p>
-          <h4>Sliders and weights</h4>
-          <p>
-            Every stat is first put on the same scale: how far above or below the list's average a player is,
-            measured in standard deviations (so 72% vs. 65% completion counts as much as 10 vs. 5 touchdowns if
-            they're equally far from typical). That score is multiplied by its slider: at 50% a stat counts
-            normally, at 100% twice as much, and at 0% not at all. Nothing is weighted behind the scenes, so the
-            sliders alone decide what matters. A stat's
-            <b>eye</b> switches it off entirely and hides its column. A card's eye does the same for a whole group.
-          </p>
-          <h4>Good and bad stats</h4>
-          <p>
-            Stats where lower is better (turnovers, sacks allowed, points allowed, stuffed runs...) count
-            against a player. Extreme values are capped, so one fluky number (say, 100% on two chances) can't
-            swamp the list, and a stat a player has no data for counts as the list's worst, or as average when
-            "-" just means no chances yet. A stat nobody has that season (it wasn't tracked yet) is left out
-            altogether.
-          </p>
-          <h4>Small samples</h4>
-          <p>
-            Stats aren't adjusted for how many games they come from, so a single stat sorts the list exactly by
-            its numbers, and a fill-in with one great game can rank high on rate stats. Raise <b>Min Games</b>
-            in the settings to leave out players with too few games.
-          </p>
-          <h4>Totals, breakdowns and per game</h4>
-          <p>
-            Paired stats like yards and touchdowns have a total slider with a breakdown underneath (click the
-            label to open it). The total scales both parts. <b>Stat Totals</b> in the settings switches counting
-            stats between season totals, <b>per game</b> (fairer to anyone who missed games) and a
-            <b>17-game pace</b>: per game over a full 17-game season, so a 12-game year or a 16-game era reads like
-            a full modern season. Per game and 17-game pace rank the same; they just read differently. A QB's games
-            are his starts plus any relief appearance with real snaps (10+ dropbacks and runs), so a brief
-            cameo doesn't halve his per-game numbers.
-          </p>
-          <h4>Ranking by hand</h4>
-          <p>
-            Drag a row by its handle to move it. A hand-dragged order stays put when you switch tabs, and
-            is kept until you change that tab's own sliders or settings.
-          </p>
-        }
+    @case ('faq') {
+      <h3>FAQ</h3>
+      <details>
+        <summary>How do past seasons work?</summary>
+        <p>
+          Pick a year from the season dropdown above the list. Your sliders, eyes and column
+          order stay as they are; the list re-ranks with that year's stats. Each season keeps its own
+          hand-dragged order while the page is open. A
+          finished season uses its full-season results for every grade (no preseason blend), and the
+          bandage marks players who finished it on injured reserve. Stats that weren't tracked yet that
+          year are left out, columns and sliders both: tracking stats like separation and time to throw
+          start in 2016, CPOE, YAC and air yards in 2006,
+          and 2003 to 2008 have no targets (so no target share or catch rate either).
+        </p>
+      </details>
+      <details>
+        <summary>What are the badges under names?</summary>
+        <p>
+          That season's honors, hover one for the details. A gold <b>Lombardi</b> for the Super Bowl
+          champion and a silver <b>cup</b> for both conference champions, on every row from that team.
+          Gold plaques for the major awards: <b>MVP</b>, Offensive Player (<b>OPOY</b>) and Rookie
+          (<b>OROY</b>) of the Year, Comeback Player (<b>CPOY</b>), <b>SB MVP</b>, Coach of the Year
+          (<b>COY</b>) on the coach, and the defensive awards (<b>DPOY</b>, <b>DROY</b>) on the winner's
+          defense. Silver <b>AP1</b> / <b>AP2</b> for the AP's first and second All-Pro teams, and bronze
+          <b>PB</b> for the Pro Bowl (players voted in, plus alternates called up as replacements). Badges
+          show for finished seasons, back to 2000; a fullback or defender only gets one on a tab he's on.
+        </p>
+      </details>
+      <details open>
+        <summary>Why is my guy ranked so low?</summary>
+        <p>
+          The ranking only reflects the sliders. Try a preset that fits his game, check whether a support
+          grade is pulling him down, or switch Stat Totals to Per Game or 17-Game Pace if he missed time. And if you still
+          disagree, drag him where he belongs.
+        </p>
+      </details>
+      <details>
+        <summary>Why does a better supporting cast hurt a player?</summary>
+        <p>
+          It's credit for doing more with less (see Grades &amp; Support). It's a small effect and you can
+          switch it off with the Support card's eye.
+        </p>
+      </details>
+      <details>
+        <summary>What is the QB's Responsibility grade?</summary>
+        <p>
+          How much of the offense runs through the QB. In each game he led (the most dropbacks for his team),
+          it measures his share of the team's plays (his dropbacks, scrambles and designed runs, leaving out
+          kneels and spikes) and his share of the team's yards, passing plus rushing. Those two are combined
+          and compared across all the QBs, blended with a preseason grade early in the year (the season takes
+          over as games are played), and curved: the QB who carries his offense the most is an A+, the one
+          most carried by it an F.
+        </p>
+        <p>
+          Unlike the other support grades, it counts <em>for</em> the QB (carrying the offense is to his
+          credit), at the same light strength as the rest. Turn its slider up or down, or to 0% to leave it
+          out.
+        </p>
+      </details>
+      <details>
+        <summary>How is the Weapons grade worked out?</summary>
+        <p>
+          From the RB, WR and TE tabs. Each player gets a grade from his spot in his own tab (#1 is an A+,
+          last is an F), and a team's grade at each position averages its players by how much they're used:
+          targets for receivers and tight ends, carries plus targets for backs (catches in 2003 to 2008,
+          which have no targets). The three positions are then
+          combined, with receivers counting 50%, running backs 30% and tight ends 20%, since it's mostly
+          about who the QB is throwing to. Like the other team grades, it starts from a preseason grade and
+          leans on this season's rankings more with every game played. Finally the 32 teams are ranked by
+          that score and graded on a curve: the best group of weapons is an A+, the worst an F.
+        </p>
+      </details>
+      <details>
+        <summary>How do I change a grade I disagree with?</summary>
+        <p>
+          Team grades (QB Play, RB Play, Weapons, O-Line, Defense, Coaching) come from the other tabs'
+          rankings, so re-rank the tab they come from: drag a team's line up the Offensive Lines tab, or a
+          receiver up the WR tab, and their grades follow everywhere. The QB page's Responsibility grade is
+          worked out from each QB's share of his team's plays and yards; if you think it counts too much or
+          too little, turn its slider up or down.
+        </p>
+      </details>
+      <details>
+        <summary>What does "-" mean?</summary>
+        <p>
+          The stat isn't available for that player yet, usually because a data source doesn't cover him or
+          he hasn't had the chance (no kicks from 50+, no short-yardage runs). Missing rate stats like 4th
+          Down Go % count as league average; most others count as the worst value.
+        </p>
+      </details>
+      <details>
+        <summary>When do the stats update?</summary>
+        <p>
+          The current season updates every night, early in the morning Eastern time, once the day's games
+          are final and the data sources have caught up. Monday night games show up the following morning.
+          Finished seasons don't change.
+        </p>
+      </details>
+      <details>
+        <summary>Is my ranking saved?</summary>
+        <p>
+          No. Everything resets when you reload the page: sliders, drags, column changes, the settings menu
+          and the season (back to the current one). Copy your list if you want to keep it.
+        </p>
+      </details>
+      <details>
+        <summary>Why don't some stats change with Garbage Time Stats off?</summary>
+        <p>
+          Only stats built play by play can be filtered: EPA, success rate, CPOE and most defense and O-line
+          stats. Season totals like yards and touchdowns, and tracking stats like separation, stay the same.
+        </p>
+      </details>
+      <details>
+        <summary>Why do early-season rankings jump around?</summary>
+        <p>
+          Small samples. One big game can swing a rate stat a lot in September (raise Min Games in the
+          settings to leave out players with too few). The team grades lean on preseason grades early and
+          shift to this season's results as games are played.
+        </p>
+      </details>
+      <details>
+        <summary>A QB I'm looking for isn't listed.</summary>
+        <p>
+          The QB tab lists quarterbacks who started a game that season. If he's there but hidden, he may be
+          injured with Injured Players turned off, or under the Min Games setting.
+        </p>
+      </details>
+    }
 
-        @case ('grades') {
-          <h3>Grades and support</h3>
-          <p>
-            Some columns are letter grades from <b>F</b> to <b>A+</b>. They describe the situation around a
-            player rather than the player himself: the offensive line, the weapons, the coaching, the defense.
-          </p>
-          <p>
-            Every grade is <b>on a curve</b>: teams are ranked by their score, the best grades an A+, the worst an
-            F, and the rest spread evenly in between. So there's always a full range, whatever the scores are.
-          </p>
-          <h4>Why better support counts against a player</h4>
-          <p>
-            It's credit for doing more with less. A QB putting up big numbers behind a bad line, throwing to
-            average receivers, is more impressive than one with every advantage. So better support slightly
-            <em>lowers</em> a player's score. It's a light touch, and you can turn it off with the Support
-            card's eye or by setting the sliders to 0%.
-          </p>
-          <p>
-            The exception is the QB page's <b class="grade-name">Responsibility</b> grade: how much the offense
-            runs through the QB. Carrying the offense counts <em>for</em> him.
-          </p>
-          <h4>How <span class="grade-name">Responsibility</span> is worked out</h4>
-          <ol>
-            <li>Only the games he led count: those where he had the most dropbacks for his team.</li>
-            <li>
-              <b>Play share:</b> his dropbacks (passes, sacks, scrambles) and designed runs, out of all his team's
-              offensive plays in those games. Kneel-downs and spikes are left out.
-            </li>
-            <li><b>Yard share:</b> his passing plus rushing yards, out of all his team's yards in those games.</li>
-            <li>
-              Each share is compared across all the QBs (how far above or below the average he is), the two count
-              equally, and the QBs are ranked on the result: the top one an A+, the bottom one an F.
-            </li>
-            <li>
-              Early in the season that's blended with a preseason grade, leaning on the season more with every
-              game (see below), then curved again so the grades always run the full A+ to F.
-            </li>
-            <li>
-              In the ranking it counts at the same light strength as the other support grades, but in the QB's
-              favor. Its slider sets how much.
-            </li>
-          </ol>
-          <h4>The tabs grade each other</h4>
-          <ul class="tab-grades">
-            <li><b>QB Play</b> comes from the QB tab, weighted by each QB's starts for the team.</li>
-            <li><b>RB Play</b> comes from the RB tab, weighted by each back's carries.</li>
-            <li>
-              <b>Weapons</b> comes from the RB, WR and TE tabs: each player's spot weighted by his targets (and
-              carries for backs), with receivers counting 50%, backs 30% and tight ends 20%.
-            </li>
-            <li><b>O-Line</b> comes from the Offensive Lines tab, with its sliders: for QBs it leans on pass protection (sacks, hits, pressures and the QB's time to throw count five times the run blocking: the column reads O-Line (Pass)), for RBs on run blocking (yards per carry, stuffs, run EPA and success: O-Line (Run)), for head coaches it's the tab's own order.</li>
-            <li><b>Defense</b> comes from the Defenses tab.</li>
-            <li><b>Coaching</b> comes from the Head Coaches tab.</li>
-          </ul>
-          <p>
-            Grades follow each tab's current order, including your drags: move the Packers' line to #1 on the
-            Offensive Lines tab and every Packers QB and RB gets a better O-Line grade. Disagree with a team
-            grade? Re-rank the tab it comes from.
-          </p>
-          <h4>Preseason vs. this season</h4>
-          <p>
-            Early on, a few games isn't much to go on, so Weapons, O-Line and Coaching grades blend a preseason
-            grade (set by AI before the season; see Data &amp; Credits) with this season's results. The season counts for about 32% after 1 game, 55% after 3, 63%
-            after 4, 77% after 6, and completely from game 10 on. The blended scores are then curved like the
-            rest. First-year head coaches start from a neutral C, since there's no track record to grade. A
-            finished season uses its full-season results.
-          </p>
-        }
-
-        @case ('tips') {
-          <h3>Tips &amp; tricks</h3>
-          <ul class="tips">
-            <li><mat-icon fontIcon="drag_indicator"></mat-icon><span><b>Reorder columns</b> by dragging a column header within its group. <b>Reorder groups</b> or <b>stats</b> by dragging the cards and slider rows in the filter menu; the table follows.</span></li>
-            <li><mat-icon fontIcon="visibility"></mat-icon><span><b>Eyes</b> switch a stat or a whole group off: the column hides and it stops counting, but its slider keeps its value.</span></li>
-            <li><mat-icon fontIcon="palette"></mat-icon><span><b>Color-coded values</b> are green above the league average and red below it. Counting stats compare per game, so missed games don't turn a good player red. Hover a column label for the average of what the column shows.</span></li>
-            <li><mat-icon fontIcon="emoji_events"></mat-icon><span><b>Rank tiles:</b> a trophy for #1, green through 10, white in the middle and red for the bottom 10.</span></li>
-            <li><mat-icon fontIcon="content_copy"></mat-icon><span><b>Copy</b> puts your whole ranked list on the clipboard, ready to paste into a group chat.</span></li>
-            <li><mat-icon fontIcon="healing"></mat-icon><span>The <b>bandage</b> marks players ESPN lists as Out, Doubtful or on IR (in a past season, those who finished it on IR). Hide them with <b>Injured Players</b> in the settings.</span></li>
-            <li><mat-icon fontIcon="hourglass_bottom"></mat-icon><span>Turn off <b>Garbage Time Stats</b> to leave out plays run once the game was decided (win probability under 10% or over 90%). Stats padded in blowouts shrink.</span></li>
-            <li><mat-icon fontIcon="leaderboard"></mat-icon><span><b>Unit Ranks</b> in the settings sets what the head coaches' Off and Def Rank columns rank on: points or yards per game.</span></li>
-            <li><mat-icon fontIcon="swap_horiz"></mat-icon><span><b>Combine Rush/Pass Stats</b> shows yards and touchdowns as single totals, leaving more room for other columns.</span></li>
-            <li><mat-icon fontIcon="filter_list"></mat-icon><span><b>Min Games</b> in the settings leaves out players who played less than a share of the season so far, in steps of 10% (the settings show the games it takes). Early on, 10% is a game; set it to 1 to see everyone.</span></li>
-            <li><mat-icon fontIcon="military_tech"></mat-icon><span>Hover any <b>badge</b> under a name for the award written out.</span></li>
-          </ul>
-        }
-
-        @case ('glossary') {
-          <h3>Stat glossary</h3>
-          <p class="muted">Every column label also shows its full name on hover.</p>
-          <dl class="glossary">
-            @for (entry of glossary; track entry[0]) {
-              <dt>{{ entry[0] }}</dt>
-              <dd>{{ entry[1] }}</dd>
-            }
-          </dl>
-        }
-
-        @case ('faq') {
-          <h3>FAQ</h3>
-          <details>
-            <summary>How do past seasons work?</summary>
-            <p>
-              Pick a year from the season dropdown above the list. Your sliders, eyes and column
-              order stay as they are; the list re-ranks with that year's stats. Each season keeps its own
-              hand-dragged order while the page is open. A
-              finished season uses its full-season results for every grade (no preseason blend), and the
-              bandage marks players who finished it on injured reserve. Stats that weren't tracked yet that
-              year are left out, columns and sliders both: tracking stats like separation and time to throw
-              start in 2016, CPOE, YAC and air yards in 2006,
-              and 2003 to 2008 have no targets (so no target share or catch rate either).
-            </p>
-          </details>
-          <details>
-            <summary>What are the badges under names?</summary>
-            <p>
-              That season's honors, hover one for the details. A gold <b>Lombardi</b> for the Super Bowl
-              champion and a silver <b>cup</b> for both conference champions, on every row from that team.
-              Gold plaques for the major awards: <b>MVP</b>, Offensive Player (<b>OPOY</b>) and Rookie
-              (<b>OROY</b>) of the Year, Comeback Player (<b>CPOY</b>), <b>SB MVP</b>, Coach of the Year
-              (<b>COY</b>) on the coach, and the defensive awards (<b>DPOY</b>, <b>DROY</b>) on the winner's
-              defense. Silver <b>AP1</b> / <b>AP2</b> for the AP's first and second All-Pro teams, and bronze
-              <b>PB</b> for the Pro Bowl (players voted in, plus alternates called up as replacements). Badges
-              show for finished seasons, back to 2000; a fullback or defender only gets one on a tab he's on.
-            </p>
-          </details>
-          <details open>
-            <summary>Why is my guy ranked so low?</summary>
-            <p>
-              The ranking only reflects the sliders. Try a preset that fits his game, check whether a support
-              grade is pulling him down, or switch Stat Totals to Per Game or 17-Game Pace if he missed time. And if you still
-              disagree, drag him where he belongs.
-            </p>
-          </details>
-          <details>
-            <summary>Why does a better supporting cast hurt a player?</summary>
-            <p>
-              It's credit for doing more with less (see Grades &amp; Support). It's a small effect and you can
-              switch it off with the Support card's eye.
-            </p>
-          </details>
-          <details>
-            <summary>What is the QB's Responsibility grade?</summary>
-            <p>
-              How much of the offense runs through the QB. In each game he led (the most dropbacks for his team),
-              it measures his share of the team's plays (his dropbacks, scrambles and designed runs, leaving out
-              kneels and spikes) and his share of the team's yards, passing plus rushing. Those two are combined
-              and compared across all the QBs, blended with a preseason grade early in the year (the season takes
-              over as games are played), and curved: the QB who carries his offense the most is an A+, the one
-              most carried by it an F.
-            </p>
-            <p>
-              Unlike the other support grades, it counts <em>for</em> the QB (carrying the offense is to his
-              credit), at the same light strength as the rest. Turn its slider up or down, or to 0% to leave it
-              out.
-            </p>
-          </details>
-          <details>
-            <summary>How is the Weapons grade worked out?</summary>
-            <p>
-              From the RB, WR and TE tabs. Each player gets a grade from his spot in his own tab (#1 is an A+,
-              last is an F), and a team's grade at each position averages its players by how much they're used:
-              targets for receivers and tight ends, carries plus targets for backs (catches in 2003 to 2008,
-              which have no targets). The three positions are then
-              combined, with receivers counting 50%, running backs 30% and tight ends 20%, since it's mostly
-              about who the QB is throwing to. Like the other team grades, it starts from a preseason grade and
-              leans on this season's rankings more with every game played. Finally the 32 teams are ranked by
-              that score and graded on a curve: the best group of weapons is an A+, the worst an F.
-            </p>
-          </details>
-          <details>
-            <summary>How do I change a grade I disagree with?</summary>
-            <p>
-              Team grades (QB Play, RB Play, Weapons, O-Line, Defense, Coaching) come from the other tabs'
-              rankings, so re-rank the tab they come from: drag a team's line up the Offensive Lines tab, or a
-              receiver up the WR tab, and their grades follow everywhere. The QB page's Responsibility grade is
-              worked out from each QB's share of his team's plays and yards; if you think it counts too much or
-              too little, turn its slider up or down.
-            </p>
-          </details>
-          <details>
-            <summary>What does "-" mean?</summary>
-            <p>
-              The stat isn't available for that player yet, usually because a data source doesn't cover him or
-              he hasn't had the chance (no kicks from 50+, no short-yardage runs). Missing rate stats like 4th
-              Down Go % count as league average; most others count as the worst value.
-            </p>
-          </details>
-          <details>
-            <summary>When do the stats update?</summary>
-            <p>
-              The current season updates every night, early in the morning Eastern time, once the day's games
-              are final and the data sources have caught up. Monday night games show up the following morning.
-              Finished seasons don't change.
-            </p>
-          </details>
-          <details>
-            <summary>Is my ranking saved?</summary>
-            <p>
-              No. Everything resets when you reload the page: sliders, drags, column changes, the settings menu
-              and the season (back to the current one). Copy your list if you want to keep it.
-            </p>
-          </details>
-          <details>
-            <summary>Why don't some stats change with Garbage Time Stats off?</summary>
-            <p>
-              Only stats built play by play can be filtered: EPA, success rate, CPOE and most defense and O-line
-              stats. Season totals like yards and touchdowns, and tracking stats like separation, stay the same.
-            </p>
-          </details>
-          <details>
-            <summary>Why do early-season rankings jump around?</summary>
-            <p>
-              Small samples. One big game can swing a rate stat a lot in September (raise Min Games in the
-              settings to leave out players with too few). The team grades lean on preseason grades early and
-              shift to this season's results as games are played.
-            </p>
-          </details>
-          <details>
-            <summary>A QB I'm looking for isn't listed.</summary>
-            <p>
-              The QB tab lists quarterbacks who started a game that season. If he's there but hidden, he may be
-              injured with Injured Players turned off, or under the Min Games setting.
-            </p>
-          </details>
-        }
-
-        @case ('data') {
-          <h3>Data &amp; credits</h3>
-          <h4>Where the numbers come from</h4>
-          <ul>
-            <li>
-              <a href="https://www.espn.com/nfl/" target="_blank" rel="noopener">ESPN</a>: game results, QB box
-              score stats (passer rating is worked out from them), the injury report and head coaches.
-            </li>
-            <li>
-              <a href="https://github.com/nflverse" target="_blank" rel="noopener">nflverse</a>: play-by-play
-              (EPA, success rate, CPOE, win probability), season stats and fantasy points, snap counts, Next Gen
-              Stats tracking data and Pro Football Reference's charting (pressures, broken tackles, drops, bad
-              throws), plus schedules, coaches and Super Bowl results for past seasons.
-            </li>
-            <li>
-              <a href="https://en.wikipedia.org/wiki/All-Pro" target="_blank" rel="noopener">Wikipedia</a>: the AP
-              All-Pro teams and Pro Bowl rosters behind the AP1 / AP2 / PB badges. The season awards (MVP, OPOY
-              and the rest) are the AP's.
-            </li>
-            <li>
-              Preseason grades (team Weapons, O-Line and Coaching, and each QB's Responsibility) are set by AI
-              before the season, then blended out as games are played. A first-year head coach has no track
-              record, so he starts at a neutral C.
-            </li>
-          </ul>
-          <h4>Thanks</h4>
-          <p>
-            Huge thanks to the nflverse project for making NFL data free and open, and to
-            <a href="https://rbsdm.com" target="_blank" rel="noopener">rbsdm.com</a>, whose garbage-time filter
-            this site borrows. And to <a href="https://claude.ai" target="_blank" rel="noopener">Claude</a>, which
-            helped build it: the rankings math, the data pipeline back to 2000 and just
-            about every pixel.
-          </p>
-          <p class="muted">
-            An unofficial fan project, not affiliated with the NFL, ESPN or any team. Team logos belong to
-            their teams.
-          </p>
-        }
-      }
-    </div>
-  </div>
-</div>
+    @case ('data') {
+      <h3>Data &amp; credits</h3>
+      <h4>Where the numbers come from</h4>
+      <ul>
+        <li>
+          <a href="https://www.espn.com/nfl/" target="_blank" rel="noopener">ESPN</a>: game results, QB box
+          score stats (passer rating is worked out from them), the injury report and head coaches.
+        </li>
+        <li>
+          <a href="https://github.com/nflverse" target="_blank" rel="noopener">nflverse</a>: play-by-play
+          (EPA, success rate, CPOE, win probability), season stats and fantasy points, snap counts, Next Gen
+          Stats tracking data and Pro Football Reference's charting (pressures, broken tackles, drops, bad
+          throws), plus schedules, coaches and Super Bowl results for past seasons.
+        </li>
+        <li>
+          <a href="https://en.wikipedia.org/wiki/All-Pro" target="_blank" rel="noopener">Wikipedia</a>: the AP
+          All-Pro teams and Pro Bowl rosters behind the AP1 / AP2 / PB badges. The season awards (MVP, OPOY
+          and the rest) are the AP's.
+        </li>
+        <li>
+          Preseason grades (team Weapons, O-Line and Coaching, and each QB's Responsibility) are set by AI
+          before the season, then blended out as games are played. A first-year head coach has no track
+          record, so he starts at a neutral C.
+        </li>
+      </ul>
+      <h4>Thanks</h4>
+      <p>
+        Huge thanks to the nflverse project for making NFL data free and open, and to
+        <a href="https://rbsdm.com" target="_blank" rel="noopener">rbsdm.com</a>, whose garbage-time filter
+        this site borrows. And to <a href="https://claude.ai" target="_blank" rel="noopener">Claude</a>, which
+        helped build it: the rankings math, the data pipeline back to 2000 and just
+        about every pixel.
+      </p>
+      <p class="muted">
+        An unofficial fan project, not affiliated with the NFL, ESPN or any team. Team logos belong to
+        their teams.
+      </p>
+    }
+  }
+</about-frame>

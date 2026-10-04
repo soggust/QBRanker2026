@@ -1,0 +1,20 @@
+@use "variables" as v;
+
+// NBA awards: All-NBA in gold / silver / bronze by team, All-Defensive in steel (a separate honor from
+// the All-NBA tiers), All-Star in bronze
+// (inside an award plaque's rule: libs/ranker/src/styles/components/_awards.scss)
+@mixin metals {
+  &.award-nba2 {
+    @include v.plaque-silver;
+  }
+
+  &.award-def1,
+  &.award-def2 {
+    @include v.plaque-steel;
+  }
+
+  &.award-nba3,
+  &.award-as {
+    @include v.plaque-bronze;
+  }
+}

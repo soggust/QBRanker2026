@@ -1,0 +1,552 @@
+// The player card (click a name): builds it and keeps it while it's open. Its stats are the columns
+// showing in the grid, as ranks in the list it's ranked in (the table's, or another season's ranked the
+// same way); then the Overview (skills, archetype, flags, radar, scouting report), the seasons they're
+// in and similar seasons load in behind it.
+import { PER_GAME_LABELS, SkillPlayer, SkillPosition, SkillStat, SkillStatGroup, headlineStats, presetWeights } from '@sport/positions';
+import { awardsFor } from '@sport/awards';
+import { SPORT } from '@sport/sport';
+import { badgeColor, whiteLogo } from '@sport/team-colors';
+import { logoForSeason } from '@sport/logo-eras';
+import { SKILLS } from '@sport/skills';
+import { CardFlag, FlagContext, ValueContext } from '@ranker/engine/sport';
+import { CardSkill, standing, tierWord } from '@ranker/engine/skills';
+import { CURRENT_SEASON, SEASONS, isLiveSeason } from '@ranker/engine/data';
+import { DEFAULT_SPORT_SETTINGS, SKILL_UNITS, defaultRanking, statValue } from '@ranker/engine/unit-scoring';
+import { StatReader } from '@ranker/engine/stat-reader';
+import { SeasonDataService } from '@ranker/engine/season-data.service';
+import { NUMBER, grade, innings, ordinal, rankPct, rankTone } from '@ranker/core/format';
+import { CardOverview, CardSeason, CardStat, CardTab, CareerSeason, PlayerCard, SeasonContext } from './card.model';
+import { archetypeFor, overviewBlurb, profileFlags, scoutingReport, skillScores } from './overview';
+import { careerHistory } from './career-history';
+import { radar, radarShape } from './radar';
+
+// What the card needs from the table it opens from
+export interface CardHost {
+  readonly position: SkillPosition;
+  // The table's season, list and stats, and the Color-Coded Values setting
+  readonly season: number;
+  readonly playerList: SkillPlayer[];
+  readonly stats: SkillStat[];
+  readonly colorValues: boolean;
+  // A reader for another season (the table's for null)
+  readerFor(context: SeasonContext | null): StatReader;
+  // Another season's list: the same filters as the table, ranked with the current sliders
+  seasonContext(season: number, rows: Record<SkillPosition, SkillPlayer[]>): SeasonContext;
+  rankedIn(context: SeasonContext, players: SkillPlayer[]): SkillPlayer[];
+  // The stat groups with columns showing, for that reader's season
+  shownGroups(reader: StatReader): SkillStatGroup[];
+  headshot(unit: { id?: number | null }, w?: number): string | null;
+}
+
+const TABS: { id: CardTab; title: string }[] = [
+  { id: 'overview', title: 'Overview' },
+  { id: 'stats', title: 'Stats' },
+  { id: 'seasons', title: 'Seasons' },
+];
+
+const POSITION_NAMES = SPORT.positionNames as Record<SkillPosition, string>;
+
+export class PlayerCards {
+  card: PlayerCard | null = null;
+  // Another season's card being built
+  loading = false;
+  // The card's tab (kept while flipping through players and seasons)
+  tab: CardTab = 'overview';
+  // Stats tab groups folded shut (kept across cards)
+  closedGroups = new Set<string>();
+
+  constructor(
+    private readonly host: CardHost,
+    private readonly data: SeasonDataService,
+  ) {}
+
+  private get position(): SkillPosition {
+    return this.host.position;
+  }
+
+  // Seasons only when they're in more than one (shown while loading; never for a career-only sport),
+  // and the sport's history tab when it has one (SPORT.cardHistory: the UFC's fights)
+  tabsFor(card: PlayerCard): { id: CardTab; title: string }[] {
+    const tabs = TABS.filter((tab) => tab.id !== 'seasons' || (!SPORT.careerOnly && (!card.seasons || card.seasons.length > 1)));
+    return SPORT.cardHistory ? [...tabs, { id: 'history', title: SPORT.cardHistory.title }] : tabs;
+  }
+
+  // A name in the table: their card for the table's season, ranked as the table has them (always on
+  // the Overview; flipping through players and seasons keeps the tab you're on)
+  open(player: SkillPlayer): void {
+    this.tab = 'overview';
+    this.show(this.render(player, this.host.season, this.host.playerList, null));
+  }
+
+  // A season link or a similar season: that season's card, without changing the table (the table's own
+  // season shows as the table has it)
+  async openSeason(season: number, gsisId: string): Promise<void> {
+    const { host } = this;
+    const listed = season === host.season ? host.playerList.find((p) => p.gsisId === gsisId) : undefined;
+    if (listed) {
+      this.show(this.render(listed, host.season, host.playerList, null));
+      return;
+    }
+    this.loading = true;
+    try {
+      const rows = season === host.season ? SKILL_UNITS : await this.data.rows(season);
+      const player = rows[this.position]?.find((p) => p.gsisId === gsisId);
+      if (!player) return;
+      const context = host.seasonContext(season, rows);
+      // (someone under the Min Games setting still gets their card, ranked where they'd fall)
+      if (!context.list.includes(player)) {
+        context.list = context.manual ? [...context.list, player] : host.rankedIn(context, [...context.list, player]);
+      }
+      this.show(this.render(player, season, context.list, context));
+    } catch (err) {
+      console.error(err);
+    } finally {
+      this.loading = false;
+    }
+  }
+
+  // The player above or below in the list (arrow keys too)
+  step(step: number): void {
+    if (!this.card) return;
+    const { list, season, context, player } = this.card;
+    const next = list[(list.indexOf(player) + step + list.length) % list.length];
+    if (next) this.show(this.render(next, season, list, context));
+  }
+
+  close(): void {
+    this.card = null;
+  }
+
+  selectTab(tab: CardTab): void {
+    this.tab = tab;
+    if (tab === 'seasons' && this.card) this.rankCareer(this.card);
+  }
+
+  toggleGroup(id: string): void {
+    if (this.closedGroups.has(id)) this.closedGroups.delete(id);
+    else this.closedGroups.add(id);
+  }
+
+  private show(card: PlayerCard): void {
+    this.card = card;
+    // (a tab this card doesn't have falls back to the Overview)
+    if (!this.tabsFor(card).some((tab) => tab.id === this.tab)) this.tab = 'overview';
+    this.loadSeasons(card);
+    this.loadPrevSkills(card);
+  }
+
+  // ---------------------------------------------------------------------------
+  // The card itself: the hero and the Stats tab's tiles, then the Overview
+  // ---------------------------------------------------------------------------
+  private render(player: SkillPlayer, season: number, list: SkillPlayer[], context: SeasonContext | null): PlayerCard {
+    const reader = this.host.readerFor(context);
+    const groups = this.host
+      .shownGroups(reader)
+      .map((group) => ({
+        id: group.id,
+        title: group.title,
+        icon: group.icon,
+        // (another season's card leaves out the values from other tabs, which are the table's season's)
+        stats: group.stats
+          .filter((stat) => !context || !SPORT.tableSeasonOnly?.(stat))
+          .map((stat) => this.cardStat(reader, player, stat, list, group.id)),
+      }))
+      .filter((group) => group.stats.length);
+    const rows = context ? context.rows : SKILL_UNITS;
+    return {
+      player,
+      season,
+      list,
+      context,
+      name: player.name,
+      positionName: POSITION_NAMES[this.position],
+      seasonLabel: SPORT.careerOnly ? 'Career' : isLiveSeason(season) ? 'This Season' : SPORT.seasonText(season),
+      teamName: SPORT.teamName ? SPORT.teamName(player, this.position, rows) : ((player as { teamName?: string | null }).teamName ?? null),
+      logo: logoForSeason(player.teamLogo, season),
+      color: badgeColor(player.teamLogo),
+      whiteLogo: whiteLogo(player.teamLogo),
+      // The table's headshot, big enough for the card's hero
+      photo: this.host.headshot(player, 440),
+      rank: list.indexOf(player) + 1,
+      of: list.length,
+      awards: awardsFor(player, this.position, season),
+      groups,
+      overview: this.overview(reader, player, season, list, context),
+      seasons: null,
+      comps: null,
+    };
+  }
+
+  private cardStat(reader: StatReader, player: SkillPlayer, stat: SkillStat, list: SkillPlayer[], group: string): CardStat {
+    // Lower is better for ranks and stats that count against a player (support grades read higher is
+    // better: a better lineup is a better lineup)
+    const lowerBetter = stat.format === 'rank' || (!!stat.negative && !stat.support);
+    const values = list.map((p) => reader.value(p, stat)).filter((v): v is number => v !== null);
+    const value = reader.value(player, stat);
+    // (display-only stats like Games aren't ranked)
+    const rank = value === null || stat.infoOnly ? null : 1 + values.filter((v) => (lowerBetter ? v < value : v > value)).length;
+    const of = values.length;
+    return {
+      key: stat.key,
+      group,
+      label: reader.label(stat),
+      name: reader.name(stat),
+      display: reader.format(player, stat),
+      rank,
+      tied: value !== null && values.filter((v) => v === value).length > 1,
+      dots: stat.format === 'recent' ? [...reader.lastFive(player)].reverse() : undefined,
+      of,
+      pct: rank === null ? null : rankPct(rank, of),
+      avg: reader.averageText(stat),
+      trait: !stat.infoOnly && (!stat.support || !!stat.supportHelps),
+      tint: reader.valueColor(player, stat),
+    };
+  }
+
+  // ---------------------------------------------------------------------------
+  // Overview: skills, archetype, the one-line take and the context flags
+  // ---------------------------------------------------------------------------
+  private overview(reader: StatReader, player: SkillPlayer, season: number, list: SkillPlayer[], context: SeasonContext | null): CardOverview {
+    const skills = this.skillsFor(reader, player, list);
+    const at = list.indexOf(player);
+    const overall = at < 0 || list.length < 2 ? 0.5 : (list.length - 1 - at) / (list.length - 1);
+    const { strengths, weaknesses, report } = scoutingReport(skills);
+    return {
+      archetype: archetypeFor(this.position, skills, overall),
+      blurb: overviewBlurb(strengths, [...weaknesses].reverse()),
+      skills,
+      report,
+      flags: this.flags(reader, player, season, overall, skillScores(this.position, skills), !context),
+      radar: radar(skills),
+      prev: null,
+    };
+  }
+
+  // Each skill as a percentile in the list: the average of its stats' percentiles (volume stats per
+  // game), each stat turned the skill's way. Stats a season didn't record are skipped, and a skill with
+  // none of its stats is left out.
+  private skillsFor(reader: StatReader, player: SkillPlayer, list: SkillPlayer[]): CardSkill[] {
+    const out: CardSkill[] = [];
+    for (const def of SKILLS[this.position]) {
+      const pcts: number[] = [];
+      const evidence: CardSkill['evidence'] = [];
+      for (const [key, dir] of def.parts) {
+        const stat = this.host.stats.find((s) => s.key === key);
+        if (!stat || reader.empty(key)) continue;
+        const mine = reader.rate(player, stat);
+        if (mine === null) continue;
+        const values = list.map((p) => reader.rate(p, stat)).filter((v): v is number => v !== null);
+        if (values.length < 3) continue;
+        const below = values.filter((v) => v < mine).length;
+        const equal = values.filter((v) => v === mine).length - 1;
+        const high = (below + equal / 2) / (values.length - 1);
+        pcts.push(dir > 0 ? high : 1 - high);
+        const rank = 1 + values.filter((v) => (dir > 0 ? v > mine : v < mine)).length;
+        const label = stat.kind === 'volume' ? (PER_GAME_LABELS[stat.key] ?? `${stat.label} / Game`) : stat.label;
+        if (!evidence.some((e) => e.label === label)) evidence.push({ label, rank, of: values.length });
+      }
+      if (!pcts.length) continue;
+      const pct = pcts.reduce((a, v) => a + v, 0) / pcts.length;
+      out.push({
+        id: def.id,
+        name: def.name,
+        short: def.short,
+        pct,
+        tier: tierWord(pct),
+        standing: standing(pct),
+        evidence: evidence.sort((a, b) => a.rank / a.of - b.rank / b.of),
+      });
+    }
+    return out;
+  }
+
+  // Context the stats alone don't say: the sport's own takes (a small sample, luck: results against
+  // what the contact or the peripherals say should have happened), then the profile's shape and results
+  // against play, then the sport's last ones
+  private flags(
+    reader: StatReader,
+    player: SkillPlayer,
+    season: number,
+    overall: number,
+    scores: Record<string, number>,
+    tableSeason: boolean,
+  ): CardFlag[] {
+    const context: FlagContext = {
+      player,
+      season,
+      position: this.position,
+      current: isLiveSeason(season),
+      ordinal,
+      innings,
+      overall,
+      tableSeason,
+      stats: this.host.stats,
+      value: (stat) => reader.raw(player, stat),
+      grade,
+    };
+    return [...SPORT.cardFlags(context), ...profileFlags(this.position, scores), ...(SPORT.cardFlagsLast?.(context) ?? [])];
+  }
+
+  // ---------------------------------------------------------------------------
+  // Last season's skills: the radar's ghost, and (for team tabs) the biggest rise and drop as flags
+  // ---------------------------------------------------------------------------
+  private async loadPrevSkills(card: PlayerCard): Promise<void> {
+    const prevSeason = card.season - 1;
+    if (prevSeason < SEASONS[SEASONS.length - 1]) return;
+    const { host } = this;
+    try {
+      let unit: SkillPlayer | undefined;
+      let list: SkillPlayer[];
+      let context: SeasonContext | null = null;
+      if (prevSeason === host.season) {
+        list = host.playerList;
+        unit = SKILL_UNITS[this.position].find((p) => p.gsisId === card.player.gsisId);
+      } else {
+        const rows = await this.data.tabRows(prevSeason, this.position);
+        unit = rows.find((p) => p.gsisId === card.player.gsisId);
+        if (!unit) return;
+        context = host.seasonContext(prevSeason, { [this.position]: rows } as Record<SkillPosition, SkillPlayer[]>);
+        list = context.list;
+      }
+      if (!unit || this.card !== card) return;
+      const prev = this.skillsFor(host.readerFor(context), unit, list);
+      const byId = new Map(prev.map((s) => [s.id, s.pct]));
+      const overview = card.overview;
+      overview.prev = {
+        season: prevSeason,
+        pcts: byId,
+        // (a skill last season didn't have, like run blocking, sits where it is now)
+        shape: radarShape(overview.skills.map((s) => byId.get(s.id) ?? s.pct)),
+      };
+      // (players and coaches get these against their whole career instead, in the history)
+      if (!SPORT.teamTabs?.includes(this.position)) return;
+      const moves = overview.skills.filter((s) => byId.has(s.id)).map((s) => ({ skill: s, delta: s.pct - byId.get(s.id)! }));
+      const up = moves.reduce((best, m) => (m.delta > (best?.delta ?? 0.2) ? m : best), null as (typeof moves)[0] | null);
+      const down = moves.reduce((worst, m) => (m.delta < (worst?.delta ?? -0.2) ? m : worst), null as (typeof moves)[0] | null);
+      const pctText = (p: number) => `${Math.round(p * 100)}th`;
+      const move = (m: (typeof moves)[0], way: string) =>
+        `${m.skill.name} ${way} from ${prevSeason} (${pctText(m.skill.pct - m.delta)} → ${pctText(m.skill.pct)} percentile)`;
+      if (up) overview.flags.push({ icon: 'trending_up', tone: 'good', text: move(up, 'up') });
+      if (down) overview.flags.push({ icon: 'trending_down', tone: 'bad', text: move(down, 'down') });
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // The seasons they're in (the Seasons tab, and the Overview's career history) and similar seasons
+  // ---------------------------------------------------------------------------
+  private async loadSeasons(card: PlayerCard): Promise<void> {
+    // (a career-only sport has no seasons to link, and no similar seasons)
+    if (SPORT.careerOnly) return;
+    try {
+      const seasons = await this.seasonLines(card.player.gsisId);
+      if (this.card !== card) return;
+      card.seasons = seasons;
+      if (this.tab === 'seasons' && seasons.length < 2) this.tab = 'overview';
+      if (this.tab === 'seasons') this.rankCareer(card);
+      this.loadHistory(card);
+      this.loadExtras(card);
+    } catch (err) {
+      console.error(err);
+    }
+    if (card.season !== CURRENT_SEASON) this.loadComps(card);
+  }
+
+  // A line per season they're in, ranked with the default sliders (careers.json for the finished
+  // seasons, this season from its rows), each headline stat's best finished season lit (lowest for a
+  // stat that counts against them; a few games into this season, a hot start would take it)
+  private async seasonLines(id: string): Promise<CardSeason[]> {
+    const position = this.position;
+    const current = this.host.season === CURRENT_SEASON ? SKILL_UNITS : await this.data.rows(CURRENT_SEASON);
+    const headline = headlineStats(position);
+    const line = (season: number, teamLogo: string, games: number, rank: number, of: number, stats: (number | null)[]): CardSeason => ({
+      season,
+      // (the team's logo that season, and the team's own file: whiteLogo reads it)
+      logo: logoForSeason(teamLogo, season),
+      teamLogo,
+      games,
+      rank,
+      of,
+      pct: rankPct(rank, of),
+      stats: headline.map((stat, i) => ({ text: totalText(stat, stats[i] ?? null), label: stat.label, value: stats[i] ?? null, share: 0, best: false })),
+    });
+    const seasons = ((await this.data.careers())[position]?.[id] ?? []).map(([season, logo, games, rank, of, stats]) =>
+      line(season, SPORT.teamLogo(logo), games, rank, of, stats),
+    );
+    const now = (current[position] ?? []).find((p) => p.gsisId === id);
+    if (now) {
+      const ranked = defaultRanking(position, presetWeights(position, 'default'), current);
+      const context: ValueContext = { position, settings: DEFAULT_SPORT_SETTINGS, rows: current, tableSeason: false, defaults: true };
+      const stats = headline.map((stat) => statValue(now, stat, context));
+      seasons.push(line(CURRENT_SEASON, now.teamLogo, now.games, ranked.indexOf(now) + 1, ranked.length, stats));
+    }
+    const finished = seasons.filter((s) => !isLiveSeason(s.season));
+    headline.forEach((stat, i) => {
+      const done = finished.map((s) => s.stats[i].value).filter((v): v is number => v !== null);
+      if (!seasons.some((s) => s.stats[i].value !== null)) return;
+      const best = stat.negative ? Math.min(...done) : Math.max(...done);
+      for (const s of seasons) {
+        const v = s.stats[i].value;
+        if (v !== null) s.stats[i].best = done.length > 1 && !isLiveSeason(s.season) && v === best;
+      }
+    });
+    return seasons;
+  }
+
+  // The Seasons tab: re-rank every season with the current sliders (a season dragged by hand this visit
+  // keeps its dragged order; the table's own season is the table's list). Each line swaps its default
+  // rank for this one as its season loads.
+  private rankCareer(card: PlayerCard): void {
+    if (card.careerRanked || !card.seasons) return;
+    card.careerRanked = true;
+    for (const line of card.seasons) {
+      this.rankSeasonLine(card, line).catch((err) => console.error(err));
+    }
+  }
+
+  private async rankSeasonLine(card: PlayerCard, line: CardSeason): Promise<void> {
+    const { list, context } = await this.rankedSeason(line.season);
+    const at = list.findIndex((p) => p.gsisId === card.player.gsisId);
+    // (under the Min Games setting that year, or hidden as injured: the default rank stays)
+    if (at < 0 || this.card !== card) return;
+    line.rank = at + 1;
+    line.of = list.length;
+    line.pct = rankPct(line.rank, line.of);
+    line.yours = true;
+    // Each headline stat by where it stood in that year's list (per game, like the table): the bar's
+    // length, and with Color-Coded Values on, its color on the card's red-orange-green scale
+    const reader = this.host.readerFor(context);
+    headlineStats(this.position).forEach((stat, i) => {
+      const readout = line.stats[i];
+      const mine = reader.rate(list[at], stat);
+      if (!readout || mine === null) return;
+      const values = list.map((p) => reader.rate(p, stat)).filter((v): v is number => v !== null);
+      if (values.length < 2) return;
+      const above = values.filter((v) => (stat.negative ? v < mine : v > mine)).length;
+      const pct = 1 - above / (values.length - 1);
+      readout.share = pct;
+      if (this.host.colorValues) readout.tint = rankTone(pct);
+    });
+  }
+
+  // A season's list ranked with the current sliders: the table's own, or another's (null context: the table's)
+  private async rankedSeason(season: number): Promise<{ list: SkillPlayer[]; context: SeasonContext | null }> {
+    if (season === this.host.season) return { list: this.host.playerList, context: null };
+    const rows = season === CURRENT_SEASON ? (await this.data.rows(CURRENT_SEASON))[this.position] : await this.data.tabRows(season, this.position);
+    const context = this.host.seasonContext(season, { [this.position]: rows } as Record<SkillPosition, SkillPlayer[]>);
+    return { list: context.list, context };
+  }
+
+  // The Overview's career history: this season and the ones before it. Players and coaches only: a
+  // defense or O-line turns over too much year to year.
+  private async loadHistory(card: PlayerCard): Promise<void> {
+    if (SPORT.teamTabs?.includes(this.position) || !card.seasons) return;
+    const upTo = card.seasons.filter((s) => s.season <= card.season);
+    try {
+      const entries = (await Promise.all(upTo.map((s) => this.careerSeason(card, s.season)))).filter((e): e is CareerSeason => !!e);
+      if (this.card !== card || !entries.length) return;
+      const played = upTo.map((s) => s.season);
+      card.overview.flags = [
+        ...card.overview.flags,
+        ...careerHistory(this.position, card.season, played, entries, card.overview.blockingArchetype),
+      ];
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  // One season of a career: where they ranked (current sliders) and their skills, or null when they're
+  // not in that year's list (under Min Games, or hidden as injured)
+  private async careerSeason(card: PlayerCard, season: number): Promise<CareerSeason | null> {
+    if (season === card.season) {
+      return { season, rank: card.rank, of: card.of, pct: rankPct(card.rank, card.of), skills: card.overview.skills, archetype: card.overview.archetype };
+    }
+    const { list, context } = await this.rankedSeason(season);
+    const at = list.findIndex((p) => p.gsisId === card.player.gsisId);
+    if (at < 0) return null;
+    const skills = this.skillsFor(this.host.readerFor(context), list[at], list);
+    const pct = rankPct(at + 1, list.length);
+    return { season, rank: at + 1, of: list.length, pct, skills, archetype: archetypeFor(this.position, skills, pct) };
+  }
+
+  // The three closest seasons by anyone else (finished seasons only)
+  private async loadComps(card: PlayerCard): Promise<void> {
+    try {
+      const matches = (await this.data.comps(card.season))[this.position]?.[card.player.gsisId] ?? [];
+      if (this.card !== card) return;
+      card.comps = matches.map(([season, gsisId, name, espnId, logo, match]) => {
+        const teamLogo = SPORT.teamLogo(logo);
+        return {
+          season,
+          gsisId,
+          name,
+          match,
+          logo: logoForSeason(teamLogo, season),
+          color: badgeColor(teamLogo),
+          whiteLogo: whiteLogo(teamLogo),
+          photo: this.host.headshot({ id: espnId }, 240),
+        };
+      });
+    } catch (err) {
+      console.error(err);
+      if (this.card === card) card.comps = [];
+    }
+  }
+
+  // The sport's card extras (SPORT.cardExtras: the NFL's run blocking), once the seasons are in
+  private async loadExtras(card: PlayerCard): Promise<void> {
+    if (!SPORT.cardExtras || !card.seasons) return;
+    const overview = card.overview;
+    const redraw = () => {
+      overview.radar = radar(overview.skills);
+      overview.report = scoutingReport(overview.skills).report;
+      if (overview.prev) overview.prev.shape = radarShape(overview.skills.map((s) => overview.prev!.pcts.get(s.id) ?? s.pct));
+    };
+    try {
+      await SPORT.cardExtras({
+        player: card.player,
+        season: card.season,
+        position: this.position,
+        seasons: card.seasons.filter((s) => s.season <= card.season).map((s) => s.season),
+        open: () => this.card === card,
+        tabRows: (season) => this.data.tabRows(season, this.position),
+        seasonFile: (season, file) => this.data.extraFile(season, file),
+        skills: () => overview.skills,
+        addSkill: (skill: CardSkill) => {
+          overview.skills = [...overview.skills.filter((s) => s.id !== skill.id), skill];
+          redraw();
+        },
+        addFlags: (flags) => (overview.flags = [...overview.flags, ...flags]),
+        setArchetype: (name) => {
+          overview.archetype = name;
+          overview.blockingArchetype = true;
+          // (a "new profile" note compared archetypes worked out without it, so it no longer applies)
+          overview.flags = overview.flags.filter((f) => !f.text.startsWith('New profile'));
+        },
+      });
+    } catch (err) {
+      console.error(err);
+    }
+  }
+}
+
+// A headline stat on the Seasons tab: a season's total, formatted like the table ("4,183")
+function totalText(stat: SkillStat, value: number | null): string {
+  if (value === null) return '-';
+  switch (stat.format) {
+    case 'pct':
+      return `${Math.round(value * 100)}%`;
+    case 'pctPoints':
+      return `${value.toFixed(1)}%`;
+    case 'dec1':
+      return value.toFixed(1);
+    case 'dec2':
+      return value.toFixed(2);
+    case 'rank':
+      return `#${value}`;
+    default:
+      return NUMBER.format(Math.round(value));
+  }
+}
+

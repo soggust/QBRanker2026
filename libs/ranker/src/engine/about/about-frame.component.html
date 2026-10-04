@@ -1,0 +1,30 @@
+<div class="about-backdrop" (click)="close()"></div>
+<div class="about-panel" role="dialog" aria-modal="true" aria-labelledby="about-title">
+  <header>
+    <mat-icon class="about-icon" aria-hidden="true" fontIcon="info"></mat-icon>
+    <h2 id="about-title">{{ heading }}</h2>
+    <button #closeButton type="button" class="about-close" aria-label="Close" title="Close (Esc)" (click)="close()">
+      <mat-icon fontIcon="close"></mat-icon>
+    </button>
+  </header>
+
+  <div class="about-layout">
+    <nav aria-label="About sections">
+      @for (section of sections; track section.id) {
+        <button
+          type="button"
+          [class.active]="active === section.id"
+          [attr.aria-current]="active === section.id ? 'true' : null"
+          (click)="show(section.id)"
+        >
+          <span>{{ section.title }}</span>
+        </button>
+      }
+    </nav>
+
+    <!-- The section showing (the sport's About projects its content here) -->
+    <div class="about-body" #body>
+      <ng-content></ng-content>
+    </div>
+  </div>
+</div>

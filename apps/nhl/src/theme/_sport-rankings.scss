@@ -1,19 +1,6 @@
-@use "variables" as v;
 @use "sport-kit" as kit;
 
-// NHL grid touches: painted rink lines, and the scoring titles' plaques in silver (the voted trophies
-// stay gold)
-
-section ul li.player .player-name .player-awards,
-.player-card .player-awards {
-  .award-badge {
-    // The Rocket Richard and Art Ross: won on the stat sheet, not by a vote
-    &.award-rocket,
-    &.award-artross {
-      @include v.plaque-silver;
-    }
-  }
-}
+// NHL grid touches: painted rink lines and a red goal line under the header
 
 // The rows one sheet (no lines between them), and the category lines painted rink lines: a solid
 // stripe of the group's color (lifted with a little white) with a faint sheen, softened like paint

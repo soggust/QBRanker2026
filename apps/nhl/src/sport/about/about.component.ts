@@ -1,32 +1,29 @@
-import { AfterViewInit, Component, ElementRef, EventEmitter, HostListener, Output, ViewChild } from '@angular/core';
+import { Component, EventEmitter, Output } from '@angular/core';
+import { AboutSection } from '@ranker/engine/about/about-frame.component';
 
-type SectionId = 'about' | 'ranking' | 'grades' | 'tips' | 'glossary' | 'faq' | 'data';
-
-// About / FAQ panel, opened from the info button in every table's footer
+// NHL Ranker's About / FAQ, opened from the info button in every table's footer (the shared frame:
+// libs/ranker/src/engine/about)
 @Component({
   selector: 'about-panel',
   templateUrl: './about.component.html',
-  styleUrls: ['../../../../../libs/ranker/src/styles/components/about.component.scss'],
+  styleUrls: ['../../../../../libs/ranker/src/styles/components/about-content.scss'],
   standalone: false,
 })
-export class AboutComponent implements AfterViewInit {
+export class AboutComponent {
   @Output() closed = new EventEmitter<void>();
-  @ViewChild('closeButton') closeButton!: ElementRef<HTMLButtonElement>;
-  @ViewChild('body') body!: ElementRef<HTMLElement>;
 
-  sections: { id: SectionId; title: string; icon: string }[] = [
-    { id: 'about', title: 'Guide', icon: 'sports_hockey' },
-    { id: 'ranking', title: 'Rankings', icon: 'tune' },
-    { id: 'grades', title: 'Player Card', icon: 'groups' },
-    { id: 'tips', title: 'Tips', icon: 'lightbulb' },
-    { id: 'glossary', title: 'Stats', icon: 'menu_book' },
-    { id: 'faq', title: 'FAQ', icon: 'help_outline' },
-    { id: 'data', title: 'Credits', icon: 'dataset' },
+  readonly sections: AboutSection[] = [
+    { id: 'about', title: 'Guide' },
+    { id: 'ranking', title: 'Rankings' },
+    { id: 'grades', title: 'Player Card' },
+    { id: 'tips', title: 'Tips' },
+    { id: 'glossary', title: 'Stats' },
+    { id: 'faq', title: 'FAQ' },
+    { id: 'data', title: 'Credits' },
   ];
-  active: SectionId = 'about';
 
   // Glossary entries: stat, what it means
-  glossary: [string, string][] = [
+  readonly glossary: [string, string][] = [
     ["Goals / Assists / Points", "Goals, assists and points: season totals to start, or per game or an 82-game pace (Stat Totals in the settings)."],
     ["+/-", "Plus/minus: goals for minus goals against while he is on the ice at even strength or shorthanded. Noisy: it depends on his linemates and his goalie."],
     ["PP Points", "Power-play points."],
@@ -49,19 +46,4 @@ export class AboutComponent implements AfterViewInit {
     ["Pts vs Goal Diff", "A coach's standings points beyond what his goals for and against imply: close games, overtime and shootouts."],
     ["Linemates / Defense / Coaching", "Support grades, F to A+: how good his team was without him (its expected-goals share with him on the bench), for goalies the defense in front of him (the quality of the shots he faced), and his team's coaching (its Coaching Lift). Better support counts slightly against a player. Early in a season a few games barely measure a team, so each grade starts from the team's grade last season and gives way to this season's: about half this season by 5 games, all of it from game 20 of 82 on (a past season is all its own results)."],
   ];
-
-  ngAfterViewInit(): void {
-    // Keyboard users land on the close button
-    this.closeButton.nativeElement.focus();
-  }
-
-  @HostListener('document:keydown.escape')
-  close(): void {
-    this.closed.emit();
-  }
-
-  show(id: SectionId): void {
-    this.active = id;
-    this.body.nativeElement.scrollTop = 0;
-  }
 }

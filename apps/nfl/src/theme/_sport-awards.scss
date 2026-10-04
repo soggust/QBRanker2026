@@ -1,0 +1,14 @@
+@use "variables" as v;
+
+// NFL awards: All-Pro plaques in silver, Pro Bowl in bronze (the rest gold)
+// (inside an award plaque's rule: libs/ranker/src/styles/components/_awards.scss)
+@mixin metals {
+  &.award-ap1,
+  &.award-ap2 {
+    @include v.plaque-silver;
+  }
+
+  &.award-pb {
+    @include v.plaque-bronze;
+  }
+}

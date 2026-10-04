@@ -7,8 +7,8 @@
 // parent), and Reset / Clear All at the bottom. The header and footer sit on the field's sidelines.
 // ===========================================================================
 
-// A small icon button's icon
-@mixin icon-size($size) {
+// A small button's icon at $size, no margin
+@mixin em-icon($size) {
   font-size: $size;
   height: 1em;
   margin: 0;
@@ -275,7 +275,7 @@
       text-transform: uppercase;
 
       .group-icon {
-        @include icon-size(1.55em);
+        @include em-icon(1.55em);
         color: var(--group-color);
       }
 
@@ -300,7 +300,7 @@
       padding: 0.3em;
 
       .mat-icon {
-        @include icon-size(1.45em);
+        @include em-icon(1.45em);
         color: rgba(255, 255, 255, 0.6);
       }
 
@@ -391,7 +391,7 @@
     padding: 0;
 
     .mat-icon {
-      @include icon-size(1.6em);
+      @include em-icon(1.6em);
       color: var(--scoreboard-led);
     }
 
@@ -438,7 +438,7 @@
     z-index: 10;
 
     .mat-icon {
-      @include icon-size(1.15em);
+      @include em-icon(1.15em);
       color: #fff;
     }
 

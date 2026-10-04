@@ -1,16 +1,1 @@
-@use "variables" as v;
-
-// NFL grid touches: All-Pro plaques in silver, Pro Bowl in bronze
-section ul li.player .player-name .player-awards,
-.player-card .player-awards {
-  .award-badge {
-    &.award-ap1,
-    &.award-ap2 {
-      @include v.plaque-silver;
-    }
-
-    &.award-pb {
-      @include v.plaque-bronze;
-    }
-  }
-}
+// NFL grid touches: none (the shared grid is the NFL look; its award metals: _sport-awards.scss)

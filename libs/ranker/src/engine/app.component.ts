@@ -1,14 +1,22 @@
 import { Component } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { PositionService } from '@ranker/engine/position.service';
 import { POSITIONS, Position } from '@sport/positions';
 import { SPORT } from '@sport/sport';
 import { SPORT_LINKS } from '@ranker/core/sports';
+import { SportSettings } from '@ranker/engine/sport';
 
+// The tabs the sport's settings show (SPORT.tabVisible: the UFC's divisions, men's or women's)
+function visibleTabs(settings: SportSettings): Position[] {
+  return POSITIONS.filter((tab) => SPORT.tabVisible?.(tab, settings) ?? true);
+}
+
+// The page: the sport bar, the filter menu, the position tabs and the rankings, and About when it's open
 @Component({
-    selector: 'app-root',
-    templateUrl: './app.component.html',
-    styleUrls: ['../styles/components/app.component.scss'],
-    standalone: false
+  selector: 'app-root',
+  templateUrl: './app.component.html',
+  styleUrls: ['../styles/components/app.component.scss'],
+  standalone: false,
 })
 export class AppComponent {
   // The sport bar across the top: each sport is its own app on the same site (apps/<sport>, served at
@@ -18,12 +26,11 @@ export class AppComponent {
 
   position$ = this.positionService.position$;
   aboutOpen$ = this.positionService.aboutOpen$;
-  // The tabs (the sport's settings can hide some: SPORT.tabVisible)
+  readonly positionNames = SPORT.tabNames as Record<Position, string>;
+
   get positions(): Position[] {
-    const settings = this.positionService.settings.sport;
-    return POSITIONS.filter((tab) => SPORT.tabVisible?.(tab, settings) ?? true);
+    return visibleTabs(this.positionService.settings.sport);
   }
-  positionNames = SPORT.tabNames as Record<Position, string>;
 
   // Below 1200px the filters are a slide-out menu (menu-open); above, a sidebar that collapses. Both
   // follow the one open / closed state (the footer's filter button and the menu's X).
@@ -32,10 +39,10 @@ export class AppComponent {
   constructor(private positionService: PositionService) {
     // A setting that shows new tabs (the UFC's women's divisions) opens the first of them; one that
     // hides the open tab goes back to the first tab
-    let shown = POSITIONS.filter((tab) => SPORT.tabVisible?.(tab, this.positionService.settings.sport) ?? true);
-    this.positionService.sportSettings$.subscribe((settings) => {
+    let shown = this.positions;
+    this.positionService.sportSettings$.pipe(takeUntilDestroyed()).subscribe((settings) => {
       if (!SPORT.tabVisible) return;
-      const now = POSITIONS.filter((tab) => SPORT.tabVisible!(tab, settings));
+      const now = visibleTabs(settings);
       const added = now.filter((tab) => !shown.includes(tab));
       shown = now;
       const open = this.positionService.position;
@@ -52,15 +59,15 @@ export class AppComponent {
     return !this.smallScreen.matches && !this.positionService.filtersOpen;
   }
 
-  closeFilters() {
+  closeFilters(): void {
     this.positionService.setFiltersOpen(false);
   }
 
-  selectPosition(position: Position) {
+  selectPosition(position: Position): void {
     this.positionService.setPosition(position);
   }
 
-  closeAbout() {
+  closeAbout(): void {
     this.positionService.setAboutOpen(false);
   }
 }

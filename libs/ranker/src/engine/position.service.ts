@@ -5,7 +5,18 @@ import { BehaviorSubject, EMPTY, Observable, combineLatest, distinctUntilChanged
 import { connectRosterGrades } from '@ranker/engine/roster-grades';
 import { DEFAULT_SPORT_SETTINGS, SKILL_UNITS, defaultRanking, rebuildUnits } from '@ranker/engine/unit-scoring';
 import type { EngineHost, SportSettings } from '@ranker/engine/sport';
-import { POSITIONS, Position, StatBasis, SkillPlayer, SkillPosition, SkillWeights, StatGroupId, presetWeights } from '@sport/positions';
+import {
+  POSITIONS,
+  Position,
+  StatBasis,
+  SkillPlayer,
+  SkillPosition,
+  SkillStat,
+  SkillStatGroup,
+  SkillWeights,
+  StatGroupId,
+  presetWeights,
+} from '@sport/positions';
 
 // Groups switched off with the sidebar eye, per position (every group is on at each page load)
 export type HiddenGroups = Partial<Record<SkillPosition, Partial<Record<StatGroupId, boolean>>>>;
@@ -182,6 +193,12 @@ export class PositionService {
     this.groupOrders = { ...this.groupOrders, [position]: order };
   }
 
+  // A tab's groups in that order
+  orderedGroups(position: Position, groups: SkillStatGroup[]): SkillStatGroup[] {
+    const order = this.groupOrder(position);
+    return [...groups].sort((a, b) => order.indexOf(a.id) - order.indexOf(b.id));
+  }
+
   // Column order within each stat group, per tab ("SS.box", "SP.advanced"...), changed by dragging
   // a column header. Starts at each table's default order on every page load.
   private columnOrders: Record<string, string[]> = {};
@@ -190,6 +207,15 @@ export class PositionService {
   columnOrder(list: string, defaults: string[]): string[] {
     this.columnDefaults[list] = defaults;
     return this.columnOrders[list] ?? defaults;
+  }
+
+  // A group's stats in their column order
+  orderedStats(position: Position, group: SkillStatGroup): SkillStat[] {
+    const order = this.columnOrder(
+      `${position}.${group.id}`,
+      group.stats.map((stat) => stat.key),
+    );
+    return [...group.stats].sort((a, b) => order.indexOf(a.key) - order.indexOf(b.key));
   }
 
   setColumnOrder(list: string, order: string[]): void {

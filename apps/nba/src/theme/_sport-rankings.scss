@@ -1,29 +1,7 @@
-@use "variables" as v;
 @use "sport-kit" as kit;
 
-// NBA grid touches: painted court lines, All-NBA plaques in gold / silver / bronze and All-Defensive
-// in steel
+// NBA grid touches: painted court lines
 
 // The rows one board (no lines between them), and the category lines painted court lines: a solid
 // stripe of the group's color (lifted with a little white, like paint on maple) with a faint sheen
 @include kit.painted-category-lines(kit.painted-line(var(--group-color)), 0.8);
-
-section ul li.player .player-name .player-awards,
-.player-card .player-awards {
-  .award-badge {
-    &.award-nba2 {
-      @include v.plaque-silver;
-    }
-
-    // All-Defensive: steel blue (a separate honor from the All-NBA tiers)
-    &.award-def1,
-    &.award-def2 {
-      @include v.plaque-steel;
-    }
-
-    &.award-nba3,
-    &.award-as {
-      @include v.plaque-bronze;
-    }
-  }
-}

@@ -8,22 +8,35 @@ copy of all of that. A sport is a small folder of configuration and a theme.
 libs/ranker/
   src/core/       small utilities the engine and apps share
     analytics.ts, clipboard.ts, value-tint.ts
+    format.ts     how values read: grades, rates, innings, ordinals, rank colors
     column-drag.directive.ts, column-highlight.directive.ts   (the column headers' drag and hover)
     sports.ts     the sport bar's list (from /sports.json)
   src/engine/     the ranker app, for every sport
     sport.ts      the contract: SportConfig (what a sport hands the engine, optional features
-                  included), CardFlag, StatFormat
+                  included), StatDef (a stat), StatFormat, StatBasis, StatGroup, CardFlag
     app.module.ts, app.component.*                 the shell: sport bar, position tabs, filter menu
-    skill-rankings/                                 the table, settings menu and player card
+    skill-rankings/                                 the grid and its button bar, the settings menu,
+                                                   the rows' glide when the list re-ranks
+    player-card/                                    the player card: its data (card.model), what
+                                                   builds it (player-cards), the Overview's words,
+                                                   career history and radar, and the component
     sidebar/                                        the filter menu (presets, sliders, groups)
+    about/                                          the About panel's frame (each sport fills it)
     position.service.ts                            sliders, settings, orders, the current tab
+    stat-reader.ts                                 a season's values as the settings show them,
+                                                   their labels, averages and colors
     unit-scoring.ts                                the ranking math (normalize, then weigh), and a
                                                    stat's value (data, or worked out in the app)
-    data.ts                                         loading a season's JSON
+    playing-time.ts, setting-options.ts            the Min setting; the sport's own settings
+    data.ts, season-data.service.ts                loading a season's JSON; other seasons' files
+    team-rows.ts                                   a Teams tab built from the head coach rows
     skills.ts, awards.ts                           shapes a sport's skills and awards follow
   src/styles/     the look
     _base.scss                    global styles (the app imports it first)
-    _variables.scss, _theme.scss  fonts, mixins (lit dots, award plaques), the Material theme
+    _variables.scss, _theme.scss  fonts, mixins (lit dots, panels, team cards, award plaques), the
+                                  Material theme
+    _sport-kit.scss               the sport themes' kit: the selectors they dress, and shared pieces
+                                  (ball knobs, painted lines, list lettering)
     components/                   each component's styles, ending with the sport's partial
   src/assets/     shared textures (copied into every app's assets/)
   scripts/        shared data-script pieces
@@ -49,13 +62,13 @@ that app's partial.
 | File | Exports |
 | --- | --- |
 | `sport.ts` | `SPORT: SportConfig`: id, names, seasons, how a season reads, the tabs' names, the playing-time measure for the Min setting, headshot and logo URLs, per-game decimals, wording, and the card's takes (`cardFlags`). The contract and its comments: `libs/ranker/src/engine/sport.ts` |
-| `positions.ts` | The tabs (`Position`, `POSITIONS`), the stat keys, `SkillPlayer`, every tab's columns (`SKILL_STATS`), names and labels (`STAT_NAMES`, `PER_GAME_LABELS`, `STAT_BASIS_LABELS`, `PACE_GAMES`), the groups (`statGroup`, `skillGroups`, `headlineStats`), `presetWeights`, `unitStat` |
+| `positions.ts` | The tabs (`Position`, `POSITIONS`), the stat keys, `SkillPlayer`, `SkillStat` (`StatDef` over its keys), every tab's columns (`SKILL_STATS`), names and labels (`STAT_NAMES`, `PER_GAME_LABELS`, `STAT_BASIS_LABELS`, `PACE_GAMES`), the groups (`statGroup`, `skillGroups`, `headlineStats`), `presetWeights`, `unitStat` |
 | `skill-presets.ts` | `SKILL_PRESETS`: the presets dropdown, per tab |
 | `skills.ts` | The card's `SKILLS` (radar axes), `ARCHETYPES`, `VOLUME_VS_EFFICIENCY`, `WINS_VS_PLAY`, `fallbackArchetype` (shapes in `engine/skills.ts`) |
 | `awards.ts` | `AWARD_INFO` (plaques; titles get an `icon`: a cup, gold for the champion, or a flag), `awardsFor` |
 | `team-colors.ts` | `badgeColor`, `whiteLogo`, `teamColors` |
 | `logo-eras.ts` | `logoForSeason`: a team's logo as it looked that season |
-| `about/` | The About panel (its sections' content; the styles are shared) |
+| `about/` | The About panel's content: its sections, glossary and text (the frame and styles are shared) |
 
 A sport can add files of its own beside these for its optional features (below): the NFL has
 `qb-rows.ts` (the QBs tab, built from its game results), `team-grades.ts` (fantasy points, unit ranks
@@ -89,12 +102,14 @@ Stat formats the engine draws for any sport: `recent` (the last five results as 
 | --- | --- |
 | `_sport-settings.scss` | Switches the shared styles read (`$lit-label-weight`) |
 | `_sport-global.scss` | The page and controls: background texture, slider knobs and switches, button and dropdown leather, accent color (`--scoreboard-led`), and the sport's textures as variables (`--tex-chalk-plays`, `--trophy-mask`) |
-| `_sport-rankings.scss` | The grid: lines between rows and categories, award plaque metals (the `plaque-*` mixins), headshot shape |
+| `_sport-rankings.scss` | The grid: lines between rows and categories, headshot shape |
+| `_sport-awards.scss` | Which awards' plaques are silver, bronze or steel (the `plaque-*` mixins; gold otherwise), on the grid and the card |
 | `_sport-card.scss` | The player card: headshot shape, stat-group edges |
 | `_sport-sidebar.scss` | The filter menu: its ball, its edges |
 
 Partials point at their own textures with relative paths (`url("../assets/textures/x.svg")`); Angular
-rebases and bundles them.
+rebases and bundles them. What several sports draw the same way (a painted category line, a ball on
+the slider knobs, the dropdowns' list lettering) comes from `_sport-kit.scss`.
 
 ### Its data (`apps/<sport>/src/StaticData/`, `apps/<sport>/scripts/`)
 
@@ -140,4 +155,6 @@ awards lists kept in `awards.ts`, and new team logos.
 
 Build every app (`npm run build`, or `npx ng build <sport>`). For anything visual, compare screenshots
 of each app before and after: the refactor into this library was checked that way, view by view, and
-came out pixel-identical.
+came out pixel-identical. The cleanup of the styles and the engine after it was checked the same way,
+plus every element's computed styles and the text of the grid, the player card's tabs and the settings
+menu, before and after.

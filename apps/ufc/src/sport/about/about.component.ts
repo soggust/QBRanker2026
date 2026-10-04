@@ -1,32 +1,29 @@
-import { AfterViewInit, Component, ElementRef, EventEmitter, HostListener, Output, ViewChild } from '@angular/core';
+import { Component, EventEmitter, Output } from '@angular/core';
+import { AboutSection } from '@ranker/engine/about/about-frame.component';
 
-type SectionId = 'about' | 'ranking' | 'grades' | 'tips' | 'glossary' | 'faq' | 'data';
-
-// About / FAQ panel, opened from the info button in every table's footer
+// UFC Ranker's About / FAQ, opened from the info button in every table's footer (the shared frame:
+// libs/ranker/src/engine/about)
 @Component({
   selector: 'about-panel',
   templateUrl: './about.component.html',
-  styleUrls: ['../../../../../libs/ranker/src/styles/components/about.component.scss'],
+  styleUrls: ['../../../../../libs/ranker/src/styles/components/about-content.scss'],
   standalone: false,
 })
-export class AboutComponent implements AfterViewInit {
+export class AboutComponent {
   @Output() closed = new EventEmitter<void>();
-  @ViewChild('closeButton') closeButton!: ElementRef<HTMLButtonElement>;
-  @ViewChild('body') body!: ElementRef<HTMLElement>;
 
-  sections: { id: SectionId; title: string; icon: string }[] = [
-    { id: 'about', title: 'Guide', icon: 'sports_mma' },
-    { id: 'ranking', title: 'Rankings', icon: 'tune' },
-    { id: 'grades', title: 'Fighter Card', icon: 'groups' },
-    { id: 'tips', title: 'Tips', icon: 'lightbulb' },
-    { id: 'glossary', title: 'Stats', icon: 'menu_book' },
-    { id: 'faq', title: 'FAQ', icon: 'help_outline' },
-    { id: 'data', title: 'Credits', icon: 'dataset' },
+  readonly sections: AboutSection[] = [
+    { id: 'about', title: 'Guide' },
+    { id: 'ranking', title: 'Rankings' },
+    { id: 'grades', title: 'Fighter Card' },
+    { id: 'tips', title: 'Tips' },
+    { id: 'glossary', title: 'Stats' },
+    { id: 'faq', title: 'FAQ' },
+    { id: 'data', title: 'Credits' },
   ];
-  active: SectionId = 'about';
 
   // Glossary entries: stat, what it means
-  glossary: [string, string][] = [
+  readonly glossary: [string, string][] = [
     ["Record", "His UFC record, wins-losses-draws (draws include no contests)."],
     ["Recent", "His last five UFC fights as dots, newest first."],
     ["UFC Rank", "UFC.com's official rank in his division (context only: the ranking here is yours)."],
@@ -47,19 +44,4 @@ export class AboutComponent implements AfterViewInit {
     ["Schedule", "His UFC opponents' UFC win percentage (3+ fights each; others count as .500)."],
     ["Avg Time / Age / Reach", "Context only: his average fight length in minutes, his age and his reach in inches."],
   ];
-
-  ngAfterViewInit(): void {
-    // Keyboard users land on the close button
-    this.closeButton.nativeElement.focus();
-  }
-
-  @HostListener('document:keydown.escape')
-  close(): void {
-    this.closed.emit();
-  }
-
-  show(id: SectionId): void {
-    this.active = id;
-    this.body.nativeElement.scrollTop = 0;
-  }
 }

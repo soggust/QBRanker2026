@@ -1,0 +1,323 @@
+@if (cards.card; as c) {
+  <div class="card-backdrop" (click)="cards.close()"></div>
+  <div
+    class="player-card"
+    role="dialog"
+    aria-modal="true"
+    [attr.aria-label]="c.name"
+    [class.loading]="cards.loading"
+    [style.--team-badge]="c.color"
+  >
+    <header class="card-hero">
+      <!-- The team card, big: the logo behind, the player standing in front and out over the top -->
+      <div class="hero-badge" [class.with-photo]="c.photo">
+        <span class="hero-card" [class.white-logo]="c.whiteLogo"><img class="hero-logo" [src]="c.logo" alt="" /></span>
+        @if (c.photo) {
+          <img class="hero-photo" [src]="c.photo" alt="" (error)="c.photo = null" />
+        }
+      </div>
+
+      <div class="hero-text">
+        <!-- The season this card is for, as a lit scoreboard chip -->
+        <p class="hero-kicker">
+          <span class="season-chip">{{ c.seasonLabel }}</span>
+        </p>
+        <h2 [attr.data-name]="c.name">{{ c.name }}</h2>
+        <!-- Position • team -->
+        <p class="hero-team">
+          <span class="hero-position">{{ c.positionName }}</span>
+          @if (c.teamName) {
+            <span class="hero-dot">•</span>{{ c.teamName }}
+          }
+        </p>
+        @if (c.awards.length) {
+          <span class="player-awards">
+            @for (award of c.awards; track award.id) {
+              @if (awardInfo[award.id].icon?.name === 'trophy') {
+                <span class="lombardi award-trophy" [title]="award.title"></span>
+              } @else if (awardInfo[award.id].icon; as icon) {
+                <mat-icon class="award-cup" [ngClass]="'award-' + (icon.metal ?? 'silver')" [fontIcon]="icon.name" [title]="award.title"></mat-icon>
+              } @else {
+                <span class="award-badge" [ngClass]="'award-' + award.id" [title]="award.title">{{ awardInfo[award.id].short }}</span>
+              }
+            }
+          </span>
+        }
+      </div>
+
+      <!-- Overall rank, as a scoreboard tile -->
+      <div class="hero-rank" [style.--tone]="rankTone(rankPct(c.rank, c.of))">
+        <span class="rank-label">Rank</span>
+        <span class="rank-number">{{ c.rank }}</span>
+        <span class="rank-of">of {{ c.of }}</span>
+      </div>
+
+      <div class="card-controls">
+        <button type="button" aria-label="Previous" title="Previous (←)" (click)="cards.step(-1)">
+          <mat-icon fontIcon="chevron_left"></mat-icon>
+        </button>
+        <button type="button" aria-label="Next" title="Next (→)" (click)="cards.step(1)">
+          <mat-icon fontIcon="chevron_right"></mat-icon>
+        </button>
+        <button type="button" aria-label="Close" title="Close (Esc)" (click)="cards.close()">
+          <mat-icon fontIcon="close"></mat-icon>
+        </button>
+      </div>
+    </header>
+
+    <!-- Tabs: Overview, Stats, Seasons and the sport's history (see PlayerCards.tabsFor) -->
+    <nav class="card-tabs" role="tablist">
+      @for (tab of cards.tabsFor(c); track tab.id) {
+        <button
+          type="button"
+          role="tab"
+          [class.active]="cards.tab === tab.id"
+          [attr.aria-selected]="cards.tab === tab.id"
+          (click)="cards.selectTab(tab.id); cardBody.scrollTop = 0"
+        >
+          {{ tab.title }}
+        </button>
+      }
+    </nav>
+
+    <div class="card-body" #cardBody>
+      <!-- One stat: value, rank in the list, a bar for where that sits, the list average -->
+      <ng-template #statTile let-s>
+        <div class="card-stat" [ngClass]="'group-' + s.group" [title]="s.name" [style.--pct]="s.pct ?? 0" [style.--tone]="rankTone(s.pct)">
+          <span class="stat-name">{{ s.label }}</span>
+          <span class="stat-rank">
+            @if (s.rank !== null) {
+              {{ s.tied ? 'T-' : '#' }}{{ s.rank }}<small> / {{ s.of }}</small>
+            }
+          </span>
+          @if (s.dots) {
+            <span class="stat-value stat-dots">
+              @for (d of s.dots; track $index) {
+                <i [class.win]="d === 1" [class.tie]="d === 0.5"></i>
+              }
+            </span>
+          } @else {
+            <span class="stat-value" [style.color]="s.tint">{{ s.display }}</span>
+          }
+          <span class="stat-bar" [class.empty]="s.rank === null"><i></i></span>
+          <span class="stat-avg">{{ s.avg !== null ? 'Avg ' + s.avg : '' }}</span>
+        </div>
+      </ng-template>
+
+      @switch (cards.tab) {
+        @case ('stats') {
+          <!-- Each group folds shut from its header bar, like the filter menu's -->
+          @for (group of c.groups; track group.id) {
+            @let closed = cards.closedGroups.has(group.id);
+            <div class="stat-group" [ngClass]="'group-' + group.id" [class.closed]="closed">
+              <button
+                type="button"
+                class="group-bar"
+                [attr.aria-expanded]="!closed"
+                [title]="(closed ? 'Show ' : 'Hide ') + group.title"
+                (click)="cards.toggleGroup(group.id)"
+              >
+                <mat-icon class="group-bar-icon" [fontIcon]="group.icon"></mat-icon>
+                <span>{{ group.title }}</span>
+                <mat-icon class="group-bar-chevron" [fontIcon]="closed ? 'expand_more' : 'expand_less'"></mat-icon>
+              </button>
+              @if (!closed) {
+                <div class="card-stats">
+                  @for (s of group.stats; track s.key) {
+                    <ng-container *ngTemplateOutlet="statTile; context: { $implicit: s }"></ng-container>
+                  }
+                </div>
+              }
+            </div>
+          }
+        }
+
+        <!-- Overview: the archetype and a one-line take, context flags, a skill radar (with last
+             season's shape as a ghost), and a scouting report of skills with the stats behind them -->
+        @case ('overview') {
+          @let o = c.overview;
+          @let flags = sortFlags(o.flags);
+          <div class="ov-top">
+            <div class="ov-profile">
+              <h4 class="ov-archetype">{{ o.archetype }}</h4>
+              <p class="ov-blurb">{{ o.blurb }}</p>
+              @if (flags.length) {
+                <ul class="ov-flags">
+                  @for (f of flags; track f.text) {
+                    <li [ngClass]="f.tone"><mat-icon [fontIcon]="f.icon"></mat-icon><span>{{ f.text }}</span></li>
+                  }
+                </ul>
+              }
+            </div>
+
+            @if (o.skills.length >= 3) {
+              <div class="ov-radar">
+                <svg viewBox="-215 -140 430 285" role="img" [attr.aria-label]="'Skill profile of ' + c.name">
+                  @for (ring of o.radar.rings; track $index) {
+                    <polygon class="ring" [class.avg]="$index === 1" [attr.points]="ring"></polygon>
+                  }
+                  @for (a of o.radar.axes; track a.label) {
+                    <line class="spoke" x1="0" y1="0" [attr.x2]="a.x" [attr.y2]="a.y"></line>
+                  }
+                  @if (o.prev) {
+                    <polygon class="ghost" [attr.points]="o.prev.shape"></polygon>
+                  }
+                  <polygon class="shape" [attr.points]="o.radar.shape"></polygon>
+                  @for (d of o.radar.dots; track $index) {
+                    <circle class="dot" r="3.5" [attr.cx]="d.x" [attr.cy]="d.y" [style.fill]="rankTone(d.pct)"></circle>
+                  }
+                  @for (a of o.radar.axes; track a.label) {
+                    <text class="axis-label" [attr.x]="a.lx" [attr.y]="a.ly" [attr.text-anchor]="a.anchor">{{ a.label }}</text>
+                  }
+                </svg>
+                <div class="ov-legend">
+                  <span><i class="key now"></i>{{ sport.careerOnly ? 'Career' : seasonName(c.season) }}</span>
+                  @if (o.prev) {
+                    <span><i class="key prev"></i>{{ seasonText(o.prev.season) }}</span>
+                  }
+                  <span><i class="key avg"></i>League Avg</span>
+                </div>
+              </div>
+            }
+          </div>
+
+          <!-- Scouting report: every skill, strengths first, then average, then weaknesses, each with
+               the stats behind it -->
+          @for (side of o.report; track side.title) {
+            @if (side.list.length) {
+              <div class="ov-section" [ngClass]="side.tone">
+                <h3><mat-icon [fontIcon]="side.icon"></mat-icon>{{ side.title }}</h3>
+                <div class="ov-skills">
+                  @for (s of side.list; track s.id) {
+                    <div class="skill-card" [style.--pct]="s.pct" [style.--tone]="rankTone(s.pct)">
+                      <div class="skill-head">
+                        <span class="skill-name">{{ s.name }}</span>
+                        <span class="skill-standing">{{ s.standing }}</span>
+                      </div>
+                      <span class="stat-bar"><i></i></span>
+                      <span class="skill-evidence">
+                        @for (e of s.evidence; track e.label) {
+                          <span><b [style.--tone]="rankTone(rankPct(e.rank, e.of))">#{{ e.rank }}</b> {{ e.label }}</span>
+                        }
+                      </span>
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+          }
+
+          <!-- The three closest seasons by anyone else, 2000 on (finished seasons only) -->
+          @if (c.season !== currentSeason && c.comps?.length) {
+            <div class="ov-section similar">
+              <h3><mat-icon fontIcon="compare_arrows"></mat-icon>Similar Seasons</h3>
+              <div class="comps-row">
+                @for (m of c.comps; track m.season + m.gsisId) {
+                  <button type="button" class="comp" [style.--team-badge]="m.color" (click)="cards.openSeason(m.season, m.gsisId)">
+                    <span class="comp-badge" [class.with-photo]="m.photo">
+                      <span class="comp-card" [class.white-logo]="m.whiteLogo"><img class="comp-logo" [src]="m.logo" alt="" /></span>
+                      @if (m.photo) {
+                        <img class="comp-photo" [src]="m.photo" alt="" (error)="m.photo = null" />
+                      }
+                    </span>
+                    <span class="comp-text">
+                      <span class="comp-season">{{ seasonText(m.season) }}</span>
+                      <span class="comp-name">{{ m.name }}</span>
+                    </span>
+                    <span class="comp-match" [style.--tone]="rankTone((m.match - 60) / 40)">{{ m.match }}<small>%</small></span>
+                  </button>
+                }
+              </div>
+            </div>
+          }
+        }
+
+        <!-- The sport's history (SPORT.cardHistory: a fighter's fights), newest first -->
+        @case ('history') {
+          <div class="card-group card-history">
+            <h3><mat-icon [fontIcon]="sport.cardHistory?.icon ?? 'history'"></mat-icon>{{ sport.cardHistory?.title }}</h3>
+            @let rows = historyRows(c);
+            @if (!rows.length) {
+              <p class="card-note">Nothing yet.</p>
+            }
+            <div class="history-list">
+              @for (r of rows; track $index) {
+                <div class="history-row">
+                  <span class="history-result" [ngClass]="r.result === 'W' ? 'win' : r.result === 'L' ? 'loss' : 'draw'">{{ r.result }}</span>
+                  <span class="history-main">{{ r.main }}<small>{{ r.sub }}</small></span>
+                  <span class="history-detail">{{ r.detail }}</span>
+                </div>
+              }
+            </div>
+          </div>
+        }
+
+        <!-- Every season they're in: each opens that season's card (the table stays as it is) -->
+        @case ('seasons') {
+          <div class="card-group card-career">
+            <h3><mat-icon fontIcon="calendar_month"></mat-icon>Seasons</h3>
+            @if (!c.seasons) {
+              <p class="card-note">Loading…</p>
+            } @else {
+              <!-- Career arc: a bar per season, as tall as where they ranked (first = full height) -->
+              <div class="career-chart" [style.--count]="c.seasons.length">
+                @for (s of c.seasons; track s.season) {
+                  <button
+                    type="button"
+                    class="arc"
+                    [class.active]="s.season === c.season"
+                    [class.pending]="!s.yours"
+                    [style.--pct]="s.pct"
+                    [style.--tone]="rankTone(s.pct)"
+                    [title]="s.season + ': #' + s.rank + ' of ' + s.of"
+                    (click)="s.season !== c.season && cards.openSeason(s.season, c.player.gsisId)"
+                  >
+                    <span class="arc-rank">#{{ s.rank }}</span>
+                    <span class="arc-bar"></span>
+                    <span class="arc-year">'{{ s.season % 100 | number: '2.0' }}</span>
+                  </button>
+                }
+              </div>
+
+              <!-- A line per season, newest first: each opens that season's card -->
+              <div class="season-list">
+                @for (s of c.seasons.slice().reverse(); track s.season) {
+                  <button
+                    type="button"
+                    class="season-row"
+                    [class.active]="s.season === c.season"
+                    [class.pending]="!s.yours"
+                    [style.--tone]="rankTone(s.pct)"
+                    [title]="s.season === c.season ? 'Showing this season' : 'Open the ' + s.season + ' card'"
+                    (click)="s.season !== c.season && cards.openSeason(s.season, c.player.gsisId)"
+                  >
+                    <img [src]="s.logo" alt="" [class.white-logo]="whiteLogo(s.teamLogo)" />
+                    <span class="season-year">{{ seasonName(s.season) }}</span>
+                    <span class="season-games">{{ s.games }} G</span>
+                    <!-- Headline stats as readouts: value, a bar against their best season, label; best lit -->
+                    @for (h of s.stats; track h.label) {
+                      <span
+                        class="readout"
+                        [class.lead]="$first"
+                        [class.best]="h.best"
+                        [class.tinted]="h.tint"
+                        [style.--share]="h.share"
+                        [style.--tint]="h.tint"
+                        [title]="h.best ? 'Career best' : ''"
+                      >
+                        <b>{{ h.text }}</b>
+                        <i></i>
+                        <small>{{ h.label }}</small>
+                      </span>
+                    }
+                    <span class="season-rank">#{{ s.rank }}<small> / {{ s.of }}</small></span>
+                  </button>
+                }
+              </div>
+            }
+          </div>
+        }
+      }
+    </div>
+  </div>
+}

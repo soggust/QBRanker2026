@@ -1,0 +1,11 @@
+@use "variables" as v;
+
+// NHL awards: the scoring titles (the Rocket Richard and Art Ross: won on the stat sheet, not by a vote)
+// in silver; the voted trophies gold
+// (inside an award plaque's rule: libs/ranker/src/styles/components/_awards.scss)
+@mixin metals {
+  &.award-rocket,
+  &.award-artross {
+    @include v.plaque-silver;
+  }
+}

@@ -1,248 +1,222 @@
-<div class="about-backdrop" (click)="close()"></div>
-<div class="about-panel" role="dialog" aria-modal="true" aria-labelledby="about-title">
-  <header>
-    <mat-icon class="about-icon" aria-hidden="true" fontIcon="info"></mat-icon>
-    <h2 id="about-title">About UFC Ranker</h2>
-    <button #closeButton type="button" class="about-close" aria-label="Close" title="Close (Esc)" (click)="close()">
-      <mat-icon fontIcon="close"></mat-icon>
-    </button>
-  </header>
+<about-frame heading="About UFC Ranker" [sections]="sections" (closed)="closed.emit()" #frame>
+  @switch (frame.active) {
+    @case ('about') {
+      <h3>Your rankings, your rules</h3>
+      <p>
+        Every fight ranking is really an argument about what matters. The record, or who it came
+        against? Knockout power, or never getting hit? Wrestling, or the striking battle? This site lets
+        you settle it yourself: move the sliders and the list re-ranks instantly.
+      </p>
+      <p>
+        It covers every current UFC fighter in every division (a UFC fight in the last two years, and not retired by the UFC's word), updated every night. In a division a fighter is ranked on his fights there (Volkanovski at lightweight on his two title shots), listed in every division he's had 3+ fights in; the P4P tab ranks everyone on his whole UFC career and lists the top 30. The dropdown above the list picks <b>Current MMA</b>, <b>Current WMMA</b>, <b>All-Time MMA</b> or
+        <b>All-Time WMMA</b>: all-time adds the retired legends, and WMMA switches the tabs to the women's.
+      </p>
+      <div class="callout">
+        <strong>New here?</strong> Pick a division up top, then try a preset from the dropdown at the top
+        of the filter menu (the <b>filter</b> button above the list, on the left, opens and closes it).
+        Each preset ranks around a different idea of "best". Then drag a few sliders and watch the list
+        move.
+      </div>
+      <h4>Quick start</h4>
+      <ul>
+        <li><b>Sliders</b> set how much each stat counts. 50% is normal, 100% is double, 0% ignores it.</li>
+        <li>
+          <b>Presets</b> load a ready-made set of sliders built around a kind of fighter (a knockout
+          artist, a wrestler, a submission artist, the best resume...); <b>Default</b> puts every slider
+          back at 50%.
+        </li>
+        <li><b>Head to head</b>: a fighter ranked right below someone he beat in their latest meeting (the last two years) moves above him.</li>
+        <li><b>Drag rows</b> to rank by hand. Your order sticks until that division's sliders change.</li>
+        <li><b>Hover</b> any column label for the full stat name and the division average.</li>
+        <li><b>Click a name</b> for the fighter card: an overview with a skill radar, archetype and scouting report, every stat as a rank, and his UFC fights.</li>
+        <li>
+          In the bar above the list: <b>filter</b> opens the filter menu, <b>copy</b> copies your list,
+          <b>info</b> opens this panel and the <b>gear</b> has the settings.
+        </li>
+        <li>
+          <b>Badges</b> under a name: the <b>belt</b> for each division's champion, and a plaque for the
+          pound-for-pound top 15 (UFC.com's rankings).
+        </li>
+      </ul>
+    }
 
-  <div class="about-layout">
-    <nav aria-label="About sections">
-      @for (section of sections; track section.id) {
-        <button
-          type="button"
-          [class.active]="active === section.id"
-          [attr.aria-current]="active === section.id ? 'true' : null"
-          (click)="show(section.id)"
-        >
-          <span>{{ section.title }}</span>
-        </button>
-      }
-    </nav>
+    @case ('ranking') {
+      <h3>How the rankings work</h3>
+      <p>
+        Every fighter gets a score from the stats you weigh, and the list is sorted by that score. Here's
+        what goes into it:
+      </p>
+      <h4>Sliders and weights</h4>
+      <p>
+        Every stat is first put on the same scale: how far above or below the division's average a
+        fighter is, measured in standard deviations (so 5 significant strikes a minute counts as much as 3
+        takedowns per 15 minutes if they're equally far from typical). That score is multiplied by its
+        slider: at 50% a stat counts normally, at 100% twice as much, and at 0% not at all. Nothing is
+        weighted behind the scenes. A stat's <b>eye</b> switches it off entirely and hides its column.
+      </p>
+      <h4>Good and bad stats</h4>
+      <p>
+        Stats where lower is better (strikes absorbed, times knocked down, times finished) count against a
+        fighter. Extreme values are capped, so one fluky number can't swamp the list. A rate from too small
+        a sample (a strike accuracy under 50 attempts, a takedown accuracy under 5) shows as "-" and counts
+        as average.
+      </p>
+      <h4>The career, not a season</h4>
+      <p>
+        Fighters fight two or three times a year, so a season says little: everything here is his UFC
+        career. The rates are per minute of fight time (striking) or per 15 minutes (knockdowns,
+        takedowns, submission attempts), so a short night and a 25-minute war count fairly. What he
+        absorbs comes from his opponents' numbers in the same fights.
+      </p>
+      <h4>Who's in each division</h4>
+      <p>
+        A fighter is listed in the division ESPN lists him in (his last fight's if not). <b>Min Fights</b>
+        in the settings sets how many UFC fights it takes to be listed, as a share of the most anyone in
+        the division has: 10% to start, in steps of 10%, down to 1 to see everyone. <b>Rookies Only</b>
+        shows just the newcomers: a UFC debut in the last year.
+      </p>
+      <h4>Small samples</h4>
+      <p>
+        A fighter four fights into his UFC run can have perfect numbers that don't mean much yet. So each
+        rate (accuracy, defense, strikes per minute, the record) counts in the ranking in proportion to the
+        fights behind it: four UFC fights count half, twelve three-quarters, a long career nearly all of it.
+        The columns show his real numbers either way.
+      </p>
+      <h4>Strength of schedule</h4>
+      <p>
+        <b>Schedule</b> is his opponents' UFC win percentage: beating fighters who win a lot means more than
+        beating ones who don't. It counts for him like any stat, so a strong record against a soft schedule
+        is weighed against a lesser one against the best.
+      </p>
+      <h4>Ranking by hand</h4>
+      <p>
+        Drag a row by its handle to move it. A hand-dragged order stays put when you switch divisions, and
+        is kept until you change that division's own sliders or settings.
+      </p>
+    }
 
-    <div class="about-body" #body>
-      @switch (active) {
-        @case ('about') {
-          <h3>Your rankings, your rules</h3>
-          <p>
-            Every fight ranking is really an argument about what matters. The record, or who it came
-            against? Knockout power, or never getting hit? Wrestling, or the striking battle? This site lets
-            you settle it yourself: move the sliders and the list re-ranks instantly.
-          </p>
-          <p>
-            It covers every current UFC fighter in every division (a UFC fight in the last two years, and not retired by the UFC's word), updated every night. In a division a fighter is ranked on his fights there (Volkanovski at lightweight on his two title shots), listed in every division he's had 3+ fights in; the P4P tab ranks everyone on his whole UFC career and lists the top 30. The dropdown above the list picks <b>Current MMA</b>, <b>Current WMMA</b>, <b>All-Time MMA</b> or
-            <b>All-Time WMMA</b>: all-time adds the retired legends, and WMMA switches the tabs to the women's.
-          </p>
-          <div class="callout">
-            <strong>New here?</strong> Pick a division up top, then try a preset from the dropdown at the top
-            of the filter menu (the <b>filter</b> button above the list, on the left, opens and closes it).
-            Each preset ranks around a different idea of "best". Then drag a few sliders and watch the list
-            move.
-          </div>
-          <h4>Quick start</h4>
-          <ul>
-            <li><b>Sliders</b> set how much each stat counts. 50% is normal, 100% is double, 0% ignores it.</li>
-            <li>
-              <b>Presets</b> load a ready-made set of sliders built around a kind of fighter (a knockout
-              artist, a wrestler, a submission artist, the best resume...); <b>Default</b> puts every slider
-              back at 50%.
-            </li>
-            <li><b>Head to head</b>: a fighter ranked right below someone he beat in their latest meeting (the last two years) moves above him.</li>
-            <li><b>Drag rows</b> to rank by hand. Your order sticks until that division's sliders change.</li>
-            <li><b>Hover</b> any column label for the full stat name and the division average.</li>
-            <li><b>Click a name</b> for the fighter card: an overview with a skill radar, archetype and scouting report, every stat as a rank, and his UFC fights.</li>
-            <li>
-              In the bar above the list: <b>filter</b> opens the filter menu, <b>copy</b> copies your list,
-              <b>info</b> opens this panel and the <b>gear</b> has the settings.
-            </li>
-            <li>
-              <b>Badges</b> under a name: the <b>belt</b> for each division's champion, and a plaque for the
-              pound-for-pound top 15 (UFC.com's rankings).
-            </li>
-          </ul>
+    @case ('grades') {
+      <h3>The fighter card</h3>
+      <p>
+        Click any name for his card. It has three tabs:
+      </p>
+      <ul>
+        <li>
+          <b>Overview:</b> related stats rolled up into skills (striking output, accuracy and defense,
+          knockout power, wrestling, takedown defense, grappling, durability and winning), each as a
+          percentile in the division. They make up the radar, pick his <b>archetype</b> (a Knockout
+          Artist, a Smothering Wrestler, a Counter Striker, a Submission Specialist...) and fill the
+          scouting report, strengths first.
+        </li>
+        <li><b>Stats:</b> every column as a rank in the division, with the division average.</li>
+        <li><b>Fights:</b> his UFC fights, newest first: the result, the opponent, the event, and how it ended (the round and time of a finish, or a decision).</li>
+      </ul>
+      <h4>The takes</h4>
+      <p>
+        The points under the archetype read his career in context: a win or losing streak, how he wins
+        (a finisher, or one who goes to the cards), whether he's ever been finished or has chin questions,
+        whether he wins the striking battle, the strength of his schedule, and his whole pro record.
+      </p>
+    }
+
+    @case ('tips') {
+      <h3>Tips &amp; tricks</h3>
+      <ul class="tips">
+        <li><mat-icon fontIcon="drag_indicator"></mat-icon><span><b>Reorder columns</b> by dragging a column header within its group. <b>Reorder groups</b> or <b>stats</b> by dragging the cards and slider rows in the filter menu; the table follows.</span></li>
+        <li><mat-icon fontIcon="visibility"></mat-icon><span><b>Eyes</b> switch a stat or a whole group off: the column hides and it stops counting, but its slider keeps its value.</span></li>
+        <li><mat-icon fontIcon="palette"></mat-icon><span><b>Color-coded values</b> are green above the division average and red below it. Hover a column label for the average.</span></li>
+        <li><mat-icon fontIcon="emoji_events"></mat-icon><span><b>Rank tiles:</b> the belt for #1, green through 10, white in the middle and red for the bottom 10.</span></li>
+        <li><mat-icon fontIcon="female"></mat-icon><span><b>WMMA</b> in the dropdown switches the tabs to the women's: pound-for-pound, bantamweight, flyweight and strawweight.</span></li>
+        <li><mat-icon fontIcon="fiber_new"></mat-icon><span><b>Rookies Only</b> in the settings lists just the newcomers: a UFC debut in the last year.</span></li>
+        <li><mat-icon fontIcon="content_copy"></mat-icon><span><b>Copy</b> puts your whole ranked list on the clipboard, ready to paste into a group chat.</span></li>
+        <li><mat-icon fontIcon="military_tech"></mat-icon><span>Hover any <b>badge</b> under a name for the title written out.</span></li>
+      </ul>
+    }
+
+    @case ('glossary') {
+      <h3>Stat glossary</h3>
+      <p class="muted">Every column label also shows its full name on hover.</p>
+      <dl class="glossary">
+        @for (entry of glossary; track entry[0]) {
+          <dt>{{ entry[0] }}</dt>
+          <dd>{{ entry[1] }}</dd>
         }
+      </dl>
+    }
 
-        @case ('ranking') {
-          <h3>How the rankings work</h3>
-          <p>
-            Every fighter gets a score from the stats you weigh, and the list is sorted by that score. Here's
-            what goes into it:
-          </p>
-          <h4>Sliders and weights</h4>
-          <p>
-            Every stat is first put on the same scale: how far above or below the division's average a
-            fighter is, measured in standard deviations (so 5 significant strikes a minute counts as much as 3
-            takedowns per 15 minutes if they're equally far from typical). That score is multiplied by its
-            slider: at 50% a stat counts normally, at 100% twice as much, and at 0% not at all. Nothing is
-            weighted behind the scenes. A stat's <b>eye</b> switches it off entirely and hides its column.
-          </p>
-          <h4>Good and bad stats</h4>
-          <p>
-            Stats where lower is better (strikes absorbed, times knocked down, times finished) count against a
-            fighter. Extreme values are capped, so one fluky number can't swamp the list. A rate from too small
-            a sample (a strike accuracy under 50 attempts, a takedown accuracy under 5) shows as "-" and counts
-            as average.
-          </p>
-          <h4>The career, not a season</h4>
-          <p>
-            Fighters fight two or three times a year, so a season says little: everything here is his UFC
-            career. The rates are per minute of fight time (striking) or per 15 minutes (knockdowns,
-            takedowns, submission attempts), so a short night and a 25-minute war count fairly. What he
-            absorbs comes from his opponents' numbers in the same fights.
-          </p>
-          <h4>Who's in each division</h4>
-          <p>
-            A fighter is listed in the division ESPN lists him in (his last fight's if not). <b>Min Fights</b>
-            in the settings sets how many UFC fights it takes to be listed, as a share of the most anyone in
-            the division has: 10% to start, in steps of 10%, down to 1 to see everyone. <b>Rookies Only</b>
-            shows just the newcomers: a UFC debut in the last year.
-          </p>
-          <h4>Small samples</h4>
-          <p>
-            A fighter four fights into his UFC run can have perfect numbers that don't mean much yet. So each
-            rate (accuracy, defense, strikes per minute, the record) counts in the ranking in proportion to the
-            fights behind it: four UFC fights count half, twelve three-quarters, a long career nearly all of it.
-            The columns show his real numbers either way.
-          </p>
-          <h4>Strength of schedule</h4>
-          <p>
-            <b>Schedule</b> is his opponents' UFC win percentage: beating fighters who win a lot means more than
-            beating ones who don't. It counts for him like any stat, so a strong record against a soft schedule
-            is weighed against a lesser one against the best.
-          </p>
-          <h4>Ranking by hand</h4>
-          <p>
-            Drag a row by its handle to move it. A hand-dragged order stays put when you switch divisions, and
-            is kept until you change that division's own sliders or settings.
-          </p>
-        }
+    @case ('faq') {
+      <h3>FAQ</h3>
+      <details open>
+        <summary>Why is my guy ranked so low?</summary>
+        <p>
+          The ranking only reflects the sliders. Try a preset that fits his style, or check Min Fights if
+          he's new. And if you still disagree, drag him where he belongs.
+        </p>
+      </details>
+      <details>
+        <summary>Why careers and not seasons?</summary>
+        <p>
+          A fighter has two or three fights a year: a season is too small to rank on. His whole UFC career
+          gives the rates enough fight time to mean something.
+        </p>
+      </details>
+      <details>
+        <summary>What's "significant" about a significant strike?</summary>
+        <p>
+          It's the official count of the strikes that matter: everything at distance, and the power shots
+          in the clinch and on the ground (not the little pitter-patter ones). It's what the UFC's own
+          stats use.
+        </p>
+      </details>
+      <details>
+        <summary>Who counts as active?</summary>
+        <p>
+          Anyone with a UFC fight in the last two years. A fighter who left the UFC or hasn't fought in two
+          years drops off the list.
+        </p>
+      </details>
+      <details>
+        <summary>What does "-" mean?</summary>
+        <p>
+          Too small a sample: under 15 minutes of fight time for a rate, or too few attempts for an
+          accuracy. Those count as the division's average.
+        </p>
+      </details>
+      <details>
+        <summary>When do the stats update?</summary>
+        <p>Every night: the night after an event, its fights are in.</p>
+      </details>
+      <details>
+        <summary>Is my ranking saved?</summary>
+        <p>
+          No. Everything resets when you reload the page: sliders, drags, column changes and the settings
+          menu. Copy your list if you want to keep it.
+        </p>
+      </details>
+    }
 
-        @case ('grades') {
-          <h3>The fighter card</h3>
-          <p>
-            Click any name for his card. It has three tabs:
-          </p>
-          <ul>
-            <li>
-              <b>Overview:</b> related stats rolled up into skills (striking output, accuracy and defense,
-              knockout power, wrestling, takedown defense, grappling, durability and winning), each as a
-              percentile in the division. They make up the radar, pick his <b>archetype</b> (a Knockout
-              Artist, a Smothering Wrestler, a Counter Striker, a Submission Specialist...) and fill the
-              scouting report, strengths first.
-            </li>
-            <li><b>Stats:</b> every column as a rank in the division, with the division average.</li>
-            <li><b>Fights:</b> his UFC fights, newest first: the result, the opponent, the event, and how it ended (the round and time of a finish, or a decision).</li>
-          </ul>
-          <h4>The takes</h4>
-          <p>
-            The points under the archetype read his career in context: a win or losing streak, how he wins
-            (a finisher, or one who goes to the cards), whether he's ever been finished or has chin questions,
-            whether he wins the striking battle, the strength of his schedule, and his whole pro record.
-          </p>
-        }
-
-        @case ('tips') {
-          <h3>Tips &amp; tricks</h3>
-          <ul class="tips">
-            <li><mat-icon fontIcon="drag_indicator"></mat-icon><span><b>Reorder columns</b> by dragging a column header within its group. <b>Reorder groups</b> or <b>stats</b> by dragging the cards and slider rows in the filter menu; the table follows.</span></li>
-            <li><mat-icon fontIcon="visibility"></mat-icon><span><b>Eyes</b> switch a stat or a whole group off: the column hides and it stops counting, but its slider keeps its value.</span></li>
-            <li><mat-icon fontIcon="palette"></mat-icon><span><b>Color-coded values</b> are green above the division average and red below it. Hover a column label for the average.</span></li>
-            <li><mat-icon fontIcon="emoji_events"></mat-icon><span><b>Rank tiles:</b> the belt for #1, green through 10, white in the middle and red for the bottom 10.</span></li>
-            <li><mat-icon fontIcon="female"></mat-icon><span><b>WMMA</b> in the dropdown switches the tabs to the women's: pound-for-pound, bantamweight, flyweight and strawweight.</span></li>
-            <li><mat-icon fontIcon="fiber_new"></mat-icon><span><b>Rookies Only</b> in the settings lists just the newcomers: a UFC debut in the last year.</span></li>
-            <li><mat-icon fontIcon="content_copy"></mat-icon><span><b>Copy</b> puts your whole ranked list on the clipboard, ready to paste into a group chat.</span></li>
-            <li><mat-icon fontIcon="military_tech"></mat-icon><span>Hover any <b>badge</b> under a name for the title written out.</span></li>
-          </ul>
-        }
-
-        @case ('glossary') {
-          <h3>Stat glossary</h3>
-          <p class="muted">Every column label also shows its full name on hover.</p>
-          <dl class="glossary">
-            @for (entry of glossary; track entry[0]) {
-              <dt>{{ entry[0] }}</dt>
-              <dd>{{ entry[1] }}</dd>
-            }
-          </dl>
-        }
-
-        @case ('faq') {
-          <h3>FAQ</h3>
-          <details open>
-            <summary>Why is my guy ranked so low?</summary>
-            <p>
-              The ranking only reflects the sliders. Try a preset that fits his style, or check Min Fights if
-              he's new. And if you still disagree, drag him where he belongs.
-            </p>
-          </details>
-          <details>
-            <summary>Why careers and not seasons?</summary>
-            <p>
-              A fighter has two or three fights a year: a season is too small to rank on. His whole UFC career
-              gives the rates enough fight time to mean something.
-            </p>
-          </details>
-          <details>
-            <summary>What's "significant" about a significant strike?</summary>
-            <p>
-              It's the official count of the strikes that matter: everything at distance, and the power shots
-              in the clinch and on the ground (not the little pitter-patter ones). It's what the UFC's own
-              stats use.
-            </p>
-          </details>
-          <details>
-            <summary>Who counts as active?</summary>
-            <p>
-              Anyone with a UFC fight in the last two years. A fighter who left the UFC or hasn't fought in two
-              years drops off the list.
-            </p>
-          </details>
-          <details>
-            <summary>What does "-" mean?</summary>
-            <p>
-              Too small a sample: under 15 minutes of fight time for a rate, or too few attempts for an
-              accuracy. Those count as the division's average.
-            </p>
-          </details>
-          <details>
-            <summary>When do the stats update?</summary>
-            <p>Every night: the night after an event, its fights are in.</p>
-          </details>
-          <details>
-            <summary>Is my ranking saved?</summary>
-            <p>
-              No. Everything resets when you reload the page: sliders, drags, column changes and the settings
-              menu. Copy your list if you want to keep it.
-            </p>
-          </details>
-        }
-
-        @case ('data') {
-          <h3>Data &amp; credits</h3>
-          <h4>Where the numbers come from</h4>
-          <ul>
-            <li>
-              <a href="https://www.espn.com/mma/" target="_blank" rel="noopener">ESPN</a>: every UFC fight since
-              2001 (the result and when it ended), each fighter's stats fight by fight, bios, flags and
-              headshots.
-            </li>
-            <li>
-              <a href="https://www.ufc.com/rankings" target="_blank" rel="noopener">UFC.com</a>: the champions and
-              the official rankings.
-            </li>
-          </ul>
-          <h4>Thanks</h4>
-          <p>
-            Thanks to <a href="https://claude.ai" target="_blank" rel="noopener">Claude</a>, which helped build it:
-            the rankings math, the data pipeline and just about every pixel.
-          </p>
-          <p class="muted">
-            An unofficial fan project, not affiliated with the UFC or any promotion.
-          </p>
-        }
-      }
-    </div>
-  </div>
-</div>
+    @case ('data') {
+      <h3>Data &amp; credits</h3>
+      <h4>Where the numbers come from</h4>
+      <ul>
+        <li>
+          <a href="https://www.espn.com/mma/" target="_blank" rel="noopener">ESPN</a>: every UFC fight since
+          2001 (the result and when it ended), each fighter's stats fight by fight, bios, flags and
+          headshots.
+        </li>
+        <li>
+          <a href="https://www.ufc.com/rankings" target="_blank" rel="noopener">UFC.com</a>: the champions and
+          the official rankings.
+        </li>
+      </ul>
+      <h4>Thanks</h4>
+      <p>
+        Thanks to <a href="https://claude.ai" target="_blank" rel="noopener">Claude</a>, which helped build it:
+        the rankings math, the data pipeline and just about every pixel.
+      </p>
+      <p class="muted">
+        An unofficial fan project, not affiliated with the UFC or any promotion.
+      </p>
+    }
+  }
+</about-frame>

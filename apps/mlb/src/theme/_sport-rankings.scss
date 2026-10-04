@@ -1,7 +1,4 @@
-@use "variables" as v;
-
-// MLB grid touches: chalk lines, square headshots, Gold Glove / Silver Slugger in silver and All-Star
-// in bronze
+// MLB grid touches: chalk lines and square headshots
 
 // Between the rows: a faint chalk line, the category lines' chalk squeezed to a quarter of their
 // thickness (the 16px-tall texture drawn 4px tall, so its line is about 1px)
@@ -9,20 +6,6 @@ section ul li.player:not(.header-row):not(.cdk-drag-preview) {
   background:
     url("../assets/textures/chalk-line-row.svg") left bottom / 240px 4px repeat-x,
     rgba(0, 0, 0, 0.1);
-}
-
-section ul li.player .player-name .player-awards,
-.player-card .player-awards {
-  .award-badge {
-    &.award-gg,
-    &.award-ss {
-      @include v.plaque-silver;
-    }
-
-    &.award-as {
-      @include v.plaque-bronze;
-    }
-  }
 }
 
 // The headshots are square (a smaller overhang puts the face where the NFL cutouts sit)

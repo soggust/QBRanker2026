@@ -1,284 +1,258 @@
-<div class="about-backdrop" (click)="close()"></div>
-<div class="about-panel" role="dialog" aria-modal="true" aria-labelledby="about-title">
-  <header>
-    <mat-icon class="about-icon" aria-hidden="true" fontIcon="info"></mat-icon>
-    <h2 id="about-title">About MLB Ranker</h2>
-    <button #closeButton type="button" class="about-close" aria-label="Close" title="Close (Esc)" (click)="close()">
-      <mat-icon fontIcon="close"></mat-icon>
-    </button>
-  </header>
+<about-frame heading="About MLB Ranker" [sections]="sections" (closed)="closed.emit()" #frame>
+  @switch (frame.active) {
+    @case ('about') {
+      <h3>Your rankings, your rules</h3>
+      <p>
+        Every baseball ranking is really an argument about what matters. Is it the back of the baseball
+        card or the advanced stats? Power or on-base? Is a shortstop's glove worth as much as a DH's bat?
+        This site lets you settle it yourself: move the sliders and the list re-ranks instantly.
+      </p>
+      <p>
+        It covers every position (catchers, first, second and third base, shortstops, outfielders and
+        designated hitters) plus starting and relief pitchers, with this season's stats, updated every
+        night, and every season back to 2000.
+      </p>
+      <div class="callout">
+        <strong>New here?</strong> Pick a tab up top, then try a preset from the dropdown at the top of the
+        filter menu (the <b>filter</b> button above the list, on the left, opens and closes it). Each preset ranks around a
+        different idea of "best". Then drag a few sliders and watch the list move.
+      </div>
+      <h4>Quick start</h4>
+      <ul>
+        <li><b>Sliders</b> set how much each stat counts. 50% is normal, 100% is double, 0% ignores it.</li>
+        <li>
+          <b>Presets</b> load a ready-made set of sliders built around a kind of player (a slugger, an ace, a
+          closer...); <b>Default</b> puts every slider back at 50%.
+        </li>
+        <li>
+          The <b>season</b> dropdown above the list ranks any year from 2000 on with the same sliders, so
+          you can see how your formula grades another season.
+        </li>
+        <li><b>Drag rows</b> to rank by hand. Your order sticks until that tab's sliders change.</li>
+        <li><b>Hover</b> any column label for the full stat name and the league average.</li>
+        <li><b>Click a name</b> (or its card) for the player card: an overview with a skill radar, archetype and scouting report, every stat as a rank, and his seasons.</li>
+        <li>
+          In the bar above the list: <b>filter</b> opens the filter menu, <b>copy</b> copies your list,
+          <b>info</b> opens this panel and the <b>gear</b> has the settings.
+        </li>
+        <li>
+          <b>Badges</b> under a name mark that season's honors: the World Series, the pennant, MVP, Cy Young,
+          Rookie of the Year, Gold Glove, Silver Slugger and All-Star (see the FAQ).
+        </li>
+      </ul>
+    }
 
-  <div class="about-layout">
-    <nav aria-label="About sections">
-      @for (section of sections; track section.id) {
-        <button
-          type="button"
-          [class.active]="active === section.id"
-          [attr.aria-current]="active === section.id ? 'true' : null"
-          (click)="show(section.id)"
-        >
-          <span>{{ section.title }}</span>
-        </button>
-      }
-    </nav>
+    @case ('ranking') {
+      <h3>How the rankings work</h3>
+      <p>
+        Every player gets a score from the stats you weigh, and the list is sorted by that score. Here's
+        what goes into it:
+      </p>
+      <h4>Sliders and weights</h4>
+      <p>
+        Every stat is first put on the same scale: how far above or below the list's average a player is,
+        measured in standard deviations (so a .300 average counts as much as 40 home runs if they're
+        equally far from typical). That score is multiplied by its slider: at 50% a stat counts normally, at
+        100% twice as much, and at 0% not at all. Nothing is weighted behind the scenes, so the sliders
+        alone decide what matters. A stat's <b>eye</b> switches it off entirely and hides its column. A
+        card's eye does the same for a whole group.
+      </p>
+      <h4>Good and bad stats</h4>
+      <p>
+        Stats where lower is better (a hitter's strikeout rate; a pitcher's ERA, WHIP, walks and home runs
+        allowed...) count against a player. Extreme values are capped, so one fluky number can't swamp the
+        list. A Statcast stat a player has no reading for counts as average. A stat nobody has that season
+        (Statcast starts in 2015) is left out altogether.
+      </p>
+      <h4>Who's on each tab</h4>
+      <p>
+        Hitters are listed at their primary position (left, center and right field together as
+        outfielders). Pitchers who started at least half their games are starters; the rest are
+        relievers. A two-way player like Ohtani shows on both sides. <b>Min PA</b> in the settings sets how
+        much playing time it takes to be listed, as a share of the most plate appearances on the tab
+        (batters faced, for pitchers): 10% to start, in steps of 10%, down to 1 to see everyone. It grows
+        with the season, and the settings show the plate appearances it takes.
+      </p>
+      <h4>Support grades</h4>
+      <p>
+        The Support columns grade the situation around a player, <b>F</b> to <b>A+</b> on a curve across
+        the league. Hitters get <b>Lineup</b> (how good the rest of his team's lineup was, without him: more
+        runners on and more hitters behind him mean more RBI and runs) and <b>Stadium</b> (how friendly his
+        home park is to hitters). Pitchers get <b>Defense</b> (his team's fielding runs behind him) and
+        <b>Stadium</b> (how friendly his park is to pitchers). Park factors are Baseball Savant's, a
+        three-year average.
+      </p>
+      <p>
+        Better support counts slightly <em>against</em> a player: it's credit for doing more with less, so a
+        great season in Coors Field or in front of a Gold Glove infield counts a little less. It's a light
+        touch (a fifth of a normal stat's strength), and the Support card's eye or the sliders turn it off.
+        (wRC+, FIP and WAR already adjust for the park on their own.)
+      </p>
+      <h4>Totals and per game</h4>
+      <p>
+        <b>Stat Totals</b> in the settings switches counting stats between season totals, <b>per game</b>
+        (fairer to anyone who missed time) and a <b>full-season pace</b>: 162 games for hitters, 32 starts
+        for starters and 65 appearances for relievers. Per game and the pace rank the same; they just read
+        differently.
+      </p>
+      <h4>Small samples</h4>
+      <p>
+        Rate stats aren't adjusted for how much playing time they come from. Raise <b>Min PA</b> in the
+        settings to leave out players with too little.
+      </p>
+      <h4>Ranking by hand</h4>
+      <p>
+        Drag a row by its handle to move it. A hand-dragged order stays put when you switch tabs, and
+        is kept until you change that tab's own sliders or settings.
+      </p>
+    }
 
-    <div class="about-body" #body>
-      @switch (active) {
-        @case ('about') {
-          <h3>Your rankings, your rules</h3>
-          <p>
-            Every baseball ranking is really an argument about what matters. Is it the back of the baseball
-            card or the advanced stats? Power or on-base? Is a shortstop's glove worth as much as a DH's bat?
-            This site lets you settle it yourself: move the sliders and the list re-ranks instantly.
-          </p>
-          <p>
-            It covers every position (catchers, first, second and third base, shortstops, outfielders and
-            designated hitters) plus starting and relief pitchers, with this season's stats, updated every
-            night, and every season back to 2000.
-          </p>
-          <div class="callout">
-            <strong>New here?</strong> Pick a tab up top, then try a preset from the dropdown at the top of the
-            filter menu (the <b>filter</b> button above the list, on the left, opens and closes it). Each preset ranks around a
-            different idea of "best". Then drag a few sliders and watch the list move.
-          </div>
-          <h4>Quick start</h4>
-          <ul>
-            <li><b>Sliders</b> set how much each stat counts. 50% is normal, 100% is double, 0% ignores it.</li>
-            <li>
-              <b>Presets</b> load a ready-made set of sliders built around a kind of player (a slugger, an ace, a
-              closer...); <b>Default</b> puts every slider back at 50%.
-            </li>
-            <li>
-              The <b>season</b> dropdown above the list ranks any year from 2000 on with the same sliders, so
-              you can see how your formula grades another season.
-            </li>
-            <li><b>Drag rows</b> to rank by hand. Your order sticks until that tab's sliders change.</li>
-            <li><b>Hover</b> any column label for the full stat name and the league average.</li>
-            <li><b>Click a name</b> (or its card) for the player card: an overview with a skill radar, archetype and scouting report, every stat as a rank, and his seasons.</li>
-            <li>
-              In the bar above the list: <b>filter</b> opens the filter menu, <b>copy</b> copies your list,
-              <b>info</b> opens this panel and the <b>gear</b> has the settings.
-            </li>
-            <li>
-              <b>Badges</b> under a name mark that season's honors: the World Series, the pennant, MVP, Cy Young,
-              Rookie of the Year, Gold Glove, Silver Slugger and All-Star (see the FAQ).
-            </li>
-          </ul>
+    @case ('grades') {
+      <h3>The player card</h3>
+      <p>
+        Click any name for his card. It has three tabs:
+      </p>
+      <ul>
+        <li>
+          <b>Overview:</b> related stats rolled up into skills (contact, power, plate discipline, speed,
+          defense... or for pitchers, missing bats, control, run prevention, limiting damage), each as a
+          percentile in the list. They make up the radar, pick his <b>archetype</b> (a Slugger, a Table
+          Setter, an Ace, a Lockdown Closer...) and fill the scouting report, strengths first.
+        </li>
+        <li><b>Stats:</b> every column as a rank in the list, with the list average.</li>
+        <li><b>Seasons:</b> his career year by year, each season ranked with your sliders. Click one for that season's card.</li>
+      </ul>
+      <h4>The takes</h4>
+      <p>
+        The points under the archetype read the season in context: luck (a hitter's wOBA against his
+        expected wOBA from quality of contact; a pitcher's ERA against his FIP), a real or costly glove, a
+        small sample, and his career so far: where he is (a promising rookie, an established star, a
+        veteran), whether this is a breakout or a down year against his recent norm, streaks, and the
+        skills that have defined his career. A card only looks at that season and the ones before it.
+      </p>
+      <h4>Similar seasons</h4>
+      <p>
+        Finished seasons show the three closest seasons by anyone else since 2000: every stat is compared
+        by how far it stood out from its own year's league, so a 2004 season and a 2024 one line up fairly.
+      </p>
+    }
+
+    @case ('tips') {
+      <h3>Tips &amp; tricks</h3>
+      <ul class="tips">
+        <li><mat-icon fontIcon="drag_indicator"></mat-icon><span><b>Reorder columns</b> by dragging a column header within its group. <b>Reorder groups</b> or <b>stats</b> by dragging the cards and slider rows in the filter menu; the table follows.</span></li>
+        <li><mat-icon fontIcon="visibility"></mat-icon><span><b>Eyes</b> switch a stat or a whole group off: the column hides and it stops counting, but its slider keeps its value.</span></li>
+        <li><mat-icon fontIcon="palette"></mat-icon><span><b>Color-coded values</b> are green above the league average and red below it. Counting stats compare per game, so missed time doesn't turn a good player red. Hover a column label for the average of what the column shows.</span></li>
+        <li><mat-icon fontIcon="emoji_events"></mat-icon><span><b>Rank tiles:</b> a trophy for #1, green through 10, white in the middle and red for the bottom 10.</span></li>
+        <li><mat-icon fontIcon="content_copy"></mat-icon><span><b>Copy</b> puts your whole ranked list on the clipboard, ready to paste into a group chat.</span></li>
+        <li><mat-icon fontIcon="healing"></mat-icon><span>The <b>bandage</b> marks players on the injured list. Hide them with <b>Injured Players</b> in the settings.</span></li>
+        <li><mat-icon fontIcon="filter_list"></mat-icon><span><b>Min PA</b> in the settings leaves out players with less than a share of the season's playing time (plate appearances; pitchers: batters faced), in steps of 10%. Try 50%+ for everyday players only, or 1 to see everyone.</span></li>
+        <li><mat-icon fontIcon="military_tech"></mat-icon><span>Hover any <b>badge</b> under a name for the award written out.</span></li>
+      </ul>
+    }
+
+    @case ('glossary') {
+      <h3>Stat glossary</h3>
+      <p class="muted">Every column label also shows its full name on hover.</p>
+      <dl class="glossary">
+        @for (entry of glossary; track entry[0]) {
+          <dt>{{ entry[0] }}</dt>
+          <dd>{{ entry[1] }}</dd>
         }
+      </dl>
+    }
 
-        @case ('ranking') {
-          <h3>How the rankings work</h3>
-          <p>
-            Every player gets a score from the stats you weigh, and the list is sorted by that score. Here's
-            what goes into it:
-          </p>
-          <h4>Sliders and weights</h4>
-          <p>
-            Every stat is first put on the same scale: how far above or below the list's average a player is,
-            measured in standard deviations (so a .300 average counts as much as 40 home runs if they're
-            equally far from typical). That score is multiplied by its slider: at 50% a stat counts normally, at
-            100% twice as much, and at 0% not at all. Nothing is weighted behind the scenes, so the sliders
-            alone decide what matters. A stat's <b>eye</b> switches it off entirely and hides its column. A
-            card's eye does the same for a whole group.
-          </p>
-          <h4>Good and bad stats</h4>
-          <p>
-            Stats where lower is better (a hitter's strikeout rate; a pitcher's ERA, WHIP, walks and home runs
-            allowed...) count against a player. Extreme values are capped, so one fluky number can't swamp the
-            list. A Statcast stat a player has no reading for counts as average. A stat nobody has that season
-            (Statcast starts in 2015) is left out altogether.
-          </p>
-          <h4>Who's on each tab</h4>
-          <p>
-            Hitters are listed at their primary position (left, center and right field together as
-            outfielders). Pitchers who started at least half their games are starters; the rest are
-            relievers. A two-way player like Ohtani shows on both sides. <b>Min PA</b> in the settings sets how
-            much playing time it takes to be listed, as a share of the most plate appearances on the tab
-            (batters faced, for pitchers): 10% to start, in steps of 10%, down to 1 to see everyone. It grows
-            with the season, and the settings show the plate appearances it takes.
-          </p>
-          <h4>Support grades</h4>
-          <p>
-            The Support columns grade the situation around a player, <b>F</b> to <b>A+</b> on a curve across
-            the league. Hitters get <b>Lineup</b> (how good the rest of his team's lineup was, without him: more
-            runners on and more hitters behind him mean more RBI and runs) and <b>Stadium</b> (how friendly his
-            home park is to hitters). Pitchers get <b>Defense</b> (his team's fielding runs behind him) and
-            <b>Stadium</b> (how friendly his park is to pitchers). Park factors are Baseball Savant's, a
-            three-year average.
-          </p>
-          <p>
-            Better support counts slightly <em>against</em> a player: it's credit for doing more with less, so a
-            great season in Coors Field or in front of a Gold Glove infield counts a little less. It's a light
-            touch (a fifth of a normal stat's strength), and the Support card's eye or the sliders turn it off.
-            (wRC+, FIP and WAR already adjust for the park on their own.)
-          </p>
-          <h4>Totals and per game</h4>
-          <p>
-            <b>Stat Totals</b> in the settings switches counting stats between season totals, <b>per game</b>
-            (fairer to anyone who missed time) and a <b>full-season pace</b>: 162 games for hitters, 32 starts
-            for starters and 65 appearances for relievers. Per game and the pace rank the same; they just read
-            differently.
-          </p>
-          <h4>Small samples</h4>
-          <p>
-            Rate stats aren't adjusted for how much playing time they come from. Raise <b>Min PA</b> in the
-            settings to leave out players with too little.
-          </p>
-          <h4>Ranking by hand</h4>
-          <p>
-            Drag a row by its handle to move it. A hand-dragged order stays put when you switch tabs, and
-            is kept until you change that tab's own sliders or settings.
-          </p>
-        }
+    @case ('faq') {
+      <h3>FAQ</h3>
+      <details>
+        <summary>How do past seasons work?</summary>
+        <p>
+          Pick a year from the season dropdown above the list. Your sliders, eyes and column order stay as
+          they are; the list re-ranks with that year's stats. Each season keeps its own hand-dragged order
+          while the page is open. Statcast stats (xwOBA, barrels, hard-hit rate, sprint speed, whiffs,
+          xERA) start in 2015, so before that their columns and sliders are left out.
+        </p>
+      </details>
+      <details>
+        <summary>What are the badges under names?</summary>
+        <p>
+          That season's honors, hover one for the details. A gold <b>trophy</b> for the World Series
+          champion and a silver <b>flag</b> for both pennant winners, on every row from that team. Plaques
+          for <b>MVP</b>, the <b>Cy Young</b> (CY), Rookie of the Year (<b>ROY</b>), the <b>Gold Glove</b>
+          (GG), the <b>Silver Slugger</b> (SS) and the <b>All-Star</b> team (AS), from either league. A
+          traded player's trophy follows the team he finished the season with.
+        </p>
+      </details>
+      <details open>
+        <summary>Why is my guy ranked so low?</summary>
+        <p>
+          The ranking only reflects the sliders. Try a preset that fits his game, or switch Stat Totals to
+          Per Game or Full-Season Pace if he missed time. And if you still disagree, drag him where he
+          belongs.
+        </p>
+      </details>
+      <details>
+        <summary>What is WAR?</summary>
+        <p>
+          Wins Above Replacement: how many wins a player added over a freely available fill-in, rolling
+          hitting, baserunning, defense and position (or pitching) into one number. 2 is a solid regular,
+          5 an All-Star, 8+ an MVP-type season. It's one slider like any other.
+        </p>
+      </details>
+      <details>
+        <summary>What does "-" mean?</summary>
+        <p>
+          The stat isn't available for that player, usually a Statcast stat with too few batted balls or
+          pitches to measure. Missing Statcast stats count as league average.
+        </p>
+      </details>
+      <details>
+        <summary>When do the stats update?</summary>
+        <p>
+          The current season updates every night, once the day's games are final. Finished seasons don't
+          change.
+        </p>
+      </details>
+      <details>
+        <summary>Is my ranking saved?</summary>
+        <p>
+          No. Everything resets when you reload the page: sliders, drags, column changes, the settings menu
+          and the season (back to the current one). Copy your list if you want to keep it.
+        </p>
+      </details>
+      <details>
+        <summary>A player I'm looking for isn't listed.</summary>
+        <p>
+          He may be under the Min PA setting (plate appearances, or batters faced for a pitcher; lower it
+          to see more), listed at a different position (his primary one), or on the injured list with
+          Injured Players turned off. At 1, everyone who batted or pitched is listed.
+        </p>
+      </details>
+    }
 
-        @case ('grades') {
-          <h3>The player card</h3>
-          <p>
-            Click any name for his card. It has three tabs:
-          </p>
-          <ul>
-            <li>
-              <b>Overview:</b> related stats rolled up into skills (contact, power, plate discipline, speed,
-              defense... or for pitchers, missing bats, control, run prevention, limiting damage), each as a
-              percentile in the list. They make up the radar, pick his <b>archetype</b> (a Slugger, a Table
-              Setter, an Ace, a Lockdown Closer...) and fill the scouting report, strengths first.
-            </li>
-            <li><b>Stats:</b> every column as a rank in the list, with the list average.</li>
-            <li><b>Seasons:</b> his career year by year, each season ranked with your sliders. Click one for that season's card.</li>
-          </ul>
-          <h4>The takes</h4>
-          <p>
-            The points under the archetype read the season in context: luck (a hitter's wOBA against his
-            expected wOBA from quality of contact; a pitcher's ERA against his FIP), a real or costly glove, a
-            small sample, and his career so far: where he is (a promising rookie, an established star, a
-            veteran), whether this is a breakout or a down year against his recent norm, streaks, and the
-            skills that have defined his career. A card only looks at that season and the ones before it.
-          </p>
-          <h4>Similar seasons</h4>
-          <p>
-            Finished seasons show the three closest seasons by anyone else since 2000: every stat is compared
-            by how far it stood out from its own year's league, so a 2004 season and a 2024 one line up fairly.
-          </p>
-        }
-
-        @case ('tips') {
-          <h3>Tips &amp; tricks</h3>
-          <ul class="tips">
-            <li><mat-icon fontIcon="drag_indicator"></mat-icon><span><b>Reorder columns</b> by dragging a column header within its group. <b>Reorder groups</b> or <b>stats</b> by dragging the cards and slider rows in the filter menu; the table follows.</span></li>
-            <li><mat-icon fontIcon="visibility"></mat-icon><span><b>Eyes</b> switch a stat or a whole group off: the column hides and it stops counting, but its slider keeps its value.</span></li>
-            <li><mat-icon fontIcon="palette"></mat-icon><span><b>Color-coded values</b> are green above the league average and red below it. Counting stats compare per game, so missed time doesn't turn a good player red. Hover a column label for the average of what the column shows.</span></li>
-            <li><mat-icon fontIcon="emoji_events"></mat-icon><span><b>Rank tiles:</b> a trophy for #1, green through 10, white in the middle and red for the bottom 10.</span></li>
-            <li><mat-icon fontIcon="content_copy"></mat-icon><span><b>Copy</b> puts your whole ranked list on the clipboard, ready to paste into a group chat.</span></li>
-            <li><mat-icon fontIcon="healing"></mat-icon><span>The <b>bandage</b> marks players on the injured list. Hide them with <b>Injured Players</b> in the settings.</span></li>
-            <li><mat-icon fontIcon="filter_list"></mat-icon><span><b>Min PA</b> in the settings leaves out players with less than a share of the season's playing time (plate appearances; pitchers: batters faced), in steps of 10%. Try 50%+ for everyday players only, or 1 to see everyone.</span></li>
-            <li><mat-icon fontIcon="military_tech"></mat-icon><span>Hover any <b>badge</b> under a name for the award written out.</span></li>
-          </ul>
-        }
-
-        @case ('glossary') {
-          <h3>Stat glossary</h3>
-          <p class="muted">Every column label also shows its full name on hover.</p>
-          <dl class="glossary">
-            @for (entry of glossary; track entry[0]) {
-              <dt>{{ entry[0] }}</dt>
-              <dd>{{ entry[1] }}</dd>
-            }
-          </dl>
-        }
-
-        @case ('faq') {
-          <h3>FAQ</h3>
-          <details>
-            <summary>How do past seasons work?</summary>
-            <p>
-              Pick a year from the season dropdown above the list. Your sliders, eyes and column order stay as
-              they are; the list re-ranks with that year's stats. Each season keeps its own hand-dragged order
-              while the page is open. Statcast stats (xwOBA, barrels, hard-hit rate, sprint speed, whiffs,
-              xERA) start in 2015, so before that their columns and sliders are left out.
-            </p>
-          </details>
-          <details>
-            <summary>What are the badges under names?</summary>
-            <p>
-              That season's honors, hover one for the details. A gold <b>trophy</b> for the World Series
-              champion and a silver <b>flag</b> for both pennant winners, on every row from that team. Plaques
-              for <b>MVP</b>, the <b>Cy Young</b> (CY), Rookie of the Year (<b>ROY</b>), the <b>Gold Glove</b>
-              (GG), the <b>Silver Slugger</b> (SS) and the <b>All-Star</b> team (AS), from either league. A
-              traded player's trophy follows the team he finished the season with.
-            </p>
-          </details>
-          <details open>
-            <summary>Why is my guy ranked so low?</summary>
-            <p>
-              The ranking only reflects the sliders. Try a preset that fits his game, or switch Stat Totals to
-              Per Game or Full-Season Pace if he missed time. And if you still disagree, drag him where he
-              belongs.
-            </p>
-          </details>
-          <details>
-            <summary>What is WAR?</summary>
-            <p>
-              Wins Above Replacement: how many wins a player added over a freely available fill-in, rolling
-              hitting, baserunning, defense and position (or pitching) into one number. 2 is a solid regular,
-              5 an All-Star, 8+ an MVP-type season. It's one slider like any other.
-            </p>
-          </details>
-          <details>
-            <summary>What does "-" mean?</summary>
-            <p>
-              The stat isn't available for that player, usually a Statcast stat with too few batted balls or
-              pitches to measure. Missing Statcast stats count as league average.
-            </p>
-          </details>
-          <details>
-            <summary>When do the stats update?</summary>
-            <p>
-              The current season updates every night, once the day's games are final. Finished seasons don't
-              change.
-            </p>
-          </details>
-          <details>
-            <summary>Is my ranking saved?</summary>
-            <p>
-              No. Everything resets when you reload the page: sliders, drags, column changes, the settings menu
-              and the season (back to the current one). Copy your list if you want to keep it.
-            </p>
-          </details>
-          <details>
-            <summary>A player I'm looking for isn't listed.</summary>
-            <p>
-              He may be under the Min PA setting (plate appearances, or batters faced for a pitcher; lower it
-              to see more), listed at a different position (his primary one), or on the injured list with
-              Injured Players turned off. At 1, everyone who batted or pitched is listed.
-            </p>
-          </details>
-        }
-
-        @case ('data') {
-          <h3>Data &amp; credits</h3>
-          <h4>Where the numbers come from</h4>
-          <ul>
-            <li>
-              <a href="https://statsapi.mlb.com" target="_blank" rel="noopener">MLB Stats API</a>: season stats,
-              WAR, wRC+, wOBA, FIP and xFIP, fielding and baserunning runs, the injured list, awards and All-Star
-              teams, and player headshots.
-            </li>
-            <li>
-              <a href="https://baseballsavant.mlb.com" target="_blank" rel="noopener">Baseball Savant</a>:
-              Statcast (xwOBA, xERA, barrels, hard-hit rate, sprint speed and whiff rate), 2015 on.
-            </li>
-          </ul>
-          <h4>Thanks</h4>
-          <p>
-            Thanks to MLB Advanced Media for keeping so much baseball data open, and to
-            <a href="https://claude.ai" target="_blank" rel="noopener">Claude</a>, which helped build it: the
-            rankings math, the data pipeline back to 2000 and just about every pixel.
-          </p>
-          <p class="muted">
-            An unofficial fan project, not affiliated with MLB or any team. Team logos belong to their teams.
-          </p>
-        }
-      }
-    </div>
-  </div>
-</div>
+    @case ('data') {
+      <h3>Data &amp; credits</h3>
+      <h4>Where the numbers come from</h4>
+      <ul>
+        <li>
+          <a href="https://statsapi.mlb.com" target="_blank" rel="noopener">MLB Stats API</a>: season stats,
+          WAR, wRC+, wOBA, FIP and xFIP, fielding and baserunning runs, the injured list, awards and All-Star
+          teams, and player headshots.
+        </li>
+        <li>
+          <a href="https://baseballsavant.mlb.com" target="_blank" rel="noopener">Baseball Savant</a>:
+          Statcast (xwOBA, xERA, barrels, hard-hit rate, sprint speed and whiff rate), 2015 on.
+        </li>
+      </ul>
+      <h4>Thanks</h4>
+      <p>
+        Thanks to MLB Advanced Media for keeping so much baseball data open, and to
+        <a href="https://claude.ai" target="_blank" rel="noopener">Claude</a>, which helped build it: the
+        rankings math, the data pipeline back to 2000 and just about every pixel.
+      </p>
+      <p class="muted">
+        An unofficial fan project, not affiliated with MLB or any team. Team logos belong to their teams.
+      </p>
+    }
+  }
+</about-frame>

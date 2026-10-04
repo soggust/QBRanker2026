@@ -2,18 +2,12 @@
 
 // ===========================================================================
 // About / FAQ: a scoreboard panel over the dimmed page, the sections down the left (like the position
-// tabs), the reading area on the grid's chalkboard
+// tabs), the reading area on the grid's chalkboard (its content: about-content.scss)
 // ===========================================================================
 :host {
   inset: 0;
   position: fixed;
   z-index: 1000;
-}
-
-@mixin icon-size($size) {
-  font-size: $size;
-  height: $size;
-  width: $size;
 }
 
 // Scrollbars 10px, like the filter menu's and the grid's (their colors are global: _base.scss)
@@ -71,7 +65,7 @@ header {
 .about-icon {
   color: var(--scoreboard-led);
   flex: 0 0 auto;
-  @include icon-size(24px);
+  @include v.icon-size(24px);
   text-shadow: var(--scoreboard-glow);
 }
 
@@ -88,7 +82,7 @@ header {
   width: 28px;
 
   .mat-icon {
-    @include icon-size(20px);
+    @include v.icon-size(20px);
   }
 
   &:hover,
@@ -163,163 +157,6 @@ nav {
   line-height: 1.6;
   overflow-y: auto;
   padding: 22px 30px 30px;
-
-  // Section headings in chalk, like the card's
-  h3 {
-    color: var(--scoreboard-led);
-    @include v.chalk(24px);
-    letter-spacing: 0.5px;
-    margin: 0 0 12px;
-  }
-
-  h4 {
-    color: #fff;
-    font-size: 15px;
-    font-weight: 800;
-    margin: 22px 0 6px;
-  }
-
-  p {
-    margin: 0 0 12px;
-  }
-
-  ul,
-  ol {
-    margin: 0 0 12px;
-    padding-left: 20px;
-  }
-
-  li {
-    margin-bottom: 6px;
-  }
-
-  b,
-  strong {
-    color: #fff;
-  }
-
-  a {
-    color: var(--scoreboard-led);
-  }
-
-  code {
-    background: rgba(255, 255, 255, 0.08);
-    border-radius: 4px;
-    font-size: 13px;
-    padding: 1px 5px;
-  }
-
-  .muted {
-    color: rgba(255, 255, 255, 0.55);
-    font-size: 13px;
-  }
-
-  // Grade names in goalpost yellow ("The tabs grade each other", Responsibility)
-  .tab-grades b,
-  .grade-name {
-    color: var(--scoreboard-led);
-  }
-}
-
-// (a faint wash of the sport's accent)
-.callout {
-  background: color-mix(in srgb, var(--scoreboard-led) 7%, transparent);
-  border-left: 3px solid var(--scoreboard-led);
-  border-radius: 0 8px 8px 0;
-  margin: 16px 0;
-  padding: 12px 16px;
-}
-
-// Tips: an icon beside each one
-ul.tips {
-  list-style: none;
-  padding: 0;
-
-  li {
-    align-items: flex-start;
-    display: flex;
-    gap: 12px;
-    margin-bottom: 12px;
-  }
-
-  .mat-icon {
-    color: var(--scoreboard-led);
-    flex: 0 0 auto;
-    @include icon-size(20px);
-    margin-top: 2px;
-  }
-}
-
-dl {
-  margin: 0;
-
-  dt {
-    color: #fff;
-    font-weight: 800;
-    margin-top: 14px;
-  }
-
-  dd {
-    margin: 2px 0 0;
-  }
-}
-
-// Glossary: term and meaning side by side on wide screens
-dl.glossary {
-  display: grid;
-  gap: 10px 18px;
-  grid-template-columns: 150px 1fr;
-
-  dt {
-    color: var(--scoreboard-led);
-    font-size: 14px;
-    margin: 0;
-  }
-
-  dd {
-    margin: 0;
-  }
-}
-
-// FAQ: questions open like the filter cards
-details {
-  border: 1px solid #2f2f2f;
-  border-radius: 8px;
-  margin-bottom: 8px;
-
-  summary {
-    cursor: pointer;
-    font-weight: 800;
-    list-style: none;
-    padding: 11px 14px;
-    position: relative;
-
-    &::-webkit-details-marker {
-      display: none;
-    }
-
-    &::after {
-      color: var(--scoreboard-led);
-      content: "+";
-      font-size: 18px;
-      line-height: 1;
-      position: absolute;
-      right: 14px;
-      top: 12px;
-    }
-
-    &:hover {
-      color: var(--scoreboard-led);
-    }
-  }
-
-  &[open] summary::after {
-    content: "\2212";
-  }
-
-  p {
-    padding: 0 14px 4px;
-  }
 }
 
 // ---------------------------------------------------------------------------
@@ -385,14 +222,5 @@ details {
   .about-body {
     font-size: 14px;
     padding: 16px 16px 24px;
-  }
-
-  dl.glossary {
-    gap: 2px;
-    grid-template-columns: 1fr;
-
-    dd {
-      margin-bottom: 10px;
-    }
   }
 }

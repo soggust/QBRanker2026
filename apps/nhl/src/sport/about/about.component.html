@@ -1,311 +1,285 @@
-<div class="about-backdrop" (click)="close()"></div>
-<div class="about-panel" role="dialog" aria-modal="true" aria-labelledby="about-title">
-  <header>
-    <mat-icon class="about-icon" aria-hidden="true" fontIcon="info"></mat-icon>
-    <h2 id="about-title">About NHL Ranker</h2>
-    <button #closeButton type="button" class="about-close" aria-label="Close" title="Close (Esc)" (click)="close()">
-      <mat-icon fontIcon="close"></mat-icon>
-    </button>
-  </header>
+<about-frame heading="About NHL Ranker" [sections]="sections" (closed)="closed.emit()" #frame>
+  @switch (frame.active) {
+    @case ('about') {
+      <h3>Your rankings, your rules</h3>
+      <p>
+        Every NHL ranking is really an argument about what matters. Is it points, or driving play at
+        5-on-5? Goals, or the chances behind them? Does a shutdown defenseman count as much as one who
+        runs the power play? This site lets you settle it yourself: move the sliders and the list
+        re-ranks instantly.
+      </p>
+      <p>
+        It covers centers, left wings, right wings, defensemen, goalies and head coaches, with this season's stats,
+        updated every night during the season, and every season back to 2008-09.
+      </p>
+      <div class="callout">
+        <strong>New here?</strong> Pick a tab up top, then try a preset from the dropdown at the top of the
+        filter menu (the <b>filter</b> button above the list, on the left, opens and closes it). Each preset ranks around a
+        different idea of "best". Then drag a few sliders and watch the list move.
+      </div>
+      <h4>Quick start</h4>
+      <ul>
+        <li><b>Sliders</b> set how much each stat counts. 50% is normal, 100% is double, 0% ignores it.</li>
+        <li>
+          <b>Presets</b> load a ready-made set of sliders built around a kind of player (a sniper, a
+          playmaker, a shutdown defenseman, a shot-stopping goalie...); <b>Default</b> puts every slider
+          back at 50%.
+        </li>
+        <li>
+          The <b>season</b> dropdown above the list ranks any season from 2008-09 on with the same sliders,
+          so you can see how your formula grades another year.
+        </li>
+        <li><b>Drag rows</b> to rank by hand. Your order sticks until that tab's sliders change.</li>
+        <li><b>Hover</b> any column label for the full stat name and the league average.</li>
+        <li><b>Click a name</b> (or its card) for the player card: an overview with a skill radar, archetype and scouting report, every stat as a rank, and his seasons.</li>
+        <li>
+          In the bar above the list: <b>filter</b> opens the filter menu, <b>copy</b> copies your list,
+          <b>info</b> opens this panel and the <b>gear</b> has the settings.
+        </li>
+        <li>
+          <b>Badges</b> under a name mark that season's honors: the Stanley Cup, the conference titles,
+          the Hart, Vezina, Norris, Calder, Selke and more (see the FAQ).
+        </li>
+      </ul>
+    }
 
-  <div class="about-layout">
-    <nav aria-label="About sections">
-      @for (section of sections; track section.id) {
-        <button
-          type="button"
-          [class.active]="active === section.id"
-          [attr.aria-current]="active === section.id ? 'true' : null"
-          (click)="show(section.id)"
-        >
-          <span>{{ section.title }}</span>
-        </button>
-      }
-    </nav>
+    @case ('ranking') {
+      <h3>How the rankings work</h3>
+      <p>
+        Every player gets a score from the stats you weigh, and the list is sorted by that score. Here's
+        what goes into it:
+      </p>
+      <h4>Sliders and weights</h4>
+      <p>
+        Every stat is first put on the same scale: how far above or below the list's average a player is,
+        measured in standard deviations (so a 55% expected-goals share counts as much as 40 goals if
+        they're equally far from typical). That score is multiplied by its slider: at 50% a stat counts
+        normally, at 100% twice as much, and at 0% not at all. Nothing is weighted behind the scenes, so
+        the sliders alone decide what matters. A stat's <b>eye</b> switches it off entirely and hides its
+        column. A card's eye does the same for a whole group.
+      </p>
+      <h4>Good and bad stats</h4>
+      <p>
+        Stats where lower is better (giveaways, penalty minutes, goals-against average) count against a
+        player. Extreme values are capped, so one fluky number can't swamp the list. A rate from too small
+        a sample (shooting percentage under 20 shots, faceoffs under 50, save percentage under 50 shots)
+        shows as "-" and counts as average.
+      </p>
+      <h4>No hand-made grades</h4>
+      <p>
+        A lot of hockey is hard to count (defense most of all), but nothing here is a grade somebody made
+        up. Play away from the puck is read from the shots and chances: <b>xGF %</b> and <b>CF %</b>
+        (his team's share of the expected goals and shot attempts while he's on the ice at 5-on-5) and
+        <b>Rel xGF %</b> (how much better his team does with him on than off). The voters' opinions show
+        up as badges instead of stats: the <b>Selke</b>, <b>Norris</b> and <b>Hart</b> sit under names and
+        never move the ranking.
+      </p>
+      <h4>Who's on each tab</h4>
+      <p>
+        Players are listed at the position the NHL lists for them that season. <b>Min Games</b> in the
+        settings sets how many games it takes to be listed, as a share of the season so far: 10% to start,
+        in steps of 10%, down to 1 to see everyone. The settings show the games it takes.
+      </p>
+      <h4>Support grades</h4>
+      <p>
+        The Support columns grade the situation around a player, <b>F</b> to <b>A+</b> on a curve across
+        the league. Skaters get <b>Linemates</b>: how good his team was without him, its expected-goals
+        share at 5-on-5 with him on the bench. Goalies get <b>Defense</b>: the team in front of him, read
+        from the quality of the shots he faced (expected goals against per 60 minutes; A+ is the
+        stingiest). Everyone gets <b>Coaching</b>: his team's Coaching Lift from the Head Coaches tab.
+      </p>
+      <p>
+        Better support counts slightly <em>against</em> a player: it's credit for doing more with less, so a
+        big season behind a stingy defense or on a stacked roster counts a little less. It's a light
+        touch (a fifth of a normal stat's strength), and the Support card's eye or the sliders turn it off.
+      </p>
+      <h4>Goalies</h4>
+      <p>
+        A goalie's save percentage depends on the shots he faces. <b>GSAx</b> (goals saved above expected)
+        fixes that: every shot gets the odds an average goalie stops it, from where and how it was taken, and
+        GSAx is the goals that adds up to minus the goals he actually allowed. +20 is a Vezina-type season.
+        His record is his own decisions (wins, losses and overtime losses).
+      </p>
+      <h4>Head coaches</h4>
+      <p>
+        Each coach is credited with the games he actually coached, so a mid-season firing splits the season:
+        his own record, playoff wins (the coach who finished it), goal differential per game, and his
+        <b>points over goal differential</b> (close games, overtime and shootouts). The team's season goes on
+        every coach it had: its 5-on-5 expected-goal share, power play and penalty kill, and its league ranks
+        in goals for and against.
+      </p>
+      <p>
+        <b>Coaching Lift</b> is the headline: how much better the team controlled play at 5-on-5 than its
+        roster predicted. The prediction is the skaters' own expected-goal share last season, weighted by
+        their ice time for the team this season and pulled a quarter of the way to average. +3 means the
+        team played three points of expected-goal share above its talent: credit for getting more out of a
+        roster, not for having a good one.
+      </p>
+      <h4>Totals and per game</h4>
+      <p>
+        Counting stats read as <b>season totals</b> to start (goals, assists and points, the way the NHL
+        talks). <b>Stat Totals</b> in the settings switches them to <b>per game</b> or an <b>82-game
+        pace</b>. Per game and the pace rank the same; they just read differently. Game Score and GSAx are
+        always season totals.
+      </p>
+      <h4>Ranking by hand</h4>
+      <p>
+        Drag a row by its handle to move it. A hand-dragged order stays put when you switch tabs, and
+        is kept until you change that tab's own sliders or settings.
+      </p>
+    }
 
-    <div class="about-body" #body>
-      @switch (active) {
-        @case ('about') {
-          <h3>Your rankings, your rules</h3>
-          <p>
-            Every NHL ranking is really an argument about what matters. Is it points, or driving play at
-            5-on-5? Goals, or the chances behind them? Does a shutdown defenseman count as much as one who
-            runs the power play? This site lets you settle it yourself: move the sliders and the list
-            re-ranks instantly.
-          </p>
-          <p>
-            It covers centers, left wings, right wings, defensemen, goalies and head coaches, with this season's stats,
-            updated every night during the season, and every season back to 2008-09.
-          </p>
-          <div class="callout">
-            <strong>New here?</strong> Pick a tab up top, then try a preset from the dropdown at the top of the
-            filter menu (the <b>filter</b> button above the list, on the left, opens and closes it). Each preset ranks around a
-            different idea of "best". Then drag a few sliders and watch the list move.
-          </div>
-          <h4>Quick start</h4>
-          <ul>
-            <li><b>Sliders</b> set how much each stat counts. 50% is normal, 100% is double, 0% ignores it.</li>
-            <li>
-              <b>Presets</b> load a ready-made set of sliders built around a kind of player (a sniper, a
-              playmaker, a shutdown defenseman, a shot-stopping goalie...); <b>Default</b> puts every slider
-              back at 50%.
-            </li>
-            <li>
-              The <b>season</b> dropdown above the list ranks any season from 2008-09 on with the same sliders,
-              so you can see how your formula grades another year.
-            </li>
-            <li><b>Drag rows</b> to rank by hand. Your order sticks until that tab's sliders change.</li>
-            <li><b>Hover</b> any column label for the full stat name and the league average.</li>
-            <li><b>Click a name</b> (or its card) for the player card: an overview with a skill radar, archetype and scouting report, every stat as a rank, and his seasons.</li>
-            <li>
-              In the bar above the list: <b>filter</b> opens the filter menu, <b>copy</b> copies your list,
-              <b>info</b> opens this panel and the <b>gear</b> has the settings.
-            </li>
-            <li>
-              <b>Badges</b> under a name mark that season's honors: the Stanley Cup, the conference titles,
-              the Hart, Vezina, Norris, Calder, Selke and more (see the FAQ).
-            </li>
-          </ul>
+    @case ('grades') {
+      <h3>The player card</h3>
+      <p>
+        Click any name for his card. It has three tabs:
+      </p>
+      <ul>
+        <li>
+          <b>Overview:</b> related stats rolled up into skills (goal scoring, finishing, playmaking, shot
+          volume, driving play, defense, physicality and overall value; faceoffs for centers; a goalie's
+          shot stopping, save percentage, big saves, workload and winning), each as a percentile in the
+          list. They make up the radar, pick his <b>archetype</b> (a Pure Sniper, a Play Driver, a Shutdown
+          Defenseman, a Brick Wall...) and fill the scouting report, strengths first.
+        </li>
+        <li><b>Stats:</b> every column as a rank in the list, with the list average.</li>
+        <li><b>Seasons:</b> his career year by year, each season ranked with your sliders. Click one for that season's card.</li>
+      </ul>
+      <h4>The takes</h4>
+      <p>
+        The points under the archetype read the season in context: a small sample, finishing that ran hot
+        or cold against his chances (often luck that evens out), whether his team tilted the ice with him
+        on, a power-play-heavy season, a huge minutes load, a goalie stealing (or leaking) goals and the
+        defense in front of him, and his career so far: where he is (a promising rookie, an established
+        star, a veteran), whether this is a breakout or a down year against his recent norm, streaks, and
+        the skills that have defined his career. A card only looks at that season and the ones before it.
+      </p>
+      <h4>Similar seasons</h4>
+      <p>
+        Finished seasons show the three closest seasons by anyone else since 2008-09: every stat is
+        compared by how far it stood out from its own year's league, so seasons from different eras of
+        scoring line up fairly.
+      </p>
+    }
+
+    @case ('tips') {
+      <h3>Tips &amp; tricks</h3>
+      <ul class="tips">
+        <li><mat-icon fontIcon="drag_indicator"></mat-icon><span><b>Reorder columns</b> by dragging a column header within its group. <b>Reorder groups</b> or <b>stats</b> by dragging the cards and slider rows in the filter menu; the table follows.</span></li>
+        <li><mat-icon fontIcon="visibility"></mat-icon><span><b>Eyes</b> switch a stat or a whole group off: the column hides and it stops counting, but its slider keeps its value.</span></li>
+        <li><mat-icon fontIcon="palette"></mat-icon><span><b>Color-coded values</b> are green above the league average and red below it. Counting stats compare per game, so missed time doesn't turn a good player red. Hover a column label for the average of what the column shows.</span></li>
+        <li><mat-icon fontIcon="emoji_events"></mat-icon><span><b>Rank tiles:</b> the Stanley Cup for #1, green through 10, white in the middle and red for the bottom 10.</span></li>
+        <li><mat-icon fontIcon="content_copy"></mat-icon><span><b>Copy</b> puts your whole ranked list on the clipboard, ready to paste into a group chat.</span></li>
+        <li><mat-icon fontIcon="fiber_new"></mat-icon><span><b>Rookies Only</b> in the settings lists just the rookies, by the Calder Trophy's rule: the race for rookie of the year.</span></li>
+        <li><mat-icon fontIcon="filter_list"></mat-icon><span><b>Min Games</b> in the settings leaves out players who played less than a share of the season, in steps of 10%. Try 70%+ for full-season regulars, or 1 to see everyone.</span></li>
+        <li><mat-icon fontIcon="military_tech"></mat-icon><span>Hover any <b>badge</b> under a name for the award written out.</span></li>
+      </ul>
+    }
+
+    @case ('glossary') {
+      <h3>Stat glossary</h3>
+      <p class="muted">Every column label also shows its full name on hover.</p>
+      <dl class="glossary">
+        @for (entry of glossary; track entry[0]) {
+          <dt>{{ entry[0] }}</dt>
+          <dd>{{ entry[1] }}</dd>
         }
+      </dl>
+    }
 
-        @case ('ranking') {
-          <h3>How the rankings work</h3>
-          <p>
-            Every player gets a score from the stats you weigh, and the list is sorted by that score. Here's
-            what goes into it:
-          </p>
-          <h4>Sliders and weights</h4>
-          <p>
-            Every stat is first put on the same scale: how far above or below the list's average a player is,
-            measured in standard deviations (so a 55% expected-goals share counts as much as 40 goals if
-            they're equally far from typical). That score is multiplied by its slider: at 50% a stat counts
-            normally, at 100% twice as much, and at 0% not at all. Nothing is weighted behind the scenes, so
-            the sliders alone decide what matters. A stat's <b>eye</b> switches it off entirely and hides its
-            column. A card's eye does the same for a whole group.
-          </p>
-          <h4>Good and bad stats</h4>
-          <p>
-            Stats where lower is better (giveaways, penalty minutes, goals-against average) count against a
-            player. Extreme values are capped, so one fluky number can't swamp the list. A rate from too small
-            a sample (shooting percentage under 20 shots, faceoffs under 50, save percentage under 50 shots)
-            shows as "-" and counts as average.
-          </p>
-          <h4>No hand-made grades</h4>
-          <p>
-            A lot of hockey is hard to count (defense most of all), but nothing here is a grade somebody made
-            up. Play away from the puck is read from the shots and chances: <b>xGF %</b> and <b>CF %</b>
-            (his team's share of the expected goals and shot attempts while he's on the ice at 5-on-5) and
-            <b>Rel xGF %</b> (how much better his team does with him on than off). The voters' opinions show
-            up as badges instead of stats: the <b>Selke</b>, <b>Norris</b> and <b>Hart</b> sit under names and
-            never move the ranking.
-          </p>
-          <h4>Who's on each tab</h4>
-          <p>
-            Players are listed at the position the NHL lists for them that season. <b>Min Games</b> in the
-            settings sets how many games it takes to be listed, as a share of the season so far: 10% to start,
-            in steps of 10%, down to 1 to see everyone. The settings show the games it takes.
-          </p>
-          <h4>Support grades</h4>
-          <p>
-            The Support columns grade the situation around a player, <b>F</b> to <b>A+</b> on a curve across
-            the league. Skaters get <b>Linemates</b>: how good his team was without him, its expected-goals
-            share at 5-on-5 with him on the bench. Goalies get <b>Defense</b>: the team in front of him, read
-            from the quality of the shots he faced (expected goals against per 60 minutes; A+ is the
-            stingiest). Everyone gets <b>Coaching</b>: his team's Coaching Lift from the Head Coaches tab.
-          </p>
-          <p>
-            Better support counts slightly <em>against</em> a player: it's credit for doing more with less, so a
-            big season behind a stingy defense or on a stacked roster counts a little less. It's a light
-            touch (a fifth of a normal stat's strength), and the Support card's eye or the sliders turn it off.
-          </p>
-          <h4>Goalies</h4>
-          <p>
-            A goalie's save percentage depends on the shots he faces. <b>GSAx</b> (goals saved above expected)
-            fixes that: every shot gets the odds an average goalie stops it, from where and how it was taken, and
-            GSAx is the goals that adds up to minus the goals he actually allowed. +20 is a Vezina-type season.
-            His record is his own decisions (wins, losses and overtime losses).
-          </p>
-          <h4>Head coaches</h4>
-          <p>
-            Each coach is credited with the games he actually coached, so a mid-season firing splits the season:
-            his own record, playoff wins (the coach who finished it), goal differential per game, and his
-            <b>points over goal differential</b> (close games, overtime and shootouts). The team's season goes on
-            every coach it had: its 5-on-5 expected-goal share, power play and penalty kill, and its league ranks
-            in goals for and against.
-          </p>
-          <p>
-            <b>Coaching Lift</b> is the headline: how much better the team controlled play at 5-on-5 than its
-            roster predicted. The prediction is the skaters' own expected-goal share last season, weighted by
-            their ice time for the team this season and pulled a quarter of the way to average. +3 means the
-            team played three points of expected-goal share above its talent: credit for getting more out of a
-            roster, not for having a good one.
-          </p>
-          <h4>Totals and per game</h4>
-          <p>
-            Counting stats read as <b>season totals</b> to start (goals, assists and points, the way the NHL
-            talks). <b>Stat Totals</b> in the settings switches them to <b>per game</b> or an <b>82-game
-            pace</b>. Per game and the pace rank the same; they just read differently. Game Score and GSAx are
-            always season totals.
-          </p>
-          <h4>Ranking by hand</h4>
-          <p>
-            Drag a row by its handle to move it. A hand-dragged order stays put when you switch tabs, and
-            is kept until you change that tab's own sliders or settings.
-          </p>
-        }
+    @case ('faq') {
+      <h3>FAQ</h3>
+      <details>
+        <summary>How do past seasons work?</summary>
+        <p>
+          Pick a season from the dropdown above the list. Your sliders, eyes and column order stay as they
+          are; the list re-ranks with that season's stats. Each season keeps its own hand-dragged order
+          while the page is open. A season is named for both years it spans (2024-25).
+        </p>
+      </details>
+      <details>
+        <summary>What are the badges under names?</summary>
+        <p>
+          That season's honors, hover one for the details. A gold <b>cup</b> for the Stanley Cup champion and
+          a silver <b>cup</b> for both conference champions (the two Final teams), on every row from that
+          team. Gold plaques for the voted trophies: the <b>Hart</b> (MVP), <b>Vezina</b> (goalie),
+          <b>Norris</b> (defenseman), <b>Calder</b> (rookie), <b>Selke</b> (defensive forward), the
+          <b>Conn</b> Smythe (playoff MVP) and the <b>Lindsay</b> (the players' MVP). Silver plaques for the
+          scoring titles won on the stat sheet: the <b>Rocket</b> Richard (goals) and the Art <b>Ross</b>
+          (points). A traded player's cup follows the team he finished the season with.
+        </p>
+      </details>
+      <details open>
+        <summary>Why is my guy ranked so low?</summary>
+        <p>
+          The ranking only reflects the sliders. Try a preset that fits his game, or check Min Games if
+          he missed time. And if you still disagree, drag him where he belongs.
+        </p>
+      </details>
+      <details>
+        <summary>What are Game Score, xGF % and GSAx?</summary>
+        <p>
+          MoneyPuck's numbers built on <b>expected goals</b>: every shot gets the odds it goes in, from where
+          and how it was taken. <b>Game Score</b> rolls a skater's goals, assists, shots, blocks, penalties,
+          faceoffs and his line's shots and goals into one number for the season. <b>xGF %</b> is his team's
+          share of the expected goals while he's on the ice at 5-on-5 (above 50% means his side is
+          generating more and better chances). <b>GSAx</b> is a goalie's goals saved above what an average
+          goalie would have on the same shots. Each is one slider like any other.
+        </p>
+      </details>
+      <details>
+        <summary>What does "-" mean?</summary>
+        <p>
+          The stat isn't available for that player, usually a rate from too small a sample. Those count as
+          league average.
+        </p>
+      </details>
+      <details>
+        <summary>When do the stats update?</summary>
+        <p>
+          The current season updates every night during the season, once the day's games are final.
+          Finished seasons don't change.
+        </p>
+      </details>
+      <details>
+        <summary>Is my ranking saved?</summary>
+        <p>
+          No. Everything resets when you reload the page: sliders, drags, column changes, the settings menu
+          and the season (back to the current one). Copy your list if you want to keep it.
+        </p>
+      </details>
+      <details>
+        <summary>A player I'm looking for isn't listed.</summary>
+        <p>
+          He may be under the Min Games setting (lower it to see more), or listed at a different position
+          (the one the NHL lists for him that season). At 1, everyone who got into a game is listed.
+        </p>
+      </details>
+    }
 
-        @case ('grades') {
-          <h3>The player card</h3>
-          <p>
-            Click any name for his card. It has three tabs:
-          </p>
-          <ul>
-            <li>
-              <b>Overview:</b> related stats rolled up into skills (goal scoring, finishing, playmaking, shot
-              volume, driving play, defense, physicality and overall value; faceoffs for centers; a goalie's
-              shot stopping, save percentage, big saves, workload and winning), each as a percentile in the
-              list. They make up the radar, pick his <b>archetype</b> (a Pure Sniper, a Play Driver, a Shutdown
-              Defenseman, a Brick Wall...) and fill the scouting report, strengths first.
-            </li>
-            <li><b>Stats:</b> every column as a rank in the list, with the list average.</li>
-            <li><b>Seasons:</b> his career year by year, each season ranked with your sliders. Click one for that season's card.</li>
-          </ul>
-          <h4>The takes</h4>
-          <p>
-            The points under the archetype read the season in context: a small sample, finishing that ran hot
-            or cold against his chances (often luck that evens out), whether his team tilted the ice with him
-            on, a power-play-heavy season, a huge minutes load, a goalie stealing (or leaking) goals and the
-            defense in front of him, and his career so far: where he is (a promising rookie, an established
-            star, a veteran), whether this is a breakout or a down year against his recent norm, streaks, and
-            the skills that have defined his career. A card only looks at that season and the ones before it.
-          </p>
-          <h4>Similar seasons</h4>
-          <p>
-            Finished seasons show the three closest seasons by anyone else since 2008-09: every stat is
-            compared by how far it stood out from its own year's league, so seasons from different eras of
-            scoring line up fairly.
-          </p>
-        }
-
-        @case ('tips') {
-          <h3>Tips &amp; tricks</h3>
-          <ul class="tips">
-            <li><mat-icon fontIcon="drag_indicator"></mat-icon><span><b>Reorder columns</b> by dragging a column header within its group. <b>Reorder groups</b> or <b>stats</b> by dragging the cards and slider rows in the filter menu; the table follows.</span></li>
-            <li><mat-icon fontIcon="visibility"></mat-icon><span><b>Eyes</b> switch a stat or a whole group off: the column hides and it stops counting, but its slider keeps its value.</span></li>
-            <li><mat-icon fontIcon="palette"></mat-icon><span><b>Color-coded values</b> are green above the league average and red below it. Counting stats compare per game, so missed time doesn't turn a good player red. Hover a column label for the average of what the column shows.</span></li>
-            <li><mat-icon fontIcon="emoji_events"></mat-icon><span><b>Rank tiles:</b> the Stanley Cup for #1, green through 10, white in the middle and red for the bottom 10.</span></li>
-            <li><mat-icon fontIcon="content_copy"></mat-icon><span><b>Copy</b> puts your whole ranked list on the clipboard, ready to paste into a group chat.</span></li>
-            <li><mat-icon fontIcon="fiber_new"></mat-icon><span><b>Rookies Only</b> in the settings lists just the rookies, by the Calder Trophy's rule: the race for rookie of the year.</span></li>
-            <li><mat-icon fontIcon="filter_list"></mat-icon><span><b>Min Games</b> in the settings leaves out players who played less than a share of the season, in steps of 10%. Try 70%+ for full-season regulars, or 1 to see everyone.</span></li>
-            <li><mat-icon fontIcon="military_tech"></mat-icon><span>Hover any <b>badge</b> under a name for the award written out.</span></li>
-          </ul>
-        }
-
-        @case ('glossary') {
-          <h3>Stat glossary</h3>
-          <p class="muted">Every column label also shows its full name on hover.</p>
-          <dl class="glossary">
-            @for (entry of glossary; track entry[0]) {
-              <dt>{{ entry[0] }}</dt>
-              <dd>{{ entry[1] }}</dd>
-            }
-          </dl>
-        }
-
-        @case ('faq') {
-          <h3>FAQ</h3>
-          <details>
-            <summary>How do past seasons work?</summary>
-            <p>
-              Pick a season from the dropdown above the list. Your sliders, eyes and column order stay as they
-              are; the list re-ranks with that season's stats. Each season keeps its own hand-dragged order
-              while the page is open. A season is named for both years it spans (2024-25).
-            </p>
-          </details>
-          <details>
-            <summary>What are the badges under names?</summary>
-            <p>
-              That season's honors, hover one for the details. A gold <b>cup</b> for the Stanley Cup champion and
-              a silver <b>cup</b> for both conference champions (the two Final teams), on every row from that
-              team. Gold plaques for the voted trophies: the <b>Hart</b> (MVP), <b>Vezina</b> (goalie),
-              <b>Norris</b> (defenseman), <b>Calder</b> (rookie), <b>Selke</b> (defensive forward), the
-              <b>Conn</b> Smythe (playoff MVP) and the <b>Lindsay</b> (the players' MVP). Silver plaques for the
-              scoring titles won on the stat sheet: the <b>Rocket</b> Richard (goals) and the Art <b>Ross</b>
-              (points). A traded player's cup follows the team he finished the season with.
-            </p>
-          </details>
-          <details open>
-            <summary>Why is my guy ranked so low?</summary>
-            <p>
-              The ranking only reflects the sliders. Try a preset that fits his game, or check Min Games if
-              he missed time. And if you still disagree, drag him where he belongs.
-            </p>
-          </details>
-          <details>
-            <summary>What are Game Score, xGF % and GSAx?</summary>
-            <p>
-              MoneyPuck's numbers built on <b>expected goals</b>: every shot gets the odds it goes in, from where
-              and how it was taken. <b>Game Score</b> rolls a skater's goals, assists, shots, blocks, penalties,
-              faceoffs and his line's shots and goals into one number for the season. <b>xGF %</b> is his team's
-              share of the expected goals while he's on the ice at 5-on-5 (above 50% means his side is
-              generating more and better chances). <b>GSAx</b> is a goalie's goals saved above what an average
-              goalie would have on the same shots. Each is one slider like any other.
-            </p>
-          </details>
-          <details>
-            <summary>What does "-" mean?</summary>
-            <p>
-              The stat isn't available for that player, usually a rate from too small a sample. Those count as
-              league average.
-            </p>
-          </details>
-          <details>
-            <summary>When do the stats update?</summary>
-            <p>
-              The current season updates every night during the season, once the day's games are final.
-              Finished seasons don't change.
-            </p>
-          </details>
-          <details>
-            <summary>Is my ranking saved?</summary>
-            <p>
-              No. Everything resets when you reload the page: sliders, drags, column changes, the settings menu
-              and the season (back to the current one). Copy your list if you want to keep it.
-            </p>
-          </details>
-          <details>
-            <summary>A player I'm looking for isn't listed.</summary>
-            <p>
-              He may be under the Min Games setting (lower it to see more), or listed at a different position
-              (the one the NHL lists for him that season). At 1, everyone who got into a game is listed.
-            </p>
-          </details>
-        }
-
-        @case ('data') {
-          <h3>Data &amp; credits</h3>
-          <h4>Where the numbers come from</h4>
-          <ul>
-            <li>
-              <a href="https://www.nhl.com/stats" target="_blank" rel="noopener">NHL.com</a>: season stats,
-              positions, hits, blocks, takeaways and faceoffs, player bios (for the rookie rule), standings,
-              the award records, headshots and team logos.
-            </li>
-            <li>
-              <a href="https://moneypuck.com" target="_blank" rel="noopener">MoneyPuck</a>: expected goals,
-              Game Score, on-ice shot and chance shares, high-danger shots and goals saved above expected.
-            </li>
-          </ul>
-          <h4>Thanks</h4>
-          <p>
-            Thanks to MoneyPuck for publishing its data for everyone, and to
-            <a href="https://claude.ai" target="_blank" rel="noopener">Claude</a>, which helped build it: the
-            rankings math, the data pipeline back to 2008-09 and just about every pixel.
-          </p>
-          <p class="muted">
-            An unofficial fan project, not affiliated with the NHL or any team. Team logos belong to their teams.
-          </p>
-        }
-      }
-    </div>
-  </div>
-</div>
+    @case ('data') {
+      <h3>Data &amp; credits</h3>
+      <h4>Where the numbers come from</h4>
+      <ul>
+        <li>
+          <a href="https://www.nhl.com/stats" target="_blank" rel="noopener">NHL.com</a>: season stats,
+          positions, hits, blocks, takeaways and faceoffs, player bios (for the rookie rule), standings,
+          the award records, headshots and team logos.
+        </li>
+        <li>
+          <a href="https://moneypuck.com" target="_blank" rel="noopener">MoneyPuck</a>: expected goals,
+          Game Score, on-ice shot and chance shares, high-danger shots and goals saved above expected.
+        </li>
+      </ul>
+      <h4>Thanks</h4>
+      <p>
+        Thanks to MoneyPuck for publishing its data for everyone, and to
+        <a href="https://claude.ai" target="_blank" rel="noopener">Claude</a>, which helped build it: the
+        rankings math, the data pipeline back to 2008-09 and just about every pixel.
+      </p>
+      <p class="muted">
+        An unofficial fan project, not affiliated with the NHL or any team. Team logos belong to their teams.
+      </p>
+    }
+  }
+</about-frame>

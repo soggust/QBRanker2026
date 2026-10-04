@@ -1,32 +1,29 @@
-import { AfterViewInit, Component, ElementRef, EventEmitter, HostListener, Output, ViewChild } from '@angular/core';
+import { Component, EventEmitter, Output } from '@angular/core';
+import { AboutSection } from '@ranker/engine/about/about-frame.component';
 
-type SectionId = 'about' | 'ranking' | 'grades' | 'tips' | 'glossary' | 'faq' | 'data';
-
-// About / FAQ panel, opened from the info button in every table's footer
+// NBA Ranker's About / FAQ, opened from the info button in every table's footer (the shared frame:
+// libs/ranker/src/engine/about)
 @Component({
   selector: 'about-panel',
   templateUrl: './about.component.html',
-  styleUrls: ['../../../../../libs/ranker/src/styles/components/about.component.scss'],
+  styleUrls: ['../../../../../libs/ranker/src/styles/components/about-content.scss'],
   standalone: false,
 })
-export class AboutComponent implements AfterViewInit {
+export class AboutComponent {
   @Output() closed = new EventEmitter<void>();
-  @ViewChild('closeButton') closeButton!: ElementRef<HTMLButtonElement>;
-  @ViewChild('body') body!: ElementRef<HTMLElement>;
 
-  sections: { id: SectionId; title: string; icon: string }[] = [
-    { id: 'about', title: 'Guide', icon: 'sports_baseball' },
-    { id: 'ranking', title: 'Rankings', icon: 'tune' },
-    { id: 'grades', title: 'Player Card', icon: 'groups' },
-    { id: 'tips', title: 'Tips', icon: 'lightbulb' },
-    { id: 'glossary', title: 'Stats', icon: 'menu_book' },
-    { id: 'faq', title: 'FAQ', icon: 'help_outline' },
-    { id: 'data', title: 'Credits', icon: 'dataset' },
+  readonly sections: AboutSection[] = [
+    { id: 'about', title: 'Guide' },
+    { id: 'ranking', title: 'Rankings' },
+    { id: 'grades', title: 'Player Card' },
+    { id: 'tips', title: 'Tips' },
+    { id: 'glossary', title: 'Stats' },
+    { id: 'faq', title: 'FAQ' },
+    { id: 'data', title: 'Credits' },
   ];
-  active: SectionId = 'about';
 
   // Glossary entries: stat, what it means
-  glossary: [string, string][] = [
+  readonly glossary: [string, string][] = [
     ["PTS / REB / AST / STL / BLK","Points, rebounds, assists, steals and blocks: per game to start, or season totals or an 82-game pace (Stat Totals in the settings)."],
     ["3PM","3-pointers made."],
     ["FG % / 3P % / FT %","Shots made per attempt: all field goals, 3-pointers (25+ attempts to show) and free throws (20+)."],
@@ -45,19 +42,4 @@ export class AboutComponent implements AfterViewInit {
     ["Coaching Lift","Net rating over what the roster's talent predicted (last season's BPM of the players he used, by their minutes): how much more a coach got from his roster."],
     ["W vs Pt Diff","Wins beyond (or short of) what the point differential implies: mostly close games."],
   ];
-
-  ngAfterViewInit(): void {
-    // Keyboard users land on the close button
-    this.closeButton.nativeElement.focus();
-  }
-
-  @HostListener('document:keydown.escape')
-  close(): void {
-    this.closed.emit();
-  }
-
-  show(id: SectionId): void {
-    this.active = id;
-    this.body.nativeElement.scrollTop = 0;
-  }
 }

@@ -1,0 +1,14 @@
+@use "variables" as v;
+
+// MLB awards: Gold Glove and Silver Slugger in silver, All-Star in bronze (the rest gold)
+// (inside an award plaque's rule: libs/ranker/src/styles/components/_awards.scss)
+@mixin metals {
+  &.award-gg,
+  &.award-ss {
+    @include v.plaque-silver;
+  }
+
+  &.award-as {
+    @include v.plaque-bronze;
+  }
+}

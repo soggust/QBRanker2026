@@ -1,10 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, DestroyRef, OnInit, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { SKILL_PRESETS, SkillPresetDef } from '@sport/skill-presets';
 import { PositionService } from '@ranker/engine/position.service';
 import { SPORT } from '@sport/sport';
 import { combinedFor, statIsEmpty } from '@ranker/engine/unit-scoring';
-
 import {
   POSITIONS,
   Position,
@@ -29,13 +29,15 @@ export interface SkillRow {
   children?: SkillStat[];
 }
 
+// The filter menu: the presets, a card per stat group (its sliders inside, each with an eye that switches
+// the stat off; drag the cards and rows to reorder the grid's groups and columns), Reset and Clear All
 @Component({
-    selector: 'sidebar',
-    templateUrl: './sidebar.component.html',
-    styleUrls: ['../../styles/components/sidebar.component.scss'],
-    standalone: false
+  selector: 'sidebar',
+  templateUrl: './sidebar.component.html',
+  styleUrls: ['../../styles/components/sidebar.component.scss'],
+  standalone: false,
 })
-export class SidebarComponent {
+export class SidebarComponent implements OnInit {
   // (the menu's title and ball)
   readonly sport = SPORT;
 
@@ -56,6 +58,8 @@ export class SidebarComponent {
     SkillPreset | 'custom' | null
   >;
 
+  private readonly destroyRef = inject(DestroyRef);
+
   constructor(private positionService: PositionService) {}
 
   closeFilters(): void {
@@ -63,12 +67,11 @@ export class SidebarComponent {
   }
 
   ngOnInit(): void {
-
-    this.positionService.skillHidden$.subscribe((hidden) => {
+    this.positionService.skillHidden$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((hidden) => {
       this.skillHidden = hidden[this.position] ?? {};
     });
 
-    this.positionService.position$.subscribe((position) => {
+    this.positionService.position$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((position) => {
       this.position = position;
       this.skillStats = SKILL_STATS[position];
       this.skillGroupList = skillGroups(position);
@@ -82,8 +85,7 @@ export class SidebarComponent {
   // its column order (the same order the grid's header drag changes). Both reset on refresh.
   // ---------------------------------------------------------------------------
   get orderedSkillGroups(): SkillStatGroup[] {
-    const order = this.positionService.groupOrder(this.position);
-    return [...this.skillGroupList].sort((a, b) => order.indexOf(a.id) - order.indexOf(b.id));
+    return this.positionService.orderedGroups(this.position, this.skillGroupList);
   }
 
   // Groups a tab doesn't have keep their place at the end of its order
@@ -96,11 +98,7 @@ export class SidebarComponent {
 
   // A card's stats in the grid's column order
   orderedStats(group: SkillStatGroup): SkillStat[] {
-    const order = this.positionService.columnOrder(
-      `${this.position}.${group.id}`,
-      group.stats.map((stat) => stat.key),
-    );
-    return [...group.stats].sort((a, b) => order.indexOf(a.key) - order.indexOf(b.key));
+    return this.positionService.orderedStats(this.position, group);
   }
 
   // A card's rows: one slider per stat, and a combined pair (SPORT.combined: Total Yds) as one parent
@@ -193,7 +191,7 @@ export class SidebarComponent {
     this.positionService.setStatHidden(this.position, key, !this.skillStatHidden(key));
   }
 
-  // Footer Buttons
+  // Reset: every slider back to its default, every stat back on
   resetDefaults(): void {
     this.positionService.showAllStats(this.position);
     this.skillPresets[this.position] = null;
