@@ -1,5 +1,5 @@
 import type { Observable } from 'rxjs';
-import type { SkillPlayer, SkillStat, StatBasis } from '@sport/positions';
+import type { SkillPlayer, SkillStat } from '@sport/positions';
 import type { CardSkill } from './skills';
 import type { RosterGrade } from './roster-grades';
 
@@ -20,6 +20,50 @@ export type StatFormat =
   | 'grade'
   | 'rank'
   | 'recent';
+
+// How counting stats are shown and ranked: season totals, per game, or per game over a full season (a
+// season's pace). Per game and the pace rank the same; they only read differently.
+export type StatBasis = 'season' | 'perGame' | 'pace17';
+
+// A stat: a column in the grid and a slider in the filter menu (every sport's SkillStat is one, over its
+// own stat keys)
+export interface StatDef<Key extends string = string> {
+  key: Key;
+  label: string;
+  description: string;
+  // Volume stats scale with games (and can be shown per game); efficiency stats are rates
+  kind: 'volume' | 'efficiency';
+  format: StatFormat;
+  // Full name for hover text, when the sport's STAT_NAMES name for the key doesn't fit this tab
+  name?: string;
+  // Lower is better (interceptions, ERA)
+  negative?: boolean;
+  // A support grade (the help around a player): counts at a fifth of a stat's strength, against the
+  // player (credit for doing more with less), or for them with supportHelps
+  support?: boolean;
+  supportHelps?: boolean;
+  // Shown for context only: no slider and no weight in the ranking
+  infoOnly?: boolean;
+  // A missing value means too small a sample, so it scores as the league average, not the worst
+  missingIsAverage?: boolean;
+  // Counts for more behind its slider (2: double at every step; 0% still off), or by the sport's settings
+  boost?: number | ((settings: SportSettings) => number);
+  // Scored on a fixed scale, best to worst, rather than against the list (the UFC's rank: the champion
+  // to unranked)
+  scale?: [best: number, worst: number];
+  // Not a rate resting on the row's own sample, so not scaled by SPORT.reliability (the UFC's rank)
+  settled?: boolean;
+}
+
+// The grid's four stat groups (each sport names and colors them), and a group with its stats
+export type StatGroupId = 'results' | 'box' | 'advanced' | 'support';
+
+export interface StatGroup<Stat extends StatDef = StatDef> {
+  id: StatGroupId;
+  title: string;
+  icon: string;
+  stats: Stat[];
+}
 
 // What a sport hands the engine (apps/<sport>/src/sport/sport.ts exports one as SPORT). Everything else a
 // sport defines lives beside it in apps/<sport>/src/sport: positions.ts (tabs, stats, groups),

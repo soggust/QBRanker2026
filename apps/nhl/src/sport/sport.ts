@@ -1,39 +1,25 @@
 import type { CardFlag, FlagContext, SportConfig } from '@ranker/engine/sport';
-import { DATA } from '@ranker/engine/data';
+import { teamRowsFromCoaches } from '@ranker/engine/team-rows';
 import type { SkillPlayer } from './positions';
 import { seasonName } from './awards';
 
-// The Teams tab's rows, built from the season's head coach rows (one per coach and team: a firing
-// splits a season): a team's coaches' records and goals added up; its season stats (every coach row
-// carries them); its playoff wins and Cup and conference badges (the coach who finished the season)
+// The Teams tab's rows, from the head coach rows: the coaches' records and goals added up (goal
+// differential per game, weighted by their games), the team's season stats (every coach row carries
+// them), its playoff wins and Cup and conference badges (the coach who finished the season)
 export function teamRows(): SkillPlayer[] {
-  const coaches = ((DATA.skillPlayers as Record<string, SkillPlayer[]>)['HC'] ?? []) as SkillPlayer[];
-  const teams = new Map<string, SkillPlayer[]>();
-  for (const c of coaches) teams.set(c.teamLogo, [...(teams.get(c.teamLogo) ?? []), c]);
-  return [...teams].map(([logo, list]) => {
-    const sum = (key: string) => list.reduce((a, c) => a + ((c.stats as Record<string, number | null>)[key] ?? 0), 0);
-    const games = list.reduce((a, c) => a + c.games, 0);
+  return teamRowsFromCoaches((coaches, sum) => {
+    const games = coaches.reduce((total, c) => total + c.games, 0);
     const wins = sum('wins');
     const ties = sum('ties');
     return {
-      id: null,
-      gsisId: `TM-${logo.split('/').pop()!.replace('.svg', '')}`,
-      name: list[0].teamName ?? logo,
-      teamLogo: logo,
-      teamName: list[0].teamName,
-      games,
-      stats: {
-        ...list[0].stats,
-        wins,
-        losses: sum('losses'),
-        ties,
-        winPct: games ? Math.round(((2 * wins + ties) / (2 * games)) * 1000) / 1000 : null,
-        playoffWins: sum('playoffWins'),
-        goalDiff: games ? Math.round((list.reduce((a, c) => a + (c.stats.goalDiff ?? 0) * c.games, 0) / games) * 100) / 100 : null,
-        ptsOver: Math.round(sum('ptsOver') * 10) / 10,
-      },
-      awards: [...new Set(list.flatMap((c) => (c.awards ?? []).filter((a) => a !== 'coy')))],
-    } as SkillPlayer;
+      wins,
+      losses: sum('losses'),
+      ties,
+      winPct: games ? Math.round(((2 * wins + ties) / (2 * games)) * 1000) / 1000 : null,
+      playoffWins: sum('playoffWins'),
+      goalDiff: games ? Math.round((coaches.reduce((total, c) => total + (c.stats.goalDiff ?? 0) * c.games, 0) / games) * 100) / 100 : null,
+      ptsOver: Math.round(sum('ptsOver') * 10) / 10,
+    };
   });
 }
 

@@ -1,5 +1,7 @@
-import type { SportSettings, StatFormat } from '@ranker/engine/sport';
+import type { SportSettings, StatBasis, StatDef, StatGroup, StatGroupId } from '@ranker/engine/sport';
 import { SKILL_PRESETS } from '@sport/skill-presets';
+
+export type { StatBasis, StatGroupId } from '@ranker/engine/sport';
 
 // The UFC tabs: pound-for-pound (every man, his whole UFC career), the eight men's divisions, heaviest
 // first, and the women's pound-for-pound and three divisions (shown with the Women's Divisions setting
@@ -63,8 +65,6 @@ export type SkillColumnKey = SkillStatKey | 'games' | 'recent';
 
 // How counting stats are shown: career totals, per fight, or over a 10-fight stretch. (Most UFC stats
 // are rates already: per minute, per 15 minutes, percentages.)
-export type StatBasis = 'season' | 'perGame' | 'pace17';
-
 export const STAT_BASIS_LABELS: Record<StatBasis, string> = {
   season: 'Career Totals',
   perGame: 'Per Fight',
@@ -119,37 +119,7 @@ export function unitStat(unit: SkillPlayer, key: SkillStatKey, _settings?: unkno
   return unit.stats[key] ?? null;
 }
 
-export interface SkillStat {
-  key: SkillColumnKey;
-  label: string;
-  description: string;
-  // Volume stats scale with fights (and can be shown per fight); efficiency stats are rates
-  kind: 'volume' | 'efficiency';
-  // 'record' shows W-L-D from the wins / losses / ties stats while ranking on the stat's value; pct: a
-  // 0-1 share shown as a whole percent; recent: his last five results as dots; rank: UFC.com's rank
-  format: StatFormat;
-  // Full name for hover text, when STAT_NAMES' name for the key doesn't fit this tab
-  name?: string;
-  // Counts against him (strikes absorbed, being finished)
-  negative?: boolean;
-  support?: boolean;
-  supportHelps?: boolean;
-  // Shown for context only: no slider and no weight in the ranking
-  infoOnly?: boolean;
-  // Counts for more behind its slider (2: double at every step, 50% included; 0% still off): the
-  // title stats, Elo and Recent, the clearest marks of an elite career; the UFC's rank far more (15:
-  // the UFC's own order leads among current fighters), less (3) in the all-time lists, where the legends
-  // have none
-  boost?: number | ((settings: SportSettings) => number);
-  // Scored on a fixed scale, best to worst, rather than against the list (the UFC's rank: #0, the
-  // champion, to #16, unranked; title wins and defenses: 10 to 0, since with most fighters at none, one
-  // would score like ten against the list)
-  scale?: [best: number, worst: number];
-  // Not a rate resting on his fights, so not scaled by how many he's had (the UFC's rank)
-  settled?: boolean;
-  // A missing value ("-") means too small a sample, so it scores as the league average, not the worst
-  missingIsAverage?: boolean;
-}
+export type SkillStat = StatDef<SkillColumnKey>;
 
 // Stat names written out in full (label hover text)
 export const STAT_NAMES: Partial<Record<SkillColumnKey, string>> = {
@@ -254,8 +224,6 @@ export function presetWeights(position: SkillPosition, preset: SkillPreset): Ski
 // ---------------------------------------------------------------------------
 // Stat groups: Results, Striking (the basic group) and Grappling (the advanced group's place)
 // ---------------------------------------------------------------------------
-export type StatGroupId = 'results' | 'box' | 'advanced' | 'support';
-
 export const STAT_GROUP_INFO: { id: StatGroupId; title: string; icon: string }[] = [
   { id: 'results', title: 'Results', icon: 'emoji_events' },
   { id: 'box', title: 'Striking', icon: 'sports_mma' },
@@ -294,12 +262,7 @@ export function headlineStats(position: SkillPosition, count = 3): SkillStat[] {
   return SKILL_STATS[position].filter((stat) => statGroup(stat) === 'box').slice(0, count);
 }
 
-export interface SkillStatGroup {
-  id: StatGroupId;
-  title: string;
-  icon: string;
-  stats: SkillStat[];
-}
+export type SkillStatGroup = StatGroup<SkillStat>;
 
 // A division's groups, in the standard order
 export function skillGroups(position: SkillPosition): SkillStatGroup[] {

@@ -1,5 +1,7 @@
-import type { SportSettings, StatFormat } from '@ranker/engine/sport';
+import type { SportSettings, StatBasis, StatDef, StatGroup, StatGroupId } from '@ranker/engine/sport';
 import { SKILL_PRESETS } from '@sport/skill-presets';
+
+export type { StatBasis, StatGroupId } from '@ranker/engine/sport';
 
 export type Position = 'TM' | 'QB' | 'RB' | 'WR' | 'TE' | 'OL' | 'K' | 'P' | 'DEF' | 'HC';
 // Every tab uses the same config-driven table, sidebar and scoring below (TM rows are teams, built in
@@ -150,8 +152,6 @@ export type RankBasis = 'points' | 'yards';
 // How counting stats (yards, touchdowns, sacks...) are shown and ranked: season totals, per game, or
 // per game over a 17-game season (a full season's pace, whatever the player's games or the era's
 // schedule). Per Game and 17-Game Pace rank the same; they only read differently.
-export type StatBasis = 'season' | 'perGame' | 'pace17';
-
 export const STAT_BASIS_LABELS: Record<StatBasis, string> = {
   season: 'Season Totals',
   perGame: 'Per Game',
@@ -211,30 +211,7 @@ export function unitStat(unit: SkillPlayer, key: SkillStatKey, settings: SportSe
   return unit.stats[key];
 }
 
-export interface SkillStat {
-  key: SkillColumnKey;
-  label: string;
-  description: string;
-  // Volume stats scale with games played (and can be shown per game); efficiency stats are rates
-  kind: 'volume' | 'efficiency';
-  // 'record' shows W-L(-T) from the wins/losses/ties stats while ranking on the stat's value;
-  // 'recent' shows the last five results as dots while ranking on the recency-weighted win rate
-  // pct: a 0-1 share shown as a whole percent; pctPoints: already in percentage points (1 decimal)
-  // 'rank' shows #1-#32 (lower is better)
-  format: StatFormat;
-  // Full name for hover text, when STAT_NAMES' name for the key doesn't fit this tab
-  name?: string;
-  // Counts against the player (e.g. fumbles)
-  negative?: boolean;
-  // Team support graded 0-12: better support is a (dampened) penalty, credit for doing more with less
-  support?: boolean;
-  // A support grade that counts for the player instead (QB Responsibility: carrying the offense)
-  supportHelps?: boolean;
-  // Shown for context only: no slider and no weight in the ranking
-  infoOnly?: boolean;
-  // A missing value ("-") means no chances yet, so it scores as the league average, not the worst
-  missingIsAverage?: boolean;
-}
+export type SkillStat = StatDef<SkillColumnKey>;
 
 // Stat names written out in full (label hover text)
 export const STAT_NAMES: Partial<Record<SkillColumnKey, string>> = {
@@ -1217,8 +1194,6 @@ export function presetWeights(position: SkillPosition, preset: SkillPreset): Ski
 // ---------------------------------------------------------------------------
 // Stat groups: the same four groups (and colors) the QB page uses
 // ---------------------------------------------------------------------------
-export type StatGroupId = 'results' | 'box' | 'advanced' | 'support';
-
 export const STAT_GROUP_INFO: { id: StatGroupId; title: string; icon: string }[] = [
   { id: 'results', title: 'Results', icon: 'emoji_events' },
   { id: 'box', title: 'Basic Stats', icon: 'bar_chart' },
@@ -1307,12 +1282,7 @@ export function headlineStats(position: SkillPosition, count = 3): SkillStat[] {
     .slice(0, count);
 }
 
-export interface SkillStatGroup {
-  id: StatGroupId;
-  title: string;
-  icon: string;
-  stats: SkillStat[];
-}
+export type SkillStatGroup = StatGroup<SkillStat>;
 
 // A position's groups, in the standard order, leaving out groups it has no stats for
 export function skillGroups(position: SkillPosition): SkillStatGroup[] {

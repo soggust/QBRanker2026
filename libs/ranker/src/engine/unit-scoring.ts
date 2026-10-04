@@ -34,11 +34,15 @@ export function statIsEmpty(position: SkillPosition, key: string): boolean {
   const cacheKey = `${dataVersion}.${position}.${key}`;
   let empty = emptyStats.get(cacheKey);
   if (empty === undefined) {
-    const units = SKILL_UNITS[position];
-    empty = units.some((unit) => key in unit.stats) && units.every((unit) => unit.stats[key as SkillStatKey] == null);
+    empty = emptyIn(SKILL_UNITS[position], key);
     emptyStats.set(cacheKey, empty);
   }
   return empty;
+}
+
+// ...in any season's rows: the rows have the stat, but nobody has a value for it
+export function emptyIn(units: SkillPlayer[], key: string): boolean {
+  return units.some((unit) => key in unit.stats) && units.every((unit) => unit.stats[key as SkillStatKey] == null);
 }
 
 // Recent form from up to five results (newest first, 1 win / 0.5 tie / 0 loss): each older game counts
@@ -124,7 +128,7 @@ export function weightedTotals<T>(
     // UFC's rank: the champion to unranked) is laid evenly across the whole range instead, best to
     // worst, so a list's many unranked fighters don't squeeze its top ranks together at the cap.
     const better = stat.support ? (stat.supportHelps ? 1 : -1) : stat.negative ? -1 : 1;
-    const scale = (stat as { scale?: [best: number, worst: number] }).scale;
+    const scale = stat.scale;
     const clamp = (z: number) => Math.max(-MAX_Z, Math.min(MAX_Z, z));
     const score = scale
       ? (v: number) => clamp(MAX_Z * (1 - (2 * (v - scale[0])) / (scale[1] - scale[0])))
@@ -132,20 +136,23 @@ export function weightedTotals<T>(
     const worst = Math.min(...known.map(score));
     // (a sport can boost a stat behind its slider: the same 0-100% range, more effect at every step;
     // the boost can depend on the sport's settings)
-    const given = (stat as { boost?: number | ((settings: SportSettings) => number) }).boost;
-    const boost = typeof given === 'function' ? given(settings) : (given ?? 1);
+    const boost = typeof stat.boost === 'function' ? stat.boost(settings) : (stat.boost ?? 1);
     const strength = (weight / 50) * boost * (stat.support ? 0.2 : 1);
 
     units.forEach((unit, i) => {
       const v = raw[i];
       const scored = v !== null ? score(v) : stat.missingIsAverage || stat.support ? 0 : worst;
       // (a rate that isn't his own sample's, like the UFC's rank, isn't scaled: stat.settled)
-      const settled = (stat as { settled?: boolean }).settled;
-      const trust = reliability && stat.kind === 'efficiency' && !settled ? reliability(unit) : 1;
+      const trust = reliability && stat.kind === 'efficiency' && !stat.settled ? reliability(unit) : 1;
       totals.set(unit, (totals.get(unit) ?? 0) + scored * strength * trust);
     });
   }
   return totals;
+}
+
+// Best first by their weighted totals, then the sport's head-to-head rule
+export function byTotals<T>(units: T[], totals: Map<T, number>): T[] {
+  return headToHead([...units].sort((a, b) => (totals.get(b) ?? 0) - (totals.get(a) ?? 0)));
 }
 
 // The sport's head-to-head rule (SPORT.beat) over a sorted list: a row right below one it beat in their
@@ -170,7 +177,7 @@ export function headToHead<T>(sorted: T[]): T[] {
 }
 
 // A tab's default ranking (its sliders, before it's been opened), best first: combined pairs' parts
-// scaled by their parent sliders, the sport's settings as given (their defaults unless), and grades
+// scaled by their parent sliders, the sport's settings as given (their defaults if not), and grades
 // from other tabs as average. The loaded season's rows unless given another season's.
 export function defaultRanking(
   position: SkillPosition,
@@ -188,5 +195,5 @@ export function defaultRanking(
     undefined,
     settings,
   );
-  return headToHead([...units].sort((a, b) => (totals.get(b) ?? 0) - (totals.get(a) ?? 0)));
+  return byTotals(units, totals);
 }

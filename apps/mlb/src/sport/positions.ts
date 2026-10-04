@@ -1,5 +1,7 @@
-import type { StatFormat } from '@ranker/engine/sport';
+import type { StatBasis, StatDef, StatGroup, StatGroupId } from '@ranker/engine/sport';
 import { SKILL_PRESETS } from '@sport/skill-presets';
+
+export type { StatBasis, StatGroupId } from '@ranker/engine/sport';
 
 // The MLB tabs: teams (first, and where the app opens), hitters by primary position (outfielders
 // together, DH for full-time designated hitters and two-way players' bats), and pitchers by role
@@ -85,8 +87,6 @@ export type SkillColumnKey = SkillStatKey | 'games';
 // How counting stats (home runs, strikeouts...) are shown and ranked: season totals, per game, or at
 // a full season's pace (see PACE_GAMES). Per Game and the pace rank the same; they only read
 // differently.
-export type StatBasis = 'season' | 'perGame' | 'pace17';
-
 export const STAT_BASIS_LABELS: Record<StatBasis, string> = {
   season: 'Season Totals',
   perGame: 'Per Game',
@@ -130,28 +130,7 @@ export function unitStat(unit: SkillPlayer, key: SkillStatKey, _settings?: unkno
   return unit.stats[key] ?? null;
 }
 
-export interface SkillStat {
-  key: SkillColumnKey;
-  label: string;
-  description: string;
-  // Volume stats scale with games played (and can be shown per game); efficiency stats are rates
-  kind: 'volume' | 'efficiency';
-  // 'record' shows W-L from the wins / losses stats while ranking on the stat's value; pct: a 0-1
-  // share shown as a whole percent; pctPoints: already in percentage points (1 decimal); avg3: a
-  // batting-average style rate (".287"); ip: innings in baseball notation (175.1 = 175 1/3)
-  format: StatFormat;
-  // Full name for hover text, when STAT_NAMES' name for the key doesn't fit this tab
-  name?: string;
-  // Counts against the player (e.g. strikeouts for a hitter, ERA for a pitcher)
-  negative?: boolean;
-  // Team support graded 0-12: better support is a (dampened) penalty, credit for doing more with less
-  support?: boolean;
-  supportHelps?: boolean;
-  // Shown for context only: no slider and no weight in the ranking
-  infoOnly?: boolean;
-  // A missing value ("-") means too small a sample, so it scores as the league average, not the worst
-  missingIsAverage?: boolean;
-}
+export type SkillStat = StatDef<SkillColumnKey>;
 
 // Stat names written out in full (label hover text)
 export const STAT_NAMES: Partial<Record<SkillColumnKey, string>> = {
@@ -412,8 +391,6 @@ export function presetWeights(position: SkillPosition, preset: SkillPreset): Ski
 // ---------------------------------------------------------------------------
 // Stat groups: the same groups (and colors) as the NFL app
 // ---------------------------------------------------------------------------
-export type StatGroupId = 'results' | 'box' | 'advanced' | 'support';
-
 export const STAT_GROUP_INFO: { id: StatGroupId; title: string; icon: string }[] = [
   { id: 'results', title: 'Results', icon: 'emoji_events' },
   { id: 'box', title: 'Basic Stats', icon: 'bar_chart' },
@@ -469,12 +446,7 @@ export function headlineStats(position: SkillPosition, count = 3): SkillStat[] {
     .slice(0, count);
 }
 
-export interface SkillStatGroup {
-  id: StatGroupId;
-  title: string;
-  icon: string;
-  stats: SkillStat[];
-}
+export type SkillStatGroup = StatGroup<SkillStat>;
 
 // A position's groups, in the standard order, leaving out groups it has no stats for
 export function skillGroups(position: SkillPosition): SkillStatGroup[] {
