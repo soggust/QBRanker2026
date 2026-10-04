@@ -92,7 +92,7 @@ $chalk-dust:
 // accent color. Its dots are counted up from the bottom edge (not down from the top) so the lit row is
 // always one whole row of dots, whatever the element's height.
 // The panel itself is pressed in: its own background under a faint dark shade (not a lighter panel).
-@mixin lit-dots($panel: null) {
+@mixin lit-dots {
   box-shadow: inset 0 0 0 100vmax rgba(0, 0, 0, 0.2);
   // (bold where the sport's settings say so)
   @if sport.$lit-label-weight {

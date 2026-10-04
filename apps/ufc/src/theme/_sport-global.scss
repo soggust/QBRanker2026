@@ -1,15 +1,20 @@
+@use "sport-kit" as kit;
+
+// ===========================================================================
+// UFC theme: the octagon's canvas instead of turf, fight gloves on the slider knobs and the settings
+// switches, octagon-cut buttons and inputs, and fight-night red as the accent
+// ===========================================================================
 :root {
   // This sport's board texture (the grid, card and About backgrounds: the cage's chain-link fence, in
   // place of the chalk plays) and #1 trophy (a championship belt)
   --tex-chalk-plays: url("../assets/textures/chalk-plays.svg");
   --trophy-mask: url("../assets/lombardi.svg");
+  // The accent (the scoreboard lettering, menu highlights, sliders and scrollbars): a bright red, so
+  // text reads on the dark panels
+  --scoreboard-led: #ff3b3b;
+  --scoreboard-glow: 0 0 6px rgba(255, 59, 59, 0.6);
 }
 
-// ===========================================================================
-// UFC theme (this app only): the octagon's canvas instead of turf, octagon-cut buttons and inputs, and
-// fight gloves on the slider knobs and the settings switches. Kept in one block so it's easy to find
-// and change; the rest of the styles are the shared look.
-// ===========================================================================
 // The canvas: the octagon's woven mat (textures/canvas.svg) under the arena lights (a bright pool
 // across the middle), with the same soft vignette as the turf
 body {
@@ -21,54 +26,34 @@ body {
   background-size: cover, cover, 600px;
 }
 
-// A fight glove (textures/glove.svg) on the knobs and switches. A glove isn't a ball: it doesn't roll.
-$glove: url("../assets/textures/glove.svg");
 $red: #d61a1f;
 $white-text: #f4f1ec;
 
+// ---------------------------------------------------------------------------
+// Sliders and switches: a fight glove (textures/glove.svg). A glove isn't a ball: it doesn't roll.
+// ---------------------------------------------------------------------------
+$glove: url("../assets/textures/glove.svg");
+
 .mdc-slider__thumb-knob {
-  --mat-slider-handle-width: 20px;
-  --mat-slider-handle-height: 20px;
-  background-blend-mode: normal !important;
-  background-color: transparent !important;
-  background-image: $glove !important;
-  background-origin: border-box !important;
-  background-size: 100% 100% !important;
+  @include kit.ball-knob($glove);
   border-color: transparent !important;
   border-radius: 0 !important;
   box-shadow: none !important;
   filter: drop-shadow(0 1px 1.5px rgba(0, 0, 0, 0.7));
-  height: 20px !important;
-  // (no roll)
   transform: translate(-50%, -50%) !important;
-  width: 20px !important;
-
-  &::after {
-    display: none !important;
-  }
 }
 
-html .mat-mdc-slide-toggle.mat-accent {
-  --mat-slide-toggle-handle-width: 18px;
+#{kit.$switch} {
+  @include kit.switch-size(18px);
+  @include kit.bare-switch-handle;
 
-  .mdc-switch__handle {
-    height: 18px !important;
-    width: 18px !important;
-
-    // (no white knob showing round the glove: the glove alone)
-    &::before {
-      background: transparent !important;
-      border-color: transparent !important;
-    }
-
-    &::after {
-      background: $glove center / 100% 100% no-repeat !important;
-      background-blend-mode: normal !important;
-      border: none !important;
-      border-radius: 0 !important;
-      filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.6));
-      rotate: none !important;
-    }
+  .mdc-switch__handle::after {
+    background: $glove center / 100% 100% no-repeat !important;
+    background-blend-mode: normal !important;
+    border: none !important;
+    border-radius: 0 !important;
+    filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.6));
+    rotate: none !important;
   }
 
   .mdc-switch__shadow {
@@ -76,15 +61,26 @@ html .mat-mdc-slide-toggle.mat-accent {
   }
 }
 
-.mat-mdc-slider .mdc-slider__track::after {
-  display: none;
+@include kit.plain-slider-track;
+
+// A switch that's on: an off-white track, so the red glove stands out on it (red on red ran together)
+.mdc-switch.mdc-switch--selected .mdc-switch__track::after,
+.mdc-switch.mdc-switch--selected:enabled:hover .mdc-switch__track::after,
+.mdc-switch.mdc-switch--selected:enabled:focus .mdc-switch__track::after,
+.mdc-switch.mdc-switch--selected:enabled:active .mdc-switch__track::after {
+  background: $white-text !important;
 }
 
-// Octagon-cut panels: the corners cut at 45 degrees like the cage, a red edge all the way round (the
-// straight sides are the border; each cut corner gets its stretch of edge from a small gradient), and a
-// black face with white text. The cut is a clip-path, so a hover darkens it rather than glowing past it.
+@include kit.switch-overreach;
+
+// ---------------------------------------------------------------------------
+// Octagon-cut buttons and inputs: the corners cut at 45 degrees like the cage, a red edge all the way
+// round and a black face with white text. The cut is a clip-path, so a hover darkens it rather than
+// glowing past it.
+// ---------------------------------------------------------------------------
 $cut: 7px;
 $edge: 2px;
+
 @function octagon-cut($c, $inset: 0px) {
   @return polygon(
     calc(#{$c} + #{$inset}) $inset,
@@ -122,14 +118,8 @@ $edge: 2px;
   }
 }
 
-section footer .filter-toggle,
-section footer .settings-toggle,
-section footer .copy-toggle,
-section footer .info-toggle,
-.sidebar footer button,
-.sidebar footer button.negative,
-.sidebar footer button:hover,
-.sidebar footer button.negative:hover {
+#{kit.$footer-buttons},
+#{kit.$menu-buttons} {
   @include octagon;
   font-weight: 500 !important;
   text-shadow: 0 1px 1px rgba(0, 0, 0, 0.8) !important;
@@ -139,21 +129,14 @@ section footer .info-toggle,
   }
 }
 
-section footer .filter-toggle.open .mat-icon,
-section footer .info-toggle.open .mat-icon,
-section footer .settings-toggle[aria-expanded="true"] .mat-icon {
-  color: var(--scoreboard-led) !important;
+#{kit.$open-buttons} {
+  .mat-icon {
+    color: var(--scoreboard-led) !important;
+  }
 }
 
 // Pressed in: a darker face
-section footer .filter-toggle.open,
-section footer .info-toggle.open,
-section footer .settings-toggle[aria-expanded="true"],
-section footer .filter-toggle:hover,
-section footer .copy-toggle:hover,
-section footer .info-toggle:hover,
-section footer .settings-toggle:hover,
-.sidebar footer button:hover {
+#{kit.$pressed-buttons} {
   filter: brightness(0.82) !important;
 }
 
@@ -163,11 +146,9 @@ section footer .settings-toggle:hover,
   text-shadow: none;
 }
 
-// The footer's Current / All-Time dropdown and the filter menu's presets dropdown: octagon-cut, the same
-// height, white text in the sport and weight bars' lettering (Nunito capitals, spaced out, light), a red
-// caret. The presets one centered.
-section footer .mat-mdc-select.season-select,
-.sidebar .filters .mat-mdc-select {
+// The footer's Current / All-Time dropdown and the presets dropdown: octagon-cut, the buttons' height,
+// white text in the sport and weight bars' lettering (Nunito capitals, light), a red caret
+#{kit.$dropdowns} {
   @include octagon;
   align-items: center;
   box-sizing: border-box;
@@ -200,9 +181,13 @@ section footer .mat-mdc-select.season-select,
   }
 }
 
+.sidebar .filters .mat-mdc-select {
+  padding-inline: 18px !important;
+}
+
 // Their open lists: black with a red edge (square: a long list cut at the corners would clip options),
-// white options on a pressed-in band when hovered or picked, the scrollbar in red
-.mdc-menu-surface.mat-mdc-select-panel {
+// white options on a pressed-in band when hovered or picked, the picked one lit, the scrollbar red
+#{kit.$open-list} {
   background: linear-gradient(180deg, #202024, #121214) !important;
   border: $edge solid $red !important;
   border-radius: 0 !important;
@@ -221,79 +206,21 @@ section footer .mat-mdc-select.season-select,
     color: var(--scoreboard-led) !important;
   }
 
-  &::-webkit-scrollbar {
-    height: 10px;
-    width: 10px;
-  }
+  @include kit.list-scrollbar(rgba(0, 0, 0, 0.3), var(--scoreboard-led));
 
-  &::-webkit-scrollbar-track {
-    background-color: rgba(0, 0, 0, 0.3) !important;
-  }
+  // The footer dropdown's group headers (Current, All-Time): small grey capitals above their options
+  .mat-mdc-optgroup-label {
+    min-height: 30px;
 
-  &::-webkit-scrollbar-thumb {
-    background: var(--scoreboard-led) !important;
-    background-clip: padding-box !important;
-  }
-}
-
-// Every open list letter like the presets dropdown: capitals at 0.85em, bold
-.mdc-menu-surface.mat-mdc-select-panel .mat-mdc-option {
-  &,
-  .mdc-list-item__primary-text {
-    font-size: 11.05px !important;
-    font-weight: 500 !important;
-    letter-spacing: normal !important;
-    text-transform: uppercase !important;
+    &,
+    .mdc-list-item__primary-text {
+      color: rgba(244, 241, 236, 0.45) !important;
+      font-size: 10px !important;
+      font-weight: 500 !important;
+      letter-spacing: 1.5px !important;
+      text-transform: uppercase;
+    }
   }
 }
 
-.mdc-menu-surface.mat-mdc-select-panel .mat-pseudo-checkbox-minimal.mat-pseudo-checkbox-checked::after {
-  color: var(--scoreboard-led) !important;
-}
-
-// The UFC's accent is fight-night red: the scoreboard lettering, menu highlights, sliders and
-// scrollbars all read this. A bright red so text reads on the dark panels.
-:root {
-  --scoreboard-led: #ff3b3b;
-  --scoreboard-glow: 0 0 6px rgba(255, 59, 59, 0.6);
-}
-
-.sidebar .filters .mat-mdc-select {
-  padding-inline: 18px !important;
-}
-
-// The footer dropdown's group headers (Current, All-Time): small grey capitals above their options (red
-// is the picked option's)
-.mdc-menu-surface.mat-mdc-select-panel .mat-mdc-optgroup-label {
-  min-height: 30px;
-
-  &,
-  .mdc-list-item__primary-text {
-    color: rgba(244, 241, 236, 0.45) !important;
-    font-size: 10px !important;
-    font-weight: 500 !important;
-    letter-spacing: 1.5px !important;
-    text-transform: uppercase;
-  }
-}
-
-// A switch that's on: an off-white track, so the red glove stands out on it (red on red ran together)
-.mdc-switch.mdc-switch--selected .mdc-switch__track::after,
-.mdc-switch.mdc-switch--selected:enabled:hover .mdc-switch__track::after,
-.mdc-switch.mdc-switch--selected:enabled:focus .mdc-switch__track::after,
-.mdc-switch.mdc-switch--selected:enabled:active .mdc-switch__track::after {
-  background: $white-text !important;
-}
-
-
-// The switch's ball reaches over the ends of its track: a pointed ball (or a glove) leaves the track's
-// rounded end showing past it at the end of its travel
-// (translate, not transform: Material positions the handle with its own transform)
-html .mat-mdc-slide-toggle.mat-accent .mdc-switch__handle {
-  transition: translate 0.15s ease;
-  translate: -3px 0;
-}
-
-html .mat-mdc-slide-toggle.mat-accent .mdc-switch--selected .mdc-switch__handle {
-  translate: 3px 0;
-}
+@include kit.list-lettering(500, $year: false);

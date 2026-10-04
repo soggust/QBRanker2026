@@ -1,0 +1,243 @@
+// The sport themes' kit (apps/<sport>/src/theme/_sport-*.scss): the selectors they dress, and the pieces
+// several of them draw the same way. The themes are global styles, so their selectors carry their own
+// weight (and !important where Material's or the components' own rules would win).
+
+// ---------------------------------------------------------------------------
+// Selectors
+// ---------------------------------------------------------------------------
+// The grid's buttons (filters, copy, info, settings)
+$footer-buttons: "section footer .filter-toggle, section footer .settings-toggle, section footer .copy-toggle, section footer .info-toggle";
+
+// The filter menu's Reset and Clear All, in every state
+$menu-buttons: ".sidebar footer button, .sidebar footer button.negative, .sidebar footer button:hover, .sidebar footer button.negative:hover";
+
+// A grid button whose panel is open, and any button pressed (open or hovered)
+$open-buttons: 'section footer .filter-toggle.open, section footer .info-toggle.open, section footer .settings-toggle[aria-expanded="true"]';
+$pressed-buttons: "#{$open-buttons}, section footer .filter-toggle:hover, section footer .copy-toggle:hover, section footer .info-toggle:hover, section footer .settings-toggle:hover, .sidebar footer button:hover";
+
+// The year dropdown and the filter menu's presets dropdown, and their open lists
+$dropdowns: "section footer .mat-mdc-select.season-select, .sidebar .filters .mat-mdc-select";
+$open-list: ".mdc-menu-surface.mat-mdc-select-panel";
+
+// The settings menu's switches
+$switch: "html .mat-mdc-slide-toggle.mat-accent";
+
+// ---------------------------------------------------------------------------
+// Inputs
+// ---------------------------------------------------------------------------
+// A dropdown's text and caret (inside Material's own template)
+@mixin dropdown-text {
+  .mat-mdc-select-value,
+  .mat-mdc-select-value-text,
+  .mat-mdc-select-placeholder,
+  .mat-mdc-select-arrow {
+    @content;
+  }
+}
+
+// The open lists' options (and the year dropdown, unless $year is false) lettered like the presets
+// dropdown: capitals at 0.85em of the page's 13px, no extra letter spacing, at the sport's weight; the
+// open list's check mark in $check
+@mixin list-lettering($weight, $year: true, $check: var(--scoreboard-led)) {
+  $targets: "#{$open-list} .mat-mdc-option";
+  $parts: "&, .mdc-list-item__primary-text";
+
+  @if $year {
+    $targets: "section footer .mat-mdc-select.season-select, #{$targets}";
+    $parts: "&, .mat-mdc-select-value-text, .mdc-list-item__primary-text";
+  }
+
+  #{$targets} {
+    #{$parts} {
+      font-size: 11.05px !important;
+      font-weight: $weight !important;
+      letter-spacing: normal !important;
+      text-transform: uppercase !important;
+    }
+  }
+
+  #{$open-list} .mat-pseudo-checkbox-minimal.mat-pseudo-checkbox-checked::after {
+    color: $check !important;
+  }
+}
+
+// An open list's 10px scrollbar on its own track (and thumb, where the sport's accent wouldn't show)
+@mixin list-scrollbar($track, $thumb: null, $thumb-lit: null) {
+  &::-webkit-scrollbar {
+    height: 10px;
+    width: 10px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background-color: $track !important;
+  }
+
+  @if $thumb {
+    &::-webkit-scrollbar-thumb {
+      background: $thumb !important;
+      background-clip: padding-box !important;
+    }
+  }
+
+  @if $thumb-lit {
+    &::-webkit-scrollbar-thumb:hover,
+    &::-webkit-scrollbar-thumb:active {
+      background: $thumb-lit !important;
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Sliders and switches
+// ---------------------------------------------------------------------------
+// The slider knob as the sport's ball ($image, drawn over the whole knob: Material draws it with a thick
+// border), without the shared football's laces
+@mixin ball-knob($image, $color: transparent, $size: 20px) {
+  --mat-slider-handle-width: #{$size};
+  --mat-slider-handle-height: #{$size};
+  background-blend-mode: normal !important;
+  background-color: $color !important;
+  background-image: $image !important;
+  background-origin: border-box !important;
+  background-size: 100% 100% !important;
+  height: $size !important;
+  width: $size !important;
+
+  &::after {
+    display: none !important;
+  }
+}
+
+// A switch's handle at the ball's size
+@mixin switch-size($size) {
+  --mat-slide-toggle-handle-width: #{$size};
+
+  .mdc-switch__handle {
+    height: $size !important;
+    width: $size !important;
+  }
+}
+
+// No white knob showing round the ball: the ball alone
+@mixin bare-switch-handle {
+  .mdc-switch__handle::before {
+    background: transparent !important;
+    border-color: transparent !important;
+  }
+}
+
+// No yard lines or hashes over the slider track: a plain painted line
+@mixin plain-slider-track {
+  .mat-mdc-slider .mdc-slider__track::after {
+    display: none;
+  }
+}
+
+// The switch's ball reaching over the ends of its track (a pointed ball or a glove would leave the
+// track's rounded end showing past it). Translate, not transform: Material positions the handle with
+// its own transform.
+@mixin switch-overreach {
+  #{$switch} .mdc-switch__handle {
+    transition: translate 0.15s ease;
+    translate: -3px 0;
+  }
+
+  #{$switch} .mdc-switch--selected .mdc-switch__handle {
+    translate: 3px 0;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Painted lines (the NBA's court, the NHL's rink, the UFC's canvas) instead of the football field's
+// sidelines with hash marks
+// ---------------------------------------------------------------------------
+// A painted line: the color lifted with a little white, a faint sheen down its middle ($across: the
+// sheen runs across a horizontal line)
+@function painted-line($color, $across: false) {
+  @return linear-gradient(if($across, 180deg, 90deg), transparent 35%, rgba(255, 255, 255, 0.35) 50%, transparent 65%),
+    color-mix(in srgb, $color 85%, #fff);
+}
+
+// The grid: no line between the rows (one board), and each stat group's line painted down the rows
+// from the header, where it replaces the plain line
+@mixin painted-category-lines($line, $opacity, $filter: null) {
+  section ul li.player:not(.header-row):not(.cdk-drag-preview) {
+    background: rgba(0, 0, 0, 0.1);
+    border-bottom: none;
+  }
+
+  section.category-colors ul li.player:not(.header-row) > .col-group > div::after {
+    display: none;
+  }
+
+  section.category-colors ul li.player:not(.header-row) > .col-group > div:first-child::before {
+    background: $line;
+    filter: $filter;
+    left: calc(-0.5em + 1px);
+    opacity: $opacity;
+    width: 3px;
+  }
+
+  section ul li.player.header-row > .col-group > div:first-child {
+    &::after {
+      border-left: none;
+    }
+
+    &::before {
+      background: $line;
+      bottom: -0.68em;
+      content: "";
+      left: calc(-0.5em);
+      pointer-events: none;
+      position: absolute;
+      top: -0.68em;
+      width: 3px;
+      z-index: 1;
+    }
+  }
+}
+
+// The player card: each stat group's edges painted solid in its color
+@mixin painted-card-edges {
+  .stat-group .card-stats {
+    $paint: color-mix(in srgb, var(--group-color, #fff) 85%, #fff);
+    background:
+      linear-gradient($paint, $paint) left top / 3px 100% no-repeat,
+      linear-gradient($paint, $paint) right top / 3px 100% no-repeat;
+    opacity: 1;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// The filter menu
+// ---------------------------------------------------------------------------
+// The logo's ball: the sport's own (drawn by $background), upright, in place of the tilted football
+@mixin logo-ball($class, $background, $size: 18px) {
+  .sidebar .logo h1 .#{$class} {
+    background: $background;
+    background-blend-mode: normal;
+    height: $size;
+    transform: none;
+    width: $size;
+
+    &::before,
+    &::after {
+      display: none;
+    }
+
+    @content;
+  }
+}
+
+// The header's and footer's edges: a painted line ($color, faded to $opacity) instead of a sideline
+// with hash marks
+@mixin painted-menu-edges($color, $opacity, $sheen: 0.4) {
+  .sidebar .logo::after,
+  .sidebar footer::before {
+    background:
+      linear-gradient(transparent 30%, rgba(255, 255, 255, $sheen) 50%, transparent 70%) 0 var(--hash-edge) / 100% 3px no-repeat,
+      linear-gradient($color, $color) 0 var(--hash-edge) / 100% 3px no-repeat;
+    height: 3px;
+    opacity: $opacity;
+  }
+}

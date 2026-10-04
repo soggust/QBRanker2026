@@ -1,10 +1,4 @@
-// NBA player card touches: painted stat-group lines
+@use "sport-kit" as kit;
 
-// NBA: the stat groups' edges are painted court lines (solid, like the table's) instead of sidelines
-// with hash marks
-.stat-group .card-stats {
-  background:
-    linear-gradient(color-mix(in srgb, var(--group-color, #fff) 85%, #fff), color-mix(in srgb, var(--group-color, #fff) 85%, #fff)) left top / 3px 100% no-repeat,
-    linear-gradient(color-mix(in srgb, var(--group-color, #fff) 85%, #fff), color-mix(in srgb, var(--group-color, #fff) 85%, #fff)) right top / 3px 100% no-repeat;
-  opacity: 1;
-}
+// NBA player card touches: the stat groups' edges are painted court lines (solid, like the table's) instead of sidelines with hash marks
+@include kit.painted-card-edges;

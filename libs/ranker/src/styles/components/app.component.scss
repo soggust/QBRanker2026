@@ -1,57 +1,17 @@
 @use "../variables" as v;
 
-main {
-  color: var(--primary-50);
-  display: flex;
-  font-family: v.$font-base;
-  // (under the sport bar)
-  height: calc(100% - var(--sport-bar-height));
-  position: relative;
-  z-index: 0;
+// ===========================================================================
+// The page: the sport bar across the top, then the filter menu (a drawer beside the rankings on big
+// screens, a slide-out menu over them below 1200px) and the rankings. The position tabs are projected
+// into the rankings, between its button bar and the grid.
+// ===========================================================================
 
-  .sidebar {
-    z-index: 3;
-  }
-
-  .shade {
-    background: rgba(0, 0, 0, 0.5);
-    display: none;
-    height: 100%;
-    inset: 0;
-    position: fixed;
-    width: 100%;
-    z-index: 2;
-  }
-
-  .content {
-    // Space the bar takes above the table; the rankings table height subtracts it
-    --position-bar-space: 46px;
-    // Let the column shrink below the table's width so the table scrolls instead of overflowing
-    min-width: 0;
-    padding: 1em 2em;
-    width: calc(100% - 28.75em);
-    z-index: 1;
-  }
-
-  // Large screens: sidebar hidden via the toggle in the position bar
-  // Collapsed: the shell slides left by the sidebar's width; only its pull tab stays visible
-  &.sidebar-collapsed {
-    // The 26em sidebar (it no longer has a right border, so nothing extra)
-    .sidebar-shell {
-      margin-left: -26em;
-    }
-
-    .content {
-      width: 100%;
-    }
-  }
-}
-
-// Sport bar: a slim strip across the top of the page, see-through to the field below with a soft
-// inset shadow, linking each sport's app (the one showing is lit like the position tabs)
+// ---------------------------------------------------------------------------
+// Sport bar: a slim scoreboard strip linking each sport's app (the one showing lit like the position
+// tabs), and the site's name on the far right
+// ---------------------------------------------------------------------------
 .sport-bar {
   align-items: stretch;
-  // background: rgba(0, 0, 0, 0.25);
   background: var(--scoreboard-dots), var(--scoreboard);
   box-shadow: inset 0 0 1em rgba(0, 0, 0, 0.4);
   display: flex;
@@ -78,93 +38,124 @@ main {
       color: var(--scoreboard-led);
     }
 
-    // Active: the sport's link lit like the position tabs (bottom row of dots glowing)
     &.active {
-      @include v.lit-dots(var(--scoreboard));
+      @include v.lit-dots;
       color: var(--scoreboard-led);
     }
   }
+
+  // The site's name: a podium, then "Season Ranker" in the menu logo's lettering, both in the sport's
+  // color, its right edge in line with the page's (the position tabs and the grid). A click reloads the
+  // sport's page.
+  a.brand {
+    color: var(--scoreboard-led);
+    font-family: "Orbitron", sans-serif;
+    font-size: 11px;
+    gap: 8px;
+    letter-spacing: 1px;
+    margin-left: auto;
+    // (the bar's own padding plus this: the page's side margin, 26px)
+    margin-right: 12px;
+    order: 2;
+    padding: 0;
+    white-space: nowrap;
+
+    &:hover {
+      background: none;
+      color: var(--scoreboard-led);
+      filter: brightness(1.25);
+    }
+
+    .brand-logo {
+      fill: var(--scoreboard-led);
+      filter: drop-shadow(0 0 3px rgba(0, 0, 0, 0.5));
+      flex: 0 0 auto;
+      height: 17px;
+      width: 17px;
+    }
+  }
+
+  // (the page's side margin is wider on tablets, narrower on phones)
+  @media (max-width: 1199px) {
+    a.brand {
+      margin-right: 31px;
+    }
+  }
+
+  // Phones: the names a size down to suit the slimmer bar, and just the podium (the sports fill the bar)
+  @media (max-width: 575px) {
+    a {
+      font-size: 11px;
+      padding: 0 10px;
+    }
+
+    a.brand {
+      margin-right: 6px;
+
+      .brand-name {
+        display: none;
+      }
+    }
+  }
 }
 
-// Position switch: projected into the rankings between its button bar and the grid, as wide as the grid
-.position-bar {
-  align-items: center;
-  box-sizing: border-box;
+// ---------------------------------------------------------------------------
+// The page under the sport bar: the menu's drawer and the rankings
+// ---------------------------------------------------------------------------
+main {
+  color: var(--primary-50);
   display: flex;
-  gap: 0.25em;
-  height: 34px;
-  margin-bottom: 12px;
-  width: 100%;
+  font-family: v.$font-base;
+  height: calc(100% - var(--sport-bar-height));
+  position: relative;
+  z-index: 0;
 
-  .collapse-toggle {
-    align-items: center;
-    display: flex;
-    margin-right: 0.5em;
-    padding: 0.3em 0.6em;
-
-    .mat-icon {
-      font-size: 1.6em;
-      height: 1em;
-      width: 1em;
-    }
+  // The drawer: on big screens it slides away left (its pull tab stays), and the rankings take the room
+  .sidebar-shell {
+    flex-shrink: 0;
+    position: relative;
+    transition: margin-left 0.25s ease;
+    z-index: 4;
   }
 
-  button {
-    background: transparent;
-    border: 1px solid transparent;
-    border-radius: 14px;
-    color: var(--primary-900);
-    cursor: pointer;
-    font-family: v.$font-base;
-    font-size: 0.85em;
-    font-weight: 900;
-    letter-spacing: 1.5px;
-    padding: 0.45em 1.1em;
-    text-transform: uppercase;
-    transition:
-      background 0.15s ease,
-      color 0.15s ease;
-
-    &:hover:not(.active) {
-      background: rgba(0, 0, 0, 0.1);
-    }
-
-    &.active {
-      background: color-mix(in srgb, var(--primary-800) 75%, transparent);
-      border-color: var(--accent-200);
-      box-shadow: 0 0 1em rgba(0, 0, 0, 0.2);
-      color: var(--accent-50);
-      text-shadow: var(--text-shadow-small);
-    }
-
-    .short {
-      display: none;
-    }
+  .sidebar {
+    transform: translateX(0);
+    z-index: 3;
   }
-}
 
-.menu-toggle {
-  display: none;
-}
+  // (behind the slide-out menu)
+  .shade {
+    background: rgba(0, 0, 0, 0.5);
+    display: none;
+    inset: 0;
+    position: fixed;
+    z-index: 2;
+  }
 
-.sidebar {
-  transform: translateX(0);
-}
+  .content {
+    // The room the position tabs take above the grid (the grid's height subtracts it)
+    --position-bar-space: 62px;
+    // (it can shrink below the grid's width, so the grid scrolls instead of overflowing)
+    min-width: 0;
+    padding: 1em 2em;
+    transition: width 0.25s ease;
+    width: calc(100% - 28.75em);
+    z-index: 1;
+  }
 
-@media (max-width: 1199px) {
-  main {
-    justify-content: center;
+  &.sidebar-collapsed {
+    .sidebar-shell {
+      margin-left: -26em;
+    }
 
     .content {
-      --position-bar-space: 48px;
-      padding: 0.75em 0 0;
-      width: 90%;
+      width: 100%;
     }
+  }
 
-    // The sidebar is a slide-out menu here, so the collapse setting doesn't apply
-    &.sidebar-collapsed .content {
-      width: 90%;
-    }
+  // Below 1200px: the menu slides out over the rankings (the collapse setting doesn't apply)
+  @media (max-width: 1199px) {
+    justify-content: center;
 
     .sidebar {
       left: -100vw;
@@ -176,217 +167,139 @@ main {
     &.menu-open {
       .sidebar {
         left: 0;
-        transform: translateX(0);
       }
 
       .shade {
         display: block;
       }
     }
-  }
 
-  .menu-toggle {
-    background: transparent;
-    border: none;
-    bottom: 2em;
-    color: var(--primary-900);
-    cursor: pointer;
-    display: block;
-    left: 4.5%;
-    position: fixed;
-    z-index: 1;
-
-    &:hover {
-      color: var(--primary-700);
-    }
-  }
-
-  // Bigger tap targets, QB/RB/WR/TE labels, and a tighter gap above the table
-  .position-bar {
-    height: 44px;
-    margin-bottom: 4px;
-
-    .collapse-toggle {
-      display: none;
+    .content,
+    &.sidebar-collapsed .content {
+      --position-bar-space: 48px;
+      padding: 0.75em 0 0;
+      width: 90%;
     }
 
-    button {
-      flex: 1;
-      height: 100%;
-
-      .full {
-        display: none;
-      }
-
-      .short {
-        display: inline;
-      }
+    &.sidebar-collapsed .sidebar-shell {
+      margin-left: 0;
     }
   }
 }
 
-// Mid-size screens: short labels, keep the eyebrow
-@media (min-width: 1200px) and (max-width: 1749px) {
-  .position-bar button {
+// ---------------------------------------------------------------------------
+// Position tabs: one scoreboard tab bar, as wide as the grid (the tab showing lit along its bottom row
+// of dots); phones get a dropdown instead
+// ---------------------------------------------------------------------------
+.position-bar {
+  align-items: center;
+  box-sizing: border-box;
+  display: flex;
+  height: 44px;
+  margin-bottom: 4px;
+  width: 100%;
+
+  @media (min-width: 576px) {
+    background: var(--scoreboard-dots), var(--scoreboard);
+    border: 1px solid #3a3a3a;
+    // (the same corners as the grid's header bar)
+    border-radius: 9.1px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+    overflow: hidden;
+  }
+
+  button {
+    background: transparent;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    flex: 1;
+    font-family: v.$font-base;
+    font-size: 0.85em;
+    font-weight: 500;
+    height: 100%;
+    letter-spacing: 1.5px;
+    padding: 0 1.1em;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+    text-transform: uppercase;
+    transition:
+      background 0.15s ease,
+      color 0.15s ease;
+
+    // (pressed in, a faint dark shade)
+    &:hover:not(.active) {
+      background: rgba(0, 0, 0, 0.1);
+      box-shadow: inset 0 0 0 100vmax rgba(0, 0, 0, 0.1);
+      color: var(--scoreboard-led);
+    }
+
+    &.active {
+      @include v.lit-dots;
+      color: var(--scoreboard-led);
+      text-shadow: var(--scoreboard-glow);
+    }
+
+    // The position's name, or (below 1750px, where nine names don't fit) its abbreviation
     .full {
       display: none;
     }
-
-    .short {
-      display: inline;
-    }
-  }
-}
-
-// ===========================================================================
-// Turf theme: white text on grass, scoreboard active tab
-// ===========================================================================
-.position-bar button {
-  color: #fff;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
-
-  &:hover:not(.active) {
-    background: rgba(0, 0, 0, 0.2);
   }
 
-  &.active {
-    background: var(--scoreboard-dots), var(--scoreboard);
-    border-color: #3a3a3a;
-    color: var(--scoreboard-led);
-    font-family: v.$font-base;
-    text-shadow: var(--scoreboard-glow);
+  .position-select {
+    display: none;
   }
-}
 
-@media (max-width: 1199px) {
-  .menu-toggle {
-    color: #fff;
+  @media (min-width: 1200px) {
+    height: 50px;
+    margin-bottom: 12px;
 
-    &:hover {
-      color: var(--scoreboard-led);
-    }
-  }
-}
-
-// Round 2: yellow outlines lift the tabs off the grass
-.position-bar button:not(.collapse-toggle) {
-  background: rgba(0, 0, 0, 0.35);
-  border: 1px solid var(--scoreboard-led);
-  margin-right: 0.35em;
-}
-
-// Big screens: the sidebar open/close button sits on a soft shaded chip
-.position-bar button.collapse-toggle {
-  background: rgba(0, 0, 0, 0.35);
-  border-radius: 8px;
-  padding: 0.35em 0.5em;
-
-  &:hover {
-    background: rgba(0, 0, 0, 0.5);
-  }
-}
-
-// Position tabs are little scoreboard panels (LED dots on black) at every size; hover lifts the
-// panel a shade, like the drawer tab
-.position-bar button:not(.collapse-toggle) {
-  background: var(--scoreboard-dots), var(--scoreboard);
-
-  // (pressed in, a faint dark shade)
-  &:hover:not(.active) {
-    background: var(--scoreboard-dots), var(--scoreboard);
-    box-shadow: inset 0 0 0 100vmax rgba(0, 0, 0, 0.1);
-  }
-}
-
-// Big screens: roomier position tabs, in a taller bar (the table gives up the extra 6px)
-@media (min-width: 1200px) {
-  .position-bar {
-    height: 40px;
-
-    button:not(.collapse-toggle) {
-      padding: 1em 1.5em;
+    button {
+      font-size: 1em;
+      padding: 0 1.5em;
+      white-space: nowrap;
     }
   }
 
-  main .content {
-    --position-bar-space: 52px;
+  @media (min-width: 1750px) {
+    button {
+      .full {
+        display: inline;
+      }
+
+      .short {
+        display: none;
+      }
+    }
   }
-}
 
-// ---------------------------------------------------------------------------
-// Sidebar drawer with a pull tab
-// ---------------------------------------------------------------------------
-main .sidebar-shell {
-  flex-shrink: 0;
-  position: relative;
-  transition: margin-left 0.25s ease;
-  z-index: 4;
-}
-
-main .content {
-  transition: width 0.25s ease;
-}
-
-// Small screens use the slide-out menu and the filter button instead
-@media (max-width: 1199px) {
-
-  main.sidebar-collapsed .sidebar-shell {
-    margin-left: 0;
+  // (nine full names only fit on one line in smaller, tighter text)
+  @media (min-width: 1750px) and (max-width: 2099px) {
+    button {
+      font-size: 0.9em;
+      letter-spacing: 1px;
+      padding-inline: 0.5em;
+    }
   }
-}
 
-@media (max-width: 1199px) {
-  main.sidebar-collapsed .content {
-    padding-left: 0;
-  }
-}
+  // Phones: the tabs don't fit, so one dropdown (the phone's own picker) on a scoreboard panel, its
+  // text and caret white
+  @media (max-width: 575px) {
+    height: 36px;
 
-// Inactive position pills are lighter weight so the active one stands out
-.position-bar button:not(.active):not(.collapse-toggle) {
-  font-weight: 500;
-}
-
-// Unselected position pills: no border
-.position-bar button:not(.active):not(.collapse-toggle) {
-  border: none;
-}
-
-// Yellow on hover: unselected pills and the drawer X
-.position-bar button:not(.active):not(.collapse-toggle):hover {
-  border-color: var(--scoreboard-led);
-  color: var(--scoreboard-led);
-}
-
-
-// The active pill keeps the same lighter weight (its scoreboard font and color set it apart)
-.position-bar button.active:not(.collapse-toggle) {
-  font-weight: 500;
-}
-
-// Phones: the eight position pills don't fit, so they become one dropdown styled like the active
-// pill (scoreboard panel, goalpost-yellow text); md+ keeps the pills
-.position-bar .position-select {
-  display: none;
-}
-
-@media (max-width: 575px) {
-  .position-bar {
-    button:not(.collapse-toggle) {
+    button {
       display: none;
     }
 
     .position-select {
       appearance: none;
       background:
-        linear-gradient(45deg, transparent 50%, var(--scoreboard-led) 50%)
-          calc(100% - 20px) 50% / 6px 6px no-repeat,
-        linear-gradient(135deg, var(--scoreboard-led) 50%, transparent 50%)
-          calc(100% - 14px) 50% / 6px 6px no-repeat,
+        linear-gradient(45deg, transparent 50%, #fff 50%) calc(100% - 20px) 50% / 6px 6px no-repeat,
+        linear-gradient(135deg, #fff 50%, transparent 50%) calc(100% - 14px) 50% / 6px 6px no-repeat,
         var(--scoreboard-dots),
         var(--scoreboard);
       border: 1px solid var(--scoreboard-led);
       border-radius: 14px;
-      color: var(--scoreboard-led);
+      color: #fff;
       cursor: pointer;
       display: block;
       flex: 1;
@@ -396,7 +309,7 @@ main .content {
       height: 100%;
       letter-spacing: 1.5px;
       padding: 0 2.5em 0 1em;
-      text-shadow: var(--scoreboard-glow);
+      text-shadow: 0 0 6px rgba(255, 255, 255, 0.35);
       text-transform: uppercase;
 
       option {
@@ -406,155 +319,5 @@ main .content {
         text-shadow: none;
       }
     }
-  }
-}
-
-// Position dropdown: white text and caret on the scoreboard panel
-@media (max-width: 575px) {
-  .position-bar .position-select {
-    background:
-      linear-gradient(45deg, transparent 50%, #fff 50%) calc(100% - 20px) 50% /
-        6px 6px no-repeat,
-      linear-gradient(135deg, #fff 50%, transparent 50%) calc(100% - 14px) 50% /
-        6px 6px no-repeat,
-      var(--scoreboard-dots),
-      var(--scoreboard);
-    color: #fff;
-    text-shadow: 0 0 6px rgba(255, 255, 255, 0.35);
-  }
-}
-
-// ===========================================================================
-// Position tabs: one connected scoreboard tab bar (rather than separate
-// pills), tablet and up; phones keep the dropdown
-// ===========================================================================
-@media (min-width: 576px) {
-  .position-bar {
-    background: var(--scoreboard-dots), var(--scoreboard);
-    border: 1px solid #3a3a3a;
-    // Same corners as the header bar and player rows below (0.7em at their 13px font)
-    border-radius: 9.1px;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
-    box-sizing: border-box;
-    gap: 0;
-    overflow: hidden;
-
-    button:not(.collapse-toggle) {
-      background: transparent;
-      border: none;
-      border-radius: 0;
-      flex: 1;
-      height: 100%;
-      margin: 0;
-      padding-bottom: 0;
-      padding-top: 0;
-
-      // (pressed in, a faint dark shade)
-      &:hover:not(.active) {
-        background: rgba(0, 0, 0, 0.1);
-        color: var(--scoreboard-led);
-      }
-
-      // Active: a lit-up panel with its bottom row of scoreboard dots glowing (variables.scss)
-      &.active {
-        @include v.lit-dots;
-      }
-
-    }
-  }
-}
-
-// Desktop: taller position tabs between the button bar and the grid, as wide as the grid
-@media (min-width: 1200px) {
-  .position-bar {
-    height: 50px;
-    margin: 0 0 12px;
-
-    button:not(.collapse-toggle) {
-      font-size: 1em;
-      white-space: nowrap;
-    }
-  }
-
-  // 50px tabs + the 12px gap under them
-  main .content {
-    --position-bar-space: 62px;
-  }
-}
-
-// Full names on the narrower big screens: nine tabs only fit on one line with smaller, tighter text
-@media (min-width: 1750px) and (max-width: 2099px) {
-  .position-bar button:not(.collapse-toggle) {
-    font-size: 0.9em;
-    letter-spacing: 1px;
-    padding-inline: 0.5em;
-  }
-}
-
-
-// Phones: the sport bar's names a size down to suit its slimmer height, and a slimmer position
-// dropdown (more of the list on screen)
-@media (max-width: 575px) {
-  .sport-bar a {
-    font-size: 11px;
-    padding: 0 10px;
-  }
-
-  .position-bar {
-    height: 36px;
-  }
-}
-
-// The site's name on the far right of the sport bar: a podium, then "Season Ranker" in the menu logo's
-// lettering, both in the sport's color, its right edge lined up with the page's (the position bar and
-// the grid below). A link: a click reloads the sport's page. Phones: just the podium (the sport names
-// fill the bar).
-.sport-bar a.brand {
-  align-items: center;
-  color: var(--scoreboard-led);
-  display: flex;
-  font-family: "Orbitron", sans-serif;
-  font-size: 11px;
-  font-weight: 400;
-  gap: 8px;
-  letter-spacing: 1px;
-  margin-left: auto;
-  // (the bar's own padding plus this: the page's side margin, 26px)
-  margin-right: 12px;
-  order: 2;
-  padding: 0;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
-  text-transform: uppercase;
-  white-space: nowrap;
-
-  .brand-logo {
-    fill: var(--scoreboard-led);
-    filter: drop-shadow(0 0 3px rgba(0, 0, 0, 0.5));
-    flex: 0 0 auto;
-    height: 17px;
-    width: 17px;
-  }
-}
-
-.sport-bar a.brand:hover {
-  background: none;
-  color: var(--scoreboard-led);
-  filter: brightness(1.25);
-}
-
-// (the page's side margin is wider on tablets, narrower on phones)
-@media (max-width: 1199px) {
-  .sport-bar a.brand {
-    margin-right: 31px;
-  }
-}
-
-@media (max-width: 575px) {
-  .sport-bar a.brand {
-    margin-right: 6px;
-  }
-
-  .sport-bar .brand .brand-name {
-    display: none;
   }
 }

@@ -1,14 +1,20 @@
+@use "sport-kit" as kit;
+
+// ===========================================================================
+// MLB theme: infield dirt instead of turf, baseballs instead of footballs on the slider knobs and the
+// settings switches, cream baseball hide instead of leather on the buttons and inputs, chalk-line
+// sliders, and the baseball's cream as the accent
+// ===========================================================================
 :root {
   // This sport's chalkboard plays (the grid, card and About backgrounds) and #1 trophy
   --tex-chalk-plays: url("../assets/textures/chalk-plays.svg");
   --trophy-mask: url("../assets/lombardi.svg");
+  // The accent: the scoreboard lettering, menu highlights, sliders and scrollbars on the dark panels
+  // (the cream hide keeps its seam red for the same states)
+  --scoreboard-led: #f1ece0;
+  --scoreboard-glow: 0 0 6px rgba(241, 236, 224, 0.5);
 }
 
-// ===========================================================================
-// MLB theme (this app only): infield dirt instead of turf, and baseballs instead of footballs on
-// the slider knobs, the settings switches and the logo. Kept in one block so it's easy to find and
-// change; the rest of the styles are the shared look.
-// ===========================================================================
 // Infield clay: a real dirt photo (CC0, ambientCG Ground088), warmed to clay by multiplying it over the
 // clay color, with the same soft vignette as the turf
 body {
@@ -20,260 +26,172 @@ body {
   background-size: cover, 512px;
 }
 
-// A baseball: off-white with a soft shade, and two red seams curving in from the sides
+$seam-red: #c8102e;
+$ink: #2b1d14;
+$hide-edge: 1px solid rgba(60, 45, 25, 0.45);
+
+// The ball's off-white leather, shaded across its width (or height) like the ball: the scrollbar thumbs
+@function ball-shade($dir, $light: #fff, $mid: #f1ece0, $dark: #c9c1ae) {
+  @return linear-gradient($dir, $light, $mid 55%, $dark);
+}
+
+// ---------------------------------------------------------------------------
+// Sliders and switches: baseballs (off-white with a soft shade, and two red seams curving in from the
+// sides) on chalk lines
+// ---------------------------------------------------------------------------
 $baseball:
   radial-gradient(ellipse 76% 95% at -48% 50%, transparent 96%, rgba(200, 16, 46, 0.5) 97%, rgba(200, 16, 46, 0.5) 104%, transparent 105%),
   radial-gradient(ellipse 76% 95% at 148% 50%, transparent 96%, rgba(200, 16, 46, 0.5) 97%, rgba(200, 16, 46, 0.5) 104%, transparent 105%),
   radial-gradient(circle at 38% 30%, #fff, #f1ece0 60%, #c9c1ae);
 
 .mdc-slider__thumb-knob {
-  --mat-slider-handle-width: 20px;
-  --mat-slider-handle-height: 20px;
-  background-blend-mode: normal !important;
-  background-color: #f1ece0 !important;
-  background-image: $baseball !important;
-  // (sized against the whole knob: Material draws it with a thick border)
-  background-origin: border-box !important;
-  background-size: 100% 100% !important;
+  @include kit.ball-knob($baseball, #f1ece0);
   border-radius: 50% !important;
-  height: 20px !important;
-  width: 20px !important;
+}
 
-  // (no laces)
-  &::after {
-    display: none !important;
+#{kit.$switch} {
+  @include kit.switch-size(16px);
+
+  .mdc-switch__handle::after {
+    background: $baseball !important;
+    background-blend-mode: normal !important;
   }
 }
 
-html .mat-mdc-slide-toggle.mat-accent {
-  --mat-slide-toggle-handle-width: 16px;
-
-  .mdc-switch__handle {
-    height: 16px !important;
-    width: 16px !important;
-
-    &::after {
-      background: $baseball !important;
-      background-blend-mode: normal !important;
-    }
-  }
-}
-
-// Slider tracks and settings switches drawn in chalk: the chalk line texture masks the track, the
-// filled part and the switch's track, so each keeps its color (category color, gray, yellow) but reads
-// as a powdery chalk line. The line sits in the middle third of its texture, so the mask is sized to
-// three times the track's height to fill it.
-$chalk-track: url("../assets/textures/chalk-line-h.svg") center / 120px 330% repeat-x;
-
+// The tracks (the slider's, its filled part, the switch's) drawn in chalk: the chalk line texture
+// masks them, so each keeps its color but reads as a powdery line. The line sits in the middle third
+// of its texture, so the mask is three times the track's height.
 .mat-mdc-slider .mdc-slider__track--active_fill,
 .mat-mdc-slider .mdc-slider__track--inactive,
 html .mat-mdc-slide-toggle .mdc-switch__track {
-  mask: $chalk-track;
+  mask: url("../assets/textures/chalk-line-h.svg") center / 120px 330% repeat-x;
 }
 
-// (no yard lines or hashes over the track)
-.mat-mdc-slider .mdc-slider__track::after {
-  display: none;
-}
+@include kit.plain-slider-track;
 
-// MLB: the leather buttons are baseball hide instead (same shapes): cream leather with a soft shade and
-// the two red stitched seams, dark icons and text on top. The footer buttons' "open" state turns the
-// icon red instead of yellow (yellow doesn't read on cream).
-$baseball-hide:
-  url("../assets/textures/baseball-seams.svg") center / 100% 100% no-repeat,
-  radial-gradient(ellipse at 35% 20%, rgba(255, 255, 255, 0.7), transparent 60%),
-  linear-gradient(180deg, rgba(255, 255, 255, 0), rgba(90, 70, 40, 0.18)),
-  #efe8d8;
-
-section footer .filter-toggle,
-section footer .settings-toggle,
-section footer .copy-toggle,
-section footer .info-toggle,
-.sidebar footer button,
-.sidebar footer button.negative,
-.sidebar footer button:hover,
-.sidebar footer button.negative:hover {
-  background: $baseball-hide !important;
+// ---------------------------------------------------------------------------
+// The buttons in baseball hide (same shapes): cream leather with a soft shade and the two red stitched
+// seams, dark icons and text. An open panel's button turns its icon red (yellow doesn't read on cream).
+// ---------------------------------------------------------------------------
+#{kit.$footer-buttons},
+#{kit.$menu-buttons} {
+  background:
+    url("../assets/textures/baseball-seams.svg") center / 100% 100% no-repeat,
+    radial-gradient(ellipse at 35% 20%, rgba(255, 255, 255, 0.7), transparent 60%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0), rgba(90, 70, 40, 0.18)),
+    #efe8d8 !important;
   background-blend-mode: normal !important;
-  border: 1px solid rgba(60, 45, 25, 0.45) !important;
-  color: #2b1d14 !important;
+  border: $hide-edge !important;
+  color: $ink !important;
   text-shadow: none !important;
 
   .mat-icon {
-    color: #2b1d14 !important;
+    color: $ink !important;
     text-shadow: none !important;
   }
 }
 
-section footer .filter-toggle.open .mat-icon,
-section footer .info-toggle.open .mat-icon,
-section footer .settings-toggle[aria-expanded="true"] .mat-icon {
-  color: #c8102e !important;
+#{kit.$open-buttons} {
+  .mat-icon {
+    color: $seam-red !important;
+  }
 }
 
-// (the little stepper buttons are plain cream: seams would crowd the minus and plus)
+// (the little stepper buttons plain cream: seams would crowd the minus and plus)
 .mat-mdc-menu-panel .min-games-stepper button {
   background: radial-gradient(ellipse at 35% 20%, rgba(255, 255, 255, 0.7), transparent 60%), #efe8d8;
-  color: #2b1d14;
+  color: $ink;
   text-shadow: none;
 }
 
-// The year dropdown and the filter menu's presets dropdown in baseball hide, like the footer buttons
-// (instead of scoreboard panels): bold dark text and caret, red on hover. Their seams are a flatter
-// version drawn for wide boxes (the buttons' seams would bow in too far stretched this wide).
-section footer .mat-mdc-select.season-select,
-.sidebar .filters .mat-mdc-select {
+// (Reset and Clear All bold, like the other labels on cream)
+.sidebar footer button {
+  font-weight: 800 !important;
+}
+
+// ---------------------------------------------------------------------------
+// The dropdowns in baseball hide too, with flatter seams drawn for wide boxes (the buttons' would bow
+// in too far): bold dark text and caret, red on hover, room on each side to clear the seams
+// ---------------------------------------------------------------------------
+#{kit.$dropdowns} {
   background:
     url("../assets/textures/baseball-seams-wide.svg") center / 100% 100% no-repeat,
     radial-gradient(ellipse at 35% 20%, rgba(255, 255, 255, 0.7), transparent 60%),
     linear-gradient(180deg, rgba(255, 255, 255, 0), rgba(90, 70, 40, 0.18)),
     #efe8d8 !important;
   background-blend-mode: normal !important;
-  border: 1px solid rgba(60, 45, 25, 0.45) !important;
+  border: $hide-edge !important;
   border-radius: 8px !important;
   box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.6) !important;
+  padding-inline: 22px !important;
 
-  .mat-mdc-select-value,
-  .mat-mdc-select-value-text,
-  .mat-mdc-select-placeholder,
-  .mat-mdc-select-arrow {
-    color: #2b1d14 !important;
+  @include kit.dropdown-text {
+    color: $ink !important;
     font-weight: 800 !important;
     text-shadow: none !important;
   }
 
   &:hover {
-    .mat-mdc-select-value,
-    .mat-mdc-select-value-text,
-    .mat-mdc-select-placeholder,
-    .mat-mdc-select-arrow {
-      color: #c8102e !important;
+    @include kit.dropdown-text {
+      color: $seam-red !important;
     }
   }
 }
 
-// Their open lists in plain cream hide (the settings menu stays a scoreboard panel; seams would sit
-// behind the options), dark options that turn red, and the page's 10px scrollbar with an off-white thumb
-.mdc-menu-surface.mat-mdc-select-panel {
+// Their open lists in plain cream hide (seams would sit behind the options), dark options that turn
+// red, a darker track so the off-white thumb shows
+#{kit.$open-list} {
   background:
     radial-gradient(ellipse at 35% 10%, rgba(255, 255, 255, 0.7), transparent 60%),
     linear-gradient(180deg, rgba(255, 255, 255, 0), rgba(90, 70, 40, 0.18)),
     #efe8d8 !important;
-  border: 1px solid rgba(60, 45, 25, 0.45) !important;
+  border: $hide-edge !important;
   border-radius: 8px !important;
-  --mat-pseudo-checkbox-minimal-selected-checkmark-color: #c8102e;
+  --mat-pseudo-checkbox-minimal-selected-checkmark-color: #{$seam-red};
 
   .mat-mdc-option span {
-    color: #2b1d14 !important;
+    color: $ink !important;
     font-weight: 800 !important;
     text-shadow: none !important;
   }
 
   .mat-mdc-option.mdc-list-item--selected span,
   .mat-mdc-option:not(.mdc-list-item--disabled):hover span {
-    color: #c8102e !important;
+    color: $seam-red !important;
   }
 
-  &::-webkit-scrollbar {
-    height: 10px;
-    width: 10px;
-  }
-
-  &::-webkit-scrollbar-track {
-    background-color: rgba(60, 45, 25, 0.15) !important;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background: linear-gradient(90deg, #fff, #f1ece0 55%, #c9c1ae) !important;
-    background-clip: padding-box !important;
-  }
+  @include kit.list-scrollbar(rgba(60, 45, 25, 0.35), ball-shade(90deg));
 
   &::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(90deg, #fff, #fbf8f1 55%, #ddd5c3) !important;
+    background: ball-shade(90deg, #fff, #fbf8f1, #ddd5c3) !important;
     background-clip: padding-box !important;
   }
 
   &::-webkit-scrollbar-thumb:active {
-    background: linear-gradient(90deg, #f1ece0, #ddd5c3 55%, #b5ab95) !important;
+    background: ball-shade(90deg, #f1ece0, #ddd5c3, #b5ab95) !important;
     background-clip: padding-box !important;
   }
 }
 
-// The year dropdown and every open list letter like the filter menu's presets dropdown: capitals at
-// 0.85em (of the page's 13px), no extra letter spacing, bold
-section footer .mat-mdc-select.season-select,
-.mdc-menu-surface.mat-mdc-select-panel .mat-mdc-option {
-  &,
-  .mat-mdc-select-value-text,
-  .mdc-list-item__primary-text {
-    font-size: 11.05px !important;
-    font-weight: 800 !important;
-    letter-spacing: normal !important;
-    text-transform: uppercase !important;
+@include kit.list-lettering(800, $check: $seam-red);
+
+// ---------------------------------------------------------------------------
+// Scrollbars everywhere (the grid, the menus, About, the open lists): the thumb the ball's off-white
+// leather, brighter under the pointer, a shade deeper while dragging
+// ---------------------------------------------------------------------------
+@each $axis, $dir in (vertical: 90deg, horizontal: 180deg) {
+  ::-webkit-scrollbar-thumb:#{$axis} {
+    background: ball-shade($dir) !important;
+    background-clip: padding-box !important;
   }
-}
 
-// The open list's check mark in the accent color
-.mdc-menu-surface.mat-mdc-select-panel .mat-pseudo-checkbox-minimal.mat-pseudo-checkbox-checked::after {
-  color: #c8102e !important;
-}
+  ::-webkit-scrollbar-thumb:#{$axis}:hover {
+    background: ball-shade($dir, #fff, #fbf8f1, #ddd5c3) !important;
+    background-clip: padding-box !important;
+  }
 
-// MLB's accent is the baseball's cream rather than goalpost yellow: the scoreboard lettering, menu
-// highlights, sliders and scrollbars all read this on the dark panels (the cream hide itself keeps its
-// seam red for the same states)
-:root {
-  --scoreboard-led: #f1ece0;
-  --scoreboard-glow: 0 0 6px rgba(241, 236, 224, 0.5);
-}
-
-// Both dropdowns: more room on each side so the text and caret clear the seams
-section footer .mat-mdc-select.season-select {
-  padding-inline: 22px !important;
-}
-
-.sidebar .filters .mat-mdc-select {
-  padding-inline: 22px !important;
-}
-
-// The filter menu's Clear All and Reset buttons: bold, like the other MLB labels on cream
-.sidebar footer button {
-  font-weight: 800 !important;
-}
-
-// Scrollbars: the thumb is a baseball's off-white leather (no seams), shaded across its width like
-// the ball, on every scroller (the table, the menus, the About panel and the open lists)
-::-webkit-scrollbar-thumb:vertical {
-  background: linear-gradient(90deg, #fff, #f1ece0 55%, #c9c1ae) !important;
-  background-clip: padding-box !important;
-}
-
-::-webkit-scrollbar-thumb:horizontal {
-  background: linear-gradient(180deg, #fff, #f1ece0 55%, #c9c1ae) !important;
-  background-clip: padding-box !important;
-}
-
-// (brighter under the pointer, a shade deeper while dragging)
-::-webkit-scrollbar-thumb:vertical:hover {
-  background: linear-gradient(90deg, #fff, #fbf8f1 55%, #ddd5c3) !important;
-  background-clip: padding-box !important;
-}
-
-::-webkit-scrollbar-thumb:horizontal:hover {
-  background: linear-gradient(180deg, #fff, #fbf8f1 55%, #ddd5c3) !important;
-  background-clip: padding-box !important;
-}
-
-::-webkit-scrollbar-thumb:vertical:active {
-  background: linear-gradient(90deg, #f1ece0, #ddd5c3 55%, #b5ab95) !important;
-  background-clip: padding-box !important;
-}
-
-::-webkit-scrollbar-thumb:horizontal:active {
-  background: linear-gradient(180deg, #f1ece0, #ddd5c3 55%, #b5ab95) !important;
-  background-clip: padding-box !important;
-}
-
-// (on the cream open lists, a darker track so the off-white thumb still shows)
-.mdc-menu-surface.mat-mdc-select-panel::-webkit-scrollbar-track {
-  background-color: rgba(60, 45, 25, 0.35) !important;
+  ::-webkit-scrollbar-thumb:#{$axis}:active {
+    background: ball-shade($dir, #f1ece0, #ddd5c3, #b5ab95) !important;
+    background-clip: padding-box !important;
+  }
 }

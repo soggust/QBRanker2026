@@ -1,26 +1,6 @@
-// UFC filter menu touches: an octagon logo, red edges
+@use "sport-kit" as kit;
 
-// UFC: the logo's ball is the octagon, seen from above
-.sidebar .logo h1 .logo-octagon {
-  background: url("../assets/textures/octagon.svg") center / 100% 100% no-repeat;
-  background-blend-mode: normal;
-  height: 20px;
-  transform: none;
-  width: 20px;
-
-  &::before,
-  &::after {
-    display: none;
-  }
-}
-
-// UFC: the header's and footer's edges are the cage's padded top rail: a solid red band with a faint
-// sheen down the middle, instead of a football sideline with hash marks
-.sidebar .logo::after,
-.sidebar footer::before {
-  background:
-    linear-gradient(transparent 30%, rgba(255, 255, 255, 0.35) 50%, transparent 70%) 0 var(--hash-edge) / 100% 3px no-repeat,
-    linear-gradient(#d61a1f, #d61a1f) 0 var(--hash-edge) / 100% 3px no-repeat;
-  height: 3px;
-  opacity: 0.6;
-}
+// UFC filter menu touches: the logo's ball the octagon, seen from above, and the header's and footer's
+// edges the cage's padded top rail (a solid red band)
+@include kit.logo-ball(logo-octagon, url("../assets/textures/octagon.svg") center / 100% 100% no-repeat, 20px);
+@include kit.painted-menu-edges(#d61a1f, 0.6, 0.35);

@@ -1,28 +1,6 @@
-// NBA filter menu touches: a basketball logo, painted edges
+@use "sport-kit" as kit;
 
-// NBA: the logo's ball is a basketball (upright, round)
-.sidebar .logo h1 .logo-basketball {
-  // (the app's basketball, like the favicon and the slider knobs)
-  background: url("../assets/textures/basketball.svg") center / 100% 100% no-repeat;
-  background-blend-mode: normal;
-  height: 18px;
-  transform: none;
-  width: 18px;
-
-  &::before,
-  &::after {
-    display: none;
-  }
-}
-
-// NBA: the header's and footer's edges are painted court lines (solid, like the table's category
-// lines, with the same faint sheen down the middle) in court-paint white, instead of a football
-// sideline with hash marks
-.sidebar .logo::after,
-.sidebar footer::before {
-  background:
-    linear-gradient(transparent 30%, rgba(255, 255, 255, 0.45) 50%, transparent 70%) 0 var(--hash-edge) / 100% 3px no-repeat,
-    linear-gradient(#efe6d8, #efe6d8) 0 var(--hash-edge) / 100% 3px no-repeat;
-  height: 3px;
-  opacity: 0.35;
-}
+// NBA filter menu touches: the logo's ball a basketball (the app's, like the favicon and the slider
+// knobs), and the header's and footer's edges painted court lines in court-paint white
+@include kit.logo-ball(logo-basketball, url("../assets/textures/basketball.svg") center / 100% 100% no-repeat);
+@include kit.painted-menu-edges(#efe6d8, 0.35, 0.45);

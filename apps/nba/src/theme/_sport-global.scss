@@ -1,14 +1,19 @@
+@use "sport-kit" as kit;
+
+// ===========================================================================
+// NBA theme: a hardwood court instead of turf, basketballs on the slider knobs and the settings
+// switches, basketball leather on the buttons and inputs, and basketball orange as the accent
+// ===========================================================================
 :root {
   // This sport's chalkboard plays (the grid, card and About backgrounds) and #1 trophy
   --tex-chalk-plays: url("../assets/textures/chalk-plays.svg");
   --trophy-mask: url("../assets/lombardi.svg");
+  // The accent (the scoreboard lettering, menu highlights, sliders and scrollbars): a bright orange,
+  // so text reads on the dark panels
+  --scoreboard-led: #ff8c32;
+  --scoreboard-glow: 0 0 6px rgba(255, 140, 50, 0.6);
 }
 
-// ===========================================================================
-// NBA theme (this app only): a hardwood court instead of turf, and basketballs instead of footballs
-// on the slider knobs, the settings switches and the logo. Kept in one block so it's easy to find and
-// change; the rest of the styles are the shared look.
-// ===========================================================================
 // Hardwood: a real maple floor photo (CC0, ambientCG WoodFloor051), warmed to a court's honey color by
 // multiplying it over that color, with a gloss across the middle (the lights on a polished floor) and
 // the same soft vignette as the turf
@@ -22,56 +27,31 @@ body {
   background-size: cover, cover, 420px;
 }
 
-// A basketball (textures/basketball.svg, also the favicon): a shaded sphere of pebbled orange leather
-// with its black channels curving over it
-$seam: #1c0e07;
+// ---------------------------------------------------------------------------
+// Sliders and switches: a basketball (textures/basketball.svg, also the favicon: a shaded sphere of
+// pebbled orange leather with its black channels curving over it), sitting on the track on a soft
+// shadow; the track a plain painted line, like a court's
+// ---------------------------------------------------------------------------
 $basketball: url("../assets/textures/basketball.svg");
+$ball-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
 
 .mdc-slider__thumb-knob {
-  --mat-slider-handle-width: 20px;
-  --mat-slider-handle-height: 20px;
-  background-blend-mode: normal !important;
-  background-color: transparent !important;
-  background-image: $basketball !important;
-  // (sized against the whole knob: Material draws it with a thick border)
-  background-origin: border-box !important;
-  background-size: 100% 100% !important;
-  border-radius: 50% !important;
-  height: 20px !important;
-  width: 20px !important;
-
-  // (no laces)
-  &::after {
-    display: none !important;
-  }
-}
-
-// (Material's knob border would ring the ball: drop it, and let a soft shadow sit it on the track)
-.mdc-slider__thumb-knob {
+  @include kit.ball-knob($basketball);
   border-color: transparent !important;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.6) !important;
+  border-radius: 50% !important;
+  box-shadow: $ball-shadow !important;
 }
 
-html .mat-mdc-slide-toggle.mat-accent {
-  --mat-slide-toggle-handle-width: 16px;
+#{kit.$switch} {
+  @include kit.switch-size(16px);
+  @include kit.bare-switch-handle;
 
-  .mdc-switch__handle {
-    height: 16px !important;
-    width: 16px !important;
-
-    // (no white knob showing round the ball's edge: the ball alone, with the slider knobs' dark edge)
-    &::before {
-      background: transparent !important;
-      border-color: transparent !important;
-    }
-
-    &::after {
-      background: $basketball center / 100% 100% no-repeat !important;
-      background-blend-mode: normal !important;
-      border: none !important;
-      border-radius: 50% !important;
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.6) !important;
-    }
+  .mdc-switch__handle::after {
+    background: $basketball center / 100% 100% no-repeat !important;
+    background-blend-mode: normal !important;
+    border: none !important;
+    border-radius: 50% !important;
+    box-shadow: $ball-shadow !important;
   }
 
   .mdc-switch__shadow {
@@ -79,67 +59,56 @@ html .mat-mdc-slide-toggle.mat-accent {
   }
 }
 
-// (no yard lines or hashes over the slider track: a plain painted line, like a court's)
-.mat-mdc-slider .mdc-slider__track::after {
-  display: none;
-}
+@include kit.plain-slider-track;
 
-// NBA: the leather buttons are basketball leather instead (same shapes): each one a panel of the ball,
-// fine pebbled orange (a tile of small, low bumps over the knobs' ball orange, domed toward the light)
-// framed by the black rubber channel that borders every panel on a real ball, so nothing crosses the
-// black icons and text. Hovering one, or a footer button's "open" state, presses it in (a darker panel),
-// the text staying black: white doesn't read on the orange.
+// ---------------------------------------------------------------------------
+// The buttons and inputs in basketball leather (same shapes): each a panel of the ball, fine pebbled
+// orange (a tile of small, low bumps, domed toward the light) framed by the black rubber channel that
+// borders every panel on a real ball, with black icons and text. Hovering one, or an open panel's
+// button, presses it in (a darker panel); white doesn't read on the orange.
+// ---------------------------------------------------------------------------
+$seam: #1c0e07;
 $pebbled:
   radial-gradient(ellipse 90% 120% at 35% 15%, rgba(255, 200, 150, 0.3), transparent 65%),
   url("../assets/textures/pebble.svg") 0 0 / 14px,
   linear-gradient(170deg, #cc6128, #a2471b);
 $pebbled-blend: normal, overlay, normal;
+$channel: 2.5px solid $seam;
 $channel-edge:
   inset 0 0 0 1px rgba(255, 200, 160, 0.28),
   inset 0 -3px 4px rgba(60, 20, 5, 0.35),
   0 1px 2px rgba(0, 0, 0, 0.55);
-$ball-leather: $pebbled;
+$pressed:
+  inset 0 0 0 100vmax rgba(60, 20, 5, 0.2),
+  inset 0 2px 4px rgba(0, 0, 0, 0.4),
+  0 1px 2px rgba(0, 0, 0, 0.55);
+$on-orange: 0 1px 0 rgba(255, 200, 160, 0.3);
 
-section footer .filter-toggle,
-section footer .settings-toggle,
-section footer .copy-toggle,
-section footer .info-toggle,
-.sidebar footer button,
-.sidebar footer button.negative,
-.sidebar footer button:hover,
-.sidebar footer button.negative:hover {
-  background: $ball-leather !important;
+#{kit.$footer-buttons},
+#{kit.$menu-buttons} {
+  background: $pebbled !important;
   background-blend-mode: $pebbled-blend !important;
-  border: 2.5px solid $seam !important;
+  border: $channel !important;
   border-radius: 10px !important;
   box-shadow: $channel-edge !important;
   color: $seam !important;
   font-weight: 900 !important;
-  text-shadow: 0 1px 0 rgba(255, 200, 160, 0.3) !important;
+  text-shadow: $on-orange !important;
 
   .mat-icon {
     color: $seam !important;
-    text-shadow: 0 1px 0 rgba(255, 200, 160, 0.3) !important;
+    text-shadow: $on-orange !important;
   }
 }
 
-section footer .filter-toggle.open .mat-icon,
-section footer .info-toggle.open .mat-icon,
-section footer .settings-toggle[aria-expanded="true"] .mat-icon {
-  color: $seam !important;
+#{kit.$open-buttons} {
+  .mat-icon {
+    color: $seam !important;
+  }
 }
 
-$pressed: inset 0 0 0 100vmax rgba(60, 20, 5, 0.2), inset 0 2px 4px rgba(0, 0, 0, 0.4);
-
-section footer .filter-toggle.open,
-section footer .info-toggle.open,
-section footer .settings-toggle[aria-expanded="true"],
-section footer .filter-toggle:hover,
-section footer .copy-toggle:hover,
-section footer .info-toggle:hover,
-section footer .settings-toggle:hover,
-.sidebar footer button:hover {
-  box-shadow: $pressed, 0 1px 2px rgba(0, 0, 0, 0.55) !important;
+#{kit.$pressed-buttons} {
+  box-shadow: $pressed !important;
   filter: none !important;
 }
 
@@ -152,110 +121,57 @@ section footer .settings-toggle:hover,
   text-shadow: none;
 }
 
-// The year dropdown and the filter menu's presets dropdown in basketball leather, like the footer
-// buttons (instead of scoreboard panels): a panel of the ball framed by its black channel, bold black
-// text and caret, pressed in on hover
-section footer .mat-mdc-select.season-select,
-.sidebar .filters .mat-mdc-select {
+// The dropdowns (instead of scoreboard panels): bold black text and caret, a little more room on each
+// side inside the channel
+#{kit.$dropdowns} {
   background: $pebbled !important;
   background-blend-mode: $pebbled-blend !important;
-  border: 2.5px solid $seam !important;
+  border: $channel !important;
   border-radius: 10px !important;
   box-shadow: $channel-edge !important;
+  padding-inline: 18px !important;
 
-  .mat-mdc-select-value,
-  .mat-mdc-select-value-text,
-  .mat-mdc-select-placeholder,
-  .mat-mdc-select-arrow {
+  @include kit.dropdown-text {
     color: $seam !important;
     font-weight: 900 !important;
-    text-shadow: 0 1px 0 rgba(255, 200, 160, 0.3) !important;
+    text-shadow: $on-orange !important;
   }
 
+  // (pressed in; the text stays black rather than lighting in the accent)
   &:hover {
-    box-shadow: $pressed, 0 1px 2px rgba(0, 0, 0, 0.55) !important;
+    box-shadow: $pressed !important;
 
-    .mat-mdc-select-value,
-    .mat-mdc-select-value-text,
-    .mat-mdc-select-placeholder,
-    .mat-mdc-select-arrow {
+    @include kit.dropdown-text {
       color: $seam !important;
     }
   }
 }
 
-// Their open lists in the same pebbled leather (no channels: they'd sit behind the options), black
-// options on a pressed-in (darker) band when hovered or picked, and the page's 10px scrollbar in a darker leather
-.mdc-menu-surface.mat-mdc-select-panel {
+// Their open lists in the same leather (no channels: they'd sit behind the options), black options on
+// a pressed-in band when hovered or picked, a darker track
+#{kit.$open-list} {
   background: $pebbled !important;
   background-blend-mode: $pebbled-blend !important;
-  border: 2.5px solid $seam !important;
+  border: $channel !important;
   border-radius: 10px !important;
 
   .mat-mdc-option span {
     color: $seam !important;
     font-weight: 900 !important;
-    text-shadow: 0 1px 0 rgba(255, 200, 160, 0.3) !important;
+    text-shadow: $on-orange !important;
   }
 
   .mat-mdc-option.mdc-list-item--selected,
   .mat-mdc-option:not(.mdc-list-item--disabled):hover {
     background: rgba(60, 20, 5, 0.2) !important;
+
+    // (black, not the accent the base lights them in)
+    span {
+      color: $seam !important;
+    }
   }
 
-  .mat-mdc-option.mdc-list-item--selected span,
-  .mat-mdc-option:not(.mdc-list-item--disabled):hover span {
-    color: $seam !important;
-  }
-
-  &::-webkit-scrollbar {
-    height: 10px;
-    width: 10px;
-  }
-
-  &::-webkit-scrollbar-track {
-    background-color: rgba(0, 0, 0, 0.3) !important;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background: #ffd2ad !important;
-    background-clip: padding-box !important;
-  }
-
-  &::-webkit-scrollbar-thumb:hover,
-  &::-webkit-scrollbar-thumb:active {
-    background: #fff !important;
-  }
+  @include kit.list-scrollbar(rgba(0, 0, 0, 0.3), #ffd2ad, #fff);
 }
 
-// The year dropdown and every open list letter like the filter menu's presets dropdown: capitals at
-// 0.85em (of the page's 13px), no extra letter spacing, bold
-section footer .mat-mdc-select.season-select,
-.mdc-menu-surface.mat-mdc-select-panel .mat-mdc-option {
-  &,
-  .mat-mdc-select-value-text,
-  .mdc-list-item__primary-text {
-    font-size: 11.05px !important;
-    font-weight: 900 !important;
-    letter-spacing: normal !important;
-    text-transform: uppercase !important;
-  }
-}
-
-// The open list's check mark in black, like the options
-.mdc-menu-surface.mat-mdc-select-panel .mat-pseudo-checkbox-minimal.mat-pseudo-checkbox-checked::after {
-  color: $seam !important;
-}
-
-// The NBA's accent is basketball orange rather than goalpost yellow: the scoreboard lettering, menu
-// highlights, sliders and scrollbars all read this. A bright orange so text reads on the dark panels.
-:root {
-  --scoreboard-led: #ff8c32;
-  --scoreboard-glow: 0 0 6px rgba(255, 140, 50, 0.6);
-}
-
-// Both dropdowns: a little more room on each side, inside the channel
-section footer .mat-mdc-select.season-select,
-.sidebar .filters .mat-mdc-select {
-  padding-inline: 18px !important;
-}
+@include kit.list-lettering(900, $check: $seam);
