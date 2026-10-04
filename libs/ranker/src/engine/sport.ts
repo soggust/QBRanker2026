@@ -55,6 +55,8 @@ export interface StatDef<Key extends string = string> {
   // Only under some of the sport's settings (MMA: today's rating in the current lists, career points in
   // the all-time ones): otherwise no column, no slider, and no part in the ranking
   shownWhen?: (settings: SportSettings) => boolean;
+  // A rank that two rows can share without a tie (MMA: the UFC's #1 and the PFL's #1): no "(t)"
+  noTies?: boolean;
   // Scored on a fixed scale, best to worst, rather than against the list (the UFC's rank: the champion
   // to unranked)
   scale?: [best: number, worst: number];

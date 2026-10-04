@@ -85,7 +85,7 @@ export class StatReader {
 
   // Another row shares this rank (a small "(t)" in the cell, "#7 (tied)" in hover and copy text)
   rankTied(player: SkillPlayer, stat: SkillStat): boolean {
-    if (stat.format !== 'rank') return false;
+    if (stat.format !== 'rank' || stat.noTies) return false;
     const rank = this.value(player, stat);
     if (rank === null) return false;
     return (this.rows[this.position] ?? []).some((other) => other !== player && this.value(other, stat) === rank);
