@@ -52,7 +52,7 @@ const MMA_ARCHETYPES: Archetype[] = [
   { name: 'Sniper', test: (s) => s['accuracy'] >= 0.85 && s['striking-defense'] >= 0.6 },
   { name: 'Smothering Wrestler', test: (s) => s['wrestling'] >= 0.85 && s['grappling'] >= 0.55 },
   // (control over finishes: top position and the back, rarely a stoppage)
-  { name: 'Control Grappler', test: (s) => s['grappling'] >= 0.8 && s['power'] <= 0.35 },
+  { name: 'Wet Blanket', test: (s) => s['grappling'] >= 0.8 && s['power'] <= 0.35 },
   { name: 'Submission Specialist', test: (s) => s['grappling'] >= 0.85 },
   { name: 'Counter Striker', test: (s) => s['striking-defense'] >= 0.85 && s['volume'] <= 0.55 },
   { name: 'Sprawl and Brawl', test: (s) => s['takedown-defense'] >= 0.8 && s['volume'] >= 0.6 && s['wrestling'] <= 0.4 },
