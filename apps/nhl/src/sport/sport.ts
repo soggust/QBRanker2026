@@ -64,11 +64,11 @@ export const SPORT: SportConfig = {
   appName: 'NHL Ranker',
   logoClass: 'logo-puck',
   // (a season is named for the year it ends in: 2026 is 2025-26)
-  currentSeason: 2026,
+  currentSeason: 2027,
   // (MoneyPuck's expected-goals data starts with 2008-09)
   firstSeason: 2009,
-  // (after the Final: 2025-26 is over; 2026-27 becomes current at the October rollover)
-  currentSeasonEnds: '2026-06-30',
+  // (after the Final: 2026-27 is over; 2027-28 becomes current at the October rollover)
+  currentSeasonEnds: '2027-06-30',
   seasonText: seasonName,
   positionNames: { C: 'Center', LW: 'Left Wing', RW: 'Right Wing', D: 'Defenseman', G: 'Goalie' },
   tabNames: { C: 'Centers', LW: 'Left Wings', RW: 'Right Wings', D: 'Defensemen', G: 'Goalies' },

@@ -20,7 +20,7 @@ import path from 'node:path';
 import { curve } from '../../../libs/ranker/scripts/grades.mjs';
 import { blendWithLastSeason } from '../../../libs/ranker/scripts/early-season.mjs';
 
-const CURRENT_SEASON = 2026;
+const CURRENT_SEASON = 2027;
 // MoneyPuck's season files start with 2008-09
 const FIRST_SEASON = 2009;
 const ROOT = path.resolve(import.meta.dirname, '..');
