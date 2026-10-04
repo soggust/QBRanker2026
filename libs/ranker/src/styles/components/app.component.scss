@@ -287,6 +287,8 @@ main {
   // text and caret white
   @media (max-width: 575px) {
     height: 36px;
+    // (room around it, more under it, so it doesn't crowd the buttons or the grid)
+    margin: 4px 0 10px;
 
     button {
       display: none;

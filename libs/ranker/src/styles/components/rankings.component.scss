@@ -191,6 +191,11 @@ section ul {
     width: 100%;
   }
 
+  // (phones: a little closer to the bottom of the screen)
+  @media (max-width: 575px) {
+    @include list-height(6.5em);
+  }
+
   // While a row is dragged: the other rows slide aside, and the horizontal scrollbar (which flashed along
   // the bottom) is hidden until the drop. On drop the rows snap into place (a transition there made them
   // jump a row and slide back).
