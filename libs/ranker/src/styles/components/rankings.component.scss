@@ -209,6 +209,13 @@ section.rankings-wrapper ul.cdk-drop-list {
   border: 1px solid #1d2520;
   border-radius: 9.1px;
   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.45);
+
+  // (tablets and up: square on top and no line there, under the position tabs)
+  @media (min-width: 576px) {
+    border-top: none;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+  }
 }
 
 ::-webkit-scrollbar {
@@ -298,7 +305,7 @@ section ul li.player.header-row,
 section ul li.player.header-row:hover {
   backdrop-filter: blur(6px);
   background: var(--scoreboard-dots), var(--scoreboard);
-  border: 1px solid #333;
+  border: none;
   border-radius: 0.7em 0.7em 0 0;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
   box-sizing: border-box;
@@ -311,6 +318,11 @@ section ul li.player.header-row:hover {
   top: 0;
   transform: none;
   z-index: 5;
+
+  // (tablets and up: square, under the position tabs)
+  @media (min-width: 576px) {
+    border-radius: 0;
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -419,6 +431,16 @@ section ul li.player:not(.header-row) {
     text-shadow: var(--text-shadow-small);
     transform: none;
     width: 46px;
+  }
+
+  // (the segment font sits high in its line box: a little room on top centers the digits; #1 is the
+  // trophy)
+  .count:not(.top-5) {
+    padding-top: 2.5px;
+
+    @media (max-width: 575px) {
+      padding-top: 1px;
+    }
   }
 
   .count.top-5 {
@@ -854,23 +876,15 @@ section ul li.player.header-row:hover {
     white-space: nowrap;
   }
 
+  // One label over the rank, team card and name, centered across them like the other columns' labels
   > div.player-info {
     height: 1.5em;
+    justify-content: center;
     visibility: visible;
 
     p.stat-label {
       cursor: default;
       margin: 0;
-    }
-
-    p.header-rank {
-      flex: 0 0 auto;
-      justify-content: center;
-      width: 46px;
-    }
-
-    p.header-name {
-      margin-left: 71.65px;
     }
   }
 

@@ -8,8 +8,7 @@
     <li class="player header-row">
       <mat-icon fontIcon="drag_indicator" class="drag-indicator" style="visibility: hidden"></mat-icon>
       <div class="player-info">
-        <!-- Plain labels over the rank and name columns -->
-        <p class="stat-label header-rank">Rank</p>
+        <!-- One label over the rank and name (the rank tiles, team cards and names read as one column) -->
         <p class="stat-label header-name">{{ rowHeader }}</p>
       </div>
       @for (group of groups; track group.id) {
