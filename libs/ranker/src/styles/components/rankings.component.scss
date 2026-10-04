@@ -977,20 +977,22 @@ section ul li.player.header-row .column-draggable {
 
 // ---------------------------------------------------------------------------
 // Category colors (settings menu, on by default): a sideline in each stat group's color before the
-// group's first cell, the full row tall, with four short hash marks off its right side evenly spaced
-// between one yard line and the next; and each row's yard line in the group's color across its columns
+// group's first cell, the full row tall, with hash marks off its right side like a football field's:
+// four little ones evenly spaced between one yard line and the next, and a big one on each yard line;
+// and each row's yard line in the group's color across its columns. (The other sports draw their own
+// lines: apps/<sport>/src/theme/_sport-rankings.scss)
 // ---------------------------------------------------------------------------
 section.category-colors ul li.player:not(.header-row) > .col-group > div:first-child::before {
-  // (the room between two yard lines, a row less its 0.5px line, split in five)
-  --hash-gap: calc((var(--row-h) - 0.5px) / 5);
+  $paint: linear-gradient(var(--group-color), var(--group-color));
+  // (each mark a whole pixel tall, on a whole pixel, so all of them draw crisp on a standard screen)
+  $hash: unquote("round(var(--row-h) / 5, 1px)");
   background:
-    linear-gradient(var(--group-color), var(--group-color)) left / 3px 100% no-repeat,
-    repeating-linear-gradient(
-        180deg,
-        transparent 0 calc(var(--hash-gap) - 0.5px),
-        var(--group-color) calc(var(--hash-gap) - 0.5px) var(--hash-gap)
-      )
-      left top / 8px calc(4 * var(--hash-gap) + 0.5px) no-repeat;
+    $paint left / 3px 100% no-repeat,
+    $paint 0 #{$hash} / 8px 1px no-repeat,
+    $paint 0 unquote("round(2 * var(--row-h) / 5, 1px)") / 8px 1px no-repeat,
+    $paint 0 unquote("round(3 * var(--row-h) / 5, 1px)") / 8px 1px no-repeat,
+    $paint 0 unquote("round(4 * var(--row-h) / 5, 1px)") / 8px 1px no-repeat,
+    $paint 0 100% / 13px 1px no-repeat;
   content: "";
   height: var(--row-h);
   left: -0.5em;
@@ -999,7 +1001,7 @@ section.category-colors ul li.player:not(.header-row) > .col-group > div:first-c
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  width: 8px;
+  width: 13px;
 }
 
 section.category-colors ul li.player:not(.header-row):not(.cdk-drag-preview) > .col-group > div {
