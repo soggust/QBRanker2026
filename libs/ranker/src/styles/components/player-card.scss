@@ -1,9 +1,39 @@
 @use "sass:meta";
 @use "../variables" as v;
 
-// Player card (click a name): a scoreboard panel like the About one. A hero in the team's color with
-// the big team card (player standing in it), name, awards and overall rank, then every column showing
-// in the grid as a tile: value, rank in the list, a bar for where that sits and the list average.
+// ===========================================================================
+// The player card (click a name): a hero in the team's color (the big team card with the player standing
+// in it, the name, awards and overall rank), tabs, and a body on the table's chalkboard: the overview
+// (profile, skill radar, scouting report, similar seasons), every column as a stat tile, and the seasons.
+// ===========================================================================
+
+// A section heading: the label in caps with its group's icon, on a line in the group's color
+@mixin group-heading {
+  align-items: center;
+  border-bottom: 1px solid color-mix(in srgb, var(--group-color) 40%, transparent);
+  color: #fff;
+  display: flex;
+  font-family: v.$font-base;
+  font-size: 13px;
+  font-weight: 800;
+  gap: 8px;
+  letter-spacing: 1.5px;
+  padding-bottom: 7px;
+  text-transform: uppercase;
+
+  .mat-icon {
+    color: var(--group-color);
+    font-size: 19px;
+    height: 19px;
+    width: 19px;
+  }
+}
+
+@mixin icon-size($size) {
+  font-size: $size;
+  height: $size;
+  width: $size;
+}
 
 .card-backdrop {
   animation: card-fade 0.15s ease;
@@ -19,13 +49,8 @@
   // What the hero's team color eases into
   --card-base: #313836;
   animation: card-rise 0.2s ease;
-  // The table's playbook chalkboard (the body scrolls over it, like the rows)
-  background:
-    var(--tex-chalk-plays) -1150px -420px / 2800px 1440px,
-    url("../../assets/textures/chalk-noise.svg") 0 0 / 300px 300px,
-    radial-gradient(ellipse at 20% 15%, rgba(255, 255, 255, 0.05), transparent 40%),
-    radial-gradient(ellipse at 75% 60%, rgba(255, 255, 255, 0.04), transparent 45%),
-    #1f2824;
+  // (the body scrolls over the board, like the rows)
+  background: var(--tex-chalk-plays) -1150px -420px / 2800px 1440px, v.$chalk-dust;
   border: 1px solid #3a4440;
   border-radius: 14px;
   box-shadow: 0 16px 48px rgba(0, 0, 0, 0.65);
@@ -44,6 +69,17 @@
   transform: translate(-50%, -50%);
   width: min(880px, calc(100vw - 32px));
   z-index: 1001;
+
+  // Another season loading: the card dims until it swaps
+  &.loading {
+    cursor: progress;
+
+    .card-body,
+    .card-hero {
+      opacity: 0.55;
+      transition: opacity 0.15s ease;
+    }
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -68,75 +104,75 @@
   position: relative;
 }
 
-// The team card, big: same build as the rows' (glossy team color, logo off to the left, the player
-// flush with the right and bottom edges, head out over the top)
-.hero-badge {
-  --w: 200px;
-  --h: 134px;
-  --shot-h: 164px;
+// The team cards: the hero's big one, and the similar seasons' at 1.2x the rows' (the player standing
+// flush with the right and bottom edges, head out over the top; the logo off to the left behind them)
+.hero-badge,
+.comp-badge {
   --shot-w: calc(var(--shot-h) * 1.379);
-  --hang: 40px;
   height: var(--h);
   position: relative;
   width: var(--w);
 }
 
-.hero-card {
-  background:
-    radial-gradient(circle at 30% 22%, rgba(255, 255, 255, 0.35), transparent 55%),
-    radial-gradient(circle at 70% 90%, rgba(0, 0, 0, 0.45), transparent 60%),
-    var(--team-badge);
-  border: 3px solid rgba(255, 255, 255, 0.15);
+.hero-badge {
+  --w: 200px;
+  --h: 134px;
+  --shot-h: 164px;
+  --hang: 40px;
+}
+
+.comp-badge {
+  --w: 73px;
+  --h: 49px;
+  --card-r: 12px;
+  --shot-h: 62px;
+  --hang: 15px;
+  flex: 0 0 auto;
+}
+
+.hero-card,
+.comp-card {
   border-radius: var(--card-r);
+  inset: 0;
+  position: absolute;
+}
+
+.hero-card {
+  @include v.team-card(3px);
+  @include v.team-card-gloss(6px, 46%, 0.5, 0.1);
   box-shadow:
     inset 0 -6px 14px rgba(0, 0, 0, 0.35),
     inset 0 2px 4px rgba(255, 255, 255, 0.45),
     0 8px 20px rgba(0, 0, 0, 0.55);
-  box-sizing: border-box;
-  inset: 0;
-  overflow: hidden;
-  position: absolute;
-
-  // Glass band across the top
-  &::after {
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.1) 60%, transparent);
-    border-radius: calc(var(--card-r) - 6px) calc(var(--card-r) - 6px) 40% 40% / calc(var(--card-r) - 6px)
-      calc(var(--card-r) - 6px) 30% 30%;
-    content: "";
-    height: 46%;
-    left: 4%;
-    pointer-events: none;
-    position: absolute;
-    top: 4%;
-    width: 92%;
-  }
 }
 
-.hero-logo {
-  height: calc(var(--h) * 1.45);
-  left: 50%;
-  position: absolute;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  width: calc(var(--h) * 1.45);
+.comp-card {
+  @include v.team-card;
+  box-shadow:
+    inset 0 -3px 6px rgba(0, 0, 0, 0.35),
+    0 2px 5px rgba(0, 0, 0, 0.55);
+  transition: border-color 0.15s ease;
 }
 
-.hero-card.white-logo .hero-logo {
-  filter: brightness(0) invert(1);
-  height: calc(var(--h) * 0.95);
-  width: calc(var(--h) * 0.95);
+.hero-logo,
+.comp-logo {
+  @include v.team-card-logo(var(--h));
 }
 
-.hero-badge.with-photo .hero-logo {
+.hero-card.white-logo .hero-logo,
+.comp-card.white-logo .comp-logo {
+  @include v.white-logo(var(--h));
+}
+
+.hero-badge.with-photo .hero-logo,
+.comp-badge.with-photo .comp-logo {
   left: 30%;
   opacity: 0.85;
 }
 
-.hero-photo {
+.hero-photo,
+.comp-photo {
   bottom: 0;
-  // Cut off flush with the card on the right, bottom and left (only the head rises out, over the top)
-  clip-path: inset(-50% var(--hang) 0 max(0px, calc(var(--shot-w) - var(--w) - var(--hang))) round 0 0 var(--card-r) 0);
-  filter: drop-shadow(-6px 2px 8px rgba(0, 0, 0, 0.55));
   height: var(--shot-h);
   position: absolute;
   right: calc(var(--hang) * -1);
@@ -144,19 +180,30 @@
   z-index: 1;
 }
 
+// (cut off flush with the card on the right, bottom and left: only the head rises out, over the top)
+.hero-photo {
+  clip-path: inset(-50% var(--hang) 0 max(0px, calc(var(--shot-w) - var(--w) - var(--hang))) round 0 0 var(--card-r) 0);
+  filter: drop-shadow(-6px 2px 8px rgba(0, 0, 0, 0.55));
+}
+
+.comp-photo {
+  clip-path: inset(-50% var(--hang) 0 0 round 0 0 var(--card-r) 0);
+  filter: drop-shadow(-3px 1px 3px rgba(0, 0, 0, 0.55));
+}
+
 .hero-text {
   min-width: 0;
   padding-bottom: 4px;
 
-  // (the name in the table's DynaPuff, a touch see-through)
+  // (the name in the table's hand, a touch see-through)
   h2 {
     color: #fff;
-    font-family: "DynaPuff", cursive;
+    font-family: v.$font-hand;
     font-size: 42px;
     font-weight: 400;
-    opacity: 0.95;
     line-height: 1.05;
-    margin: 4px 0 4px;
+    margin: 4px 0;
+    opacity: 0.95;
     text-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
   }
 
@@ -168,45 +215,39 @@
   }
 }
 
+// "Running Back • San Francisco 49ers" over the name, lit, with the season beside it
 .hero-kicker {
+  align-items: center;
   color: var(--scoreboard-led);
+  display: flex;
+  flex-wrap: wrap;
   font-family: v.$font-base;
   font-size: 12px;
   font-weight: 800;
+  gap: 10px;
   letter-spacing: 2px;
   margin: 0;
   text-shadow: var(--scoreboard-glow);
   text-transform: uppercase;
 }
 
-// The card's season: a lit scoreboard chip in chalk, so another year's card reads as that year at a
-// glance (the current season's is quieter)
-.hero-kicker {
-  align-items: center;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-
+// The card's season: a lit scoreboard chip in white chalk, so another year's card reads as that year at
+// a glance
 .season-chip {
   align-items: center;
   background: var(--scoreboard-dots), var(--scoreboard);
   border: 1px solid var(--scoreboard-led);
   border-radius: 999px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.45);
-  // White chalk reads cleanly on the dark chip; the lit yellow frame draws the eye
   color: #fff;
   display: inline-flex;
-  font-family: "Cabin Sketch", cursive;
-  font-size: 14px;
-  font-weight: 700;
+  @include v.chalk(14px);
   letter-spacing: 0.5px;
   padding: 1px 11px;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9);
   text-transform: none;
 }
 
-// "Running Back • San Francisco 49ers": the position in bold white
 .hero-position {
   color: #fff;
   font-weight: 800;
@@ -255,12 +296,9 @@
   }
 
   .rank-number {
-    color: var(--tone);
-    font-family: "Cabin Sketch", cursive;
-    font-size: 50px;
-    font-weight: 700;
+    @include v.chalk(50px);
+    @include v.tone-glow(60%, 12px);
     line-height: 1.05;
-    text-shadow: 0 0 12px color-mix(in srgb, var(--tone) 60%, transparent);
   }
 }
 
@@ -292,19 +330,8 @@
   }
 }
 
-// Another season loading: the card dims until it swaps
-.player-card.loading {
-  .card-body,
-  .card-hero {
-    opacity: 0.55;
-    transition: opacity 0.15s ease;
-  }
-
-  cursor: progress;
-}
-
 // ---------------------------------------------------------------------------
-// Tabs: like the position bar (the one showing lit in scoreboard yellow with a line under it)
+// Tabs: like the position bar (the one showing lit in scoreboard yellow along its bottom row of dots)
 // ---------------------------------------------------------------------------
 .card-tabs {
   background: var(--scoreboard-dots), var(--scoreboard);
@@ -335,7 +362,6 @@
       color: var(--scoreboard-led);
     }
 
-    // Active: lit like the position tabs (bottom row of dots glowing)
     &.active {
       @include v.lit-dots;
       color: var(--scoreboard-led);
@@ -352,233 +378,17 @@
   padding: 18px 28px 28px;
 }
 
-// Similar seasons: three mini team cards (player standing in each), name, year and match score
-.card-comps,
-.card-career {
-  --group-color: var(--scoreboard-led);
-}
-
-// Seasons tab: the career arc (a bar per season, as tall as where they ranked) over a line per season
-.career-chart {
-  align-items: end;
-  display: grid;
-  gap: 4px;
-  grid-template-columns: repeat(var(--count), minmax(0, 1fr));
-  height: 150px;
-  margin: 14px auto 0;
-  max-width: calc(var(--count) * 56px);
-}
-
-.arc {
+// A line of explanation or an empty state inside a tab
+.card-note {
   align-items: center;
-  background: none;
-  border: none;
-  border-radius: 4px;
-  color: #fff;
-  cursor: pointer;
+  color: #9a9a9a;
   display: flex;
-  flex-direction: column;
-  height: 100%;
-  justify-content: flex-end;
-  min-width: 0;
-  padding: 0 0 2px;
-
-  .arc-rank {
-    color: var(--tone);
-    font-family: "Cabin Sketch", cursive;
-    font-size: 13px;
-    font-weight: 700;
-    white-space: nowrap;
-  }
-
-  .arc-bar {
-    background: linear-gradient(180deg, var(--tone), color-mix(in srgb, var(--tone) 35%, transparent));
-    border-radius: 3px 3px 0 0;
-    box-shadow: 0 0 8px color-mix(in srgb, var(--tone) 35%, transparent);
-    height: calc(8% + var(--pct) * 72%);
-    margin-top: 3px;
-    width: min(70%, 30px);
-  }
-
-  .arc-year {
-    border-top: 1px solid rgba(255, 255, 255, 0.25);
-    color: #bdbdbd;
-    font-family: "Cabin Sketch", cursive;
-    font-size: 13px;
-    font-weight: 700;
-    padding-top: 3px;
-    text-align: center;
-    width: 100%;
-  }
-
-  &:hover:not(.active) .arc-year {
-    color: var(--scoreboard-led);
-  }
-
-  &.active {
-    background: rgba(255, 205, 0, 0.08);
-    cursor: default;
-
-    .arc-year {
-      border-top-color: var(--scoreboard-led);
-      color: var(--scoreboard-led);
-    }
-  }
-}
-
-.season-list {
-  display: flex;
-  flex-direction: column;
+  font-size: 13px;
   gap: 6px;
-  margin-top: 18px;
-}
+  margin: 12px 0 0;
 
-.season-row {
-  align-items: center;
-  background: var(--scoreboard-dots), var(--scoreboard);
-  border: 1px solid #3a3a3a;
-  border-radius: 0;
-  color: #fff;
-  column-gap: 14px;
-  cursor: pointer;
-  display: grid;
-  font-family: inherit;
-  grid-template-columns: 30px 112px 40px repeat(3, minmax(0, 1fr)) 88px;
-  padding: 8px 14px;
-  text-align: left;
-  transition: border-color 0.15s ease;
-
-  img {
-    height: 28px;
-    object-fit: contain;
-    width: 28px;
-
-    // (dark logos the table draws in white, like the Giants', would vanish on the board)
-    &.white-logo {
-      filter: brightness(0) invert(1);
-    }
-  }
-
-  .season-year {
-    font-family: "Cabin Sketch", cursive;
-    font-size: 20px;
-    font-weight: 700;
-    white-space: nowrap;
-  }
-
-  .season-rank {
-    color: var(--tone);
-    text-align: right;
-    font-family: "Cabin Sketch", cursive;
-    font-size: 19px;
-    font-weight: 700;
-    text-shadow: 0 0 8px color-mix(in srgb, var(--tone) 40%, transparent);
-    white-space: nowrap;
-
-    small {
-      color: #858585;
-      font-size: 13px;
-      text-shadow: none;
-    }
-  }
-
-  .season-games {
-    color: #bdbdbd;
-    font-size: 13px;
-    font-weight: 700;
-    white-space: nowrap;
-  }
-
-  // A headline stat: its value in chalk, a thin bar for where it stood in that year's list, the label
-  // under it; their best season's value is lit yellow
-  .readout {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    min-width: 0;
-
-    b {
-      color: #fff;
-      font-family: "Cabin Sketch", cursive;
-      font-size: 18px;
-      font-weight: 700;
-      line-height: 1.05;
-      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
-      white-space: nowrap;
-    }
-
-    i {
-      background:
-        linear-gradient(90deg, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0.85)) left / calc(var(--share) * 100%) 100%
-          no-repeat,
-        rgba(255, 255, 255, 0.1);
-      border-radius: 2px;
-      height: 3px;
-      max-width: 110px;
-    }
-
-    small {
-      color: #8f8f8f;
-      font-size: 10px;
-      font-weight: 700;
-      letter-spacing: 0.5px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      text-transform: uppercase;
-      white-space: nowrap;
-    }
-
-    // Color-Coded Values: the bar in how the stat compared with that year's list (green above
-    // average, red below)
-    &.tinted i {
-      background:
-        linear-gradient(90deg, color-mix(in srgb, var(--tint) 60%, transparent), var(--tint)) left /
-          calc(var(--share) * 100%) 100% no-repeat,
-        rgba(255, 255, 255, 0.1);
-    }
-
-    &.best {
-      b {
-        color: var(--scoreboard-led);
-        text-shadow: var(--scoreboard-glow);
-      }
-
-      // (with Color-Coded Values on, the bar keeps its tint; the star and yellow number mark the best)
-      &:not(.tinted) i {
-        background:
-          linear-gradient(90deg, rgba(255, 205, 0, 0.5), var(--scoreboard-led)) left / 100% 100% no-repeat,
-          rgba(255, 255, 255, 0.1);
-        box-shadow: 0 0 6px rgba(255, 205, 0, 0.45);
-      }
-
-      // Career best: a star beside the number
-      b::after {
-        content: " ★";
-        font-family: v.$font-base;
-        font-size: 13px;
-        vertical-align: 2px;
-      }
-    }
-  }
-
-  // Like the tabs: hover lightens it and lights the year; the season showing is lit along its bottom row of dots
-  &:hover:not(.active) {
-    background: linear-gradient(rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.06)), var(--scoreboard-dots), var(--scoreboard);
-
-    .season-year {
-      color: var(--scoreboard-led);
-    }
-  }
-
-  // (lit like the position tabs: bottom row of dots glowing)
-  &.active {
-    @include v.lit-dots;
-    cursor: default;
-
-    .season-year {
-      color: var(--scoreboard-led);
-      text-shadow: var(--scoreboard-glow);
-    }
+  .mat-icon {
+    @include icon-size(17px);
   }
 }
 
@@ -594,29 +404,16 @@
 .ov-profile,
 .ov-radar,
 .skill-card {
-  background: var(--scoreboard-dots), var(--scoreboard);
-  border: 1px solid #3a3a3a;
-  border-radius: 6px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  @include v.scoreboard-panel;
 }
 
 .ov-profile {
   padding: 16px 18px;
 }
 
-.ov-kicker {
-  color: #9a9a9a;
-  font-size: 12px;
-  font-weight: 800;
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
-}
-
 .ov-archetype {
   color: var(--scoreboard-led);
-  font-family: "Cabin Sketch", cursive;
-  font-size: 32px;
-  font-weight: 700;
+  @include v.chalk(32px);
   line-height: 1.1;
   margin: 0 0 10px;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
@@ -649,9 +446,7 @@
 
     .mat-icon {
       flex: 0 0 auto;
-      font-size: 18px;
-      height: 18px;
-      width: 18px;
+      @include icon-size(18px);
     }
 
     &.good .mat-icon {
@@ -668,8 +463,9 @@
   }
 }
 
-// The radar: faint rings (the middle one is the league average, dashed), spokes, last season's
-// shape as a dashed ghost, and this season's filled in yellow with a dot per skill in its rank color
+// The radar: faint rings (the middle one is the league average, dashed), spokes, last season's shape as
+// a dashed ghost, and this season's filled in yellow with a dot per skill in its rank color; it grows out
+// from its center when the card opens
 .ov-radar {
   align-items: center;
   display: flex;
@@ -716,6 +512,14 @@
     stroke-width: 1.5;
   }
 
+  .shape,
+  .ghost,
+  .dot {
+    animation: radar-grow 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+    transform-box: view-box;
+    transform-origin: 0 0;
+  }
+
   .axis-label {
     fill: #ddd;
     font-family: v.$font-base;
@@ -728,8 +532,6 @@
 
 // (at the bottom of the panel, not tucked under the chart)
 .ov-legend {
-  margin-top: auto;
-  padding-top: 8px;
   color: #bdbdbd;
   display: flex;
   flex-wrap: wrap;
@@ -737,6 +539,8 @@
   font-weight: 700;
   gap: 14px;
   justify-content: center;
+  margin-top: auto;
+  padding-top: 8px;
   text-transform: uppercase;
 
   span {
@@ -764,31 +568,14 @@
   }
 }
 
-// Scouting report: every skill, strengths first, then average, then weaknesses (two cards a row),
-// and similar seasons last
+// Scouting report: every skill, strengths first, then average, then weaknesses (two cards a row), and
+// similar seasons last
 .ov-section {
   margin-top: 22px;
 
   h3 {
-    align-items: center;
-    border-bottom: 1px solid color-mix(in srgb, var(--group-color) 40%, transparent);
-    color: #fff;
-    display: flex;
-    font-family: v.$font-base;
-    font-size: 13px;
-    font-weight: 800;
-    gap: 8px;
-    letter-spacing: 1.5px;
+    @include group-heading;
     margin: 0 0 12px;
-    padding-bottom: 7px;
-    text-transform: uppercase;
-
-    .mat-icon {
-      color: var(--group-color);
-      font-size: 19px;
-      height: 19px;
-      width: 19px;
-    }
   }
 
   &.good {
@@ -837,20 +624,15 @@
 
 .skill-name {
   color: #fff;
-  font-family: "Cabin Sketch", cursive;
-  font-size: 22px;
-  font-weight: 700;
+  @include v.chalk(22px);
   line-height: 1.1;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
 }
 
 .skill-standing {
-  color: var(--tone);
   flex: 0 0 auto;
-  font-family: "Cabin Sketch", cursive;
-  font-size: 18px;
-  font-weight: 700;
-  text-shadow: 0 0 8px color-mix(in srgb, var(--tone) 40%, transparent);
+  @include v.chalk(18px);
+  @include v.tone-glow;
 }
 
 .skill-evidence {
@@ -867,22 +649,7 @@
   }
 }
 
-// A line of explanation or an empty state inside a tab
-.card-note {
-  align-items: center;
-  color: #9a9a9a;
-  display: flex;
-  font-size: 13px;
-  gap: 6px;
-  margin: 12px 0 0;
-
-  .mat-icon {
-    font-size: 17px;
-    height: 17px;
-    width: 17px;
-  }
-}
-
+// Similar seasons: three mini team cards (player standing in each), name, year and match score
 .comps-row {
   display: grid;
   gap: 10px;
@@ -892,10 +659,7 @@
 
 .comp {
   align-items: center;
-  background: var(--scoreboard-dots), var(--scoreboard);
-  border: 1px solid #3a3a3a;
-  border-radius: 6px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  @include v.scoreboard-panel;
   color: #fff;
   cursor: pointer;
   display: flex;
@@ -918,68 +682,6 @@
   }
 }
 
-// The rows' team card at 1.2x
-.comp-badge {
-  --w: 73px;
-  --h: 49px;
-  --r: 12px;
-  --shot-h: 62px;
-  --shot-w: calc(var(--shot-h) * 1.379);
-  --hang: 15px;
-  flex: 0 0 auto;
-  height: var(--h);
-  position: relative;
-  width: var(--w);
-}
-
-.comp-card {
-  background:
-    radial-gradient(circle at 30% 22%, rgba(255, 255, 255, 0.35), transparent 55%),
-    radial-gradient(circle at 70% 90%, rgba(0, 0, 0, 0.45), transparent 60%),
-    var(--team-badge);
-  border: 2px solid rgba(255, 255, 255, 0.15);
-  border-radius: var(--r);
-  box-shadow:
-    inset 0 -3px 6px rgba(0, 0, 0, 0.35),
-    0 2px 5px rgba(0, 0, 0, 0.55);
-  box-sizing: border-box;
-  inset: 0;
-  overflow: hidden;
-  position: absolute;
-  transition: border-color 0.15s ease;
-}
-
-.comp-logo {
-  height: calc(var(--h) * 1.45);
-  left: 50%;
-  position: absolute;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  width: calc(var(--h) * 1.45);
-}
-
-.comp-card.white-logo .comp-logo {
-  filter: brightness(0) invert(1);
-  height: calc(var(--h) * 0.95);
-  width: calc(var(--h) * 0.95);
-}
-
-.comp-badge.with-photo .comp-logo {
-  left: 30%;
-  opacity: 0.85;
-}
-
-.comp-photo {
-  bottom: 0;
-  clip-path: inset(-50% var(--hang) 0 0 round 0 0 var(--r) 0);
-  filter: drop-shadow(-3px 1px 3px rgba(0, 0, 0, 0.55));
-  height: var(--shot-h);
-  position: absolute;
-  right: calc(var(--hang) * -1);
-  width: var(--shot-w);
-  z-index: 1;
-}
-
 .comp-text {
   display: flex;
   flex: 1;
@@ -989,16 +691,12 @@
 
 .comp-season {
   color: var(--scoreboard-led);
-  font-family: "Cabin Sketch", cursive;
-  font-size: 15px;
-  font-weight: 700;
+  @include v.chalk(15px);
   letter-spacing: 0.5px;
 }
 
 .comp-name {
-  font-family: "Cabin Sketch", cursive;
-  font-size: 19px;
-  font-weight: 700;
+  @include v.chalk(19px);
   line-height: 1.15;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1007,18 +705,19 @@
 }
 
 .comp-match {
-  color: var(--tone);
   flex: 0 0 auto;
-  font-family: "Cabin Sketch", cursive;
-  font-size: 24px;
-  font-weight: 700;
-  text-shadow: 0 0 8px color-mix(in srgb, var(--tone) 45%, transparent);
+  @include v.chalk(24px);
+  @include v.tone-glow(45%);
 
   small {
     font-size: 11px;
   }
 }
 
+// ---------------------------------------------------------------------------
+// Stats: each group a card like the filter menu's (a border in its category's color, and a header bar,
+// the scoreboard with the category's tint, that folds it shut), its tiles inside on the chalkboard
+// ---------------------------------------------------------------------------
 .card-group {
   margin-top: 22px;
 
@@ -1027,31 +726,15 @@
   }
 
   h3 {
-    align-items: center;
-    border-bottom: 1px solid color-mix(in srgb, var(--group-color) 40%, transparent);
-    color: #fff;
-    display: flex;
-    font-family: v.$font-base;
-    font-size: 13px;
-    font-weight: 800;
-    gap: 8px;
-    letter-spacing: 1.5px;
+    @include group-heading;
     margin: 0;
-    padding-bottom: 7px;
-    text-transform: uppercase;
-
-    .mat-icon {
-      color: var(--group-color);
-      font-size: 19px;
-      height: 19px;
-      width: 19px;
-    }
   }
 }
 
-// Stats tab: each group is a card like the filter menu's: a border in its category's color, and a
-// header bar (scoreboard texture with the category's tint) that folds it shut. The tiles sit inside
-// on the chalkboard.
+.card-career {
+  --group-color: var(--scoreboard-led);
+}
+
 .stat-group {
   border: 1px solid color-mix(in srgb, var(--group-color) 40%, transparent);
   border-radius: 6px;
@@ -1062,29 +745,38 @@
     margin-top: 0;
   }
 
+  &:not(.closed) .group-bar {
+    border-bottom: 1px solid color-mix(in srgb, var(--group-color) 40%, transparent);
+  }
+
+  &.closed {
+    margin-top: 10px;
+  }
+
   // Open, the body has the table's sidelines down both edges in the category's color: a solid line
   // with short hash marks off it, pointing in
   .card-stats {
     --hash-gap: 12px;
     --line: color-mix(in srgb, var(--group-color) 75%, transparent);
+    $hashes: repeating-linear-gradient(
+      180deg,
+      transparent 0 calc(var(--hash-gap) - 1px),
+      var(--line) calc(var(--hash-gap) - 1px) var(--hash-gap)
+    );
     background:
       linear-gradient(var(--line), var(--line)) left / 1px 100% no-repeat,
       linear-gradient(var(--line), var(--line)) right / 1px 100% no-repeat,
-      repeating-linear-gradient(180deg, transparent 0 calc(var(--hash-gap) - 1px), var(--line) calc(var(--hash-gap) - 1px) var(--hash-gap))
-        left top / 5px 100% no-repeat,
-      repeating-linear-gradient(180deg, transparent 0 calc(var(--hash-gap) - 1px), var(--line) calc(var(--hash-gap) - 1px) var(--hash-gap))
-        right top / 5px 100% no-repeat;
+      $hashes left top / 5px 100% no-repeat,
+      $hashes right top / 5px 100% no-repeat;
     margin: 0;
     padding: 12px 16px;
   }
 }
 
 .group-bar {
+  --bar-tint: color-mix(in srgb, var(--group-color) 16%, transparent);
   align-items: center;
-  background:
-    linear-gradient(color-mix(in srgb, var(--group-color) 16%, transparent), color-mix(in srgb, var(--group-color) 16%, transparent)),
-    var(--scoreboard-dots),
-    var(--scoreboard);
+  background: linear-gradient(var(--bar-tint), var(--bar-tint)), var(--scoreboard-dots), var(--scoreboard);
   border: none;
   color: #fff;
   cursor: pointer;
@@ -1101,46 +793,23 @@
 
   .group-bar-icon {
     color: var(--group-color);
-    font-size: 19px;
-    height: 19px;
-    width: 19px;
+    @include icon-size(19px);
   }
 
   .group-bar-chevron {
     color: rgba(255, 255, 255, 0.6);
-    font-size: 20px;
-    height: 20px;
+    @include icon-size(20px);
     margin-left: auto;
-    width: 20px;
   }
 
   &:hover {
-    background:
-      linear-gradient(color-mix(in srgb, var(--group-color) 24%, transparent), color-mix(in srgb, var(--group-color) 24%, transparent)),
-      var(--scoreboard-dots),
-      var(--scoreboard);
+    --bar-tint: color-mix(in srgb, var(--group-color) 24%, transparent);
 
     span,
     .group-bar-chevron {
       color: var(--scoreboard-led);
     }
   }
-}
-
-// Open, the header sits on a line in the category's color
-.stat-group:not(.closed) .group-bar {
-  border-bottom: 1px solid color-mix(in srgb, var(--group-color) 40%, transparent);
-}
-
-.stat-group.closed {
-  margin-top: 10px;
-}
-
-// Seasons tab: until a season is ranked with the current sliders, its default rank shows dimmed
-.arc.pending .arc-rank,
-.arc.pending .arc-bar,
-.season-row.pending .season-rank {
-  opacity: 0.45;
 }
 
 .card-stats {
@@ -1150,14 +819,10 @@
   margin-top: 12px;
 }
 
-// One stat: name and rank on top, the value big, a bar for where it ranks (the tick is the middle of
-// the list), the list average underneath
+// One stat: name and rank on top, the value big, a bar for where it ranks (the tick is the middle of the
+// list), the list average underneath
 .card-stat {
-  // A scoreboard panel on the chalkboard
-  background: var(--scoreboard-dots), var(--scoreboard);
-  border: 1px solid #3a3a3a;
-  border-radius: 6px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  @include v.scoreboard-panel;
   column-gap: 8px;
   display: grid;
   grid-template-areas:
@@ -1182,13 +847,10 @@
 }
 
 .stat-rank {
-  color: var(--tone);
-  font-family: "Cabin Sketch", cursive;
-  font-size: 18px;
-  font-weight: 700;
+  @include v.chalk(18px);
+  @include v.tone-glow(45%);
   grid-area: rank;
   line-height: 1.1;
-  text-shadow: 0 0 8px color-mix(in srgb, var(--tone) 45%, transparent);
 
   small {
     color: #858585;
@@ -1199,9 +861,7 @@
 
 .stat-value {
   color: #fff;
-  font-family: "Cabin Sketch", cursive;
-  font-size: 26px;
-  font-weight: 700;
+  @include v.chalk(26px);
   grid-area: value;
   line-height: 1.25;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
@@ -1229,6 +889,7 @@
   }
 }
 
+// (the fill grows in from the left when the card opens)
 .stat-bar {
   background: rgba(255, 255, 255, 0.08);
   border-radius: 3px;
@@ -1238,12 +899,14 @@
   position: relative;
 
   i {
+    animation: bar-fill 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) both;
     background: linear-gradient(90deg, color-mix(in srgb, var(--tone) 35%, transparent), var(--tone));
     border-radius: 3px;
     box-shadow: 0 0 8px color-mix(in srgb, var(--tone) 50%, transparent);
     inset: 0 auto 0 0;
     min-width: 6px;
     position: absolute;
+    transform-origin: left center;
     width: calc(var(--pct) * 100%);
   }
 
@@ -1270,19 +933,307 @@
   min-height: 1em;
 }
 
-// The radar grows out from its center when the card opens, and the skill and stat bars fill in from
-// the left
-.ov-radar .shape,
-.ov-radar .ghost,
-.ov-radar .dot {
-  animation: radar-grow 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) both;
-  transform-box: view-box;
-  transform-origin: 0 0;
+// ---------------------------------------------------------------------------
+// Seasons: the career arc (a bar per season, as tall as where they ranked) over a line per season; until
+// a season is ranked with the current sliders, its default rank shows dimmed
+// ---------------------------------------------------------------------------
+.career-chart {
+  align-items: end;
+  display: grid;
+  gap: 4px;
+  grid-template-columns: repeat(var(--count), minmax(0, 1fr));
+  height: 150px;
+  margin: 14px auto 0;
+  max-width: calc(var(--count) * 56px);
 }
 
-.stat-bar i {
-  animation: bar-fill 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) both;
-  transform-origin: left center;
+.arc {
+  align-items: center;
+  background: none;
+  border: none;
+  border-radius: 4px;
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  justify-content: flex-end;
+  min-width: 0;
+  padding: 0 0 2px;
+
+  .arc-rank {
+    @include v.chalk(13px);
+    color: var(--tone);
+    white-space: nowrap;
+  }
+
+  .arc-bar {
+    background: linear-gradient(180deg, var(--tone), color-mix(in srgb, var(--tone) 35%, transparent));
+    border-radius: 3px 3px 0 0;
+    box-shadow: 0 0 8px color-mix(in srgb, var(--tone) 35%, transparent);
+    height: calc(8% + var(--pct) * 72%);
+    margin-top: 3px;
+    width: min(70%, 30px);
+  }
+
+  .arc-year {
+    border-top: 1px solid rgba(255, 255, 255, 0.25);
+    color: #bdbdbd;
+    @include v.chalk(13px);
+    padding-top: 3px;
+    text-align: center;
+    width: 100%;
+  }
+
+  &:hover:not(.active) .arc-year {
+    color: var(--scoreboard-led);
+  }
+
+  &.active {
+    background: rgba(255, 205, 0, 0.08);
+    cursor: default;
+
+    .arc-year {
+      border-top-color: var(--scoreboard-led);
+      color: var(--scoreboard-led);
+    }
+  }
+
+  &.pending .arc-rank,
+  &.pending .arc-bar {
+    opacity: 0.45;
+  }
+}
+
+.season-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 18px;
+}
+
+.season-row {
+  align-items: center;
+  @include v.scoreboard-panel(0, null);
+  color: #fff;
+  column-gap: 14px;
+  cursor: pointer;
+  display: grid;
+  font-family: inherit;
+  grid-template-columns: 30px 112px 40px repeat(3, minmax(0, 1fr)) 88px;
+  padding: 8px 14px;
+  text-align: left;
+  transition: border-color 0.15s ease;
+
+  img {
+    height: 28px;
+    object-fit: contain;
+    width: 28px;
+
+    // (dark logos the table draws in white, like the Giants', would vanish on the board)
+    &.white-logo {
+      filter: brightness(0) invert(1);
+    }
+  }
+
+  .season-year {
+    @include v.chalk(20px);
+    white-space: nowrap;
+  }
+
+  .season-rank {
+    @include v.chalk(19px);
+    @include v.tone-glow;
+    text-align: right;
+    white-space: nowrap;
+
+    small {
+      color: #858585;
+      font-size: 13px;
+      text-shadow: none;
+    }
+  }
+
+  &.pending .season-rank {
+    opacity: 0.45;
+  }
+
+  .season-games {
+    color: #bdbdbd;
+    font-size: 13px;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  // A headline stat: its value in chalk, a thin bar for where it stood in that year's list, the label
+  // under it; their best season's value is lit yellow
+  .readout {
+    // (the bar: white, or with Color-Coded Values on, how the stat compared with that year's list)
+    --fill: linear-gradient(90deg, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0.85));
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+
+    b {
+      color: #fff;
+      @include v.chalk(18px);
+      line-height: 1.05;
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+      white-space: nowrap;
+    }
+
+    i {
+      background:
+        var(--fill) left / calc(var(--share) * 100%) 100% no-repeat,
+        rgba(255, 255, 255, 0.1);
+      border-radius: 2px;
+      height: 3px;
+      max-width: 110px;
+    }
+
+    small {
+      color: #8f8f8f;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    &.tinted {
+      --fill: linear-gradient(90deg, color-mix(in srgb, var(--tint) 60%, transparent), var(--tint));
+    }
+
+    &.best {
+      b {
+        color: var(--scoreboard-led);
+        text-shadow: var(--scoreboard-glow);
+      }
+
+      // Career best: a star beside the number
+      b::after {
+        content: " ★";
+        font-family: v.$font-base;
+        font-size: 13px;
+        vertical-align: 2px;
+      }
+
+      // (with Color-Coded Values on, the bar keeps its tint; the star and yellow number mark the best)
+      &:not(.tinted) i {
+        background:
+          linear-gradient(90deg, rgba(255, 205, 0, 0.5), var(--scoreboard-led)) left / 100% 100% no-repeat,
+          rgba(255, 255, 255, 0.1);
+        box-shadow: 0 0 6px rgba(255, 205, 0, 0.45);
+      }
+    }
+  }
+
+  // Like the tabs: hover lightens it and lights the year; the season showing is lit along its bottom
+  // row of dots
+  &:hover:not(.active) {
+    background:
+      linear-gradient(rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.06)),
+      var(--scoreboard-dots),
+      var(--scoreboard);
+
+    .season-year {
+      color: var(--scoreboard-led);
+    }
+  }
+
+  &.active {
+    @include v.lit-dots;
+    cursor: default;
+
+    .season-year {
+      color: var(--scoreboard-led);
+      text-shadow: var(--scoreboard-glow);
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// History (a fighter's fights): a line each, newest first: a result tile (green win, red loss, gray
+// draw), what it was with where and when under it, and a detail at the end
+// ---------------------------------------------------------------------------
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.history-row {
+  align-items: center;
+  background: rgba(0, 0, 0, 0.18);
+  border-radius: 6px;
+  display: grid;
+  gap: 14px;
+  grid-template-columns: 30px 1fr auto;
+  padding: 8px 12px;
+}
+
+.history-result {
+  border-radius: 4px;
+  color: #111;
+  font-family: "Orbitron", sans-serif;
+  font-size: 13px;
+  font-weight: 900;
+  line-height: 26px;
+  text-align: center;
+
+  &.win {
+    background: #3ecf6e;
+  }
+
+  &.loss {
+    background: #ff5a4f;
+  }
+
+  &.draw {
+    background: #9aa0a6;
+  }
+}
+
+.history-main {
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  font-size: 15px;
+  font-weight: 700;
+  min-width: 0;
+
+  small {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 12px;
+    font-weight: 500;
+  }
+}
+
+.history-detail {
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 13px;
+  font-weight: 700;
+  text-align: right;
+  white-space: nowrap;
+}
+
+// ---------------------------------------------------------------------------
+// Animations
+// ---------------------------------------------------------------------------
+@keyframes card-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes card-rise {
+  from {
+    opacity: 0;
+    transform: translate(-50%, calc(-50% + 12px));
+  }
 }
 
 @keyframes radar-grow {
@@ -1307,23 +1258,14 @@
   }
 }
 
-@keyframes card-fade {
-  from {
-    opacity: 0;
-  }
-}
-
-@keyframes card-rise {
-  from {
-    opacity: 0;
-    transform: translate(-50%, calc(-50% + 12px));
-  }
-}
-
-// Phones: the hero stacks (card, then name, with the rank tile beside the name)
+// ---------------------------------------------------------------------------
+// Phones: the hero stacks (card, then name, with the rank tile beside the name), one column of skills,
+// the season lines on two rows
+// ---------------------------------------------------------------------------
 @media (max-width: 640px) {
   // (the visible screen below the sport bar, less a small margin)
   .player-card {
+    --card-r: 16px;
     height: calc(100dvh - var(--sport-bar-height) - 12px);
     width: calc(100vw - 16px);
   }
@@ -1341,10 +1283,6 @@
     --hang: 30px;
     grid-column: 1 / -1;
     justify-self: center;
-  }
-
-  .player-card {
-    --card-r: 16px;
   }
 
   .hero-text h2 {
@@ -1427,69 +1365,6 @@
 
 // The sport's own touches (apps/<sport>/src/theme/_sport-card.scss)
 @include meta.load-css("sport-card");
-
-// The history tab (a fighter's fights): a line each, newest first: a result tile (green win, red loss,
-// gray draw), what it was with where and when under it, and a detail at the end
-.history-list {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.history-row {
-  align-items: center;
-  background: rgba(0, 0, 0, 0.18);
-  border-radius: 6px;
-  display: grid;
-  gap: 14px;
-  grid-template-columns: 30px 1fr auto;
-  padding: 8px 12px;
-}
-
-.history-result {
-  border-radius: 4px;
-  color: #111;
-  font-family: "Orbitron", sans-serif;
-  font-size: 13px;
-  font-weight: 900;
-  line-height: 26px;
-  text-align: center;
-
-  &.win {
-    background: #3ecf6e;
-  }
-
-  &.loss {
-    background: #ff5a4f;
-  }
-
-  &.draw {
-    background: #9aa0a6;
-  }
-}
-
-.history-main {
-  color: #fff;
-  display: flex;
-  flex-direction: column;
-  font-size: 15px;
-  font-weight: 700;
-  min-width: 0;
-
-  small {
-    color: rgba(255, 255, 255, 0.6);
-    font-size: 12px;
-    font-weight: 500;
-  }
-}
-
-.history-detail {
-  color: rgba(255, 255, 255, 0.85);
-  font-size: 13px;
-  font-weight: 700;
-  text-align: right;
-  white-space: nowrap;
-}
 
 // Headshots keep their own shape: ESPN's cutouts (NFL, NBA) are as wide as the box and fill it, while
 // MLB's and the NHL's are square, so they sit bottom-center in it rather than being stretched wide

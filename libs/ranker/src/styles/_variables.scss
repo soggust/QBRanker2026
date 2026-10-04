@@ -2,9 +2,91 @@
 // tune the few things that differ between sports.
 @use "sport-settings" as sport;
 
-// Fonts
+// Fonts: the UI's, the chalk the values and numbers are written in, and the names' soft hand
 $font-base: "Nunito", sans-serif;
 $font-heading: "Zain", cursive;
+$font-chalk: "Cabin Sketch", cursive;
+$font-hand: "DynaPuff", cursive;
+
+// The playbook chalkboard behind the grid, the player card and About: chalk dust, two smudges and the
+// slate (each puts the sport's chalked plays, --tex-chalk-plays, on top where it wants them)
+$chalk-dust:
+  var(--tex-chalk-noise) 0 0 / 300px 300px,
+  radial-gradient(ellipse at 20% 15%, rgba(255, 255, 255, 0.05), transparent 40%),
+  radial-gradient(ellipse at 75% 60%, rgba(255, 255, 255, 0.04), transparent 45%),
+  #1f2824;
+
+// A soft diagonal glint that sweeps across a trophy, plaque or award icon (trophy-shine animates it)
+@function glint($strength: 0.85) {
+  @return linear-gradient(105deg, transparent 40%, rgba(255, 255, 255, $strength) 50%, transparent 60%) 150% 0 /
+    300% 100% no-repeat;
+}
+
+// Text in chalk
+@mixin chalk($size, $weight: 700) {
+  font-family: $font-chalk;
+  font-size: $size;
+  font-weight: $weight;
+}
+
+// A number glowing in its own rank color (--tone)
+@mixin tone-glow($strength: 40%, $blur: 8px) {
+  color: var(--tone);
+  text-shadow: 0 0 $blur color-mix(in srgb, var(--tone) $strength, transparent);
+}
+
+// A scoreboard panel: the dot-matrix board behind a thin dark frame
+@mixin scoreboard-panel($radius: 6px, $shadow: 0 2px 6px rgba(0, 0, 0, 0.4)) {
+  background: var(--scoreboard-dots), var(--scoreboard);
+  border: 1px solid #3a3a3a;
+  border-radius: $radius;
+  box-shadow: $shadow;
+}
+
+// A team card: glossy, in the team color (lit from the top left, darker bottom right), the logo inside
+// it big enough to run off the edges
+@mixin team-card($border: 2px) {
+  background:
+    radial-gradient(circle at 30% 22%, rgba(255, 255, 255, 0.35), transparent 55%),
+    radial-gradient(circle at 70% 90%, rgba(0, 0, 0, 0.45), transparent 60%),
+    var(--team-badge);
+  border: $border solid rgba(255, 255, 255, 0.15);
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+// ...its glass: a bright band across the top, fading out ($inset: how far in from the card's corners)
+@mixin team-card-gloss($inset, $height, $top: 0.55, $mid: 0.12) {
+  &::after {
+    background: linear-gradient(180deg, rgba(255, 255, 255, $top), rgba(255, 255, 255, $mid) 60%, transparent);
+    border-radius: calc(var(--card-r) - #{$inset}) calc(var(--card-r) - #{$inset}) 40% 40% /
+      calc(var(--card-r) - #{$inset}) calc(var(--card-r) - #{$inset}) 30% 30%;
+    content: "";
+    height: $height;
+    left: 4%;
+    pointer-events: none;
+    position: absolute;
+    top: 4%;
+    width: 92%;
+  }
+}
+
+// ...and its logo, centered at $scale times the card's height ($h)
+@mixin team-card-logo($h, $scale: 1.45) {
+  height: calc(#{$h} * #{$scale});
+  left: 50%;
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: calc(#{$h} * #{$scale});
+}
+
+// A logo that's dark lettering on its own (the Giants' "ny"): drawn in white, smaller, so it stays whole
+@mixin white-logo($h) {
+  filter: brightness(0) invert(1);
+  height: calc(#{$h} * 0.95);
+  width: calc(#{$h} * 0.95);
+}
 
 // The active tab / item on a scoreboard panel: a lit-up panel whose bottom row of dots glows in the
 // accent color. Its dots are counted up from the bottom edge (not down from the top) so the lit row is

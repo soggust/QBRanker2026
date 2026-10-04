@@ -8,21 +8,12 @@
 
 // The chalkboard: dark green-gray slate with chalk dust, smudges and two coach-drawn plays (a pass and a
 // sweep) in faint chalk, scrolling with the rows
-$chalkboard:
-  var(--tex-chalk-plays) -1150px -420px / 2800px 1440px,
-  url("../../assets/textures/chalk-noise.svg") 0 0 / 300px 300px,
-  radial-gradient(ellipse at 20% 15%, rgba(255, 255, 255, 0.05), transparent 40%),
-  radial-gradient(ellipse at 75% 60%, rgba(255, 255, 255, 0.04), transparent 45%),
-  #1f2824;
-
-// A soft diagonal glint sweeping across a trophy or plaque (its background), on a shared 4s beat
-$glint: linear-gradient(105deg, transparent 40%, rgba(255, 255, 255, 0.85) 50%, transparent 60%) 150% 0 / 300% 100%
-  no-repeat;
+$chalkboard: var(--tex-chalk-plays) -1150px -420px / 2800px 1440px, v.$chalk-dust;
 
 // An award icon in a metal: the glyph filled with its gradient (and the glint), glowing softly
 @mixin metal-icon($light, $mid, $dark, $glow) {
   background:
-    linear-gradient(105deg, transparent 40%, rgba(255, 255, 255, 0.95) 50%, transparent 60%) 150% 0 / 300% 100% no-repeat,
+    v.glint(0.95),
     linear-gradient(180deg, $light, $mid 55%, $dark);
   -webkit-background-clip: text;
   background-clip: text;
@@ -80,7 +71,7 @@ section footer {
     background:
       radial-gradient(ellipse at 35% 20%, rgba(255, 255, 255, 0.2), transparent 60%),
       linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(0, 0, 0, 0.18)),
-      url("../../assets/textures/leather.jpg") center / 96px,
+      var(--tex-leather) center / 96px,
       var(--leather);
     background-blend-mode: normal, normal, soft-light, normal;
     border: 1px solid rgba(0, 0, 0, 0.55);
@@ -121,10 +112,7 @@ section footer {
   // lettering (its text and caret are styled in _base.scss: they're inside Material's own template)
   .mat-mdc-select.season-select {
     align-items: center;
-    background: var(--scoreboard-dots), var(--scoreboard);
-    border: 1px solid #3a3a3a;
-    border-radius: 8px;
-    box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.6);
+    @include v.scoreboard-panel(8px, 1px 1px 1px rgba(0, 0, 0, 0.6));
     box-sizing: border-box;
     display: inline-flex;
     font-family: v.$font-base;
@@ -460,11 +448,8 @@ section ul li.player:not(.header-row) {
   // #1's trophy, green like the 2-10 digits, catching the light now and then (the glint is inside its mask)
   .count .lombardi {
     animation: trophy-shine 4s ease-in-out infinite;
+    background: v.glint();
     background-color: var(--tint-good, #3ee07a);
-    background-image: linear-gradient(105deg, transparent 40%, rgba(255, 255, 255, 0.85) 50%, transparent 60%);
-    background-position: 150% 0;
-    background-repeat: no-repeat;
-    background-size: 300% 100%;
     filter: drop-shadow(0 0 4px rgba(62, 224, 122, 0.55));
     height: 1.3em;
     width: 1em;
@@ -508,24 +493,19 @@ section ul li.player:not(.header-row) {
   }
 
   .team-badge {
+    @include v.team-card;
+    @include v.team-card-gloss(3px, 48%);
     align-items: center;
-    background:
-      radial-gradient(circle at 30% 22%, rgba(255, 255, 255, 0.35), transparent 55%),
-      radial-gradient(circle at 70% 90%, rgba(0, 0, 0, 0.45), transparent 60%),
-      var(--team-badge);
-    border: solid 2px rgba(255, 255, 255, 0.15);
     border-radius: var(--card-r);
     box-shadow:
       inset 0 -3px 6px rgba(0, 0, 0, 0.35),
       inset 0 1px 2px rgba(255, 255, 255, 0.45),
       0 2px 4px rgba(0, 0, 0, 0.55);
-    box-sizing: border-box;
     display: inline-flex;
     flex: 0 0 auto;
     height: var(--card-h);
     justify-content: center;
     margin-right: 0;
-    overflow: hidden;
     padding-left: 0;
     position: relative;
     transition: border-color 0.15s ease;
@@ -535,17 +515,13 @@ section ul li.player:not(.header-row) {
     // The logo, big enough to run off the edges (white-logo teams, like the Giants' "ny", are all
     // lettering, so they stay nearly whole; so does the Colts' horseshoe, mostly its open middle)
     .team-logo {
-      height: calc(var(--orb) * 1.45);
-      left: 50%;
+      @include v.team-card-logo(var(--orb));
       margin: 0;
       max-width: none;
       object-fit: contain;
       padding: 0;
-      position: absolute;
-      top: 50%;
-      transform: translate(-50%, -50%);
-      width: calc(var(--orb) * 1.45);
 
+      // (the Colts' horseshoe is mostly its open middle: smaller, so it stays whole too)
       &[src*="/Colts.png"] {
         height: calc(var(--orb) * 1.05);
         width: calc(var(--orb) * 1.05);
@@ -553,23 +529,7 @@ section ul li.player:not(.header-row) {
     }
 
     &.white-logo .team-logo {
-      filter: brightness(0) invert(1);
-      height: calc(var(--orb) * 0.95);
-      width: calc(var(--orb) * 0.95);
-    }
-
-    // Glass: a bright band across the top, fading out, above the logo
-    &::after {
-      background: linear-gradient(180deg, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0.12) 60%, transparent);
-      border-radius: calc(var(--card-r) - 3px) calc(var(--card-r) - 3px) 40% 40% / calc(var(--card-r) - 3px)
-        calc(var(--card-r) - 3px) 30% 30%;
-      content: "";
-      height: 48%;
-      left: 4%;
-      pointer-events: none;
-      position: absolute;
-      top: 4%;
-      width: 92%;
+      @include v.white-logo(var(--orb));
     }
   }
 
@@ -611,7 +571,7 @@ section ul li.player:not(.header-row) {
   // The name in DynaPuff (a soft, rounded hand), a touch see-through to soften it
   .player-name strong {
     color: #fff !important;
-    font-family: "DynaPuff", cursive !important;
+    font-family: v.$font-hand !important;
     font-size: 15px !important;
     font-synthesis: none;
     font-weight: 400 !important;
@@ -659,8 +619,7 @@ section ul li.player .player-name .player-awards,
 
     &::after {
       animation: trophy-shine 4s ease-in-out infinite;
-      background: linear-gradient(105deg, transparent 40%, rgba(255, 255, 255, 0.75) 50%, transparent 60%) 150% 0 /
-        300% 100% no-repeat;
+      background: v.glint(0.75);
       content: "";
       inset: 0;
       pointer-events: none;
@@ -692,7 +651,7 @@ section ul li.player .player-name .player-awards,
   // (always first; a little extra room after it, since it's much narrower than the plaques)
   .lombardi.award-trophy {
     animation: trophy-shine 4s ease-in-out infinite;
-    background: $glint;
+    background: v.glint();
     background-color: #ffcd00;
     cursor: help;
     filter: drop-shadow(0 0 3px rgba(255, 205, 0, 0.45));
@@ -925,9 +884,7 @@ section ul li.player:not(.header-row) {
 
   > .col-group > div:not(.box) > p:not(.stat-label) {
     color: #f1efe6;
-    font-family: "Cabin Sketch", cursive;
-    font-size: 16px;
-    font-weight: 400;
+    @include v.chalk(16px, 400);
     // A dark drop shadow and halo lift the chalk off the board; a faint glow keeps it powdery
     text-shadow:
       0 1px 2px rgba(0, 0, 0, 0.9),
@@ -1163,10 +1120,7 @@ section.category-colors ul li.player:not(.header-row):not(.cdk-drag-preview) > .
 // The "List copied" toast, on a scoreboard panel; the settings menu's switch labels
 // ---------------------------------------------------------------------------
 .toast {
-  background: var(--scoreboard-dots), var(--scoreboard);
-  border: 1px solid #3a3a3a;
-  border-radius: 2.5px;
-  box-shadow: 0 0 1em rgba(0, 0, 0, 0.4);
+  @include v.scoreboard-panel(2.5px, 0 0 1em rgba(0, 0, 0, 0.4));
   color: #fff;
   min-width: 100px;
   opacity: 0;
