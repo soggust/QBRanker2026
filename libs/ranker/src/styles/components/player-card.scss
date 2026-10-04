@@ -148,11 +148,13 @@
   min-width: 0;
   padding-bottom: 4px;
 
+  // (the name in the table's DynaPuff, a touch see-through)
   h2 {
     color: #fff;
-    font-family: "Cabin Sketch", cursive;
+    font-family: "DynaPuff", cursive;
     font-size: 42px;
-    font-weight: 700;
+    font-weight: 400;
+    opacity: 0.95;
     line-height: 1.05;
     margin: 4px 0 4px;
     text-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);

@@ -14,26 +14,3 @@ section ul li.player .player-name .player-awards,
     }
   }
 }
-
-// (trying it out) Player names in the chalk (Cabin Sketch) with its hatching filled in: the same name drawn
-// behind it in solid Cabin (the face Cabin Sketch is drawn from, so the shapes line up) in a faint,
-// see-through white, so the strokes read as solid without flooding the chalk
-section ul li.player:not(.header-row) .player-name strong {
-  isolation: isolate;
-  position: relative;
-
-  &::before {
-    color: rgba(255, 255, 255, 0.32);
-    content: attr(data-name);
-    font-family: "Cabin", sans-serif;
-    font-weight: 700;
-    inset: 0;
-    pointer-events: none;
-    position: absolute;
-    text-shadow: none;
-    // (Cabin runs 1.7% narrower than the chalk: stretched to match, so the fill stays under every letter)
-    transform: scaleX(1.0168);
-    transform-origin: left center;
-    z-index: -1;
-  }
-}
