@@ -30,6 +30,7 @@ const STATIC = path.join(ROOT, 'src/StaticData');
 const CACHE = path.join(import.meta.dirname, 'cache.json');
 const COMMON = 'https://site.web.api.espn.com/apis/common/v3/sports/mma/athletes';
 const RANKINGS = 'https://www.ufc.com/rankings';
+const PFL_RANKINGS = 'https://pflmma.com/rankings';
 const CHAMPIONS = 'https://en.wikipedia.org/w/index.php?title=List_of_UFC_champions&action=raw';
 const ACTIVE_DAYS = 730;
 const ROUND = 300;
@@ -203,6 +204,51 @@ async function rankings() {
   return out;
 }
 
+// A ranked name's key by surname alone, when exactly one has it and the first initial matches (the first
+// names spelled apart): names is key -> the name as written
+function uniqueSurname(names, name) {
+  const parts = (n) => n.split(' ').map(nameKey);
+  const [first, last] = [parts(name)[0], parts(name).at(-1)];
+  const hits = [...names].filter(([, n]) => parts(n).at(-1) === last && parts(n)[0][0] === first[0]);
+  return hits.length === 1 ? hits[0][0] : null;
+}
+
+// The PFL's: its champions and top 10s, and its pound-for-pound list (by name)
+const PFL_DIVISIONS = {
+  bantamweight: 'BW',
+  featherweight: 'FW',
+  lightweight: 'LW',
+  welterweight: 'WW',
+  middleweight: 'MW',
+  light_heavyweight: 'LHW',
+  heavyweight: 'HW',
+  womens_flyweight: 'WFLW',
+};
+async function pflRankings() {
+  const html = (await get(PFL_RANKINGS, 'text')) ?? '';
+  const out = { champions: new Map(), ranks: new Map(), byName: new Map(), names: new Map(), p4p: new Map() };
+  const text = (s) => s.replace(/<br\s*\/?>/g, ' ').replace(/<[^>]+>/g, '').replace(/&#0?39;/g, "'").replace(/&amp;/g, '&').replace(/\s+/g, ' ').trim();
+  for (const box of html.split('class="rankings-box rankings-box-').slice(1)) {
+    const division = box.match(/^([a-z0-9_]+)/)?.[1];
+    const ranked = [...box.matchAll(/<span>(\d+)<\/span>[\s\S]*?<h6[^>]*>([\s\S]*?)<\/h6>/g)].map((m) => [nameKey(text(m[2])), Number(m[1])]);
+    for (const m of box.matchAll(/<h[46][^>]*>([\s\S]*?)<\/h[46]>/g)) out.names.set(nameKey(text(m[1])), text(m[1]));
+    if (division === 'mens_p4p') {
+      for (const [key, n] of ranked) out.p4p.set(key, n);
+      continue;
+    }
+    const tab = PFL_DIVISIONS[division];
+    if (!tab) continue;
+    const champion = box.match(/CHAMPION<\/div>\s*<h4[^>]*>([\s\S]*?)<\/h4>/)?.[1];
+    if (champion && !/vacant/i.test(champion)) out.champions.set(nameKey(text(champion)), tab);
+    for (const [key, n] of ranked) {
+      out.ranks.set(`${tab}/${key}`, n);
+      out.byName.set(key, n);
+    }
+    if (champion && !/vacant/i.test(champion)) out.byName.set(nameKey(text(champion)), 0);
+  }
+  return out;
+}
+
 // ---------------------------------------------------------------------------
 // A fighter's status on UFC.com ("Active", "Retired", "Not Fighting"...): his page's hero tags, the
 // page found by his name ("Stipe Miocic" -> /athlete/stipe-miocic). null when there's no such page.
@@ -353,6 +399,8 @@ const mapsFromJson = (json) => Object.fromEntries(Object.entries(json).map(([k, 
 
 const all = await bouts();
 const ranked = await lastGood('rankings', rankings, (r) => !r.champions.size, mapsToJson, mapsFromJson);
+const pflRanked = await lastGood('pflRankings', pflRankings, (r) => !r.ranks.size, mapsToJson, mapsFromJson);
+console.log(`PFL: ${pflRanked.champions.size} champions, ${pflRanked.ranks.size} ranked, ${pflRanked.p4p.size} pound-for-pound`);
 const titleHistory = await lastGood('titles', titles, (t) => !t.size, (t) => [...t], (json) => new Map(json));
 console.log(`Title history: ${titleHistory.size} champions, ${[...titleHistory.values()].reduce((s, t) => s + t.defenses, 0)} defenses`);
 console.log(`${all.length} fights; UFC.com: ${ranked.champions.size} champions, ${ranked.ranks.size} ranked`);
@@ -505,17 +553,39 @@ for (const id of active) {
   const title = titleHistory.get(key) ?? titleHistory.get(nameKey(name.split(' ').reverse().join(' '))) ?? { reigns: 0, defenses: 0 };
   const c = career(id, fights, cache[id]?.stats ?? {}, cache);
   const won = fights.filter((f) => f.fighters.find((x) => x.id === id).winner);
+  // His promotion's rank (Org Rank): the UFC's, or the PFL's for a PFL fighter (his last fight's
+  // promotion). Only with a fight there in the last year: otherwise he's fighting elsewhere (no rankings
+  // to read), or away long enough to be dropped from them, and no rank says nothing (inactive).
+  const org = fights[0].league;
+  // (the PFL fights less often: two years there, as for being active at all)
+  const orgFresh = (org === 'ufc' && fights[0].date >= yearAgo) || (org === 'pfl' && fights[0].date >= cutoff);
+  // (the PFL's names by ours, or by surname when the first names are spelled differently: Dovletdzhan
+  // Yagshimuradov for Dovlet; its rank in whichever division it lists him)
+  const pflKey = pflRanked.byName.has(key) ? key : uniqueSurname(pflRanked.names, name);
+  const pflChampion = pflRanked.champions.get(pflKey);
+  const pflDivision = pflKey ? (pflRanked.byName.get(pflKey) ?? null) : null;
+  const pflP4p = pflRanked.p4p.get(pflKey) ?? pflRanked.p4p.get(key) ?? null;
+  // (the rank shown, and what it counts as in the ranking on the 0-16 scale: the UFC's ranks as they are,
+  // the champion #0 and unranked #16; pound-for-pound, the P4P top 15 first (#1 = 0.5 ... #15 = 7.5), then
+  // his division rank behind them (its champion 7.5, #1 = 8 ... #15 = 15). The PFL ranks ten, so its ranks
+  // are stretched to the same scale (#10 = 15))
+  const orgRank = (tab) => {
+    if (org === 'pfl') {
+      const shown = tab === p4pTab ? pflP4p : pflDivision;
+      if (!orgFresh) return { officialRank: shown };
+      const scored = tab === p4pTab ? (pflP4p ? (pflP4p * 1.5) / 2 : pflDivision != null ? (15 + pflDivision * 1.5) / 2 : 16) : shown != null ? shown * 1.5 : 16;
+      return { officialRank: shown, rankScore: scored };
+    }
+    const shown = tab === p4pTab ? (p4p ?? null) : champion === tab ? 0 : (ranked.ranks.get(`${tab}/${key}`) ?? null);
+    return { officialRank: shown, ...(tab === p4pTab ? { rankScore: p4p ? p4p / 2 : divisionRank != null ? (15 + divisionRank) / 2 : null } : {}) };
+  };
   const row = (tab) => {
     const rating = tab === p4pTab ? p4pRating(id) : ratingIn(id, tab);
+    const { officialRank, rankScore } = orgRank(tab);
     return {
       division: tab === p4pTab ? (champion ?? home) : tab,
-      // (pound-for-pound: what his rank counts as in the ranking, on the division tabs' 0-16 scale: the P4P
-      // top 15 first (#1 = 0.5 ... #15 = 7.5), then his division rank behind them (its champion 7.5, #1 = 8
-      // ... #15 = 15), so a ranked contender stays above the unranked; null: neither)
-      ...(tab === p4pTab ? { rankScore: p4p ? p4p / 2 : divisionRank != null ? (15 + divisionRank) / 2 : null } : {}),
-      // (no UFC fight in a year: fighting elsewhere, or away long enough for the UFC to drop him from its
-      // rankings, so no rank says nothing)
-      inactive: !fights.some((f) => f.league === 'ufc' && f.date >= yearAgo),
+      ...(rankScore !== undefined ? { rankScore } : {}),
+      inactive: !orgFresh,
       titleHolder: champion === tab,
       id: Number(id),
       gsisId: id,
@@ -548,8 +618,9 @@ for (const id of active) {
         mainEventWins: won.filter((f) => f.rounds >= 5).length,
         titleWins: title.reigns + title.defenses,
         titleDefenses: title.defenses,
-        // (UFC.com's: the division's top 15, the champion above it as #0; pound-for-pound on that tab)
-        officialRank: tab === p4pTab ? (p4p ?? null) : champion === tab ? 0 : (ranked.ranks.get(`${tab}/${key}`) ?? null),
+        // (his promotion's: the division's top 15 (the PFL's top 10), the champion above it as #0;
+        // pound-for-pound on that tab)
+        officialRank,
         age: b?.age ?? null,
         reach: b?.reach ?? null,
       },

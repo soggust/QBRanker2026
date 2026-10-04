@@ -13,7 +13,7 @@ const PRESETS: SkillPresetDef[] = [
   {
     key: 'resume',
     label: 'Resume',
-    description: "Who he's beaten: his belts, the rating, his best win, quality wins, UFC rank, the record and the strength of his schedule",
+    description: "Who he's beaten: his belts, the rating, his best win, quality wins, org rank, the record and the strength of his schedule",
     weights: { titleDefenses: 100, titleWins: 100, officialRank: 70, rating: 90, bestWin: 90, qualityWins: 100, peakRating: 80, winPct: 70, oppRating: 70 },
   },
   {

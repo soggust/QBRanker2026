@@ -136,6 +136,10 @@ export const SPORT: SportConfig = {
       slot: 'display',
     },
   ],
+  // The rank column: his promotion's (the UFC's or the PFL's), or with UFC Fighters Only on, the UFC's
+  statLabel: (stat, settings) => (stat.key === 'officialRank' && settings['ufcOnly'] ? 'UFC Rank' : stat.label),
+  statName: (stat, _position, settings) =>
+    stat.key === 'officialRank' ? (settings['ufcOnly'] ? "UFC's Official Division Rank" : "His Promotion's Official Rank (UFC or PFL)") : undefined,
   // (no injury report, and a rookie season means nothing in a fighting career)
   noSwitches: ['showInjured', 'rookiesOnly'],
   // (the women's tabs or the men's, one set at a time)
@@ -146,7 +150,8 @@ export const SPORT: SportConfig = {
   // UFC Fighters Only: the others hidden, after the ranking (everyone's still measured against the whole
   // division, so the UFC fighters keep their order)
   rowShown: (player, settings) => !settings['ufcOnly'] || (allTime(settings) ? !!player.ufcCareer : player.promotion === 'UFC'),
-  // The UFC's rank in the ranking: a division's champion as #0 (above #1), an unranked fighter as #16
+  // His promotion's rank in the ranking (the PFL's stretched to the UFC's scale in the data: rankScore): a
+  // division's champion as #0 (above #1), an unranked fighter as #16
   // (just past the top 15). Unknown (average) for a retired fighter, and for one unranked without a UFC
   // fight in a year (fighting elsewhere, or dropped from the UFC's rankings for the layoff): that says
   // nothing about how good he is.

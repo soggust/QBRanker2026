@@ -125,6 +125,7 @@ export function rate(fights, p = PARAMS, { onBefore, onAfter } = {}) {
       s.fights++;
       if (lbs) s.lbs = lbs;
       s.women = women || s.women;
+      s.league = fight.league;
       state.set([a, b][i].id, s);
     }
     onAfter?.(fight, sa, sb);
@@ -157,8 +158,10 @@ export function tabOf(lbs, women) {
 // less down the list (0.85 a place), scaled by how deep the division was then (full points from 30
 // ranked fighters up), so ten years at the top of a deep division is worth the most. Also, for each
 // fighter: his peak cautious rating, the best opponent he beat and his quality wins (by the opponent's
-// cautious rating going in), and his opponents' average.
-export const POINTS = { places: 15, decay: 0.85, depth: 30, activeDays: 450, minFights: 3, qualityTop: 0.1 };
+// cautious rating going in), and his opponents' average. A month's points count in full while he fights in
+// a promotion that was the sport's premier competition (the UFC; PRIDE and Strikeforce in their day, and
+// the WEC for the lighter weights), half elsewhere: a long reign over a thinner field is worth less
+export const POINTS = { places: 15, decay: 0.85, depth: 30, activeDays: 450, minFights: 3, qualityTop: 0.1, premier: ['ufc', 'pride', 'strikeforce', 'wec'], elsewhere: 0.5 };
 
 export function history(fights, p = PARAMS) {
   const out = new Map();
@@ -184,7 +187,7 @@ export function history(fights, p = PARAMS) {
       const depth = Math.min(1, list.length / POINTS.depth);
       list.slice(0, POINTS.places).forEach(([id], i) => {
         const h = of(id);
-        const pts = (POINTS.decay ** i * depth) / 12;
+        const pts = ((POINTS.decay ** i * depth) / 12) * (POINTS.premier.includes(live.get(id).league) ? 1 : POINTS.elsewhere);
         h.points += pts;
         h.byTab[tab] = (h.byTab[tab] ?? 0) + pts;
         if (i === 0) h.months1++;

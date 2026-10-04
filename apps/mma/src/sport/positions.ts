@@ -157,7 +157,7 @@ export const STAT_NAMES: Partial<Record<SkillColumnKey, string>> = {
   qualityWins: 'Quality Wins (over opponents rated in the top tenth going in)',
   titleWins: 'Title Fight Wins (winning a belt, interim ones too, and each defense)',
   titleDefenses: 'Successful Title Defenses',
-  officialRank: "UFC's Official Division Rank",
+  officialRank: "His Promotion's Official Rank (UFC or PFL)",
   age: 'Age',
   reach: 'Reach (inches)',
 };
@@ -180,7 +180,7 @@ const MMA_STATS: SkillStat[] = [
   { key: 'games', label: 'Fights', description: 'Pro fights in the promotions covered: the UFC, PFL, Bellator, Rizin, PRIDE, Strikeforce, WEC, KSW, Cage Warriors and LFA (for context; not part of the ranking)', kind: 'efficiency', format: 'int', infoOnly: true },
   { key: 'winPct', label: 'Record', description: 'His whole pro record, wins-losses-draws, the regional fights before the big promotions too (ranked on win percentage)', kind: 'efficiency', format: 'record' },
   { key: 'recent', label: 'Recent', description: 'His last five fights, newest first (ranked on a recency-weighted win rate); counts double behind its slider in the current lists, not at all in the all-time ones', kind: 'efficiency', format: 'recent', boost: (settings) => (allTime(settings) ? 0 : 2) },
-  { key: 'officialRank', label: 'UFC Rank', description: "UFC.com's official rank in his division, or pound-for-pound on those tabs (a division's champion is #0, above #1; unranked UFC fighters as #16; fighters outside the UFC, or retired, as average); counts 6x behind its slider among current fighters, 1x in the all-time lists", kind: 'efficiency', format: 'rank', negative: true, missingIsAverage: true, scale: [0, 16], settled: true, boost: (settings) => (allTime(settings) ? 1 : 6) },
+  { key: 'officialRank', label: 'Org Rank', description: "His promotion's official rank in his division, or pound-for-pound on those tabs: UFC.com's top 15 for a UFC fighter, the PFL's top 10 for a PFL one (stretched to the same scale, its #10 counting as the UFC's #15). A champion is #0, above #1; an unranked fighter counts as #16; one fighting elsewhere (no rankings), or retired, as average. With UFC Fighters Only on, it's the UFC's rank. Counts 6x behind its slider among current fighters, 1x in the all-time lists", kind: 'efficiency', format: 'rank', negative: true, missingIsAverage: true, scale: [0, 16], settled: true, boost: (settings) => (allTime(settings) ? 1 : 6) },
   // (the title ones count double behind their sliders, the rating and career points 12x: the clearest marks of an elite career.
   // The career totals (titles, quality wins) don't count in the current lists, where form leads: careerTotal)
   { key: 'titleDefenses', label: 'Title Defenses', description: 'Successful UFC title defenses, across every reign (from Wikipedia\'s list of UFC champions); counts double behind its slider all-time, not at all in the current lists; scored in proportion, 0 to 10 (most fighters have none, so against the list one defense would score like ten)', kind: 'volume', format: 'int', boost: careerTotal(2), scale: [10, 0] },
