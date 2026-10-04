@@ -13,7 +13,9 @@ const THREE_YEARS_AGO = new Date(Date.now() - 1096 * 864e5).toISOString().slice(
 export function cardFlags({ player }: FlagContext): CardFlag[] {
   const flags: CardFlag[] = [];
   const st = player.stats;
+  // (his pro fights, all of them; the finishes and the striking come from the ones covered)
   const fights = player.games;
+  const covered = player.fights?.length ?? fights;
   const pct = (v: number) => `${Math.round(v * 100)}%`;
 
   if (fights < 4) {
@@ -28,16 +30,16 @@ export function cardFlags({ player }: FlagContext): CardFlag[] {
   // How he wins, and whether he gets finished
   if (st.finishRate !== null && st.finishes !== null && st.finishes >= 3 && st.finishRate >= 0.75) {
     flags.push({ icon: 'bolt', tone: 'good', text: `Finisher: ${pct(st.finishRate)} of his wins came inside the distance` });
-  } else if (st.finishRate !== null && fights >= 6 && st.finishRate <= 0.2) {
+  } else if (st.finishRate !== null && covered >= 6 && st.finishRate <= 0.2) {
     flags.push({ icon: 'gavel', tone: 'info', text: `Goes to the cards: ${pct(1 - st.finishRate)} of his wins were decisions` });
   }
-  if (fights >= 6 && st.finished === 0) {
-    flags.push({ icon: 'shield', tone: 'good', text: `Never finished in ${fights} fights` });
+  if (covered >= 6 && st.finished === 0) {
+    flags.push({ icon: 'shield', tone: 'good', text: `Never finished in ${covered} fights in the big promotions` });
   } else if (st.kdAgainst !== null && st.kdAgainst >= 0.6) {
     flags.push({ icon: 'warning', tone: 'bad', text: `Chin questions: knocked down ${st.kdAgainst.toFixed(2)} times per 15 minutes` });
   }
   // The striking battle
-  if (st.strDiff !== null && fights >= 4) {
+  if (st.strDiff !== null && covered >= 4) {
     if (st.strDiff >= 2) flags.push({ icon: 'sports_mma', tone: 'good', text: `Wins the striking: +${st.strDiff.toFixed(2)} significant strikes a minute` });
     else if (st.strDiff <= -1.5) flags.push({ icon: 'sports_mma', tone: 'bad', text: `Loses the striking: ${st.strDiff.toFixed(2)} significant strikes a minute` });
   }
@@ -101,7 +103,7 @@ export const SPORT: SportConfig = {
   roleWord: () => 'fighter',
   playingTime: {
     label: 'Fights',
-    title: 'Leave out fighters with fewer pro fights (in the promotions covered) than this (1 shows everyone)',
+    title: 'Leave out fighters with fewer pro fights than this (all of them, the regional ones too; 1 shows everyone)',
     // (his whole career: a champion new to a division is still listed there)
     of: (player) => player.games ?? 0,
     // (a count, not a share of the most anyone has: 6 to start, 2 a click. The rating weighs a short

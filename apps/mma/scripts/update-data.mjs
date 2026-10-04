@@ -373,6 +373,12 @@ async function titles() {
   return out;
 }
 
+// His pro fights, all of them (his bio's record), or those covered when the bio has none or fewer
+function proFights(pro, covered) {
+  const m = /^(\d+)-(\d+)(?:-(\d+))?/.exec(pro ?? '');
+  return m ? Math.max(covered, +m[1] + +m[2] + +(m[3] ?? 0)) : covered;
+}
+
 // His whole pro record (his bio's: the regional fights too) for the Record column, over the one from the
 // promotions covered; that one when the bio has none, or one short of the fights here
 function proRecord(pro, c) {
@@ -687,7 +693,8 @@ for (const id of active) {
       promotion: PROMOTIONS[fights[0].league] ?? null,
       // (a UFC fight in his career: the UFC Fighters Only setting's all-time lists)
       ufcCareer: fights.some((f) => f.league === 'ufc'),
-      games: fights.length,
+      // (his whole pro career, as the Record column reads it: the regional fights too)
+      games: proFights(b?.pro, fights.length),
       // (his own stats or his opponent's: what he absorbs comes from theirs)
       statFights: fights.filter((f) => cache[id]?.stats?.[f.id] || f.fighters.some((x) => x.id !== id && cache[x.id]?.stats?.[f.id])).length,
       rookie: fights[fights.length - 1].date >= debutCutoff,

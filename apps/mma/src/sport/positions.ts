@@ -86,8 +86,8 @@ export interface SkillPlayer {
   teamLogo: string;
   teamName?: string | null;
   country?: string | null;
-  // His pro fights in the promotions covered, and the ones with striking and grappling stats (the UFC's
-  // and PFL's)
+  // His pro fights, all of them (the regional ones too), and the ones with striking and grappling stats
+  // (the UFC's and PFL's)
   games: number;
   statFights?: number;
   // The division the row's belt is for (his own, or the one he holds, on pound-for-pound)
@@ -195,7 +195,6 @@ const boxBoost = (settings: SportSettings) => (allTime(settings) ? BOX_ALLTIME :
 
 // Every division has the same columns; the presets (skill-presets.ts) weigh them
 const MMA_STATS: SkillStat[] = [
-  { key: 'games', label: 'Fights', description: 'Pro fights in the promotions covered: the UFC, PFL, Bellator, Rizin, PRIDE, Strikeforce, WEC, KSW, Cage Warriors, LFA, DREAM, Shooto, Pancrase, K-1 HERO\'S, M-1, Affliction, the IFL and EliteXC (for context; not part of the ranking)', kind: 'efficiency', format: 'int', infoOnly: true },
   { key: 'winPct', label: 'Record', description: 'His whole pro record, wins-losses-draws, the regional fights before the big promotions too (ranked on win percentage; 3x behind its slider all-time)', kind: 'efficiency', format: 'record', boost: (settings) => (allTime(settings) ? 3 : 1) },
   { key: 'recent', label: 'Recent', description: 'His last five fights, newest first (ranked on a recency-weighted win rate); counts double behind its slider in the current lists, not at all in the all-time ones', kind: 'efficiency', format: 'recent', boost: (settings) => (allTime(settings) ? 0 : 2), shownWhen: (settings) => !allTime(settings) },
   { key: 'officialRank', label: 'Org Rank', description: "His promotion's official rank in his division, or pound-for-pound on those tabs: UFC.com's top 15 for a UFC fighter, the PFL's top 10 for a PFL one (counting five places below the UFC's, its field shallower: its champion as the UFC's #5, its #10 as #15). A champion is #0, above #1; an unranked fighter counts as #16; one fighting elsewhere (no rankings), or retired, as average. With UFC Fighters Only on, it's the UFC's rank. Counts 6x behind its slider among current fighters, 1x in the all-time lists", kind: 'efficiency', format: 'rank', negative: true, missingIsAverage: true, scale: [0, 16], settled: true, boost: (settings) => (allTime(settings) ? 1 : 6), shownWhen: (settings) => !allTime(settings) },
@@ -263,7 +262,6 @@ export const STAT_GROUP_INFO: { id: StatGroupId; title: string; icon: string }[]
 ];
 
 const RESULTS_STATS = new Set<SkillColumnKey>([
-  'games',
   'winPct',
   'recent',
   'officialRank',
