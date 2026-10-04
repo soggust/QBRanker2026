@@ -200,6 +200,8 @@ export const SPORT: SportConfig = {
   // (all-time, head to head settles close calls only: Weidman's two wins don't put him over Anderson
   // Silva's career)
   beatGap: (settings) => (allTime(settings) ? 1 / 3 : undefined),
+  // (the current lists: a recent win reaches two rows up, past one fighter between them)
+  beatReach: (settings) => (allTime(settings) ? 1 : 2),
   // A fighter's rates rest on few fights early on: 4 fights count half, 12 count three-quarters. The
   // striking and grappling stats count only the fights they were kept for (the UFC's and PFL's): a
   // Bellator veteran's few PFL fights are a small sample, however long his career
