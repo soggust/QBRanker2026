@@ -52,7 +52,7 @@
 }
 
 // ---------------------------------------------------------------------------
-// Header: the sport's ball and the app's name in the scoreboard's lettering, the X that closes the menu
+// Header: the sport's ball and the app's name in the names' hand, the X that closes the menu
 // ---------------------------------------------------------------------------
 .sidebar .logo {
   align-items: center;
@@ -65,9 +65,9 @@
     align-items: center;
     color: #fff;
     display: flex;
-    font-family: "Orbitron", sans-serif;
+    font-family: v.$font-hand;
     font-size: 1.35em;
-    font-weight: 500;
+    font-weight: 400;
     line-height: 1;
     margin: 0 0 0 0.5em;
     text-shadow: 0 0 6px rgba(255, 255, 255, 0.35);
@@ -412,7 +412,7 @@
 
   span.slider-value {
     color: #9a9a9a;
-    font-family: "DSEG7", "Orbitron", sans-serif;
+    font-family: "DSEG7", sans-serif;
     font-size: 0.65em;
     font-weight: bold;
     grid-area: value;

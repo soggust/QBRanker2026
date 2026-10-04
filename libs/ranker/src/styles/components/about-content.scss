@@ -8,7 +8,7 @@
 // Section headings in chalk, like the card's
 h3 {
   color: var(--scoreboard-led);
-  @include v.chalk(24px);
+  @include v.hand(24px);
   letter-spacing: 0.5px;
   margin: 0 0 12px;
 }

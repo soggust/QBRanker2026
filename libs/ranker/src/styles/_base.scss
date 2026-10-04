@@ -4,7 +4,7 @@
 // ===========================================================================
 @use "theme";
 @use "variables" as v;
-@import url("https://fonts.googleapis.com/css2?family=Zain:wght@400;700;800;900&family=Nunito:wght@400;500;600;700;800;900&family=Orbitron:wght@400;500;600;800;900&family=Cabin+Sketch:wght@400;700&family=DynaPuff:wght@400;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Zain:wght@400;700;800;900&family=Nunito:wght@400;500;600;700;800;900&family=DynaPuff:wght@400;600;700&display=swap");
 
 // LCD / segment-display fonts (open source, DSEG by keshikan)
 @font-face {
@@ -317,7 +317,7 @@ html {
 
     .min-games-value {
       color: var(--scoreboard-led) !important;
-      font-family: "Cabin Sketch", cursive !important;
+      font-family: v.$font-hand !important;
       font-size: 15px;
       font-weight: 700;
       margin: 0 7px;

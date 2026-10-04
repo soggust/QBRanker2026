@@ -349,7 +349,7 @@ section ul li.player {
   // The rank: a scoreboard tile with segment digits, lit gold for the top 5, green 2-10 (a trophy for #1),
   // red for the bottom 10, white between
   .count {
-    font-family: "DSEG7", "Orbitron", sans-serif;
+    font-family: "DSEG7", sans-serif;
     font-size: 1.15em;
     font-weight: 900;
     line-height: 1;
@@ -820,7 +820,7 @@ section ul li.player:not(.header-row) {
 
   > .col-group > div:not(.box) > p:not(.stat-label) {
     color: #f1efe6;
-    @include v.chalk(16px, 400);
+    @include v.hand(15px, 400);
     // A dark drop shadow and halo lift the chalk off the board; a faint glow keeps it powdery
     text-shadow:
       0 1px 2px rgba(0, 0, 0, 0.9),
@@ -1134,7 +1134,7 @@ section ul li.empty-list {
   border: none;
   color: rgba(255, 255, 255, 0.75);
   display: block;
-  font-family: "Orbitron", sans-serif;
+  font-family: v.$font-base;
   font-size: 14px;
   left: 0;
   letter-spacing: 2px;

@@ -249,7 +249,7 @@
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.45);
   color: #fff;
   display: inline-flex;
-  @include v.chalk(14px);
+  @include v.hand(14px);
   letter-spacing: 0.5px;
   padding: 1px 11px;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9);
@@ -304,7 +304,7 @@
   }
 
   .rank-number {
-    @include v.chalk(50px);
+    @include v.hand(50px);
     @include v.tone-glow(60%, 12px);
     line-height: 1.05;
   }
@@ -421,7 +421,7 @@
 
 .ov-archetype {
   color: var(--scoreboard-led);
-  @include v.chalk(32px);
+  @include v.hand(32px);
   line-height: 1.1;
   margin: 0 0 10px;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
@@ -632,14 +632,14 @@
 
 .skill-name {
   color: #fff;
-  @include v.chalk(22px);
+  @include v.hand(22px);
   line-height: 1.1;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
 }
 
 .skill-standing {
   flex: 0 0 auto;
-  @include v.chalk(18px);
+  @include v.hand(18px);
   @include v.tone-glow;
 }
 
@@ -699,12 +699,12 @@
 
 .comp-season {
   color: var(--scoreboard-led);
-  @include v.chalk(15px);
+  @include v.hand(15px);
   letter-spacing: 0.5px;
 }
 
 .comp-name {
-  @include v.chalk(19px);
+  @include v.hand(19px);
   line-height: 1.15;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -714,7 +714,7 @@
 
 .comp-match {
   flex: 0 0 auto;
-  @include v.chalk(24px);
+  @include v.hand(24px);
   @include v.tone-glow(45%);
 
   small {
@@ -855,7 +855,7 @@
 }
 
 .stat-rank {
-  @include v.chalk(18px);
+  @include v.hand(18px);
   @include v.tone-glow(45%);
   grid-area: rank;
   line-height: 1.1;
@@ -869,7 +869,7 @@
 
 .stat-value {
   color: #fff;
-  @include v.chalk(26px);
+  @include v.hand(26px);
   grid-area: value;
   line-height: 1.25;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
@@ -970,7 +970,7 @@
   padding: 0 0 2px;
 
   .arc-rank {
-    @include v.chalk(13px);
+    @include v.hand(13px);
     color: var(--tone);
     white-space: nowrap;
   }
@@ -987,7 +987,7 @@
   .arc-year {
     border-top: 1px solid rgba(255, 255, 255, 0.25);
     color: #bdbdbd;
-    @include v.chalk(13px);
+    @include v.hand(13px);
     padding-top: 3px;
     text-align: center;
     width: 100%;
@@ -1045,12 +1045,12 @@
   }
 
   .season-year {
-    @include v.chalk(20px);
+    @include v.hand(20px);
     white-space: nowrap;
   }
 
   .season-rank {
-    @include v.chalk(19px);
+    @include v.hand(19px);
     @include v.tone-glow;
     text-align: right;
     white-space: nowrap;
@@ -1085,7 +1085,7 @@
 
     b {
       color: #fff;
-      @include v.chalk(18px);
+      @include v.hand(18px);
       line-height: 1.05;
       text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
       white-space: nowrap;
@@ -1186,7 +1186,7 @@
 .history-result {
   border-radius: 4px;
   color: #111;
-  font-family: "Orbitron", sans-serif;
+  font-family: v.$font-base;
   font-size: 13px;
   font-weight: 900;
   line-height: 26px;
