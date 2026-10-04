@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, HostListener } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { PositionService } from '@ranker/engine/position.service';
 import { POSITIONS, Position } from '@sport/positions';
@@ -57,6 +57,15 @@ export class AppComponent {
 
   get sidebarCollapsed(): boolean {
     return !this.smallScreen.matches && !this.positionService.filtersOpen;
+  }
+
+  // A click outside the filter menu closes it: not one in its dropdowns' lists (they open over the page)
+  // or on the filter button (that toggles it)
+  @HostListener('document:pointerdown', ['$event'])
+  closeOnOutsideClick(event: PointerEvent): void {
+    if (!this.positionService.filtersOpen) return;
+    if ((event.target as Element | null)?.closest('.sidebar-shell, .cdk-overlay-container, .filter-toggle')) return;
+    this.closeFilters();
   }
 
   closeFilters(): void {

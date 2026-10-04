@@ -102,9 +102,7 @@ const headshot = espnHeadshot('nfl');
 
 export const SPORT: SportConfig = {
   id: 'nfl',
-  appName: 'NFL Ranker',
   // (the shared styles' own ball)
-  logoClass: 'logo-football',
   currentSeason: 2026,
   // (stats not recorded yet in a season, like drops before 2018, are hidden for it)
   firstSeason: 2000,

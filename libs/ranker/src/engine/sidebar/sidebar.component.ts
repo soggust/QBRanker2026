@@ -62,10 +62,6 @@ export class SidebarComponent implements OnInit {
 
   constructor(private positionService: PositionService) {}
 
-  closeFilters(): void {
-    this.positionService.setFiltersOpen(false);
-  }
-
   ngOnInit(): void {
     this.positionService.skillHidden$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((hidden) => {
       this.skillHidden = hidden[this.position] ?? {};
@@ -150,6 +146,11 @@ export class SidebarComponent implements OnInit {
   // white label and football
   skillRowOff(key: SkillColumnKey, parent?: SkillColumnKey): boolean {
     return this.skillStatHidden(key) || (!!parent && this.skillStatHidden(parent));
+  }
+
+  // The presets dropdown's placeholder: "QB Presets...", "Team Presets..." on a Teams tab
+  get presetsLabel(): string {
+    return `${(this.position as string) === 'TM' ? 'Team' : this.position} Presets...`;
   }
 
   // This tab's presets (skill-presets.ts)

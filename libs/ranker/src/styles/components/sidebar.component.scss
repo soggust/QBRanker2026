@@ -51,106 +51,12 @@
   width: 10px;
 }
 
-// ---------------------------------------------------------------------------
-// Header: the sport's ball and the app's name in the names' hand, the X that closes the menu
-// ---------------------------------------------------------------------------
-.sidebar .logo {
-  align-items: center;
-  display: flex;
-  justify-content: space-between;
-  padding: 2.85em 0.5em;
-  position: relative;
-
-  h1 {
-    align-items: center;
-    color: #fff;
-    display: flex;
-    font-family: v.$font-hand;
-    font-size: 1.35em;
-    font-weight: 400;
-    line-height: 1;
-    margin: 0 0 0 0.5em;
-    text-shadow: 0 0 6px rgba(255, 255, 255, 0.35);
-    text-transform: uppercase;
-    white-space: nowrap;
-  }
-
-  // The ball: the slider knobs' brown leather and white laces, tilted (a sport's theme draws its own)
-  h1 .logo-football {
-    background:
-      radial-gradient(ellipse at 40% 25%, rgba(255, 255, 255, 0.25), transparent 65%),
-      var(--tex-leather) center / 40px,
-      #a8602f;
-    background-blend-mode: normal, soft-light, normal;
-    border-radius: 50%;
-    box-shadow:
-      0 2px 5px rgba(0, 0, 0, 0.75),
-      0 0 0 1.5px rgba(0, 0, 0, 0.35);
-    display: inline-block;
-    flex: 0 0 auto;
-    font-size: 0.7em;
-    height: 17px;
-    // Centered over the cards' icons below
-    margin-left: 6.5px;
-    margin-right: calc(0.75em + 4px);
-    position: relative;
-    // Centered on the capital letters (flex centering sits it on the line box, a touch low)
-    top: -0.25px;
-    transform: rotate(-40deg);
-    width: 27px;
-
-    &::after {
-      background:
-        linear-gradient(#fff, #fff) center / 100% 1.5px no-repeat,
-        repeating-linear-gradient(90deg, #fff 0 1.5px, transparent 1.5px 3px) center / 100% 6px no-repeat;
-      content: "";
-      height: 6px;
-      left: 50%;
-      position: absolute;
-      top: 50%;
-      transform: translate(-50%, -50%);
-      width: 11px;
-    }
-  }
-
-  // The X, level with the name: white, yellow on hover or keyboard focus (like the About panel's)
-  .filters-close {
-    align-items: center;
-    background: none;
-    border: none;
-    color: #fff;
-    cursor: pointer;
-    display: inline-flex;
-    flex: 0 0 auto;
-    height: 28px;
-    justify-content: center;
-    padding: 0;
-    width: 28px;
-
-    .mat-icon {
-      color: inherit;
-      font-size: 20px;
-      height: 20px;
-      margin-right: 0.5em;
-      position: relative;
-      top: -0.1em;
-      width: 20px;
-    }
-
-    &:hover,
-    &:focus-visible {
-      color: var(--scoreboard-led);
-      outline: none;
-    }
-  }
-}
-
-// The header and footer sit on the field's sidelines: a 4px line with hash marks running into the menu
-// (down from the header, up from the footer), four little ones to each big one like the grid's category
-// lines. Drawn in solid white and faded as a whole, so where a big and a little hash overlap they don't
-// double up. (A sport's theme draws its own lines.)
+// The menu's top and its footer sit on the field's sidelines: a 4px line with hash marks running into the
+// menu (down from the top, up from the footer), four little ones to each big one like the grid's
+// category lines. Drawn in solid white and faded as a whole, so where a big and a little hash overlap they
+// don't double up. (A sport's theme draws its own lines.)
 .sidebar {
-  .logo::after,
+  &::before,
   footer::before {
     // (past the 4px line, the big hashes reach 10px and the little ones 5px)
     background:
@@ -168,9 +74,9 @@
   }
 
   // (--hash-edge: the side the line sits on)
-  .logo::after {
+  &::before {
     --hash-edge: top;
-    top: 100%;
+    top: 0;
   }
 
   footer::before {
@@ -575,18 +481,9 @@
 // The sport's own touches (apps/<sport>/src/theme/_sport-sidebar.scss)
 @include meta.load-css("sport-sidebar");
 
-// Phones: a slimmer header and footer (more room for the sliders), and less room around the presets.
-// Last in the file so it wins over the sports' own touches.
+// Phones: a slimmer footer (more room for the sliders), and less room around the presets. Last in the
+// file so it wins over the sports' own touches.
 @media (max-width: 575px) {
-  .sidebar .logo {
-    padding-bottom: 1.1em;
-    padding-top: 1.1em;
-
-    h1 {
-      font-size: 1.15em;
-    }
-  }
-
   .sidebar footer {
     height: auto;
     padding: 0.6em 1em;

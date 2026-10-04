@@ -211,28 +211,10 @@ $switch: "html .mat-mdc-slide-toggle.mat-accent";
 // ---------------------------------------------------------------------------
 // The filter menu
 // ---------------------------------------------------------------------------
-// The logo's ball: the sport's own (drawn by $background), upright, in place of the tilted football
-@mixin logo-ball($class, $background, $size: 18px) {
-  .sidebar .logo h1 .#{$class} {
-    background: $background;
-    background-blend-mode: normal;
-    height: $size;
-    transform: none;
-    width: $size;
-
-    &::before,
-    &::after {
-      display: none;
-    }
-
-    @content;
-  }
-}
-
-// The header's and footer's edges: a painted line ($color, faded to $opacity) instead of a sideline
-// with hash marks
+// The menu's top and footer edges: a painted line ($color, faded to $opacity) instead of a sideline with
+// hash marks
 @mixin painted-menu-edges($color, $opacity, $sheen: 0.4) {
-  .sidebar .logo::after,
+  .sidebar::before,
   .sidebar footer::before {
     background:
       linear-gradient(transparent 30%, rgba(255, 255, 255, $sheen) 50%, transparent 70%) 0 var(--hash-edge) / 100% 3px no-repeat,

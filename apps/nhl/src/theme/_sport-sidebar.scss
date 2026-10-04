@@ -1,21 +1,16 @@
 @use "sport-kit" as kit;
 
-// NHL filter menu touches: the logo's ball a puck (the app's, like the favicon and the slider knobs),
-// glowing ice blue, and the header's and footer's edges a rink's painted lines: a blue line over the
-// footer, and under the header the red center line with the blue center-ice faceoff dot on it
-@include kit.logo-ball(logo-puck, url("../assets/textures/puck.svg") center / 100% 100% no-repeat) {
-  filter: drop-shadow(0 0 3px rgba(90, 190, 255, 0.85));
-}
-
+// NHL filter menu touches: its edges a rink's painted lines (solid, with a faint sheen down the middle): a
+// blue line over the footer, and along the top the red center line with the blue center-ice faceoff dot
 @include kit.painted-menu-edges(#2a6fd6, 0.55);
 
-.sidebar .logo::after {
+.sidebar::before {
   background:
     radial-gradient(circle, #2a6fd6 0 5px, transparent 5.5px) 50% 50% / 12px 12px no-repeat,
     linear-gradient(transparent 30%, rgba(255, 255, 255, 0.4) 50%, transparent 70%) 0 50% / 100% 3px no-repeat,
     linear-gradient(#d0213a, #d0213a) 0 50% / 100% 3px no-repeat;
   height: 12px;
-  // (the line stays where it was, the dot centered on it)
+  // (the line at the top edge, the dot centered on it)
   margin-top: -4.5px;
   opacity: 0.6;
 }

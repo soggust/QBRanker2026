@@ -1,6 +1,4 @@
 @use "sport-kit" as kit;
 
-// NBA filter menu touches: the logo's ball a basketball (the app's, like the favicon and the slider
-// knobs), and the header's and footer's edges painted court lines in court-paint white
-@include kit.logo-ball(logo-basketball, url("../assets/textures/basketball.svg") center / 100% 100% no-repeat);
+// NBA filter menu touches: its top and footer edges painted court lines in court-paint white
 @include kit.painted-menu-edges(#efe6d8, 0.35, 0.45);

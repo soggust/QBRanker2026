@@ -1,6 +1,4 @@
 @use "sport-kit" as kit;
 
-// UFC filter menu touches: the logo's ball the octagon, seen from above, and the header's and footer's
-// edges the cage's padded top rail (a solid red band)
-@include kit.logo-ball(logo-octagon, url("../assets/textures/octagon.svg") center / 100% 100% no-repeat, 20px);
+// MMA filter menu touches: its top and footer edges the cage's padded top rail (a solid red band)
 @include kit.painted-menu-edges(#d61a1f, 0.6, 0.35);

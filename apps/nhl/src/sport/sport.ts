@@ -120,8 +120,6 @@ export function cardFlags({ player, position, current }: FlagContext): CardFlag[
 
 export const SPORT: SportConfig = {
   id: 'nhl',
-  appName: 'NHL Ranker',
-  logoClass: 'logo-puck',
   // (a season is named for the year it ends in: 2026 is 2025-26)
   currentSeason: 2027,
   // (MoneyPuck's expected-goals data starts with 2008-09)

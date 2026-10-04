@@ -188,9 +188,6 @@ export interface CardHost {
 export interface SportConfig {
   // The site path and the sport bar's id ('nba': served at /nba/)
   id: string;
-  // The filter menu's title ("NBA Ranker") and its ball's class (styled in the sport's theme)
-  appName: string;
-  logoClass: string;
   // The season updated every night, and the first one kept (finished seasons in StaticData/seasons)
   currentSeason: number;
   firstSeason: number;

@@ -1,17 +1,5 @@
-@use "sport-kit" as kit;
-
-// MLB filter menu touches: the logo's ball a baseball (upright, round), and the header's and footer's
-// edges a chalked baseline (the same chalk line as the table's)
-@include kit.logo-ball(
-  logo-baseball,
-  (
-    radial-gradient(ellipse 76% 95% at -48% 50%, transparent 96%, #c8102e 97%, #c8102e 104%, transparent 105%),
-    radial-gradient(ellipse 76% 95% at 148% 50%, transparent 96%, #c8102e 97%, #c8102e 104%, transparent 105%),
-    radial-gradient(circle at 38% 30%, #fff, #f1ece0 60%, #c9c1ae)
-  )
-);
-
-.sidebar .logo::after,
+// MLB filter menu touches: its top and footer edges a chalked baseline (the same chalk line as the table's)
+.sidebar::before,
 .sidebar footer::before {
   background: url("../assets/textures/chalk-line-h.svg") 0 var(--hash-edge) / 150px 10px repeat-x;
   height: 10px;

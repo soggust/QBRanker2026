@@ -112,8 +112,6 @@ export function cardFlags({ player, position, current, ordinal, innings }: FlagC
 
 export const SPORT: SportConfig = {
   id: 'nba',
-  appName: 'NBA Ranker',
-  logoClass: 'logo-basketball',
   // (a season is named for the year it ends in: 2026 is 2025-26)
   currentSeason: 2026,
   firstSeason: 2001,

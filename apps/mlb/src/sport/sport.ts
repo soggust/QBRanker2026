@@ -63,8 +63,6 @@ export function cardFlags({ player, position, current, ordinal, innings }: FlagC
 
 export const SPORT: SportConfig = {
   id: 'mlb',
-  appName: 'MLB Ranker',
-  logoClass: 'logo-baseball',
   currentSeason: 2026,
   firstSeason: 2000,
   // (after the World Series)

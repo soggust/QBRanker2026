@@ -62,8 +62,6 @@ const fightRows = (player: { fights?: [string, string, 'W' | 'L' | 'D', string, 
 
 export const SPORT: SportConfig = {
   id: 'ufc',
-  appName: 'UFC Ranker',
-  logoClass: 'logo-octagon',
   // (one career table: the "season" is today's)
   currentSeason: 2026,
   firstSeason: 2026,
