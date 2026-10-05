@@ -1228,61 +1228,9 @@ async function qbBoxStats(id) {
   };
 }
 
-// Every passer's box score, added up over the games read (gameStarters): athlete id -> totals. The QBs'
-// box stats come from these, the same games as their records, so the two always agree (ESPN's season
-// totals lag a day or so behind its game summaries)
-const boxTotals = new Map();
-function addBoxScore(summary) {
-  for (const team of summary.boxscore?.players ?? []) {
-    const category = (name) => team.statistics.find((c) => c.name === name);
-    const line = (name, id) => {
-      const c = category(name);
-      const a = c?.athletes.find((x) => x.athlete.id === id);
-      return a ? Object.fromEntries(c.keys.map((k, i) => [k, a.stats[i]])) : null;
-    };
-    for (const { athlete } of category('passing')?.athletes ?? []) {
-      const pass = line('passing', athlete.id);
-      const [completions, attempts] = String(pass['completions/passingAttempts'] ?? '0/0').split('/').map(Number);
-      const rush = line('rushing', athlete.id);
-      const fumbles = line('fumbles', athlete.id);
-      const t = boxTotals.get(athlete.id) ?? { games: 0, completions: 0, attempts: 0, passYards: 0, passTd: 0, ints: 0, rushYards: 0, rushTd: 0, fumLost: 0 };
-      t.games++;
-      t.completions += completions || 0;
-      t.attempts += attempts || 0;
-      t.passYards += Number(pass.passingYards) || 0;
-      t.passTd += Number(pass.passingTouchdowns) || 0;
-      t.ints += Number(pass.interceptions) || 0;
-      t.rushYards += Number(rush?.rushingYards) || 0;
-      t.rushTd += Number(rush?.rushingTouchdowns) || 0;
-      t.fumLost += Number(fumbles?.fumblesLost) || 0;
-      boxTotals.set(athlete.id, t);
-    }
-  }
-}
-
-// A QB's box stats from his games' box scores (boxTotals), in qbBoxStats's shape; null if he has none
-function summedBoxStats(id) {
-  const t = boxTotals.get(String(id));
-  if (!t) return null;
-  return {
-    // (the games he has a box score line in; the realGames count below decides when it's known)
-    games: t.games,
-    fumLost: t.fumLost,
-    passYards: t.passYards,
-    passTd: t.passTd,
-    ints: t.ints,
-    compPercent: t.attempts ? round((t.completions / t.attempts) * 100, 1) : 0,
-    ypa: t.attempts ? round(t.passYards / t.attempts, 2) : 0,
-    rating: passerRating(t.completions, t.attempts, t.passYards, t.passTd, t.ints),
-    rushYards: t.rushYards,
-    rushTd: t.rushTd,
-  };
-}
-
 // Returns [{ athlete, team, result }] for both teams in a game
 async function gameStarters(game) {
   const summary = await getJson(`${SITE}/summary?event=${game.id}`);
-  addBoxScore(summary);
   const competitors = summary.header.competitions[0].competitors;
   const tie = competitors.every((c) => !c.winner);
 
@@ -1391,10 +1339,9 @@ async function main() {
   const missing = gameData.filter((qb) => !qb.advanced).map((qb) => qb.name);
   if (missing.length) console.warn(`No advanced stats for: ${missing.join(', ')}`);
 
-  // Box stats (passing, rushing, rating): added up from the same games' box scores as the records, so a
-  // QB's stats and record always cover the same games; ESPN's season totals (which lag behind) only for
-  // one with no box score lines, and yesterday's if ESPN can't be reached
-  const boxes = await mapBatched(gameData, 8, (qb) => summedBoxStats(qb.id) ?? qbBoxStats(qb.id).catch(() => undefined));
+  // Box stats (games, passing, rushing, rating) from ESPN in the same run as the results, so a
+  // QB's stats and record always change together; keep yesterday's if ESPN can't be reached
+  const boxes = await mapBatched(gameData, 8, (qb) => qbBoxStats(qb.id).catch(() => undefined));
   gameData.forEach((qb, i) => {
     qb.box = boxes[i] === undefined ? (previous.find((p) => p.id === qb.id)?.box ?? null) : boxes[i];
     // Games played: starts plus real relief appearances, not ESPN's every-snap count (see QB_GAME_PLAYS)
