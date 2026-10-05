@@ -1010,8 +1010,28 @@ section ul li.player.header-row:hover {
       text-shadow: none;
       top: 50%;
       transform: translateY(-50%);
+      transition:
+        filter 0.12s ease,
+        text-shadow 0.12s ease,
+        transform 0.12s ease;
       width: 17px;
       z-index: 1;
+
+      // (it collapses and opens the group: a lift, a little brighter, a glow in the group's color)
+      &:hover {
+        filter: brightness(1.3);
+        text-shadow: 0 0 8px color-mix(in srgb, var(--group-color) 70%, transparent);
+        transform: translateY(-50%) scale(1.18);
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        transition: none;
+      }
+    }
+
+    // (a collapsed strip's "…" lights up with its icon)
+    &.collapsed-strip:has(> .group-icon:hover) .collapsed-more {
+      filter: brightness(1.3);
     }
   }
 }
