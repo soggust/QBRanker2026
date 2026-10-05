@@ -440,7 +440,7 @@ export class SkillRankingsComponent implements OnChanges, CardHost {
   }
 
   collapseTitle(group: { id: StatGroupId; title: string }): string {
-    return `${group.title}: click to ${this.isCollapsed(group.id) ? 'show its columns' : 'collapse it to a strip (its stats still count)'}`;
+    return `${group.title}: Click to ${this.isCollapsed(group.id) ? 'Expand' : 'Collapse'}`;
   }
 
   // Games in a row's record its stats don't cover yet (the data's statsBehind; the current season only)
