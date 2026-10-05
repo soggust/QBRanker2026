@@ -56,7 +56,8 @@ async function teamRecent(season, teamCount) {
       if (!key || !away || !home || awayPts === null || homePts === null) continue;
       const awayName = decode(cells.match(/data-stat="visitor_team_name"[^>]*>([\s\S]*?)<\/td>/)?.[1] ?? '') || away;
       const homeName = decode(cells.match(/data-stat="home_team_name"[^>]*>([\s\S]*?)<\/td>/)?.[1] ?? '') || home;
-      for (const [team, mine, theirs, opponent] of [[away, awayPts, homePts, homeName], [home, homePts, awayPts, awayName]]) {
+      // (whom it came against, "@ Boston Celtics" away or "vs Miami Heat" at home: the Recent dot's hover)
+      for (const [team, mine, theirs, opponent] of [[away, awayPts, homePts, `@ ${homeName}`], [home, homePts, awayPts, `vs ${awayName}`]]) {
         (games.get(team) ?? games.set(team, []).get(team)).push([key, mine > theirs ? 1 : 0, opponent]);
       }
     }

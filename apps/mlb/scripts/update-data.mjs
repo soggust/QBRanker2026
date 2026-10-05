@@ -382,7 +382,9 @@ async function teamRows(season, teamDef, parks, logo) {
         const t = game.teams?.[side];
         if (!t) continue;
         if (t.isWinner && game.gameType !== 'R') playoffWins.set(t.team.id, (playoffWins.get(t.team.id) ?? 0) + 1);
-        const other = game.teams?.[side === 'home' ? 'away' : 'home']?.team?.name ?? null;
+        // (whom it came against, "@ Chicago Cubs" away or "vs New York Mets" at home: the Recent dot's hover)
+        const otherName = game.teams?.[side === 'home' ? 'away' : 'home']?.team?.name;
+        const other = otherName ? `${side === 'home' ? 'vs' : '@'} ${otherName}` : null;
         if (final && t.isWinner !== undefined) (results.get(t.team.id) ?? results.set(t.team.id, []).get(t.team.id)).push([game.gameDate, t.isWinner ? 1 : 0, other]);
       }
     }

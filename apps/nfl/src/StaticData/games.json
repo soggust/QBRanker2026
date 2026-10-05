@@ -14,10 +14,10 @@
       1
     ],
     "lastFiveVs": [
-      "Cleveland Browns",
-      "Cincinnati Bengals",
-      "New England Patriots",
-      "Atlanta Falcons"
+      "@ Cleveland Browns",
+      "vs Cincinnati Bengals",
+      "@ New England Patriots",
+      "vs Atlanta Falcons"
     ],
     "starts": {
       "assets/NFL_Icons/Steelers.png": 4
@@ -68,7 +68,7 @@
       0
     ],
     "lastFiveVs": [
-      "Indianapolis Colts"
+      "vs Indianapolis Colts"
     ],
     "starts": {
       "assets/NFL_Icons/Commanders.png": 1
@@ -121,9 +121,9 @@
       0
     ],
     "lastFiveVs": [
-      "Minnesota Vikings",
-      "Cleveland Browns",
-      "Cincinnati Bengals"
+      "vs Minnesota Vikings",
+      "vs Cleveland Browns",
+      "@ Cincinnati Bengals"
     ],
     "starts": {
       "assets/NFL_Icons/Bucs.png": 3
@@ -177,10 +177,10 @@
       0
     ],
     "lastFiveVs": [
-      "San Francisco 49ers",
-      "Los Angeles Rams",
-      "Jacksonville Jaguars",
-      "Kansas City Chiefs"
+      "@ San Francisco 49ers",
+      "vs Los Angeles Rams",
+      "vs Jacksonville Jaguars",
+      "@ Kansas City Chiefs"
     ],
     "starts": {
       "assets/NFL_Icons/Broncos.png": 4
@@ -234,10 +234,10 @@
       1
     ],
     "lastFiveVs": [
-      "Denver Broncos",
-      "Arizona Cardinals",
-      "Miami Dolphins",
-      "Los Angeles Rams"
+      "vs Denver Broncos",
+      "vs Arizona Cardinals",
+      "vs Miami Dolphins",
+      "@ Los Angeles Rams"
     ],
     "starts": {
       "assets/NFL_Icons/49ers.png": 4
@@ -291,10 +291,10 @@
       0
     ],
     "lastFiveVs": [
-      "Detroit Lions",
-      "Cleveland Browns",
-      "Atlanta Falcons",
-      "Chicago Bears"
+      "vs Detroit Lions",
+      "@ Cleveland Browns",
+      "@ Atlanta Falcons",
+      "vs Chicago Bears"
     ],
     "starts": {
       "assets/NFL_Icons/Panthers.png": 4
@@ -321,13 +321,13 @@
     "box": {
       "games": 4,
       "fumLost": 0,
-      "passYards": 939,
-      "passTd": 7,
+      "passYards": 1268,
+      "passTd": 9,
       "ints": 2,
-      "compPercent": 59.5,
-      "ypa": 7.76,
-      "rating": 96.4,
-      "rushYards": 16,
+      "compPercent": 62.3,
+      "ypa": 7.83,
+      "rating": 100,
+      "rushYards": 19,
       "rushTd": 1
     },
     "injuryStatus": "Active",
@@ -348,10 +348,10 @@
       0
     ],
     "lastFiveVs": [
-      "Dallas Cowboys",
-      "Indianapolis Colts",
-      "Cincinnati Bengals",
-      "Buffalo Bills"
+      "vs Dallas Cowboys",
+      "@ Indianapolis Colts",
+      "vs Cincinnati Bengals",
+      "vs Buffalo Bills"
     ],
     "starts": {
       "assets/NFL_Icons/Texans.png": 4
@@ -403,8 +403,8 @@
       1
     ],
     "lastFiveVs": [
-      "Minnesota Vikings",
-      "Carolina Panthers"
+      "vs Minnesota Vikings",
+      "@ Carolina Panthers"
     ],
     "starts": {
       "assets/NFL_Icons/Bears.png": 2
@@ -458,10 +458,10 @@
       0
     ],
     "lastFiveVs": [
-      "Baltimore Ravens",
-      "New York Giants",
-      "Philadelphia Eagles",
-      "New York Jets"
+      "@ Baltimore Ravens",
+      "@ New York Giants",
+      "vs Philadelphia Eagles",
+      "vs New York Jets"
     ],
     "starts": {
       "assets/NFL_Icons/Titans.png": 4
@@ -513,8 +513,8 @@
       1
     ],
     "lastFiveVs": [
-      "Chicago Bears",
-      "Green Bay Packers"
+      "@ Chicago Bears",
+      "vs Green Bay Packers"
     ],
     "starts": {
       "assets/NFL_Icons/Vikings.png": 2
@@ -565,7 +565,7 @@
       1
     ],
     "lastFiveVs": [
-      "Philadelphia Eagles"
+      "vs Philadelphia Eagles"
     ],
     "starts": {
       "assets/NFL_Icons/Bears.png": 1
@@ -617,8 +617,8 @@
       0
     ],
     "lastFiveVs": [
-      "Carolina Panthers",
-      "Pittsburgh Steelers"
+      "vs Carolina Panthers",
+      "@ Pittsburgh Steelers"
     ],
     "starts": {
       "assets/NFL_Icons/Falcons.png": 2
@@ -672,10 +672,10 @@
       0
     ],
     "lastFiveVs": [
-      "Houston Texans",
-      "Baltimore Ravens",
-      "Washington Commanders",
-      "New York Giants"
+      "@ Houston Texans",
+      "vs Baltimore Ravens",
+      "vs Washington Commanders",
+      "@ New York Giants"
     ],
     "starts": {
       "assets/NFL_Icons/Cowboys.png": 4
@@ -729,10 +729,10 @@
       0
     ],
     "lastFiveVs": [
-      "Washington Commanders",
-      "Houston Texans",
-      "Kansas City Chiefs",
-      "Baltimore Ravens"
+      "@ Washington Commanders",
+      "vs Houston Texans",
+      "@ Kansas City Chiefs",
+      "vs Baltimore Ravens"
     ],
     "starts": {
       "assets/NFL_Icons/Colts.png": 4
@@ -786,10 +786,10 @@
       0
     ],
     "lastFiveVs": [
-      "Pittsburgh Steelers",
-      "Carolina Panthers",
-      "Tampa Bay Buccaneers",
-      "Jacksonville Jaguars"
+      "vs Pittsburgh Steelers",
+      "vs Carolina Panthers",
+      "@ Tampa Bay Buccaneers",
+      "@ Jacksonville Jaguars"
     ],
     "starts": {
       "assets/NFL_Icons/Browns.png": 4
@@ -843,10 +843,10 @@
       0
     ],
     "lastFiveVs": [
-      "Buffalo Bills",
-      "Jacksonville Jaguars",
-      "Pittsburgh Steelers",
-      "Seattle Seahawks"
+      "@ Buffalo Bills",
+      "@ Jacksonville Jaguars",
+      "vs Pittsburgh Steelers",
+      "@ Seattle Seahawks"
     ],
     "starts": {
       "assets/NFL_Icons/Patriots.png": 4
@@ -898,8 +898,8 @@
       1
     ],
     "lastFiveVs": [
-      "Arizona Cardinals",
-      "New England Patriots"
+      "@ Arizona Cardinals",
+      "vs New England Patriots"
     ],
     "starts": {
       "assets/NFL_Icons/Seahawks.png": 2
@@ -953,10 +953,10 @@
       1
     ],
     "lastFiveVs": [
-      "Chicago Bears",
-      "Detroit Lions",
-      "Green Bay Packers",
-      "Tennessee Titans"
+      "@ Chicago Bears",
+      "@ Detroit Lions",
+      "vs Green Bay Packers",
+      "@ Tennessee Titans"
     ],
     "starts": {
       "assets/NFL_Icons/Jets.png": 4
@@ -1010,10 +1010,10 @@
       1
     ],
     "lastFiveVs": [
-      "New York Giants",
-      "San Francisco 49ers",
-      "Seattle Seahawks",
-      "Los Angeles Chargers"
+      "@ New York Giants",
+      "@ San Francisco 49ers",
+      "vs Seattle Seahawks",
+      "@ Los Angeles Chargers"
     ],
     "starts": {
       "assets/NFL_Icons/Cardinals.png": 4
@@ -1067,10 +1067,10 @@
       1
     ],
     "lastFiveVs": [
-      "Los Angeles Rams",
-      "Chicago Bears",
-      "Tennessee Titans",
-      "Washington Commanders"
+      "vs Los Angeles Rams",
+      "@ Chicago Bears",
+      "@ Tennessee Titans",
+      "vs Washington Commanders"
     ],
     "starts": {
       "assets/NFL_Icons/Eagles.png": 4
@@ -1121,7 +1121,7 @@
       0
     ],
     "lastFiveVs": [
-      "Green Bay Packers"
+      "vs Green Bay Packers"
     ],
     "starts": {
       "assets/NFL_Icons/Bucs.png": 1
@@ -1174,9 +1174,9 @@
       0
     ],
     "lastFiveVs": [
-      "Arizona Cardinals",
-      "Tennessee Titans",
-      "Los Angeles Rams"
+      "vs Arizona Cardinals",
+      "vs Tennessee Titans",
+      "@ Los Angeles Rams"
     ],
     "starts": {
       "assets/NFL_Icons/Giants.png": 3
@@ -1230,10 +1230,10 @@
       1
     ],
     "lastFiveVs": [
-      "Carolina Panthers",
-      "New York Jets",
-      "Buffalo Bills",
-      "New Orleans Saints"
+      "@ Carolina Panthers",
+      "vs New York Jets",
+      "@ Buffalo Bills",
+      "vs New Orleans Saints"
     ],
     "starts": {
       "assets/NFL_Icons/Lions.png": 4
@@ -1284,7 +1284,7 @@
       1
     ],
     "lastFiveVs": [
-      "Dallas Cowboys"
+      "vs Dallas Cowboys"
     ],
     "starts": {
       "assets/NFL_Icons/Giants.png": 1
@@ -1336,8 +1336,8 @@
       0
     ],
     "lastFiveVs": [
-      "Dallas Cowboys",
-      "Philadelphia Eagles"
+      "@ Dallas Cowboys",
+      "@ Philadelphia Eagles"
     ],
     "starts": {
       "assets/NFL_Icons/Commanders.png": 2
@@ -1391,10 +1391,10 @@
       1
     ],
     "lastFiveVs": [
-      "Jacksonville Jaguars",
-      "Pittsburgh Steelers",
-      "Houston Texans",
-      "Tampa Bay Buccaneers"
+      "vs Jacksonville Jaguars",
+      "@ Pittsburgh Steelers",
+      "@ Houston Texans",
+      "vs Tampa Bay Buccaneers"
     ],
     "starts": {
       "assets/NFL_Icons/Bengals.png": 4
@@ -1448,10 +1448,10 @@
       0
     ],
     "lastFiveVs": [
-      "Tampa Bay Buccaneers",
-      "Atlanta Falcons",
-      "New York Jets",
-      "Minnesota Vikings"
+      "@ Tampa Bay Buccaneers",
+      "vs Atlanta Falcons",
+      "@ New York Jets",
+      "@ Minnesota Vikings"
     ],
     "starts": {
       "assets/NFL_Icons/Packers.png": 4
@@ -1505,10 +1505,10 @@
       1
     ],
     "lastFiveVs": [
-      "New England Patriots",
-      "Los Angeles Chargers",
-      "Detroit Lions",
-      "Houston Texans"
+      "vs New England Patriots",
+      "vs Los Angeles Chargers",
+      "vs Detroit Lions",
+      "@ Houston Texans"
     ],
     "starts": {
       "assets/NFL_Icons/Bills.png": 4
@@ -1562,10 +1562,10 @@
       0
     ],
     "lastFiveVs": [
-      "Seattle Seahawks",
-      "Buffalo Bills",
-      "Las Vegas Raiders",
-      "Arizona Cardinals"
+      "@ Seattle Seahawks",
+      "@ Buffalo Bills",
+      "vs Las Vegas Raiders",
+      "vs Arizona Cardinals"
     ],
     "starts": {
       "assets/NFL_Icons/Chargers.png": 4
@@ -1619,10 +1619,10 @@
       1
     ],
     "lastFiveVs": [
-      "Kansas City Chiefs",
-      "New Orleans Saints",
-      "Los Angeles Chargers",
-      "Miami Dolphins"
+      "vs Kansas City Chiefs",
+      "@ New Orleans Saints",
+      "@ Los Angeles Chargers",
+      "vs Miami Dolphins"
     ],
     "starts": {
       "assets/NFL_Icons/Raiders.png": 4
@@ -1674,8 +1674,8 @@
       1
     ],
     "lastFiveVs": [
-      "Miami Dolphins",
-      "Tampa Bay Buccaneers"
+      "vs Miami Dolphins",
+      "@ Tampa Bay Buccaneers"
     ],
     "starts": {
       "assets/NFL_Icons/Vikings.png": 2
@@ -1729,10 +1729,10 @@
       1
     ],
     "lastFiveVs": [
-      "Tennessee Titans",
-      "Dallas Cowboys",
-      "New Orleans Saints",
-      "Indianapolis Colts"
+      "vs Tennessee Titans",
+      "@ Dallas Cowboys",
+      "vs New Orleans Saints",
+      "@ Indianapolis Colts"
     ],
     "starts": {
       "assets/NFL_Icons/Ravens.png": 4
@@ -1786,10 +1786,10 @@
       0
     ],
     "lastFiveVs": [
-      "Minnesota Vikings",
-      "Kansas City Chiefs",
-      "San Francisco 49ers",
-      "Las Vegas Raiders"
+      "@ Minnesota Vikings",
+      "vs Kansas City Chiefs",
+      "@ San Francisco 49ers",
+      "@ Las Vegas Raiders"
     ],
     "starts": {
       "assets/NFL_Icons/Dolphins.png": 4
@@ -1840,7 +1840,7 @@
       1
     ],
     "lastFiveVs": [
-      "Seattle Seahawks"
+      "vs Seattle Seahawks"
     ],
     "starts": {
       "assets/NFL_Icons/Commanders.png": 1
@@ -1894,10 +1894,10 @@
       0
     ],
     "lastFiveVs": [
-      "Philadelphia Eagles",
-      "Denver Broncos",
-      "New York Giants",
-      "San Francisco 49ers"
+      "@ Philadelphia Eagles",
+      "@ Denver Broncos",
+      "vs New York Giants",
+      "vs San Francisco 49ers"
     ],
     "starts": {
       "assets/NFL_Icons/Rams.png": 4
@@ -1948,7 +1948,7 @@
       1
     ],
     "lastFiveVs": [
-      "Green Bay Packers"
+      "@ Green Bay Packers"
     ],
     "starts": {
       "assets/NFL_Icons/Falcons.png": 1
@@ -2002,10 +2002,10 @@
       1
     ],
     "lastFiveVs": [
-      "Las Vegas Raiders",
-      "Miami Dolphins",
-      "Indianapolis Colts",
-      "Denver Broncos"
+      "@ Las Vegas Raiders",
+      "@ Miami Dolphins",
+      "vs Indianapolis Colts",
+      "vs Denver Broncos"
     ],
     "starts": {
       "assets/NFL_Icons/Chiefs.png": 4
@@ -2057,8 +2057,8 @@
       0
     ],
     "lastFiveVs": [
-      "Los Angeles Chargers",
-      "Washington Commanders"
+      "vs Los Angeles Chargers",
+      "@ Washington Commanders"
     ],
     "starts": {
       "assets/NFL_Icons/Seahawks.png": 2
@@ -2112,10 +2112,10 @@
       1
     ],
     "lastFiveVs": [
-      "Cincinnati Bengals",
-      "New England Patriots",
-      "Denver Broncos",
-      "Cleveland Browns"
+      "@ Cincinnati Bengals",
+      "vs New England Patriots",
+      "@ Denver Broncos",
+      "vs Cleveland Browns"
     ],
     "starts": {
       "assets/NFL_Icons/Jaguars.png": 4
@@ -2168,9 +2168,9 @@
       0
     ],
     "lastFiveVs": [
-      "Las Vegas Raiders",
-      "Baltimore Ravens",
-      "Detroit Lions"
+      "vs Las Vegas Raiders",
+      "@ Baltimore Ravens",
+      "@ Detroit Lions"
     ],
     "starts": {
       "assets/NFL_Icons/Saints.png": 3
@@ -2221,7 +2221,7 @@
       1
     ],
     "lastFiveVs": [
-      "New York Jets"
+      "vs New York Jets"
     ],
     "starts": {
       "assets/NFL_Icons/Bears.png": 1

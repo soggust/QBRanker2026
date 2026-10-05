@@ -109,13 +109,13 @@ export class StatReader {
     return ((player as { lastFive?: number[] }).lastFive ?? []).slice(0, recentCount(this.position));
   }
 
-  // One Recent dot's hover: the result and whom it came against ("W - Kansas City Chiefs"; the result
-  // alone when the data doesn't say)
+  // One Recent dot's hover: the result and whom it came against ("W @ Denver Broncos", "L vs Seattle
+  // Seahawks": the data writes the @ or vs; the result alone when the data doesn't say)
   recentTitle(player: SkillPlayer, i: number): string {
     const result = this.lastFive(player)[i];
     const word = result === 1 ? 'W' : result === 0.5 ? 'T' : 'L';
     const vs = (player as { lastFiveVs?: (string | null)[] }).lastFiveVs?.[i];
-    return vs ? `${word} - ${vs}` : word;
+    return vs ? `${word} ${/^(@|vs) /.test(vs) ? vs : `vs ${vs}`}` : word;
   }
 
   format(player: SkillPlayer, stat: SkillStat): string {

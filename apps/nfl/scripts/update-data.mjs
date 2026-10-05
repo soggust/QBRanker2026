@@ -903,6 +903,9 @@ function mostGamesCoach(played) {
   return [...counts].sort((a, b) => b[1] - a[1])[0]?.[0];
 }
 
+// An opponent as the Recent dot's hover reads him: "@ Denver Broncos" away, "vs Seattle Seahawks" at home
+const atOrVs = (away, name) => (name ? `${away ? '@' : 'vs'} ${name}` : null);
+
 // A team's last five games, newest first
 const lastGames = (played) => [...played].sort((x, y) => String(y.game.gameday).localeCompare(String(x.game.gameday))).slice(0, 5);
 
@@ -955,7 +958,7 @@ function coachUnits({ pbp, games, headCoaches }) {
       // (the team's last five games, newest first: the Teams tab's Recent; 1 a win, 0.5 a tie, 0 a loss)
       teamLastFive: lastGames(played).map((g) => (g.pointsFor > g.pointsAgainst ? 1 : g.pointsFor < g.pointsAgainst ? 0 : 0.5)),
       // (whom each came against, in the same order)
-      teamLastFiveVs: lastGames(played).map((g) => TEAM_NAMES[g.home ? g.game.away_team : g.game.home_team] ?? null),
+      teamLastFiveVs: lastGames(played).map((g) => atOrVs(!g.home, TEAM_NAMES[g.home ? g.game.away_team : g.game.home_team])),
       stats: {
         wins,
         losses,
@@ -1250,8 +1253,8 @@ async function gameStarters(game) {
         athlete: starter.athlete,
         team: teamStats.team.displayName,
         result: tie ? 0.5 : competitor.winner ? 1 : 0,
-        // (the other team: the Recent dot's hover)
-        opponent: competitors.find((c) => c.team.id !== teamStats.team.id)?.team.displayName ?? null,
+        // (the other team, "@ Denver Broncos" away or "vs Seattle Seahawks" at home: the Recent dot's hover)
+        opponent: atOrVs(competitor.homeAway !== 'home', competitors.find((c) => c.team.id !== teamStats.team.id)?.team.displayName),
       },
     ];
   });

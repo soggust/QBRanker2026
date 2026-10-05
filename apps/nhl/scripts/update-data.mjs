@@ -332,11 +332,11 @@ async function buildSeason(season) {
       .filter((g) => (g.gameType === 2 || g.gameType === 3) && (g.gameState === 'OFF' || g.gameState === 'FINAL'))
       .sort((x, y) => y.gameDate.localeCompare(x.gameDate) || y.id - x.id)
       .slice(0, 7)
-      .map((g) => (g.homeTeam.abbrev === tri ? [g.homeTeam, g.awayTeam] : [g.awayTeam, g.homeTeam]));
+      .map((g) => (g.homeTeam.abbrev === tri ? [g.homeTeam, g.awayTeam, 'vs'] : [g.awayTeam, g.homeTeam, '@']));
     lastSeven.set(tri, {
       results: last.map(([mine, theirs]) => (mine.score > theirs.score ? 1 : 0)),
-      // (whom each came against: "Toronto Maple Leafs")
-      vs: last.map(([, theirs]) => [theirs.placeName?.default, theirs.commonName?.default].filter(Boolean).join(' ') || theirs.abbrev),
+      // (whom each came against, "@ Toronto Maple Leafs" away or "vs Boston Bruins" at home)
+      vs: last.map(([, theirs, where]) => `${where} ${[theirs.placeName?.default, theirs.commonName?.default].filter(Boolean).join(' ') || theirs.abbrev}`),
     });
   }
   for (const c of coached.rows) {

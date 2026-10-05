@@ -702,7 +702,7 @@ for (const id of active) {
       retired: !activeSet.has(id),
       lastFive: results.slice(0, 5),
       // (whom each came against, in the same order)
-      lastFiveVs: fights.slice(0, 5).map((f) => f.fighters.find((x) => x.id !== id)?.name ?? null),
+      lastFiveVs: fights.slice(0, 5).map((f) => `vs ${f.fighters.find((x) => x.id !== id)?.name ?? '?'}`),
       stats: {
         ...c,
         ...proRecord(b?.pro, c),
