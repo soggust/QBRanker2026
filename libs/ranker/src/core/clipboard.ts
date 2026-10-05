@@ -7,17 +7,22 @@ interface Column {
 }
 
 // Copy the rankings exactly as shown: current order and the visible columns, read from the list (or,
-// with stats off, just the rank, logo and name). Plain text is tab-separated (pastes into spreadsheets
-// and notes); HTML is a table with team logos (pastes into forums and docs).
+// with stats off, just the rank, picture and name). Plain text is tab-separated (pastes into spreadsheets
+// and notes); HTML is a table with each row's picture: a player's headshot, or the team's logo (pastes
+// into forums and docs).
 export function copyRankingsToClipboard(list: HTMLElement, stats = true): Promise<void> {
   const header = list.querySelector<HTMLElement>(':scope > li.header-row');
   const rows = Array.from(list.querySelectorAll<HTMLElement>(':scope > li.player:not(.header-row)'));
   const columns = header && stats ? readColumns(header) : [];
 
+  // (headshots load as they scroll into view: one that has loaded gives the shape for every row's)
+  const loaded = rows.map((row) => row.querySelector<HTMLImageElement>('img.headshot')).find((img) => img?.naturalWidth);
+  const headshotRatio = loaded ? loaded.naturalWidth / loaded.naturalHeight : 160 / 116;
   const table = rows.map((row, index) => ({
     rank: index + 1,
     name: row.querySelector('.player-name strong')?.textContent?.trim() ?? '',
-    logo: logoUrl(row.querySelector<HTMLImageElement>('.team-logo')),
+    // (a player's headshot when the row has one, a fighter's in MMA; else the team's logo)
+    image: rowImage(row, headshotRatio),
     values: columns.map((column) => cellText(cellAt(row, column.path))),
   }));
 
@@ -28,18 +33,18 @@ export function copyRankingsToClipboard(list: HTMLElement, stats = true): Promis
     .map((cells) => cells.join('\t'))
     .join('\n');
 
-  // HTML: no header row, the logo in a cell of its own between the rank and the name (forums strip the
-  // space or margin between an image and its text, not a cell's padding), the rank close to it; each logo a
-  // fixed square, as attributes and style (forums keep one or the other, and an image with only a height
+  // HTML: no header row, the picture in a cell of its own between the rank and the name (forums strip the
+  // space or margin between an image and its text, not a cell's padding), the rank close to it; each picture
+  // a fixed size, as attributes and style (forums keep one or the other, and an image with only a height
   // gets stretched to the post's width)
   const td = (html: string, padding = '2px 8px') => `<td style="padding:${padding};white-space:nowrap">${html}</td>`;
-  const img = (src: string) =>
-    `<img src="${src}" width="18" height="18" style="width:18px;height:18px;max-width:18px;object-fit:contain;vertical-align:middle">`;
+  const img = ({ src, width, height }: RowImage) =>
+    `<img src="${src}" width="${width}" height="${height}" style="width:${width}px;height:${height}px;max-width:${width}px;vertical-align:middle">`;
   const html = [
     '<table><tbody>',
     ...table.map(
       (r) =>
-        `<tr>${td(String(r.rank), '2px 4px 2px 8px')}${td(r.logo ? img(r.logo) : '', '2px 4px')}${td(`<b>${escape(r.name)}</b>`, '2px 8px 2px 4px')}${r.values
+        `<tr>${td(String(r.rank), '2px 4px 2px 8px')}${td(r.image ? img(r.image) : '', '2px 4px')}${td(`<b>${escape(r.name)}</b>`, '2px 8px 2px 4px')}${r.values
           .map((v) => td(escape(v)))
           .join('')}</tr>`,
     ),
@@ -53,10 +58,28 @@ export function copyRankingsToClipboard(list: HTMLElement, stats = true): Promis
   return navigator.clipboard.write([clipboardItem]);
 }
 
-// A logo's full address, wherever it's pasted: resolved against the page (each sport's app serves its own
+// A row's image in the copy: its full address and a size keeping its proportions (the forum keeps the
+// width and height; a logo is square, a headshot a cutout wider than tall)
+interface RowImage {
+  src: string;
+  width: number;
+  height: number;
+}
+const IMAGE_HEIGHT = 20;
+
+function rowImage(row: HTMLElement, headshotRatio: number): RowImage | null {
+  const headshot = row.querySelector<HTMLImageElement>('img.headshot');
+  const img = headshot?.getAttribute('src') ? headshot : row.querySelector<HTMLImageElement>('img.team-logo');
+  const src = img ? imageUrl(img) : '';
+  if (!img || !src) return null;
+  const ratio = img.naturalWidth && img.naturalHeight ? img.naturalWidth / img.naturalHeight : img === headshot ? headshotRatio : 1;
+  return { src, width: Math.round(IMAGE_HEIGHT * ratio), height: IMAGE_HEIGHT };
+}
+
+// An image's full address, wherever it's pasted: resolved against the page (each sport's app serves its own
 // assets: /nfl/assets/...), and from the live site when copied from a local dev server
-function logoUrl(img: HTMLImageElement | null): string {
-  const src = img?.getAttribute('src');
+function imageUrl(img: HTMLImageElement): string {
+  const src = img.getAttribute('src');
   if (!src) return '';
   const url = new URL(src, document.baseURI);
   return /^(localhost|127\.0\.0\.1)$/.test(url.hostname) ? `${BASE_URL}${url.pathname}` : url.href;

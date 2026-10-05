@@ -46,7 +46,7 @@ export class SettingsMenuComponent {
     `A first season is the first one they're in our data, so ${SPORT.seasonText(SPORT.firstSeason)} lists everyone`;
 
   readonly copyStatsTitle =
-    'On: the copy button copies the list with every column shown. Off: just the rank, logo and name, a plain list';
+    'On: the copy button copies the list with every column shown. Off (the default): just the rank, picture and name, a plain list';
 
   flipCopyStats(): void {
     this.set({ copyStats: !this.settings.copyStats });

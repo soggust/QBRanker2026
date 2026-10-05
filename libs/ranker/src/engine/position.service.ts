@@ -59,7 +59,7 @@ const DEFAULT_SETTINGS: RankerSettings = {
   categoryColors: true,
   combineStats: true,
   rookiesOnly: false,
-  copyStats: true,
+  copyStats: false,
   sport: DEFAULT_SPORT_SETTINGS,
 };
 
