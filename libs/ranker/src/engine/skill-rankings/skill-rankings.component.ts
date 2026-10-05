@@ -200,7 +200,7 @@ export class SkillRankingsComponent implements OnChanges, CardHost {
   // Best first by the sliders: switched-off groups and stats don't count, and each combined pair's
   // parts count by their parent slider
   private ranked(reader: StatReader, players: SkillPlayer[]): SkillPlayer[] {
-    const counted = this.stats.filter((stat) => !this.hidden[statGroup(stat)] && !this.statHidden(stat.key));
+    const counted = this.stats.filter((stat) => !this.hidden[statGroup(stat)] && !this.statHidden(stat.key) && !reader.recentOff(stat));
     const weights = combinedWeights(this.position, this.weights);
     const totals = weightedTotals(players, counted, weights, (player, stat) => reader.value(player, stat), undefined, this.sportSettings);
     return byTotals(players, totals, this.sportSettings);
@@ -297,7 +297,7 @@ export class SkillRankingsComponent implements OnChanges, CardHost {
   // The eye decides first; then a stat the season didn't record has no column; then Unweighted Stats
   // decides whether a 0% stat shows (display-only columns like Games always do)
   private isShown(stat: SkillStat, reader: StatReader): boolean {
-    if (this.statHidden(stat.key) || stat.shownWhen?.(this.sportSettings) === false) return false;
+    if (this.statHidden(stat.key) || stat.shownWhen?.(this.sportSettings) === false || reader.recentOff(stat)) return false;
     const weights = combinedWeights(this.position, this.weights);
     const showUnused = this.settings.showUnused;
     // A combined column shows if either of its stats would
@@ -332,6 +332,9 @@ export class SkillRankingsComponent implements OnChanges, CardHost {
       get version() {
         return table.dataVersion;
       },
+      get season() {
+        return table.season;
+      },
       tableSeason: true,
       empty: (key: string) => statIsEmpty(table.position, key),
     };
@@ -345,6 +348,7 @@ export class SkillRankingsComponent implements OnChanges, CardHost {
       rows: context.rows,
       list: context.list,
       tableSeason: false,
+      season: context.season,
       empty: context.empty,
     });
   }

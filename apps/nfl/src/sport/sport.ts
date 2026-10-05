@@ -39,6 +39,7 @@ function teamRows(): SkillPlayer[] {
     name: names.get(coach.teamLogo) ?? coach.teamLogo.split('/').pop()!.replace('.png', ''),
     // (the team's last five games: the Recent column)
     lastFive: (coach as { teamLastFive?: number[] }).teamLastFive,
+    lastFiveVs: (coach as { teamLastFiveVs?: (string | null)[] }).teamLastFiveVs,
   }));
 }
 

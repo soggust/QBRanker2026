@@ -13,6 +13,12 @@
       0,
       1
     ],
+    "lastFiveVs": [
+      "Cleveland Browns",
+      "Cincinnati Bengals",
+      "New England Patriots",
+      "Atlanta Falcons"
+    ],
     "starts": {
       "assets/NFL_Icons/Steelers.png": 4
     },
@@ -61,6 +67,9 @@
     "lastFive": [
       0
     ],
+    "lastFiveVs": [
+      "Indianapolis Colts"
+    ],
     "starts": {
       "assets/NFL_Icons/Commanders.png": 1
     },
@@ -99,6 +108,11 @@
       0,
       0,
       0
+    ],
+    "lastFiveVs": [
+      "Minnesota Vikings",
+      "Cleveland Browns",
+      "Cincinnati Bengals"
     ],
     "starts": {
       "assets/NFL_Icons/Bucs.png": 3
@@ -151,6 +165,12 @@
       1,
       0
     ],
+    "lastFiveVs": [
+      "San Francisco 49ers",
+      "Los Angeles Rams",
+      "Jacksonville Jaguars",
+      "Kansas City Chiefs"
+    ],
     "starts": {
       "assets/NFL_Icons/Broncos.png": 4
     },
@@ -201,6 +221,12 @@
       1,
       1,
       1
+    ],
+    "lastFiveVs": [
+      "Denver Broncos",
+      "Arizona Cardinals",
+      "Miami Dolphins",
+      "Los Angeles Rams"
     ],
     "starts": {
       "assets/NFL_Icons/49ers.png": 4
@@ -253,6 +279,12 @@
       1,
       0
     ],
+    "lastFiveVs": [
+      "Detroit Lions",
+      "Cleveland Browns",
+      "Atlanta Falcons",
+      "Chicago Bears"
+    ],
     "starts": {
       "assets/NFL_Icons/Panthers.png": 4
     },
@@ -304,6 +336,12 @@
       0,
       0
     ],
+    "lastFiveVs": [
+      "Dallas Cowboys",
+      "Indianapolis Colts",
+      "Cincinnati Bengals",
+      "Buffalo Bills"
+    ],
     "starts": {
       "assets/NFL_Icons/Texans.png": 4
     },
@@ -352,6 +390,10 @@
     "lastFive": [
       0,
       1
+    ],
+    "lastFiveVs": [
+      "Minnesota Vikings",
+      "Carolina Panthers"
     ],
     "starts": {
       "assets/NFL_Icons/Bears.png": 2
@@ -404,6 +446,12 @@
       0,
       0
     ],
+    "lastFiveVs": [
+      "Baltimore Ravens",
+      "New York Giants",
+      "Philadelphia Eagles",
+      "New York Jets"
+    ],
     "starts": {
       "assets/NFL_Icons/Titans.png": 4
     },
@@ -453,6 +501,10 @@
       1,
       1
     ],
+    "lastFiveVs": [
+      "Chicago Bears",
+      "Green Bay Packers"
+    ],
     "starts": {
       "assets/NFL_Icons/Vikings.png": 2
     },
@@ -500,6 +552,9 @@
     "ties": 0,
     "lastFive": [
       1
+    ],
+    "lastFiveVs": [
+      "Philadelphia Eagles"
     ],
     "starts": {
       "assets/NFL_Icons/Bears.png": 1
@@ -549,6 +604,10 @@
     "lastFive": [
       0,
       0
+    ],
+    "lastFiveVs": [
+      "Carolina Panthers",
+      "Pittsburgh Steelers"
     ],
     "starts": {
       "assets/NFL_Icons/Falcons.png": 2
@@ -601,6 +660,12 @@
       1,
       0
     ],
+    "lastFiveVs": [
+      "Houston Texans",
+      "Baltimore Ravens",
+      "Washington Commanders",
+      "New York Giants"
+    ],
     "starts": {
       "assets/NFL_Icons/Cowboys.png": 4
     },
@@ -651,6 +716,12 @@
       1,
       0,
       0
+    ],
+    "lastFiveVs": [
+      "Washington Commanders",
+      "Houston Texans",
+      "Kansas City Chiefs",
+      "Baltimore Ravens"
     ],
     "starts": {
       "assets/NFL_Icons/Colts.png": 4
@@ -703,6 +774,12 @@
       1,
       0
     ],
+    "lastFiveVs": [
+      "Pittsburgh Steelers",
+      "Carolina Panthers",
+      "Tampa Bay Buccaneers",
+      "Jacksonville Jaguars"
+    ],
     "starts": {
       "assets/NFL_Icons/Browns.png": 4
     },
@@ -754,6 +831,12 @@
       1,
       0
     ],
+    "lastFiveVs": [
+      "Buffalo Bills",
+      "Jacksonville Jaguars",
+      "Pittsburgh Steelers",
+      "Seattle Seahawks"
+    ],
     "starts": {
       "assets/NFL_Icons/Patriots.png": 4
     },
@@ -802,6 +885,10 @@
     "lastFive": [
       1,
       1
+    ],
+    "lastFiveVs": [
+      "Arizona Cardinals",
+      "New England Patriots"
     ],
     "starts": {
       "assets/NFL_Icons/Seahawks.png": 2
@@ -854,6 +941,12 @@
       0,
       1
     ],
+    "lastFiveVs": [
+      "Chicago Bears",
+      "Detroit Lions",
+      "Green Bay Packers",
+      "Tennessee Titans"
+    ],
     "starts": {
       "assets/NFL_Icons/Jets.png": 4
     },
@@ -904,6 +997,12 @@
       0,
       0,
       1
+    ],
+    "lastFiveVs": [
+      "New York Giants",
+      "San Francisco 49ers",
+      "Seattle Seahawks",
+      "Los Angeles Chargers"
     ],
     "starts": {
       "assets/NFL_Icons/Cardinals.png": 4
@@ -956,6 +1055,12 @@
       1,
       1
     ],
+    "lastFiveVs": [
+      "Los Angeles Rams",
+      "Chicago Bears",
+      "Tennessee Titans",
+      "Washington Commanders"
+    ],
     "starts": {
       "assets/NFL_Icons/Eagles.png": 4
     },
@@ -1003,6 +1108,9 @@
     "ties": 0,
     "lastFive": [
       0
+    ],
+    "lastFiveVs": [
+      "Green Bay Packers"
     ],
     "starts": {
       "assets/NFL_Icons/Bucs.png": 1
@@ -1053,6 +1161,11 @@
       1,
       1,
       0
+    ],
+    "lastFiveVs": [
+      "Arizona Cardinals",
+      "Tennessee Titans",
+      "Los Angeles Rams"
     ],
     "starts": {
       "assets/NFL_Icons/Giants.png": 3
@@ -1105,6 +1218,12 @@
       0,
       1
     ],
+    "lastFiveVs": [
+      "Carolina Panthers",
+      "New York Jets",
+      "Buffalo Bills",
+      "New Orleans Saints"
+    ],
     "starts": {
       "assets/NFL_Icons/Lions.png": 4
     },
@@ -1152,6 +1271,9 @@
     "ties": 0,
     "lastFive": [
       1
+    ],
+    "lastFiveVs": [
+      "Dallas Cowboys"
     ],
     "starts": {
       "assets/NFL_Icons/Giants.png": 1
@@ -1201,6 +1323,10 @@
     "lastFive": [
       0,
       0
+    ],
+    "lastFiveVs": [
+      "Dallas Cowboys",
+      "Philadelphia Eagles"
     ],
     "starts": {
       "assets/NFL_Icons/Commanders.png": 2
@@ -1253,6 +1379,12 @@
       1,
       1
     ],
+    "lastFiveVs": [
+      "Jacksonville Jaguars",
+      "Pittsburgh Steelers",
+      "Houston Texans",
+      "Tampa Bay Buccaneers"
+    ],
     "starts": {
       "assets/NFL_Icons/Bengals.png": 4
     },
@@ -1303,6 +1435,12 @@
       0,
       1,
       0
+    ],
+    "lastFiveVs": [
+      "Tampa Bay Buccaneers",
+      "Atlanta Falcons",
+      "New York Jets",
+      "Minnesota Vikings"
     ],
     "starts": {
       "assets/NFL_Icons/Packers.png": 4
@@ -1355,6 +1493,12 @@
       1,
       1
     ],
+    "lastFiveVs": [
+      "New England Patriots",
+      "Los Angeles Chargers",
+      "Detroit Lions",
+      "Houston Texans"
+    ],
     "starts": {
       "assets/NFL_Icons/Bills.png": 4
     },
@@ -1405,6 +1549,12 @@
       0,
       0,
       0
+    ],
+    "lastFiveVs": [
+      "Seattle Seahawks",
+      "Buffalo Bills",
+      "Las Vegas Raiders",
+      "Arizona Cardinals"
     ],
     "starts": {
       "assets/NFL_Icons/Chargers.png": 4
@@ -1457,6 +1607,12 @@
       1,
       1
     ],
+    "lastFiveVs": [
+      "Kansas City Chiefs",
+      "New Orleans Saints",
+      "Los Angeles Chargers",
+      "Miami Dolphins"
+    ],
     "starts": {
       "assets/NFL_Icons/Raiders.png": 4
     },
@@ -1505,6 +1661,10 @@
     "lastFive": [
       1,
       1
+    ],
+    "lastFiveVs": [
+      "Miami Dolphins",
+      "Tampa Bay Buccaneers"
     ],
     "starts": {
       "assets/NFL_Icons/Vikings.png": 2
@@ -1557,6 +1717,12 @@
       0,
       1
     ],
+    "lastFiveVs": [
+      "Tennessee Titans",
+      "Dallas Cowboys",
+      "New Orleans Saints",
+      "Indianapolis Colts"
+    ],
     "starts": {
       "assets/NFL_Icons/Ravens.png": 4
     },
@@ -1608,6 +1774,12 @@
       0,
       0
     ],
+    "lastFiveVs": [
+      "Minnesota Vikings",
+      "Kansas City Chiefs",
+      "San Francisco 49ers",
+      "Las Vegas Raiders"
+    ],
     "starts": {
       "assets/NFL_Icons/Dolphins.png": 4
     },
@@ -1655,6 +1827,9 @@
     "ties": 0,
     "lastFive": [
       1
+    ],
+    "lastFiveVs": [
+      "Seattle Seahawks"
     ],
     "starts": {
       "assets/NFL_Icons/Commanders.png": 1
@@ -1707,6 +1882,12 @@
       1,
       0
     ],
+    "lastFiveVs": [
+      "Philadelphia Eagles",
+      "Denver Broncos",
+      "New York Giants",
+      "San Francisco 49ers"
+    ],
     "starts": {
       "assets/NFL_Icons/Rams.png": 4
     },
@@ -1754,6 +1935,9 @@
     "ties": 0,
     "lastFive": [
       1
+    ],
+    "lastFiveVs": [
+      "Green Bay Packers"
     ],
     "starts": {
       "assets/NFL_Icons/Falcons.png": 1
@@ -1806,6 +1990,12 @@
       1,
       1
     ],
+    "lastFiveVs": [
+      "Las Vegas Raiders",
+      "Miami Dolphins",
+      "Indianapolis Colts",
+      "Denver Broncos"
+    ],
     "starts": {
       "assets/NFL_Icons/Chiefs.png": 4
     },
@@ -1854,6 +2044,10 @@
     "lastFive": [
       1,
       0
+    ],
+    "lastFiveVs": [
+      "Los Angeles Chargers",
+      "Washington Commanders"
     ],
     "starts": {
       "assets/NFL_Icons/Seahawks.png": 2
@@ -1906,6 +2100,12 @@
       0,
       1
     ],
+    "lastFiveVs": [
+      "Cincinnati Bengals",
+      "New England Patriots",
+      "Denver Broncos",
+      "Cleveland Browns"
+    ],
     "starts": {
       "assets/NFL_Icons/Jaguars.png": 4
     },
@@ -1956,6 +2156,11 @@
       1,
       0
     ],
+    "lastFiveVs": [
+      "Las Vegas Raiders",
+      "Baltimore Ravens",
+      "Detroit Lions"
+    ],
     "starts": {
       "assets/NFL_Icons/Saints.png": 3
     },
@@ -2003,6 +2208,9 @@
     "ties": 0,
     "lastFive": [
       1
+    ],
+    "lastFiveVs": [
+      "New York Jets"
     ],
     "starts": {
       "assets/NFL_Icons/Bears.png": 1

@@ -745,6 +745,22 @@ section ul li.player {
           background: none;
           box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.35);
         }
+
+        // (a played game's dot under the cursor: a touch bigger and brighter, a soft ring; its title
+        // says the result and the opponent)
+        &:not(.unplayed) {
+          cursor: default;
+          transition:
+            filter 0.12s ease,
+            transform 0.12s ease;
+
+          &:hover {
+            filter: brightness(1.2);
+            outline: 2px solid rgba(255, 255, 255, 0.22);
+            outline-offset: 1px;
+            transform: scale(1.25);
+          }
+        }
       }
     }
 
@@ -823,6 +839,11 @@ section ul li.player:not(.header-row) {
         opacity: 0;
       }
     }
+  }
+
+  // (Recent: each dot has its own hover, so the cell's cover lets them through)
+  div.recent-box .stat-label {
+    pointer-events: none;
   }
 
   > .col-group > div:not(.box) > p:not(.stat-label) {

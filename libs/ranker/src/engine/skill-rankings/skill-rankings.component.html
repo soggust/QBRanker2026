@@ -139,7 +139,7 @@
                     <div class="last-five" [class.many]="manyRecent">
                       <div>
                         @for (result of reader.lastFive(player); track $index) {
-                          <p [ngClass]="result === 1 ? 'green' : result === 0.5 ? 'tie' : 'red'">
+                          <p [ngClass]="result === 1 ? 'green' : result === 0.5 ? 'tie' : 'red'" [title]="reader.recentTitle(player, $index)">
                             {{ result === 1 ? 'W' : result === 0.5 ? 'T' : 'L' }}
                           </p>
                         }

@@ -903,6 +903,9 @@ function mostGamesCoach(played) {
   return [...counts].sort((a, b) => b[1] - a[1])[0]?.[0];
 }
 
+// A team's last five games, newest first
+const lastGames = (played) => [...played].sort((x, y) => String(y.game.gameday).localeCompare(String(x.game.gameday))).slice(0, 5);
+
 function coachUnits({ pbp, games, headCoaches }) {
   const coaches = Object.keys(TEAM_ICONS)
     .map((team) => {
@@ -950,10 +953,9 @@ function coachUnits({ pbp, games, headCoaches }) {
       teamLogo: teamIcon(team),
       games: played.length,
       // (the team's last five games, newest first: the Teams tab's Recent; 1 a win, 0.5 a tie, 0 a loss)
-      teamLastFive: [...played]
-        .sort((x, y) => String(y.game.gameday).localeCompare(String(x.game.gameday)))
-        .slice(0, 5)
-        .map((g) => (g.pointsFor > g.pointsAgainst ? 1 : g.pointsFor < g.pointsAgainst ? 0 : 0.5)),
+      teamLastFive: lastGames(played).map((g) => (g.pointsFor > g.pointsAgainst ? 1 : g.pointsFor < g.pointsAgainst ? 0 : 0.5)),
+      // (whom each came against, in the same order)
+      teamLastFiveVs: lastGames(played).map((g) => TEAM_NAMES[g.home ? g.game.away_team : g.game.home_team] ?? null),
       stats: {
         wins,
         losses,
@@ -1248,6 +1250,8 @@ async function gameStarters(game) {
         athlete: starter.athlete,
         team: teamStats.team.displayName,
         result: tie ? 0.5 : competitor.winner ? 1 : 0,
+        // (the other team: the Recent dot's hover)
+        opponent: competitors.find((c) => c.team.id !== teamStats.team.id)?.team.displayName ?? null,
       },
     ];
   });
@@ -1270,10 +1274,11 @@ async function main() {
 
   // Games are in date order, so results accumulate chronologically
   const qbs = new Map();
-  for (const { athlete, team, result } of perGame.flat()) {
-    const qb = qbs.get(athlete.id) ?? { id: Number(athlete.id), name: athlete.displayName, results: [], starts: {} };
+  for (const { athlete, team, result, opponent } of perGame.flat()) {
+    const qb = qbs.get(athlete.id) ?? { id: Number(athlete.id), name: athlete.displayName, results: [], opponents: [], starts: {} };
     qb.team = team;
     qb.results.push(result);
+    qb.opponents.push(opponent);
     qb.starts[teamLogo(team)] = (qb.starts[teamLogo(team)] ?? 0) + 1;
     qbs.set(athlete.id, qb);
   }
@@ -1291,6 +1296,8 @@ async function main() {
         ties: count(0.5),
         // Up to 5 most recent results, newest first (1 win, 0.5 tie, 0 loss); unplayed slots are left out
         lastFive: [...qb.results].reverse().slice(0, 5),
+        // (whom each came against, in the same order)
+        lastFiveVs: [...qb.opponents].reverse().slice(0, 5),
         // Starts per team (keyed by logo path), used to weight team QB play for receivers
         starts: qb.starts,
       };

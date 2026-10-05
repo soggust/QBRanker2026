@@ -701,6 +701,8 @@ for (const id of active) {
       // (no fight in a major promotion in two years: listed with the Retired Fighters setting on)
       retired: !activeSet.has(id),
       lastFive: results.slice(0, 5),
+      // (whom each came against, in the same order)
+      lastFiveVs: fights.slice(0, 5).map((f) => f.fighters.find((x) => x.id !== id)?.name ?? null),
       stats: {
         ...c,
         ...proRecord(b?.pro, c),

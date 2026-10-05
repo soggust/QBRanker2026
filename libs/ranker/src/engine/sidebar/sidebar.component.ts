@@ -5,6 +5,7 @@ import { SKILL_PRESETS, SkillPresetDef } from '@sport/skill-presets';
 import { PositionService } from '@ranker/engine/position.service';
 import { SPORT } from '@sport/sport';
 import { combinedFor, statIsEmpty } from '@ranker/engine/unit-scoring';
+import { CURRENT_SEASON, dataSeason } from '@ranker/engine/data';
 import {
   POSITIONS,
   Position,
@@ -103,7 +104,9 @@ export class SidebarComponent implements OnInit {
     // Stats not recorded in the loaded season (Statcast's before 2015, drops before 2018) have no slider,
     // nor do those the sport's settings leave out (SkillStat.shownWhen)
     const sport = this.positionService.settings.sport;
-    const stats = this.orderedStats(group).filter((stat) => !statIsEmpty(this.position, stat.key) && stat.shownWhen?.(sport) !== false);
+    const stats = this.orderedStats(group).filter(
+      (stat) => !statIsEmpty(this.position, stat.key) && stat.shownWhen?.(sport) !== false && !(stat.format === 'recent' && dataSeason !== CURRENT_SEASON),
+    );
     const pairs = combinedFor(this.position);
     const rows: SkillRow[] = [];
     const used = new Set<string>();

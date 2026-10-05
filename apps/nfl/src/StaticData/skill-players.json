@@ -1038,6 +1038,12 @@
         0,
         1
       ],
+      "teamLastFiveVs": [
+        "Chicago Bears",
+        "Detroit Lions",
+        "Green Bay Packers",
+        "Tennessee Titans"
+      ],
       "stats": {
         "wins": 1,
         "losses": 3,
@@ -1076,6 +1082,12 @@
         1,
         1,
         1
+      ],
+      "teamLastFiveVs": [
+        "Las Vegas Raiders",
+        "Miami Dolphins",
+        "Indianapolis Colts",
+        "Denver Broncos"
       ],
       "stats": {
         "wins": 4,
@@ -1116,6 +1128,12 @@
         0,
         1
       ],
+      "teamLastFiveVs": [
+        "New York Jets",
+        "Philadelphia Eagles",
+        "Minnesota Vikings",
+        "Carolina Panthers"
+      ],
       "stats": {
         "wins": 3,
         "losses": 1,
@@ -1154,6 +1172,12 @@
         0,
         1,
         0
+      ],
+      "teamLastFiveVs": [
+        "Houston Texans",
+        "Baltimore Ravens",
+        "Washington Commanders",
+        "New York Giants"
       ],
       "stats": {
         "wins": 2,
@@ -1194,6 +1218,12 @@
         0,
         1
       ],
+      "teamLastFiveVs": [
+        "Carolina Panthers",
+        "New York Jets",
+        "Buffalo Bills",
+        "New Orleans Saints"
+      ],
       "stats": {
         "wins": 2,
         "losses": 2,
@@ -1232,6 +1262,12 @@
         1,
         0,
         0
+      ],
+      "teamLastFiveVs": [
+        "Indianapolis Colts",
+        "Seattle Seahawks",
+        "Dallas Cowboys",
+        "Philadelphia Eagles"
       ],
       "stats": {
         "wins": 1,
@@ -1272,6 +1308,12 @@
         1,
         0
       ],
+      "teamLastFiveVs": [
+        "Detroit Lions",
+        "Cleveland Browns",
+        "Atlanta Falcons",
+        "Chicago Bears"
+      ],
       "stats": {
         "wins": 2,
         "losses": 2,
@@ -1310,6 +1352,12 @@
         0,
         0,
         0
+      ],
+      "teamLastFiveVs": [
+        "Dallas Cowboys",
+        "Indianapolis Colts",
+        "Cincinnati Bengals",
+        "Buffalo Bills"
       ],
       "stats": {
         "wins": 0,
@@ -1350,6 +1398,12 @@
         0,
         0
       ],
+      "teamLastFiveVs": [
+        "Minnesota Vikings",
+        "Kansas City Chiefs",
+        "San Francisco 49ers",
+        "Las Vegas Raiders"
+      ],
       "stats": {
         "wins": 0,
         "losses": 4,
@@ -1388,6 +1442,12 @@
         1,
         0,
         1
+      ],
+      "teamLastFiveVs": [
+        "Tennessee Titans",
+        "Dallas Cowboys",
+        "New Orleans Saints",
+        "Indianapolis Colts"
       ],
       "stats": {
         "wins": 3,
@@ -1428,6 +1488,12 @@
         0,
         0
       ],
+      "teamLastFiveVs": [
+        "Seattle Seahawks",
+        "Buffalo Bills",
+        "Las Vegas Raiders",
+        "Arizona Cardinals"
+      ],
       "stats": {
         "wins": 0,
         "losses": 4,
@@ -1466,6 +1532,12 @@
         1,
         1,
         1
+      ],
+      "teamLastFiveVs": [
+        "New England Patriots",
+        "Los Angeles Chargers",
+        "Detroit Lions",
+        "Houston Texans"
       ],
       "stats": {
         "wins": 3,
@@ -1506,6 +1578,12 @@
         0,
         1
       ],
+      "teamLastFiveVs": [
+        "Arizona Cardinals",
+        "Tennessee Titans",
+        "Los Angeles Rams",
+        "Dallas Cowboys"
+      ],
       "stats": {
         "wins": 3,
         "losses": 1,
@@ -1543,6 +1621,11 @@
         0,
         1,
         0
+      ],
+      "teamLastFiveVs": [
+        "Las Vegas Raiders",
+        "Baltimore Ravens",
+        "Detroit Lions"
       ],
       "stats": {
         "wins": 1,
@@ -1583,6 +1666,12 @@
         1,
         1
       ],
+      "teamLastFiveVs": [
+        "Miami Dolphins",
+        "Tampa Bay Buccaneers",
+        "Chicago Bears",
+        "Green Bay Packers"
+      ],
       "stats": {
         "wins": 4,
         "losses": 0,
@@ -1620,6 +1709,11 @@
         1,
         0,
         0
+      ],
+      "teamLastFiveVs": [
+        "Green Bay Packers",
+        "Carolina Panthers",
+        "Pittsburgh Steelers"
       ],
       "stats": {
         "wins": 1,
@@ -1660,6 +1754,12 @@
         1,
         1
       ],
+      "teamLastFiveVs": [
+        "Kansas City Chiefs",
+        "New Orleans Saints",
+        "Los Angeles Chargers",
+        "Miami Dolphins"
+      ],
       "stats": {
         "wins": 3,
         "losses": 1,
@@ -1698,6 +1798,12 @@
         1,
         1,
         1
+      ],
+      "teamLastFiveVs": [
+        "Denver Broncos",
+        "Arizona Cardinals",
+        "Miami Dolphins",
+        "Los Angeles Rams"
       ],
       "stats": {
         "wins": 4,
@@ -1738,6 +1844,12 @@
         0,
         1
       ],
+      "teamLastFiveVs": [
+        "Cincinnati Bengals",
+        "New England Patriots",
+        "Denver Broncos",
+        "Cleveland Browns"
+      ],
       "stats": {
         "wins": 3,
         "losses": 1,
@@ -1776,6 +1888,12 @@
         0,
         1,
         0
+      ],
+      "teamLastFiveVs": [
+        "Tampa Bay Buccaneers",
+        "Atlanta Falcons",
+        "New York Jets",
+        "Minnesota Vikings"
       ],
       "stats": {
         "wins": 2,
@@ -1816,6 +1934,12 @@
         0,
         1
       ],
+      "teamLastFiveVs": [
+        "New York Giants",
+        "San Francisco 49ers",
+        "Seattle Seahawks",
+        "Los Angeles Chargers"
+      ],
       "stats": {
         "wins": 1,
         "losses": 3,
@@ -1854,6 +1978,12 @@
         0,
         1,
         1
+      ],
+      "teamLastFiveVs": [
+        "Los Angeles Chargers",
+        "Washington Commanders",
+        "Arizona Cardinals",
+        "New England Patriots"
       ],
       "stats": {
         "wins": 3,
@@ -1894,6 +2024,12 @@
         0,
         1
       ],
+      "teamLastFiveVs": [
+        "Cleveland Browns",
+        "Cincinnati Bengals",
+        "New England Patriots",
+        "Atlanta Falcons"
+      ],
       "stats": {
         "wins": 2,
         "losses": 2,
@@ -1932,6 +2068,12 @@
         0,
         1,
         0
+      ],
+      "teamLastFiveVs": [
+        "Buffalo Bills",
+        "Jacksonville Jaguars",
+        "Pittsburgh Steelers",
+        "Seattle Seahawks"
       ],
       "stats": {
         "wins": 2,
@@ -1972,6 +2114,12 @@
         1,
         1
       ],
+      "teamLastFiveVs": [
+        "Los Angeles Rams",
+        "Chicago Bears",
+        "Tennessee Titans",
+        "Washington Commanders"
+      ],
       "stats": {
         "wins": 2,
         "losses": 2,
@@ -2010,6 +2158,12 @@
         0,
         0,
         0
+      ],
+      "teamLastFiveVs": [
+        "Baltimore Ravens",
+        "New York Giants",
+        "Philadelphia Eagles",
+        "New York Jets"
       ],
       "stats": {
         "wins": 0,
@@ -2050,6 +2204,12 @@
         1,
         0
       ],
+      "teamLastFiveVs": [
+        "Philadelphia Eagles",
+        "Denver Broncos",
+        "New York Giants",
+        "San Francisco 49ers"
+      ],
       "stats": {
         "wins": 2,
         "losses": 2,
@@ -2088,6 +2248,12 @@
         1,
         1,
         0
+      ],
+      "teamLastFiveVs": [
+        "San Francisco 49ers",
+        "Los Angeles Rams",
+        "Jacksonville Jaguars",
+        "Kansas City Chiefs"
       ],
       "stats": {
         "wins": 2,
@@ -2128,6 +2294,12 @@
         0,
         0
       ],
+      "teamLastFiveVs": [
+        "Washington Commanders",
+        "Houston Texans",
+        "Kansas City Chiefs",
+        "Baltimore Ravens"
+      ],
       "stats": {
         "wins": 2,
         "losses": 2,
@@ -2166,6 +2338,12 @@
         0,
         0,
         0
+      ],
+      "teamLastFiveVs": [
+        "Green Bay Packers",
+        "Minnesota Vikings",
+        "Cleveland Browns",
+        "Cincinnati Bengals"
       ],
       "stats": {
         "wins": 0,
@@ -2206,6 +2384,12 @@
         1,
         0
       ],
+      "teamLastFiveVs": [
+        "Pittsburgh Steelers",
+        "Carolina Panthers",
+        "Tampa Bay Buccaneers",
+        "Jacksonville Jaguars"
+      ],
       "stats": {
         "wins": 3,
         "losses": 1,
@@ -2244,6 +2428,12 @@
         0,
         1,
         1
+      ],
+      "teamLastFiveVs": [
+        "Jacksonville Jaguars",
+        "Pittsburgh Steelers",
+        "Houston Texans",
+        "Tampa Bay Buccaneers"
       ],
       "stats": {
         "wins": 2,

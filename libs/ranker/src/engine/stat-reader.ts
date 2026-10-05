@@ -5,6 +5,7 @@ import { PACE_GAMES, PER_GAME_LABELS, STAT_NAMES, SkillPlayer, SkillPosition, Sk
 import { SPORT } from '@sport/sport';
 import { ValueContext } from '@ranker/engine/sport';
 import { recentCount, statValue } from '@ranker/engine/unit-scoring';
+import { CURRENT_SEASON } from '@ranker/engine/data';
 import type { RankerSettings } from '@ranker/engine/position.service';
 import { TintScale, tintFrom, tintScale } from '@ranker/core/value-tint';
 import { NUMBER, avg3, grade, gradeColor, innings } from '@ranker/core/format';
@@ -17,6 +18,8 @@ export interface ReaderSource {
   list: SkillPlayer[];
   // The table's own season (values from other tabs are only for it)
   tableSeason: boolean;
+  // Which season it is (Recent is the current season's only)
+  season: number;
   // A stat the season didn't record
   empty: (key: string) => boolean;
   // Bumped when the values change underneath (the sport's values from other tabs)
@@ -37,6 +40,16 @@ export class StatReader {
 
   get list(): SkillPlayer[] {
     return this.source.list;
+  }
+
+  get season(): number {
+    return this.source.season;
+  }
+
+  // Recent form is the season being played's alone: a finished season's last few games say little, so
+  // its Recent has no column, no slider and no part in the ranking
+  recentOff(stat: SkillStat): boolean {
+    return stat.format === 'recent' && this.source.season !== CURRENT_SEASON;
   }
 
   get rows(): Record<SkillPosition, SkillPlayer[]> {
@@ -94,6 +107,15 @@ export class StatReader {
   // The last five results (newest first; 1 win, 0.5 tie, 0 loss), for a sport with a 'recent' stat
   lastFive(player: SkillPlayer): number[] {
     return ((player as { lastFive?: number[] }).lastFive ?? []).slice(0, recentCount(this.position));
+  }
+
+  // One Recent dot's hover: the result and whom it came against ("W - Kansas City Chiefs"; the result
+  // alone when the data doesn't say)
+  recentTitle(player: SkillPlayer, i: number): string {
+    const result = this.lastFive(player)[i];
+    const word = result === 1 ? 'W' : result === 0.5 ? 'T' : 'L';
+    const vs = (player as { lastFiveVs?: (string | null)[] }).lastFiveVs?.[i];
+    return vs ? `${word} - ${vs}` : word;
   }
 
   format(player: SkillPlayer, stat: SkillStat): string {

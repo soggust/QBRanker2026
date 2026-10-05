@@ -382,12 +382,13 @@ async function teamRows(season, teamDef, parks, logo) {
         const t = game.teams?.[side];
         if (!t) continue;
         if (t.isWinner && game.gameType !== 'R') playoffWins.set(t.team.id, (playoffWins.get(t.team.id) ?? 0) + 1);
-        if (final && t.isWinner !== undefined) (results.get(t.team.id) ?? results.set(t.team.id, []).get(t.team.id)).push([game.gameDate, t.isWinner ? 1 : 0]);
+        const other = game.teams?.[side === 'home' ? 'away' : 'home']?.team?.name ?? null;
+        if (final && t.isWinner !== undefined) (results.get(t.team.id) ?? results.set(t.team.id, []).get(t.team.id)).push([game.gameDate, t.isWinner ? 1 : 0, other]);
       }
     }
   }
   // (its last ten: a baseball team's recent form)
-  const lastFive = (id) => (results.get(id) ?? []).sort((a, b) => b[0].localeCompare(a[0])).slice(0, 10).map(([, r]) => r);
+  const lastTen = (id) => (results.get(id) ?? []).sort((a, b) => b[0].localeCompare(a[0])).slice(0, 10);
   const records = (standings.records ?? []).flatMap((r) => r.teamRecords ?? []);
   const perGame = (t, key) => (t.gamesPlayed ? t[key] / t.gamesPlayed : null);
   const rankBy = (key, dir) => {
@@ -410,7 +411,8 @@ async function teamRows(season, teamDef, parks, logo) {
       teamName: fullName.get(id) ?? t.team.name,
       games: gp,
       // (its last ten games, newest first: the Recent column)
-      lastFive: lastFive(id),
+      lastFive: lastTen(id).map(([, r]) => r),
+      lastFiveVs: lastTen(id).map(([, , o]) => o),
       stats: {
         wins: t.wins,
         losses: t.losses,

@@ -54,13 +54,21 @@ async function teamRecent(season, teamCount) {
       const awayPts = num(cells.match(/data-stat="visitor_pts"[^>]*>(\d*)</)?.[1]);
       const homePts = num(cells.match(/data-stat="home_pts"[^>]*>(\d*)</)?.[1]);
       if (!key || !away || !home || awayPts === null || homePts === null) continue;
-      for (const [team, mine, theirs] of [[away, awayPts, homePts], [home, homePts, awayPts]]) {
-        (games.get(team) ?? games.set(team, []).get(team)).push([key, mine > theirs ? 1 : 0]);
+      const awayName = decode(cells.match(/data-stat="visitor_team_name"[^>]*>([\s\S]*?)<\/td>/)?.[1] ?? '') || away;
+      const homeName = decode(cells.match(/data-stat="home_team_name"[^>]*>([\s\S]*?)<\/td>/)?.[1] ?? '') || home;
+      for (const [team, mine, theirs, opponent] of [[away, awayPts, homePts, homeName], [home, homePts, awayPts, awayName]]) {
+        (games.get(team) ?? games.set(team, []).get(team)).push([key, mine > theirs ? 1 : 0, opponent]);
       }
     }
     if (games.size >= teamCount && [...games.values()].every((list) => list.length >= 7)) break;
   }
-  return new Map([...games].map(([team, list]) => [team, list.sort((a, b) => b[0].localeCompare(a[0])).slice(0, 7).map(([, r]) => r)]));
+  // (team -> { results, vs: whom each came against })
+  return new Map(
+    [...games].map(([team, list]) => {
+      const last = list.sort((a, b) => b[0].localeCompare(a[0])).slice(0, 7);
+      return [team, { results: last.map(([, r]) => r), vs: last.map(([, , o]) => o) }];
+    }),
+  );
 }
 
 // Basketball-Reference asks for no more than 20 requests a minute
@@ -301,7 +309,7 @@ async function buildSeason(season) {
       games: g,
       _team: code,
       // (the team's last seven games: the Teams tab's Recent)
-      ...(recent.get(code)?.length ? { teamLastFive: recent.get(code) } : {}),
+      ...(recent.get(code)?.results.length ? { teamLastFive: recent.get(code).results, teamLastFiveVs: recent.get(code).vs } : {}),
       stats: {
         wins,
         losses,

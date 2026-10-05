@@ -328,20 +328,20 @@ async function buildSeason(season) {
   const lastSeven = new Map();
   for (const tri of new Set(coached.rows.map((c) => c._team).filter(Boolean))) {
     const games = (await get(`${WEB}/club-schedule-season/${tri}/${seasonId(season)}`).catch(() => null))?.games ?? [];
-    lastSeven.set(
-      tri,
-      games
-        .filter((g) => (g.gameType === 2 || g.gameType === 3) && (g.gameState === 'OFF' || g.gameState === 'FINAL'))
-        .sort((x, y) => y.gameDate.localeCompare(x.gameDate) || y.id - x.id)
-        .slice(0, 7)
-        .map((g) => {
-          const [mine, theirs] = g.homeTeam.abbrev === tri ? [g.homeTeam, g.awayTeam] : [g.awayTeam, g.homeTeam];
-          return mine.score > theirs.score ? 1 : 0;
-        }),
-    );
+    const last = games
+      .filter((g) => (g.gameType === 2 || g.gameType === 3) && (g.gameState === 'OFF' || g.gameState === 'FINAL'))
+      .sort((x, y) => y.gameDate.localeCompare(x.gameDate) || y.id - x.id)
+      .slice(0, 7)
+      .map((g) => (g.homeTeam.abbrev === tri ? [g.homeTeam, g.awayTeam] : [g.awayTeam, g.homeTeam]));
+    lastSeven.set(tri, {
+      results: last.map(([mine, theirs]) => (mine.score > theirs.score ? 1 : 0)),
+      // (whom each came against: "Toronto Maple Leafs")
+      vs: last.map(([, theirs]) => [theirs.placeName?.default, theirs.commonName?.default].filter(Boolean).join(' ') || theirs.abbrev),
+    });
   }
   for (const c of coached.rows) {
-    if (lastSeven.get(c._team)?.length) c.teamLastFive = lastSeven.get(c._team);
+    const recent = lastSeven.get(c._team);
+    if (recent?.results.length) Object.assign(c, { teamLastFive: recent.results, teamLastFiveVs: recent.vs });
     delete c._team;
   }
   out.HC = coached.rows;
