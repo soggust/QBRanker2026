@@ -35,7 +35,9 @@ export function copyRankingsToClipboard(list: HTMLElement, stats = true): Promis
     ...table.map(
       (r) =>
         `<tr>${td(String(r.rank))}${td(
-          `${r.logo ? `<img src="${r.logo}" height="16" style="vertical-align:middle"> ` : ''}<b>${escape(r.name)}</b>`,
+          // (a fixed width and height, as attributes and style: forums keep one or the other, and an image with
+          // only a height gets stretched to the post's width)
+          `${r.logo ? `<img src="${r.logo}" width="18" height="18" style="width:18px;height:18px;max-width:18px;object-fit:contain;vertical-align:middle"> ` : ''}<b>${escape(r.name)}</b>`,
         )}${r.values.map((v) => td(escape(v))).join('')}</tr>`,
     ),
     '</tbody></table>',
@@ -68,7 +70,8 @@ function rowCells(row: Element): Element[] {
 function readColumns(header: HTMLElement): Column[] {
   const columns: Column[] = [];
   rowCells(header).forEach((cell, i) => {
-    if (!(cell instanceof HTMLElement) || i < 2) return;
+    // (a collapsed group's strip has no label: not a column)
+    if (!(cell instanceof HTMLElement) || i < 2 || !cell.querySelector('.stat-label')) return;
     const inner = cell.classList.contains('box') ? Array.from(cell.children) : [];
     const grouped = inner.filter((child) => child.querySelector('.stat-label'));
     if (grouped.length > 1) {

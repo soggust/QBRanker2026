@@ -322,6 +322,17 @@ export class PositionService {
     this.skillHiddenSubject.next(next);
   }
 
+  // Stat groups collapsed to a strip in the grid (their group icon clicked): out of sight, still counted
+  private collapsedGroups: Partial<Record<SkillPosition, Partial<Record<StatGroupId, boolean>>>> = {};
+
+  isGroupCollapsed(position: SkillPosition, id: StatGroupId): boolean {
+    return !!this.collapsedGroups[position]?.[id];
+  }
+
+  toggleGroupCollapsed(position: SkillPosition, id: StatGroupId): void {
+    this.collapsedGroups = { ...this.collapsedGroups, [position]: { ...this.collapsedGroups[position], [id]: !this.isGroupCollapsed(position, id) } };
+  }
+
   // A sport setting set to a value (the footer's dropdown)
   setSportSetting(key: string, value: string | boolean): void {
     this.updateSettings({ sport: { ...this.settings.sport, [key]: value } });

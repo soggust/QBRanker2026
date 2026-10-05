@@ -12,11 +12,18 @@
         <p class="stat-label header-name">{{ rowHeader }}</p>
       </div>
       @for (group of groups; track group.id) {
-        <div class="col-group" [ngClass]="'group-' + group.id">
-          <!-- Each group's icon sits in the slot at the start of its first cell; hover shows the group's name -->
-          @if (group.id === 'support') {
+        <div class="col-group" [ngClass]="'group-' + group.id" [class.collapsed]="isCollapsed(group.id)">
+          <!-- Each group's icon sits in the slot at the start of its first cell; hover shows the group's name,
+               a click collapses the group to a strip of just the icon (and opens it again) -->
+          @if (isCollapsed(group.id)) {
+            <div class="collapsed-strip">
+              <!-- (the "…": there's more to open) -->
+              <span class="collapsed-more" aria-hidden="true">…</span>
+              <mat-icon class="group-icon" [fontIcon]="group.icon" [title]="collapseTitle(group)" (click)="toggleCollapsed(group.id, $event)"></mat-icon>
+            </div>
+          } @else if (group.id === 'support') {
             <div class="box support-box" [style.min-width.em]="group.stats.length * 7.5">
-              <mat-icon class="group-icon" [fontIcon]="group.icon" [title]="group.title"></mat-icon>
+              <mat-icon class="group-icon" [fontIcon]="group.icon" [title]="collapseTitle(group)" (click)="toggleCollapsed(group.id, $event)"></mat-icon>
               @for (stat of group.stats; track stat.key) {
                 <div [columnDrag]="{ list: position + '.' + group.id, id: columnId(stat) }">
                   <p class="stat-label" [title]="labelTitle(stat)">{{ labelParts(stat)[0] }}@if (labelParts(stat)[1]; as tag) {<span class="label-tag">{{ ' ' + tag }}</span>}</p>
@@ -28,7 +35,7 @@
               @if (stat.format === 'recent') {
                 <div class="box support-box recent-box" [columnDrag]="{ list: position + '.' + group.id, id: columnId(stat) }">
                   @if (first) {
-                    <mat-icon class="group-icon" [fontIcon]="group.icon" [title]="group.title"></mat-icon>
+                    <mat-icon class="group-icon" [fontIcon]="group.icon" [title]="collapseTitle(group)" (click)="toggleCollapsed(group.id, $event)"></mat-icon>
                   }
                   <div class="last-five">
                     <div></div>
@@ -38,7 +45,7 @@
               } @else {
                 <div [columnDrag]="{ list: position + '.' + group.id, id: columnId(stat) }">
                   @if (first) {
-                    <mat-icon class="group-icon" [fontIcon]="group.icon" [title]="group.title"></mat-icon>
+                    <mat-icon class="group-icon" [fontIcon]="group.icon" [title]="collapseTitle(group)" (click)="toggleCollapsed(group.id, $event)"></mat-icon>
                   }
                   <p class="stat-label" [title]="labelTitle(stat)">{{ labelParts(stat)[0] }}@if (labelParts(stat)[1]; as tag) {<span class="label-tag">{{ ' ' + tag }}</span>}</p>
                 </div>
@@ -130,8 +137,11 @@
         </div>
 
         @for (group of groups; track group.id) {
-          <div class="col-group" [ngClass]="'group-' + group.id">
-            @if (group.id === 'support') {
+          <div class="col-group" [ngClass]="'group-' + group.id" [class.collapsed]="isCollapsed(group.id)">
+            @if (isCollapsed(group.id)) {
+              <!-- A collapsed group: its line and an empty strip -->
+              <div class="collapsed-strip"></div>
+            } @else if (group.id === 'support') {
               <!-- Support grades share a dark box -->
               <div class="box support-box" [style.min-width.em]="group.stats.length * 7.5">
                 @for (stat of group.stats; track stat.key) {

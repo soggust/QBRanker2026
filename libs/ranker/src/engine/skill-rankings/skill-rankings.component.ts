@@ -428,6 +428,21 @@ export class SkillRankingsComponent implements OnChanges, CardHost {
     return recentCount(this.position) > 7;
   }
 
+  // A stat group collapsed to a strip (its header icon clicked; clicked again to open): hidden, still
+  // counted in the ranking
+  isCollapsed(id: StatGroupId): boolean {
+    return this.positionService.isGroupCollapsed(this.position, id);
+  }
+
+  toggleCollapsed(id: StatGroupId, event: Event): void {
+    event.stopPropagation();
+    this.positionService.toggleGroupCollapsed(this.position, id);
+  }
+
+  collapseTitle(group: { id: StatGroupId; title: string }): string {
+    return `${group.title}: click to ${this.isCollapsed(group.id) ? 'show its columns' : 'collapse it to a strip (its stats still count)'}`;
+  }
+
   // Games in a row's record its stats don't cover yet (the data's statsBehind; the current season only)
   statsBehind(player: SkillPlayer): number {
     return this.season === CURRENT_SEASON ? ((player as { statsBehind?: number }).statsBehind ?? 0) : 0;

@@ -678,6 +678,24 @@ section ul li.player {
     margin-left: 1.1em;
   }
 
+  // A collapsed group: only its icon's slot and a "…" after it, a narrow strip (its stats hidden, still
+  // counted); fixed, so every row's strip lines up under the header's
+  > .col-group > div.collapsed-strip {
+    flex: 0 0 auto;
+    max-width: none;
+    min-width: 0;
+    padding-right: 0.2em;
+    width: 1.1em;
+  }
+
+  .collapsed-more {
+    color: var(--group-color);
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1;
+    pointer-events: none;
+  }
+
   // Recent and the grade boxes: one panel across their columns
   div.box {
     border: none;
@@ -832,6 +850,12 @@ section.spread ul li.player > .col-group {
     flex: 0 0 auto;
     min-width: 6em;
   }
+
+  // (a collapsed group's strip: its own fixed width, above)
+  > div.collapsed-strip {
+    flex: 0 0 auto;
+    min-width: 0;
+  }
 }
 
 // In a player's row: the values in chalk, the labels hidden (they still cover each cell, invisibly, so
@@ -977,7 +1001,7 @@ section ul li.player.header-row:hover {
 
     > .group-icon {
       color: var(--group-color);
-      cursor: default;
+      cursor: pointer;
       font-size: 17px;
       height: 17px;
       left: 0.35em;
