@@ -54,6 +54,11 @@
           }
         </div>
       }
+      <!-- The grid's closing line: an empty cell after the last group, in its color, drawn like a group's
+           opening line (each sport's own: the NFL's hash marks, MLB's chalk...) -->
+      @if (groups.length) {
+        <div class="col-group group-end" [ngClass]="'group-' + groups[groups.length - 1].id"><div></div></div>
+      }
     </li>
     <!-- Nobody listed (every row filtered out by the settings) -->
     @if (!playerList.length) {
@@ -195,6 +200,9 @@
               }
             }
           </div>
+        }
+        @if (groups.length) {
+          <div class="col-group group-end" [ngClass]="'group-' + groups[groups.length - 1].id"><div></div></div>
         }
       </li>
     }

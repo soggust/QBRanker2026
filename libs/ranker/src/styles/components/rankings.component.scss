@@ -856,6 +856,21 @@ section.spread ul li.player > .col-group {
     flex: 0 0 auto;
     min-width: 0;
   }
+
+  // (the closing line's cell: no width of its own, just where the next group would start)
+  &.group-end > div {
+    flex: 0 0 0;
+    max-width: 0;
+    min-width: 0;
+    padding: 0;
+  }
+}
+
+// (the header's closing cell: its group's line, without the group's tint)
+section ul li.player.header-row > .col-group.group-end > div::after {
+  background: none;
+  right: auto;
+  width: 0;
 }
 
 // In a player's row: the values in chalk, the labels hidden (they still cover each cell, invisibly, so
