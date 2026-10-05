@@ -85,6 +85,16 @@
           <!-- The badge through the name opens the player card -->
           <p class="player-name card-target" (click)="cards.open(player)">
             <strong class="card-link" role="button" tabindex="0" [attr.data-name]="player.name" (keydown.enter)="cards.open(player)">{{ player.name }}</strong>
+            @if (statsBehind(player); as n) {
+              <!-- His stats don't cover every game in his record yet (the data source catching up) -->
+              <mat-icon
+                aria-hidden="false"
+                aria-label="Stats catching up"
+                fontIcon="sync_problem"
+                class="stats-behind-icon"
+                [title]="'Stats through ' + (player.games - n) + ' of ' + player.games + ' games: ESPN hasn\'t added the latest yet'"
+              ></mat-icon>
+            }
             @if (player.injured) {
               <mat-icon
                 aria-hidden="false"

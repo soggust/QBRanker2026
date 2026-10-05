@@ -386,6 +386,20 @@ section ul li.player {
     }
   }
 
+  // (stats catching up with the record: quiet, not alarming)
+  .stats-behind-icon {
+    color: rgba(255, 255, 255, 0.55);
+    font-size: 1em;
+    height: 50%;
+    margin-left: 0.25em;
+    padding-left: 0.5em;
+
+    &:hover {
+      color: #fff;
+      cursor: help;
+    }
+  }
+
   .injury-icon {
     animation: injury-pulse 2.4s ease-in-out infinite;
     color: #fb2;

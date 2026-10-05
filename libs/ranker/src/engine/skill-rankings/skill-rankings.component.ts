@@ -428,6 +428,11 @@ export class SkillRankingsComponent implements OnChanges, CardHost {
     return recentCount(this.position) > 7;
   }
 
+  // Games in a row's record its stats don't cover yet (the data's statsBehind; the current season only)
+  statsBehind(player: SkillPlayer): number {
+    return this.season === CURRENT_SEASON ? ((player as { statsBehind?: number }).statsBehind ?? 0) : 0;
+  }
+
   // Bandage hover: the injury status (the sport's wording)
   injuryTitle(player: SkillPlayer): string {
     return SPORT.copy.injuryTitle(player, dataSeason === CURRENT_SEASON);

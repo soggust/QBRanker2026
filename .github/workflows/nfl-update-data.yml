@@ -2,13 +2,15 @@ name: NFL - Update Game Data
 
 on:
   schedule:
-    # Nightly at 09:13 UTC (4:13 AM CDT / 3:13 AM CST): hours after the last night game ends,
-    # so a day's results and stats land together in one update. Off the top of the hour on
-    # purpose: GitHub delays and sometimes drops scheduled runs set for :00, when everyone's
-    # run at once. The 12:47 UTC run (7:47 AM CDT) is a backup for a delayed or dropped one;
-    # a run with nothing new is a no-op (no commit, no deploy).
-    - cron: "13 9 * * *"
+    # Nightly at 08:13 UTC (4:13 AM EDT / 3:13 AM CDT): hours after the last night game ends.
+    # Off the top of the hour on purpose: GitHub delays and sometimes drops scheduled runs set
+    # for :00, when everyone's run at once. The 12:47 and 14:47 UTC runs are retries: the update
+    # waits until ESPN's season stats cover every game in its results (update-data.mjs, a run
+    # that holds writes nothing), and they also cover a delayed or dropped run. A run with
+    # nothing new is a no-op (no commit, no deploy).
+    - cron: "13 8 * * *"
     - cron: "47 12 * * *"
+    - cron: "47 14 * * *"
   workflow_dispatch:
 
 # One update at a time: a run that starts while another is still going waits for it

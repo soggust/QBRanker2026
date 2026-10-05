@@ -28,6 +28,9 @@ import { gunzipSync } from 'node:zlib';
 const CURRENT_SEASON = 2026;
 const SEASON = Number(process.env.SEASON ?? CURRENT_SEASON);
 const PAST_SEASON = SEASON < CURRENT_SEASON;
+// How long after the latest game an update waits for ESPN's season stats to catch up with its results
+// before going ahead anyway (the QBs still behind marked)
+const HOLD_HOURS = 36;
 const WEEKS = 18;
 const SITE = 'https://site.api.espn.com/apis/site/v2/sports/football/nfl';
 const DATA_DIR = process.env.OUT_DIR
@@ -1213,6 +1216,8 @@ async function qbBoxStats(id) {
   const attempts = stat('passing', 'passingAttempts');
   return {
     games: stat('general', 'gamesPlayed'),
+    // (for the catching-up check: update-data's gamesBehind; not shown)
+    attempts,
     fumLost: stat('general', 'fumblesLost'),
     passYards: stat('passing', 'passingYards'),
     passTd: stat('passing', 'passingTouchdowns'),
@@ -1231,9 +1236,35 @@ async function qbBoxStats(id) {
   };
 }
 
+// Each passer's attempts game by game, from the summaries read for the records: athlete id -> [[date,
+// attempts]]. Only to tell whether ESPN's season totals have caught up with those games yet
+const summaryAttempts = new Map();
+function noteAttempts(summary, date) {
+  for (const team of summary.boxscore?.players ?? []) {
+    const passing = team.statistics.find((c) => c.name === 'passing');
+    const at = passing?.keys.indexOf('completions/passingAttempts') ?? -1;
+    for (const a of passing?.athletes ?? []) {
+      const attempts = Number(String(a.stats[at] ?? '0/0').split('/')[1]) || 0;
+      (summaryAttempts.get(a.athlete.id) ?? summaryAttempts.set(a.athlete.id, []).get(a.athlete.id)).push([date, attempts]);
+    }
+  }
+}
+
+// How many of a QB's latest games ESPN's season totals leave out (0: caught up): the fewest latest games
+// whose attempts make up the gap between the summaries' total and the season total
+function gamesBehind(id, seasonAttempts) {
+  const list = (summaryAttempts.get(String(id)) ?? []).sort((a, b) => a[0].localeCompare(b[0]));
+  let gap = list.reduce((sum, [, n]) => sum + n, 0) - seasonAttempts;
+  if (gap <= 0) return 0;
+  let n = 0;
+  for (let i = list.length - 1; i >= 0 && gap > 0; i--, n++) gap -= list[i][1];
+  return n;
+}
+
 // Returns [{ athlete, team, result }] for both teams in a game
 async function gameStarters(game) {
   const summary = await getJson(`${SITE}/summary?event=${game.id}`);
+  noteAttempts(summary, game.date);
   const competitors = summary.header.competitions[0].competitors;
   const tie = competitors.every((c) => !c.winner);
 
@@ -1307,6 +1338,24 @@ async function main() {
     })
     .sort((a, b) => a.name.localeCompare(b.name));
 
+  // Box stats (games, passing, rushing, rating): ESPN's season totals. The records come from its game
+  // summaries, which land as soon as a game ends; the season totals follow a few hours later. Until they
+  // cover every game in the records, nothing is written (the site keeps the last update, records and
+  // stats together) and the next scheduled run tries again. Past HOLD_HOURS after the latest game the
+  // update goes ahead anyway, each QB still behind marked (statsBehind) rather than the site frozen.
+  const boxes = await mapBatched(gameData, 8, (qb) => qbBoxStats(qb.id).catch(() => undefined));
+  const behind = gameData.map((qb, i) => [qb, boxes[i] ? gamesBehind(qb.id, boxes[i].attempts) : 0]).filter(([, n]) => n > 0);
+  const latest = games.at(-1)?.date;
+  const hoursSince = latest ? (Date.now() - Date.parse(latest)) / 3600000 : Infinity;
+  if (behind.length && !PAST_SEASON && hoursSince < HOLD_HOURS) {
+    console.log(
+      `ESPN's season stats are behind its results for ${behind.map(([qb, n]) => `${qb.name} (${n} game${n === 1 ? '' : 's'})`).join(', ')}: ` +
+        `keeping the current data (the latest game ended ${Math.round(hoursSince)} hours ago; going ahead anyway after ${HOLD_HOURS})`,
+    );
+    return;
+  }
+  for (const [qb, n] of behind) qb.statsBehind = n;
+
   // nflverse can lag ESPN or be briefly unavailable; keep the last known values rather than failing
   const previous = JSON.parse(await readFile(GAMES_FILE, 'utf8').catch(() => '[]'));
   let advanced = new Map();
@@ -1342,9 +1391,7 @@ async function main() {
   const missing = gameData.filter((qb) => !qb.advanced).map((qb) => qb.name);
   if (missing.length) console.warn(`No advanced stats for: ${missing.join(', ')}`);
 
-  // Box stats (games, passing, rushing, rating) from ESPN in the same run as the results, so a
-  // QB's stats and record always change together; keep yesterday's if ESPN can't be reached
-  const boxes = await mapBatched(gameData, 8, (qb) => qbBoxStats(qb.id).catch(() => undefined));
+  // (the box stats fetched above; yesterday's if ESPN couldn't be reached)
   gameData.forEach((qb, i) => {
     qb.box = boxes[i] === undefined ? (previous.find((p) => p.id === qb.id)?.box ?? null) : boxes[i];
     // Games played: starts plus real relief appearances, not ESPN's every-snap count (see QB_GAME_PLAYS)

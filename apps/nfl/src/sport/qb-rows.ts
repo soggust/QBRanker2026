@@ -32,6 +32,8 @@ export interface StaticPlayerData {
   id: number;
   lastFive: number[];
   lastFiveVs?: (string | null)[];
+  // Games in his record that ESPN's season stats don't cover yet
+  statsBehind?: number;
   injured: boolean;
   // ESPN injury report status (Out, Doubtful, Injured Reserve)
   injuryStatus?: string;
@@ -69,6 +71,8 @@ interface GameData {
   ties: number;
   lastFive: number[];
   lastFiveVs?: (string | null)[];
+  // Games in his record that ESPN's season stats don't cover yet
+  statsBehind?: number;
   starts: Record<string, number>;
   // From ESPN's injury report: Out, Doubtful or Injured Reserve
   injured: boolean;
@@ -175,6 +179,7 @@ function qbData(): StaticPlayerData[] {
       ties: game.ties,
       lastFive: game.lastFive,
       lastFiveVs: game.lastFiveVs,
+      statsBehind: game.statsBehind,
       epaPerPlay: game.advanced?.epaPerPlay ?? null,
       cpoe: game.advanced?.cpoe ?? null,
       successRate: game.advanced?.successRate ?? null,
@@ -222,6 +227,7 @@ export function buildQbUnits(): SkillPlayer[] {
         injuryStatus: qb.injuryStatus,
         lastFive: qb.lastFive,
         lastFiveVs: qb.lastFiveVs,
+        statsBehind: qb.statsBehind,
         starts: qb.starts,
         competitive: qb.competitive ?? undefined,
         stats: {
