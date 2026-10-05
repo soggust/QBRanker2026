@@ -11,7 +11,7 @@ section ul li.player:not(.header-row):not(.cdk-drag-preview) {
 // The closing line after the last group: the sideline mirrored, its hash marks facing in toward the grid
 // (the 13px-wide mark shifted so its sideline stays where a group's would start)
 section.category-colors ul li.player:not(.header-row) > .col-group.group-end > div:first-child::before {
-  left: calc(-0.5em - 10px);
+  left: calc(-0.5em - 10.5px);
   transform: translateY(-50%) scaleX(-1);
 }
 

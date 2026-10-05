@@ -26,7 +26,8 @@ section.category-colors
   > .col-group
   > div:first-child::before {
   background: color-mix(in srgb, var(--group-color) 80%, #fff);
-  left: calc(-0.5em - 3px);
+  // (under the header's chalk: half a pixel left of it, so they read as one line down the grid)
+  left: calc(-0.5em - 4.5px);
   mask: $chalk-mask;
   opacity: 0.75;
   width: 10px;

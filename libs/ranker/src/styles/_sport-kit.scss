@@ -173,7 +173,8 @@ $switch: "html .mat-mdc-slide-toggle.mat-accent";
   section.category-colors ul li.player:not(.header-row) > .col-group > div:first-child::before {
     background: $line;
     filter: $filter;
-    left: calc(-0.5em + 1px);
+    // (under the header's line: half a pixel left of it, so they read as one line down the grid)
+    left: calc(-0.5em - 0.5px);
     opacity: $opacity;
     width: 3px;
   }
