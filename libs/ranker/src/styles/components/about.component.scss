@@ -18,6 +18,8 @@
 
 .about-backdrop {
   animation: about-fade 0.15s ease;
+  // (the page behind softly blurred, as behind the player card)
+  backdrop-filter: blur(2px);
   background: rgba(0, 0, 0, 0.6);
   inset: 0;
   position: absolute;

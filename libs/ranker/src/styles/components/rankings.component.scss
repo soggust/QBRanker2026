@@ -860,10 +860,16 @@ section.spread ul li.player > .col-group {
   // (the closing line's cell: no width of its own, just where the next group would start)
   &.group-end > div {
     flex: 0 0 0;
+    // (the row ends at the line: pulled back over the line's offset, the row's own end padding gone)
+    margin-right: calc(-0.5em + 3px);
     max-width: 0;
     min-width: 0;
     padding: 0;
   }
+}
+
+section.spread ul li.player:has(> .col-group.group-end) {
+  padding-right: 0;
 }
 
 // (the header's closing cell: its group's line, without the group's tint)
