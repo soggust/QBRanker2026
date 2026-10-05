@@ -1,1 +1,13 @@
-// NFL grid touches: none (the shared grid is the NFL look; its award metals: _sport-awards.scss)
+// NFL grid touches (the shared grid is otherwise the NFL look; its award metals: _sport-awards.scss)
+
+// The rows' yard lines as heavy as the category lines' hash marks (1px; the shared grid draws them a
+// hairline): the line under each row, and each group's colored line across its columns
+section ul li.player:not(.header-row):not(.cdk-drag-preview) {
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.12)) left bottom / 100% 1px no-repeat,
+    rgba(0, 0, 0, 0.1);
+}
+
+section.category-colors ul li.player:not(.header-row):not(.cdk-drag-preview) > .col-group > div::after {
+  height: 1px;
+}
