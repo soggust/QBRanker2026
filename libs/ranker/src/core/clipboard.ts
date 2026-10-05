@@ -21,26 +21,27 @@ export function copyRankingsToClipboard(list: HTMLElement, stats = true): Promis
     values: columns.map((column) => cellText(cellAt(row, column.path))),
   }));
 
+  // Plain text: tab-separated, with a row of column labels when the stats come along (a spreadsheet's
+  // header); just "rank, name" lines without them
   const labels = ['Rank', 'Name', ...columns.map((c) => c.label)];
-  const plain = [labels, ...table.map((r) => [r.rank, r.name, ...r.values])]
+  const plain = [...(columns.length ? [labels] : []), ...table.map((r) => [r.rank, r.name, ...r.values])]
     .map((cells) => cells.join('\t'))
     .join('\n');
 
-  const th = (text: string) => `<th style="text-align:left;padding:2px 8px">${escape(text)}</th>`;
-  const td = (html: string, padding = '2px 8px') => `<td style="padding:${padding}">${html}</td>`;
+  // HTML: no header row, the logo in a cell of its own between the rank and the name (forums strip the
+  // space or margin between an image and its text, not a cell's padding), the rank close to it; each logo a
+  // fixed square, as attributes and style (forums keep one or the other, and an image with only a height
+  // gets stretched to the post's width)
+  const td = (html: string, padding = '2px 8px') => `<td style="padding:${padding};white-space:nowrap">${html}</td>`;
+  const img = (src: string) =>
+    `<img src="${src}" width="18" height="18" style="width:18px;height:18px;max-width:18px;object-fit:contain;vertical-align:middle">`;
   const html = [
-    '<table><thead><tr>',
-    labels.map(th).join(''),
-    '</tr></thead><tbody>',
+    '<table><tbody>',
     ...table.map(
       (r) =>
-        // (the rank close to the logo: less padding between the two cells; the logo spaced from the name)
-        `<tr>${td(String(r.rank), '2px 4px 2px 8px')}${td(
-          // (a fixed width and height, as attributes and style: forums keep one or the other, and an image with
-          // only a height gets stretched to the post's width)
-          `${r.logo ? `<img src="${r.logo}" width="18" height="18" style="width:18px;height:18px;max-width:18px;object-fit:contain;vertical-align:middle;margin-right:6px">&nbsp;` : ''}<b>${escape(r.name)}</b>`,
-          '2px 8px 2px 4px',
-        )}${r.values.map((v) => td(escape(v))).join('')}</tr>`,
+        `<tr>${td(String(r.rank), '2px 4px 2px 8px')}${td(r.logo ? img(r.logo) : '', '2px 4px')}${td(`<b>${escape(r.name)}</b>`, '2px 8px 2px 4px')}${r.values
+          .map((v) => td(escape(v)))
+          .join('')}</tr>`,
     ),
     '</tbody></table>',
   ].join('');
