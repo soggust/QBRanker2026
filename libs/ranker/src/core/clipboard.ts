@@ -27,17 +27,19 @@ export function copyRankingsToClipboard(list: HTMLElement, stats = true): Promis
     .join('\n');
 
   const th = (text: string) => `<th style="text-align:left;padding:2px 8px">${escape(text)}</th>`;
-  const td = (html: string) => `<td style="padding:2px 8px">${html}</td>`;
+  const td = (html: string, padding = '2px 8px') => `<td style="padding:${padding}">${html}</td>`;
   const html = [
     '<table><thead><tr>',
     labels.map(th).join(''),
     '</tr></thead><tbody>',
     ...table.map(
       (r) =>
-        `<tr>${td(String(r.rank))}${td(
+        // (the rank close to the logo: less padding between the two cells; the logo spaced from the name)
+        `<tr>${td(String(r.rank), '2px 4px 2px 8px')}${td(
           // (a fixed width and height, as attributes and style: forums keep one or the other, and an image with
           // only a height gets stretched to the post's width)
-          `${r.logo ? `<img src="${r.logo}" width="18" height="18" style="width:18px;height:18px;max-width:18px;object-fit:contain;vertical-align:middle"> ` : ''}<b>${escape(r.name)}</b>`,
+          `${r.logo ? `<img src="${r.logo}" width="18" height="18" style="width:18px;height:18px;max-width:18px;object-fit:contain;vertical-align:middle;margin-right:6px">&nbsp;` : ''}<b>${escape(r.name)}</b>`,
+          '2px 8px 2px 4px',
         )}${r.values.map((v) => td(escape(v))).join('')}</tr>`,
     ),
     '</tbody></table>',
