@@ -4543,8 +4543,8 @@
         "epaPerCarry": -0.276,
         "epaPerTarget": -1.498
       },
-      "injuryStatus": "Out",
-      "injured": true
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4685116,
