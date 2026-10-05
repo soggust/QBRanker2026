@@ -31,6 +31,18 @@
     </span>
     <span>Min {{ sport.playingTime.label }}: <span class="menu-value">{{ minCount }}</span></span>
   </div>
+  <!-- The copy button's list: with the stat columns, or just rank, logo and name -->
+  <div mat-menu-item [title]="copyStatsTitle" (click)="$event.stopPropagation(); flipCopyStats()">
+    <mat-slide-toggle
+      hideIcon
+      color="accent"
+      class="slide-toggle"
+      [ngModel]="settings.copyStats"
+      (ngModelChange)="flipCopyStats()"
+      (click)="$event.stopPropagation()"
+    ></mat-slide-toggle>
+    <span>Copy Stats</span>
+  </div>
 
   <!-- Display: what the table shows -->
   <div class="menu-section section-display" (click)="$event.stopPropagation()">Display</div>

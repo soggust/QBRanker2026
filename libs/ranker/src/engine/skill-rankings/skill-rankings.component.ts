@@ -524,7 +524,7 @@ export class SkillRankingsComponent implements OnChanges, CardHost {
   copyList(button: HTMLElement): void {
     const rect = button.getBoundingClientRect();
     this.toastAt = { top: rect.bottom + 8, left: rect.left + rect.width / 2 };
-    copyRankingsToClipboard(this.rankingsList.nativeElement)
+    copyRankingsToClipboard(this.rankingsList.nativeElement, this.settings.copyStats)
       .then(() => {
         this.toastVisible = true;
         setTimeout(() => (this.toastVisible = false), 2000);

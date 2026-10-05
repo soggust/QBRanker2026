@@ -6,18 +6,18 @@ interface Column {
   path: number[];
 }
 
-// Copy the rankings exactly as shown: current order and the visible columns, read from the list.
-// Plain text is tab-separated (pastes into spreadsheets and notes); HTML is a table with team
-// logos (pastes into forums and docs).
-export function copyRankingsToClipboard(list: HTMLElement): Promise<void> {
+// Copy the rankings exactly as shown: current order and the visible columns, read from the list (or,
+// with stats off, just the rank, logo and name). Plain text is tab-separated (pastes into spreadsheets
+// and notes); HTML is a table with team logos (pastes into forums and docs).
+export function copyRankingsToClipboard(list: HTMLElement, stats = true): Promise<void> {
   const header = list.querySelector<HTMLElement>(':scope > li.header-row');
   const rows = Array.from(list.querySelectorAll<HTMLElement>(':scope > li.player:not(.header-row)'));
-  const columns = header ? readColumns(header) : [];
+  const columns = header && stats ? readColumns(header) : [];
 
   const table = rows.map((row, index) => ({
     rank: index + 1,
     name: row.querySelector('.player-name strong')?.textContent?.trim() ?? '',
-    logo: row.querySelector<HTMLImageElement>('.team-logo')?.getAttribute('src') ?? '',
+    logo: logoUrl(row.querySelector<HTMLImageElement>('.team-logo')),
     values: columns.map((column) => cellText(cellAt(row, column.path))),
   }));
 
@@ -35,7 +35,7 @@ export function copyRankingsToClipboard(list: HTMLElement): Promise<void> {
     ...table.map(
       (r) =>
         `<tr>${td(String(r.rank))}${td(
-          `<img src="${BASE_URL}/${r.logo}" height="16" style="vertical-align:middle"> <b>${escape(r.name)}</b>`,
+          `${r.logo ? `<img src="${r.logo}" height="16" style="vertical-align:middle"> ` : ''}<b>${escape(r.name)}</b>`,
         )}${r.values.map((v) => td(escape(v))).join('')}</tr>`,
     ),
     '</tbody></table>',
@@ -46,6 +46,15 @@ export function copyRankingsToClipboard(list: HTMLElement): Promise<void> {
     'text/html': new Blob([html], { type: 'text/html' }),
   });
   return navigator.clipboard.write([clipboardItem]);
+}
+
+// A logo's full address, wherever it's pasted: resolved against the page (each sport's app serves its own
+// assets: /nfl/assets/...), and from the live site when copied from a local dev server
+function logoUrl(img: HTMLImageElement | null): string {
+  const src = img?.getAttribute('src');
+  if (!src) return '';
+  const url = new URL(src, document.baseURI);
+  return /^(localhost|127\.0\.0\.1)$/.test(url.hostname) ? `${BASE_URL}${url.pathname}` : url.href;
 }
 
 // A row's cells, looking through display: contents column-group wrappers

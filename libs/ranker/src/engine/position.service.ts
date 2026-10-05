@@ -40,6 +40,8 @@ export interface RankerSettings {
   combineStats: boolean;
   // List only rookies (and first-year head coaches): everyone else is left out, like Min Games
   rookiesOnly: boolean;
+  // The copy button copies the stat columns too (off: just the rank, logo and name, a plain list)
+  copyStats: boolean;
   // The sport's own settings (SPORT.settings), by key
   sport: SportSettings;
 }
@@ -57,6 +59,7 @@ const DEFAULT_SETTINGS: RankerSettings = {
   categoryColors: true,
   combineStats: true,
   rookiesOnly: false,
+  copyStats: true,
   sport: DEFAULT_SPORT_SETTINGS,
 };
 
