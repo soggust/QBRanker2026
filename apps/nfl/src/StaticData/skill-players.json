@@ -6347,8 +6347,8 @@
         "epaPerCarry": -0.264,
         "epaPerTarget": -1.392
       },
-      "injuryStatus": "Questionable",
-      "injured": false
+      "injuryStatus": "Out",
+      "injured": true
     },
     {
       "id": 3916148,
@@ -8989,7 +8989,7 @@
         "epaPerCarry": 0,
         "epaPerTarget": -0.065
       },
-      "injuryStatus": "Active",
+      "injuryStatus": "Questionable",
       "injured": false
     },
     {
