@@ -872,6 +872,16 @@ section.spread ul li.player:has(> .col-group.group-end) {
   padding-right: 0;
 }
 
+// (a row's closing cell: no colored row line of its own, which ran on past the closing line)
+section ul li.player:not(.header-row) > .col-group.group-end > div::after {
+  display: none;
+}
+
+// (the last group's tint runs right up to the closing line: no seam before it, as between two groups)
+section ul li.player.header-row > .col-group:has(+ .col-group.group-end) > div:last-child::after {
+  right: -1.6em;
+}
+
 // (the header's closing cell: its group's line, without the group's tint)
 section ul li.player.header-row > .col-group.group-end > div::after {
   background: none;
