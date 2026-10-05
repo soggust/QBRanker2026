@@ -39,6 +39,30 @@ const franchise = (code) => FRANCHISE[code] ?? code;
 const WINNER_AWARDS = { 'MVP-1': 'mvp', 'DPOY-1': 'dpoy', 'ROY-1': 'roy', '6MOY-1': 'smoy', 'MIP-1': 'mip', 'CPOY-1': 'cpoy' };
 const TEAM_AWARDS = { NBA1: 'nba1', NBA2: 'nba2', NBA3: 'nba3', DEF1: 'def1', DEF2: 'def2', AS: 'as' };
 
+// Each team's last seven games, newest first (1 a win, 0 a loss), the regular season's and the playoffs':
+// Basketball-Reference's monthly schedule pages, the latest months first, until every team has seven
+// (the Teams tab's Recent)
+const MONTHS = ['october', 'november', 'december', 'january', 'february', 'march', 'april', 'may', 'june'];
+async function teamRecent(season, teamCount) {
+  const games = new Map();
+  for (const month of [...MONTHS].reverse()) {
+    const html = await page(`${BBREF}/leagues/NBA_${season}_games-${month}.html`);
+    for (const [, cells] of html.matchAll(/<tr[^>]*>([\s\S]*?)<\/tr>/g)) {
+      const key = cells.match(/data-stat="date_game" csk="(\d+)/)?.[1];
+      const away = cells.match(/data-stat="visitor_team_name" csk="([A-Z]{3})/)?.[1];
+      const home = cells.match(/data-stat="home_team_name" csk="([A-Z]{3})/)?.[1];
+      const awayPts = num(cells.match(/data-stat="visitor_pts"[^>]*>(\d*)</)?.[1]);
+      const homePts = num(cells.match(/data-stat="home_pts"[^>]*>(\d*)</)?.[1]);
+      if (!key || !away || !home || awayPts === null || homePts === null) continue;
+      for (const [team, mine, theirs] of [[away, awayPts, homePts], [home, homePts, awayPts]]) {
+        (games.get(team) ?? games.set(team, []).get(team)).push([key, mine > theirs ? 1 : 0]);
+      }
+    }
+    if (games.size >= teamCount && [...games.values()].every((list) => list.length >= 7)) break;
+  }
+  return new Map([...games].map(([team, list]) => [team, list.sort((a, b) => b[0].localeCompare(a[0])).slice(0, 7).map(([, r]) => r)]));
+}
+
 // Basketball-Reference asks for no more than 20 requests a minute
 let lastRequest = 0;
 async function page(url) {
@@ -254,6 +278,7 @@ async function buildSeason(season) {
 
   // Head coaches: one row per coach and team (an interim coach has his own games and record; the
   // team's ratings are its whole season's)
+  const recent = await teamRecent(season, teams.size);
   const coaches = [];
   for (const row of coachRows) {
     const code = row.team;
@@ -275,6 +300,8 @@ async function buildSeason(season) {
       teamName: team?.name ?? null,
       games: g,
       _team: code,
+      // (the team's last seven games: the Teams tab's Recent)
+      ...(recent.get(code)?.length ? { teamLastFive: recent.get(code) } : {}),
       stats: {
         wins,
         losses,

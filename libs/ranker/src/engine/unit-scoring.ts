@@ -45,11 +45,17 @@ export function emptyIn(units: SkillPlayer[], key: string): boolean {
   return units.some((unit) => key in unit.stats) && units.every((unit) => unit.stats[key as SkillStatKey] == null);
 }
 
-// Recent form from up to five results (newest first, 1 win / 0.5 tie / 0 loss): each older game counts
-// a little less, scaled to a 0-4 range (4 = won them all); no games yet scores 0
-export function recencyScore(lastFive: number[] = []): number {
-  const weights = [1, 0.9, 0.8, 0.7, 0.6];
-  const played = lastFive.slice(0, 5);
+// How many games a tab's Recent column covers (SPORT.recentGames; 5 if the sport doesn't say)
+export function recentCount(position: string): number {
+  return SPORT.recentGames?.(position) ?? 5;
+}
+
+// Recent form from the latest results (newest first, 1 win / 0.5 tie / 0 loss; up to count of them):
+// each older game counts a little less, the oldest 0.6 of the newest, scaled so winning them all scores
+// the weights' total; no games yet scores 0
+export function recencyScore(lastFive: number[] = [], count = 5): number {
+  const weights = Array.from({ length: count }, (_, i) => (count > 1 ? 1 - (0.4 * i) / (count - 1) : 1));
+  const played = lastFive.slice(0, count);
   if (!played.length) return 0;
   const earned = played.reduce((sum, result, i) => sum + result * weights[i], 0);
   const possible = played.reduce((sum, _, i) => sum + weights[i], 0);
@@ -75,7 +81,7 @@ export function combinedWeights(position: string, weights: SkillWeights): SkillW
 // pair's total, or the sport's own: SPORT.computedValue)
 export function statValue(unit: SkillPlayer, stat: SkillStat, context: ValueContext): number | null {
   if (stat.key === 'games') return unit.games;
-  if (stat.format === 'recent') return recencyScore((unit as { lastFive?: number[] }).lastFive);
+  if (stat.format === 'recent') return recencyScore((unit as { lastFive?: number[] }).lastFive, recentCount(context.position));
   const pair = combinedFor(context.position).find(({ stat: total }) => total.key === stat.key);
   if (pair) {
     const values = pair.parts.map((part) => unitStat(unit, part as SkillStatKey, context.settings));

@@ -76,7 +76,7 @@ export type SkillStatKey =
   | 'coaching';
 
 // Columns worked out in the app rather than read from the data
-export type SkillColumnKey = SkillStatKey | 'games';
+export type SkillColumnKey = SkillStatKey | 'games' | 'recent';
 
 // How counting stats (goals, points, hits...) are shown and ranked: season totals, per game, or at a
 // full season's pace (82 games). Per Game and the pace rank the same; they only read differently.
@@ -279,6 +279,7 @@ const GOALIE_STATS: SkillStat[] = [
 const TEAM_STATS: SkillStat[] = [
   { key: 'games', label: 'Games', description: 'Games played (for context; not part of the ranking)', kind: 'efficiency', format: 'int', infoOnly: true },
   { key: 'winPct', label: 'Record', name: 'Record', description: 'Wins-losses-overtime losses (ranked on points percentage)', kind: 'efficiency', format: 'record' },
+  { key: 'recent', label: 'Recent', description: 'The last 7 games, newest first (newer ones count a little more)', kind: 'efficiency', format: 'recent' },
   { key: 'playoffWins', label: 'Playoff Wins', description: 'Playoff games won (16 is a Cup)', kind: 'efficiency', format: 'int' },
   { key: 'goalDiff', label: 'Goal Diff / GP', description: 'Goals for minus against per game', kind: 'efficiency', format: 'dec2' },
   // (ranks rather than goals per game: league scoring drifts over the years, and "3rd" means the same in
@@ -341,7 +342,8 @@ export const STAT_GROUP_INFO: { id: StatGroupId; title: string; icon: string }[]
   { id: 'support', title: 'Support', icon: 'groups' },
 ];
 
-const RESULTS_STATS = new Set<SkillColumnKey>(['games', 'toi', 'gamesStarted', 'winPct', 'playoffWins']);
+const RESULTS_STATS = new Set<SkillColumnKey>(['games', 'toi', 'gamesStarted', 'winPct',
+  'recent', 'playoffWins']);
 
 // (Game Score and GSAx lead them: each position's all-in-one value number)
 const ADVANCED_STATS = new Set<SkillColumnKey>([

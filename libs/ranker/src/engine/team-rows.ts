@@ -20,6 +20,8 @@ export function teamRowsFromCoaches(stats: (coaches: SkillPlayer[], sum: (key: s
       teamLogo: logo,
       teamName: list[0].teamName,
       games: list.reduce((total, c) => total + c.games, 0),
+      // (the team's last five games, newest first, from its coaches' rows: the Recent column)
+      lastFive: (list.find((c) => (c as { teamLastFive?: number[] }).teamLastFive) as { teamLastFive?: number[] } | undefined)?.teamLastFive,
       stats: { ...list[0].stats, ...stats(list, sum) },
       awards: [...new Set(list.flatMap((c) => (c.awards ?? []).filter((award) => award !== 'coy')))],
     } as SkillPlayer;

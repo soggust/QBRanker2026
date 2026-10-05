@@ -66,7 +66,7 @@ export type SkillStatKey =
   | 'coaching';
 
 // Columns worked out in the app rather than read from the data
-export type SkillColumnKey = SkillStatKey | 'games';
+export type SkillColumnKey = SkillStatKey | 'games' | 'recent';
 
 // How counting stats (points, rebounds...) are shown and ranked: season totals, per game, or at a
 // full season's pace (82 games). Per Game and the pace rank the same; they only read differently.
@@ -224,6 +224,7 @@ const NBA_STATS: SkillStat[] = [
 const TEAM_STATS: SkillStat[] = [
   { key: 'games', label: 'Games', description: 'Games played (for context; not part of the ranking)', kind: 'efficiency', format: 'int', infoOnly: true },
   { key: 'winPct', label: 'Record', name: 'Record', description: 'The win-loss record (ranked on win percentage)', kind: 'efficiency', format: 'record' },
+  { key: 'recent', label: 'Recent', description: 'The last 7 games, newest first (newer ones count a little more)', kind: 'efficiency', format: 'recent' },
   { key: 'playoffWins', label: 'Playoff Wins', description: 'Playoff games won (16 is a title)', kind: 'efficiency', format: 'int' },
   { key: 'netRtg', label: 'Net Rtg', description: 'Points scored minus allowed per 100 possessions', kind: 'efficiency', format: 'dec1' },
   { key: 'offRank', label: 'Off Rank', name: 'Offense Rank', description: "The offense's league rank by offensive rating, points scored per 100 possessions", kind: 'efficiency', format: 'rank', negative: true },
@@ -281,7 +282,8 @@ export const STAT_GROUP_INFO: { id: StatGroupId; title: string; icon: string }[]
   { id: 'support', title: 'Support', icon: 'groups' },
 ];
 
-const RESULTS_STATS = new Set<SkillColumnKey>(['games', 'minutes', 'winPct', 'ws', 'vorp', 'playoffWins']);
+const RESULTS_STATS = new Set<SkillColumnKey>(['games', 'minutes', 'winPct',
+  'recent', 'ws', 'vorp', 'playoffWins']);
 
 const ADVANCED_STATS = new Set<SkillColumnKey>([
   'tsPct',

@@ -134,9 +134,9 @@
             } @else {
               @for (stat of group.stats; track stat.key) {
                 @if (stat.format === 'recent') {
-                  <!-- Last five results as dots, newest first; empty slots for games not played yet -->
+                  <!-- The latest results as dots, newest first; empty slots for games not played yet -->
                   <div class="box support-box recent-box">
-                    <div class="last-five">
+                    <div class="last-five" [class.many]="manyRecent">
                       <div>
                         @for (result of reader.lastFive(player); track $index) {
                           <p [ngClass]="result === 1 ? 'green' : result === 0.5 ? 'tie' : 'red'">

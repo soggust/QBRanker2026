@@ -161,6 +161,8 @@ export const SPORT: SportConfig = {
   // ESPN's headshot cutouts (the NFL app's shape)
   headshot: (id, w) => `https://a.espncdn.com/combiner/i?img=/i/headshots/nba/players/full/${id}.png&w=${w}&h=${Math.round(w * 0.725)}`,
   cardFlags,
+  // (the Teams tab's Recent: the last 7 games)
+  recentGames: (position) => (position === 'TM' ? 7 : 5),
   copy: {
     noHolesIcon: 'verified',
     volumeOverEfficiency: 'Big numbers, below-average efficiency: empty stats',

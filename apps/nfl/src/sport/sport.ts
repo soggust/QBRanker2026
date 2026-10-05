@@ -37,6 +37,8 @@ function teamRows(): SkillPlayer[] {
     id: null,
     gsisId: `TM-${coach.teamLogo.split('/').pop()!.replace('.png', '')}`,
     name: names.get(coach.teamLogo) ?? coach.teamLogo.split('/').pop()!.replace('.png', ''),
+    // (the team's last five games: the Recent column)
+    lastFive: (coach as { teamLastFive?: number[] }).teamLastFive,
   }));
 }
 

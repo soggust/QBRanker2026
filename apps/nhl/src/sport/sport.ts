@@ -153,6 +153,8 @@ export const SPORT: SportConfig = {
   // The NHL's player headshots
   headshot: (id) => `https://assets.nhle.com/mugs/nhl/latest/${id}.png`,
   cardFlags,
+  // (the Teams tab's Recent: the last 7 games)
+  recentGames: (position) => (position === 'TM' ? 7 : 5),
   copy: {
     noHolesIcon: 'verified',
     volumeOverEfficiency: 'Lots of shots, below-average finishing: a volume shooter',

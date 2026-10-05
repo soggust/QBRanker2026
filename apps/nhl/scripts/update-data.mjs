@@ -323,7 +323,27 @@ async function buildSeason(season) {
     u.stats.coaching = coaching.get(u._team) ?? null;
     delete u._team;
   }
-  for (const c of coached.rows) delete c._team;
+  // (each team's last seven games, newest first, from its season schedule: the Teams tab's Recent; the
+  // regular season's and the playoffs', 1 a win, 0 a loss, overtime and shootout ones too)
+  const lastSeven = new Map();
+  for (const tri of new Set(coached.rows.map((c) => c._team).filter(Boolean))) {
+    const games = (await get(`${WEB}/club-schedule-season/${tri}/${seasonId(season)}`).catch(() => null))?.games ?? [];
+    lastSeven.set(
+      tri,
+      games
+        .filter((g) => (g.gameType === 2 || g.gameType === 3) && (g.gameState === 'OFF' || g.gameState === 'FINAL'))
+        .sort((x, y) => y.gameDate.localeCompare(x.gameDate) || y.id - x.id)
+        .slice(0, 7)
+        .map((g) => {
+          const [mine, theirs] = g.homeTeam.abbrev === tri ? [g.homeTeam, g.awayTeam] : [g.awayTeam, g.homeTeam];
+          return mine.score > theirs.score ? 1 : 0;
+        }),
+    );
+  }
+  for (const c of coached.rows) {
+    if (lastSeven.get(c._team)?.length) c.teamLastFive = lastSeven.get(c._team);
+    delete c._team;
+  }
   out.HC = coached.rows;
   console.log(coached.log);
   // (early in the season, Linemates, Defense and Coaching start from the team's last season: libs/ranker/scripts/early-season)

@@ -82,7 +82,7 @@ export type SkillStatKey =
   | 'bullpen';
 
 // Columns worked out in the app rather than read from the data
-export type SkillColumnKey = SkillStatKey | 'games';
+export type SkillColumnKey = SkillStatKey | 'games' | 'recent';
 
 // How counting stats (home runs, strikeouts...) are shown and ranked: season totals, per game, or at
 // a full season's pace (see PACE_GAMES). Per Game and the pace rank the same; they only read
@@ -308,6 +308,7 @@ const PITCHER_FIELDING_STAT: SkillStat = {
 // and the roster by your own rankings at each spot, weighted by playing time
 const TEAM_STATS: SkillStat[] = [
   { key: 'winPct', label: 'Record', name: 'Record', description: 'The win-loss record (ranked on win percentage)', kind: 'efficiency', format: 'record' },
+  { key: 'recent', label: 'Recent', description: 'The last 10 games, newest first (newer ones count a little more)', kind: 'efficiency', format: 'recent' },
   { key: 'playoffWins', label: 'Playoff Wins', description: 'Postseason games won (11 or more is usually a title)', kind: 'efficiency', format: 'int' },
   { key: 'runDiff', label: 'Run Diff / G', name: 'Run Differential per Game', description: 'Runs scored minus allowed per game', kind: 'efficiency', format: 'dec2' },
   { key: 'offRank', label: 'Off Rank', name: 'Offense Rank', description: "The offense's league rank by runs per game", kind: 'efficiency', format: 'rank', negative: true },
@@ -398,7 +399,8 @@ export const STAT_GROUP_INFO: { id: StatGroupId; title: string; icon: string }[]
   { id: 'support', title: 'Support', icon: 'groups' },
 ];
 
-const RESULTS_STATS = new Set<SkillColumnKey>(['games', 'pa', 'winPct', 'saves', 'holds', 'playoffWins']);
+const RESULTS_STATS = new Set<SkillColumnKey>(['games', 'pa', 'winPct',
+  'recent', 'saves', 'holds', 'playoffWins']);
 
 // (the Teams tab's roster grades sit where the support grades do, under "Roster")
 const ROSTER_STATS = new Set<SkillColumnKey>(['hitters', 'rotation', 'bullpen']);

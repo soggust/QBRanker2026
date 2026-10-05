@@ -365,21 +365,29 @@ async function teamRows(season, teamDef, parks, logo) {
     json(`${API}/standings?leagueId=103,104&season=${season}&standingsTypes=regularSeason`),
     json(`${API}/teams/stats?stats=season&group=hitting&season=${season}&sportIds=1`),
     json(`${API}/teams/stats?stats=season&group=pitching&season=${season}&sportIds=1`),
-    json(`${API}/schedule?sportId=1&season=${season}&gameType=F,D,L,W`).catch(() => ({ dates: [] })),
+    // (every game, the regular season's and the postseason's: postseason wins, and the last five)
+    json(`${API}/schedule?sportId=1&season=${season}&gameType=R,F,D,L,W`).catch(() => ({ dates: [] })),
   ]);
   const ops = new Map((hitting.stats?.[0]?.splits ?? []).map((s) => [s.team.id, num(s.stat.ops)]));
   // (the full name, "Toronto Blue Jays": the standings have just "Blue Jays")
   const fullName = new Map((hitting.stats?.[0]?.splits ?? []).map((s) => [s.team.id, s.team.name]));
   const era = new Map((pitching.stats?.[0]?.splits ?? []).map((s) => [s.team.id, num(s.stat.era)]));
   const playoffWins = new Map();
+  // (each team's finished games, for its last five: [date, 1 a win, 0 a loss])
+  const results = new Map();
   for (const date of postseason.dates ?? []) {
     for (const game of date.games ?? []) {
+      const final = game.status?.abstractGameState === 'Final' && game.status?.detailedState !== 'Postponed';
       for (const side of ['home', 'away']) {
         const t = game.teams?.[side];
-        if (t?.isWinner) playoffWins.set(t.team.id, (playoffWins.get(t.team.id) ?? 0) + 1);
+        if (!t) continue;
+        if (t.isWinner && game.gameType !== 'R') playoffWins.set(t.team.id, (playoffWins.get(t.team.id) ?? 0) + 1);
+        if (final && t.isWinner !== undefined) (results.get(t.team.id) ?? results.set(t.team.id, []).get(t.team.id)).push([game.gameDate, t.isWinner ? 1 : 0]);
       }
     }
   }
+  // (its last ten: a baseball team's recent form)
+  const lastFive = (id) => (results.get(id) ?? []).sort((a, b) => b[0].localeCompare(a[0])).slice(0, 10).map(([, r]) => r);
   const records = (standings.records ?? []).flatMap((r) => r.teamRecords ?? []);
   const perGame = (t, key) => (t.gamesPlayed ? t[key] / t.gamesPlayed : null);
   const rankBy = (key, dir) => {
@@ -401,6 +409,8 @@ async function teamRows(season, teamDef, parks, logo) {
       teamLogo: logo(t.team),
       teamName: fullName.get(id) ?? t.team.name,
       games: gp,
+      // (its last ten games, newest first: the Recent column)
+      lastFive: lastFive(id),
       stats: {
         wins: t.wins,
         losses: t.losses,

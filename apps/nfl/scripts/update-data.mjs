@@ -949,6 +949,11 @@ function coachUnits({ pbp, games, headCoaches }) {
       name,
       teamLogo: teamIcon(team),
       games: played.length,
+      // (the team's last five games, newest first: the Teams tab's Recent; 1 a win, 0.5 a tie, 0 a loss)
+      teamLastFive: [...played]
+        .sort((x, y) => String(y.game.gameday).localeCompare(String(x.game.gameday)))
+        .slice(0, 5)
+        .map((g) => (g.pointsFor > g.pointsAgainst ? 1 : g.pointsFor < g.pointsAgainst ? 0 : 0.5)),
       stats: {
         wins,
         losses,

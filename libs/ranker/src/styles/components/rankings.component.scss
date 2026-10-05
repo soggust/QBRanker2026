@@ -747,6 +747,13 @@ section ul li.player {
         }
       }
     }
+
+    // (ten games: smaller dots, closer together, so the column stays narrow)
+    &.many div p {
+      height: 7px;
+      margin: 0 1px;
+      width: 7px;
+    }
   }
 
   // League ranks (#7, #7 (t) for ties): the "#" and the tie mark small and dimmed so the number reads

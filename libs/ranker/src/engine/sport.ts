@@ -264,6 +264,9 @@ export interface SportConfig {
   // How close the two rows' scores must be for head to head to swap them, in standard deviations of the
   // list's scores (none: any gap; MMA's all-time lists: a close call, not a career's whole resume)
   beatGap?: (settings: SportSettings) => number | undefined;
+  // How many of the latest games the Recent column shows and scores, by tab (none: 5; MLB's teams 10,
+  // the NBA's and NHL's 7: a few games mean less in a long season)
+  recentGames?: (position: string) => number;
   // How many rows a tab lists at most, its top ones (MMA's pound-for-pound tabs: 30); none: all
   listLimit?: (position: string) => number | undefined;
   // Rows the sport's settings can hide (MMA's retired fighters, until switched on)

@@ -20,7 +20,7 @@ import { SportSetting, SportSettings } from '@ranker/engine/sport';
 import { PositionService, RankerSettings } from '@ranker/engine/position.service';
 import { SeasonDataService } from '@ranker/engine/season-data.service';
 import { CURRENT_SEASON, SEASONS, dataSeason, dataVersion, isLiveSeason } from '@ranker/engine/data';
-import { SKILL_UNITS, byTotals, combinedFor, combinedWeights, emptyIn, statIsEmpty, weightedTotals } from '@ranker/engine/unit-scoring';
+import { SKILL_UNITS, byTotals, combinedFor, combinedWeights, emptyIn, recentCount, statIsEmpty, weightedTotals } from '@ranker/engine/unit-scoring';
 import { StatReader } from '@ranker/engine/stat-reader';
 import { hasMin, minCount, seasonLength } from '@ranker/engine/playing-time';
 import { settingGroups, settingOptions, settingText, settingsAt } from '@ranker/engine/setting-options';
@@ -414,9 +414,14 @@ export class SkillRankingsComponent implements OnChanges, CardHost {
     return value === '-' ? name : `${value} ${name}`;
   }
 
-  // Empty Recent slots for games not played yet (up to five)
+  // Empty Recent slots for games not played yet (up to the tab's count: SPORT.recentGames)
   unplayed(player: SkillPlayer): null[] {
-    return Array(Math.max(0, 5 - this.reader.lastFive(player).length)).fill(null);
+    return Array(Math.max(0, recentCount(this.position) - this.reader.lastFive(player).length)).fill(null);
+  }
+
+  // More than 7 Recent dots: smaller ones, so the column stays narrow
+  get manyRecent(): boolean {
+    return recentCount(this.position) > 7;
   }
 
   // Bandage hover: the injury status (the sport's wording)

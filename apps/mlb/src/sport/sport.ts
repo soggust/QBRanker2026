@@ -121,6 +121,8 @@ export const SPORT: SportConfig = {
   // MLB's headshot cutouts (square)
   headshot: (id, w) => `https://img.mlbstatic.com/mlb-photos/image/upload/w_${w},q_auto:best/v1/people/${id}/headshot/silo/current`,
   cardFlags,
+  // (the Teams tab's Recent: the last 10 games, a long season's form; the players' 5)
+  recentGames: (position) => (position === 'TM' ? 10 : 5),
   copy: {
     noHolesIcon: 'shield',
     volumeOverEfficiency: 'Big counting stats, below-average rates: a compiler',

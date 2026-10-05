@@ -4,7 +4,7 @@
 import { PACE_GAMES, PER_GAME_LABELS, STAT_NAMES, SkillPlayer, SkillPosition, SkillStat } from '@sport/positions';
 import { SPORT } from '@sport/sport';
 import { ValueContext } from '@ranker/engine/sport';
-import { statValue } from '@ranker/engine/unit-scoring';
+import { recentCount, statValue } from '@ranker/engine/unit-scoring';
 import type { RankerSettings } from '@ranker/engine/position.service';
 import { TintScale, tintFrom, tintScale } from '@ranker/core/value-tint';
 import { NUMBER, avg3, grade, gradeColor, innings } from '@ranker/core/format';
@@ -93,7 +93,7 @@ export class StatReader {
 
   // The last five results (newest first; 1 win, 0.5 tie, 0 loss), for a sport with a 'recent' stat
   lastFive(player: SkillPlayer): number[] {
-    return (player as { lastFive?: number[] }).lastFive ?? [];
+    return ((player as { lastFive?: number[] }).lastFive ?? []).slice(0, recentCount(this.position));
   }
 
   format(player: SkillPlayer, stat: SkillStat): string {

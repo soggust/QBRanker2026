@@ -629,6 +629,7 @@ const RECEIVING_STATS: SkillStat[] = [
 // Defense, Coaching), here as the team's own strengths rather than support
 const TEAM_STATS: SkillStat[] = [
   { key: 'winPct', label: 'Record', description: 'Win-loss record', kind: 'efficiency', format: 'record' },
+  { key: 'recent', label: 'Recent', description: 'The last 5 games, newest first (newer ones count a little more)', kind: 'efficiency', format: 'recent' },
     {
       key: 'pointDiffPerGame',
       label: 'Pt Diff / Game',
