@@ -31,8 +31,6 @@ export interface BetRow extends BetEntry {
   pick: string;
   marketLabel: string;
   agree: number;
-  // the other reports making the same call (its duplicates, not listed on their own)
-  others: string[];
   key: string;
   // its score, or for an older report an estimate from its grade and the report's confidence
   sureness: number;
@@ -114,16 +112,12 @@ export class BetsPageComponent implements OnInit {
             : [b.lean, b.market];
       const estimated = !b.score;
       const sureness = b.score ?? Math.max(1, Math.min(10, ESTIMATE[b.strength] + SURE[b.confidence ?? 'medium'] - 2));
-      return { ...b, id: i, key: keys[i], pick, marketLabel, agree: (counts.get(keys[i]) ?? 1) - 1, others: [], sureness, estimated };
+      return { ...b, id: i, key: keys[i], pick, marketLabel, agree: (counts.get(keys[i]) ?? 1) - 1, sureness, estimated };
     });
     rows.sort((a, b) => b.sureness - a.sureness || b.agree - a.agree || (a.game?.date ?? '').localeCompare(b.game?.date ?? ''));
     // the same call from several reports: listed once, as its highest-ranked report has it
     const kept = new Map<string, BetRow>();
-    for (const r of rows) {
-      const first = kept.get(r.key);
-      if (first) first.others.push(this.sourceLabel(r));
-      else kept.set(r.key, r);
-    }
+    for (const r of rows) if (!kept.has(r.key)) kept.set(r.key, r);
     this.rows = [...kept.values()];
   }
 
@@ -142,10 +136,5 @@ export class BetsPageComponent implements OnInit {
 
   toggle(id: number): void {
     if (!this.open.delete(id)) this.open.add(id);
-  }
-
-  // A bet's source: a team's nickname, a player with his position
-  sourceLabel(b: BetEntry): string {
-    return b.kind === 'team' ? b.source.replace(/\s*\(.*\)/, '') : `${b.source}${b.position ? ` (${b.position})` : ''}`;
   }
 }
