@@ -600,13 +600,13 @@ section ul li.player:not(.header-row) {
     }
   }
 
-  // The name in DynaPuff (a soft, rounded hand), a touch see-through to soften it
+  // The name in the headline font (a player's, a team's, a coach's), a touch see-through to soften it
   .player-name strong {
     color: #fff !important;
-    font-family: v.$font-hand !important;
+    font-family: v.$font-heading !important;
     font-size: 15px !important;
     font-synthesis: none;
-    font-weight: 400 !important;
+    font-weight: 500 !important;
     letter-spacing: normal !important;
     opacity: 0.95;
     text-shadow:
