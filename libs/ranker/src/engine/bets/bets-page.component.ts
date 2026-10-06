@@ -74,14 +74,9 @@ function callKey(b: BetEntry): string {
 export class BetsPageComponent implements OnInit {
   rows: BetRow[] | null = null;
   updated: string | null = null;
-  // the filters: a grade (or all), and how much of the list
+  // the filter: a grade, or all (within the top 50)
   grade: 'all' | 'like' | 'lean' | 'fade' = 'all';
-  share = 1;
-  readonly shares = [
-    { value: 1, label: 'All' },
-    { value: 0.5, label: 'Top 50%' },
-    { value: 0.25, label: 'Top 25%' },
-  ];
+  readonly limit = 50;
   open = new Set<number>();
 
   async ngOnInit(): Promise<void> {
@@ -132,14 +127,17 @@ export class BetsPageComponent implements OnInit {
     this.rows = [...kept.values()];
   }
 
-  // The list as filtered: a grade, then the top share of what's left
+  // The top 50 bets, and of them the grade asked for
+  get top(): BetRow[] {
+    return (this.rows ?? []).slice(0, this.limit);
+  }
+
   get shown(): BetRow[] {
-    const rows = (this.rows ?? []).filter((r) => this.grade === 'all' || r.strength === this.grade);
-    return rows.slice(0, Math.max(1, Math.ceil(rows.length * this.share)));
+    return this.top.filter((r) => this.grade === 'all' || r.strength === this.grade);
   }
 
   count(grade: 'like' | 'lean' | 'fade'): number {
-    return (this.rows ?? []).filter((r) => r.strength === grade).length;
+    return this.top.filter((r) => r.strength === grade).length;
   }
 
   toggle(id: number): void {

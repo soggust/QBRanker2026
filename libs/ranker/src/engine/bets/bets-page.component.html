@@ -10,19 +10,14 @@
           <span class="bets-updated">Updated {{ updated | date: 'EEE MMM d, h:mm a' }}</span>
         }
       </div>
-      <p class="bets-how">Ranked by how sure the analysis is that each bet wins (out of 10), then by how many reports make the same call (listed once).</p>
+      <p class="bets-how">Ranked by how sure the analysis is that each bet wins (out of 10), then by how many reports make the same call (listed once). The top {{ limit }} of {{ rows?.length ?? 0 }}.</p>
       @if (rows?.length) {
         <div class="bets-filters">
           <div class="bets-chips">
-            <button type="button" [class.on]="grade === 'all'" (click)="grade = 'all'">All {{ rows!.length }}</button>
+            <button type="button" [class.on]="grade === 'all'" (click)="grade = 'all'">Top {{ top.length }}</button>
             <button type="button" class="like" [class.on]="grade === 'like'" (click)="grade = 'like'">Like {{ count('like') }}</button>
             <button type="button" class="lean" [class.on]="grade === 'lean'" (click)="grade = 'lean'">Lean {{ count('lean') }}</button>
             <button type="button" class="fade" [class.on]="grade === 'fade'" (click)="grade = 'fade'">Fade {{ count('fade') }}</button>
-          </div>
-          <div class="bets-chips">
-            @for (s of shares; track s.value) {
-              <button type="button" [class.on]="share === s.value" (click)="share = s.value">{{ s.label }}</button>
-            }
           </div>
         </div>
       }
