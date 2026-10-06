@@ -191,7 +191,7 @@ html body {
   #{kit.$dropdowns} {
     @include kit.dropdown-text {
       font-family: v.$font-heading !important;
-      letter-spacing: 1px !important;
+      letter-spacing: 0.5px !important;
     }
   }
 
@@ -199,14 +199,14 @@ html body {
     &,
     .mdc-list-item__primary-text {
       font-family: v.$font-heading !important;
-      letter-spacing: 1px !important;
+      letter-spacing: 0.5px !important;
     }
   }
 
   .sidebar footer button,
   bets-page .bets-game {
     font-family: v.$font-heading !important;
-    letter-spacing: 1px !important;
+    letter-spacing: 0.5px !important;
   }
 }
 

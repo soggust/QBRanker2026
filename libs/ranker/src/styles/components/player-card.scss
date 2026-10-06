@@ -207,7 +207,7 @@
   h2 {
     color: #fff;
     @include v.headline(42px);
-    letter-spacing: 1px;
+    letter-spacing: 0.5px;
     line-height: 1.05;
     margin: 4px 0;
     opacity: 0.95;
