@@ -151,6 +151,19 @@ export interface HistoryRow {
   detail: string;
 }
 
+// A player's game log this season (the card's Game Log tab): the stat columns, and a row a game, newest
+// first ("Sep 13", "@ IND", "W 41-23", the game's line)
+export interface GameLog {
+  columns: string[];
+  rows: GameLogRow[];
+}
+export interface GameLogRow {
+  date: string;
+  vs: string;
+  result: string;
+  values: string[];
+}
+
 // What the engine gives a sport's connect hook (SportConfig.connect)
 export interface EngineHost {
   // The sport's settings as they change
@@ -278,6 +291,12 @@ export interface SportConfig {
   rowShown?: (player: SkillPlayer, settings: SportSettings) => boolean;
   // A tab the sport's settings can hide (MMA's women's divisions, until switched on)
   tabVisible?: (position: string, settings: SportSettings) => boolean;
+  // The card's Game Log tab (the season being played only): whether a row has one (players, not teams),
+  // and loading it when the tab opens
+  gameLog?: {
+    has: (player: SkillPlayer, position: string) => boolean;
+    load: (player: SkillPlayer, position: string) => Promise<GameLog>;
+  };
   // A history tab on the card in place of the seasons one (MMA's fights): its title and icon, and a
   // player's rows, newest first
   cardHistory?: { title: string; icon: string; rows: (player: SkillPlayer) => HistoryRow[] };

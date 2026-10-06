@@ -1,4 +1,5 @@
 import type { CardFlag, FlagContext, SportConfig } from '@ranker/engine/sport';
+import { espnGameLog } from '@ranker/core/game-logs';
 import { teamRowsFromCoaches } from '@ranker/engine/team-rows';
 import type { SkillPlayer } from './positions';
 import { seasonName } from './awards';
@@ -161,6 +162,12 @@ export const SPORT: SportConfig = {
   // ESPN's headshot cutouts (the NFL app's shape)
   headshot: (id, w) => `https://a.espncdn.com/combiner/i?img=/i/headshots/nba/players/full/${id}.png&w=${w}&h=${Math.round(w * 0.725)}`,
   cardFlags,
+  // The card's Game Log tab: a player's games this season, from ESPN (by his ESPN id; teams and coaches
+  // have none)
+  gameLog: {
+    has: (player, position) => !['TM', 'HC'].includes(position) && Number(player.id) > 0,
+    load: (player) => espnGameLog('basketball/nba', player.id!, SPORT.currentSeason),
+  },
   // (the Teams tab's Recent: the last 7 games)
   recentGames: (position) => (position === 'TM' ? 7 : 5),
   copy: {

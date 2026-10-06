@@ -8,7 +8,7 @@ import { SPORT } from '@sport/sport';
 import { badgeColor, whiteLogo } from '@sport/team-colors';
 import { logoForSeason } from '@sport/logo-eras';
 import { SKILLS } from '@sport/skills';
-import { CardFlag, FlagContext, ValueContext } from '@ranker/engine/sport';
+import { CardFlag, FlagContext, GameLog, ValueContext } from '@ranker/engine/sport';
 import { CardSkill, standing, tierWord } from '@ranker/engine/skills';
 import { CURRENT_SEASON, SEASONS, isLiveSeason } from '@ranker/engine/data';
 import { DEFAULT_SPORT_SETTINGS, SKILL_UNITS, defaultRanking, statValue } from '@ranker/engine/unit-scoring';
@@ -70,7 +70,27 @@ export class PlayerCards {
   // and the sport's history tab when it has one (SPORT.cardHistory: MMA's fights)
   tabsFor(card: PlayerCard): { id: CardTab; title: string }[] {
     const tabs = TABS.filter((tab) => tab.id !== 'seasons' || (!SPORT.careerOnly && (!card.seasons || card.seasons.length > 1)));
-    return SPORT.cardHistory ? [...tabs, { id: 'history', title: SPORT.cardHistory.title }] : tabs;
+    const games = this.hasGameLog(card) ? [{ id: 'games' as CardTab, title: 'Game Log' }] : [];
+    return SPORT.cardHistory ? [...tabs, ...games, { id: 'history', title: SPORT.cardHistory.title }] : [...tabs, ...games];
+  }
+
+  // The Game Log tab: the season being played's, for a row the sport has one for (SPORT.gameLog)
+  hasGameLog(card: PlayerCard): boolean {
+    return card.season === CURRENT_SEASON && !!SPORT.gameLog?.has(card.player, this.position);
+  }
+
+  // A card's game log, loaded the first time its tab asks (then kept): the log, or still loading, or failed
+  private gameLogs = new Map<string, GameLog | 'loading' | 'error'>();
+  gameLog(card: PlayerCard): GameLog | 'loading' | 'error' {
+    const key = `${this.position}/${card.player.gsisId}`;
+    if (!this.gameLogs.has(key) && SPORT.gameLog) {
+      this.gameLogs.set(key, 'loading');
+      SPORT.gameLog
+        .load(card.player, this.position)
+        .then((log) => this.gameLogs.set(key, log))
+        .catch(() => this.gameLogs.set(key, 'error'));
+    }
+    return this.gameLogs.get(key) ?? 'error';
   }
 
   // A name in the table: their card for the table's season, ranked as the table has them (always on

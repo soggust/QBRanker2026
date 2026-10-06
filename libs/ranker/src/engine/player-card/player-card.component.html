@@ -232,6 +232,48 @@
           }
         }
 
+        <!-- This season's games (SPORT.gameLog), newest first -->
+        @case ('games') {
+          <div class="card-group card-games">
+            <h3><mat-icon fontIcon="event_note"></mat-icon>Game Log</h3>
+            @let log = cards.gameLog(c);
+            @if (log === 'loading') {
+              <p class="card-note">Loading…</p>
+            } @else if (log === 'error') {
+              <p class="card-note">The game log couldn't be loaded.</p>
+            } @else if (!log.rows.length) {
+              <p class="card-note">No games yet this season.</p>
+            } @else {
+              <div class="game-log">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Date</th>
+                      <th>Opp</th>
+                      <th>Result</th>
+                      @for (col of log.columns; track $index) {
+                        <th>{{ col }}</th>
+                      }
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (g of log.rows; track $index) {
+                      <tr>
+                        <td>{{ g.date }}</td>
+                        <td>{{ g.vs }}</td>
+                        <td [ngClass]="g.result.startsWith('W') ? 'win' : g.result.startsWith('L') ? 'loss' : ''">{{ g.result }}</td>
+                        @for (v of g.values; track $index) {
+                          <td>{{ v }}</td>
+                        }
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            }
+          </div>
+        }
+
         <!-- The sport's history (SPORT.cardHistory: a fighter's fights), newest first -->
         @case ('history') {
           <div class="card-group card-history">

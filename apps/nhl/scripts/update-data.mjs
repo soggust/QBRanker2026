@@ -51,6 +51,11 @@ async function get(url, as = 'json') {
     try {
       const res = await fetch(url, { headers: { 'User-Agent': 'sports-ranker data script' } });
       if (res.status === 404) return null;
+      // (rate-limited: wait as long as the API asks, then try again)
+      if (res.status === 429 && attempt < 5) {
+        await new Promise((r) => setTimeout(r, (Number(res.headers.get('retry-after')) || 30) * 1000));
+        continue;
+      }
       if (!res.ok) throw new Error(`${res.status} for ${url}`);
       return as === 'json' ? await res.json() : await res.text();
     } catch (err) {
@@ -58,6 +63,36 @@ async function get(url, as = 'json') {
       await new Promise((r) => setTimeout(r, 3000 * attempt));
     }
   }
+}
+
+// Every listed player's game log this season, regular season and playoffs (from April on), newest first:
+// game-logs.json, { skater: columns, goalie: columns, logs: { id: [[date, "@ TOR", result, ...the line],
+// ...] } }. One at a time at get()'s pace (the API rate-limits faster asking): a few minutes
+const SKATER_LOG = ['G', 'A', 'P', '+/-', 'SOG', 'PIM', 'TOI'];
+const GOALIE_LOG = ['SA', 'GA', 'SV%', 'TOI'];
+async function writeGameLogs(season, skaters, goalies, dir) {
+  const players = [...skaters.map((u) => [u.id, false]), ...goalies.map((u) => [u.id, true])];
+  const logs = {};
+  const playoffs = new Date().getMonth() >= 3 && new Date().getMonth() <= 5;
+  const one = async ([id, goalie]) => {
+    const games = [];
+    for (const type of playoffs ? [3, 2] : [2]) {
+      const body = await get(`${WEB}/player/${id}/game-log/${seasonId(season)}/${type}`).catch(() => null);
+      games.push(...(body?.gameLog ?? []));
+    }
+    if (!games.length) return;
+    games.sort((a, b) => b.gameDate.localeCompare(a.gameDate));
+    logs[id] = games.map((g) => {
+      const date = new Date(`${g.gameDate}T12:00:00`).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      const vs = `${g.homeRoadFlag === 'H' ? 'vs' : '@'} ${g.opponentAbbrev}`;
+      return goalie
+        ? [date, vs, g.decision === 'W' ? 'W' : g.decision === 'L' || g.decision === 'O' ? 'L' : '', g.shotsAgainst, g.goalsAgainst, g.savePctg == null ? '-' : g.savePctg.toFixed(3).replace(/^0/, ''), g.toi]
+        : [date, vs, '', g.goals, g.assists, g.points, g.plusMinus > 0 ? `+${g.plusMinus}` : g.plusMinus, g.shots, g.pim, g.toi];
+    });
+  };
+  for (const player of players) await one(player);
+  await writeFile(path.join(dir, 'game-logs.json'), JSON.stringify({ skater: SKATER_LOG, goalie: GOALIE_LOG, logs }));
+  console.log(`Game logs: ${Object.keys(logs).length} players`);
 }
 
 const round = (v, d = 3) => (v === null || v === undefined || !Number.isFinite(v) ? null : Math.round(v * 10 ** d) / 10 ** d);
@@ -354,6 +389,8 @@ async function buildSeason(season) {
   await mkdir(dir, { recursive: true });
   // (compact: the files are served to the browser as is)
   await writeFile(path.join(dir, 'skill-players.json'), JSON.stringify(out));
+  // (this season's game logs, for the card's Game Log tab: the NHL's API doesn't let the site ask it)
+  if (current) await writeGameLogs(season, skaterRows, out.G, dir);
   const champion = [...teamAwards].find(([, a]) => a.includes('cup'))?.[0] ?? '?';
   const rookieCount = [...skaterRows, ...out.G].filter((u) => u.rookie).length;
   console.log(

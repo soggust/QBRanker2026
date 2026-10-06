@@ -1,4 +1,5 @@
 import type { CardFlag, FlagContext, SportConfig } from '@ranker/engine/sport';
+import { espnGameLog } from '@ranker/core/game-logs';
 import {
   FANTASY_SCORING_LABELS,
   FantasyScoring,
@@ -161,6 +162,11 @@ export const SPORT: SportConfig = {
     return position === 'DEF' || position === 'TM' || team === player.name ? null : team;
   },
   cardFlags,
+  // The card's Game Log tab: a player's games this season, from ESPN (teams and units have none)
+  gameLog: {
+    has: (player, position) => ['QB', 'RB', 'WR', 'TE', 'K', 'P'].includes(position) && Number(player.id) > 0,
+    load: (player) => espnGameLog('football/nfl', player.id!, SPORT.currentSeason),
+  },
   cardFlagsLast: castFlags,
   cardExtras: blockingExtras,
 

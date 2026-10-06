@@ -1383,3 +1383,45 @@
   object-fit: contain;
   object-position: 50% 100%;
 }
+
+// ---------------------------------------------------------------------------
+// The Game Log tab: a compact table, newest game first, scrolling sideways when the line is long
+// ---------------------------------------------------------------------------
+.game-log {
+  overflow-x: auto;
+
+  table {
+    border-collapse: collapse;
+    font-size: 12px;
+    width: 100%;
+  }
+
+  th,
+  td {
+    padding: 4px 7px;
+    text-align: right;
+    white-space: nowrap;
+
+    &:nth-child(-n + 3) {
+      text-align: left;
+    }
+  }
+
+  th {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    color: rgba(255, 255, 255, 0.6);
+    font-weight: 600;
+  }
+
+  tbody tr:nth-child(even) {
+    background: rgba(255, 255, 255, 0.04);
+  }
+
+  td.win {
+    color: rgb(80, 207, 80);
+  }
+
+  td.loss {
+    color: #ff6b61;
+  }
+}

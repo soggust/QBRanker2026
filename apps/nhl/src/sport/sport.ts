@@ -1,4 +1,23 @@
 import type { CardFlag, FlagContext, SportConfig } from '@ranker/engine/sport';
+
+// This season's game logs (game-logs.json, kept nightly: the NHL's API doesn't let the site ask), loaded
+// once, the first time a card's Game Log tab opens (again after a failure)
+interface NhlGameLogs {
+  skater: string[];
+  goalie: string[];
+  logs: Record<string, (string | number)[][]>;
+}
+let nhlGameLogsFile: Promise<NhlGameLogs> | null = null;
+function nhlGameLogs(): Promise<NhlGameLogs> {
+  nhlGameLogsFile ??= fetch('data/game-logs.json', { cache: 'no-cache' }).then((res) => {
+    if (!res.ok) throw new Error(String(res.status));
+    return res.json() as Promise<NhlGameLogs>;
+  });
+  return nhlGameLogsFile.catch((err) => {
+    nhlGameLogsFile = null;
+    throw err;
+  });
+}
 import { teamRowsFromCoaches } from '@ranker/engine/team-rows';
 import type { SkillPlayer } from './positions';
 import { seasonName } from './awards';
@@ -153,6 +172,19 @@ export const SPORT: SportConfig = {
   // The NHL's player headshots
   headshot: (id) => `https://assets.nhle.com/mugs/nhl/latest/${id}.png`,
   cardFlags,
+  // The card's Game Log tab: a player's games this season (kept nightly in game-logs.json: the NHL's API
+  // doesn't let the site ask; teams and coaches have none)
+  gameLog: {
+    has: (player, position) => !['TM', 'HC'].includes(position),
+    load: async (player, position) => {
+      const file = await nhlGameLogs();
+      const rows = file.logs[String(player.id)] ?? [];
+      return {
+        columns: position === 'G' ? file.goalie : file.skater,
+        rows: rows.map(([date, vs, result, ...values]) => ({ date: String(date), vs: String(vs), result: String(result), values: values.map(String) })),
+      };
+    },
+  },
   // (the Teams tab's Recent: the last 7 games)
   recentGames: (position) => (position === 'TM' ? 7 : 5),
   copy: {

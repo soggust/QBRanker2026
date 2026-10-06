@@ -1,4 +1,5 @@
 import type { CardFlag, FlagContext, SportConfig } from '@ranker/engine/sport';
+import { mlbGameLog } from '@ranker/core/game-logs';
 
 // MLB: what the engine needs to know about baseball (the rest is beside this file: positions,
 // skill-presets, skills, awards, team-colors, logo-eras, about/)
@@ -121,6 +122,15 @@ export const SPORT: SportConfig = {
   // MLB's headshot cutouts (square)
   headshot: (id, w) => `https://img.mlbstatic.com/mlb-photos/image/upload/w_${w},q_auto:best/v1/people/${id}/headshot/silo/current`,
   cardFlags,
+  // The card's Game Log tab: a player's games this season, from MLB's stats API (a pitcher's pitching, a
+  // hitter's hitting; teams have none)
+  gameLog: {
+    has: (player, position) => position !== 'TM' && Number(player.id) > 0,
+    load: (player, position) =>
+      ['SP', 'RP'].includes(position)
+        ? mlbGameLog(player.id!, SPORT.currentSeason, 'pitching', [['IP', 'inningsPitched'], ['H', 'hits'], ['R', 'runs'], ['ER', 'earnedRuns'], ['BB', 'baseOnBalls'], ['SO', 'strikeOuts'], ['HR', 'homeRuns'], ['ERA', 'era']])
+        : mlbGameLog(player.id!, SPORT.currentSeason, 'hitting', [['AB', 'atBats'], ['R', 'runs'], ['H', 'hits'], ['2B', 'doubles'], ['HR', 'homeRuns'], ['RBI', 'rbi'], ['BB', 'baseOnBalls'], ['SO', 'strikeOuts'], ['SB', 'stolenBases'], ['AVG', 'avg']]),
+  },
   // (the Teams tab's Recent: the last 10 games, a long season's form; the players' 5)
   recentGames: (position) => (position === 'TM' ? 10 : 5),
   copy: {
