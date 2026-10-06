@@ -206,8 +206,7 @@
   // (the name in the table's hand, a touch see-through)
   h2 {
     color: #fff;
-    @include v.headline(42px);
-    letter-spacing: 0.5px;
+    @include v.hand(42px);
     line-height: 1.05;
     margin: 4px 0;
     opacity: 0.95;
