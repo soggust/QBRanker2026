@@ -109,14 +109,13 @@
   padding: 0;
 }
 
-// each row tinted by its bet's confidence (like the Season groups' bars): green high, yellow medium,
-// gray low; a little deeper when open
+// Each row a panel like the card's Analysis sections: a thin edge and a scoreboard bar tinted by its bet's
+// confidence (green high, yellow medium, gray low), the chevron on the left; open, its reasoning below
 .bet {
   --tint: #9aa0a6;
-  --tint-amount: 10%;
-  background: linear-gradient(color-mix(in srgb, var(--tint) var(--tint-amount), transparent), color-mix(in srgb, var(--tint) var(--tint-amount), transparent)), rgba(0, 0, 0, 0.22);
-  border-radius: 8px;
-  box-shadow: inset 3px 0 0 color-mix(in srgb, var(--tint) 70%, transparent);
+  border: 1px solid color-mix(in srgb, var(--tint) 40%, transparent);
+  border-radius: 6px;
+  overflow: hidden;
 
   &.high {
     --tint: #3ecf6e;
@@ -126,31 +125,32 @@
     --tint: #ffcd00;
   }
 
-  &.low {
-    --tint-amount: 6%;
-  }
-
-  &.open {
-    --tint-amount: 15%;
+  &.open .bet-row {
+    border-bottom: 1px solid color-mix(in srgb, var(--tint) 40%, transparent);
   }
 }
 
 .bet-row {
+  --bar-tint: color-mix(in srgb, var(--tint) 16%, transparent);
   align-items: center;
-  background: none;
+  background: linear-gradient(var(--bar-tint), var(--bar-tint)), var(--scoreboard-dots), var(--scoreboard);
   border: none;
   color: #fff;
   cursor: pointer;
   display: grid;
   font-family: v.$font-base;
   gap: 12px;
-  grid-template-columns: 42px 58px minmax(0, 1fr) minmax(0, 220px) 84px 20px;
-  padding: 10px 12px;
+  grid-template-columns: 20px 42px 58px minmax(0, 1fr) minmax(0, 220px) 72px;
+  padding: 10px 14px 10px 10px;
   text-align: left;
   width: 100%;
 
-  &:hover .bet-main b {
-    color: var(--scoreboard-led);
+  &:hover {
+    --bar-tint: color-mix(in srgb, var(--tint) 24%, transparent);
+
+    .bet-chevron {
+      color: var(--scoreboard-led);
+    }
   }
 }
 
@@ -253,13 +253,13 @@
 }
 
 .bet-chevron {
-  color: rgba(255, 255, 255, 0.45);
+  color: rgba(255, 255, 255, 0.55);
   @include v.icon-size(20px);
 }
 
 .bet-reasons {
-  border-top: 1px solid rgba(255, 255, 255, 0.07);
-  padding: 12px 18px 14px 124px;
+  background: rgba(0, 0, 0, 0.25);
+  padding: 14px 18px 16px 168px;
 
   p {
     color: rgba(255, 255, 255, 0.85);
@@ -278,11 +278,10 @@
 
 @media (max-width: 700px) {
   .bet-row {
-    grid-template-columns: 42px 50px minmax(0, 1fr) 56px;
+    grid-template-columns: 20px 42px 50px minmax(0, 1fr) 56px;
   }
 
-  .bet-game,
-  .bet-chevron {
+  .bet-game {
     display: none;
   }
 
