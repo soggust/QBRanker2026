@@ -1925,6 +1925,11 @@
     }
   }
 
+  .ai-bar {
+    padding-bottom: 14px;
+    padding-top: 14px;
+  }
+
   .ai-bar .ai-chevron {
     color: rgba(255, 255, 255, 0.55);
     @include v.icon-size(20px);
@@ -1936,7 +1941,7 @@
   }
 
   .group-body {
-    padding: 14px 20px 16px;
+    padding: 20px 20px 22px;
   }
 
   // (the season, next game and rest of season take the site's category colors: their group-* class)
