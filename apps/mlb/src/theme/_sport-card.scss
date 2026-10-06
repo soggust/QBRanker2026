@@ -19,7 +19,8 @@
 
 // MLB: the stat groups' edges are chalked baselines (the same chalk line as the table's) instead of
 // sidelines with hash marks
-.stat-group .card-stats {
+.stat-group .card-stats,
+.stat-group .group-body {
   background:
     url("../assets/textures/chalk-line-v.svg") left top / 10px 150px repeat-y,
     url("../assets/textures/chalk-line-v.svg") right top / 10px 150px repeat-y;

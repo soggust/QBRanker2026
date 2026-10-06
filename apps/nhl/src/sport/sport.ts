@@ -1,4 +1,5 @@
 import type { CardFlag, FlagContext, SportConfig } from '@ranker/engine/sport';
+import { espnTeamGameLog } from '@ranker/core/game-logs';
 
 // This season's game logs (game-logs.json, kept nightly: the NHL's API doesn't let the site ask), loaded
 // once, the first time a card's Game Log tab opens (again after a failure)
@@ -175,13 +176,28 @@ export const SPORT: SportConfig = {
   // The card's Game Log tab: a player's games this season (kept nightly in game-logs.json: the NHL's API
   // doesn't let the site ask; teams and coaches have none)
   gameLog: {
-    has: (player, position) => !['TM', 'HC'].includes(position),
+    league: 'hockey/nhl',
+    has: () => true,
     load: async (player, position) => {
+      if (['TM', 'HC'].includes(position)) {
+        return espnTeamGameLog('hockey/nhl', [player.teamName ?? undefined, player.name, player.teamLogo?.match(/([^/]+)\.\w+$/)?.[1]], SPORT.currentSeason, 3);
+      }
       const file = await nhlGameLogs();
       const rows = file.logs[String(player.id)] ?? [];
+      const goalie = position === 'G';
+      const columns = (goalie ? file.goalie : file.skater).map((label) => ({ label }));
       return {
-        columns: position === 'G' ? file.goalie : file.skater,
-        rows: rows.map(([date, vs, result, ...values]) => ({ date: String(date), vs: String(vs), result: String(result), values: values.map(String) })),
+        columns,
+        rows: rows.map(([date, vs, result, ...values]) => ({
+          date: String(date),
+          vs: String(vs),
+          // (the opponent's logo, from the abbreviation in "@ TOR")
+          logo: `https://assets.nhle.com/logos/nhl/svg/${String(vs).split(' ').pop()}_dark.svg`,
+          result: String(result),
+          values: values.map(String),
+        })),
+        // (a skater's points, goals then assists; a goalie's shots faced, a dot a goal)
+        chart: goalie ? { label: 'Shots against', stack: ['SA'], minus: ['GA'] } : { label: 'Points', stack: ['G', 'A'], names: ['Goals', 'Assists'] },
       };
     },
   },

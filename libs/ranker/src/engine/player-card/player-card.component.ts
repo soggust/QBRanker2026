@@ -28,9 +28,9 @@ export class PlayerCardComponent {
   readonly rankPct = rankPct;
   readonly sortFlags = sortFlags;
 
-  // "2025", "2024-25", or "This Season" while it's being played
+  // "2025", "2024-25", or "Current" while it's being played
   seasonName(season: number): string {
-    return isLiveSeason(season) ? 'This Season' : SPORT.seasonText(season);
+    return isLiveSeason(season) ? 'Current' : SPORT.seasonText(season);
   }
 
   seasonText(season: number): string {

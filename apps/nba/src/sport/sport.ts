@@ -1,5 +1,5 @@
 import type { CardFlag, FlagContext, SportConfig } from '@ranker/engine/sport';
-import { espnGameLog } from '@ranker/core/game-logs';
+import { espnGameLog, espnTeamGameLog } from '@ranker/core/game-logs';
 import { teamRowsFromCoaches } from '@ranker/engine/team-rows';
 import type { SkillPlayer } from './positions';
 import { seasonName } from './awards';
@@ -165,8 +165,12 @@ export const SPORT: SportConfig = {
   // The card's Game Log tab: a player's games this season, from ESPN (by his ESPN id; teams and coaches
   // have none)
   gameLog: {
-    has: (player, position) => !['TM', 'HC'].includes(position) && Number(player.id) > 0,
-    load: (player) => espnGameLog('basketball/nba', player.id!, SPORT.currentSeason),
+    league: 'basketball/nba',
+    has: (player, position) => ['TM', 'HC'].includes(position) || Number(player.id) > 0,
+    load: (player, position) =>
+      ['TM', 'HC'].includes(position)
+        ? espnTeamGameLog('basketball/nba', [player.teamName ?? undefined, player.name, player.teamLogo?.match(/([^/]+)\.\w+$/)?.[1]], SPORT.currentSeason, 4)
+        : espnGameLog('basketball/nba', player.id!, SPORT.currentSeason, { chart: { label: 'Points', stack: ['PTS'] } }),
   },
   // (the Teams tab's Recent: the last 7 games)
   recentGames: (position) => (position === 'TM' ? 7 : 5),

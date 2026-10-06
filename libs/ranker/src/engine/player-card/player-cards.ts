@@ -8,7 +8,7 @@ import { SPORT } from '@sport/sport';
 import { badgeColor, whiteLogo } from '@sport/team-colors';
 import { logoForSeason } from '@sport/logo-eras';
 import { SKILLS } from '@sport/skills';
-import { CardFlag, FlagContext, GameLog, ValueContext } from '@ranker/engine/sport';
+import { CardFlag, FlagContext, ValueContext } from '@ranker/engine/sport';
 import { CardSkill, standing, tierWord } from '@ranker/engine/skills';
 import { CURRENT_SEASON, SEASONS, isLiveSeason } from '@ranker/engine/data';
 import { DEFAULT_SPORT_SETTINGS, SKILL_UNITS, defaultRanking, statValue } from '@ranker/engine/unit-scoring';
@@ -19,6 +19,8 @@ import { CardOverview, CardSeason, CardStat, CardTab, CareerSeason, PlayerCard, 
 import { archetypeFor, overviewBlurb, profileFlags, scoutingReport, skillScores } from './overview';
 import { careerHistory } from './career-history';
 import { radar, radarShape } from './radar';
+import { GameLogView, gameLogView } from './game-log-view';
+import { espnUpcoming } from '@ranker/core/game-logs';
 
 // What the card needs from the table it opens from
 export interface CardHost {
@@ -42,8 +44,8 @@ export interface CardHost {
 
 const TABS: { id: CardTab; title: string }[] = [
   { id: 'overview', title: 'Overview' },
-  { id: 'stats', title: 'Stats' },
-  { id: 'seasons', title: 'Seasons' },
+  { id: 'stats', title: 'Season' },
+  { id: 'seasons', title: 'Career' },
 ];
 
 const POSITION_NAMES = SPORT.positionNames as Record<SkillPosition, string>;
@@ -68,10 +70,19 @@ export class PlayerCards {
 
   // Seasons only when they're in more than one (shown while loading; never for a career-only sport),
   // and the sport's history tab when it has one (SPORT.cardHistory: MMA's fights)
+  // Overview, Season, Game Log (the season being played), Career ("History" for a team, a defense or a
+  // line)
   tabsFor(card: PlayerCard): { id: CardTab; title: string }[] {
-    const tabs = TABS.filter((tab) => tab.id !== 'seasons' || (!SPORT.careerOnly && (!card.seasons || card.seasons.length > 1)));
-    const games = this.hasGameLog(card) ? [{ id: 'games' as CardTab, title: 'Game Log' }] : [];
-    return SPORT.cardHistory ? [...tabs, ...games, { id: 'history', title: SPORT.cardHistory.title }] : [...tabs, ...games];
+    const [overview, stats, seasons] = TABS;
+    const tabs: { id: CardTab; title: string }[] = [overview, stats];
+    if (this.hasGameLog(card)) tabs.push({ id: 'games', title: 'Game Log' });
+    if (!SPORT.careerOnly && (!card.seasons || card.seasons.length > 1)) tabs.push({ ...seasons, title: this.careerTitle });
+    return SPORT.cardHistory ? [...tabs, { id: 'history', title: SPORT.cardHistory.title }] : tabs;
+  }
+
+  // The Career tab's name: a team row's is its History
+  get careerTitle(): string {
+    return this.position === 'TM' || SPORT.teamTabs?.includes(this.position) ? 'History' : 'Career';
   }
 
   // The Game Log tab: the season being played's, for a row the sport has one for (SPORT.gameLog)
@@ -79,15 +90,21 @@ export class PlayerCards {
     return card.season === CURRENT_SEASON && !!SPORT.gameLog?.has(card.player, this.position);
   }
 
-  // A card's game log, loaded the first time its tab asks (then kept): the log, or still loading, or failed
-  private gameLogs = new Map<string, GameLog | 'loading' | 'error'>();
-  gameLog(card: PlayerCard): GameLog | 'loading' | 'error' {
+  // A card's game log, loaded the first time its tab asks (then kept, as the tab shows it), with the
+  // team's next games when the sport names its league (those failing just leave the strip out): the log,
+  // or still loading, or failed
+  private gameLogs = new Map<string, GameLogView | 'loading' | 'error'>();
+  gameLog(card: PlayerCard): GameLogView | 'loading' | 'error' {
     const key = `${this.position}/${card.player.gsisId}`;
     if (!this.gameLogs.has(key) && SPORT.gameLog) {
       this.gameLogs.set(key, 'loading');
-      SPORT.gameLog
-        .load(card.player, this.position)
-        .then((log) => this.gameLogs.set(key, log))
+      const { load, league } = SPORT.gameLog;
+      const player = card.player;
+      const next = league
+        ? espnUpcoming(league, [(player as { teamName?: string | null }).teamName ?? undefined, player.name, player.teamLogo?.match(/([^/]+)\.\w+$/)?.[1]], SPORT.currentSeason).catch(() => [])
+        : Promise.resolve([]);
+      Promise.all([load(player, this.position), next])
+        .then(([log, upcoming]) => this.gameLogs.set(key, gameLogView(log, upcoming)))
         .catch(() => this.gameLogs.set(key, 'error'));
     }
     return this.gameLogs.get(key) ?? 'error';

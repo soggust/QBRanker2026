@@ -45,10 +45,13 @@
         }
       </div>
 
-      <!-- Overall rank, as a scoreboard tile -->
+      <!-- Overall rank, as a scoreboard tile: the words lit in the board's dots, the number in segments over
+           its unlit 8s -->
       <div class="hero-rank" [style.--tone]="rankTone(rankPct(c.rank, c.of))">
         <span class="rank-label">Rank</span>
-        <span class="rank-number">{{ c.rank }}</span>
+        <span class="rank-number"
+          ><span class="rank-unlit" aria-hidden="true">{{ '8'.repeat((c.rank + '').length) }}</span><span class="rank-lit">{{ c.rank }}</span></span
+        >
         <span class="rank-of">of {{ c.of }}</span>
       </div>
 
@@ -232,45 +235,166 @@
           }
         }
 
-        <!-- This season's games (SPORT.gameLog), newest first -->
+        <!-- This season's games (SPORT.gameLog): a bar per game of the key stat (a team's margin), oldest
+             first, then the table, newest first, each value tinted against their own average -->
         @case ('games') {
-          <div class="card-group card-games">
-            <h3><mat-icon fontIcon="event_note"></mat-icon>Game Log</h3>
+          <div class="stat-group tab-card card-games">
+            <div class="group-bar static"><mat-icon class="group-bar-icon" fontIcon="event_note"></mat-icon><span>Game Log</span></div>
+            <div class="group-body">
             @let log = cards.gameLog(c);
             @if (log === 'loading') {
               <p class="card-note">Loading…</p>
             } @else if (log === 'error') {
               <p class="card-note">The game log couldn't be loaded.</p>
-            } @else if (!log.rows.length) {
-              <p class="card-note">No games yet this season.</p>
             } @else {
+              @if (!log.rows.length && !log.upcoming.length) {
+                <p class="card-note">No games yet this season.</p>
+              } @else {
+              @if (log.chart; as chart) {
+                <div class="log-chart" [class.diverging]="chart.diverging" [class.dense]="chart.bars.length > 24">
+                  <div class="log-chart-head">
+                    <span class="log-chart-label">{{ chart.label }}<small>by game</small></span>
+                    <span class="log-legend">
+                      @for (name of chart.legend; track $index) {
+                        <span><i [class]="'seg-' + $index"></i>{{ name }}</span>
+                      }
+                      @if (chart.plusLabel) {
+                        <span><i class="dot plus"></i>{{ chart.plusLabel }}</span>
+                      }
+                      @if (chart.minusLabel) {
+                        <span><i class="dot minus"></i>{{ chart.minusLabel }}</span>
+                      }
+                    </span>
+                  </div>
+                  <div class="log-bars">
+                    @for (bar of chart.bars; track $index) {
+                      <span class="log-bar" [ngClass]="bar.outcome" [class.negative]="bar.negative" [class.single]="chart.legend.length === 0" [title]="bar.title">
+                        <span class="log-pile">
+                          @if (!chart.diverging && chart.bars.length <= 24) {
+                            <span class="log-dots">
+                              @for (d of [].constructor(bar.minus > 4 ? 4 : bar.minus); track $index) {
+                                <i class="dot minus"></i>
+                              }
+                              @for (d of [].constructor(bar.plus > 4 ? 4 : bar.plus); track $index) {
+                                <i class="dot plus"></i>
+                              }
+                            </span>
+                            <b>{{ bar.text }}</b>
+                          }
+                          @if (chart.diverging && chart.bars.length <= 24 && !bar.negative) {
+                            <b>{{ bar.text }}</b>
+                          }
+                          @for (h of bar.segments; track $index) {
+                            <i [class]="'seg seg-' + $index" [style.--h]="h"></i>
+                          }
+                          @if (chart.diverging && chart.bars.length <= 24 && bar.negative) {
+                            <b>{{ bar.text }}</b>
+                          }
+                        </span>
+                        @if (!chart.diverging) {
+                          <span class="log-outcome-tick" [ngClass]="bar.outcome"></span>
+                        }
+                      </span>
+                    }
+                  </div>
+                </div>
+              }
               <div class="game-log">
                 <table>
                   <thead>
+                    @if (log.groups) {
+                      <tr class="log-groups">
+                        <th colspan="3"></th>
+                        @for (g of log.groups; track $index) {
+                          <th [attr.colspan]="g.span"><span>{{ g.label }}</span></th>
+                        }
+                      </tr>
+                    }
                     <tr>
-                      <th>Date</th>
-                      <th>Opp</th>
-                      <th>Result</th>
+                      <th class="log-date">Date</th>
+                      <th class="log-opp">Opp</th>
+                      <th class="log-result">Result</th>
                       @for (col of log.columns; track $index) {
-                        <th>{{ col }}</th>
+                        <th [class.key]="log.chart?.keys?.includes($index)" [class.wide]="col.wide" [class.group-start]="log.groups && ($index === 0 || col.group !== log.columns[$index - 1].group)">{{ col.label }}</th>
                       }
                     </tr>
                   </thead>
                   <tbody>
                     @for (g of log.rows; track $index) {
                       <tr>
-                        <td>{{ g.date }}</td>
-                        <td>{{ g.vs }}</td>
-                        <td [ngClass]="g.result.startsWith('W') ? 'win' : g.result.startsWith('L') ? 'loss' : ''">{{ g.result }}</td>
-                        @for (v of g.values; track $index) {
-                          <td>{{ v }}</td>
+                        <td class="log-date">{{ g.date }}</td>
+                        <td class="log-opp">
+                          <span class="log-vs">{{ g.vs.split(' ')[0] }}</span>
+                          @if (g.logo) {
+                            <img [src]="g.logo" alt="" loading="lazy" />
+                          }
+                          {{ g.vs.split(' ').slice(1).join(' ') }}
+                        </td>
+                        <td class="log-result">
+                          @if (g.outcome) {
+                            <span class="log-outcome" [ngClass]="g.outcome">{{ g.outcome }}</span>
+                          }
+                          {{ g.score }}
+                        </td>
+                        @for (cell of g.cells; track $index) {
+                          <td
+                            [class.key]="log.chart?.keys?.includes($index)"
+                            [class.wide]="log.columns[$index].wide"
+                            [class.group-start]="log.groups && ($index === 0 || log.columns[$index].group !== log.columns[$index - 1].group)"
+                          >
+                            {{ cell }}
+                          </td>
                         }
+                      </tr>
+                    }
+                    <!-- per game, after the games played -->
+                    @if (log.average && log.rows.length) {
+                      <tr class="log-avg">
+                        <td colspan="3">Per game</td>
+                        @for (a of log.average; track $index) {
+                          <td [class.key]="log.chart?.keys?.includes($index)" [class.group-start]="log.groups && ($index === 0 || log.columns[$index].group !== log.columns[$index - 1].group)">{{ a }}</td>
+                        }
+                      </tr>
+                    }
+                    <!-- the games still to play: when, on what, and the line once it's posted -->
+                    @if (log.upcoming.length) {
+                      <tr class="log-gap" aria-hidden="true"><td [attr.colspan]="log.columns.length + 3"></td></tr>
+                      <tr class="log-next-head">
+                        <th class="log-date">Date</th>
+                        <th class="log-opp">Opp</th>
+                        <th class="log-result">Time</th>
+                        <th class="log-next-detail" [attr.colspan]="log.columns.length">TV · Line</th>
+                      </tr>
+                    }
+                    @for (u of log.upcoming; track $index) {
+                      <tr class="log-next" [class.first]="$first">
+                        <td class="log-date">{{ u.date }}</td>
+                        <td class="log-opp">
+                          <span class="log-vs">{{ u.vs.split(' ')[0] }}</span>
+                          @if (u.logo) {
+                            <img [src]="u.logo" alt="" loading="lazy" />
+                          }
+                          {{ u.vs.split(' ').slice(1).join(' ') }}
+                        </td>
+                        <td class="log-result">{{ u.time }}</td>
+                        <td class="log-next-detail" [attr.colspan]="log.columns.length">
+                          @if (u.tv) {
+                            <span>{{ u.tv }}</span>
+                          }
+                          @if (u.line) {
+                            <span class="log-line" title="DraftKings, via ESPN"
+                              >{{ u.line }}@if (u.total) { · {{ u.total }}}@if (u.moneyline) { · ML {{ u.moneyline }}}</span
+                            >
+                          }
+                        </td>
                       </tr>
                     }
                   </tbody>
                 </table>
               </div>
+              }
             }
+            </div>
           </div>
         }
 
@@ -296,8 +420,9 @@
 
         <!-- Every season they're in: each opens that season's card (the table stays as it is) -->
         @case ('seasons') {
-          <div class="card-group card-career">
-            <h3><mat-icon fontIcon="calendar_month"></mat-icon>Seasons</h3>
+          <div class="stat-group tab-card card-career">
+            <div class="group-bar static"><mat-icon class="group-bar-icon" fontIcon="calendar_month"></mat-icon><span>{{ cards.careerTitle }}</span></div>
+            <div class="group-body">
             @if (!c.seasons) {
               <p class="card-note">Loading…</p>
             } @else {
@@ -357,6 +482,7 @@
                 }
               </div>
             }
+            </div>
           </div>
         }
       }

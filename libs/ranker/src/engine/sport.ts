@@ -151,16 +151,51 @@ export interface HistoryRow {
   detail: string;
 }
 
-// A player's game log this season (the card's Game Log tab): the stat columns, and a row a game, newest
-// first ("Sep 13", "@ IND", "W 41-23", the game's line)
+// A player's (or team's) game log this season (the card's Game Log tab): the stat columns, and a row a
+// game, newest first ("Sep 13", "@ IND", the opponent's logo, "W 41-23", the game's line). The chart
+// above it: the chart's columns game by game, or with none each game's margin (a team's, chartLabel)
 export interface GameLog {
-  columns: string[];
+  columns: GameLogColumn[];
   rows: GameLogRow[];
+  chart?: GameLogChart;
+  chartLabel?: string;
+}
+// The chart: a bar a game of the stack columns piled up (passing yards, then rushing), with a dot a game
+// for each of the plus columns' (touchdowns) and the minus columns' (turnovers). Columns by "Group
+// LABEL" ("Passing YDS") or LABEL; names: the pieces' names in the legend (their groups unless given)
+export interface GameLogChart {
+  label: string;
+  stack: string[];
+  names?: string[];
+  // one plain bar of the stack's total (a QB's total yards), its color the result
+  combine?: boolean;
+  plus?: string[];
+  minus?: string[];
+}
+// A game still to play (the Game Log's last rows): when, where, the opponent's logo, the TV, and the
+// sportsbook's line once one is posted ("BAL -3", "O/U 45.5", his team's moneyline "-150")
+export interface UpcomingGame {
+  date: string;
+  time: string;
+  vs: string;
+  logo?: string;
+  tv?: string;
+  line?: string;
+  total?: string;
+  moneyline?: string;
+}
+// A column: its label, the category it sits under ("Passing"), text that's wide (a team's leader)
+export interface GameLogColumn {
+  label: string;
+  group?: string;
+  wide?: boolean;
 }
 export interface GameLogRow {
   date: string;
   vs: string;
+  logo?: string;
   result: string;
+  margin?: number;
   values: string[];
 }
 
@@ -291,11 +326,13 @@ export interface SportConfig {
   rowShown?: (player: SkillPlayer, settings: SportSettings) => boolean;
   // A tab the sport's settings can hide (MMA's women's divisions, until switched on)
   tabVisible?: (position: string, settings: SportSettings) => boolean;
-  // The card's Game Log tab (the season being played only): whether a row has one (players, not teams),
+  // The card's Game Log tab (the season being played only): whether a row has one,
   // and loading it when the tab opens
   gameLog?: {
     has: (player: SkillPlayer, position: string) => boolean;
     load: (player: SkillPlayer, position: string) => Promise<GameLog>;
+    // ESPN's name for the league ("football/nfl"): the row's team's next games show above the log
+    league?: string;
   };
   // A history tab on the card in place of the seasons one (MMA's fights): its title and icon, and a
   // player's rows, newest first

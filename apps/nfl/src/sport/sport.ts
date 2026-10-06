@@ -1,5 +1,5 @@
-import type { CardFlag, FlagContext, SportConfig } from '@ranker/engine/sport';
-import { espnGameLog } from '@ranker/core/game-logs';
+import type { CardFlag, FlagContext, GameLogChart, SportConfig } from '@ranker/engine/sport';
+import { espnGameLog, espnTeamGameLog } from '@ranker/core/game-logs';
 import {
   FANTASY_SCORING_LABELS,
   FantasyScoring,
@@ -104,6 +104,19 @@ const espnHeadshot = (league: string) => (id: number, w: number) =>
   `https://a.espncdn.com/combiner/i?img=/i/headshots/${league}/players/full/${id}.png&w=${w}&h=${Math.floor(w * 0.7273)}`;
 const headshot = espnHeadshot('nfl');
 
+// A row's logo file name (the team's nickname: "Ravens"); the rows with their team's games as their log
+const logoName = (p: { teamLogo?: string | null }) => p.teamLogo?.match(/([^/]+)\.\w+$/)?.[1];
+const TEAM_LOGS = ['TM', 'DEF', 'OL', 'HC'];
+// The Game Log's chart: a QB's total yards by game; the others' yards from scrimmage, their main kind first,
+// with their touchdowns and turnovers
+const SCORING = { plus: ['Passing TD', 'Rushing TD', 'Receiving TD'], minus: ['Passing INT', 'Rushing FL'] };
+const YARDS_CHART: Record<string, GameLogChart | undefined> = {
+  QB: { label: 'Total yards', stack: ['Passing YDS', 'Rushing YDS'], combine: true },
+  RB: { label: 'Scrimmage yards', stack: ['Rushing YDS', 'Receiving YDS'], ...SCORING },
+  WR: { label: 'Scrimmage yards', stack: ['Receiving YDS', 'Rushing YDS'], ...SCORING },
+  TE: { label: 'Scrimmage yards', stack: ['Receiving YDS', 'Rushing YDS'], ...SCORING },
+};
+
 export const SPORT: SportConfig = {
   id: 'nfl',
   // (the shared styles' own ball)
@@ -163,9 +176,20 @@ export const SPORT: SportConfig = {
   },
   cardFlags,
   // The card's Game Log tab: a player's games this season, from ESPN (teams and units have none)
+  // (teams, defenses, lines and coaches: their team's games; a player's: ESPN's columns, without the longest
+  // gains, sacks, or fumbles but the ones lost (FL, at the end of Rushing), charting his yards from scrimmage with his touchdowns and
+  // turnovers)
   gameLog: {
-    has: (player, position) => ['QB', 'RB', 'WR', 'TE', 'K', 'P'].includes(position) && Number(player.id) > 0,
-    load: (player) => espnGameLog('football/nfl', player.id!, SPORT.currentSeason),
+    league: 'football/nfl',
+    has: (player, position) => TEAM_LOGS.includes(position) || (['QB', 'RB', 'WR', 'TE', 'K', 'P'].includes(position) && Number(player.id) > 0),
+    load: (player, position) =>
+      TEAM_LOGS.includes(position)
+        ? espnTeamGameLog('football/nfl', [player.name, logoName(player)], SPORT.currentSeason, 4)
+        : espnGameLog('football/nfl', player.id!, SPORT.currentSeason, {
+            label: (group, label) => (['LNG', 'SACK', 'FUM', 'FF', 'KB'].includes(label) ? null : label),
+            chart: YARDS_CHART[position],
+            fumblesLost: YARDS_CHART[position] ? 'Rushing' : undefined,
+          }),
   },
   cardFlagsLast: castFlags,
   cardExtras: blockingExtras,

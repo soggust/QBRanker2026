@@ -29,7 +29,7 @@ $chalk-dust:
 }
 
 // Text in the hand (DynaPuff)
-@mixin hand($size, $weight: 700) {
+@mixin hand($size, $weight: 400) {
   font-family: $font-hand;
   font-size: $size;
   font-weight: $weight;

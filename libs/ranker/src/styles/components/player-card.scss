@@ -291,22 +291,49 @@
   display: flex;
   flex-direction: column;
   min-width: 96px;
-  padding: 8px 14px 10px;
+  padding: 8px 14px 7px;
 
+  // the words: letters made of lit LED dots (a dot grid clipped to the type), glowing
   .rank-label,
   .rank-of {
-    color: #9a9a9a;
+    -webkit-background-clip: text;
+    background: radial-gradient(circle, var(--scoreboard-led) 0.8px, transparent 1.05px) 0 0 / 2px 2px;
+    background-clip: text;
+    color: transparent;
+    filter: drop-shadow(0 0 1.5px color-mix(in srgb, var(--scoreboard-led) 75%, transparent));
     font-family: v.$font-base;
-    font-size: 11px;
-    font-weight: 800;
-    letter-spacing: 1.5px;
+    font-size: 13px;
+    font-weight: 900;
+    letter-spacing: 2px;
+    line-height: 1.2;
     text-transform: uppercase;
   }
 
+  .rank-label {
+    margin-top: calc(0.25em - 2px);
+  }
+
+  // the number: seven-segment digits in the rank's color, over faint unlit 8s
   .rank-number {
-    @include v.hand(50px);
-    @include v.tone-glow(60%, 12px);
-    line-height: 1.05;
+    display: grid;
+    font-family: "DSEG7", sans-serif;
+    font-size: 40px;
+    font-weight: 900;
+    line-height: 1;
+    margin: 8px 0 10px;
+
+    > span {
+      grid-area: 1 / 1;
+      text-align: right;
+    }
+  }
+
+  .rank-unlit {
+    color: rgba(255, 255, 255, 0.06);
+  }
+
+  .rank-lit {
+    @include v.tone-glow(70%, 10px);
   }
 }
 
@@ -743,6 +770,28 @@
   --group-color: var(--scoreboard-led);
 }
 
+// The Game Log and Career tabs: one card each, like a Season group (its bar a title, not a fold)
+.tab-card {
+  --group-color: var(--scoreboard-led);
+
+  .group-bar.static {
+    cursor: default;
+
+    &:hover {
+      --bar-tint: color-mix(in srgb, var(--group-color) 16%, transparent);
+
+      span {
+        color: #fff;
+      }
+    }
+  }
+
+  .log-chart:first-child,
+  .career-chart:first-child {
+    margin-top: 0;
+  }
+}
+
 .stat-group {
   border: 1px solid color-mix(in srgb, var(--group-color) 40%, transparent);
   border-radius: 6px;
@@ -763,7 +812,8 @@
 
   // Open, the body has the table's sidelines down both edges in the category's color: a solid line
   // with short hash marks off it, pointing in
-  .card-stats {
+  .card-stats,
+  .group-body {
     --hash-gap: 12px;
     --line: color-mix(in srgb, var(--group-color) 75%, transparent);
     $hashes: repeating-linear-gradient(
@@ -1304,7 +1354,7 @@
     padding: 6px 10px 8px;
 
     .rank-number {
-      font-size: 32px;
+      font-size: 28px;
     }
   }
 
@@ -1385,43 +1435,411 @@
 }
 
 // ---------------------------------------------------------------------------
-// The Game Log tab: a compact table, newest game first, scrolling sideways when the line is long
+// The Game Log tab: a bar chart of the key stat by game (green wins, red losses; a team's margin above
+// and below a center line), then the table: category headers, the opponent's logo, a result tile, each
+// value tinted against their own average (the tint is set inline), and a per-game average row
 // ---------------------------------------------------------------------------
+.log-chart {
+  background: rgba(0, 0, 0, 0.18);
+  border-radius: 8px;
+  margin: 12px 0 14px;
+  padding: 10px 14px 10px;
+}
+
+.log-chart-head {
+  align-items: baseline;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.log-chart-label {
+  color: #fff;
+  font-size: 13px;
+  font-weight: 800;
+
+  small {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 11px;
+    font-weight: 600;
+    margin-left: 5px;
+  }
+}
+
+.log-legend {
+  color: rgba(255, 255, 255, 0.65);
+  display: flex;
+  flex-wrap: wrap;
+  font-size: 11px;
+  font-weight: 700;
+  gap: 4px 12px;
+
+  span {
+    align-items: center;
+    display: inline-flex;
+    gap: 5px;
+  }
+
+  i:not(.dot) {
+    border-radius: 2px;
+    display: inline-block;
+    height: 9px;
+    width: 9px;
+  }
+
+  .seg-0 {
+    background: var(--log-seg-0);
+  }
+
+  .seg-1 {
+    background: var(--log-seg-1);
+  }
+}
+
+// a touchdown (green) or a turnover (red)
+.log-chart .dot {
+  border-radius: 50%;
+  display: inline-block;
+  height: 6px;
+  width: 6px;
+
+  &.plus {
+    background: #3ecf6e;
+    box-shadow: 0 0 4px rgba(62, 207, 110, 0.6);
+  }
+
+  &.minus {
+    background: #ff5a4f;
+    box-shadow: 0 0 4px rgba(255, 90, 79, 0.6);
+  }
+}
+
+.log-chart {
+  --log-seg-0: var(--scoreboard-led, #ffcd00);
+  --log-seg-1: #5ab4ff;
+}
+
+.log-bars {
+  display: flex;
+  gap: 5px;
+  height: 104px;
+  position: relative;
+}
+
+.log-bar {
+  align-items: center;
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  max-width: 64px;
+  min-width: 0;
+  position: relative;
+
+  &:hover .seg {
+    filter: brightness(1.2);
+  }
+}
+
+// the pile, bottom up: the stacked pieces, the total, the dots
+.log-pile {
+  align-items: center;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  justify-content: flex-end;
+  min-height: 0;
+  width: 100%;
+
+  b {
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 10px;
+    font-weight: 800;
+    line-height: 13px;
+    order: 1;
+    white-space: nowrap;
+  }
+
+  .seg {
+    display: block;
+    height: calc(var(--h) * 0.68%);
+    min-height: 1px;
+    width: 100%;
+
+    &:first-of-type {
+      border-radius: 0 0 2px 2px;
+    }
+  }
+
+  .seg-0 {
+    background: linear-gradient(0deg, color-mix(in srgb, var(--log-seg-0) 55%, transparent), var(--log-seg-0));
+    order: 10;
+  }
+
+  .seg-1 {
+    background: linear-gradient(0deg, color-mix(in srgb, var(--log-seg-1) 55%, transparent), var(--log-seg-1));
+    border-radius: 3px 3px 0 0;
+    order: 9;
+  }
+}
+
+.log-dots {
+  display: flex;
+  flex-wrap: wrap-reverse;
+  gap: 2px;
+  justify-content: center;
+  margin-bottom: 2px;
+  order: 0;
+}
+
+// one piece: its color says the result; the top rounded
+.log-bar.single .seg-0 {
+  border-radius: 3px 3px 0 0;
+}
+
+.log-bar.single.W .seg-0,
+.log-chart.diverging .log-bar.W .seg-0 {
+  --log-seg-0: #3ecf6e;
+}
+
+.log-bar.single.L .seg-0,
+.log-chart.diverging .log-bar.L .seg-0 {
+  --log-seg-0: #ff5a4f;
+}
+
+// the result under each bar (stacked bars, whose colors are the pieces)
+.log-outcome-tick {
+  background: #9aa0a6;
+  border-radius: 1px;
+  flex: none;
+  height: 3px;
+  margin-top: 3px;
+  width: 100%;
+
+  &.W {
+    background: #3ecf6e;
+  }
+
+  &.L {
+    background: #ff5a4f;
+  }
+}
+
+.log-bar.single .log-outcome-tick {
+  display: none;
+}
+
+// a team's margins: up from the center line for wins, down for losses
+.log-chart.diverging {
+  .log-bars::after {
+    border-top: 1px solid rgba(255, 255, 255, 0.25);
+    content: "";
+    left: 0;
+    position: absolute;
+    right: 0;
+    top: 50%;
+  }
+
+  .log-pile {
+    flex: none;
+    height: 50%;
+    margin-bottom: auto;
+
+    .seg {
+      border-radius: 3px 3px 0 0;
+      height: calc(var(--h) * 0.8%);
+    }
+  }
+
+  .log-bar.negative .log-pile {
+    justify-content: flex-start;
+    margin-bottom: 0;
+    margin-top: auto;
+
+    .seg {
+      border-radius: 0 0 3px 3px;
+      order: 0;
+    }
+
+    b {
+      order: 1;
+    }
+  }
+}
+
+.log-chart.dense .log-bars {
+  gap: 1px;
+}
+
 .game-log {
+  border-radius: 8px;
   overflow-x: auto;
 
   table {
-    border-collapse: collapse;
-    font-size: 12px;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 12.5px;
+    font-variant-numeric: tabular-nums;
     width: 100%;
   }
 
   th,
   td {
-    padding: 4px 7px;
+    padding: 5px 8px;
     text-align: right;
     white-space: nowrap;
+  }
 
-    &:nth-child(-n + 3) {
-      text-align: left;
+  .log-date,
+  .log-opp,
+  .log-result,
+  .wide {
+    text-align: left;
+  }
+
+  thead th,
+  tr.log-next-head th {
+    background: rgba(0, 0, 0, 0.25);
+    color: rgba(255, 255, 255, 0.55);
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  // the category row: each name over its columns, underlined
+  .log-groups th {
+    background: none;
+    padding: 0 8px 2px;
+
+    span {
+      border-bottom: 2px solid rgba(255, 255, 255, 0.18);
+      color: rgba(255, 255, 255, 0.8);
+      display: block;
+      font-size: 10.5px;
+      padding-bottom: 2px;
+      text-align: center;
     }
   }
 
-  th {
-    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  .group-start {
+    border-left: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  // the charted column stands out a little
+  th.key {
+    color: var(--scoreboard-led, #ffcd00);
+  }
+
+  td.key {
+    color: #fff;
+    font-weight: 800;
+  }
+
+  tbody td {
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.88);
+  }
+
+  tbody tr:hover td {
+    box-shadow: inset 0 0 0 999px rgba(255, 255, 255, 0.05);
+  }
+
+  .log-date {
     color: rgba(255, 255, 255, 0.6);
-    font-weight: 600;
   }
 
-  tbody tr:nth-child(even) {
-    background: rgba(255, 255, 255, 0.04);
+  td.log-opp {
+    font-weight: 700;
+
+    img {
+      height: 18px;
+      margin: -3px 4px -4px 2px;
+      object-fit: contain;
+      vertical-align: middle;
+      width: 18px;
+    }
   }
 
-  td.win {
-    color: rgb(80, 207, 80);
+  .log-vs {
+    color: rgba(255, 255, 255, 0.45);
+    display: inline-block;
+    font-size: 11px;
+    min-width: 16px;
   }
 
-  td.loss {
-    color: #ff6b61;
+  td.log-result {
+    font-weight: 700;
+  }
+
+  .log-outcome {
+    border-radius: 3px;
+    color: #111;
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 900;
+    line-height: 17px;
+    margin-right: 5px;
+    text-align: center;
+    width: 17px;
+
+    &.W {
+      background: #3ecf6e;
+    }
+
+    &.L {
+      background: #ff5a4f;
+    }
+
+    &.T {
+      background: #9aa0a6;
+    }
+  }
+
+  // the games to come: dimmer, a line above the first, the time and TV (and the line) across the stats
+  tr.log-gap td {
+    background: none;
+    border: none;
+    height: 18px;
+    padding: 0;
+  }
+
+  tr.log-next td {
+    color: rgba(255, 255, 255, 0.5);
+  }
+
+  // (the games to come get their own header row, like the one at the top)
+  tr.log-next-head th {
+    text-align: left;
+  }
+
+  td.log-next-detail {
+    text-align: left;
+
+    span + span::before {
+      content: "·";
+      margin: 0 7px;
+    }
+  }
+
+  .log-line {
+    color: var(--scoreboard-led, #ffcd00);
+    font-weight: 700;
+  }
+
+  tr.log-avg td {
+    background: rgba(0, 0, 0, 0.25);
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    color: rgba(255, 255, 255, 0.75);
+    font-weight: 800;
+
+    &:first-child {
+      color: rgba(255, 255, 255, 0.5);
+      font-size: 11px;
+      letter-spacing: 0.04em;
+      text-align: left;
+      text-transform: uppercase;
+    }
   }
 }
