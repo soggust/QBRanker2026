@@ -2,9 +2,10 @@
 // tune the few things that differ between sports.
 @use "sport-settings" as sport;
 
-// Fonts: the UI's, and the soft hand the names, values and numbers are written in
+// Fonts: the UI's, the headlines' (the card's name, the analysis headlines, the logo, modal titles), and
+// the soft hand the names, values and numbers are written in
 $font-base: "Nunito", sans-serif;
-$font-heading: "Zain", cursive;
+$font-heading: "Huninn", sans-serif;
 $font-hand: "DynaPuff", cursive;
 
 // The playbook chalkboard behind the grid, the player card and About: chalk dust, two smudges and the
@@ -26,6 +27,13 @@ $chalk-dust:
   font-size: $size;
   height: $size;
   width: $size;
+}
+
+// A headline (Huninn: one weight)
+@mixin headline($size) {
+  font-family: $font-heading;
+  font-size: $size;
+  font-weight: 400;
 }
 
 // Text in the hand (DynaPuff)

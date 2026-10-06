@@ -49,9 +49,7 @@
   // sport's page.
   a.brand {
     color: var(--scoreboard-led);
-    font-family: v.$font-hand;
-    font-size: 11px;
-    font-weight: 400;
+    @include v.headline(11px);
     gap: 8px;
     letter-spacing: 1px;
     margin-left: auto;

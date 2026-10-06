@@ -55,9 +55,7 @@ header {
   h2 {
     color: #fff;
     flex: 1;
-    font-family: v.$font-hand;
-    font-size: 17px;
-    font-weight: 400;
+    @include v.headline(17px);
     letter-spacing: normal;
     margin: 0;
     text-transform: uppercase;
