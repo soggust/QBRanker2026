@@ -612,6 +612,11 @@
 .ov-section {
   margin-top: 14px;
 
+  // (the first, more room off the archetype and radar panels above)
+  :not(.ov-section) + & {
+    margin-top: 26px;
+  }
+
   &.good {
     --group-color: #3ee07a;
   }
