@@ -115,7 +115,8 @@ export class PlayerCards {
 
   // The Career tab's name: a team row's is its History
   get careerTitle(): string {
-    return this.position === 'TM' || SPORT.teamTabs?.includes(this.position) ? 'History' : 'Career';
+    const position: string = this.position;
+    return position === 'TM' || SPORT.teamTabs?.includes(position) ? 'History' : 'Career';
   }
 
   // The Game Log tab: the season being played's, for a row the sport has one for (SPORT.gameLog)
