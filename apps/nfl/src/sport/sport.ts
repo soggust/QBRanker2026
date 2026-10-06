@@ -107,15 +107,9 @@ const headshot = espnHeadshot('nfl');
 // A row's logo file name (the team's nickname: "Ravens"); the rows with their team's games as their log
 const logoName = (p: { teamLogo?: string | null }) => p.teamLogo?.match(/([^/]+)\.\w+$/)?.[1];
 const TEAM_LOGS = ['TM', 'DEF', 'OL', 'HC'];
-// The Game Log's chart: a QB's total yards by game; the others' yards from scrimmage, their main kind first,
-// with their touchdowns and turnovers
-const SCORING = { plus: ['Passing TD', 'Rushing TD', 'Receiving TD'], minus: ['Passing INT', 'Rushing FL'] };
-const YARDS_CHART: Record<string, GameLogChart | undefined> = {
-  QB: { label: 'Total yards', stack: ['Passing YDS', 'Rushing YDS'], combine: true },
-  RB: { label: 'Scrimmage yards', stack: ['Rushing YDS', 'Receiving YDS'], ...SCORING },
-  WR: { label: 'Scrimmage yards', stack: ['Receiving YDS', 'Rushing YDS'], ...SCORING },
-  TE: { label: 'Scrimmage yards', stack: ['Receiving YDS', 'Rushing YDS'], ...SCORING },
-};
+// The Game Log's chart: each game's total yards (passing and rushing, or from scrimmage), one plain bar
+const TOTAL_YARDS = { label: 'Total yards', stack: ['Passing YDS', 'Rushing YDS', 'Receiving YDS'], combine: true };
+const YARDS_CHART: Record<string, GameLogChart | undefined> = { QB: TOTAL_YARDS, RB: TOTAL_YARDS, WR: TOTAL_YARDS, TE: TOTAL_YARDS };
 
 export const SPORT: SportConfig = {
   id: 'nfl',
@@ -179,7 +173,7 @@ export const SPORT: SportConfig = {
   analysis: true,
   // The card's Game Log tab: teams, defenses, lines and coaches get their team's games; a player ESPN's
   // columns, without the longest gains, sacks, or fumbles but the ones lost (FL, at the end of Rushing),
-  // charting his yards from scrimmage with his touchdowns and turnovers (a QB's total yards)
+  // charting his total yards
   gameLog: {
     league: 'football/nfl',
     has: (player, position) => TEAM_LOGS.includes(position) || (['QB', 'RB', 'WR', 'TE', 'K', 'P'].includes(position) && Number(player.id) > 0),
