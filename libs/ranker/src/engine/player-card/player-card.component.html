@@ -23,12 +23,15 @@
           <span class="season-chip">{{ c.seasonLabel }}</span>
         </p>
         <h2 [attr.data-name]="c.name">{{ c.name }}</h2>
-        <!-- Position • team -->
+        <!-- Position • team (a team's card: just the team, no "Team") -->
         <p class="hero-team">
-          <span class="hero-position">{{ c.positionName }}</span>
-          @if (c.teamName) {
-            <span class="hero-dot">•</span>{{ c.teamName }}
+          @if (c.positionName !== 'Team') {
+            <span class="hero-position">{{ c.positionName }}</span>
+            @if (c.teamName) {
+              <span class="hero-dot">•</span>
+            }
           }
+          {{ c.teamName }}
         </p>
         @if (c.awards.length) {
           <span class="player-awards">
