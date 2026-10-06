@@ -276,8 +276,11 @@
               </p>
             </div>
 
-            <div class="stat-group tab-card ai-card">
-              <div class="group-bar static"><mat-icon class="group-bar-icon" fontIcon="auto_awesome"></mat-icon><span>The Take</span></div>
+            <div class="stat-group tab-card ai-card" [class.closed]="!cards.aiOpen.has('take')">
+              <button type="button" class="group-bar ai-bar" [attr.aria-expanded]="cards.aiOpen.has('take')" (click)="cards.toggleAi('take')">
+                <mat-icon class="ai-chevron" [fontIcon]="cards.aiOpen.has('take') ? 'expand_more' : 'chevron_right'"></mat-icon>
+                <mat-icon class="group-bar-icon" fontIcon="auto_awesome"></mat-icon><span>The Take</span>
+              </button>
               <div class="group-body ai-prose">
                 @for (p of paragraphs(r.take); track $index) {
                   <p>{{ p }}</p>
@@ -285,8 +288,11 @@
               </div>
             </div>
 
-            <div class="stat-group tab-card ai-card ai-season">
-              <div class="group-bar static"><mat-icon class="group-bar-icon" fontIcon="insights"></mat-icon><span>Season So Far</span></div>
+            <div class="stat-group tab-card ai-card ai-season" [class.closed]="!cards.aiOpen.has('season')">
+              <button type="button" class="group-bar ai-bar" [attr.aria-expanded]="cards.aiOpen.has('season')" (click)="cards.toggleAi('season')">
+                <mat-icon class="ai-chevron" [fontIcon]="cards.aiOpen.has('season') ? 'expand_more' : 'chevron_right'"></mat-icon>
+                <mat-icon class="group-bar-icon" fontIcon="insights"></mat-icon><span>Season So Far</span>
+              </button>
               <div class="group-body">
                 <div class="ai-columns">
                   <div class="ai-points strengths">
@@ -307,11 +313,11 @@
             </div>
 
             @if (a.game) {
-              <div class="stat-group tab-card ai-card ai-next">
-                <div class="group-bar static">
-                  <mat-icon class="group-bar-icon" fontIcon="sports_football"></mat-icon>
-                  <span>Next Up: Week {{ a.game.week }} {{ a.game.at === 'home' ? 'vs' : '@' }} {{ a.game.opp }}</span>
-                </div>
+              <div class="stat-group tab-card ai-card ai-next" [class.closed]="!cards.aiOpen.has('next')">
+                <button type="button" class="group-bar ai-bar" [attr.aria-expanded]="cards.aiOpen.has('next')" (click)="cards.toggleAi('next')">
+                  <mat-icon class="ai-chevron" [fontIcon]="cards.aiOpen.has('next') ? 'expand_more' : 'chevron_right'"></mat-icon>
+                  <mat-icon class="group-bar-icon" fontIcon="sports_football"></mat-icon><span>Next Up: Week {{ a.game.week }} {{ a.game.at === 'home' ? 'vs' : '@' }} {{ a.game.opp }}</span>
+                </button>
                 <div class="group-body">
                   <div class="ai-next-head">
                     <span class="ai-outlook" [ngClass]="r.nextGame.outlook">{{ r.nextGame.outlook }} matchup</span>
@@ -343,8 +349,11 @@
               </div>
             }
 
-            <div class="stat-group tab-card ai-card ai-rest">
-              <div class="group-bar static"><mat-icon class="group-bar-icon" fontIcon="event_upcoming"></mat-icon><span>Rest of Season</span></div>
+            <div class="stat-group tab-card ai-card ai-rest" [class.closed]="!cards.aiOpen.has('rest')">
+              <button type="button" class="group-bar ai-bar" [attr.aria-expanded]="cards.aiOpen.has('rest')" (click)="cards.toggleAi('rest')">
+                <mat-icon class="ai-chevron" [fontIcon]="cards.aiOpen.has('rest') ? 'expand_more' : 'chevron_right'"></mat-icon>
+                <mat-icon class="group-bar-icon" fontIcon="event_upcoming"></mat-icon><span>Rest of Season</span>
+              </button>
               <div class="group-body">
                 <div class="ai-projections">
                   @for (p of r.restOfSeason.projections; track $index) {
@@ -368,25 +377,27 @@
               </div>
             </div>
 
-            <div class="stat-group tab-card ai-card ai-bets">
-              <div class="group-bar static"><mat-icon class="group-bar-icon" fontIcon="paid"></mat-icon><span>Betting Angles</span></div>
+            <div class="stat-group tab-card ai-card ai-bets" [class.closed]="!cards.aiOpen.has('bets')">
+              <button type="button" class="group-bar ai-bar" [attr.aria-expanded]="cards.aiOpen.has('bets')" (click)="cards.toggleAi('bets')">
+                <mat-icon class="ai-chevron" [fontIcon]="cards.aiOpen.has('bets') ? 'expand_more' : 'chevron_right'"></mat-icon>
+                <mat-icon class="group-bar-icon" fontIcon="paid"></mat-icon><span>Betting Angles</span>
+              </button>
               <div class="group-body">
                 @if (!r.bets.length) {
                   <p class="card-note">Nothing in this matchup looks mispriced.</p>
                 }
                 @for (b of r.bets; track $index) {
                   <div class="ai-bet">
-                    <span class="ai-bet-strength" [ngClass]="b.strength">{{ b.strength }}</span>
+                    <span class="ai-bet-strength" [ngClass]="b.strength === 'strong' ? 'like' : b.strength">{{ b.strength === 'strong' ? 'like' : b.strength }}</span>
                     <div class="ai-bet-main">
                       <span class="ai-bet-pick"><b>{{ b.lean }}</b><small>{{ b.market }}</small></span>
                       <p>{{ b.reason }}</p>
                     </div>
                   </div>
                 }
-                <p class="ai-disclaimer">For entertainment: an AI's read of the numbers, not betting advice.</p>
+                <p class="ai-disclaimer">This is not betting advice.</p>
               </div>
             </div>
-            <p class="ai-credit">Written by AI ({{ a.model }}) from this site's data; it can be wrong.</p>
           }
         }
 

@@ -107,6 +107,12 @@ export class PlayerCards {
     return this.analysisLoads.get(file)!;
   }
 
+  // The Analysis tab's sections open (all folded to start; kept across cards)
+  aiOpen = new Set<string>();
+  toggleAi(section: string): void {
+    if (!this.aiOpen.delete(section)) this.aiOpen.add(section);
+  }
+
   // The Career tab's name: a team row's is its History
   get careerTitle(): string {
     return this.position === 'TM' || SPORT.teamTabs?.includes(this.position) ? 'History' : 'Career';

@@ -50,7 +50,7 @@ Define it in one sentence for this player.
 
 Evidence: every strength, concern and key matchup cites 1-3 numbers from the dossier by JSON path (dot notation from the dossier root, array indexes as numbers: "splits.byDepth.short0to9.epa", "season.ranked.ypa", "gameLog.2.line.passYds", "nextGame.oppDefense.defRushEpa"). The site shows the real value from that path, so the path must exist exactly. The label is a 1-4 word name for the number.
 
-Betting angles (the site shows them as entertainment, with a disclaimer): look at the game's line (spread, total, moneyline) and his own production against this matchup, and flag what looks favorable — or say nothing looks off. For his player markets the dossier has no prop lines, so frame those against his own baseline ("his rushing yards: lean over his 36-a-game average against a front that ..."). Be selective and honest: "pass" is a fine answer, and a lean needs a real reason in the data, not a vibe. Strength: lean (slight), like (solid), strong (rare).
+Betting angles (the site shows them as entertainment, with a disclaimer): look at the game's line (spread, total, moneyline) and his own production against this matchup, and flag what looks favorable — or say nothing looks off. For his player markets the dossier has no prop lines, so frame those against his own baseline ("his rushing yards: lean over his 36-a-game average against a front that ..."). Give every angle the data really supports, up to five — and none when nothing stands out; never pad the list. Each needs a real reason in the data, not a vibe. Grade each: like (a solid edge), lean (a slight one), or fade (a side the market or the obvious read favors that the data argues against: name that side as the market and say why to go against it).
 
 Style: plain sentences, numbers woven in only where they make the point, no clichés ("he's a gamer", "elite", "weapon"), no filler, never restate the totals table.`;
 
@@ -133,13 +133,13 @@ const SCHEMA = {
     },
     bets: {
       type: 'array',
-      description: '0-3 betting angles for the coming game; empty when nothing looks off',
+      description: '0-5 betting angles for the coming game, only those the data supports; empty when nothing looks off',
       items: {
         type: 'object',
         properties: {
           market: { type: 'string', description: 'e.g. "BAL -2.5", "Over 44.5", "Jackson rushing yards"' },
           lean: { type: 'string', description: 'the side, e.g. "Over", "BAL -2.5", "Under his average"' },
-          strength: { type: 'string', enum: ['lean', 'like', 'strong'] },
+          strength: { type: 'string', enum: ['like', 'lean', 'fade'] },
           reason: { type: 'string', description: '1-3 sentences from the data' },
         },
         required: ['market', 'lean', 'strength', 'reason'],

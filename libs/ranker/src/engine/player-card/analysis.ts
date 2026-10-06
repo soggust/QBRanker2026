@@ -18,7 +18,9 @@ export interface AnalysisPoint {
 export interface AnalysisBet {
   market: string;
   lean: string;
-  strength: 'lean' | 'like' | 'strong';
+  // like (green): solid; lean (yellow): slight; fade (red): the side to go against (an older report's
+  // strong reads as like)
+  strength: 'fade' | 'lean' | 'like' | 'strong';
   reason: string;
 }
 export interface PlayerAnalysis {

@@ -1912,6 +1912,25 @@
 .ai-card {
   margin-top: 14px;
 
+  // folded shut (each starts that way): just the bar
+  &.closed {
+    margin-top: 10px;
+
+    .group-body {
+      display: none;
+    }
+  }
+
+  .ai-bar .ai-chevron {
+    color: rgba(255, 255, 255, 0.55);
+    @include v.icon-size(20px);
+    margin: 0 -4px 0 -4px;
+  }
+
+  .ai-bar:hover .ai-chevron {
+    color: var(--scoreboard-led);
+  }
+
   .group-body {
     padding: 14px 20px 16px;
   }
@@ -2236,17 +2255,22 @@
   text-align: center;
   text-transform: uppercase;
 
-  &.lean {
-    color: #9aa0a6;
-  }
-
+  // like green, lean yellow, fade red
   &.like {
-    color: #ffcd00;
-  }
-
-  &.strong {
     background: #3ecf6e;
     border-color: #3ecf6e;
+    color: #111;
+  }
+
+  &.lean {
+    background: #ffcd00;
+    border-color: #ffcd00;
+    color: #111;
+  }
+
+  &.fade {
+    background: #ff5a4f;
+    border-color: #ff5a4f;
     color: #111;
   }
 }
@@ -2281,17 +2305,11 @@
   }
 }
 
-.ai-disclaimer,
-.ai-credit {
+.ai-disclaimer {
   color: rgba(255, 255, 255, 0.4);
   font-size: 11.5px;
   font-style: italic;
   margin: 10px 0 0;
-}
-
-.ai-credit {
-  margin-top: 14px;
-  text-align: center;
 }
 
 @media (max-width: 700px) {
