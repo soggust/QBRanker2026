@@ -53,7 +53,7 @@ Define it in one sentence for this player.
 
 Evidence: every strength, concern and key matchup cites 1-3 numbers from the dossier by JSON path (dot notation from the dossier root, array indexes as numbers: "splits.byDepth.short0to9.epa", "season.ranked.ypa", "gameLog.2.line.passYds", "nextGame.oppDefense.defRushEpa"). The site shows the real value from that path, so the path must exist exactly. The label is a 1-4 word name for the number.
 
-Betting angles: look at the game's line (spread, total, moneyline) and his own production against this matchup, and flag what looks favorable — or say nothing looks off. For his player markets the dossier has no prop lines, so frame those against his own baseline ("his rushing yards: over his 36-a-game average against a front that ..."). Give every angle the data really supports, up to five — and none when nothing stands out; never pad the list. Each needs a real reason in the data, not a vibe. Mark each like (backing the side you name) or fade (going against a side the market or the obvious read favors: name that side as the market, and make the lean the bet itself, the other side); how strong a bet is belongs in its score, not this. Then score each 1-10 for how likely it is to win, apart from its grade (a fade can score as high as any bet). Be decisive, not defensive: when the matchup, recent form, injuries and the number all point the same way, say so with an 8 or 9; a 5-6 is a modest edge; below 5 isn't worth listing. Don't park every bet in the middle to protect yourself; the reader wants to know which of your calls you would actually put money on. This score is about the bet, not about how much data there is (that is the report's confidence).
+Betting angles: look at the game's line (spread, total, moneyline) and his own production against this matchup, and flag what looks favorable — or say nothing looks off. For his player markets the dossier has no prop lines, so frame those against his own baseline ("his rushing yards: over his 36-a-game average against a front that ..."). Give every angle the data really supports, up to five — and none when nothing stands out; never pad the list. Only bets someone could actually place ("avoid his props" is not a bet), and none at all if he isn't expected to play (ruled out, doubtful, or not the starter). Each needs a real reason in the data, not a vibe. Mark each like (backing the side you name) or fade (going against a side the market or the obvious read favors: name that side as the market, and make the lean the bet itself, the other side); how strong a bet is belongs in its score, not this. Then score each 1-10 for how likely it is to win, apart from its grade (a fade can score as high as any bet). Be decisive, not defensive: when the matchup, recent form, injuries and the number all point the same way, say so with an 8 or 9; a 5-6 is a modest edge; below 5 isn't worth listing. Don't park every bet in the middle to protect yourself; the reader wants to know which of your calls you would actually put money on. This score is about the bet, not about how much data there is (that is the report's confidence).
 
 Style: plain sentences, numbers woven in only where they make the point, no clichés ("he's a gamer", "elite", "weapon"), no filler, never restate the totals table.`;
 
@@ -81,7 +81,7 @@ Evidence: every strength, concern and key matchup cites 1-3 numbers from the dos
 
 Projections: per-game or season ranges for the rest of the season (e.g. "Final wins", "Points scored / game", "Points allowed / game").
 
-Betting angles: look at the game's line (spread, total, moneyline), each side's team total, and the season picture, and flag what looks favorable — or say nothing looks off. Give every angle the data really supports, up to five, and none when nothing stands out; never pad the list. Each needs a real reason in the data, not a vibe. Mark each like (backing the side you name) or fade (going against a side the market or the obvious read favors: name that side as the market, and make the lean the bet itself, the other side); how strong a bet is belongs in its score, not this. Then score each 1-10 for how likely it is to win, apart from its grade (a fade can score as high as any bet). Be decisive, not defensive: when the matchup, recent form, injuries and the number all point the same way, say so with an 8 or 9; a 5-6 is a modest edge; below 5 isn't worth listing. Don't park every bet in the middle to protect yourself; the reader wants to know which of your calls you would actually put money on. This score is about the bet, not about how much data there is (that is the report's confidence).
+Betting angles: look at the game's line (spread, total, moneyline), each side's team total, and the season picture, and flag what looks favorable — or say nothing looks off. Give every angle the data really supports, up to five, and none when nothing stands out; never pad the list. Only bets someone could actually place ("avoid this game" is not a bet). Each needs a real reason in the data, not a vibe. Mark each like (backing the side you name) or fade (going against a side the market or the obvious read favors: name that side as the market, and make the lean the bet itself, the other side); how strong a bet is belongs in its score, not this. Then score each 1-10 for how likely it is to win, apart from its grade (a fade can score as high as any bet). Be decisive, not defensive: when the matchup, recent form, injuries and the number all point the same way, say so with an 8 or 9; a 5-6 is a modest edge; below 5 isn't worth listing. Don't park every bet in the middle to protect yourself; the reader wants to know which of your calls you would actually put money on. This score is about the bet, not about how much data there is (that is the report's confidence).
 
 Style: plain sentences, numbers woven in only where they make the point, no clichés, no filler, never restate the stats table.`;
 
@@ -251,6 +251,46 @@ function save(id, dossier, message, batch) {
 const dossierFile = (id) => (id.startsWith('team-') ? path.join(TEAM_DOSSIERS, `${id.slice(5)}.json`) : path.join(DOSSIERS, `${id}.json`));
 const load = (id) => JSON.parse(readFileSync(dossierFile(id), 'utf8'));
 
+// ---- the Bets page's bets: only bets you could place, from players who'll play
+
+const OUT = /^(out|injured reserve|doubtful|suspended)/i;
+const unavailable = (d) => OUT.test(d.player?.injury?.status ?? '') || OUT.test(d.player?.siteInjuryStatus ?? '');
+// The depth-chart rank of a player's spot ("QB1" -> 1; none: 99)
+const depthRank = (d) => Number(d.player?.depthChart?.match(/^[A-Z]+(\d+)/)?.[1] ?? 99);
+// Whether a player plays this week: not ruled out, and (a QB) the best-ranked of his team's QBs who aren't
+let starters = null;
+function playing(id, dossier) {
+  if (unavailable(dossier)) return false;
+  if (dossier.player?.position !== 'QB') return true;
+  if (!starters) {
+    starters = new Map();
+    for (const f of readdirSync(DOSSIERS)) {
+      const d = JSON.parse(readFileSync(path.join(DOSSIERS, f), 'utf8'));
+      if (d.player?.position !== 'QB' || unavailable(d)) continue;
+      const team = d.player.team;
+      const best = starters.get(team);
+      if (!best || depthRank(d) < best.rank) starters.set(team, { id: f.replace('.json', ''), rank: depthRank(d) });
+    }
+  }
+  return starters.get(dossier.player.team)?.id === id;
+}
+
+// A bet as one you could place, or null: "avoid ..." isn't a bet; a fade written as "Fade WSH -3" is the
+// other side ("NYG +3", "Over" -> "Under"), dropped when there's no telling what that is
+function actionable(b, team, opp) {
+  if (/^avoid\b/i.test(b.lean.trim()) || /\bany\b/i.test(b.market)) return null;
+  if (!/^fade\b/i.test(b.lean.trim())) return b;
+  const faded = b.lean.trim().replace(/^fade\s+/i, '');
+  const total = faded.match(/^(over|under)\s*(\d+(?:\.\d+)?)?/i);
+  if (total) return { ...b, lean: `${/over/i.test(total[1]) ? 'Under' : 'Over'}${total[2] ? ` ${total[2]}` : ''}` };
+  const side = faded.match(/^([A-Z]{2,3})\s*([+-])(\d+(?:\.\d+)?)/);
+  if (side && team && opp) {
+    const other = side[1] === team || (side[1] === 'WSH' && team === 'WAS') ? opp : team;
+    return { ...b, lean: `${other} ${side[2] === '-' ? '+' : '-'}${side[3]}` };
+  }
+  return null;
+}
+
 // ---- the site's copies: what the tab shows, each evidence with its real value (bad paths dropped), the
 // game it previews, keyed by the row ids the site uses (a QB's "QB-<ESPN id>"; a team's report under its
 // Team, Defense, O-line and Coach rows)
@@ -283,7 +323,11 @@ function publish() {
     );
     for (const id of ids) listed[id] = file;
     const team = (dossier.kind === 'team' ? dossier.team.name : (dossier.player.team ?? '')).match(/\((\w+)\)/)?.[1] ?? null;
-    for (const b of r.bets ?? []) {
+    // (a player's bets only when he's expected to play: his team's starter, not ruled out)
+    if (dossier.kind !== 'team' && !playing(kept.id, dossier)) continue;
+    for (const raw of r.bets ?? []) {
+      const b = actionable(raw, team, next?.opp);
+      if (!b) continue;
       bets.push({
         sport: 'nfl',
         source: kept.name,

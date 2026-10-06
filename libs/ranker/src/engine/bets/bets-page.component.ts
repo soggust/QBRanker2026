@@ -43,6 +43,9 @@ export interface BetRow extends BetEntry {
 const ESTIMATE = { like: 7, fade: 6, lean: 5 };
 const SURE = { high: 3, medium: 2, low: 1 };
 
+// A team as the schedule names it (the sportsbook's WSH and LAR are its WAS and LA)
+const team = (abbr: string) => ({ WSH: 'WAS', LAR: 'LA' })[abbr] ?? abbr;
+
 // The call a bet makes, the same however a report words it: a game total ("under 45.5"), a side
 // ("ATL +2.5", "BAL ml"), or anything else by its market and direction ("jackson rushing yards|under")
 function callKey(b: BetEntry): string {
@@ -56,12 +59,24 @@ function callKey(b: BetEntry): string {
   if (bare && marketTotal) return `${game}|total ${bare[1].toLowerCase()} ${marketTotal[1]}`;
   // a side: "ATL +2.5", or a moneyline
   const spread = lean.match(/\b([A-Z]{2,3})\s*([+-]\d+(?:\.\d+)?)/);
-  if (spread) return `${game}|${spread[1]} ${spread[2]}`;
+  if (spread) return `${game}|${team(spread[1])} ${spread[2]}`;
   const ml = `${lean} ${b.market}`.match(/\b([A-Z]{2,3})\s+(?:ML|moneyline)\b/i);
-  if (ml) return `${game}|${ml[1]} ml`;
+  if (ml) return `${game}|${team(ml[1])} ml`;
   // anything else (a player's or a team's own numbers): its market and direction
   const direction = lean.match(/\b(over|under|yes|no)\b/i)?.[1]?.toLowerCase() ?? lean.toLowerCase();
   return `${game}|${b.market.toLowerCase().replace(/\s*\(.*\)/, '')}|${direction}`;
+}
+
+// The line a call is on, whichever side it takes: a total ("...|total 43.5"), a spread ("...|spread 3"),
+// a moneyline ("...|ml"); null for anything else (a player's or a team's own numbers)
+function lineOf(key: string): string | null {
+  const [sport, game, call] = key.split('|');
+  const total = call?.match(/^total (?:over|under) (.+)$/);
+  if (total) return `${sport}|${game}|total ${total[1]}`;
+  const spread = call?.match(/^[A-Z]{2,3} [+-]([\d.]+)$/);
+  if (spread) return `${sport}|${game}|spread ${spread[1]}`;
+  if (/^[A-Z]{2,3} ml$/.test(call ?? '')) return `${sport}|${game}|ml`;
+  return null;
 }
 
 @Component({
@@ -121,6 +136,22 @@ export class BetsPageComponent implements OnInit {
     // the same call from several reports: listed once, as its highest-ranked report has it
     const kept = new Map<string, BetRow>();
     for (const r of rows) if (!kept.has(r.key)) kept.set(r.key, r);
+    // opposite calls on the same line (the over and the under, one side and the other): the side more
+    // analyses make wins (then the surer one); an even split shows neither
+    const sides = new Map<string, BetRow[]>();
+    for (const r of kept.values()) {
+      const line = lineOf(r.key);
+      if (!line) continue;
+      if (!sides.has(line)) sides.set(line, []);
+      sides.get(line)!.push(r);
+    }
+    for (const calls of sides.values()) {
+      if (calls.length < 2) continue;
+      const ranked = [...calls].sort((a, b) => b.agree - a.agree || b.sureness - a.sureness);
+      const [best, next] = ranked;
+      const tied = best.agree === next.agree && best.sureness === next.sureness;
+      for (const r of ranked) if (tied || r !== best) kept.delete(r.key);
+    }
     this.rows = [...kept.values()];
   }
 
