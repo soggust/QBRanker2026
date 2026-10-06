@@ -79,9 +79,9 @@ export class BetsPageComponent implements OnInit {
   open = new Set<number>();
 
   async ngOnInit(): Promise<void> {
-    // every sport's bets (the ones without any are skipped)
+    // the bets of every sport with AI analyses (sports.json's analysis)
     const files = await Promise.all(
-      SPORT_LINKS.map((s) =>
+      SPORT_LINKS.filter((s) => s.analysis).map((s) =>
         fetch(`/${s.id}/data/analysis/bets.json`, { cache: 'no-cache' })
           .then((res) => (res.ok ? res.json() : null))
           .catch(() => null),

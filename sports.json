@@ -1,5 +1,5 @@
 [
-  { "id": "nfl", "label": "NFL" },
+  { "id": "nfl", "label": "NFL", "analysis": true },
   { "id": "mlb", "label": "MLB" },
   { "id": "nba", "label": "NBA" },
   { "id": "nhl", "label": "NHL" },
