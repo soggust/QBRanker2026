@@ -84,6 +84,26 @@
     </nav>
 
     <div class="card-body" #cardBody>
+      <!-- A point in the analysis: its title, the take, the numbers behind it (their real values and ranks) -->
+      <ng-template #aiPoint let-p>
+        <div class="ai-point">
+          <h5>{{ p.title }}</h5>
+          <p>{{ p.body }}</p>
+          @if (p.evidence.length) {
+            <div class="ai-evidence">
+              @for (e of p.evidence; track $index) {
+                <span class="ai-chip" [style.--tone]="e.rank ? rankTone(rankPct(e.rank, e.of)) : null">
+                  <small>{{ e.label }}</small><b>{{ evidenceText(e.value) }}</b>
+                  @if (e.rank) {
+                    <i>#{{ e.rank }}<small>/{{ e.of }}</small></i>
+                  }
+                </span>
+              }
+            </div>
+          }
+        </div>
+      </ng-template>
+
       <!-- One stat: value, rank in the list, a bar for where that sits, the list average -->
       <ng-template #statTile let-s>
         <div class="card-stat" [ngClass]="'group-' + s.group" [title]="s.name" [style.--pct]="s.pct ?? 0" [style.--tone]="rankTone(s.pct)">
@@ -232,6 +252,141 @@
                 }
               </div>
             </div>
+          }
+        }
+
+        <!-- The AI write-up (player-card/analysis.ts): the archetype and headline, the take, the season's
+             strengths and concerns, the coming game, the rest of the season, betting angles -->
+        @case ('analysis') {
+          @let a = cards.analysis(c);
+          @if (a === 'loading') {
+            <p class="card-note">Loading…</p>
+          } @else if (a === 'error') {
+            <p class="card-note">The analysis couldn't be loaded.</p>
+          } @else {
+            @let r = a.report;
+            <div class="ai-hero">
+              <span class="ai-archetype">{{ r.archetype.name }}</span>
+              <h2 class="ai-headline">{{ r.headline }}</h2>
+              <p class="ai-definition">{{ r.archetype.definition }}</p>
+              <p class="ai-meta">
+                <span class="ai-confidence" [ngClass]="r.confidence.level">{{ r.confidence.level }} confidence</span>
+                <span>{{ r.confidence.note }}</span>
+                <span>Updated {{ a.at | date: 'MMM d' }}</span>
+              </p>
+            </div>
+
+            <div class="stat-group tab-card ai-card">
+              <div class="group-bar static"><mat-icon class="group-bar-icon" fontIcon="auto_awesome"></mat-icon><span>The Take</span></div>
+              <div class="group-body ai-prose">
+                @for (p of paragraphs(r.take); track $index) {
+                  <p>{{ p }}</p>
+                }
+              </div>
+            </div>
+
+            <div class="stat-group tab-card ai-card ai-season">
+              <div class="group-bar static"><mat-icon class="group-bar-icon" fontIcon="insights"></mat-icon><span>Season So Far</span></div>
+              <div class="group-body">
+                <div class="ai-columns">
+                  <div class="ai-points strengths">
+                    <h4><mat-icon fontIcon="trending_up"></mat-icon>Strengths</h4>
+                    @for (p of r.strengths; track $index) {
+                      <ng-container *ngTemplateOutlet="aiPoint; context: { $implicit: p }"></ng-container>
+                    }
+                  </div>
+                  <div class="ai-points concerns">
+                    <h4><mat-icon fontIcon="trending_down"></mat-icon>Concerns</h4>
+                    @for (p of r.concerns; track $index) {
+                      <ng-container *ngTemplateOutlet="aiPoint; context: { $implicit: p }"></ng-container>
+                    }
+                  </div>
+                </div>
+                <p class="ai-trend" [ngClass]="r.trend.direction"><b>{{ r.trend.direction }}</b>{{ r.trend.note }}</p>
+              </div>
+            </div>
+
+            @if (a.game) {
+              <div class="stat-group tab-card ai-card ai-next">
+                <div class="group-bar static">
+                  <mat-icon class="group-bar-icon" fontIcon="sports_football"></mat-icon>
+                  <span>Next Up: Week {{ a.game.week }} {{ a.game.at === 'home' ? 'vs' : '@' }} {{ a.game.opp }}</span>
+                </div>
+                <div class="group-body">
+                  <div class="ai-next-head">
+                    <span class="ai-outlook" [ngClass]="r.nextGame.outlook">{{ r.nextGame.outlook }} matchup</span>
+                    @if (a.game.line; as line) {
+                      <span class="ai-line" [title]="(line.book ?? 'Sportsbook') + ', via ESPN'">
+                        <b>{{ line.line }}</b>
+                        @if (line.overUnder) {
+                          <span>O/U {{ line.overUnder }}</span>
+                        }
+                        @if (line.hisTeamMoneyline) {
+                          <span>ML {{ line.hisTeamMoneyline }}</span>
+                        }
+                      </span>
+                    }
+                  </div>
+                  <h3 class="ai-subhead">{{ r.nextGame.headline }}</h3>
+                  <div class="ai-prose">
+                    @for (p of paragraphs(r.nextGame.body); track $index) {
+                      <p>{{ p }}</p>
+                    }
+                  </div>
+                  <div class="ai-points matchups">
+                    @for (p of r.nextGame.keyMatchups; track $index) {
+                      <ng-container *ngTemplateOutlet="aiPoint; context: { $implicit: p }"></ng-container>
+                    }
+                  </div>
+                  <p class="ai-watch"><mat-icon fontIcon="visibility"></mat-icon><span><b>Watch:</b> {{ r.nextGame.watch }}</span></p>
+                </div>
+              </div>
+            }
+
+            <div class="stat-group tab-card ai-card ai-rest">
+              <div class="group-bar static"><mat-icon class="group-bar-icon" fontIcon="event_upcoming"></mat-icon><span>Rest of Season</span></div>
+              <div class="group-body">
+                <div class="ai-projections">
+                  @for (p of r.restOfSeason.projections; track $index) {
+                    <div class="ai-projection">
+                      <span class="ai-projection-range">{{ p.low | number: '1.0-2' }}<small>–</small>{{ p.high | number: '1.0-2' }}</span>
+                      <span class="ai-projection-stat">{{ p.stat }}</span>
+                    </div>
+                  }
+                </div>
+                <div class="ai-prose">
+                  @for (p of paragraphs(r.restOfSeason.body); track $index) {
+                    <p>{{ p }}</p>
+                  }
+                </div>
+                <div class="ai-swing">
+                  <span class="ai-swing-label">Swing factors</span>
+                  @for (f of r.restOfSeason.swingFactors; track $index) {
+                    <span class="ai-chip">{{ f }}</span>
+                  }
+                </div>
+              </div>
+            </div>
+
+            <div class="stat-group tab-card ai-card ai-bets">
+              <div class="group-bar static"><mat-icon class="group-bar-icon" fontIcon="paid"></mat-icon><span>Betting Angles</span></div>
+              <div class="group-body">
+                @if (!r.bets.length) {
+                  <p class="card-note">Nothing in this matchup looks mispriced.</p>
+                }
+                @for (b of r.bets; track $index) {
+                  <div class="ai-bet">
+                    <span class="ai-bet-strength" [ngClass]="b.strength">{{ b.strength }}</span>
+                    <div class="ai-bet-main">
+                      <span class="ai-bet-pick"><b>{{ b.lean }}</b><small>{{ b.market }}</small></span>
+                      <p>{{ b.reason }}</p>
+                    </div>
+                  </div>
+                }
+                <p class="ai-disclaimer">For entertainment: an AI's read of the numbers, not betting advice.</p>
+              </div>
+            </div>
+            <p class="ai-credit">Written by AI ({{ a.model }}) from this site's data; it can be wrong.</p>
           }
         }
 

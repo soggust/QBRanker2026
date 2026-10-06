@@ -175,10 +175,11 @@ export const SPORT: SportConfig = {
     return position === 'DEF' || position === 'TM' || team === player.name ? null : team;
   },
   cardFlags,
-  // The card's Game Log tab: a player's games this season, from ESPN (teams and units have none)
-  // (teams, defenses, lines and coaches: their team's games; a player's: ESPN's columns, without the longest
-  // gains, sacks, or fumbles but the ones lost (FL, at the end of Rushing), charting his yards from scrimmage with his touchdowns and
-  // turnovers)
+  // The card's Analysis tab: the AI write-ups (apps/nfl/scripts/analysis)
+  analysis: true,
+  // The card's Game Log tab: teams, defenses, lines and coaches get their team's games; a player ESPN's
+  // columns, without the longest gains, sacks, or fumbles but the ones lost (FL, at the end of Rushing),
+  // charting his yards from scrimmage with his touchdowns and turnovers (a QB's total yards)
   gameLog: {
     league: 'football/nfl',
     has: (player, position) => TEAM_LOGS.includes(position) || (['QB', 'RB', 'WR', 'TE', 'K', 'P'].includes(position) && Number(player.id) > 0),

@@ -20,6 +20,7 @@ import { archetypeFor, overviewBlurb, profileFlags, scoutingReport, skillScores 
 import { careerHistory } from './career-history';
 import { radar, radarShape } from './radar';
 import { GameLogView, gameLogView } from './game-log-view';
+import { PlayerAnalysis, analysisIndex, loadAnalysis } from './analysis';
 import { espnUpcoming } from '@ranker/core/game-logs';
 
 // What the card needs from the table it opens from
@@ -70,14 +71,40 @@ export class PlayerCards {
 
   // Seasons only when they're in more than one (shown while loading; never for a career-only sport),
   // and the sport's history tab when it has one (SPORT.cardHistory: MMA's fights)
-  // Overview, Season, Game Log (the season being played), Career ("History" for a team, a defense or a
-  // line)
+  // Overview, Analysis (when written up), Season, Game Log (the season being played), Career ("History"
+  // for a team, a defense or a line)
   tabsFor(card: PlayerCard): { id: CardTab; title: string }[] {
     const [overview, stats, seasons] = TABS;
-    const tabs: { id: CardTab; title: string }[] = [overview, stats];
+    const tabs: { id: CardTab; title: string }[] = [overview];
+    if (this.analysisFile(card)) tabs.push({ id: 'analysis', title: 'Analysis' });
+    tabs.push(stats);
     if (this.hasGameLog(card)) tabs.push({ id: 'games', title: 'Game Log' });
     if (!SPORT.careerOnly && (!card.seasons || card.seasons.length > 1)) tabs.push({ ...seasons, title: this.careerTitle });
     return SPORT.cardHistory ? [...tabs, { id: 'history', title: SPORT.cardHistory.title }] : tabs;
+  }
+
+  // The Analysis tab: the season being played's write-up, for a row the sport has one for (the index
+  // loads with the first card; the tab shows once it's in)
+  private analyses: Record<string, string> | null = null;
+  private analysisLoads = new Map<string, PlayerAnalysis | 'loading' | 'error'>();
+  analysisFile(card: PlayerCard): string | null {
+    if (!SPORT.analysis || card.season !== CURRENT_SEASON) return null;
+    if (!this.analyses) {
+      analysisIndex().then((index) => (this.analyses = index));
+      return null;
+    }
+    return this.analyses[card.player.gsisId] ?? null;
+  }
+  analysis(card: PlayerCard): PlayerAnalysis | 'loading' | 'error' {
+    const file = this.analysisFile(card);
+    if (!file) return 'error';
+    if (!this.analysisLoads.has(file)) {
+      this.analysisLoads.set(file, 'loading');
+      loadAnalysis(file)
+        .then((a) => this.analysisLoads.set(file, a))
+        .catch(() => this.analysisLoads.set(file, 'error'));
+    }
+    return this.analysisLoads.get(file)!;
   }
 
   // The Career tab's name: a team row's is its History

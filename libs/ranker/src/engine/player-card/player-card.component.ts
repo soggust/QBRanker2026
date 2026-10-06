@@ -7,6 +7,7 @@ import { rankPct, rankTone } from '@ranker/core/format';
 import { PlayerCard } from './card.model';
 import { PlayerCards } from './player-cards';
 import { sortFlags } from './overview';
+import { evidenceText, paragraphs } from './analysis';
 
 // The player card: a scoreboard panel over the dimmed page, the hero (team card, name, awards, overall
 // rank) over the Overview, Stats, Seasons and the sport's history tab. Arrow keys flip through the
@@ -27,6 +28,8 @@ export class PlayerCardComponent {
   readonly rankTone = rankTone;
   readonly rankPct = rankPct;
   readonly sortFlags = sortFlags;
+  readonly paragraphs = paragraphs;
+  readonly evidenceText = evidenceText;
 
   // "2025", "2024-25", or "Current" while it's being played
   seasonName(season: number): string {

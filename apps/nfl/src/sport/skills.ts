@@ -10,7 +10,9 @@ export const SKILLS: Record<SkillPosition, SkillDef[]> = {
     { id: 'efficiency', name: 'Efficiency', short: 'Efficiency', parts: [['epaPerPlay', 1], ['successRate', 1], ['ypa', 1], ['rating', 1]] },
     { id: 'downfield', name: 'Pushing the Ball', short: 'Downfield', parts: [['adot', 1], ['aggressiveness', 1], ['ypa', 1]] },
     { id: 'security', name: 'Ball Security', short: 'Security', parts: [['ints', -1], ['fumbles', -1]] },
-    { id: 'pocket', name: 'Pocket Presence', short: 'Pocket', parts: [['pressureToSack', -1], ['timeToThrow', -1]] },
+    // (how often pressure ends in a sack: what it says about him, scrambler or statue, is the AI Analysis's
+    // call, not this card's)
+    { id: 'pocket', name: 'Avoiding Sacks', short: 'Sacks', parts: [['pressureToSack', -1]] },
     { id: 'legs', name: 'Running Threat', short: 'Legs', parts: [['rushYards', 1], ['rushTds', 1]] },
     { id: 'production', name: 'Production', short: 'Production', parts: [['passYards', 1], ['passTds', 1]] },
     { id: 'winning', name: 'Winning', short: 'Winning', parts: [['winPct', 1], ['recent', 1]] },

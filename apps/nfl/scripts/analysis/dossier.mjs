@@ -422,7 +422,10 @@ async function main() {
       underCenter: split(pass.filter((x) => x.shotgun === '0'), 'pass'),
       noHuddle: split(pass.filter((x) => x.no_huddle === '1'), 'pass'),
       hitOrSackedPct: per(pass.filter((x) => x.sack === '1' || x.qb_hit === '1').length * 100, pass.length, 1),
-      scrambles: { count: plays.filter((x) => x.rusher_player_id === gsis && x.qb_scramble === '1').length, yards: sum(plays.filter((x) => x.rusher_player_id === gsis && x.qb_scramble === '1'), 'rushing_yards') },
+      scrambles: (() => {
+        const sc = plays.filter((x) => x.rusher_player_id === gsis && x.qb_scramble === '1');
+        return { count: sc.length, yards: sum(sc, 'rushing_yards'), perDropbackPct: per(sc.length * 100, db.length, 1), epaPerScramble: r(mean(sc, 'epa')), firstDowns: sc.filter((x) => x.first_down === '1' || x.touchdown === '1').length };
+      })(),
       designedRuns: split(designed, 'rush'),
       turnoverWorthy: { ints: pass.filter((x) => x.interception === '1').length, fumbles: plays.filter((x) => x.fumbled_1_player_id === gsis).length },
       // where his passes go: target share by position of the receiver (top targets)
@@ -586,6 +589,30 @@ async function main() {
       .sort((a, b) => (b.snapPct ?? -1) - (a.snapPct ?? -1))
       .slice(0, limit);
 
+  // QBs under pressure this season (PFR charting): how often pressured and blitzed, how often pressure
+  // became a sack, bad-throw rate; pressure-to-sack ranked among QBs with 50+ attempts (1 = fewest sacks)
+  const pressureOf = (gsis) => {
+    const rows = pfrPassBy.get(gsis) ?? [];
+    const att = sum(weeklyBy.get(gsis) ?? [], 'attempts');
+    if (!rows.length) return null;
+    const pressured = sum(rows, 'times_pressured');
+    const dropbacks = att + sum(rows, 'times_sacked');
+    return {
+      pressuredPct: per(pressured * 100, dropbacks, 1),
+      pressureToSackPct: per(sum(rows, 'times_sacked') * 100, pressured, 1),
+      blitzedPct: per(sum(rows, 'times_blitzed') * 100, dropbacks, 1),
+      badThrowPct: per(sum(rows, 'passing_bad_throws') * 100, att, 1),
+      att,
+    };
+  };
+  const qbPressure = new Map([...pfrPassBy.keys()].filter(Boolean).map((id) => [id, pressureOf(id)]));
+  const qualifiedPressure = [...qbPressure.values()].filter((x) => x && x.att >= 50);
+  const pressureRank = {
+    pressureToSackPct: ranker(qualifiedPressure.map((x) => x.pressureToSackPct), true),
+    pressuredPct: ranker(qualifiedPressure.map((x) => x.pressuredPct), true),
+    badThrowPct: ranker(qualifiedPressure.map((x) => x.badThrowPct), true),
+  };
+
   // ---- the dossiers
   const filters = process.argv.slice(2).map((x) => x.toLowerCase());
   let written = 0;
@@ -714,6 +741,12 @@ async function main() {
         totals: Object.fromEntries(Object.entries(season).filter(([, v]) => v !== null && v !== 0)),
         ranked: Object.fromEntries(Object.entries(ranked).filter(([, v]) => v)),
         tracking: ngsSeason,
+        ...(p.pos === 'QB' && qbPressure.get(p.gsis)
+          ? (() => {
+              const q = qbPressure.get(p.gsis);
+              return { pressure: { pressuredPct: pressureRank.pressuredPct(q.pressuredPct), pressureToSackPct: pressureRank.pressureToSackPct(q.pressureToSackPct), blitzedPct: q.blitzedPct, badThrowPct: pressureRank.badThrowPct(q.badThrowPct) } };
+            })()
+          : {}),
         ...(p.pos === 'QB' && p.site.box ? { record: `${p.site.wins}-${p.site.losses}${p.site.ties ? `-${p.site.ties}` : ''}` } : {}),
       },
       splits: p.pos === 'QB' ? qbSplits(p.gsis) : p.pos === 'RB' ? { rushing: rusherSplits(p.gsis, team), receiving: receiverSplits(p.gsis, team) } : receiverSplits(p.gsis, team),
