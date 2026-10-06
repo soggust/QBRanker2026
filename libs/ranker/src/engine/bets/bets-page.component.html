@@ -60,12 +60,10 @@
             @if (open.has(r.id)) {
               <div class="bet-reasons">
                 <p>{{ r.reason }}</p>
-                <p class="bet-meta">
-                  {{ r.confidence }} confidence overall
-                  @if (r.agree) {
-                    · {{ r.agree }} other analys{{ r.agree > 1 ? 'es' : 'is' }} agree{{ r.agree > 1 ? '' : 's' }}
-                  }
-                </p>
+                <!-- (the confidence shown is the bet's own; the report's overall confidence stays on its card) -->
+                @if (r.agree) {
+                  <p class="bet-meta">{{ r.agree }} other analys{{ r.agree > 1 ? 'es' : 'is' }} make{{ r.agree > 1 ? '' : 's' }} the same call</p>
+                }
               </div>
             }
           </li>
