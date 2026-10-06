@@ -25,7 +25,7 @@
     "nhl:build-comps": "node apps/nhl/scripts/build-comps.mjs",
     "start:mma": "ng serve mma",
     "mma:update-data": "node apps/mma/scripts/update-data.mjs",
-    "nfl:analysis": "node apps/nfl/scripts/analysis/dossier.mjs --fresh && node apps/nfl/scripts/analysis/analyze.mjs --batch --teams --qbs"
+    "nfl:analysis": "node apps/nfl/scripts/analysis/weekly.mjs"
   },
   "private": true,
   "dependencies": {

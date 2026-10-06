@@ -285,6 +285,17 @@ async function main() {
       .map((g) => `W${g.week} ${g.home === team ? g.homeQb : g.awayQb}`);
 
   // ---- play-by-play: plays that count (no penalties-only, no kneels or spikes)
+  // Every finished game in nflverse's play-by-play and weekly stats yet? With --require-complete, stop
+  // (exit 3, nothing written) when they're behind the schedule, so a run never analyzes stale numbers
+  const finished = games.filter((g) => g.homeScore !== null);
+  const inPbp = new Set(pbp.map((x) => x.game_id));
+  const inWeekly = new Set(weekly.map((x) => x.game_id));
+  const behind = finished.filter((g) => !inPbp.has(g.id) || !inWeekly.has(g.id)).map((g) => g.id);
+  if (behind.length) {
+    console.log(`nflverse is behind: ${behind.join(', ')}`);
+    if (process.argv.includes('--require-complete')) process.exit(3);
+  }
+
   const plays = pbp.filter((x) => (x.pass === '1' || x.rush === '1') && x.play_deleted !== '1' && x.qb_kneel !== '1' && x.qb_spike !== '1');
   const neutral = (x) => num(x.wp) !== null && num(x.wp) >= 0.2 && num(x.wp) <= 0.8 && num(x.qtr) <= 4;
 
