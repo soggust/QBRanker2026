@@ -10,7 +10,7 @@
           <span class="bets-updated">Updated {{ updated | date: 'EEE MMM d, h:mm a' }}</span>
         }
       </div>
-      <p class="bets-how">Ranked by grade (like, then lean, then fade), then by the report's confidence.</p>
+      <p class="bets-how">Ranked by how sure the analysis is that each bet wins (out of 10), then by how many reports make the same call.</p>
       @if (rows?.length) {
         <div class="bets-filters">
           <div class="bets-chips">
@@ -37,7 +37,7 @@
         @for (r of shown; track r.id; let i = $index) {
           <li class="bet" [class.open]="open.has(r.id)">
             <button type="button" class="bet-row" (click)="toggle(r.id)" [attr.aria-expanded]="open.has(r.id)">
-              <span class="bet-rank">{{ i + 1 }}</span>
+              <span class="bet-rank" [class.first]="i === 0" [class.top]="i > 0 && i < 10">{{ i + 1 }}</span>
               <span class="bet-grade" [ngClass]="r.strength">{{ r.strength }}</span>
               <span class="bet-main">
                 <b>{{ r.pick }}</b>
@@ -54,14 +54,19 @@
                   </small>
                 }
               </span>
-              <span class="bet-sure" [ngClass]="r.confidence">{{ r.confidence ?? '' }}</span>
+              <span class="bet-score" [class.high]="r.sureness >= 7" [class.mid]="r.sureness >= 5 && r.sureness < 7" [title]="r.estimated ? 'Estimated from its grade and its report confidence (written before bets were scored)' : 'How likely the analysis thinks it wins'"
+                >@if (r.estimated) {<i class="est">~</i>}{{ r.sureness }}<small>/10</small></span
+              >
               <mat-icon class="bet-chevron" [fontIcon]="open.has(r.id) ? 'expand_less' : 'expand_more'"></mat-icon>
             </button>
             @if (open.has(r.id)) {
               <div class="bet-reasons">
                 <p>{{ r.reason }}</p>
                 <p class="bet-meta">
-                  {{ sourceLabel(r) }} analysis · {{ r.confidence }} confidence
+                  {{ sourceLabel(r) }} analysis · {{ r.confidence }} confidence overall
+                  @if (r.estimated) {
+                    · score estimated (written before bets were scored)
+                  }
                   @if (r.agree) {
                     · {{ r.agree }} other report{{ r.agree > 1 ? 's' : '' }} make{{ r.agree > 1 ? '' : 's' }} the same call
                   }

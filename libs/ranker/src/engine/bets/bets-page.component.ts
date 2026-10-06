@@ -2,9 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { SPORT_LINKS } from '@ranker/core/sports';
 
 // The Bets page (dev only: the sport bar's Bets link, #bets): every betting angle in the latest AI
-// analyses (each sport's data/analysis/bets.json, written with them), one row per bet, ranked most
-// confident first: its grade (like, lean, fade), then its report's confidence (high, medium, low), then
-// how many other reports make the same call. A row opens to its reasoning.
+// analyses (each sport's data/analysis/bets.json, written with them), one row per bet, ranked by how sure
+// the analysis is that it wins (its 1-10 score; a fade can top the list), then by how many other reports
+// make the same call. A row opens to its reasoning.
 
 interface BetEntry {
   sport: string;
@@ -17,6 +17,8 @@ interface BetEntry {
   market: string;
   lean: string;
   strength: 'like' | 'lean' | 'fade';
+  // how likely it wins, 1-10 (reports written before the score have none)
+  score?: number | null;
   reason: string;
   confidence: 'low' | 'medium' | 'high' | null;
   at: string;
@@ -29,9 +31,14 @@ export interface BetRow extends BetEntry {
   pick: string;
   marketLabel: string;
   agree: number;
+  // its score, or for an older report an estimate from its grade and the report's confidence
+  sureness: number;
+  estimated: boolean;
 }
 
-const GRADE = { like: 3, lean: 2, fade: 1 };
+// (an older report's bet, without a score: like 7, fade 6, lean 5, one more for a sure report, one less
+// for an unsure one)
+const ESTIMATE = { like: 7, fade: 6, lean: 5 };
 const SURE = { high: 3, medium: 2, low: 1 };
 
 // The call a bet makes, the same however a report words it: a game total ("under 45.5"), a side
@@ -107,10 +114,11 @@ export class BetsPageComponent implements OnInit {
           : ml
             ? [`${ml[1]} ML`, 'Moneyline']
             : [b.lean, b.market];
-      return { ...b, id: i, pick, marketLabel, agree: (counts.get(keys[i]) ?? 1) - 1 };
+      const estimated = !b.score;
+      const sureness = b.score ?? Math.max(1, Math.min(10, ESTIMATE[b.strength] + SURE[b.confidence ?? 'medium'] - 2));
+      return { ...b, id: i, pick, marketLabel, agree: (counts.get(keys[i]) ?? 1) - 1, sureness, estimated };
     });
-    const sure = (r: BetRow) => SURE[r.confidence ?? 'low'];
-    this.rows = rows.sort((a, b) => GRADE[b.strength] - GRADE[a.strength] || sure(b) - sure(a) || b.agree - a.agree || (a.game?.date ?? '').localeCompare(b.game?.date ?? ''));
+    this.rows = rows.sort((a, b) => b.sureness - a.sureness || b.agree - a.agree || (a.game?.date ?? '').localeCompare(b.game?.date ?? ''));
   }
 
   // The list as filtered: a grade, then the top share of what's left
