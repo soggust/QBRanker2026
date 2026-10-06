@@ -270,8 +270,6 @@
               <h2 class="ai-headline">{{ r.headline }}</h2>
               <p class="ai-definition">{{ r.archetype.definition }}</p>
               <p class="ai-meta">
-                <span class="ai-confidence" [ngClass]="r.confidence.level">{{ r.confidence.level }} confidence</span>
-                <span>{{ r.confidence.note }}</span>
                 <span>Updated {{ a.at | date: 'MMM d' }}</span>
               </p>
             </div>
