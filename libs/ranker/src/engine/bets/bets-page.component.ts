@@ -145,6 +145,11 @@ export class BetsPageComponent implements OnInit {
     return `${r.sport}|${r.game?.matchup ?? ''}`;
   }
 
+  // A bet's confidence as words: high (7 and up), medium (5-6), low
+  level(r: BetRow): 'high' | 'medium' | 'low' {
+    return r.sureness >= 7 ? 'high' : r.sureness >= 5 ? 'medium' : 'low';
+  }
+
   toggle(id: number): void {
     if (!this.open.delete(id)) this.open.add(id);
   }

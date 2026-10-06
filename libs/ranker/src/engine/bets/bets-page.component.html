@@ -12,7 +12,7 @@
       </div>
       <div class="bets-sub">
         <p class="bets-how">
-          Ranked by how sure the analysis is that each bet wins (out of 10), then by how many analyses make the same call.
+          Ranked by how sure the analysis is that each bet wins, then by how many analyses make the same call.
           {{ game ? 'The top ' + gameLimit + ' on this game.' : 'The top ' + limit + ' across all games.' }}
         </p>
         @if (rows?.length) {
@@ -58,9 +58,7 @@
                   </small>
                 }
               </span>
-              <span class="bet-score" [class.high]="r.sureness >= 7" [class.mid]="r.sureness >= 5 && r.sureness < 7" [title]="r.estimated ? 'Estimated from its grade and its report confidence (written before bets were scored)' : 'How likely the analysis thinks it wins'"
-                >@if (r.estimated) {<i class="est">~</i>}{{ r.sureness }}<small>/10</small></span
-              >
+              <span class="bet-score" [ngClass]="level(r)">{{ level(r) }}</span>
               <mat-icon class="bet-chevron" [fontIcon]="open.has(r.id) ? 'expand_less' : 'expand_more'"></mat-icon>
             </button>
             @if (open.has(r.id)) {

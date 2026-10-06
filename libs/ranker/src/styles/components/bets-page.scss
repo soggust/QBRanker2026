@@ -1,50 +1,33 @@
 @use "../variables" as v;
 
 // The Bets page (dev only): one scoreboard panel down the middle of the page, a row per call, most
-// confident first; like green, lean yellow, fade red (as on the card's Analysis tab)
+// confident first; like green, lean yellow, fade red (as on the card's Analysis tab).
+
 // The page on a card-room table: blue felt (a fine woven fiber over a soft mottle, a warm light pooled
-// in the middle, the edges falling off into shadow), with the table's printed double gold line around it
+// in the middle, the edges falling off into shadow)
 :host {
   background:
     radial-gradient(ellipse 60% 50% at 50% 30%, rgba(255, 236, 200, 0.1), transparent 70%),
     radial-gradient(ellipse 120% 90% at 50% 40%, transparent 35%, rgba(0, 0, 0, 0.72) 100%),
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.7' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.16 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23f)'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='512' height='512'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.7' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.16 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23f)'/%3E%3C/svg%3E"),
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='600'%3E%3Cfilter id='m'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.012' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.22 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23m)'/%3E%3C/svg%3E"),
     radial-gradient(ellipse at 50% 30%, #1a63a8, #0e3f70 55%, #072443);
+  // (the mottle stretched over the whole table, so it never repeats; the fiber's tile seamless)
+  background-size: auto, auto, 512px, cover, auto;
   display: block;
   height: calc(100% - var(--sport-bar-height));
   overflow-y: auto;
-  position: relative;
-
-  // (the printed line: fixed to the table, the list scrolling over it)
-  &::before {
-    border: 2px solid rgba(222, 186, 92, 0.32);
-    border-radius: 48px;
-    content: "";
-    inset: calc(var(--sport-bar-height) + 16px) 16px 16px;
-    outline: 1px solid rgba(222, 186, 92, 0.18);
-    outline-offset: -9px;
-    pointer-events: none;
-    position: fixed;
-  }
 }
 
-// (above the printed line)
 .bets-page {
   margin: 0 auto;
-  position: relative;
-  z-index: 1;
   max-width: 980px;
   padding: 26px 16px 40px;
 }
 
-// (a thin gold edge, like a table's printed line)
 .bets-panel {
   @include v.scoreboard-panel(12px);
-  border-color: rgba(212, 175, 55, 0.45);
-  box-shadow:
-    0 0 0 4px rgba(212, 175, 55, 0.08),
-    0 18px 40px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.5);
   padding: 18px 20px 20px;
 }
 
@@ -153,7 +136,7 @@
   display: grid;
   font-family: v.$font-base;
   gap: 12px;
-  grid-template-columns: 42px 58px minmax(0, 1fr) minmax(0, 220px) 62px 20px;
+  grid-template-columns: 42px 58px minmax(0, 1fr) minmax(0, 220px) 84px 20px;
   padding: 10px 12px;
   text-align: left;
   width: 100%;
@@ -247,39 +230,23 @@
   letter-spacing: 0.2px;
 }
 
-// the score out of 10, in DynaPuff: green 7+, yellow 5-6, muted below
+// the bet's confidence in words: green high, yellow medium, muted low
 .bet-score {
   color: rgba(255, 255, 255, 0.45);
-  // (the card's stat-value hand, not a second set of segment digits beside the rank's)
-  @include v.hand(18px);
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.8px;
   text-align: right;
-
-  small {
-    font-family: v.$font-base;
-    font-size: 10px;
-    font-weight: 700;
-    margin-left: 1px;
-    opacity: 0.7;
-  }
-
-  // (an estimate's ~, in the page's type)
-  .est {
-    font-family: v.$font-base;
-    font-size: 13px;
-    font-style: normal;
-    font-weight: 800;
-    margin-right: 2px;
-  }
+  text-transform: uppercase;
 
   &.high {
     color: #3ecf6e;
   }
 
-  &.mid {
+  &.medium {
     color: #ffcd00;
   }
 }
-
 .bet-chevron {
   color: rgba(255, 255, 255, 0.45);
   @include v.icon-size(20px);
