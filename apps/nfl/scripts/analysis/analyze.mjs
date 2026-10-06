@@ -261,7 +261,7 @@ function publish() {
   rmSync(SITE, { recursive: true, force: true });
   mkdirSync(SITE, { recursive: true });
   const listed = {};
-  // every betting angle, for the dev-only Bets page: its game, its source, the call and how sure
+  // every betting angle, for the Bets page: its game, its source, the call and how sure
   const bets = [];
   for (const f of readdirSync(REPORTS)) {
     const kept = JSON.parse(readFileSync(path.join(REPORTS, f), 'utf8'));

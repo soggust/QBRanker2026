@@ -59,6 +59,15 @@ export async function loadAnalysis(file: string): Promise<PlayerAnalysis> {
 }
 
 // A text's paragraphs (split on blank lines)
+// A fade's line under what it fades: "Bet TB +9.5 instead"; a bet that already says what to do as
+// written ("Fade the 2-per-game pace instead"); "against X" as "Bet against X instead"
+export function insteadText(bet: string): string {
+  const text = bet.trim().replace(/\s+instead\.?$/i, '');
+  if (/^(fade|avoid|take|back|bet|lay|play|stay)\b/i.test(text)) return `${text[0].toUpperCase()}${text.slice(1)} instead`;
+  if (/^against\b/i.test(text)) return `Bet ${text[0].toLowerCase()}${text.slice(1)} instead`;
+  return `Bet ${text} instead`;
+}
+
 export const paragraphs = (text: string): string[] =>
   text
     .split(/\n\s*\n/)

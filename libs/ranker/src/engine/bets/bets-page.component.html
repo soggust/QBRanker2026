@@ -38,7 +38,7 @@
                 <!-- (a fade says what it fades, and the bet to make instead) -->
                 @if (r.strength === 'fade') {
                   <b>{{ r.market }}</b>
-                  <small>Bet {{ r.pick }} instead</small>
+                  <small>{{ insteadText(r.pick) }}</small>
                 } @else {
                   <b>{{ r.pick }}</b>
                   <small>{{ r.marketLabel }}</small>

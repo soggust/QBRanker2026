@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { SPORT_LINKS } from '@ranker/core/sports';
+import { insteadText } from '../player-card/analysis';
 
-// The Bets page (dev only: the sport bar's Bets link, #bets): every betting angle in the latest AI
+// The Bets page (the sport bar's Bets link, #bets): every betting angle in the latest AI
 // analyses (each sport's data/analysis/bets.json, written with them), one row per bet, ranked by how sure
 // the analysis is that it wins (its 1-10 score; a fade can top the list), then by how many other reports
 // make the same call. A row opens to its reasoning.
@@ -77,6 +78,7 @@ export class BetsPageComponent implements OnInit {
   readonly limit = 50;
   readonly gameLimit = 15;
   open = new Set<number>();
+  readonly insteadText = insteadText;
 
   async ngOnInit(): Promise<void> {
     // the bets of every sport with AI analyses (sports.json's analysis)
