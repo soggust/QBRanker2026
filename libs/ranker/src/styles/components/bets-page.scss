@@ -109,12 +109,29 @@
   padding: 0;
 }
 
+// each row tinted by its bet's confidence (like the Season groups' bars): green high, yellow medium,
+// gray low; a little deeper when open
 .bet {
-  background: rgba(0, 0, 0, 0.22);
+  --tint: #9aa0a6;
+  --tint-amount: 10%;
+  background: linear-gradient(color-mix(in srgb, var(--tint) var(--tint-amount), transparent), color-mix(in srgb, var(--tint) var(--tint-amount), transparent)), rgba(0, 0, 0, 0.22);
   border-radius: 8px;
+  box-shadow: inset 3px 0 0 color-mix(in srgb, var(--tint) 70%, transparent);
+
+  &.high {
+    --tint: #3ecf6e;
+  }
+
+  &.medium {
+    --tint: #ffcd00;
+  }
+
+  &.low {
+    --tint-amount: 6%;
+  }
 
   &.open {
-    background: rgba(0, 0, 0, 0.32);
+    --tint-amount: 15%;
   }
 }
 
@@ -221,23 +238,20 @@
   letter-spacing: 0.2px;
 }
 
-// the bet's confidence in words: green high, yellow medium, muted low
+// the confidence in words, white on the row's tint (low dimmer)
 .bet-score {
-  color: rgba(255, 255, 255, 0.45);
+  color: rgba(255, 255, 255, 0.92);
   font-size: 12px;
   font-weight: 900;
   letter-spacing: 0.8px;
   text-align: right;
   text-transform: uppercase;
 
-  &.high {
-    color: #3ecf6e;
-  }
-
-  &.medium {
-    color: #ffcd00;
+  &.low {
+    color: rgba(255, 255, 255, 0.55);
   }
 }
+
 .bet-chevron {
   color: rgba(255, 255, 255, 0.45);
   @include v.icon-size(20px);
