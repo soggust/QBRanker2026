@@ -371,7 +371,7 @@ export class PlayerCards {
   }
 
   // ---------------------------------------------------------------------------
-  // Last season's skills: the radar's ghost, and (for team tabs) the biggest rise and drop as flags
+  // Last season's skills: for team tabs, the biggest rise and drop as flags
   // ---------------------------------------------------------------------------
   private async loadPrevSkills(card: PlayerCard): Promise<void> {
     const prevSeason = card.season - 1;

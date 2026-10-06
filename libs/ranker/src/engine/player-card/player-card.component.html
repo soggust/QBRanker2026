@@ -187,9 +187,6 @@
                   @for (a of o.radar.axes; track a.label) {
                     <line class="spoke" x1="0" y1="0" [attr.x2]="a.x" [attr.y2]="a.y"></line>
                   }
-                  @if (o.prev) {
-                    <polygon class="ghost" [attr.points]="o.prev.shape"></polygon>
-                  }
                   <polygon class="shape" [attr.points]="o.radar.shape"></polygon>
                   @for (d of o.radar.dots; track $index) {
                     <circle class="dot" r="3.5" [attr.cx]="d.x" [attr.cy]="d.y" [style.fill]="rankTone(d.pct)"></circle>
@@ -200,9 +197,6 @@
                 </svg>
                 <div class="ov-legend">
                   <span><i class="key now"></i>{{ sport.careerOnly ? 'Career' : seasonName(c.season) }}</span>
-                  @if (o.prev) {
-                    <span><i class="key prev"></i>{{ seasonText(o.prev.season) }}</span>
-                  }
                   <span><i class="key avg"></i>League Avg</span>
                 </div>
               </div>
