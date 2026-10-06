@@ -22,17 +22,19 @@
         <p class="hero-kicker">
           <span class="season-chip">{{ c.seasonLabel }}</span>
         </p>
-        <h2 [attr.data-name]="c.name">{{ c.name }}</h2>
-        <!-- Position • team (a team's card: just the team, no "Team") -->
-        <p class="hero-team">
-          @if (c.positionName !== 'Team') {
+        @let isTeam = c.positionName === 'Team';
+        <h2 [attr.data-name]="c.name" [class.alone]="isTeam && (!c.teamName || c.teamName === c.name)">{{ c.name }}</h2>
+        <!-- Position • team (a team's card: nothing more to say under its own name) -->
+        @if (!isTeam) {
+          <p class="hero-team">
             <span class="hero-position">{{ c.positionName }}</span>
             @if (c.teamName) {
-              <span class="hero-dot">•</span>
+              <span class="hero-dot">•</span>{{ c.teamName }}
             }
-          }
-          {{ c.teamName }}
-        </p>
+          </p>
+        } @else if (c.teamName && c.teamName !== c.name) {
+          <p class="hero-team">{{ c.teamName }}</p>
+        }
         @if (c.awards.length) {
           <span class="player-awards">
             @for (award of c.awards; track award.id) {
