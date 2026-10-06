@@ -147,8 +147,8 @@
   }
 }
 
-// the rank: a scoreboard tile with segment digits, like the rankings grid's: #1 lit in the sport's
-// color, 2-10 green, the rest white
+// the rank: a scoreboard tile with segment digits, like the rankings grid's: the top 10 green, the rest
+// white
 .bet-rank {
   align-items: center;
   background: var(--scoreboard-dots), var(--scoreboard);
@@ -166,11 +166,6 @@
   padding-top: 2px;
   text-shadow: var(--text-shadow-small);
   width: 42px;
-
-  &.first {
-    color: var(--scoreboard-led);
-    text-shadow: var(--scoreboard-glow);
-  }
 
   &.top {
     color: var(--tint-good, #3ee07a);

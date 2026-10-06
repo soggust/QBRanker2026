@@ -10,7 +10,7 @@
           <span class="bets-updated">Updated {{ updated | date: 'EEE MMM d, h:mm a' }}</span>
         }
       </div>
-      <p class="bets-how">Ranked by how sure the analysis is that each bet wins (out of 10), then by how many reports make the same call.</p>
+      <p class="bets-how">Ranked by how sure the analysis is that each bet wins (out of 10), then by how many reports make the same call (listed once).</p>
       @if (rows?.length) {
         <div class="bets-filters">
           <div class="bets-chips">
@@ -37,7 +37,7 @@
         @for (r of shown; track r.id; let i = $index) {
           <li class="bet" [class.open]="open.has(r.id)">
             <button type="button" class="bet-row" (click)="toggle(r.id)" [attr.aria-expanded]="open.has(r.id)">
-              <span class="bet-rank" [class.first]="i === 0" [class.top]="i > 0 && i < 10">{{ i + 1 }}</span>
+              <span class="bet-rank" [class.top]="i < 10">{{ i + 1 }}</span>
               <span class="bet-grade" [ngClass]="r.strength">{{ r.strength }}</span>
               <span class="bet-main">
                 <b>{{ r.pick }}</b>
@@ -67,8 +67,8 @@
                   @if (r.estimated) {
                     · score estimated (written before bets were scored)
                   }
-                  @if (r.agree) {
-                    · {{ r.agree }} other report{{ r.agree > 1 ? 's' : '' }} make{{ r.agree > 1 ? '' : 's' }} the same call
+                  @if (r.others.length) {
+                    · also backed by {{ r.others.join(', ') }}
                   }
                 </p>
               </div>

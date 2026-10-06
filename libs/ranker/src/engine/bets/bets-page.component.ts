@@ -31,6 +31,9 @@ export interface BetRow extends BetEntry {
   pick: string;
   marketLabel: string;
   agree: number;
+  // the other reports making the same call (its duplicates, not listed on their own)
+  others: string[];
+  key: string;
   // its score, or for an older report an estimate from its grade and the report's confidence
   sureness: number;
   estimated: boolean;
@@ -116,9 +119,17 @@ export class BetsPageComponent implements OnInit {
             : [b.lean, b.market];
       const estimated = !b.score;
       const sureness = b.score ?? Math.max(1, Math.min(10, ESTIMATE[b.strength] + SURE[b.confidence ?? 'medium'] - 2));
-      return { ...b, id: i, pick, marketLabel, agree: (counts.get(keys[i]) ?? 1) - 1, sureness, estimated };
+      return { ...b, id: i, key: keys[i], pick, marketLabel, agree: (counts.get(keys[i]) ?? 1) - 1, others: [], sureness, estimated };
     });
-    this.rows = rows.sort((a, b) => b.sureness - a.sureness || b.agree - a.agree || (a.game?.date ?? '').localeCompare(b.game?.date ?? ''));
+    rows.sort((a, b) => b.sureness - a.sureness || b.agree - a.agree || (a.game?.date ?? '').localeCompare(b.game?.date ?? ''));
+    // the same call from several reports: listed once, as its highest-ranked report has it
+    const kept = new Map<string, BetRow>();
+    for (const r of rows) {
+      const first = kept.get(r.key);
+      if (first) first.others.push(this.sourceLabel(r));
+      else kept.set(r.key, r);
+    }
+    this.rows = [...kept.values()];
   }
 
   // The list as filtered: a grade, then the top share of what's left
