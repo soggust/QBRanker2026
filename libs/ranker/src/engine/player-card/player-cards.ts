@@ -107,7 +107,7 @@ export class PlayerCards {
     return this.analysisLoads.get(file)!;
   }
 
-  // The Analysis tab's sections open (all folded to start; kept across cards)
+  // The Analysis tab's sections open (all folded each time the tab opens, or another card does)
   aiOpen = new Set<string>();
   toggleAi(section: string): void {
     if (!this.aiOpen.delete(section)) this.aiOpen.add(section);
@@ -192,6 +192,7 @@ export class PlayerCards {
 
   selectTab(tab: CardTab): void {
     this.tab = tab;
+    if (tab === 'analysis') this.aiOpen.clear();
     if (tab === 'seasons' && this.card) this.rankCareer(this.card);
   }
 
@@ -208,6 +209,7 @@ export class PlayerCards {
 
   private show(card: PlayerCard): void {
     this.card = card;
+    this.aiOpen.clear();
     // (a tab this card doesn't have falls back to the Overview)
     if (!this.tabsFor(card).some((tab) => tab.id === this.tab)) this.tab = 'overview';
     this.loadSeasons(card);
