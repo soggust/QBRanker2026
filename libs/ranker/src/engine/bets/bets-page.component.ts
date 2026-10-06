@@ -72,9 +72,10 @@ function callKey(b: BetEntry): string {
 export class BetsPageComponent implements OnInit {
   rows: BetRow[] | null = null;
   updated: string | null = null;
-  // the filter: all games (the top 50 bets), or one game (all of its bets), by its matchup
+  // the filter: all games (the top 50 bets), or one game (its top 15, from all of its bets), by its matchup
   game = '';
   readonly limit = 50;
+  readonly gameLimit = 15;
   open = new Set<number>();
 
   async ngOnInit(): Promise<void> {
@@ -121,10 +122,10 @@ export class BetsPageComponent implements OnInit {
     this.rows = [...kept.values()];
   }
 
-  // All games: the top 50 bets; a game: all of its bets
+  // All games: the top 50 bets; a game: its top 15 (from all of its bets, not just those in the top 50)
   get shown(): BetRow[] {
     const rows = this.rows ?? [];
-    return this.game ? rows.filter((r) => this.gameKey(r) === this.game) : rows.slice(0, this.limit);
+    return this.game ? rows.filter((r) => this.gameKey(r) === this.game).slice(0, this.gameLimit) : rows.slice(0, this.limit);
   }
 
   // The week's games with bets, by kickoff: the dropdown's choices, each with how many bets it has
@@ -134,7 +135,7 @@ export class BetsPageComponent implements OnInit {
       if (!r.game) continue;
       const key = this.gameKey(r);
       const game = byGame.get(key) ?? { key, label: `${r.game.matchup} · ${new Date(`${r.game.date}T12:00:00`).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}`, date: r.game.date, count: 0 };
-      game.count++;
+      game.count = Math.min(game.count + 1, this.gameLimit);
       byGame.set(key, game);
     }
     return [...byGame.values()].sort((a, b) => a.date.localeCompare(b.date) || a.label.localeCompare(b.label));
