@@ -5,7 +5,7 @@
 // Fonts: the UI's, the headlines' (the card's name, the analysis headlines, the logo, modal titles), and
 // the soft hand the names, values and numbers are written in
 $font-base: "Nunito", sans-serif;
-$font-heading: "Syne", sans-serif;
+$font-heading: "Chakra Petch", sans-serif;
 $font-hand: "DynaPuff", cursive;
 
 // The playbook chalkboard behind the grid, the player card and About: chalk dust, two smudges and the
@@ -29,7 +29,7 @@ $chalk-dust:
   width: $size;
 }
 
-// A headline (Syne)
+// A headline (Chakra Petch)
 @mixin headline($size) {
   font-family: $font-heading;
   font-size: $size;
