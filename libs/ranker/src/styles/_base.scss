@@ -219,6 +219,28 @@ html {
   color: var(--primary-900) !important;
 }
 
+// The settings menu on a wide screen: Format and Display side by side (a rule between them), so it isn't
+// a tall column
+@media (min-width: 1000px) {
+  .mat-mdc-menu-panel.settings-menu {
+    max-width: none;
+
+    .menu-cols {
+      display: grid;
+      grid-template-columns: auto auto;
+    }
+
+    .menu-col + .menu-col {
+      border-left: 1px solid rgba(255, 255, 255, 0.12);
+
+      > .menu-section:first-child {
+        border-top: none;
+        padding-top: 6px;
+      }
+    }
+  }
+}
+
 // ---------------------------------------------------------------------------
 // The settings menu: sections, switches and cycled choices in a column (each label starts where Min
 // Games' does: its stepper is the widest control), lighting up in the accent when hovered
@@ -247,6 +269,12 @@ html {
       border-top: none;
       padding-top: 6px;
     }
+  }
+
+  // (the Display column's section, under Format in one column, keeps its rule above)
+  .menu-col + .menu-col > .menu-section:first-child {
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+    padding-top: 10px;
   }
 
   .menu-icon {

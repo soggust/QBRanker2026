@@ -1,21 +1,30 @@
 import type { CardFlag, FlagContext, SportConfig } from '@ranker/engine/sport';
 import { espnTeamGameLog } from '@ranker/core/game-logs';
 
-// This season's game logs (game-logs.json, kept nightly: the NHL's API doesn't let the site ask), loaded
-// once, the first time a card's Game Log tab opens (again after a failure)
+// A season's game logs (the NHL's API doesn't let the site ask): this season's in game-logs.json, kept
+// nightly; an earlier one's in game-logs/<season>.json, written once. Each loaded the first time a card
+// of that season opens its Game Log tab (again after a failure)
 interface NhlGameLogs {
   skater: string[];
   goalie: string[];
   logs: Record<string, (string | number)[][]>;
 }
-let nhlGameLogsFile: Promise<NhlGameLogs> | null = null;
-function nhlGameLogs(): Promise<NhlGameLogs> {
-  nhlGameLogsFile ??= fetch('data/game-logs.json', { cache: 'no-cache' }).then((res) => {
-    if (!res.ok) throw new Error(String(res.status));
-    return res.json() as Promise<NhlGameLogs>;
-  });
-  return nhlGameLogsFile.catch((err) => {
-    nhlGameLogsFile = null;
+// (whether the earlier seasons' files are there: player logs for past seasons)
+const PAST_SEASON_LOGS = false;
+const nhlGameLogFiles = new Map<number, Promise<NhlGameLogs>>();
+function nhlGameLogs(season: number): Promise<NhlGameLogs> {
+  if (!nhlGameLogFiles.has(season)) {
+    const file = season === SPORT.currentSeason ? 'data/game-logs.json' : `data/game-logs/${season}.json`;
+    nhlGameLogFiles.set(
+      season,
+      fetch(file, { cache: 'no-cache' }).then((res) => {
+        if (!res.ok) throw new Error(String(res.status));
+        return res.json() as Promise<NhlGameLogs>;
+      }),
+    );
+  }
+  return nhlGameLogFiles.get(season)!.catch((err) => {
+    nhlGameLogFiles.delete(season);
     throw err;
   });
 }
@@ -173,16 +182,16 @@ export const SPORT: SportConfig = {
   // The NHL's player headshots
   headshot: (id) => `https://assets.nhle.com/mugs/nhl/latest/${id}.png`,
   cardFlags,
-  // The card's Game Log tab: a player's games this season (kept nightly in game-logs.json: the NHL's API
-  // doesn't let the site ask; teams and coaches have none)
+  // The card's Game Log tab: a team's (or coach's) games from ESPN, any season; a player's from the game-log
+  // files (this season's, and earlier ones once they're written)
   gameLog: {
     league: 'hockey/nhl',
-    has: () => true,
-    load: async (player, position) => {
+    has: (player, position, season) => ['TM', 'HC'].includes(position) || season === SPORT.currentSeason || PAST_SEASON_LOGS,
+    load: async (player, position, season) => {
       if (['TM', 'HC'].includes(position)) {
-        return espnTeamGameLog('hockey/nhl', [player.teamName ?? undefined, player.name, player.teamLogo?.match(/([^/]+)\.\w+$/)?.[1]], SPORT.currentSeason, 3);
+        return espnTeamGameLog('hockey/nhl', [player.teamName ?? undefined, player.name, player.teamLogo?.match(/([^/]+)\.\w+$/)?.[1]], season, 3);
       }
-      const file = await nhlGameLogs();
+      const file = await nhlGameLogs(season);
       const rows = file.logs[String(player.id)] ?? [];
       const goalie = position === 'G';
       const columns = (goalie ? file.goalie : file.skater).map((label) => ({ label }));

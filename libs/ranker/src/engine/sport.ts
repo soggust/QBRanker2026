@@ -197,6 +197,8 @@ export interface GameLogRow {
   result: string;
   margin?: number;
   values: string[];
+  // a playoff game (the log sets them apart from the regular season)
+  playoff?: boolean;
 }
 
 // What the engine gives a sport's connect hook (SportConfig.connect)
@@ -326,11 +328,11 @@ export interface SportConfig {
   rowShown?: (player: SkillPlayer, settings: SportSettings) => boolean;
   // A tab the sport's settings can hide (MMA's women's divisions, until switched on)
   tabVisible?: (position: string, settings: SportSettings) => boolean;
-  // The card's Game Log tab (the season being played only): whether a row has one,
+  // The card's Game Log tab: whether a row has one for a season (that season's games only),
   // and loading it when the tab opens
   gameLog?: {
-    has: (player: SkillPlayer, position: string) => boolean;
-    load: (player: SkillPlayer, position: string) => Promise<GameLog>;
+    has: (player: SkillPlayer, position: string, season: number) => boolean;
+    load: (player: SkillPlayer, position: string, season: number) => Promise<GameLog>;
     // ESPN's name for the league ("football/nfl"): the row's team's next games show above the log
     league?: string;
   };

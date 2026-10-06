@@ -488,7 +488,12 @@
                   </thead>
                   <tbody>
                     @for (g of log.rows; track $index) {
-                      <tr>
+                      <!-- the playoffs set apart: a gap and their own heading, their rows tinted -->
+                      @if (g.playoff && ($index === 0 || !log.rows[$index - 1].playoff)) {
+                        <tr class="log-gap" aria-hidden="true"><td [attr.colspan]="log.columns.length + 3"></td></tr>
+                        <tr class="log-section"><th [attr.colspan]="log.columns.length + 3">Playoffs</th></tr>
+                      }
+                      <tr [class.log-playoff]="g.playoff">
                         <td class="log-date">{{ g.date }}</td>
                         <td class="log-opp">
                           <span class="log-vs">{{ g.vs.split(' ')[0] }}</span>

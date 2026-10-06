@@ -19,7 +19,7 @@ export interface EspnLogOptions {
 interface EspnGameLog {
   labels?: string[];
   categories?: { name: string; displayName: string; count: number }[];
-  events?: Record<string, { gameDate: string; atVs: string; gameResult?: string; score?: string; opponent?: { abbreviation?: string; logo?: string } }>;
+  events?: Record<string, { gameDate: string; atVs: string; gameResult?: string; score?: string; opponent?: { abbreviation?: string; displayName?: string; logo?: string } }>;
   seasonTypes?: { displayName: string; categories: { events?: { eventId: string; stats: string[] }[] }[] }[];
 }
 
@@ -48,10 +48,12 @@ export async function espnGameLog(league: string, id: number | string, season: n
     for (const category of type.categories) {
       for (const line of category.events ?? []) {
         const game = data.events?.[line.eventId];
-        if (!game) continue;
+        // (not an all-star game: the Pro Bowl, filed with the playoffs)
+        if (!game || /^(AFC|NFC)$/.test(game.opponent?.abbreviation ?? '') || /all-star/i.test(game.opponent?.displayName ?? '')) continue;
         rows.push({
           at: game.gameDate,
           event: line.eventId,
+          playoff: /post/i.test(type.displayName),
           date: day(game.gameDate),
           vs: `${game.atVs === '@' ? '@' : 'vs'} ${game.opponent?.abbreviation ?? ''}`.trim(),
           logo: game.opponent?.logo,
@@ -282,12 +284,37 @@ const ESPN_TEAMS: Record<string, [string, string, string, string][]> = {
 };
 
 // A row's team on ESPN, from what the row knows: its team's full name, its own name (a team row's), or
-// its logo's file name (a nickname, or an abbreviation)
-const NICKNAMES: Record<string, string> = { bucs: 'buccaneers' };
+// its logo's file name (a nickname, or an abbreviation). Earlier seasons' names are today's franchise
+// (ESPN keeps a franchise's past seasons under its current team), or ESPN's own id for one it moved on
+// from (the Coyotes, before Utah)
+const NICKNAMES: Record<string, string> = {
+  bucs: 'buccaneers',
+  // NBA
+  'seattle supersonics': 'oklahoma city thunder',
+  'new jersey nets': 'brooklyn nets',
+  'charlotte bobcats': 'charlotte hornets',
+  'new orleans hornets': 'new orleans pelicans',
+  'new orleans/oklahoma city hornets': 'new orleans pelicans',
+  'vancouver grizzlies': 'memphis grizzlies',
+  // MLB
+  'montreal expos': 'washington nationals',
+  'florida marlins': 'miami marlins',
+  'anaheim angels': 'los angeles angels',
+  'los angeles angels of anaheim': 'los angeles angels',
+  'tampa bay devil rays': 'tampa bay rays',
+  'cleveland indians': 'cleveland guardians',
+  'oakland athletics': 'athletics',
+  // NHL
+  'atlanta thrashers': 'winnipeg jets',
+  'mighty ducks of anaheim': 'anaheim ducks',
+  'phoenix coyotes': 'id:24',
+  'arizona coyotes': 'id:24',
+};
 function espnTeamId(league: string, names: (string | undefined)[]): string {
   const teams = ESPN_TEAMS[league] ?? [];
   const wanted = names.filter((n): n is string => !!n).map((n) => NICKNAMES[n.toLowerCase()] ?? n.toLowerCase());
   for (const name of wanted) {
+    if (name.startsWith('id:')) return name.slice(3);
     const team = teams.find((t) => t.slice(1).some((x) => x.toLowerCase() === name));
     if (team) return team[0];
   }
@@ -350,6 +377,7 @@ export async function espnTeamGameLog(league: string, names: (string | undefined
     const leader = us.leaders?.[0]?.leaders?.[0];
     rows.push({
       at: event.date,
+      playoff: event.seasonType?.type === 3,
       date: day(event.date),
       vs: `${us.homeAway === 'home' ? 'vs' : '@'} ${them.team.abbreviation}`,
       logo: them.team.logos?.[0]?.href ?? them.team.logo,

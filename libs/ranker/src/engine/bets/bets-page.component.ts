@@ -109,7 +109,11 @@ export class BetsPageComponent implements OnInit {
       if (!file?.bets?.length) continue;
       // (the latest run only: reports written within 6 hours of its newest, not an older pilot's)
       const newest = Math.max(...file.bets.map((b: BetEntry) => Date.parse(b.at)));
-      entries.push(...file.bets.filter((b: BetEntry) => newest - Date.parse(b.at) < 6 * 3600e3));
+      const latest = file.bets.filter((b: BetEntry) => newest - Date.parse(b.at) < 6 * 3600e3);
+      // (the coming week's games only: a team on a bye previews the week after, which would list its
+      // opponent twice)
+      const week = Math.min(...latest.map((b: BetEntry) => b.game?.week ?? Infinity));
+      entries.push(...latest.filter((b: BetEntry) => b.game?.week === week));
       if (!this.updated || file.at > this.updated) this.updated = file.at;
     }
     // how many reports make each call

@@ -11,6 +11,9 @@
     </div>
   </ng-template>
 
+  <!-- Two columns on a wide screen (Format, Display), one on a narrow one -->
+  <div class="menu-cols">
+  <div class="menu-col">
   <!-- Format: how the stats are counted and shown -->
   <div class="menu-section section-stats" (click)="$event.stopPropagation()">Format</div>
   @for (setting of settingsAt('formatTop'); track setting.key) {
@@ -41,9 +44,11 @@
       (ngModelChange)="flipCopyStats()"
       (click)="$event.stopPropagation()"
     ></mat-slide-toggle>
-    <span>{{ settings.showRanks ? 'Copy Ranks' : 'Copy Stats' }}</span>
+    <span>{{ settings.showRanks ? 'Copy Includes Ranks' : 'Copy Includes Stats' }}</span>
   </div>
 
+  </div>
+  <div class="menu-col">
   <!-- Display: what the table shows -->
   <div class="menu-section section-display" (click)="$event.stopPropagation()">Display</div>
   @for (item of switches; track item.label) {
@@ -59,4 +64,6 @@
       <span>{{ item.label }}</span>
     </div>
   }
+  </div>
+  </div>
 </mat-menu>

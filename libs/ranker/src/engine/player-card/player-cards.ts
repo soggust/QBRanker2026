@@ -119,25 +119,25 @@ export class PlayerCards {
     return position === 'TM' || SPORT.teamTabs?.includes(position) ? 'History' : 'Career';
   }
 
-  // The Game Log tab: the season being played's, for a row the sport has one for (SPORT.gameLog)
+  // The Game Log tab: the card's season's games, for a row the sport has one for (SPORT.gameLog)
   hasGameLog(card: PlayerCard): boolean {
-    return card.season === CURRENT_SEASON && !!SPORT.gameLog?.has(card.player, this.position);
+    return !!SPORT.gameLog?.has(card.player, this.position, card.season);
   }
 
-  // A card's game log, loaded the first time its tab asks (then kept, as the tab shows it), with the
-  // team's next games when the sport names its league (those failing just leave the strip out): the log,
-  // or still loading, or failed
+  // A card's game log for its season, loaded the first time its tab asks (then kept, as the tab shows it),
+  // with the team's games still to play when it's the season being played and the sport names its league
+  // (those failing just leave them out): the log, or still loading, or failed
   private gameLogs = new Map<string, GameLogView | 'loading' | 'error'>();
   gameLog(card: PlayerCard): GameLogView | 'loading' | 'error' {
-    const key = `${this.position}/${card.player.gsisId}`;
+    const key = `${this.position}/${card.player.gsisId}/${card.season}`;
     if (!this.gameLogs.has(key) && SPORT.gameLog) {
       this.gameLogs.set(key, 'loading');
       const { load, league } = SPORT.gameLog;
       const player = card.player;
-      const next = league
+      const next = league && card.season === CURRENT_SEASON
         ? espnUpcoming(league, [(player as { teamName?: string | null }).teamName ?? undefined, player.name, player.teamLogo?.match(/([^/]+)\.\w+$/)?.[1]], SPORT.currentSeason).catch(() => [])
         : Promise.resolve([]);
-      Promise.all([load(player, this.position), next])
+      Promise.all([load(player, this.position, card.season), next])
         .then(([log, upcoming]) => this.gameLogs.set(key, gameLogView(log, upcoming)))
         .catch(() => this.gameLogs.set(key, 'error'));
     }
@@ -227,9 +227,11 @@ export class PlayerCards {
         id: group.id,
         title: group.title,
         icon: group.icon,
-        // (another season's card leaves out the values from other tabs, which are the table's season's)
+        // (another season's card leaves out the values from other tabs, which are the table's season's, and
+        // a display-only stat that season doesn't have: Time of Possession before it was kept)
         stats: group.stats
           .filter((stat) => !context || !SPORT.tableSeasonOnly?.(stat))
+          .filter((stat) => !stat.infoOnly || Number.isFinite(reader.value(player, stat)))
           .map((stat) => this.cardStat(reader, player, stat, list, group.id)),
       }))
       .filter((group) => group.stats.length);

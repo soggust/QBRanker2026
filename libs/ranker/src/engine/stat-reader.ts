@@ -9,6 +9,7 @@ import { CURRENT_SEASON } from '@ranker/engine/data';
 
 // Minutes as minutes:seconds: 31.4 -> "31:24"
 const mmss = (minutes: number): string => {
+  if (!Number.isFinite(minutes)) return '-';
   const total = Math.round(minutes * 60);
   return `${Math.floor(total / 60)}:${String(total % 60).padStart(2, '0')}`;
 };

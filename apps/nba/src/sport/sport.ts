@@ -167,10 +167,10 @@ export const SPORT: SportConfig = {
   gameLog: {
     league: 'basketball/nba',
     has: (player, position) => ['TM', 'HC'].includes(position) || Number(player.id) > 0,
-    load: (player, position) =>
+    load: (player, position, season) =>
       ['TM', 'HC'].includes(position)
-        ? espnTeamGameLog('basketball/nba', [player.teamName ?? undefined, player.name, player.teamLogo?.match(/([^/]+)\.\w+$/)?.[1]], SPORT.currentSeason, 4)
-        : espnGameLog('basketball/nba', player.id!, SPORT.currentSeason, { chart: { label: 'Points', stack: ['PTS'] } }),
+        ? espnTeamGameLog('basketball/nba', [player.teamName ?? undefined, player.name, player.teamLogo?.match(/([^/]+)\.\w+$/)?.[1]], season, 4)
+        : espnGameLog('basketball/nba', player.id!, season, { chart: { label: 'Points', stack: ['PTS'] } }),
   },
   // (the Teams tab's Recent: the last 7 games)
   recentGames: (position) => (position === 'TM' ? 7 : 5),

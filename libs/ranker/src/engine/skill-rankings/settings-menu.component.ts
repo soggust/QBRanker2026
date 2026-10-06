@@ -64,14 +64,14 @@ export class SettingsMenuComponent {
         `${SPORT.copy.lowerIsBetterExample})`,
     ),
     ...(SPORT.combined ? [this.switch('combineStats', SPORT.combined.label, SPORT.combined.title)] : []),
+    ...settingsAt('display').map((setting) => this.sportSwitch(setting)),
+    ...(SPORT.noSwitches?.includes('showInjured') ? [] : [this.switch('showInjured', 'Injured Players', SPORT.copy.injuredHelp)]),
+    ...(SPORT.noSwitches?.includes('rookiesOnly') ? [] : [this.switch('rookiesOnly', 'Rookies Only', this.rookiesTitle)]),
     this.switch(
       'showRanks',
       'Show Ranks',
       "Show each value as its place in the list (#1 the best; lower first for lower-is-better stats). Display only: the ranking doesn't change",
     ),
-    ...settingsAt('display').map((setting) => this.sportSwitch(setting)),
-    ...(SPORT.noSwitches?.includes('showInjured') ? [] : [this.switch('showInjured', 'Injured Players', SPORT.copy.injuredHelp)]),
-    ...(SPORT.noSwitches?.includes('rookiesOnly') ? [] : [this.switch('rookiesOnly', 'Rookies Only', this.rookiesTitle)]),
     this.switch(
       'showUnused',
       'Unweighted Stats',

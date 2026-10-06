@@ -127,12 +127,12 @@ export const SPORT: SportConfig = {
   gameLog: {
     league: 'baseball/mlb',
     has: (player, position) => position === 'TM' || Number(player.id) > 0,
-    load: (player, position) =>
+    load: (player, position, season) =>
       position === 'TM'
-        ? espnTeamGameLog('baseball/mlb', [player.teamName ?? undefined, player.name], SPORT.currentSeason, 9)
+        ? espnTeamGameLog('baseball/mlb', [player.teamName ?? undefined, player.name], season, 9)
         : ['SP', 'RP'].includes(position)
-          ? mlbGameLog(player.id!, SPORT.currentSeason, 'pitching', [['IP', 'inningsPitched'], ['H', 'hits'], ['R', 'runs'], ['ER', 'earnedRuns'], ['BB', 'baseOnBalls'], ['SO', 'strikeOuts'], ['HR', 'homeRuns'], ['ERA', 'era']], { chart: { label: 'Strikeouts', stack: ['SO'], minus: ['ER'] } })
-          : mlbGameLog(player.id!, SPORT.currentSeason, 'hitting', [['AB', 'atBats'], ['R', 'runs'], ['H', 'hits'], ['2B', 'doubles'], ['HR', 'homeRuns'], ['RBI', 'rbi'], ['BB', 'baseOnBalls'], ['SO', 'strikeOuts'], ['SB', 'stolenBases'], ['AVG', 'avg']], { chart: { label: 'Hits', stack: ['H'], plus: ['HR'] } }),
+          ? mlbGameLog(player.id!, season, 'pitching', [['IP', 'inningsPitched'], ['H', 'hits'], ['R', 'runs'], ['ER', 'earnedRuns'], ['BB', 'baseOnBalls'], ['SO', 'strikeOuts'], ['HR', 'homeRuns'], ['ERA', 'era']], { chart: { label: 'Strikeouts', stack: ['SO'], minus: ['ER'] } })
+          : mlbGameLog(player.id!, season, 'hitting', [['AB', 'atBats'], ['R', 'runs'], ['H', 'hits'], ['2B', 'doubles'], ['HR', 'homeRuns'], ['RBI', 'rbi'], ['BB', 'baseOnBalls'], ['SO', 'strikeOuts'], ['SB', 'stolenBases'], ['AVG', 'avg']], { chart: { label: 'Hits', stack: ['H'], plus: ['HR'] } }),
   },
   // (the Teams tab's Recent: the last 10 games, a long season's form; the players' 5)
   recentGames: (position) => (position === 'TM' ? 10 : 5),

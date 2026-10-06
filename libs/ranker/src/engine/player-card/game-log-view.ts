@@ -6,6 +6,7 @@ import type { GameLog, GameLogColumn, UpcomingGame } from '@ranker/engine/sport'
 export interface GameLogViewRow {
   date: string;
   vs: string;
+  playoff: boolean;
   logo?: string;
   outcome: 'W' | 'L' | 'T' | '';
   score: string;
@@ -78,6 +79,7 @@ export function gameLogView(log: GameLog, upcoming: UpcomingGame[] = []): GameLo
     date: row.date,
     vs: row.vs,
     logo: row.logo,
+    playoff: !!row.playoff,
     outcome: OUTCOME(row.result),
     score: row.result.replace(/^[WLT]\s*/, ''),
     cells: Array.from({ length: n }, (_, c) => row.values[c] ?? '-'),

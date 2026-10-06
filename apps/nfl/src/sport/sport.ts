@@ -177,10 +177,10 @@ export const SPORT: SportConfig = {
   gameLog: {
     league: 'football/nfl',
     has: (player, position) => TEAM_LOGS.includes(position) || (['QB', 'RB', 'WR', 'TE', 'K', 'P'].includes(position) && Number(player.id) > 0),
-    load: (player, position) =>
+    load: (player, position, season) =>
       TEAM_LOGS.includes(position)
-        ? espnTeamGameLog('football/nfl', [player.name, logoName(player)], SPORT.currentSeason, 4)
-        : espnGameLog('football/nfl', player.id!, SPORT.currentSeason, {
+        ? espnTeamGameLog('football/nfl', [player.name, logoName(player)], season, 4)
+        : espnGameLog('football/nfl', player.id!, season, {
             label: (group, label) => (['LNG', 'SACK', 'FUM', 'FF', 'KB'].includes(label) ? null : label),
             chart: YARDS_CHART[position],
             fumblesLost: YARDS_CHART[position] ? 'Rushing' : undefined,
