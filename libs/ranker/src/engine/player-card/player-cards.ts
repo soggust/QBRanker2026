@@ -245,7 +245,7 @@ export class PlayerCards {
       positionName: POSITION_NAMES[this.position],
       seasonLabel: SPORT.careerOnly ? 'Career' : isLiveSeason(season) ? 'This Season' : SPORT.seasonText(season),
       teamName: SPORT.teamName ? SPORT.teamName(player, this.position, rows) : ((player as { teamName?: string | null }).teamName ?? null),
-      logo: logoForSeason(player.teamLogo, season),
+      logo: SPORT.cardLogo ? SPORT.cardLogo(logoForSeason(player.teamLogo, season)) : logoForSeason(player.teamLogo, season),
       color: badgeColor(player.teamLogo),
       whiteLogo: whiteLogo(player.teamLogo),
       // The table's headshot, big enough for the card's hero

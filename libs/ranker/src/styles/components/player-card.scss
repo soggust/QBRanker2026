@@ -1102,7 +1102,7 @@
   }
 
   .season-year {
-    @include v.hand(20px);
+    @include v.headline(20px);
     white-space: nowrap;
   }
 

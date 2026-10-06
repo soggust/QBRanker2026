@@ -336,6 +336,8 @@ export interface SportConfig {
     // ESPN's name for the league ("football/nfl"): the row's team's next games show above the log
     league?: string;
   };
+  // The card's big hero logo when the sport has a sharper one than the grid's icon (the NFL's, 256px)
+  cardLogo?: (logo: string) => string;
   // The card's Analysis tab: the sport publishes AI write-ups (data/analysis: player-card/analysis.ts)
   analysis?: boolean;
   // A history tab on the card in place of the seasons one (MMA's fights): its title and icon, and a

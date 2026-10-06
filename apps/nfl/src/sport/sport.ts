@@ -169,6 +169,12 @@ export const SPORT: SportConfig = {
     return position === 'DEF' || position === 'TM' || team === player.name ? null : team;
   },
   cardFlags,
+  // (the card's hero logo sharp: a 256px copy of ESPN's, today's logos; the Giants keep theirs, whose
+  // outline ESPN's doesn't have, and an older era its own)
+  cardLogo: (logo) => {
+    const team = logo.match(/^assets\/NFL_Icons\/([^/]+)\.png$/)?.[1];
+    return team && team !== 'Giants' ? `assets/NFL_Icons/hd/${team}.png` : logo;
+  },
   // The card's Analysis tab: the AI write-ups (apps/nfl/scripts/analysis)
   analysis: true,
   // The card's Game Log tab: teams, defenses, lines and coaches get their team's games; a player ESPN's
