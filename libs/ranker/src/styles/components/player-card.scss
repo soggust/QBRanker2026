@@ -923,7 +923,7 @@
 
 .stat-value {
   color: #fff;
-  @include v.hand(26px);
+  @include v.hand(20px);
   grid-area: value;
   line-height: 1.25;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
