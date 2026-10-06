@@ -19,11 +19,13 @@ const ROOT = path.resolve(import.meta.dirname, '../../../..');
 const DATA = path.join(ROOT, 'apps/nfl/src/StaticData');
 const CACHE = path.join(ROOT, '.cache/nflverse');
 const OUT = path.join(ROOT, '.cache/analysis/dossiers');
+const TEAM_OUT = path.join(ROOT, '.cache/analysis/teams');
 const SEASON = 2026;
 const NFLVERSE = 'https://github.com/nflverse/nflverse-data/releases/download';
 const FILES = {
   pbp: `pbp/play_by_play_${SEASON}.csv.gz`,
   weekly: `stats_player/stats_player_week_${SEASON}.csv.gz`,
+  teamWeekly: `stats_team/stats_team_week_${SEASON}.csv.gz`,
   ngsPass: 'nextgen_stats/ngs_passing.csv.gz',
   ngsRec: 'nextgen_stats/ngs_receiving.csv.gz',
   ngsRush: 'nextgen_stats/ngs_rushing.csv.gz',
@@ -199,6 +201,7 @@ async function main() {
     readCsv(paths.draft, null, (x) => Number(x.season) >= 2000),
     readCsv(paths.schedule, null, (x) => x.season === String(SEASON)),
   ]);
+  const teamWeekly = await readCsv(paths.teamWeekly, null);
   const depthRows = await readCsv(paths.depth, ['dt', 'team', 'gsis_id', 'pos_abb', 'pos_rank']);
   const injuryReport = await espnInjuries();
 
@@ -546,11 +549,12 @@ async function main() {
     RB: { high: ['carries', 'rushYards', 'rushTds', 'ypc', 'epaPerCarry', 'ryoePerAtt', 'yacoPerCarry', 'targets', 'recYards', 'epaPerTarget', 'totalTds', 'snapShare'], low: ['fumbles'], keep: ['brokenTackles'] },
     WR: { high: ['targets', 'receptions', 'recYards', 'recTds', 'catchPct', 'epaPerTarget', 'targetShare', 'airYardsShare', 'separation', 'yacOverExp', 'snapShare'], low: ['dropPct'], keep: ['adot'] },
     TE: { high: ['targets', 'receptions', 'recYards', 'recTds', 'catchPct', 'epaPerTarget', 'targetShare', 'separation', 'yacOverExp', 'snapShare', 'runBlockEpa'], low: ['dropPct'], keep: ['adot'] },
+    TM: { high: ['wins', 'winsOverExpected', 'atsPct', 'pointDiffPerGame', 'netEpa', 'offEpa', 'ptsPerGame', 'turnoverDiffPerGame', 'oneScoreWinPct'], low: ['defEpaAllowed', 'ptsAllowedPerGame'], keep: ['losses'] },
   };
   const careers = new Map();
   const seasonsDir = path.join(DATA, 'seasons');
   for (const y of readdirSync(seasonsDir).map(Number).sort()) {
-    for (const pos of ['QB', 'RB', 'WR', 'TE']) {
+    for (const pos of ['QB', 'RB', 'WR', 'TE', 'TM']) {
       const f = path.join(seasonsDir, String(y), 'units', `${pos}.json`);
       if (!existsSync(f)) continue;
       const rows = JSON.parse(readFileSync(f, 'utf8'));
@@ -769,6 +773,168 @@ async function main() {
     writeFileSync(path.join(OUT, `${p.gsis}.json`), JSON.stringify(dossier));
     written++;
   }
+  // ---- team dossiers: one per team, read by its Team, Defense, O-line and Coach cards. The site's team,
+  // defense and line stats ranked across the 32, the standings, each game with its line and box score,
+  // who has been playing, the injury report, the next game, the rest of the schedule, recent seasons
+  mkdirSync(TEAM_OUT, { recursive: true });
+  const siteRows = (pos) => new Map((site[pos] ?? []).map((row) => [LOGO_TEAM[row.teamLogo?.match(/NFL_Icons\/(.+)\.png/)?.[1]], row]));
+  const coachRows = siteRows('HC');
+  const defRows = siteRows('DEF');
+  const olRows = siteRows('OL');
+  // each site stat ranked across the teams (the lower-is-better ones the other way)
+  const LOW = new Set(['losses', 'defEpaAllowed', 'ptsAllowedPerGame', 'yardsAllowedPerGame', 'penaltiesPerGame', 'epaAllowed', 'passEpaAllowed', 'rushEpaAllowed', 'successAllowed', 'thirdDownPct', 'redZoneTdPct', 'missedTacklePct', 'sacksAllowed', 'qbHitsAllowed', 'sackRate', 'stuffRate', 'linePenaltiesPerGame']);
+  const rankRows = (rows, skip = []) => {
+    const keys = new Set([...rows.values()].flatMap((row) => Object.keys(row.stats ?? {})));
+    const out = new Map([...rows.keys()].map((t) => [t, {}]));
+    for (const k of keys) {
+      if (skip.includes(k)) continue;
+      // (the O-line's pressure rate is pressure allowed: lower is better; the defense's is pressure made)
+      const low = LOW.has(k) || (rows === olRows && k === 'pressureRate');
+      const rank = ranker([...rows.values()].map((row) => row.stats?.[k] ?? null), low);
+      for (const [t, row] of rows) {
+        const v = rank(row.stats?.[k] ?? null);
+        if (v) out.get(t)[k] = v;
+      }
+    }
+    return out;
+  };
+  const teamRanked = rankRows(coachRows, ['ties', 'fantasyStd', 'receptions']);
+  const defRanked = rankRows(defRows, ['fantasyStd', 'receptions']);
+  const olRanked = rankRows(olRows);
+  const dataGrades = JSON.parse(readFileSync(path.join(DATA, 'data-grades.json'), 'utf8')).teams ?? {};
+  const preseason = JSON.parse(readFileSync(path.join(DATA, 'team-grades.json'), 'utf8'));
+
+  // records and division standings
+  const DIVISIONS = {
+    'AFC East': ['BUF', 'MIA', 'NE', 'NYJ'], 'AFC North': ['BAL', 'CIN', 'CLE', 'PIT'], 'AFC South': ['HOU', 'IND', 'JAX', 'TEN'], 'AFC West': ['DEN', 'KC', 'LAC', 'LV'],
+    'NFC East': ['DAL', 'NYG', 'PHI', 'WAS'], 'NFC North': ['CHI', 'DET', 'GB', 'MIN'], 'NFC South': ['ATL', 'CAR', 'NO', 'TB'], 'NFC West': ['ARI', 'LA', 'SEA', 'SF'],
+  };
+  const record = (t) => {
+    const played = games.filter((g) => (g.home === t || g.away === t) && g.homeScore !== null && g.type === 'REG');
+    const r = { w: 0, l: 0, t: 0, pf: 0, pa: 0 };
+    for (const g of played) {
+      const s = side(g, t);
+      r[s.result === 'W' ? 'w' : s.result === 'L' ? 'l' : 't']++;
+      const [us, them] = s.score.split('-').map(Number);
+      r.pf += us;
+      r.pa += them;
+    }
+    return r;
+  };
+  const recordText = (r) => `${r.w}-${r.l}${r.t ? `-${r.t}` : ''}`;
+  const divisionOf = (t) => Object.entries(DIVISIONS).find(([, ts]) => ts.includes(t));
+
+  // the team's box score each game (nflverse team stats)
+  const teamWeeklyBy = group(teamWeekly.filter((x) => x.season_type === 'REG' || x.season_type === 'POST'), (x) => `${x.team}/${x.game_id}`);
+
+  // who carries the offense: the top passers, rushers and receivers this season
+  const usageOf = (t) => {
+    const rows = regWeekly.filter((x) => x.team === t);
+    const by = group(rows, 'player_id');
+    const total = (rs, k) => sum(rs, k);
+    const top = (k, n) =>
+      [...by]
+        .map(([id, rs]) => ({ name: rs[0].player_display_name, pos: rs[0].position, games: rs.length, value: total(rs, k) }))
+        .filter((x) => x.value > 0)
+        .sort((a, b) => b.value - a.value)
+        .slice(0, n);
+    return {
+      passing: top('passing_yards', 2).map((x) => ({ ...x, stat: 'passYards' })),
+      rushing: top('carries', 3).map((x) => ({ ...x, stat: 'carries' })),
+      targets: top('targets', 5).map((x) => ({ ...x, stat: 'targets' })),
+    };
+  };
+
+  const teamIndex = [];
+  for (const t of Object.keys(TEAMS)) {
+    const coach = coachRows.get(t);
+    const rec = record(t);
+    const [division, members] = divisionOf(t);
+    const next = nextGame(t);
+    const nickname = TEAMS[t] === 'Buccaneers' ? 'Bucs' : TEAMS[t];
+    const played = games.filter((g) => (g.home === t || g.away === t) && g.homeScore !== null).sort((a, b) => a.date.localeCompare(b.date));
+    const remaining = games.filter((g) => (g.home === t || g.away === t) && g.homeScore === null).sort((a, b) => a.date.localeCompare(b.date));
+    const history = (careers.get(`TM-${nickname}`) ?? []).filter((c) => c.season < SEASON).slice(-8);
+    const dossier = {
+      kind: 'team',
+      team: {
+        name: `${TEAMS[t]} (${t})`,
+        headCoach: coach?.name ?? null,
+        newCoach: dataGrades[nickname]?.newCoach ?? null,
+        record: recordText(rec),
+        pointsFor: rec.pf,
+        pointsAgainst: rec.pa,
+        division,
+        standings: members
+          .map((m) => ({ team: m, record: recordText(record(m)), w: record(m).w }))
+          .sort((a, b) => b.w - a.w)
+          .map(({ team, record }) => `${team} ${record}`),
+        preseasonGrades: preseason[nickname] ?? null,
+        currentGrades: dataGrades[nickname] ? { oline: dataGrades[nickname].oline, weapons: dataGrades[nickname].weapons } : null,
+      },
+      season: {
+        year: SEASON,
+        team: teamRanked.get(t) ?? null,
+        defense: defRanked.get(t) ?? null,
+        offensiveLine: olRanked.get(t) ?? null,
+        playByPlay: teamCtx[t],
+      },
+      qbStarts: qbStarts(t),
+      usage: usageOf(t),
+      gameLog: played.map((g) => {
+        const s = side(g, t);
+        const box = teamWeeklyBy.get(`${t}/${g.id}`)?.[0];
+        const opp = teamWeeklyBy.get(`${s.opp}/${g.id}`)?.[0];
+        return {
+          ...s,
+          qb: g.home === t ? g.homeQb : g.awayQb,
+          oppDefRankNow: teamCtx[s.opp]?.defEpa?.[1] ?? null,
+          oppOffRankNow: teamCtx[s.opp]?.offEpa?.[1] ?? null,
+          box: box
+            ? {
+                passYds: num(box.passing_yards),
+                rushYds: num(box.rushing_yards),
+                passEpa: r(num(box.passing_epa), 1),
+                rushEpa: r(num(box.rushing_epa), 1),
+                turnovers: (num(box.passing_interceptions) ?? 0) + (num(box.fumbles_lost_total) ?? 0),
+                sacksAllowed: num(box.sacks_suffered),
+                defSacks: num(box.def_sacks),
+                takeaways: (num(box.def_interceptions) ?? 0) + (num(opp?.fumbles_lost_total) ?? 0),
+                penaltyYds: num(box.penalty_yards),
+                oppPassYds: num(opp?.passing_yards),
+                oppRushYds: num(opp?.rushing_yards),
+              }
+            : null,
+        };
+      }),
+      injuries: injuryList(t, null, false, 16),
+      nextGame: next
+        ? {
+            ...next,
+            oppRecord: recordText(record(next.opp)),
+            line: (() => {
+              const l = lines.get(next.at === 'home' ? `${next.opp}@${t}` : `${t}@${next.opp}`);
+              return l ? { line: l.line, overUnder: l.overUnder, hisTeamMoneyline: next.at === 'home' ? l.homeMoneyline : l.awayMoneyline, book: l.book } : null;
+            })(),
+            opp: next.opp,
+            oppSeason: { team: teamRanked.get(next.opp) ?? null, defense: defRanked.get(next.opp) ?? null, offensiveLine: olRanked.get(next.opp) ?? null, playByPlay: teamCtx[next.opp] },
+            oppQbStarts: qbStarts(next.opp),
+            oppInjuries: injuryList(next.opp, null, false, 14),
+          }
+        : null,
+      // the rest of the schedule: each opponent\'s record and its offense / defense EPA ranks today
+      restOfSchedule: remaining.slice(next ? 1 : 0).map((g) => {
+        const s = side(g, t);
+        return { week: s.week, opp: s.opp, at: s.at, oppRecord: recordText(record(s.opp)), oppOffRank: teamCtx[s.opp]?.offEpa?.[1] ?? null, oppDefRank: teamCtx[s.opp]?.defEpa?.[1] ?? null, div: s.div };
+      }),
+      history,
+    };
+    writeFileSync(path.join(TEAM_OUT, `${t}.json`), JSON.stringify(dossier));
+    teamIndex.push({ team: t, name: TEAMS[t], siteIds: [`TM-${nickname}`, `DEF-${t}`, `OL-${t}`, ...(coach ? [coach.gsisId] : [])] });
+  }
+  writeFileSync(path.join(ROOT, '.cache/analysis/team-index.json'), JSON.stringify(teamIndex));
+  console.log(`${teamIndex.length} team dossiers`);
+
   writeFileSync(path.join(ROOT, '.cache/analysis/index.json'), JSON.stringify(list.map((p) => ({ gsis: p.gsis, pos: p.pos, siteId: p.siteId, name: bio.get(p.gsis)?.display_name ?? p.site.name }))));
   console.log(`${written} dossiers (${list.length} players listed)`);
 }

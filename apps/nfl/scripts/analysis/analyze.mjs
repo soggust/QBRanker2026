@@ -3,8 +3,10 @@
 // kept in .cache/analysis/reports/<gsisId>.json with its token usage. --publish writes the reports the
 // site reads (apps/nfl/src/StaticData/analysis/<row id>.json and its index).
 //
-//   node apps/nfl/scripts/analysis/analyze.mjs <name filters...>   (live calls, a few at a time: the pilot)
-//   node apps/nfl/scripts/analysis/analyze.mjs --batch            (every dossier, through the Batch API)
+//   node apps/nfl/scripts/analysis/analyze.mjs <names...> --qbs --teams --team=BAL   (live calls, 4 at a time)
+//   node apps/nfl/scripts/analysis/analyze.mjs --batch <the same choices>          (through the Batch API: half price)
+//   ... --skip-done                                                               (not the ones written today)
+//   node apps/nfl/scripts/analysis/analyze.mjs --resume                           (the last batch's results)
 //   node apps/nfl/scripts/analysis/analyze.mjs --publish          (no calls: the kept reports to the site)
 //
 // Needs ANTHROPIC_API_KEY (not for --publish).
@@ -15,6 +17,7 @@ import path from 'node:path';
 
 const ROOT = path.resolve(import.meta.dirname, '../../../..');
 const DOSSIERS = path.join(ROOT, '.cache/analysis/dossiers');
+const TEAM_DOSSIERS = path.join(ROOT, '.cache/analysis/teams');
 const REPORTS = path.join(ROOT, '.cache/analysis/reports');
 const SITE = path.join(ROOT, 'apps/nfl/src/StaticData/analysis');
 const MODEL = 'claude-opus-5-5';
@@ -53,6 +56,34 @@ Evidence: every strength, concern and key matchup cites 1-3 numbers from the dos
 Betting angles (the site shows them as entertainment, with a disclaimer): look at the game's line (spread, total, moneyline) and his own production against this matchup, and flag what looks favorable — or say nothing looks off. For his player markets the dossier has no prop lines, so frame those against his own baseline ("his rushing yards: lean over his 36-a-game average against a front that ..."). Give every angle the data really supports, up to five — and none when nothing stands out; never pad the list. Each needs a real reason in the data, not a vibe. Grade each: like (a solid edge), lean (a slight one), or fade (a side the market or the obvious read favors that the data argues against: name that side as the market and say why to go against it).
 
 Style: plain sentences, numbers woven in only where they make the point, no clichés ("he's a gamer", "elite", "weapon"), no filler, never restate the totals table.`;
+
+// Teams: the same report, about a team (its Team, Defense, O-line and Coach cards all show it)
+const TEAM_SYSTEM = `You are the analyst behind a football rankings site's team cards. The reader has opened a team's Analysis tab to understand it properly: what kind of team this is, what is really driving its record, what is real and what is noise, how the coming game sets up, where the season is heading, and whether anything in the betting market looks off. Write like a sharp film-and-numbers analyst talking to a smart fan: in depth, in context, with a point of view. Not a stat table read aloud, not a hype piece, not disconnected bullet points.
+
+You get one team's dossier as JSON. It is your only source. Use no outside knowledge of players, teams, injuries, trades or coaches beyond what the dossier says, and never state a number that isn't in it or directly derivable from it (a difference, a per-game average or a ratio of dossier numbers is fine). The one exception is restOfSeason.projections, which are your own estimates. If something you'd want to know isn't there, don't guess.
+
+How to read the dossier:
+- [value, rank, of]: the value and its rank among the 32 teams this season (1 = best; for stats where less is better — points allowed, EPA allowed, sacks allowed, penalties — rank 1 is the fewest). History lines rank within that season.
+- team: record, points for and against, division standings, the coach (newCoach: first year), preseasonGrades (the site's 0-12 preseason grades for weapons, line and coaching) and currentGrades (the line and weapons now).
+- season.team: results and efficiency (winsOverExpected: wins beyond what the point differential predicts, so luck; atsPct: share of games covered; netEpa; offEpa; defEpaAllowed; oneScoreWinPct; turnoverDiffPerGame; fourthDownGoPct; topPerGame). season.defense: EPA allowed by pass and rush, pressure rate made, takeaways, third-down and red-zone rates allowed, missed tackles. season.offensiveLine: pressure and sack rates allowed, stuff rate, yards before contact, run EPA. season.playByPlay: offense and defense EPA splits by pass and rush, success rates, pass rate over expected, explosive plays allowed, deep and short passing defense.
+- qbStarts: who started at QB each week. usage: who carries the offense (top passers, rushers by carries, receivers by targets).
+- gameLog: each game: the score, Vegas (favoredBy: negative = underdog; covered; overUnder), the QB, the opponent's offense and defense EPA ranks today, and the box score (yards, EPA, turnovers, sacks both ways, takeaways, penalties).
+- injuries: the team's injury report, most-used first (snapPct: 90+ is a starter, under 30 a backup), with ESPN's news notes and return estimates (estimates, not promises).
+- nextGame: the coming opponent, the line (line like "BAL -2.5" names the favorite and the spread; overUnder; this team's moneyline), the opponent's record, its season profile, its QB starts and its injury report. restOfSchedule: each remaining opponent's record and offense/defense EPA ranks today (division games marked).
+- history: the team's recent seasons, ranked within each season.
+- Early in a season samples are small: weigh them honestly and say so when it matters, without hedging everything.
+
+Think like a football analyst, not a spreadsheet. Before calling anything a strength or a weakness, ask what produces it and judge the cause: a record built on close wins and turnovers (luck that tends to regress) versus one built on efficiency; a defense whose numbers came against bad offenses; points allowed driven by short fields from turnovers; a run game that looks bad because of the line or good because of game script; a quarterback change or key injuries that split the season in two. Check history before calling anything new.
+
+The archetype: the established way fans and analysts describe this kind of team, optionally with a short qualifier in parentheses for its style ("Playoff Team (defense-first)"). Pick from: Super Bowl Contender, Playoff Team, Fringe Contender, Pretender (record ahead of its play), Better Than Its Record, Retooling, Rebuilding — or an equally standard term if none fits. Define it in one sentence for this team.
+
+Evidence: every strength, concern and key matchup cites 1-3 numbers from the dossier by JSON path (dot notation from the dossier root, array indexes as numbers: "season.team.netEpa", "season.defense.pressureRate", "gameLog.2.box.rushYds", "nextGame.oppSeason.playByPlay.defRushEpa"). The site shows the real value from that path, so the path must exist exactly. The label is a 1-4 word name for the number.
+
+Projections: per-game or season ranges for the rest of the season (e.g. "Final wins", "Points scored / game", "Points allowed / game").
+
+Betting angles: look at the game's line (spread, total, moneyline), each side's team total, and the season picture, and flag what looks favorable — or say nothing looks off. Give every angle the data really supports, up to five, and none when nothing stands out; never pad the list. Each needs a real reason in the data, not a vibe. Grade each: like (a solid edge), lean (a slight one), or fade (a side the market or the obvious read favors that the data argues against: name that side as the market and say why to go against it).
+
+Style: plain sentences, numbers woven in only where they make the point, no clichés, no filler, never restate the stats table.`;
 
 const evidence = {
   type: 'array',
@@ -161,7 +192,7 @@ const params = (dossier) => ({
   model: MODEL,
   max_tokens: 20000,
   output_config: { effort: EFFORT, format: { type: 'json_schema', schema: SCHEMA } },
-  system: SYSTEM,
+  system: dossier.kind === 'team' ? TEAM_SYSTEM : SYSTEM,
   messages: [{ role: 'user', content: `Dossier:\n${JSON.stringify(dossier)}` }],
 });
 
@@ -209,28 +240,35 @@ function save(id, dossier, message, batch) {
   const text = message.content.find((b) => b.type === 'text')?.text;
   const report = JSON.parse(text);
   const problems = check(report, dossier);
-  const out = { id, name: dossier.player.name, model: MODEL, effort: EFFORT, at: new Date().toISOString(), usage: message.usage, cost: costOf(message.usage, batch), problems, report };
+  const name = dossier.kind === 'team' ? dossier.team.name : dossier.player.name;
+  const out = { id, name, model: MODEL, effort: EFFORT, at: new Date().toISOString(), usage: message.usage, cost: costOf(message.usage, batch), problems, report };
   writeFileSync(path.join(REPORTS, `${id}.json`), JSON.stringify(out, null, 2));
   return out;
 }
 
+// A job's dossier: a player's by gsis id, a team's as "team-BAL"
+const dossierFile = (id) => (id.startsWith('team-') ? path.join(TEAM_DOSSIERS, `${id.slice(5)}.json`) : path.join(DOSSIERS, `${id}.json`));
+const load = (id) => JSON.parse(readFileSync(dossierFile(id), 'utf8'));
+
 // ---- the site's copies: what the tab shows, each evidence with its real value (bad paths dropped), the
-// game it previews, keyed by the row id the site uses (a QB's "QB-<ESPN id>")
+// game it previews, keyed by the row ids the site uses (a QB's "QB-<ESPN id>"; a team's report under its
+// Team, Defense, O-line and Coach rows)
 function publish() {
-  const index = JSON.parse(readFileSync(path.join(ROOT, '.cache/analysis/index.json'), 'utf8'));
-  const siteIds = new Map(index.map((p) => [p.gsis, p.siteId]));
+  const players = JSON.parse(readFileSync(path.join(ROOT, '.cache/analysis/index.json'), 'utf8'));
+  const teams = existsSync(path.join(ROOT, '.cache/analysis/team-index.json')) ? JSON.parse(readFileSync(path.join(ROOT, '.cache/analysis/team-index.json'), 'utf8')) : [];
+  const siteIds = new Map([...players.map((p) => [p.gsis, [p.siteId]]), ...teams.map((t) => [`team-${t.team}`, t.siteIds])]);
   rmSync(SITE, { recursive: true, force: true });
   mkdirSync(SITE, { recursive: true });
   const listed = {};
   for (const f of readdirSync(REPORTS)) {
     const kept = JSON.parse(readFileSync(path.join(REPORTS, f), 'utf8'));
-    const siteId = siteIds.get(kept.id);
-    if (!siteId || !kept.report.take) continue;
-    const dossier = JSON.parse(readFileSync(path.join(DOSSIERS, `${kept.id}.json`), 'utf8'));
+    const ids = siteIds.get(kept.id);
+    if (!ids || !kept.report.take || !existsSync(dossierFile(kept.id))) continue;
+    const dossier = load(kept.id);
     const r = kept.report;
     for (const p of points(r)) p.evidence = p.evidence.map((e) => ({ label: e.label, ...(resolve(dossier, e.path) ?? {}) })).filter((e) => e.value !== undefined);
     const next = dossier.nextGame;
-    const file = siteId.replace(/[^\w-]/g, '_');
+    const file = kept.id.startsWith('team-') ? kept.id : ids[0].replace(/[^\w-]/g, '_');
     writeFileSync(
       path.join(SITE, `${file}.json`),
       JSON.stringify({
@@ -240,10 +278,27 @@ function publish() {
         report: r,
       }),
     );
-    listed[siteId] = file;
+    for (const id of ids) listed[id] = file;
   }
   writeFileSync(path.join(SITE, 'index.json'), JSON.stringify(listed));
-  console.log(`published ${Object.keys(listed).length} analyses`);
+  console.log(`published ${new Set(Object.values(listed)).size} analyses (${Object.keys(listed).length} rows)`);
+}
+
+// The jobs the command line asks for: --qbs (every QB), --teams (every team), --team=BAL, and names
+function jobs() {
+  const args = process.argv.slice(2);
+  const players = JSON.parse(readFileSync(path.join(ROOT, '.cache/analysis/index.json'), 'utf8'));
+  const teams = JSON.parse(readFileSync(path.join(ROOT, '.cache/analysis/team-index.json'), 'utf8'));
+  const names = args.filter((a) => !a.startsWith('--')).map((x) => x.toLowerCase());
+  const ids = new Set();
+  if (args.includes('--qbs')) for (const p of players) if (p.pos === 'QB') ids.add(p.gsis);
+  if (args.includes('--teams')) for (const t of teams) ids.add(`team-${t.team}`);
+  for (const a of args) if (a.startsWith('--team=')) ids.add(`team-${a.slice(7).toUpperCase()}`);
+  for (const p of players) if (names.some((n) => p.name.toLowerCase().includes(n))) ids.add(p.gsis);
+  // (--skip-done: not the ones already written today)
+  const today = new Date().toISOString().slice(0, 10);
+  const done = (id) => existsSync(path.join(REPORTS, `${id}.json`)) && JSON.parse(readFileSync(path.join(REPORTS, `${id}.json`), 'utf8')).at.startsWith(today);
+  return [...ids].filter((id) => !args.includes('--skip-done') || !done(id));
 }
 
 async function main() {
@@ -251,18 +306,23 @@ async function main() {
   if (!process.env.ANTHROPIC_API_KEY) throw new Error('ANTHROPIC_API_KEY is not set');
   mkdirSync(REPORTS, { recursive: true });
   const client = new Anthropic();
-  const index = JSON.parse(readFileSync(path.join(ROOT, '.cache/analysis/index.json'), 'utf8'));
-  const load = (id) => JSON.parse(readFileSync(path.join(DOSSIERS, `${id}.json`), 'utf8'));
+  // (--resume: wait for the last batch sent, and keep its results)
+  const resume = process.argv.includes('--resume');
+  const ids = resume ? [] : jobs();
+  if (!ids.length && !resume) throw new Error('nothing to analyze (names, --qbs, --teams, --team=BAL)');
 
-  if (process.argv.includes('--batch')) {
-    const ids = readdirSync(DOSSIERS).map((f) => f.replace('.json', ''));
-    const batch = await client.messages.batches.create({ requests: ids.map((id) => ({ custom_id: id, params: params(load(id)) })) });
-    console.log(`batch ${batch.id}: ${ids.length} requests`);
-    writeFileSync(path.join(ROOT, '.cache/analysis/batch.json'), JSON.stringify({ id: batch.id, at: new Date().toISOString() }));
+  if (process.argv.includes('--batch') || resume) {
+    const batch = resume
+      ? JSON.parse(readFileSync(path.join(ROOT, '.cache/analysis/batch.json'), 'utf8'))
+      : await client.messages.batches.create({ requests: ids.map((id) => ({ custom_id: id, params: params(load(id)) })) });
+    if (!resume) {
+      console.log(`batch ${batch.id}: ${ids.length} requests`);
+      writeFileSync(path.join(ROOT, '.cache/analysis/batch.json'), JSON.stringify({ id: batch.id, ids, at: new Date().toISOString() }));
+    }
     for (;;) {
       const b = await client.messages.batches.retrieve(batch.id);
       if (b.processing_status === 'ended') break;
-      console.log(`  ${b.request_counts.processing} processing...`);
+      console.log(`  ${b.request_counts.processing} processing, ${b.request_counts.succeeded} done...`);
       await new Promise((res) => setTimeout(res, 60_000));
     }
     let total = 0;
@@ -279,18 +339,15 @@ async function main() {
     return publish();
   }
 
-  const filters = process.argv.slice(2).map((x) => x.toLowerCase());
-  const picks = index.filter((p) => filters.some((f) => p.name.toLowerCase().includes(f)));
-  if (!picks.length) throw new Error('no players match');
   let total = 0;
-  const one = async (p) => {
-    const dossier = load(p.gsis);
+  const one = async (id) => {
+    const dossier = load(id);
     const message = await client.messages.stream(params(dossier)).finalMessage();
-    const out = save(p.gsis, dossier, message, false);
+    const out = save(id, dossier, message, false);
     total += out.cost;
     console.log(`${out.name}: ${message.usage.input_tokens} in / ${message.usage.output_tokens} out, $${out.cost.toFixed(3)} (batched $${(out.cost / 2).toFixed(3)})${out.problems.length ? `\n  ${out.problems.join('\n  ')}` : ''}`);
   };
-  for (let i = 0; i < picks.length; i += 4) await Promise.all(picks.slice(i, i + 4).map(one));
+  for (let i = 0; i < ids.length; i += 4) await Promise.all(ids.slice(i, i + 4).map(one));
   console.log(`total $${total.toFixed(2)} live (batched about $${(total / 2).toFixed(2)})`);
   publish();
 }
