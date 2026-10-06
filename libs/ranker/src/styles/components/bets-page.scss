@@ -2,7 +2,14 @@
 
 // The Bets page (dev only): one scoreboard panel down the middle of the page, a row per call, most
 // confident first; like green, lean yellow, fade red (as on the card's Analysis tab)
+// The page on a card-room table: blue poker felt (a woven grain, light pooled in the middle, the edges
+// falling off into shadow) instead of the field
 :host {
+  background:
+    radial-gradient(ellipse 70% 55% at 50% 35%, rgba(120, 190, 255, 0.12), transparent 70%),
+    radial-gradient(ellipse at center, transparent 45%, rgba(0, 0, 0, 0.6) 100%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.28 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
+    linear-gradient(180deg, #11487a, #0a2d50);
   display: block;
   height: calc(100% - var(--sport-bar-height));
   overflow-y: auto;
@@ -14,8 +21,13 @@
   padding: 26px 16px 40px;
 }
 
+// (a thin gold edge, like a table's printed line)
 .bets-panel {
   @include v.scoreboard-panel(12px);
+  border-color: rgba(212, 175, 55, 0.45);
+  box-shadow:
+    0 0 0 4px rgba(212, 175, 55, 0.08),
+    0 18px 40px rgba(0, 0, 0, 0.5);
   padding: 18px 20px 20px;
 }
 
@@ -50,58 +62,45 @@
   margin-left: auto;
 }
 
-.bets-filters {
+// the explanation, and the game dropdown at its right
+.bets-sub {
+  align-items: center;
   display: flex;
   flex-wrap: wrap;
   gap: 10px 18px;
   justify-content: space-between;
-  margin-top: 14px;
+  margin-top: 6px;
+
+  .bets-how {
+    flex: 1 1 320px;
+    margin: 0;
+  }
 }
 
-.bets-chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
+.bets-game {
+  appearance: none;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24'%3E%3Cpath fill='%23ffcd00' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E") right 10px center / 14px no-repeat,
+    rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 8px;
+  color: #fff;
+  cursor: pointer;
+  font-family: v.$font-base;
+  font-size: 13px;
+  font-weight: 800;
+  min-width: 220px;
+  padding: 7px 32px 7px 12px;
 
-  button {
-    background: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: 999px;
-    color: rgba(255, 255, 255, 0.75);
-    cursor: pointer;
-    font-family: v.$font-base;
-    font-size: 12px;
-    font-weight: 800;
-    letter-spacing: 0.4px;
-    padding: 5px 12px;
+  &:hover,
+  &:focus {
+    border-color: var(--scoreboard-led);
+    outline: none;
+  }
 
-    &:hover {
-      color: var(--scoreboard-led);
-    }
-
-    &.on {
-      background: color-mix(in srgb, var(--scoreboard-led) 18%, transparent);
-      border-color: var(--scoreboard-led);
-      color: var(--scoreboard-led);
-    }
-
-    &.like.on {
-      background: color-mix(in srgb, #3ecf6e 18%, transparent);
-      border-color: #3ecf6e;
-      color: #3ecf6e;
-    }
-
-    &.lean.on {
-      background: color-mix(in srgb, #ffcd00 18%, transparent);
-      border-color: #ffcd00;
-      color: #ffcd00;
-    }
-
-    &.fade.on {
-      background: color-mix(in srgb, #ff5a4f 18%, transparent);
-      border-color: #ff5a4f;
-      color: #ff5a4f;
-    }
+  option {
+    background: #1b1b1b;
+    color: #fff;
   }
 }
 
@@ -225,6 +224,12 @@
   font-size: 13px;
 }
 
+// the bet itself in the hand (DynaPuff), like the card's headline numbers
+.bet-main b {
+  @include v.hand(16px);
+  letter-spacing: 0.2px;
+}
+
 // the score out of 10, in DynaPuff: green 7+, yellow 5-6, muted below
 .bet-score {
   color: rgba(255, 255, 255, 0.45);
@@ -285,7 +290,6 @@
 .bets-how {
   color: rgba(255, 255, 255, 0.5);
   font-size: 12.5px;
-  margin: 6px 0 0;
 }
 
 @media (max-width: 700px) {

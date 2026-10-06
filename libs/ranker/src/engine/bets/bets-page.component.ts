@@ -72,8 +72,8 @@ function callKey(b: BetEntry): string {
 export class BetsPageComponent implements OnInit {
   rows: BetRow[] | null = null;
   updated: string | null = null;
-  // the filter: a grade, or all (within the top 50)
-  grade: 'all' | 'like' | 'lean' | 'fade' = 'all';
+  // the filter: all games (the top 50 bets), or one game (all of its bets), by its matchup
+  game = '';
   readonly limit = 50;
   open = new Set<number>();
 
@@ -121,17 +121,27 @@ export class BetsPageComponent implements OnInit {
     this.rows = [...kept.values()];
   }
 
-  // The top 50 bets, and of them the grade asked for
-  get top(): BetRow[] {
-    return (this.rows ?? []).slice(0, this.limit);
-  }
-
+  // All games: the top 50 bets; a game: all of its bets
   get shown(): BetRow[] {
-    return this.top.filter((r) => this.grade === 'all' || r.strength === this.grade);
+    const rows = this.rows ?? [];
+    return this.game ? rows.filter((r) => this.gameKey(r) === this.game) : rows.slice(0, this.limit);
   }
 
-  count(grade: 'like' | 'lean' | 'fade'): number {
-    return this.top.filter((r) => r.strength === grade).length;
+  // The week's games with bets, by kickoff: the dropdown's choices, each with how many bets it has
+  get games(): { key: string; label: string; count: number }[] {
+    const byGame = new Map<string, { key: string; label: string; date: string; count: number }>();
+    for (const r of this.rows ?? []) {
+      if (!r.game) continue;
+      const key = this.gameKey(r);
+      const game = byGame.get(key) ?? { key, label: `${r.game.matchup} · ${new Date(`${r.game.date}T12:00:00`).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}`, date: r.game.date, count: 0 };
+      game.count++;
+      byGame.set(key, game);
+    }
+    return [...byGame.values()].sort((a, b) => a.date.localeCompare(b.date) || a.label.localeCompare(b.label));
+  }
+
+  gameKey(r: BetRow): string {
+    return `${r.sport}|${r.game?.matchup ?? ''}`;
   }
 
   toggle(id: number): void {

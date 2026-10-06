@@ -10,17 +10,20 @@
           <span class="bets-updated">Updated {{ updated | date: 'EEE MMM d, h:mm a' }}</span>
         }
       </div>
-      <p class="bets-how">Ranked by how sure the analysis is that each bet wins (out of 10), then by how many reports make the same call (listed once). The top {{ limit }} of {{ rows?.length ?? 0 }}.</p>
-      @if (rows?.length) {
-        <div class="bets-filters">
-          <div class="bets-chips">
-            <button type="button" [class.on]="grade === 'all'" (click)="grade = 'all'">Top {{ top.length }}</button>
-            <button type="button" class="like" [class.on]="grade === 'like'" (click)="grade = 'like'">Like {{ count('like') }}</button>
-            <button type="button" class="lean" [class.on]="grade === 'lean'" (click)="grade = 'lean'">Lean {{ count('lean') }}</button>
-            <button type="button" class="fade" [class.on]="grade === 'fade'" (click)="grade = 'fade'">Fade {{ count('fade') }}</button>
-          </div>
-        </div>
-      }
+      <div class="bets-sub">
+        <p class="bets-how">
+          Ranked by how sure the analysis is that each bet wins (out of 10), then by how many analyses make the same call.
+          {{ game ? 'Every bet on this game.' : 'The top ' + limit + ' across all games.' }}
+        </p>
+        @if (rows?.length) {
+          <select class="bets-game" aria-label="Game" [(ngModel)]="game">
+            <option value="">All Games</option>
+            @for (g of games; track g.key) {
+              <option [value]="g.key">{{ g.label }} ({{ g.count }})</option>
+            }
+          </select>
+        }
+      </div>
     </header>
 
     @if (rows === null) {
