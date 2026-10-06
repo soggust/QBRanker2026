@@ -388,7 +388,7 @@
                 }
                 @for (b of r.bets; track $index) {
                   <div class="ai-bet">
-                    <span class="ai-bet-strength" [ngClass]="b.strength === 'strong' ? 'like' : b.strength">{{ b.strength === 'strong' ? 'like' : b.strength }}</span>
+                    <span class="ai-bet-strength" [ngClass]="b.strength === 'fade' ? 'fade' : 'like'">{{ b.strength === 'fade' ? 'fade' : 'like' }}</span>
                     <div class="ai-bet-main">
                       <span class="ai-bet-pick"
                         >@if (b.strength === 'fade') {<b>Fade {{ b.market }}</b><small>bet {{ b.lean }} instead</small>} @else {<b>{{ b.lean }}</b><small>{{ b.market }}</small>}</span

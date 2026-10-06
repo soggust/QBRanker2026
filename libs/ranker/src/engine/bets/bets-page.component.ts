@@ -145,6 +145,12 @@ export class BetsPageComponent implements OnInit {
     return `${r.sport}|${r.game?.matchup ?? ''}`;
   }
 
+  // A bet's side: fade (going against what it names) or like (backing it); an older report's lean is a
+  // like (how sure is the confidence's job)
+  side(r: BetRow): 'like' | 'fade' {
+    return r.strength === 'fade' ? 'fade' : 'like';
+  }
+
   // A bet's confidence as words: high (7 and up), medium (5-6), low
   level(r: BetRow): 'high' | 'medium' | 'low' {
     return r.sureness >= 7 ? 'high' : r.sureness >= 5 ? 'medium' : 'low';
