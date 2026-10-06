@@ -83,6 +83,22 @@ if (built === 3) {
 }
 if (built !== 0) process.exit(built ?? 1);
 
+// Nothing new since the last run (the offseason): don't pay to write the same reports again
+const lastRun = existsSync(MARK) ? JSON.parse(readFileSync(MARK, 'utf8')).at : null;
+const [header, ...rows] = readFileSync(path.join(ROOT, '.cache/nflverse/games.csv'), 'utf8').trim().split('\n');
+const cols = header.split(',');
+const [dayCol, scoreCol] = [cols.indexOf('gameday'), cols.indexOf('home_score')];
+const latestGame = rows
+  .map((line) => line.split(','))
+  .filter((c) => c[scoreCol] && c[scoreCol] !== 'NA')
+  .map((c) => c[dayCol])
+  .sort()
+  .at(-1);
+if (lastRun && latestGame && latestGame < lastRun.slice(0, 10)) {
+  console.log(`${stamp()}: no games since the last run (${lastRun.slice(0, 10)}); nothing to do`);
+  process.exit(0);
+}
+
 console.log(`${stamp()}: analyzing every team and QB`);
 const analyzed = run('analyze.mjs', ['--batch', '--teams', '--qbs']);
 if (analyzed !== 0) process.exit(analyzed ?? 1);
