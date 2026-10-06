@@ -238,7 +238,7 @@
   letter-spacing: 0.2px;
 }
 
-// the confidence in words, white on the row's tint (low dimmer)
+// the confidence in words: light green high, yellow medium, dim white low
 .bet-score {
   color: rgba(255, 255, 255, 0.92);
   font-size: 10px;
@@ -246,6 +246,14 @@
   letter-spacing: 0.8px;
   text-align: right;
   text-transform: uppercase;
+
+  &.high {
+    color: #8ff0ae;
+  }
+
+  &.medium {
+    color: #ffd84d;
+  }
 
   &.low {
     color: rgba(255, 255, 255, 0.55);
