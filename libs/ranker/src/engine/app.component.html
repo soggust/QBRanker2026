@@ -1,7 +1,11 @@
 <!-- Sport bar: a link to each sport's app on this site (the page shrinks by its height) -->
 <nav class="sport-bar" aria-label="Sport">
   @for (s of sports; track s.id) {
-    <a [href]="'/' + s.id + '/'" [class.active]="s.id === sport" [attr.aria-current]="s.id === sport ? 'page' : null">{{ s.label }}</a>
+    <a [href]="'/' + s.id + '/'" [class.active]="s.id === sport && !betsOpen" [attr.aria-current]="s.id === sport && !betsOpen ? 'page' : null">{{ s.label }}</a>
+  }
+  <!-- Dev only: every sport's betting angles on one page (#bets) -->
+  @if (devMode) {
+    <a href="#bets" [class.active]="betsOpen" [attr.aria-current]="betsOpen ? 'page' : null">Bets</a>
   }
   <!-- The site's name on the far right, after a little podium (#1 on the middle step) in the sport's color;
        a click reloads this sport's page fresh, from the top -->
@@ -16,6 +20,9 @@
   </a>
 </nav>
 
+@if (betsOpen) {
+  <bets-page></bets-page>
+} @else {
 <main [class.menu-open]="menuOpen" [class.sidebar-collapsed]="sidebarCollapsed">
   <!-- Filters menu: opened by the filter button, closed by it or a click anywhere else -->
   <div class="sidebar-shell">
@@ -58,6 +65,7 @@
     }
   </div>
 </main>
+}
 
 <!-- About / FAQ, opened from the info button in the footer -->
 @if (aboutOpen$ | async) {

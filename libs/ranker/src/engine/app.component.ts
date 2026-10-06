@@ -1,4 +1,4 @@
-import { Component, HostListener } from '@angular/core';
+import { Component, HostListener, isDevMode } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { PositionService } from '@ranker/engine/position.service';
 import { POSITIONS, Position } from '@sport/positions';
@@ -23,6 +23,15 @@ export class AppComponent {
   // /<sport>/); this one is lit
   readonly sport = SPORT.id;
   readonly sports = SPORT_LINKS;
+
+  // Dev only: the Bets page (#bets) in place of the rankings, from the sport bar's Bets link
+  readonly devMode = isDevMode();
+  betsOpen = this.devMode && location.hash === '#bets';
+
+  @HostListener('window:hashchange')
+  onHashChange(): void {
+    this.betsOpen = this.devMode && location.hash === '#bets';
+  }
 
   position$ = this.positionService.position$;
   aboutOpen$ = this.positionService.aboutOpen$;

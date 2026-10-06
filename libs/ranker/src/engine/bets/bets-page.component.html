@@ -1,0 +1,78 @@
+<!-- Every betting angle in the latest analyses, one row per call, most confident first; a row opens to
+     each report's reasoning -->
+<div class="bets-page">
+  <div class="bets-panel">
+    <header class="bets-head">
+      <div class="bets-title">
+        <mat-icon fontIcon="paid"></mat-icon>
+        <h1>Bets</h1>
+        @if (updated) {
+          <span class="bets-updated">Updated {{ updated | date: 'EEE MMM d, h:mm a' }}</span>
+        }
+      </div>
+      @if (calls?.length) {
+        <div class="bets-filters">
+          <div class="bets-chips">
+            <button type="button" [class.on]="grade === 'all'" (click)="grade = 'all'">All {{ calls!.length }}</button>
+            <button type="button" class="like" [class.on]="grade === 'like'" (click)="grade = 'like'">Like {{ count('like') }}</button>
+            <button type="button" class="lean" [class.on]="grade === 'lean'" (click)="grade = 'lean'">Lean {{ count('lean') }}</button>
+            <button type="button" class="fade" [class.on]="grade === 'fade'" (click)="grade = 'fade'">Fade {{ count('fade') }}</button>
+          </div>
+          <div class="bets-chips">
+            @for (s of shares; track s.value) {
+              <button type="button" [class.on]="share === s.value" (click)="share = s.value">{{ s.label }}</button>
+            }
+          </div>
+        </div>
+      }
+    </header>
+
+    @if (calls === null) {
+      <p class="bets-note">Loading…</p>
+    } @else if (!calls.length) {
+      <p class="bets-note">No bets in the latest analyses.</p>
+    } @else {
+      <ol class="bets-list">
+        @for (c of shown; track c.key; let i = $index) {
+          <li class="bet" [class.open]="open.has(c.key)">
+            <button type="button" class="bet-row" (click)="toggle(c.key)" [attr.aria-expanded]="open.has(c.key)">
+              <span class="bet-rank">{{ i + 1 }}</span>
+              <span class="bet-grade" [ngClass]="c.strength">{{ c.strength }}</span>
+              <span class="bet-main">
+                <b>{{ c.pick }}</b>
+                <small>{{ c.market }}</small>
+              </span>
+              <span class="bet-game">
+                @if (c.game) {
+                  <b>{{ c.game.matchup }}</b>
+                  <small>
+                    {{ c.sport | uppercase }} · Wk {{ c.game.week }}
+                    @if (c.game.line) {
+                      · {{ c.game.line.line }}@if (c.game.line.overUnder) { · O/U {{ c.game.line.overUnder }}}
+                    }
+                  </small>
+                }
+              </span>
+              <span class="bet-agree" [class.many]="c.sources.length > 1" [title]="c.sources.length + ' report' + (c.sources.length > 1 ? 's' : '') + ' make this call'">×{{ c.sources.length }}</span>
+              <mat-icon class="bet-chevron" [fontIcon]="open.has(c.key) ? 'expand_less' : 'expand_more'"></mat-icon>
+            </button>
+            @if (open.has(c.key)) {
+              <div class="bet-reasons">
+                @for (s of c.sources; track $index) {
+                  <div class="bet-reason">
+                    <span class="bet-source">
+                      <span class="bet-grade small" [ngClass]="s.strength">{{ s.strength }}</span>
+                      <b>{{ sourceLabel(s) }}</b>
+                      <small>{{ s.lean }} · {{ s.market }}@if (s.confidence) { · {{ s.confidence }} confidence}</small>
+                    </span>
+                    <p>{{ s.reason }}</p>
+                  </div>
+                }
+              </div>
+            }
+          </li>
+        }
+      </ol>
+    }
+  </div>
+</div>

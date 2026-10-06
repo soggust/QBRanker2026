@@ -19,6 +19,7 @@ import { MatMenuModule } from '@angular/material/menu';
 import { AboutComponent } from '@sport/about/about.component';
 import { AboutFrameComponent } from './about/about-frame.component';
 import { PositionService } from './position.service';
+import { BetsPageComponent } from './bets/bets-page.component';
 
 @NgModule({
   declarations: [
@@ -31,6 +32,7 @@ import { PositionService } from './position.service';
     ColumnDragDirective,
     AboutComponent,
     AboutFrameComponent,
+    BetsPageComponent,
   ],
   bootstrap: [AppComponent],
   // (the column headers' drag and drop reorders columns through the position service)

@@ -260,6 +260,8 @@ function publish() {
   rmSync(SITE, { recursive: true, force: true });
   mkdirSync(SITE, { recursive: true });
   const listed = {};
+  // every betting angle, for the dev-only Bets page: its game, its source, the call and how sure
+  const bets = [];
   for (const f of readdirSync(REPORTS)) {
     const kept = JSON.parse(readFileSync(path.join(REPORTS, f), 'utf8'));
     const ids = siteIds.get(kept.id);
@@ -279,8 +281,27 @@ function publish() {
       }),
     );
     for (const id of ids) listed[id] = file;
+    const team = (dossier.kind === 'team' ? dossier.team.name : (dossier.player.team ?? '')).match(/\((\w+)\)/)?.[1] ?? null;
+    for (const b of r.bets ?? []) {
+      bets.push({
+        sport: 'nfl',
+        source: kept.name,
+        kind: dossier.kind === 'team' ? 'team' : 'player',
+        position: dossier.player?.position ?? null,
+        rowId: ids[0],
+        team,
+        game: next && team ? { week: next.week, date: next.date, matchup: next.at === 'home' ? `${next.opp} @ ${team}` : `${team} @ ${next.opp}`, line: next.line ?? null } : null,
+        market: b.market,
+        lean: b.lean,
+        strength: b.strength === 'strong' ? 'like' : b.strength,
+        reason: b.reason,
+        confidence: r.confidence?.level ?? null,
+        at: kept.at,
+      });
+    }
   }
   writeFileSync(path.join(SITE, 'index.json'), JSON.stringify(listed));
+  writeFileSync(path.join(SITE, 'bets.json'), JSON.stringify({ at: new Date().toISOString(), bets }));
   console.log(`published ${new Set(Object.values(listed)).size} analyses (${Object.keys(listed).length} rows)`);
 }
 
