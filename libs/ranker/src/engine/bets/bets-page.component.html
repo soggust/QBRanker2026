@@ -62,9 +62,6 @@
                 <p>{{ r.reason }}</p>
                 <p class="bet-meta">
                   {{ r.confidence }} confidence overall
-                  @if (r.estimated) {
-                    · score estimated (written before bets were scored)
-                  }
                   @if (r.agree) {
                     · {{ r.agree }} other analys{{ r.agree > 1 ? 'es' : 'is' }} agree{{ r.agree > 1 ? '' : 's' }}
                   }
