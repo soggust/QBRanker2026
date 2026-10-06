@@ -156,6 +156,31 @@ about-panel ::-webkit-scrollbar-track {
   background-color: #2e2e2e !important;
 }
 
+// The Bets page (dev only) scrolls on its blue felt: a felt-blue thumb on a dark navy track
+bets-page::-webkit-scrollbar {
+  height: 10px;
+  width: 10px;
+}
+
+bets-page::-webkit-scrollbar-track {
+  background-color: #061a30 !important;
+}
+
+bets-page::-webkit-scrollbar-thumb {
+  background: #1d5f9e !important;
+  background-clip: padding-box !important;
+
+  &:hover {
+    background: #2b7ac4 !important;
+    background-clip: padding-box !important;
+  }
+
+  &:active {
+    background: #17507f !important;
+    background-clip: padding-box !important;
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Menus and dropdown lists: scoreboard panels
 // ---------------------------------------------------------------------------

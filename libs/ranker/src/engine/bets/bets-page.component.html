@@ -11,10 +11,6 @@
         }
       </div>
       <div class="bets-sub">
-        <p class="bets-how">
-          Ranked by how sure the analysis is that each bet wins, then by how many analyses make the same call.
-          {{ game ? 'The top ' + gameLimit + ' on this game.' : 'The top ' + limit + ' across all games.' }}
-        </p>
         @if (rows?.length) {
           <select class="bets-game" aria-label="Game" [(ngModel)]="game">
             <option value="">All Games</option>
