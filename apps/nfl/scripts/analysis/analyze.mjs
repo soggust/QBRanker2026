@@ -275,20 +275,34 @@ function playing(id, dossier) {
   return starters.get(dossier.player.team)?.id === id;
 }
 
-// A bet as one you could place, or null: "avoid ..." isn't a bet; a fade written as "Fade WSH -3" is the
-// other side ("NYG +3", "Over" -> "Under"), dropped when there's no telling what that is
-function actionable(b, team, opp) {
-  if (/^avoid\b/i.test(b.lean.trim()) || /\bany\b/i.test(b.market)) return null;
-  if (!/^fade\b/i.test(b.lean.trim())) return b;
-  const faded = b.lean.trim().replace(/^fade\s+/i, '');
-  const total = faded.match(/^(over|under)\s*(\d+(?:\.\d+)?)?/i);
-  if (total) return { ...b, lean: `${/over/i.test(total[1]) ? 'Under' : 'Over'}${total[2] ? ` ${total[2]}` : ''}` };
-  const side = faded.match(/^([A-Z]{2,3})\s*([+-])(\d+(?:\.\d+)?)/);
-  if (side && team && opp) {
-    const other = side[1] === team || (side[1] === 'WSH' && team === 'WAS') ? opp : team;
-    return { ...b, lean: `${other} ${side[2] === '-' ? '+' : '-'}${side[3]}` };
-  }
+// A bet as one you could place, or null. "Avoid ...", "no edge" and "pass" aren't bets. A side spelled out
+// inside ("Against Seattle (SF +2.5)") is that side. Going against something ("Fade WSH -3", "Against
+// NE") is the other side of what it names, or of its market: a spread the other team's, a moneyline the
+// other team's, a total the other way; a player's or team's own numbers stay as written; anything else
+// (no telling the other side) is dropped
+const SAME = { WSH: 'WAS', LAR: 'LA' };
+function otherSide(text, team, opp) {
+  const total = text.match(/\b(over|under)\s*(\d+(?:\.\d+)?)?/i);
+  if (total && !/team total/i.test(text)) return `${/over/i.test(total[1]) ? 'Under' : 'Over'}${total[2] ? ` ${total[2]}` : ''}`;
+  if (!team || !opp) return null;
+  const other = (abbr) => ((SAME[abbr] ?? abbr) === team ? opp : team);
+  const ml = text.match(/\b([A-Z]{2,3})\b[^/]*?\b(?:moneyline|ML)\b/);
+  if (ml) return `${other(ml[1])} ML`;
+  const side = text.match(/\b([A-Z]{2,3})\s*[^\d+-]*([+-])(\d+(?:\.\d+)?)/);
+  if (side) return `${other(side[1])} ${side[2] === '-' ? '+' : '-'}${side[3]}`;
   return null;
+}
+function actionable(b, team, opp) {
+  const lean = b.lean.trim();
+  if (/^(avoid|no edge|no bet|pass|none|stay away)\b/i.test(lean) || /\bany\b/i.test(b.market)) return null;
+  const inner = lean.match(/\(([A-Z]{2,3})\s*([+-]\d+(?:\.\d+)?)\)/);
+  if (inner) return { ...b, lean: `${inner[1]} ${inner[2]}` };
+  const against = lean.match(/^(?:fade|against)\s+(.*)$/i);
+  if (!against) return b;
+  const flipped = otherSide(against[1], team, opp) ?? otherSide(b.market, team, opp);
+  if (flipped) return { ...b, lean: flipped };
+  // (a player's or team's own numbers: "against the streak" stays as written)
+  return /\b(passing|rushing|receiving|sacks?|interceptions?|touchdowns?|tds?|yards|completions)\b/i.test(b.market) ? b : null;
 }
 
 // ---- the site's copies: what the tab shows, each evidence with its real value (bad paths dropped), the

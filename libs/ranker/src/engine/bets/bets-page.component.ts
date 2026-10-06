@@ -57,25 +57,25 @@ function callKey(b: BetEntry): string {
   const marketTotal = b.market.match(/^(?:over\/under|over|under|o\/u|total)\s+(\d+(?:\.\d+)?)$/i);
   if (leanTotal) return `${game}|total ${leanTotal[1].toLowerCase()} ${leanTotal[2]}`;
   if (bare && marketTotal) return `${game}|total ${bare[1].toLowerCase()} ${marketTotal[1]}`;
-  // a side: "ATL +2.5", or a moneyline
+  // a moneyline ("LV ML", "LV +160" on the market "LV moneyline +160"), or a side: "ATL +2.5"
+  const ml = /\b(ML|moneyline)\b/i.test(`${lean} ${b.market}`) ? `${lean} ${b.market}`.match(/\b([A-Z]{2,3})\b/) : null;
+  if (ml) return `${game}|${team(ml[1])} ml`;
   const spread = lean.match(/\b([A-Z]{2,3})\s*([+-]\d+(?:\.\d+)?)/);
   if (spread) return `${game}|${team(spread[1])} ${spread[2]}`;
-  const ml = `${lean} ${b.market}`.match(/\b([A-Z]{2,3})\s+(?:ML|moneyline)\b/i);
-  if (ml) return `${game}|${team(ml[1])} ml`;
   // anything else (a player's or a team's own numbers): its market and direction
   const direction = lean.match(/\b(over|under|yes|no)\b/i)?.[1]?.toLowerCase() ?? lean.toLowerCase();
   return `${game}|${b.market.toLowerCase().replace(/\s*\(.*\)/, '')}|${direction}`;
 }
 
-// The line a call is on, whichever side it takes: a total ("...|total 43.5"), a spread ("...|spread 3"),
-// a moneyline ("...|ml"); null for anything else (a player's or a team's own numbers)
-function lineOf(key: string): string | null {
+// The question a call answers, and its answer: a total ("...|total 43.5", over or under), or who wins the
+// game (its spread and moneyline together: the team backed); null for anything else (a player's or a
+// team's own numbers)
+function lineOf(key: string): { line: string; side: string } | null {
   const [sport, game, call] = key.split('|');
-  const total = call?.match(/^total (?:over|under) (.+)$/);
-  if (total) return `${sport}|${game}|total ${total[1]}`;
-  const spread = call?.match(/^[A-Z]{2,3} [+-]([\d.]+)$/);
-  if (spread) return `${sport}|${game}|spread ${spread[1]}`;
-  if (/^[A-Z]{2,3} ml$/.test(call ?? '')) return `${sport}|${game}|ml`;
+  const total = call?.match(/^total (over|under) (.+)$/);
+  if (total) return { line: `${sport}|${game}|total ${total[2]}`, side: total[1] };
+  const side = call?.match(/^([A-Z]{2,3}) (?:[+-][\d.]+|ml)$/);
+  if (side) return { line: `${sport}|${game}|winner`, side: side[1] };
   return null;
 }
 
@@ -136,21 +136,22 @@ export class BetsPageComponent implements OnInit {
     // the same call from several reports: listed once, as its highest-ranked report has it
     const kept = new Map<string, BetRow>();
     for (const r of rows) if (!kept.has(r.key)) kept.set(r.key, r);
-    // opposite calls on the same line (the over and the under, one side and the other): the side more
-    // analyses make wins (then the surer one); an even split shows neither
-    const sides = new Map<string, BetRow[]>();
+    // opposite answers to the same question (the over and the under; one team and the other, by spread
+    // or moneyline): the side more analyses back wins, its bets kept and the other's
+    // dropped; an even split shows neither
+    const questions = new Map<string, Map<string, BetRow[]>>();
     for (const r of kept.values()) {
-      const line = lineOf(r.key);
-      if (!line) continue;
-      if (!sides.has(line)) sides.set(line, []);
-      sides.get(line)!.push(r);
+      const q = lineOf(r.key);
+      if (!q) continue;
+      const answers = questions.get(q.line) ?? questions.set(q.line, new Map()).get(q.line)!;
+      answers.set(q.side, [...(answers.get(q.side) ?? []), r]);
     }
-    for (const calls of sides.values()) {
-      if (calls.length < 2) continue;
-      const ranked = [...calls].sort((a, b) => b.agree - a.agree || b.sureness - a.sureness);
-      const [best, next] = ranked;
-      const tied = best.agree === next.agree && best.sureness === next.sureness;
-      for (const r of ranked) if (tied || r !== best) kept.delete(r.key);
+    for (const answers of questions.values()) {
+      if (answers.size < 2) continue;
+      const support = (rs: BetRow[]) => ({ count: rs.reduce((n, r) => n + r.agree + 1, 0), sure: Math.max(...rs.map((r) => r.sureness)) });
+      const ranked = [...answers.values()].map((rs) => ({ rs, ...support(rs) })).sort((a, b) => b.count - a.count || b.sure - a.sure);
+      const tied = ranked[0].count === ranked[1].count;
+      for (const [i, side] of ranked.entries()) if (tied || i > 0) for (const r of side.rs) kept.delete(r.key);
     }
     this.rows = [...kept.values()];
   }
