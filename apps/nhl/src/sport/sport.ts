@@ -8,6 +8,8 @@ interface NhlGameLogs {
   skater: string[];
   goalie: string[];
   logs: Record<string, (string | number)[][]>;
+  // each player's playoff games, the newest of his log
+  playoffs?: Record<string, number>;
 }
 // (whether the earlier seasons' files are there: player logs for past seasons)
 const PAST_SEASON_LOGS = false;
@@ -197,7 +199,8 @@ export const SPORT: SportConfig = {
       const columns = (goalie ? file.goalie : file.skater).map((label) => ({ label }));
       return {
         columns,
-        rows: rows.map(([date, vs, result, ...values]) => ({
+        rows: rows.map(([date, vs, result, ...values], i) => ({
+          playoff: i < (file.playoffs?.[String(player.id)] ?? 0),
           date: String(date),
           vs: String(vs),
           // (the opponent's logo, from the abbreviation in "@ TOR")

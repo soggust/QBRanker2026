@@ -232,11 +232,6 @@ html {
 
     .menu-col + .menu-col {
       border-left: 1px solid rgba(255, 255, 255, 0.12);
-
-      > .menu-section:first-child {
-        border-top: none;
-        padding-top: 6px;
-      }
     }
   }
 }
@@ -253,28 +248,27 @@ html {
     text-shadow: var(--text-shadow-small);
   }
 
-  // Sections (Stats / Display / Players): small caps labels with a rule above
+  // Sections (Format / Display): headed like the card's groups: an icon in the sport's light, the name in
+  // white, a line under them
   .menu-section {
-    border-top: 1px solid rgba(255, 255, 255, 0.12);
-    color: var(--scoreboard-led);
+    align-items: center;
+    border-bottom: 1px solid color-mix(in srgb, var(--scoreboard-led) 40%, transparent);
+    color: #fff;
     cursor: default;
+    display: flex;
     font-family: v.$font-base;
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 800;
+    gap: 8px;
     letter-spacing: 1.5px;
-    padding: 10px 16px 4px;
+    margin: 10px 16px 6px;
+    padding: 4px 0 7px;
     text-transform: uppercase;
 
-    &:first-child {
-      border-top: none;
-      padding-top: 6px;
+    .mat-icon {
+      color: var(--scoreboard-led);
+      @include v.icon-size(18px);
     }
-  }
-
-  // (the Display column's section, under Format in one column, keeps its rule above)
-  .menu-col + .menu-col > .menu-section:first-child {
-    border-top: 1px solid rgba(255, 255, 255, 0.12);
-    padding-top: 10px;
   }
 
   .menu-icon {
@@ -315,6 +309,26 @@ html {
     // (not Min Games: only its buttons are clickable)
     &:not(.min-games-item):hover span {
       color: var(--scoreboard-led) !important;
+    }
+  }
+
+  // Format's rows: a slot on the left as wide as Min Games' stepper (a value, the stepper, a switch), the
+  // names lined up behind it
+  .menu-slot {
+    align-items: center;
+    display: inline-flex;
+    flex: 0 0 auto;
+    margin-right: 14px;
+    width: 96px;
+
+    .menu-value {
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .min-games-stepper,
+    .slide-toggle {
+      margin-right: 0;
     }
   }
 

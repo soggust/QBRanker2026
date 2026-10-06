@@ -126,11 +126,6 @@ export class SettingsMenuComponent {
     return minCount(this.settings, this.total);
   }
 
-  get minLabel(): string {
-    if (SPORT.playingTime.fixed) return `${this.minCount}`;
-    return this.settings.minShare ? `${Math.round(this.settings.minShare)}%` : '1';
-  }
-
   get canLowerMin(): boolean {
     return SPORT.playingTime.fixed ? this.minCount > 1 : this.settings.minShare > 0;
   }

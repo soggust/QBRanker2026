@@ -73,11 +73,14 @@ const GOALIE_LOG = ['SA', 'GA', 'SV%', 'TOI'];
 async function writeGameLogs(season, skaters, goalies, dir) {
   const players = [...skaters.map((u) => [u.id, false]), ...goalies.map((u) => [u.id, true])];
   const logs = {};
+  // (each player's playoff games: the newest of his log, set apart on the card)
+  const playoffGames = {};
   const playoffs = new Date().getMonth() >= 3 && new Date().getMonth() <= 5;
   const one = async ([id, goalie]) => {
     const games = [];
     for (const type of playoffs ? [3, 2] : [2]) {
       const body = await get(`${WEB}/player/${id}/game-log/${seasonId(season)}/${type}`).catch(() => null);
+      if (type === 3 && body?.gameLog?.length) playoffGames[id] = body.gameLog.length;
       games.push(...(body?.gameLog ?? []));
     }
     if (!games.length) return;
@@ -91,7 +94,7 @@ async function writeGameLogs(season, skaters, goalies, dir) {
     });
   };
   for (const player of players) await one(player);
-  await writeFile(path.join(dir, 'game-logs.json'), JSON.stringify({ skater: SKATER_LOG, goalie: GOALIE_LOG, logs }));
+  await writeFile(path.join(dir, 'game-logs.json'), JSON.stringify({ skater: SKATER_LOG, goalie: GOALIE_LOG, logs, playoffs: playoffGames }));
   console.log(`Game logs: ${Object.keys(logs).length} players`);
 }
 

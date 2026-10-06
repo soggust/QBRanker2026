@@ -1,13 +1,10 @@
 <mat-menu class="settings-menu">
-  <!-- A sport setting that cycles through choices ("Fantasy Scoring: PPR") -->
+  <!-- A sport setting that cycles through choices: its value in the slot on the left ("PPR"), then its
+       name (Format's rows all line up behind that slot, as wide as Min Games' stepper) -->
   <ng-template #choice let-setting>
     <div mat-menu-item [title]="setting.title" (click)="$event.stopPropagation(); stepSportSetting(setting.key)">
-      @if (setting.iconClass) {
-        <span class="menu-icon" [ngClass]="setting.iconClass" aria-hidden="true"></span>
-      } @else {
-        <mat-icon class="menu-icon unit-rank-icon" [fontIcon]="setting.icon" aria-hidden="true"></mat-icon>
-      }
-      <span>{{ setting.label }}: <span class="menu-value">{{ settingText(setting) }}</span></span>
+      <span class="menu-slot"><span class="menu-value">{{ settingText(setting) }}</span></span>
+      <span>{{ setting.label }}</span>
     </div>
   </ng-template>
 
@@ -15,42 +12,47 @@
   <div class="menu-cols">
   <div class="menu-col">
   <!-- Format: how the stats are counted and shown -->
-  <div class="menu-section section-stats" (click)="$event.stopPropagation()">Format</div>
+  <div class="menu-section section-stats" (click)="$event.stopPropagation()"><mat-icon fontIcon="tune"></mat-icon>Format</div>
   @for (setting of settingsAt('formatTop'); track setting.key) {
     <ng-container *ngTemplateOutlet="choice; context: { $implicit: setting }"></ng-container>
   }
   <div mat-menu-item [title]="statBasisTitle" (click)="$event.stopPropagation(); cycleStatBasis()">
-    <mat-icon class="menu-icon unit-rank-icon" fontIcon="functions" aria-hidden="true"></mat-icon>
-    <span>Stat Totals: <span class="menu-value">{{ statBasisLabels[settings.statBasis] }}</span></span>
+    <span class="menu-slot"><span class="menu-value">{{ statBasisLabels[settings.statBasis] }}</span></span>
+    <span>Stat Totals</span>
   </div>
   @for (setting of settingsAt('formatMid'); track setting.key) {
     <ng-container *ngTemplateOutlet="choice; context: { $implicit: setting }"></ng-container>
   }
   <div mat-menu-item class="min-games-item" [title]="sport.playingTime.title" (click)="$event.stopPropagation()">
-    <span class="min-games-stepper" (click)="$event.stopPropagation()">
-      <button type="button" aria-label="Lower" [disabled]="!canLowerMin" (click)="stepMin(-1)">−</button>
-      <span class="min-games-value">{{ minLabel }}</span>
-      <button type="button" aria-label="Higher" [disabled]="!canRaiseMin" (click)="stepMin(1)">+</button>
+    <!-- (it steps by share of the season; it shows the count that comes to) -->
+    <span class="menu-slot">
+      <span class="min-games-stepper" (click)="$event.stopPropagation()">
+        <button type="button" aria-label="Lower" [disabled]="!canLowerMin" (click)="stepMin(-1)">−</button>
+        <span class="min-games-value">{{ minCount }}</span>
+        <button type="button" aria-label="Higher" [disabled]="!canRaiseMin" (click)="stepMin(1)">+</button>
+      </span>
     </span>
-    <span>Min {{ sport.playingTime.label }}: <span class="menu-value">{{ minCount }}</span></span>
+    <span>Min {{ sport.playingTime.label }}</span>
   </div>
   <!-- The copy button's list: with the stat columns, or just rank, logo and name -->
   <div mat-menu-item [title]="copyStatsTitle" (click)="$event.stopPropagation(); flipCopyStats()">
-    <mat-slide-toggle
-      hideIcon
-      color="accent"
-      class="slide-toggle"
-      [ngModel]="settings.copyStats"
-      (ngModelChange)="flipCopyStats()"
-      (click)="$event.stopPropagation()"
-    ></mat-slide-toggle>
+    <span class="menu-slot">
+      <mat-slide-toggle
+        hideIcon
+        color="accent"
+        class="slide-toggle"
+        [ngModel]="settings.copyStats"
+        (ngModelChange)="flipCopyStats()"
+        (click)="$event.stopPropagation()"
+      ></mat-slide-toggle>
+    </span>
     <span>{{ settings.showRanks ? 'Copy Includes Ranks' : 'Copy Includes Stats' }}</span>
   </div>
 
   </div>
   <div class="menu-col">
   <!-- Display: what the table shows -->
-  <div class="menu-section section-display" (click)="$event.stopPropagation()">Display</div>
+  <div class="menu-section section-display" (click)="$event.stopPropagation()"><mat-icon fontIcon="visibility"></mat-icon>Display</div>
   @for (item of switches; track item.label) {
     <div mat-menu-item [title]="item.title" (click)="$event.stopPropagation(); item.flip()">
       <mat-slide-toggle
