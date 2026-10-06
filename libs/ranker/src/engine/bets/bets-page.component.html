@@ -37,7 +37,7 @@
               <span class="bet-main">
                 <!-- (a fade says what it fades, and the bet to make instead) -->
                 @if (r.strength === 'fade') {
-                  <b>Fade {{ r.market }}</b>
+                  <b>{{ r.market }}</b>
                   <small>Bet {{ r.pick }} instead</small>
                 } @else {
                   <b>{{ r.pick }}</b>
