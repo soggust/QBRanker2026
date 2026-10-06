@@ -608,13 +608,9 @@
 
 // Scouting report: every skill, strengths first, then average, then weaknesses (two cards a row), and
 // similar seasons last
+// The Overview's sections: cards like the other tabs' (a bar, the sport's sidelines), in their tone
 .ov-section {
-  margin-top: 22px;
-
-  h3 {
-    @include group-heading;
-    margin: 0 0 12px;
-  }
+  margin-top: 14px;
 
   &.good {
     --group-color: #3ee07a;

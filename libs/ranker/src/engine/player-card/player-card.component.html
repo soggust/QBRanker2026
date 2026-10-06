@@ -207,8 +207,9 @@
                the stats behind it -->
           @for (side of o.report; track side.title) {
             @if (side.list.length) {
-              <div class="ov-section" [ngClass]="side.tone">
-                <h3><mat-icon [fontIcon]="side.icon"></mat-icon>{{ side.title }}</h3>
+              <div class="ov-section stat-group tab-card" [ngClass]="side.tone">
+                <div class="group-bar static"><mat-icon class="group-bar-icon" [fontIcon]="side.icon"></mat-icon><span>{{ side.title }}</span></div>
+                <div class="group-body">
                 <div class="ov-skills">
                   @for (s of side.list; track s.id) {
                     <div class="skill-card" [style.--pct]="s.pct" [style.--tone]="rankTone(s.pct)">
@@ -225,14 +226,16 @@
                     </div>
                   }
                 </div>
+                </div>
               </div>
             }
           }
 
           <!-- The three closest seasons by anyone else, 2000 on (finished seasons only) -->
           @if (c.season !== currentSeason && c.comps?.length) {
-            <div class="ov-section similar">
-              <h3><mat-icon fontIcon="compare_arrows"></mat-icon>Similar Seasons</h3>
+            <div class="ov-section similar stat-group tab-card">
+              <div class="group-bar static"><mat-icon class="group-bar-icon" fontIcon="compare_arrows"></mat-icon><span>Similar Seasons</span></div>
+              <div class="group-body">
               <div class="comps-row">
                 @for (m of c.comps; track m.season + m.gsisId) {
                   <button type="button" class="comp" [style.--team-badge]="m.color" (click)="cards.openSeason(m.season, m.gsisId)">
@@ -249,6 +252,7 @@
                     <span class="comp-match" [style.--tone]="rankTone((m.match - 60) / 40)">{{ m.match }}<small>%</small></span>
                   </button>
                 }
+              </div>
               </div>
             </div>
           }
