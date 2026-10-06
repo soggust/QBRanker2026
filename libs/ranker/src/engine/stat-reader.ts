@@ -235,11 +235,12 @@ export class StatReader {
     return { rank: better + 1, tied: values.filter((v) => v === mine).length > 1 };
   }
 
-  // A grid cell's text: the value, or with Show Ranks its place ("#3", "#3 (t)")
+  // A grid cell's text: the value, or with Show Ranks its place ("#3"). No tie mark: in the grade boxes it
+  // doesn't fit (a rank's "(tied)" stays in its hover)
   cellText(player: SkillPlayer, stat: SkillStat): string {
-    if (!this.showsRank(stat)) return this.format(player, stat);
+    if (!this.showsRank(stat)) return this.format(player, stat).replace(/ \(tied\)$/, '');
     const r = this.listRank(player, stat);
-    return r ? `#${r.rank}${r.tied ? ' (t)' : ''}` : '-';
+    return r ? `#${r.rank}` : '-';
   }
 
   // A grade's own color (null for anything else)
