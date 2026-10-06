@@ -63,14 +63,13 @@
   display: flex;
   flex-direction: column;
   font-family: v.$font-base;
-  // A fixed height, so switching tabs doesn't make the card jump. It fits the visible screen below the
-  // sport bar (dvh: a phone's browser bars don't count), centered there, so the sport bar never covers
-  // its top (the close button)
-  height: min(860px, calc(100dvh - var(--sport-bar-height) - 24px));
+  // A fixed height, so switching tabs doesn't make the card jump. It takes the whole visible screen, over
+  // the sport bar (dvh: a phone's browser bars don't count), centered in it
+  height: min(940px, calc(100dvh - 24px));
   left: 50%;
   overflow: hidden;
   position: fixed;
-  top: calc(50% + var(--sport-bar-height) / 2);
+  top: 50%;
   transform: translate(-50%, -50%);
   width: min(880px, calc(100vw - 32px));
   z-index: 1001;
@@ -1331,10 +1330,10 @@
 // the season lines on two rows
 // ---------------------------------------------------------------------------
 @media (max-width: 640px) {
-  // (the visible screen below the sport bar, less a small margin)
+  // (the whole visible screen, less a small margin)
   .player-card {
     --card-r: 16px;
-    height: calc(100dvh - var(--sport-bar-height) - 12px);
+    height: calc(100dvh - 12px);
     width: calc(100vw - 16px);
   }
 

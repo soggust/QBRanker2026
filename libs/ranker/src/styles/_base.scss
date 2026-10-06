@@ -210,6 +210,12 @@ html body {
   }
 }
 
+// While the player card is open it covers the whole screen: the sport bar drops under the page's layer
+// (where the card is), so the card and its dimmed backdrop go over it
+body:has(.card-backdrop) .sport-bar {
+  z-index: 0 !important;
+}
+
 // ---------------------------------------------------------------------------
 // Menus and dropdown lists: scoreboard panels
 // ---------------------------------------------------------------------------
