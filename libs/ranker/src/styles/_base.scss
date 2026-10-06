@@ -156,17 +156,17 @@ about-panel ::-webkit-scrollbar-track {
   background-color: #2e2e2e !important;
 }
 
-// The Bets page scrolls on its blue felt: a felt-blue thumb on a dark navy track
-bets-page::-webkit-scrollbar {
+// The Bets page's list scrolls in its panel: a felt-blue thumb
+bets-page .bets-list::-webkit-scrollbar {
   height: 10px;
   width: 10px;
 }
 
-bets-page::-webkit-scrollbar-track {
-  background-color: #061a30 !important;
+bets-page .bets-list::-webkit-scrollbar-track {
+  background-color: rgba(0, 0, 0, 0.35) !important;
 }
 
-bets-page::-webkit-scrollbar-thumb {
+bets-page .bets-list::-webkit-scrollbar-thumb {
   background: #1d5f9e !important;
   background-clip: padding-box !important;
 
