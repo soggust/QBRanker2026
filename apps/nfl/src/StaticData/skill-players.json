@@ -3995,7 +3995,7 @@
         "epaPerCarry": -0.21,
         "epaPerTarget": 0.854
       },
-      "injuryStatus": "Out",
+      "injuryStatus": "Doubtful",
       "injured": true
     },
     {
@@ -6019,8 +6019,8 @@
         "epaPerCarry": 0.057,
         "epaPerTarget": -0.081
       },
-      "injuryStatus": "Out",
-      "injured": true
+      "injuryStatus": "Questionable",
+      "injured": false
     },
     {
       "id": 4601080,
@@ -6151,8 +6151,8 @@
         "epaPerCarry": -0.366,
         "epaPerTarget": -0.277
       },
-      "injuryStatus": "Out",
-      "injured": true
+      "injuryStatus": "Questionable",
+      "injured": false
     },
     {
       "id": 4568490,
@@ -6813,7 +6813,7 @@
         "epaPerCarry": 0,
         "epaPerTarget": 0.576
       },
-      "injuryStatus": "Out",
+      "injuryStatus": "Doubtful",
       "injured": true
     },
     {
@@ -7077,8 +7077,8 @@
         "epaPerCarry": 0,
         "epaPerTarget": 0.359
       },
-      "injuryStatus": "Out",
-      "injured": true
+      "injuryStatus": "Questionable",
+      "injured": false
     },
     {
       "id": 4871023,
@@ -7693,8 +7693,8 @@
         "epaPerCarry": 0,
         "epaPerTarget": 0.233
       },
-      "injuryStatus": "Out",
-      "injured": true
+      "injuryStatus": "Questionable",
+      "injured": false
     },
     {
       "id": 3915416,
@@ -8397,8 +8397,8 @@
         "epaPerCarry": 0,
         "epaPerTarget": 0.602
       },
-      "injuryStatus": "Out",
-      "injured": true
+      "injuryStatus": "Questionable",
+      "injured": false
     },
     {
       "id": 4426388,
@@ -8705,8 +8705,8 @@
         "epaPerCarry": 0,
         "epaPerTarget": 0.752
       },
-      "injuryStatus": "Out",
-      "injured": true
+      "injuryStatus": "Questionable",
+      "injured": false
     },
     {
       "id": 2973405,
@@ -8881,8 +8881,8 @@
         "epaPerCarry": 0,
         "epaPerTarget": -0.129
       },
-      "injuryStatus": "Out",
-      "injured": true
+      "injuryStatus": "Questionable",
+      "injured": false
     },
     {
       "id": 3045523,
@@ -10333,8 +10333,8 @@
         "epaPerCarry": 0,
         "epaPerTarget": 0.447
       },
-      "injuryStatus": "Out",
-      "injured": true
+      "injuryStatus": "Questionable",
+      "injured": false
     },
     {
       "id": 4685472,
@@ -11083,7 +11083,7 @@
         "epaPerCarry": 0,
         "epaPerTarget": 1.097
       },
-      "injuryStatus": "Out",
+      "injuryStatus": "Doubtful",
       "injured": true
     },
     {
@@ -12403,8 +12403,8 @@
         "epaPerCarry": 0,
         "epaPerTarget": -0.425
       },
-      "injuryStatus": "Out",
-      "injured": true
+      "injuryStatus": "Questionable",
+      "injured": false
     },
     {
       "id": 4240472,
@@ -13797,8 +13797,8 @@
         "epaPerPunt": -0.216,
         "fairCatchPct": 0.4
       },
-      "injuryStatus": "Out",
-      "injured": true
+      "injuryStatus": "Questionable",
+      "injured": false
     },
     {
       "id": 3051397,
