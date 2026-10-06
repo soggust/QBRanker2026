@@ -137,7 +137,7 @@
   display: grid;
   font-family: v.$font-base;
   gap: 12px;
-  grid-template-columns: 26px 58px minmax(0, 1fr) minmax(0, 220px) 34px 20px;
+  grid-template-columns: 26px 58px minmax(0, 1fr) minmax(0, 220px) 62px 20px;
   padding: 10px 12px;
   text-align: left;
   width: 100%;
@@ -176,12 +176,6 @@
     background: #ff5a4f;
   }
 
-  &.small {
-    display: inline-block;
-    font-size: 9.5px;
-    min-width: 40px;
-    padding: 2px 0;
-  }
 }
 
 .bet-main,
@@ -212,14 +206,24 @@
   font-size: 13px;
 }
 
-.bet-agree {
-  color: rgba(255, 255, 255, 0.35);
-  font-size: 13px;
+// the report's confidence: green high, yellow medium, muted low
+.bet-sure {
+  font-size: 11px;
   font-weight: 900;
+  letter-spacing: 0.6px;
   text-align: right;
+  text-transform: uppercase;
 
-  &.many {
-    color: var(--scoreboard-led);
+  &.high {
+    color: #3ecf6e;
+  }
+
+  &.medium {
+    color: #ffcd00;
+  }
+
+  &.low {
+    color: rgba(255, 255, 255, 0.4);
   }
 }
 
@@ -230,41 +234,32 @@
 
 .bet-reasons {
   border-top: 1px solid rgba(255, 255, 255, 0.07);
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  padding: 12px 16px 14px 108px;
-}
+  padding: 12px 18px 14px 108px;
 
-.bet-source {
-  align-items: baseline;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px 8px;
-
-  b {
-    color: #fff;
-    font-size: 13.5px;
-    font-weight: 800;
+  p {
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 14px;
+    line-height: 1.6;
+    margin: 0;
   }
 
-  small {
-    color: rgba(255, 255, 255, 0.5);
+  .bet-meta {
+    color: rgba(255, 255, 255, 0.45);
     font-size: 12px;
     font-weight: 600;
+    margin-top: 8px;
   }
 }
 
-.bet-reason p {
-  color: rgba(255, 255, 255, 0.8);
-  font-size: 13.5px;
-  line-height: 1.55;
-  margin: 4px 0 0;
+.bets-how {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 12.5px;
+  margin: 6px 0 0;
 }
 
 @media (max-width: 700px) {
   .bet-row {
-    grid-template-columns: 22px 50px minmax(0, 1fr) 30px;
+    grid-template-columns: 22px 50px minmax(0, 1fr) 56px;
   }
 
   .bet-game,

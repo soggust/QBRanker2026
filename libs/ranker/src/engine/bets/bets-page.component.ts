@@ -2,9 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { SPORT_LINKS } from '@ranker/core/sports';
 
 // The Bets page (dev only: the sport bar's Bets link, #bets): every betting angle in the latest AI
-// analyses (each sport's data/analysis/bets.json, written with them), the same call from several reports
-// merged into one, ranked most confident first: like, then lean, then fade; within a grade, the more
-// reports making the call and the surer they are, the higher.
+// analyses (each sport's data/analysis/bets.json, written with them), one row per bet, ranked most
+// confident first: its grade (like, lean, fade), then its report's confidence (high, medium, low), then
+// how many other reports make the same call. A row opens to its reasoning.
 
 interface BetEntry {
   sport: string;
@@ -22,16 +22,13 @@ interface BetEntry {
   at: string;
 }
 
-// One call: the pick as its best-graded report words it, its game, and every report making it
-export interface BetCall {
-  key: string;
-  sport: string;
+// One bet as the page shows it: the pick (a game total or a side read as the call itself), and how many
+// other reports make the same call
+export interface BetRow extends BetEntry {
+  id: number;
   pick: string;
-  market: string;
-  game: BetEntry['game'];
-  strength: 'like' | 'lean' | 'fade';
-  sources: BetEntry[];
-  score: number;
+  marketLabel: string;
+  agree: number;
 }
 
 const GRADE = { like: 3, lean: 2, fade: 1 };
@@ -65,7 +62,7 @@ function callKey(b: BetEntry): string {
   standalone: false,
 })
 export class BetsPageComponent implements OnInit {
-  calls: BetCall[] | null = null;
+  rows: BetRow[] | null = null;
   updated: string | null = null;
   // the filters: a grade (or all), and how much of the list
   grade: 'all' | 'like' | 'lean' | 'fade' = 'all';
@@ -75,7 +72,7 @@ export class BetsPageComponent implements OnInit {
     { value: 0.5, label: 'Top 50%' },
     { value: 0.25, label: 'Top 25%' },
   ];
-  open = new Set<string>();
+  open = new Set<number>();
 
   async ngOnInit(): Promise<void> {
     // every sport's bets (the ones without any are skipped)
@@ -94,59 +91,43 @@ export class BetsPageComponent implements OnInit {
       entries.push(...file.bets.filter((b: BetEntry) => newest - Date.parse(b.at) < 6 * 3600e3));
       if (!this.updated || file.at > this.updated) this.updated = file.at;
     }
-    const byCall = new Map<string, BetEntry[]>();
-    for (const b of entries) {
-      const key = `${b.sport}|${callKey(b)}`;
-      if (!byCall.has(key)) byCall.set(key, []);
-      byCall.get(key)!.push(b);
-    }
-    const calls = [...byCall].map(([key, sources]): BetCall => {
-      // the call's grade: its best report's; its wording: that report's
-      const sorted = [...sources].sort((a, b) => GRADE[b.strength] - GRADE[a.strength] || SURE[b.confidence ?? 'low'] - SURE[a.confidence ?? 'low']);
-      const lead = sorted[0];
-      const sure = Math.max(...sources.map((s) => SURE[s.confidence ?? 'low']));
-      // a game total or a side reads as the call itself ("Under 45.5" / Game total, "TEN +7" / Spread)
-      const call = key.split('|').slice(2).join('|');
+    // how many reports make each call
+    const keys = entries.map((b) => `${b.sport}|${callKey(b)}`);
+    const counts = new Map<string, number>();
+    for (const k of keys) counts.set(k, (counts.get(k) ?? 0) + 1);
+    const rows = entries.map((b, i): BetRow => {
+      const call = keys[i].split('|').slice(2).join('|');
       const total = call.match(/^total (over|under) (.+)$/);
       const side = call.match(/^([A-Z]{2,3}) ([+-][\d.]+)$/);
       const ml = call.match(/^([A-Z]{2,3}) ml$/);
-      const [pick, market] = total
+      const [pick, marketLabel] = total
         ? [`${total[1][0].toUpperCase()}${total[1].slice(1)} ${total[2]}`, 'Game total']
         : side
           ? [`${side[1]} ${side[2]}`, 'Spread']
           : ml
             ? [`${ml[1]} ML`, 'Moneyline']
-            : [lead.lean, lead.market];
-      return {
-        key,
-        sport: lead.sport,
-        pick,
-        market,
-        game: lead.game,
-        strength: lead.strength,
-        sources: sorted,
-        // the grade first, then how many reports make the call, then how sure they are
-        score: GRADE[lead.strength] * 100 + Math.min(sources.length, 9) * 10 + sure,
-      };
+            : [b.lean, b.market];
+      return { ...b, id: i, pick, marketLabel, agree: (counts.get(keys[i]) ?? 1) - 1 };
     });
-    this.calls = calls.sort((a, b) => b.score - a.score || (a.game?.date ?? '').localeCompare(b.game?.date ?? ''));
+    const sure = (r: BetRow) => SURE[r.confidence ?? 'low'];
+    this.rows = rows.sort((a, b) => GRADE[b.strength] - GRADE[a.strength] || sure(b) - sure(a) || b.agree - a.agree || (a.game?.date ?? '').localeCompare(b.game?.date ?? ''));
   }
 
   // The list as filtered: a grade, then the top share of what's left
-  get shown(): BetCall[] {
-    const calls = (this.calls ?? []).filter((c) => this.grade === 'all' || c.strength === this.grade);
-    return calls.slice(0, Math.max(1, Math.ceil(calls.length * this.share)));
+  get shown(): BetRow[] {
+    const rows = (this.rows ?? []).filter((r) => this.grade === 'all' || r.strength === this.grade);
+    return rows.slice(0, Math.max(1, Math.ceil(rows.length * this.share)));
   }
 
   count(grade: 'like' | 'lean' | 'fade'): number {
-    return (this.calls ?? []).filter((c) => c.strength === grade).length;
+    return (this.rows ?? []).filter((r) => r.strength === grade).length;
   }
 
-  toggle(key: string): void {
-    if (!this.open.delete(key)) this.open.add(key);
+  toggle(id: number): void {
+    if (!this.open.delete(id)) this.open.add(id);
   }
 
-  // A report's name in a call's sources: a team's nickname, a player with his position
+  // A bet's source: a team's nickname, a player with his position
   sourceLabel(b: BetEntry): string {
     return b.kind === 'team' ? b.source.replace(/\s*\(.*\)/, '') : `${b.source}${b.position ? ` (${b.position})` : ''}`;
   }
