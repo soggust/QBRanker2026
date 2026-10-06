@@ -186,22 +186,28 @@ bets-page .bets-list::-webkit-scrollbar-thumb {
 // The inputs in the headline font: the dropdowns and their open lists, the sidebar's buttons, the Bets
 // page's game dropdown
 // ---------------------------------------------------------------------------
-#{kit.$dropdowns} {
-  @include kit.dropdown-text {
-    font-family: v.$font-heading !important;
+// (html body: past the sport themes' lettering, which sets their spacing)
+html body {
+  #{kit.$dropdowns} {
+    @include kit.dropdown-text {
+      font-family: v.$font-heading !important;
+      letter-spacing: 1px !important;
+    }
   }
-}
 
-#{kit.$open-list} .mat-mdc-option {
-  &,
-  .mdc-list-item__primary-text {
-    font-family: v.$font-heading !important;
+  #{kit.$open-list} .mat-mdc-option {
+    &,
+    .mdc-list-item__primary-text {
+      font-family: v.$font-heading !important;
+      letter-spacing: 1px !important;
+    }
   }
-}
 
-.sidebar footer button,
-bets-page .bets-game {
-  font-family: v.$font-heading !important;
+  .sidebar footer button,
+  bets-page .bets-game {
+    font-family: v.$font-heading !important;
+    letter-spacing: 1px !important;
+  }
 }
 
 // ---------------------------------------------------------------------------

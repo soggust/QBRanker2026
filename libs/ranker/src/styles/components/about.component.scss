@@ -56,7 +56,7 @@ header {
     color: #fff;
     flex: 1;
     @include v.headline(17px);
-    letter-spacing: normal;
+    letter-spacing: 1.5px;
     margin: 0;
     text-transform: uppercase;
   }
