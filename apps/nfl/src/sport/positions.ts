@@ -315,7 +315,7 @@ export const STAT_NAMES: Partial<Record<SkillColumnKey, string>> = {
   timeToThrow: 'QB Time to Throw (Seconds)',
 };
 
-// Short labels for volume stats when Stat Totals is on Per Game (yards read as YPG, points as PPG)
+// Short labels for volume stats when Stat Defs is on Per Game (yards read as YPG, points as PPG)
 export const PER_GAME_LABELS: Partial<Record<SkillColumnKey, string>> = {
   passYards: 'Pass YPG',
   passTds: 'Pass TDs / Game',

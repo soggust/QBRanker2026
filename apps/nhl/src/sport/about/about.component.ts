@@ -24,7 +24,7 @@ export class AboutComponent {
 
   // Glossary entries: stat, what it means
   readonly glossary: [string, string][] = [
-    ["Goals / Assists / Points", "Goals, assists and points: season totals to start, or per game or an 82-game pace (Stat Totals in the settings)."],
+    ["Goals / Assists / Points", "Goals, assists and points: season totals to start, or per game or an 82-game pace (Stat Defs in the settings)."],
     ["+/-", "Plus/minus: goals for minus goals against while he is on the ice at even strength or shorthanded. Noisy: it depends on his linemates and his goalie."],
     ["PP Points", "Power-play points."],
     ["Shots / Shooting %", "Shots on goal, and goals per shot on goal (20+ shots to show)."],

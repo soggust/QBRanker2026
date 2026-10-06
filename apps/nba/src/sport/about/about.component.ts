@@ -24,7 +24,7 @@ export class AboutComponent {
 
   // Glossary entries: stat, what it means
   readonly glossary: [string, string][] = [
-    ["PTS / REB / AST / STL / BLK","Points, rebounds, assists, steals and blocks: per game to start, or season totals or an 82-game pace (Stat Totals in the settings)."],
+    ["PTS / REB / AST / STL / BLK","Points, rebounds, assists, steals and blocks: per game to start, or season totals or an 82-game pace (Stat Defs in the settings)."],
     ["3PM","3-pointers made."],
     ["FG % / 3P % / FT %","Shots made per attempt: all field goals, 3-pointers (25+ attempts to show) and free throws (20+)."],
     ["TS %","True shooting: points per shooting possession, counting 3s as worth more and free throws too. About 57% is league average now."],

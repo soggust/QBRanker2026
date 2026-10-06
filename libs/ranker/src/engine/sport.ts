@@ -122,7 +122,7 @@ export interface SportSetting {
   // Men's and Women's under it); the closed dropdown still shows the full label from options
   optionGroups?: { label: string; options: Record<string, string> }[];
   default: string | boolean;
-  // Where it sits: the Format section's top, after Stat Totals, among the Display switches (before
+  // Where it sits: the Format section's top, after Stat Defs, among the Display switches (before
   // Injured Players), at the bottom of the menu, or (a choice) as the footer's dropdown in the year
   // selector's place (MMA's Current / All-Time)
   slot: 'formatTop' | 'formatMid' | 'display' | 'displayEnd' | 'footer';
@@ -282,7 +282,7 @@ export interface SportConfig {
     // starting value and how far each click moves it
     fixed?: { default: number; step: number };
   };
-  // How counting stats read to start, their decimals per game, and the Stat Totals setting's hover
+  // How counting stats read to start, their decimals per game, and the Stat Defs setting's hover
   // text: example counting stats, and what a full season's pace is
   defaultStatBasis: StatBasis;
   perGameDecimals: number;

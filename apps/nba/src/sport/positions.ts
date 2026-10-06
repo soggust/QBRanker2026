@@ -149,7 +149,7 @@ export const STAT_NAMES: Partial<Record<SkillColumnKey, string>> = {
   frontcourt: 'Frontcourt (power forwards and centers, by your rankings)',
 };
 
-// Per-game column labels, when Stat Totals is on Per Game
+// Per-game column labels, when Stat Defs is on Per Game
 export const PER_GAME_LABELS: Partial<Record<SkillColumnKey, string>> = {
   minutes: 'MPG',
   points: 'PPG',

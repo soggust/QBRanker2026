@@ -90,7 +90,7 @@ export class StatReader {
     return statValue(player, stat, context);
   }
 
-  // The shown value: for volume stats, per game or at a full season's pace as the Stat Totals setting says
+  // The shown value: for volume stats, per game or at a full season's pace as the Stat Defs setting says
   value(player: SkillPlayer, stat: SkillStat): number | null {
     const raw = this.raw(player, stat);
     if (raw === null || !this.showsPerGame(stat) || !player.games) return raw;
