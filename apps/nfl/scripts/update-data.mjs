@@ -492,6 +492,19 @@ function pointsAllowedFantasy(points) {
 
 // Team defenses: EPA/success allowed, sacks, takeaways, points allowed and D/ST fantasy
 // (sack 1, takeaway 2, TD 6, safety 2, plus the points-allowed tier each game)
+// A team's time of possession per game, in minutes: its drives' times (each drive once; the play-by-play
+// carries the drive's time on every play of it), over its games
+function topPerGame(pbp, team, games) {
+  const drives = new Map();
+  for (const play of pbp) if (play.posteam === team && play.drive_time_of_possession) drives.set(`${play.game_id}-${play.fixed_drive}`, play.drive_time_of_possession);
+  let seconds = 0;
+  for (const time of drives.values()) {
+    const [m, s] = time.split(':').map(Number);
+    if (Number.isFinite(m) && Number.isFinite(s)) seconds += m * 60 + s;
+  }
+  return games ? round(seconds / 60 / games, 2) : null;
+}
+
 function defenseUnits({ pbp, games, pfr }) {
   return seasonTeams(games).map((team) => {
     const defPlays = pbp.filter((play) => play.defteam === team);
@@ -535,6 +548,8 @@ function defenseUnits({ pbp, games, pfr }) {
           : null,
         thirdDownPct: ratio(thirdDowns.filter((play) => play.third_down_converted === '1').length, thirdDowns.length),
         redZoneTdPct: ratio([...redZone.values()].filter((result) => result === 'Touchdown').length, redZone.size),
+        // (the team's own time with the ball: how long its defense rests)
+        topPerGame: topPerGame(pbp, team, played.length),
       },
     };
   });
@@ -992,6 +1007,7 @@ function coachUnits({ pbp, games, headCoaches }) {
           1
         ),
         fourthDownGoPct: fourthDownGoRate(plays, team),
+        topPerGame: topPerGame(plays, team, played.length),
       },
     };
   });

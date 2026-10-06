@@ -41,7 +41,7 @@
       (ngModelChange)="flipCopyStats()"
       (click)="$event.stopPropagation()"
     ></mat-slide-toggle>
-    <span>Copy Stats</span>
+    <span>{{ settings.showRanks ? 'Copy Ranks' : 'Copy Stats' }}</span>
   </div>
 
   <!-- Display: what the table shows -->

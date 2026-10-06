@@ -45,8 +45,10 @@ export class SettingsMenuComponent {
     `On: list only players in their first season (and first-year head coaches), across every tab but the team ones. ` +
     `A first season is the first one they're in our data, so ${SPORT.seasonText(SPORT.firstSeason)} lists everyone`;
 
-  readonly copyStatsTitle =
-    'On: the copy button copies the list with every column shown. Off (the default): just the rank, picture and name, a plain list';
+  get copyStatsTitle(): string {
+    const what = this.settings.showRanks ? 'ranks' : 'stats';
+    return `On: the copy button copies the list with every column's ${what}. Off (the default): just the rank, picture and name, a plain list`;
+  }
 
   flipCopyStats(): void {
     this.set({ copyStats: !this.settings.copyStats });
@@ -62,6 +64,11 @@ export class SettingsMenuComponent {
         `${SPORT.copy.lowerIsBetterExample})`,
     ),
     ...(SPORT.combined ? [this.switch('combineStats', SPORT.combined.label, SPORT.combined.title)] : []),
+    this.switch(
+      'showRanks',
+      'Show Ranks',
+      "Show each value as its place in the list (#1 the best; lower first for lower-is-better stats). Display only: the ranking doesn't change",
+    ),
     ...settingsAt('display').map((setting) => this.sportSwitch(setting)),
     ...(SPORT.noSwitches?.includes('showInjured') ? [] : [this.switch('showInjured', 'Injured Players', SPORT.copy.injuredHelp)]),
     ...(SPORT.noSwitches?.includes('rookiesOnly') ? [] : [this.switch('rookiesOnly', 'Rookies Only', this.rookiesTitle)]),
@@ -75,7 +82,7 @@ export class SettingsMenuComponent {
 
   constructor(private positionService: PositionService) {}
 
-  private switch(key: 'categoryColors' | 'colorValues' | 'combineStats' | 'showInjured' | 'rookiesOnly' | 'showUnused', label: string, title: string): MenuSwitch {
+  private switch(key: 'categoryColors' | 'colorValues' | 'combineStats' | 'showInjured' | 'rookiesOnly' | 'showUnused' | 'showRanks', label: string, title: string): MenuSwitch {
     return { label, title, on: () => this.settings[key], flip: () => this.set({ [key]: !this.settings[key] }) };
   }
 

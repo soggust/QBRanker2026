@@ -118,7 +118,8 @@ export type SkillStatKey =
   | 'ptsPerGame'
   | 'yardsPerGame'
   | 'yardsAllowedPerGame'
-  | 'stEpaPerGame';
+  | 'stEpaPerGame'
+  | 'topPerGame';
 
 // Columns computed in the app: fantasy points in the chosen scoring, and team support grades
 export type SkillColumnKey =
@@ -630,6 +631,7 @@ const RECEIVING_STATS: SkillStat[] = [
 const TEAM_STATS: SkillStat[] = [
   { key: 'winPct', label: 'Record', description: 'Win-loss record', kind: 'efficiency', format: 'record' },
   { key: 'recent', label: 'Recent', description: 'The last 5 games, newest first (newer ones count a little more)', kind: 'efficiency', format: 'recent' },
+  { key: 'topPerGame', label: 'TOP / Game', name: 'Time of Possession per Game', description: "The team's time with the ball per game (for context; not part of the ranking)", kind: 'efficiency', format: 'mmss', infoOnly: true },
     {
       key: 'pointDiffPerGame',
       label: 'Pt Diff / Game',
@@ -929,6 +931,7 @@ export const SKILL_STATS: Record<SkillPosition, SkillStat[]> = {
   // Lower is better for everything "allowed", so those count against the defense
   DEF: [
     GAMES_STAT,
+    { key: 'topPerGame', label: 'TOP / Game', name: 'Time of Possession per Game', description: "The team's own time with the ball per game: how long its defense rests (for context; not part of the ranking)", kind: 'efficiency', format: 'mmss', infoOnly: true },
     {
       key: 'epaAllowed',
       label: 'EPA / Play',
@@ -1215,6 +1218,7 @@ const RESULTS_STATS = new Set<SkillColumnKey>([
   'games',
   'winPct',
   'recent',
+  'topPerGame',
   'winsOverExpected',
   'atsPct',
   'offRank',

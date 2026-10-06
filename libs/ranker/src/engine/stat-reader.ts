@@ -6,6 +6,12 @@ import { SPORT } from '@sport/sport';
 import { ValueContext } from '@ranker/engine/sport';
 import { recentCount, statValue } from '@ranker/engine/unit-scoring';
 import { CURRENT_SEASON } from '@ranker/engine/data';
+
+// Minutes as minutes:seconds: 31.4 -> "31:24"
+const mmss = (minutes: number): string => {
+  const total = Math.round(minutes * 60);
+  return `${Math.floor(total / 60)}:${String(total % 60).padStart(2, '0')}`;
+};
 import type { RankerSettings } from '@ranker/engine/position.service';
 import { TintScale, tintFrom, tintScale } from '@ranker/core/value-tint';
 import { NUMBER, avg3, grade, gradeColor, innings } from '@ranker/core/format';
@@ -30,6 +36,8 @@ export class StatReader {
   // Each column's average and spread over the list, computed once and reused by every cell and the
   // header hover (per cell, it made the table slow to update), until the list or the settings change
   private scales = new Map<string, TintScale | null>();
+  // (each column's values in the list, for Show Ranks; cleared with the scales)
+  private rankValues = new Map<string, number[]>();
   private scalesFor?: unknown[];
 
   constructor(private readonly source: ReaderSource) {}
@@ -148,6 +156,8 @@ export class StatReader {
         return (Number(value.toFixed(perGameVolume ? 2 : 1)) + 0).toFixed(perGameVolume ? 2 : 1);
       case 'dec2':
         return (Number(value.toFixed(2)) + 0).toFixed(2);
+      case 'mmss':
+        return mmss(value);
       default:
         if (perGameVolume) return value.toFixed(SPORT.perGameDecimals);
         return NUMBER.format(paceVolume ? Math.round(value) : value);
@@ -187,6 +197,8 @@ export class StatReader {
         return `${avg.toFixed(1)}%`;
       case 'dec2':
         return avg.toFixed(2);
+      case 'mmss':
+        return mmss(avg);
       default:
         // (a full-season pace reads in whole numbers, like its column)
         return this.basis === 'pace17' && stat.kind === 'volume' ? NUMBER.format(Math.round(avg)) : avg.toFixed(1);
@@ -200,6 +212,35 @@ export class StatReader {
     return tintFrom(this.rate(player, stat), this.scale(stat, 'rate'), !!stat.negative);
   }
 
+  // Show Ranks: a column shown as places in the list (not the Recent dots, a column that's a rank
+  // already, or a display-only one)
+  showsRank(stat: SkillStat): boolean {
+    return !!this.source.settings.showRanks && !stat.infoOnly && !['recent', 'rank'].includes(stat.format);
+  }
+
+  // A value's place in the list on what the column shows (its per-game or pace value; lower first for a
+  // lower-is-better stat), tied values sharing a place; null with no value
+  listRank(player: SkillPlayer, stat: SkillStat): { rank: number; tied: boolean } | null {
+    const mine = this.rate(player, stat);
+    if (mine === null) return null;
+    this.scale(stat, 'rate');
+    const key = `rank.${stat.key}`;
+    let values = this.rankValues.get(key);
+    if (!values) {
+      values = this.source.list.map((p) => this.rate(p, stat)).filter((v): v is number => v !== null);
+      this.rankValues.set(key, values);
+    }
+    const better = values.filter((v) => (stat.negative ? v < mine : v > mine)).length;
+    return { rank: better + 1, tied: values.filter((v) => v === mine).length > 1 };
+  }
+
+  // A grid cell's text: the value, or with Show Ranks its place ("#3", "#3 (t)")
+  cellText(player: SkillPlayer, stat: SkillStat): string {
+    if (!this.showsRank(stat)) return this.format(player, stat);
+    const r = this.listRank(player, stat);
+    return r ? `#${r.rank}${r.tied ? ' (t)' : ''}` : '-';
+  }
+
   // A grade's own color (null for anything else)
   gradeColor(player: SkillPlayer, stat: SkillStat): string | null {
     return stat.format === 'grade' ? gradeColor(this.value(player, stat) ?? 6) : null;
@@ -209,6 +250,7 @@ export class StatReader {
     const inputs = [this.source.list, this.source.version, this.source.settings];
     if (!this.scalesFor || inputs.some((v, i) => v !== this.scalesFor![i])) {
       this.scales.clear();
+      this.rankValues.clear();
       this.scalesFor = inputs;
     }
     const key = `${basis}.${stat.key}`;

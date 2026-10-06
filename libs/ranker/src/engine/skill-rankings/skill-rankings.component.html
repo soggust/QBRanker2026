@@ -151,7 +151,7 @@
               <div class="box support-box" [style.min-width.em]="group.stats.length * 7.5">
                 @for (stat of group.stats; track stat.key) {
                   <div>
-                    <p [style.color]="reader.gradeColor(player, stat) ?? reader.valueColor(player, stat)">{{ reader.format(player, stat) }}</p>
+                    <p [style.color]="reader.gradeColor(player, stat) ?? reader.valueColor(player, stat)">{{ reader.cellText(player, stat) }}</p>
                     <p class="stat-label" [title]="valueTitle(player, stat)">{{ reader.label(stat) }}</p>
                   </div>
                 }
@@ -189,9 +189,17 @@
                     >
                     <p class="stat-label" [title]="valueTitle(player, stat)">{{ reader.label(stat) }}</p>
                   </div>
+                } @else if (reader.showsRank(stat) && reader.listRank(player, stat); as place) {
+                  <!-- Show Ranks: the value's place in the list, styled like a rank column -->
+                  <div>
+                    <p class="rank-value" [style.color]="reader.gradeColor(player, stat) ?? reader.valueColor(player, stat)"
+                      ><span class="rank-hash">#</span>{{ place.rank }}@if (place.tied) {<span class="rank-tie">(t)</span>}</p
+                    >
+                    <p class="stat-label" [title]="valueTitle(player, stat)">{{ reader.label(stat) }}</p>
+                  </div>
                 } @else {
                   <div>
-                    <p [style.color]="reader.gradeColor(player, stat) ?? reader.valueColor(player, stat)">{{ reader.format(player, stat) }}</p>
+                    <p [style.color]="reader.gradeColor(player, stat) ?? reader.valueColor(player, stat)">{{ reader.cellText(player, stat) }}</p>
                     <p class="stat-label" [title]="valueTitle(player, stat)">
                       {{ reader.label(stat) }}
                     </p>

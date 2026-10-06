@@ -666,8 +666,8 @@
       "rushYards": 20,
       "rushTd": 0
     },
-    "injuryStatus": "Active",
-    "injured": false
+    "injuryStatus": "Out",
+    "injured": true
   },
   {
     "id": 2577417,

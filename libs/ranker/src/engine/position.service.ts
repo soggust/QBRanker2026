@@ -42,6 +42,9 @@ export interface RankerSettings {
   rookiesOnly: boolean;
   // The copy button copies the stat columns too (off: just the rank, logo and name, a plain list)
   copyStats: boolean;
+  // The grid shows each value as its place in the list (#1 the best) instead: display only, the ranking
+  // and its weights unchanged
+  showRanks: boolean;
   // The sport's own settings (SPORT.settings), by key
   sport: SportSettings;
 }
@@ -60,6 +63,7 @@ const DEFAULT_SETTINGS: RankerSettings = {
   combineStats: true,
   rookiesOnly: false,
   copyStats: false,
+  showRanks: false,
   sport: DEFAULT_SPORT_SETTINGS,
 };
 

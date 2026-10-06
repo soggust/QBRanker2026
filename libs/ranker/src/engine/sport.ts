@@ -19,7 +19,9 @@ export type StatFormat =
   | 'record'
   | 'grade'
   | 'rank'
-  | 'recent';
+  | 'recent'
+  // Minutes as minutes:seconds ("31:24": time of possession)
+  | 'mmss';
 
 // How counting stats are shown and ranked: season totals, per game, or per game over a full season (a
 // season's pace). Per game and the pace rank the same; they only read differently.

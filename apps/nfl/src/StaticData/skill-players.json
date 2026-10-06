@@ -19,7 +19,8 @@
         "pressureRate": 0.169,
         "missedTacklePct": 0.069,
         "thirdDownPct": 0.455,
-        "redZoneTdPct": 0.692
+        "redZoneTdPct": 0.692,
+        "topPerGame": 31.87
       },
       "competitive": {
         "epaAllowed": 0.054,
@@ -51,7 +52,8 @@
         "pressureRate": 0.265,
         "missedTacklePct": 0.075,
         "thirdDownPct": 0.357,
-        "redZoneTdPct": 0.5
+        "redZoneTdPct": 0.5,
+        "topPerGame": 32.89
       },
       "competitive": {
         "epaAllowed": -0.057,
@@ -83,7 +85,8 @@
         "pressureRate": 0.147,
         "missedTacklePct": 0.105,
         "thirdDownPct": 0.375,
-        "redZoneTdPct": 0.643
+        "redZoneTdPct": 0.643,
+        "topPerGame": 31.27
       },
       "competitive": {
         "epaAllowed": 0.004,
@@ -115,7 +118,8 @@
         "pressureRate": 0.222,
         "missedTacklePct": 0.122,
         "thirdDownPct": 0.407,
-        "redZoneTdPct": 0.688
+        "redZoneTdPct": 0.688,
+        "topPerGame": 28.1
       },
       "competitive": {
         "epaAllowed": 0.049,
@@ -147,7 +151,8 @@
         "pressureRate": 0.219,
         "missedTacklePct": 0.089,
         "thirdDownPct": 0.426,
-        "redZoneTdPct": 0.727
+        "redZoneTdPct": 0.727,
+        "topPerGame": 29.65
       },
       "competitive": {
         "epaAllowed": 0.081,
@@ -179,7 +184,8 @@
         "pressureRate": 0.276,
         "missedTacklePct": 0.088,
         "thirdDownPct": 0.237,
-        "redZoneTdPct": 0.556
+        "redZoneTdPct": 0.556,
+        "topPerGame": 36.59
       },
       "competitive": {
         "epaAllowed": -0.079,
@@ -211,7 +217,8 @@
         "pressureRate": 0.242,
         "missedTacklePct": 0.131,
         "thirdDownPct": 0.44,
-        "redZoneTdPct": 0.308
+        "redZoneTdPct": 0.308,
+        "topPerGame": 30.81
       },
       "competitive": {
         "epaAllowed": -0.035,
@@ -243,7 +250,8 @@
         "pressureRate": 0.194,
         "missedTacklePct": 0.119,
         "thirdDownPct": 0.37,
-        "redZoneTdPct": 0.5
+        "redZoneTdPct": 0.5,
+        "topPerGame": 28.66
       },
       "competitive": {
         "epaAllowed": -0.047,
@@ -275,7 +283,8 @@
         "pressureRate": 0.162,
         "missedTacklePct": 0.074,
         "thirdDownPct": 0.523,
-        "redZoneTdPct": 0.733
+        "redZoneTdPct": 0.733,
+        "topPerGame": 28.98
       },
       "competitive": {
         "epaAllowed": 0.173,
@@ -307,7 +316,8 @@
         "pressureRate": 0.181,
         "missedTacklePct": 0.167,
         "thirdDownPct": 0.475,
-        "redZoneTdPct": 0.5
+        "redZoneTdPct": 0.5,
+        "topPerGame": 28.5
       },
       "competitive": {
         "epaAllowed": 0.077,
@@ -339,7 +349,8 @@
         "pressureRate": 0.188,
         "missedTacklePct": 0.025,
         "thirdDownPct": 0.528,
-        "redZoneTdPct": 0.824
+        "redZoneTdPct": 0.824,
+        "topPerGame": 30.34
       },
       "competitive": {
         "epaAllowed": 0.161,
@@ -371,7 +382,8 @@
         "pressureRate": 0.213,
         "missedTacklePct": 0.085,
         "thirdDownPct": 0.482,
-        "redZoneTdPct": 0.857
+        "redZoneTdPct": 0.857,
+        "topPerGame": 26.77
       },
       "competitive": {
         "epaAllowed": 0.025,
@@ -403,7 +415,8 @@
         "pressureRate": 0.169,
         "missedTacklePct": 0.084,
         "thirdDownPct": 0.377,
-        "redZoneTdPct": 0.636
+        "redZoneTdPct": 0.636,
+        "topPerGame": 29.2
       },
       "competitive": {
         "epaAllowed": 0.125,
@@ -435,7 +448,8 @@
         "pressureRate": 0.138,
         "missedTacklePct": 0.122,
         "thirdDownPct": 0.292,
-        "redZoneTdPct": 0.571
+        "redZoneTdPct": 0.571,
+        "topPerGame": 30.89
       },
       "competitive": {
         "epaAllowed": 0.07,
@@ -467,7 +481,8 @@
         "pressureRate": 0.16,
         "missedTacklePct": 0.097,
         "thirdDownPct": 0.326,
-        "redZoneTdPct": 0.286
+        "redZoneTdPct": 0.286,
+        "topPerGame": 30.89
       },
       "competitive": {
         "epaAllowed": -0.087,
@@ -499,7 +514,8 @@
         "pressureRate": 0.133,
         "missedTacklePct": 0.08,
         "thirdDownPct": 0.37,
-        "redZoneTdPct": 0.444
+        "redZoneTdPct": 0.444,
+        "topPerGame": 30.16
       },
       "competitive": {
         "epaAllowed": 0.005,
@@ -531,7 +547,8 @@
         "pressureRate": 0.299,
         "missedTacklePct": 0.092,
         "thirdDownPct": 0.404,
-        "redZoneTdPct": 0.769
+        "redZoneTdPct": 0.769,
+        "topPerGame": 31.46
       },
       "competitive": {
         "epaAllowed": -0.023,
@@ -563,7 +580,8 @@
         "pressureRate": 0.219,
         "missedTacklePct": 0.086,
         "thirdDownPct": 0.365,
-        "redZoneTdPct": 0.563
+        "redZoneTdPct": 0.563,
+        "topPerGame": 29.28
       },
       "competitive": {
         "epaAllowed": -0.023,
@@ -595,7 +613,8 @@
         "pressureRate": 0.158,
         "missedTacklePct": 0.06,
         "thirdDownPct": 0.333,
-        "redZoneTdPct": 0.583
+        "redZoneTdPct": 0.583,
+        "topPerGame": 31.31
       },
       "competitive": {
         "epaAllowed": -0.066,
@@ -627,7 +646,8 @@
         "pressureRate": 0.121,
         "missedTacklePct": 0.067,
         "thirdDownPct": 0.467,
-        "redZoneTdPct": 0.647
+        "redZoneTdPct": 0.647,
+        "topPerGame": 27.63
       },
       "competitive": {
         "epaAllowed": 0.159,
@@ -659,7 +679,8 @@
         "pressureRate": 0.379,
         "missedTacklePct": 0.042,
         "thirdDownPct": 0.226,
-        "redZoneTdPct": 0.182
+        "redZoneTdPct": 0.182,
+        "topPerGame": 32.13
       },
       "competitive": {
         "epaAllowed": -0.183,
@@ -691,7 +712,8 @@
         "pressureRate": 0.179,
         "missedTacklePct": 0.07,
         "thirdDownPct": 0.383,
-        "redZoneTdPct": 0.583
+        "redZoneTdPct": 0.583,
+        "topPerGame": 30.82
       },
       "competitive": {
         "epaAllowed": -0.028,
@@ -723,7 +745,8 @@
         "pressureRate": 0.248,
         "missedTacklePct": 0.086,
         "thirdDownPct": 0.471,
-        "redZoneTdPct": 0.615
+        "redZoneTdPct": 0.615,
+        "topPerGame": 32.27
       },
       "competitive": {
         "epaAllowed": 0.093,
@@ -755,7 +778,8 @@
         "pressureRate": 0.077,
         "missedTacklePct": 0.111,
         "thirdDownPct": 0.489,
-        "redZoneTdPct": 0.75
+        "redZoneTdPct": 0.75,
+        "topPerGame": 32.68
       },
       "competitive": {
         "epaAllowed": -0.071,
@@ -787,7 +811,8 @@
         "pressureRate": 0.175,
         "missedTacklePct": 0.097,
         "thirdDownPct": 0.37,
-        "redZoneTdPct": 0.529
+        "redZoneTdPct": 0.529,
+        "topPerGame": 30.55
       },
       "competitive": {
         "epaAllowed": 0.009,
@@ -819,7 +844,8 @@
         "pressureRate": 0.112,
         "missedTacklePct": 0.141,
         "thirdDownPct": 0.404,
-        "redZoneTdPct": 0.588
+        "redZoneTdPct": 0.588,
+        "topPerGame": 28.55
       },
       "competitive": {
         "epaAllowed": 0.025,
@@ -851,7 +877,8 @@
         "pressureRate": 0.208,
         "missedTacklePct": 0.126,
         "thirdDownPct": 0.348,
-        "redZoneTdPct": 0.6
+        "redZoneTdPct": 0.6,
+        "topPerGame": 30.69
       },
       "competitive": {
         "epaAllowed": 0.052,
@@ -883,7 +910,8 @@
         "pressureRate": 0.188,
         "missedTacklePct": 0.077,
         "thirdDownPct": 0.441,
-        "redZoneTdPct": 0.455
+        "redZoneTdPct": 0.455,
+        "topPerGame": 28.5
       },
       "competitive": {
         "epaAllowed": 0.026,
@@ -915,7 +943,8 @@
         "pressureRate": 0.221,
         "missedTacklePct": 0.064,
         "thirdDownPct": 0.286,
-        "redZoneTdPct": 0.667
+        "redZoneTdPct": 0.667,
+        "topPerGame": 29.95
       },
       "competitive": {
         "epaAllowed": -0.176,
@@ -947,7 +976,8 @@
         "pressureRate": 0.169,
         "missedTacklePct": 0.11,
         "thirdDownPct": 0.327,
-        "redZoneTdPct": 0.455
+        "redZoneTdPct": 0.455,
+        "topPerGame": 30
       },
       "competitive": {
         "epaAllowed": -0.053,
@@ -979,7 +1009,8 @@
         "pressureRate": 0.165,
         "missedTacklePct": 0.068,
         "thirdDownPct": 0.358,
-        "redZoneTdPct": 0.667
+        "redZoneTdPct": 0.667,
+        "topPerGame": 24.31
       },
       "competitive": {
         "epaAllowed": 0.118,
@@ -1011,7 +1042,8 @@
         "pressureRate": 0.243,
         "missedTacklePct": 0.105,
         "thirdDownPct": 0.42,
-        "redZoneTdPct": 0.8
+        "redZoneTdPct": 0.8,
+        "topPerGame": 31.4
       },
       "competitive": {
         "epaAllowed": -0.002,
@@ -1063,7 +1095,8 @@
         "oneScoreWinPct": 0,
         "penaltiesPerGame": 9.3,
         "turnoverDiffPerGame": 0.8,
-        "fourthDownGoPct": 1
+        "fourthDownGoPct": 1,
+        "topPerGame": 30.55
       },
       "competitive": {
         "netEpa": -0.032,
@@ -1108,7 +1141,8 @@
         "oneScoreWinPct": 1,
         "penaltiesPerGame": 7.8,
         "turnoverDiffPerGame": 1.3,
-        "fourthDownGoPct": 1
+        "fourthDownGoPct": 1,
+        "topPerGame": 30.16
       },
       "competitive": {
         "netEpa": 0.211,
@@ -1153,7 +1187,8 @@
         "oneScoreWinPct": 0,
         "penaltiesPerGame": 7.3,
         "turnoverDiffPerGame": -0.3,
-        "fourthDownGoPct": 0.857
+        "fourthDownGoPct": 0.857,
+        "topPerGame": 36.59
       },
       "competitive": {
         "netEpa": 0.166,
@@ -1198,7 +1233,8 @@
         "oneScoreWinPct": 0.333,
         "penaltiesPerGame": 6.8,
         "turnoverDiffPerGame": 0,
-        "fourthDownGoPct": null
+        "fourthDownGoPct": null,
+        "topPerGame": 28.98
       },
       "competitive": {
         "netEpa": -0.003,
@@ -1243,7 +1279,8 @@
         "oneScoreWinPct": 0.667,
         "penaltiesPerGame": 7.8,
         "turnoverDiffPerGame": 0.8,
-        "fourthDownGoPct": 1
+        "fourthDownGoPct": 1,
+        "topPerGame": 30.34
       },
       "competitive": {
         "netEpa": -0.057,
@@ -1288,7 +1325,8 @@
         "oneScoreWinPct": 0.5,
         "penaltiesPerGame": 7.5,
         "turnoverDiffPerGame": 0.8,
-        "fourthDownGoPct": 0.6
+        "fourthDownGoPct": 0.6,
+        "topPerGame": 31.4
       },
       "competitive": {
         "netEpa": -0.046,
@@ -1333,7 +1371,8 @@
         "oneScoreWinPct": 0.5,
         "penaltiesPerGame": 8.8,
         "turnoverDiffPerGame": 1.3,
-        "fourthDownGoPct": 0
+        "fourthDownGoPct": 0,
+        "topPerGame": 29.65
       },
       "competitive": {
         "netEpa": 0.07,
@@ -1378,7 +1417,8 @@
         "oneScoreWinPct": 0,
         "penaltiesPerGame": 7.8,
         "turnoverDiffPerGame": 0.3,
-        "fourthDownGoPct": 0.6
+        "fourthDownGoPct": 0.6,
+        "topPerGame": 29.2
       },
       "competitive": {
         "netEpa": -0.12,
@@ -1423,7 +1463,8 @@
         "oneScoreWinPct": 0,
         "penaltiesPerGame": 8,
         "turnoverDiffPerGame": -0.5,
-        "fourthDownGoPct": 0.5
+        "fourthDownGoPct": 0.5,
+        "topPerGame": 27.63
       },
       "competitive": {
         "netEpa": -0.223,
@@ -1468,7 +1509,8 @@
         "oneScoreWinPct": 0.667,
         "penaltiesPerGame": 9.8,
         "turnoverDiffPerGame": 0.8,
-        "fourthDownGoPct": 1
+        "fourthDownGoPct": 1,
+        "topPerGame": 31.27
       },
       "competitive": {
         "netEpa": 0.265,
@@ -1513,7 +1555,8 @@
         "oneScoreWinPct": 0,
         "penaltiesPerGame": 9.5,
         "turnoverDiffPerGame": -0.3,
-        "fourthDownGoPct": null
+        "fourthDownGoPct": null,
+        "topPerGame": 29.28
       },
       "competitive": {
         "netEpa": -0.187,
@@ -1558,7 +1601,8 @@
         "oneScoreWinPct": 0.667,
         "penaltiesPerGame": 7.5,
         "turnoverDiffPerGame": -0.5,
-        "fourthDownGoPct": 1
+        "fourthDownGoPct": 1,
+        "topPerGame": 28.1
       },
       "competitive": {
         "netEpa": 0.114,
@@ -1603,7 +1647,8 @@
         "oneScoreWinPct": 1,
         "penaltiesPerGame": 7.3,
         "turnoverDiffPerGame": 0.8,
-        "fourthDownGoPct": 1
+        "fourthDownGoPct": 1,
+        "topPerGame": 32.68
       },
       "competitive": {
         "netEpa": 0.036,
@@ -1646,7 +1691,8 @@
         "oneScoreWinPct": 0.333,
         "penaltiesPerGame": 6.3,
         "turnoverDiffPerGame": -1.3,
-        "fourthDownGoPct": 1
+        "fourthDownGoPct": 1,
+        "topPerGame": 32.27
       },
       "competitive": {
         "netEpa": -0.069,
@@ -1691,7 +1737,8 @@
         "oneScoreWinPct": 1,
         "penaltiesPerGame": 6.5,
         "turnoverDiffPerGame": 1.3,
-        "fourthDownGoPct": 1
+        "fourthDownGoPct": 1,
+        "topPerGame": 32.13
       },
       "competitive": {
         "netEpa": 0.077,
@@ -1734,7 +1781,8 @@
         "oneScoreWinPct": 0,
         "penaltiesPerGame": 7,
         "turnoverDiffPerGame": -2,
-        "fourthDownGoPct": 0.333
+        "fourthDownGoPct": 0.333,
+        "topPerGame": 32.89
       },
       "competitive": {
         "netEpa": -0.112,
@@ -1779,7 +1827,8 @@
         "oneScoreWinPct": 0.5,
         "penaltiesPerGame": 5.8,
         "turnoverDiffPerGame": 0.8,
-        "fourthDownGoPct": 0.6
+        "fourthDownGoPct": 0.6,
+        "topPerGame": 31.46
       },
       "competitive": {
         "netEpa": 0.108,
@@ -1824,7 +1873,8 @@
         "oneScoreWinPct": 1,
         "penaltiesPerGame": 4.3,
         "turnoverDiffPerGame": 0.3,
-        "fourthDownGoPct": 0.667
+        "fourthDownGoPct": 0.667,
+        "topPerGame": 28.5
       },
       "competitive": {
         "netEpa": 0.256,
@@ -1869,7 +1919,8 @@
         "oneScoreWinPct": 0.5,
         "penaltiesPerGame": 6.8,
         "turnoverDiffPerGame": 1.5,
-        "fourthDownGoPct": 0
+        "fourthDownGoPct": 0,
+        "topPerGame": 30.89
       },
       "competitive": {
         "netEpa": 0.18,
@@ -1914,7 +1965,8 @@
         "oneScoreWinPct": 1,
         "penaltiesPerGame": 10.5,
         "turnoverDiffPerGame": -0.5,
-        "fourthDownGoPct": 0.833
+        "fourthDownGoPct": 0.833,
+        "topPerGame": 26.77
       },
       "competitive": {
         "netEpa": -0.096,
@@ -1959,7 +2011,8 @@
         "oneScoreWinPct": 0,
         "penaltiesPerGame": 7.8,
         "turnoverDiffPerGame": 0.3,
-        "fourthDownGoPct": 0.75
+        "fourthDownGoPct": 0.75,
+        "topPerGame": 31.87
       },
       "competitive": {
         "netEpa": -0.095,
@@ -2004,7 +2057,8 @@
         "oneScoreWinPct": 0.667,
         "penaltiesPerGame": 8.8,
         "turnoverDiffPerGame": 0.3,
-        "fourthDownGoPct": 1
+        "fourthDownGoPct": 1,
+        "topPerGame": 29.95
       },
       "competitive": {
         "netEpa": 0.119,
@@ -2049,7 +2103,8 @@
         "oneScoreWinPct": 0.667,
         "penaltiesPerGame": 6.3,
         "turnoverDiffPerGame": 0,
-        "fourthDownGoPct": null
+        "fourthDownGoPct": null,
+        "topPerGame": 30.69
       },
       "competitive": {
         "netEpa": -0.138,
@@ -2094,7 +2149,8 @@
         "oneScoreWinPct": 0.5,
         "penaltiesPerGame": 6.8,
         "turnoverDiffPerGame": -1.3,
-        "fourthDownGoPct": 1
+        "fourthDownGoPct": 1,
+        "topPerGame": 30.82
       },
       "competitive": {
         "netEpa": 0.039,
@@ -2139,7 +2195,8 @@
         "oneScoreWinPct": 0.667,
         "penaltiesPerGame": 7.3,
         "turnoverDiffPerGame": -0.8,
-        "fourthDownGoPct": 1
+        "fourthDownGoPct": 1,
+        "topPerGame": 28.55
       },
       "competitive": {
         "netEpa": -0.096,
@@ -2184,7 +2241,8 @@
         "oneScoreWinPct": 0,
         "penaltiesPerGame": 5.8,
         "turnoverDiffPerGame": -0.8,
-        "fourthDownGoPct": 1
+        "fourthDownGoPct": 1,
+        "topPerGame": 24.31
       },
       "competitive": {
         "netEpa": -0.283,
@@ -2229,7 +2287,8 @@
         "oneScoreWinPct": 0.5,
         "penaltiesPerGame": 7.8,
         "turnoverDiffPerGame": -1.3,
-        "fourthDownGoPct": 1
+        "fourthDownGoPct": 1,
+        "topPerGame": 31.31
       },
       "competitive": {
         "netEpa": 0.079,
@@ -2274,7 +2333,8 @@
         "oneScoreWinPct": 1,
         "penaltiesPerGame": 7.3,
         "turnoverDiffPerGame": 0.3,
-        "fourthDownGoPct": 0
+        "fourthDownGoPct": 0,
+        "topPerGame": 28.5
       },
       "competitive": {
         "netEpa": -0.077,
@@ -2319,7 +2379,8 @@
         "oneScoreWinPct": 0.5,
         "penaltiesPerGame": 4,
         "turnoverDiffPerGame": -1.5,
-        "fourthDownGoPct": 0.667
+        "fourthDownGoPct": 0.667,
+        "topPerGame": 30.89
       },
       "competitive": {
         "netEpa": -0.104,
@@ -2364,7 +2425,8 @@
         "oneScoreWinPct": 0,
         "penaltiesPerGame": 6.5,
         "turnoverDiffPerGame": -1.3,
-        "fourthDownGoPct": 0.667
+        "fourthDownGoPct": 0.667,
+        "topPerGame": 30
       },
       "competitive": {
         "netEpa": -0.162,
@@ -2409,7 +2471,8 @@
         "oneScoreWinPct": 1,
         "penaltiesPerGame": 10.8,
         "turnoverDiffPerGame": -0.3,
-        "fourthDownGoPct": 0.5
+        "fourthDownGoPct": 0.5,
+        "topPerGame": 28.66
       },
       "competitive": {
         "netEpa": 0.104,
@@ -2454,7 +2517,8 @@
         "oneScoreWinPct": 0.333,
         "penaltiesPerGame": 9,
         "turnoverDiffPerGame": 0.5,
-        "fourthDownGoPct": 0.5
+        "fourthDownGoPct": 0.5,
+        "topPerGame": 30.81
       },
       "competitive": {
         "netEpa": 0.136,
@@ -5071,7 +5135,7 @@
         "epaPerCarry": -0.046,
         "epaPerTarget": -0.189
       },
-      "injuryStatus": "Active",
+      "injuryStatus": "Questionable",
       "injured": false
     },
     {
@@ -12423,8 +12487,8 @@
         "epaPerCarry": 0,
         "epaPerTarget": -0.425
       },
-      "injuryStatus": "Questionable",
-      "injured": false
+      "injuryStatus": "Out",
+      "injured": true
     },
     {
       "id": 4240472,
