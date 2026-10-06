@@ -2,21 +2,38 @@
 
 // The Bets page (dev only): one scoreboard panel down the middle of the page, a row per call, most
 // confident first; like green, lean yellow, fade red (as on the card's Analysis tab)
-// The page on a card-room table: blue poker felt (a woven grain, light pooled in the middle, the edges
-// falling off into shadow) instead of the field
+// The page on a card-room table: blue felt (a fine woven fiber over a soft mottle, a warm light pooled
+// in the middle, the edges falling off into shadow), with the table's printed double gold line around it
 :host {
   background:
-    radial-gradient(ellipse 70% 55% at 50% 35%, rgba(120, 190, 255, 0.12), transparent 70%),
-    radial-gradient(ellipse at center, transparent 45%, rgba(0, 0, 0, 0.6) 100%),
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.28 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
-    linear-gradient(180deg, #11487a, #0a2d50);
+    radial-gradient(ellipse 60% 50% at 50% 30%, rgba(255, 236, 200, 0.1), transparent 70%),
+    radial-gradient(ellipse 120% 90% at 50% 40%, transparent 35%, rgba(0, 0, 0, 0.72) 100%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.7' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.16 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23f)'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='600'%3E%3Cfilter id='m'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.012' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.22 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23m)'/%3E%3C/svg%3E"),
+    radial-gradient(ellipse at 50% 30%, #1a63a8, #0e3f70 55%, #072443);
   display: block;
   height: calc(100% - var(--sport-bar-height));
   overflow-y: auto;
+  position: relative;
+
+  // (the printed line: fixed to the table, the list scrolling over it)
+  &::before {
+    border: 2px solid rgba(222, 186, 92, 0.32);
+    border-radius: 48px;
+    content: "";
+    inset: calc(var(--sport-bar-height) + 16px) 16px 16px;
+    outline: 1px solid rgba(222, 186, 92, 0.18);
+    outline-offset: -9px;
+    pointer-events: none;
+    position: fixed;
+  }
 }
 
+// (above the printed line)
 .bets-page {
   margin: 0 auto;
+  position: relative;
+  z-index: 1;
   max-width: 980px;
   padding: 26px 16px 40px;
 }
