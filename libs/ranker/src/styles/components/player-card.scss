@@ -1873,21 +1873,24 @@
   padding: 16px 18px 14px;
 }
 
+// The header's order of attention: the headline (big, in the sport's light), the definition under it, the
+// archetype a quiet tag above
 .ai-archetype {
-  border: 1px solid color-mix(in srgb, var(--scoreboard-led) 60%, transparent);
+  border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 999px;
-  color: var(--scoreboard-led);
+  color: rgba(255, 255, 255, 0.55);
   display: inline-block;
-  font-size: 11px;
-  font-weight: 900;
-  letter-spacing: 1.2px;
-  padding: 3px 11px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  padding: 2px 9px;
   text-transform: uppercase;
 }
 
 .ai-headline {
-  color: #fff;
-  @include v.headline(21px);
+  color: var(--scoreboard-led);
+  @include v.headline(24px);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
   line-height: 1.2;
   margin: 10px 0 6px;
 }
