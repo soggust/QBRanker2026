@@ -35,8 +35,14 @@
               <span class="bet-rank" [class.top]="i < 10">{{ i + 1 }}</span>
               <span class="bet-grade" [ngClass]="r.strength">{{ r.strength }}</span>
               <span class="bet-main">
-                <b>{{ r.pick }}</b>
-                <small>{{ r.marketLabel }} · from {{ sourceLabel(r) }}</small>
+                <!-- (a fade reads as what it fades, the bet to make under it) -->
+                @if (r.strength === 'fade') {
+                  <b>{{ r.market }}</b>
+                  <small>Take {{ r.pick }} · from {{ sourceLabel(r) }}</small>
+                } @else {
+                  <b>{{ r.pick }}</b>
+                  <small>{{ r.marketLabel }} · from {{ sourceLabel(r) }}</small>
+                }
               </span>
               <span class="bet-game">
                 @if (r.game) {

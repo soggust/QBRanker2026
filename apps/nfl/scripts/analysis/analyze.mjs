@@ -169,7 +169,7 @@ const SCHEMA = {
         type: 'object',
         properties: {
           market: { type: 'string', description: 'e.g. "BAL -2.5", "Over 44.5", "Jackson rushing yards"' },
-          lean: { type: 'string', description: 'the side, e.g. "Over", "BAL -2.5", "Under his average"' },
+          lean: { type: 'string', description: 'the bet itself, in a few words: "Under 45.5", "TB +9.5", "Over 0.5 INT", "Under his rushing average" (for a fade, the other side: never "fade ...")' },
           strength: { type: 'string', enum: ['like', 'lean', 'fade'] },
           confidence: { type: 'integer', description: 'how likely this bet is to win, 5-10 (decisive: 8-9 when everything lines up; a fade can be a 9)' },
           reason: { type: 'string', description: '1-3 sentences from the data' },

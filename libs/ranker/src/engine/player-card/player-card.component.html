@@ -390,7 +390,9 @@
                   <div class="ai-bet">
                     <span class="ai-bet-strength" [ngClass]="b.strength === 'strong' ? 'like' : b.strength">{{ b.strength === 'strong' ? 'like' : b.strength }}</span>
                     <div class="ai-bet-main">
-                      <span class="ai-bet-pick"><b>{{ b.lean }}</b><small>{{ b.market }}</small></span>
+                      <span class="ai-bet-pick"
+                        >@if (b.strength === 'fade') {<b>{{ b.market }}</b><small>take {{ b.lean }}</small>} @else {<b>{{ b.lean }}</b><small>{{ b.market }}</small>}</span
+                      >
                       <p>{{ b.reason }}</p>
                     </div>
                   </div>
