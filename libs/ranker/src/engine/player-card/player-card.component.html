@@ -255,7 +255,7 @@
           }
         }
 
-        <!-- The AI write-up (player-card/analysis.ts): the archetype and headline, the take, the season's
+        <!-- The AI write-up (player-card/analysis.ts): the archetype and headline, the overview, the season's
              strengths and concerns, the coming game, the rest of the season, betting angles -->
         @case ('analysis') {
           @let a = cards.analysis(c);
@@ -279,7 +279,7 @@
             <div class="stat-group tab-card ai-card" [class.closed]="!cards.aiOpen.has('take')">
               <button type="button" class="group-bar ai-bar" [attr.aria-expanded]="cards.aiOpen.has('take')" (click)="cards.toggleAi('take')">
                 <mat-icon class="ai-chevron" [fontIcon]="cards.aiOpen.has('take') ? 'expand_more' : 'chevron_right'"></mat-icon>
-                <mat-icon class="group-bar-icon" fontIcon="auto_awesome"></mat-icon><span>The Take</span>
+                <mat-icon class="group-bar-icon" fontIcon="auto_awesome"></mat-icon><span>Overview</span>
               </button>
               <div class="group-body ai-prose">
                 @for (p of paragraphs(r.take); track $index) {
@@ -291,7 +291,7 @@
             <div class="stat-group tab-card ai-card ai-season" [class.closed]="!cards.aiOpen.has('season')">
               <button type="button" class="group-bar ai-bar" [attr.aria-expanded]="cards.aiOpen.has('season')" (click)="cards.toggleAi('season')">
                 <mat-icon class="ai-chevron" [fontIcon]="cards.aiOpen.has('season') ? 'expand_more' : 'chevron_right'"></mat-icon>
-                <mat-icon class="group-bar-icon" fontIcon="insights"></mat-icon><span>Season So Far</span>
+                <mat-icon class="group-bar-icon" fontIcon="insights"></mat-icon><span>Current Season</span>
               </button>
               <div class="group-body">
                 <div class="ai-columns">
