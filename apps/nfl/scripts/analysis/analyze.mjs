@@ -64,7 +64,7 @@ You get one team's dossier as JSON. It is your only source. Use no outside knowl
 
 How to read the dossier:
 - [value, rank, of]: the value and its rank among the 32 teams this season (1 = best; for stats where less is better — points allowed, EPA allowed, sacks allowed, penalties — rank 1 is the fewest). History lines rank within that season.
-- team: record, points for and against, division standings, the coach (newCoach: first year), preseasonGrades (the site's 0-12 preseason grades for weapons, line and coaching) and currentGrades (the line and weapons now).
+- team: record, points for and against, division standings, the coach (newCoach: first year).
 - season.team: results and efficiency (winsOverExpected: wins beyond what the point differential predicts, so luck; atsPct: share of games covered; netEpa; offEpa; defEpaAllowed; oneScoreWinPct; turnoverDiffPerGame; fourthDownGoPct; topPerGame). season.defense: EPA allowed by pass and rush, pressure rate made, takeaways, third-down and red-zone rates allowed, missed tackles. season.offensiveLine: pressure and sack rates allowed, stuff rate, yards before contact, run EPA. season.playByPlay: offense and defense EPA splits by pass and rush, success rates, pass rate over expected, explosive plays allowed, deep and short passing defense.
 - qbStarts: who started at QB each week. usage: who carries the offense (top passers, rushers by carries, receivers by targets).
 - gameLog: each game: the score, Vegas (favoredBy: negative = underdog; covered; overUnder), the QB, the opponent's offense and defense EPA ranks today, and the box score (yards, EPA, turnovers, sacks both ways, takeaways, penalties).

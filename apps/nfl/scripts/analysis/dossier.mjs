@@ -2,7 +2,7 @@
 // (the model explains numbers, it doesn't add them up). Each rate comes with its rank among the
 // position's qualifiers ([value, rank, of]), so "good" and "bad" are the league's, not the model's guess.
 //
-//   node apps/nfl/scripts/analysis/dossier.mjs [name filter...]
+//   node apps/nfl/scripts/analysis/dossier.mjs [name filter...] [--fresh]
 //
 // Sources (cached in .cache/nflverse for 12 hours): nflverse play-by-play, weekly player stats, Next Gen
 // Stats, PFR advanced stats, snap counts, injuries, depth charts, players, draft picks and the
@@ -57,7 +57,8 @@ const LOGO_TEAM = Object.fromEntries(Object.entries(TEAMS).map(([abbr, name]) =>
 
 async function download(file, url) {
   const dest = path.join(CACHE, file);
-  if (existsSync(dest) && Date.now() - statSync(dest).mtimeMs < 12 * 3600e3) return dest;
+  // (--fresh: download again, whatever the cache has)
+  if (!process.argv.includes('--fresh') && existsSync(dest) && Date.now() - statSync(dest).mtimeMs < 12 * 3600e3) return dest;
   const res = await fetch(url);
   if (!res.ok) throw new Error(`${url}: ${res.status}`);
   writeFileSync(dest, Buffer.from(await res.arrayBuffer()));
@@ -618,7 +619,7 @@ async function main() {
   };
 
   // ---- the dossiers
-  const filters = process.argv.slice(2).map((x) => x.toLowerCase());
+  const filters = process.argv.slice(2).filter((x) => !x.startsWith('--')).map((x) => x.toLowerCase());
   let written = 0;
   for (const p of list) {
     const b = bio.get(p.gsis);
@@ -773,6 +774,7 @@ async function main() {
     writeFileSync(path.join(OUT, `${p.gsis}.json`), JSON.stringify(dossier));
     written++;
   }
+  // (only what the site shows: not its hidden preseason or line/weapons grades)
   // ---- team dossiers: one per team, read by its Team, Defense, O-line and Coach cards. The site's team,
   // defense and line stats ranked across the 32, the standings, each game with its line and box score,
   // who has been playing, the injury report, the next game, the rest of the schedule, recent seasons
@@ -802,7 +804,6 @@ async function main() {
   const defRanked = rankRows(defRows, ['fantasyStd', 'receptions']);
   const olRanked = rankRows(olRows);
   const dataGrades = JSON.parse(readFileSync(path.join(DATA, 'data-grades.json'), 'utf8')).teams ?? {};
-  const preseason = JSON.parse(readFileSync(path.join(DATA, 'team-grades.json'), 'utf8'));
 
   // records and division standings
   const DIVISIONS = {
@@ -869,8 +870,6 @@ async function main() {
           .map((m) => ({ team: m, record: recordText(record(m)), w: record(m).w }))
           .sort((a, b) => b.w - a.w)
           .map(({ team, record }) => `${team} ${record}`),
-        preseasonGrades: preseason[nickname] ?? null,
-        currentGrades: dataGrades[nickname] ? { oline: dataGrades[nickname].oline, weapons: dataGrades[nickname].weapons } : null,
       },
       season: {
         year: SEASON,
