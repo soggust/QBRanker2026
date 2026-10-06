@@ -770,9 +770,13 @@
   --group-color: var(--scoreboard-led);
 }
 
-// The Game Log and Career tabs: one card each, like a Season group (its bar a title, not a fold)
-.tab-card {
+// The Game Log and Career tabs: one card each, like a Season group (its bar a title, not a fold). The
+// yellow is only a default (:where: no weight), so a card with a category class takes that color
+:where(.tab-card) {
   --group-color: var(--scoreboard-led);
+}
+
+.tab-card {
 
   .group-bar.static {
     cursor: default;
@@ -1935,20 +1939,9 @@
     padding: 14px 20px 16px;
   }
 
-  &.ai-season {
-    --group-color: #3ecf6e;
-  }
-
-  &.ai-next {
-    --group-color: #5ab4ff;
-  }
-
-  &.ai-rest {
-    --group-color: #b38cff;
-  }
-
+  // (the season, next game and rest of season take the site's category colors: their group-* class)
   &.ai-bets {
-    --group-color: #ffcd00;
+    --group-color: var(--scoreboard-led);
   }
 }
 
@@ -1963,50 +1956,44 @@
   }
 }
 
+// strengths over concerns, one column
 .ai-columns {
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: 18px;
-  grid-template-columns: 1fr 1fr;
 }
 
 .ai-points {
   display: flex;
   flex-direction: column;
-  gap: 10px;
 
+  // Strengths / Concerns: headed like the rest of the card (a line under the icon and title), in green
+  // or red
   h4 {
-    align-items: center;
-    display: flex;
-    font-size: 12px;
-    font-weight: 900;
-    gap: 6px;
-    letter-spacing: 1.2px;
-    margin: 0 0 2px;
-    text-transform: uppercase;
-
-    .mat-icon {
-      @include v.icon-size(18px);
-    }
+    @include group-heading;
+    margin: 0 0 4px;
   }
 
   &.strengths h4 {
-    color: #3ecf6e;
+    --group-color: #3ecf6e;
   }
 
   &.concerns h4 {
-    color: #ff6b61;
+    --group-color: #ff6b61;
   }
 
   &.matchups {
-    margin-top: 14px;
+    margin-top: 10px;
   }
 }
 
+// A point: no box, a colored marker by its title, a hairline between points
 .ai-point {
-  background: rgba(0, 0, 0, 0.2);
-  border-left: 3px solid var(--point, rgba(255, 255, 255, 0.2));
-  border-radius: 6px;
-  padding: 10px 12px 11px;
+  padding: 10px 0 11px;
+
+  & + & {
+    border-top: 1px solid rgba(255, 255, 255, 0.07);
+  }
 
   .strengths & {
     --point: #3ecf6e;
@@ -2017,14 +2004,27 @@
   }
 
   .matchups & {
-    --point: #5ab4ff;
+    --point: var(--group-color);
   }
 
   h5 {
+    align-items: center;
     color: #fff;
+    display: flex;
     font-size: 14px;
     font-weight: 800;
+    gap: 8px;
     margin: 0 0 4px;
+
+    &::before {
+      background: var(--point, #fff);
+      border-radius: 50%;
+      box-shadow: 0 0 6px color-mix(in srgb, var(--point, #fff) 60%, transparent);
+      content: "";
+      flex: none;
+      height: 7px;
+      width: 7px;
+    }
   }
 
   p {
@@ -2035,11 +2035,27 @@
   }
 }
 
+// its numbers: one quiet line, dot-separated
 .ai-evidence {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
-  margin-top: 9px;
+  gap: 2px 0;
+  margin-top: 6px;
+
+  .ai-chip {
+    background: none;
+    border: none;
+    border-radius: 0;
+    font-size: 11.5px;
+    gap: 4px;
+    padding: 0;
+
+    & + .ai-chip::before {
+      color: rgba(255, 255, 255, 0.25);
+      content: "·";
+      margin: 0 8px;
+    }
+  }
 }
 
 .ai-chip {
@@ -2164,7 +2180,7 @@
 
 .ai-watch {
   align-items: flex-start;
-  background: color-mix(in srgb, #5ab4ff 10%, transparent);
+  background: color-mix(in srgb, var(--group-color) 10%, transparent);
   border-radius: 6px;
   color: rgba(255, 255, 255, 0.85);
   display: flex;
@@ -2175,7 +2191,7 @@
   padding: 9px 12px;
 
   .mat-icon {
-    color: #5ab4ff;
+    color: var(--group-color);
     flex: none;
     @include v.icon-size(18px);
     margin-top: 1px;
@@ -2197,9 +2213,9 @@
 }
 
 .ai-projection-range {
-  color: #b38cff;
+  color: var(--group-color);
   @include v.hand(22px);
-  text-shadow: 0 0 10px color-mix(in srgb, #b38cff 45%, transparent);
+  text-shadow: 0 0 10px color-mix(in srgb, var(--group-color) 45%, transparent);
 
   small {
     margin: 0 3px;
