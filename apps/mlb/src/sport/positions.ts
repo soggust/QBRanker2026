@@ -178,7 +178,7 @@ export const STAT_NAMES: Partial<Record<SkillColumnKey, string>> = {
   park: 'Home Park',
 };
 
-// Per-game column labels, when Stat Defs is on Per Game
+// Per-game column labels, when Stat Base is on Per Game
 export const PER_GAME_LABELS: Partial<Record<SkillColumnKey, string>> = {
   war: 'WAR / Game',
   homeRuns: 'HR / Game',

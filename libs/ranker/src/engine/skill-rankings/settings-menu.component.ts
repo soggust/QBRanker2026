@@ -16,7 +16,7 @@ interface MenuSwitch {
   flip: () => void;
 }
 
-// The settings menu (the footer's gear): how stats are counted (Stat Defs, Min Games, the sport's
+// The settings menu (the footer's gear): how stats are counted (Stat Base, Min Games, the sport's
 // format settings) and what the table shows (dividers, colors, combined columns, injured players,
 // rookies, unweighted stats, the sport's display settings). Shared by every tab; the rankings re-rank
 // on any change (PositionService.settings$).
@@ -36,7 +36,7 @@ export class SettingsMenuComponent {
   readonly statBasisLabels = STAT_BASIS_LABELS;
   readonly settingsAt = settingsAt;
 
-  // The Stat Defs setting's hover text, in the sport's terms
+  // The Stat Base setting's hover text, in the sport's terms
   readonly statBasisTitle =
     `Click to switch how counting stats (${SPORT.statBasisHelp.examples}) are shown and ranked: season totals, ` +
     `per game (fairer to anyone who missed time), or a full season's pace (${SPORT.statBasisHelp.pace})`;

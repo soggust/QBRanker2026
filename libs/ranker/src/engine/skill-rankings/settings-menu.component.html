@@ -18,7 +18,7 @@
   }
   <div mat-menu-item [title]="statBasisTitle" (click)="$event.stopPropagation(); cycleStatBasis()">
     <span class="menu-slot"><span class="menu-value">{{ statBasisLabels[settings.statBasis] }}</span></span>
-    <span>Stat Defs</span>
+    <span>Stat Base</span>
   </div>
   @for (setting of settingsAt('formatMid'); track setting.key) {
     <ng-container *ngTemplateOutlet="choice; context: { $implicit: setting }"></ng-container>
