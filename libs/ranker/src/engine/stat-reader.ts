@@ -69,6 +69,12 @@ export class StatReader {
     return this.source.empty(key);
   }
 
+  // Whether anyone in the list has a value for a stat (a season from before it was kept has none: Time of
+  // Possession)
+  hasValues(stat: SkillStat): boolean {
+    return this.source.list.some((p) => Number.isFinite(this.value(p, stat)));
+  }
+
   private get basis() {
     return this.source.settings.statBasis;
   }

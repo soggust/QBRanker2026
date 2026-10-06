@@ -307,7 +307,8 @@ export class SkillRankingsComponent implements OnChanges, CardHost {
       return parts.length > 0 && (showUnused || parts.some((key) => !!weights[key as keyof SkillWeights]));
     }
     if (reader.empty(stat.key)) return false;
-    if (stat.infoOnly) return true;
+    // (a display-only column nobody has a value for this season: one it didn't keep yet)
+    if (stat.infoOnly) return ['recent', 'record'].includes(stat.format) || reader.hasValues(stat);
     return showUnused || !!weights[stat.key];
   }
 
