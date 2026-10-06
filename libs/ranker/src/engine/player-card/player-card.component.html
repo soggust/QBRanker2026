@@ -9,6 +9,8 @@
     [style.--team-badge]="c.color"
   >
     <header class="card-hero">
+      <!-- The team logo, huge and faint in white: a texture on the team color -->
+      <span class="hero-texture" aria-hidden="true"><img [src]="c.logo" alt="" /></span>
       <!-- The team card, big: the logo behind, the player standing in front and out over the top -->
       <div class="hero-badge" [class.with-photo]="c.photo">
         <span class="hero-card" [class.white-logo]="c.whiteLogo"><img class="hero-logo" [src]="c.logo" alt="" /></span>

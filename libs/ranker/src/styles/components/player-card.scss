@@ -107,8 +107,28 @@
   flex: 0 0 auto;
   gap: 26px;
   grid-template-columns: auto 1fr auto;
+  isolation: isolate;
   padding: 44px 28px 22px;
   position: relative;
+}
+
+// ...the team logo on it, overscaled, in faint white: a texture on the gradient
+.hero-texture {
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  position: absolute;
+  z-index: -1;
+
+  img {
+    filter: brightness(0) invert(1);
+    height: 225%;
+    opacity: 0.06;
+    position: absolute;
+    right: -6%;
+    top: 50%;
+    transform: translateY(-50%) rotate(-8deg);
+  }
 }
 
 // The team cards: the hero's big one, and the similar seasons' at 1.2x the rows' (the player standing
