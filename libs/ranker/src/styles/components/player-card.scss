@@ -1925,10 +1925,10 @@
 // The header's order of attention: the headline (big, in the sport's light), the definition under it
 .ai-headline {
   color: var(--scoreboard-led);
-  @include v.headline(24px);
+  @include v.headline(20px);
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
   line-height: 1.2;
-  margin: 16px 0 12px;
+  margin: 12px 0;
 }
 
 .ai-definition {
@@ -1942,7 +1942,7 @@
   color: rgba(255, 255, 255, 0.45);
   display: flex;
   flex-wrap: wrap;
-  font-size: 11.5px;
+  font-size: 9.5px;
   font-weight: 600;
   gap: 4px 14px;
   justify-content: flex-end;
@@ -1972,8 +1972,9 @@
     margin: 0 -4px 0 -4px;
   }
 
+  // (on hover the chevron lightens with the rest of the bar: never the accent color)
   .ai-bar:hover .ai-chevron {
-    color: var(--scoreboard-led);
+    color: rgba(255, 255, 255, 0.9);
   }
 
   .group-body {
