@@ -388,8 +388,8 @@ $chip-clay: #b0202b;
   --tint: #9aa0a6;
   // (its full height in the scrolling list, never squeezed to fit)
   flex-shrink: 0;
-  // (its confidence color softened: desaturated toward gray, so it tints without going muddy)
-  --soft: color-mix(in srgb, var(--tint) 88%, #8a9097);
+  // (its confidence color, the row and its open section washed in it)
+  --soft: var(--tint);
   border: 1px solid color-mix(in srgb, var(--soft) 45%, transparent);
   border-radius: 6px;
   overflow: hidden;
