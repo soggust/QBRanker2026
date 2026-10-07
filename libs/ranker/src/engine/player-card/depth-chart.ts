@@ -61,5 +61,7 @@ export interface DepthView {
   special: { label: string; player: DepthPlayer | null }[];
   usage: DepthUsageGroup[];
   changes: DepthChange[];
+  // (the changes panel's title: "New Starters Since Week 1", a past season's "Starters Who Changed")
+  changesTitle: string;
   teamGames: number;
 }

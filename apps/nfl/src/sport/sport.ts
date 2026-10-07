@@ -193,10 +193,10 @@ export const SPORT: SportConfig = {
             fumblesLost: YARDS_CHART[position] ? 'Rushing' : undefined,
           }),
   },
-  // The Depth Chart tab on the team rows' cards, for the season being played (data/depth: build-depth.mjs)
+  // The Roster tab on the team rows' cards, 2001 on (data/depth, data/seasons/<year>/depth: build-depth.mjs)
   depthChart: {
-    has: (player, position, season) => TEAM_LOGS.includes(position) && season === SPORT.currentSeason && !!logoName(player),
-    load: (player, position) => loadDepthChart(logoName(player)!, position),
+    has: (player, position, season) => TEAM_LOGS.includes(position) && season >= 2001 && !!logoName(player),
+    load: (player, position, season) => loadDepthChart(logoName(player)!, position, season, season === SPORT.currentSeason),
   },
   cardFlagsLast: castFlags,
   cardExtras: blockingExtras,

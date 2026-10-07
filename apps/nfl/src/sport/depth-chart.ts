@@ -1,21 +1,27 @@
-// The NFL's Depth Chart tab (the card's Team, O-Line, Defense and Head Coach rows): a team's file
-// (scripts/build-depth.mjs: data/depth/<logo>.json) laid out as the engine draws it
-// (@ranker/engine/player-card/depth-chart): the offense in its 3WR 1TE set and the defense in its base
-// front, each slot placed on the field, then the special teams, who's played and what's changed.
+// The NFL's Roster tab (the card's Team, O-Line, Defense and Head Coach rows): a team's file
+// (scripts/build-depth.mjs: data/depth/<logo>.json for the season being played, data/seasons/<year>/depth
+// for past ones) laid out as the engine draws it (@ranker/engine/player-card/depth-chart): the offense in
+// its main personnel (two tight ends or a fullback where that's what it mostly played) and the defense in
+// its base front, each slot placed on the field, then the special teams, who's played and what changed.
 import type { DepthPlayer, DepthSide, DepthSlot, DepthUsageGroup, DepthView } from '@ranker/engine/player-card/depth-chart';
 
 // A team's file
 interface DepthFile {
   team: string;
+  season: number;
   at: string;
   teamGames: number;
   front: string | null;
+  // its main personnel: how many backs, tight ends and receivers it had on the field (from the snap counts:
+  // 2012 on)
+  personnel: { rb: number; te: number; wr: number } | null;
   slots: { side: 'offense' | 'defense' | 'special'; key: string; abb: string; name: string; depth: string[] }[];
   players: Record<
     string,
     {
       name: string;
       espnId: string | null;
+      // (the NFL's image id, "league/abc123", or a whole link)
       headshot: string | null;
       pos: string | null;
       unit: string | null;
@@ -31,14 +37,13 @@ interface DepthFile {
   changes: { side: string; key: string; name: string; from: string; to: string }[];
 }
 
-// Where each slot sits (x across, y down, in percent of the field): the offense facing up from the line
-// of scrimmage (its receivers split wide, the slot inside), the defense above its line (the front on it,
-// the linebackers behind, the corners wide, the safeties deep)
-// (the offense on a wider, shorter field than the defense: the engine draws it at 2:1, the line near the top)
+// Where each spot sits (x across, y down, in percent of the field): the offense facing up from the line
+// of scrimmage, near the top of its wider, shorter field (the engine draws it at 2:1); the defense above
+// its line (the front on it, the linebackers behind, the corners wide, the safeties deep)
 const OFFENSE_LOS = 22;
-const OFFENSE: Record<string, [number, number]> = {
-  WR1: [6, 26], WR8: [18, 36], LT3: [30, 22], LG4: [40, 22], C5: [50, 22], RG6: [60, 22], RT7: [70, 22],
-  TE10: [81, 26], WR2: [94, 26], QB9: [50, 50], FB12: [50, 64], RB11: [50, 78],
+const SPOT: Record<string, [number, number]> = {
+  X: [6, 26], SLOT: [18, 36], Z: [94, 26], LT: [30, 22], LG: [40, 22], C: [50, 22], RG: [60, 22], RT: [70, 22],
+  TE: [81, 26], TE2: [20, 24], QB: [50, 50], FB: [50, 64], RB: [50, 78],
 };
 const DEFENSE_LOS = 80;
 const DEFENSE_34: Record<string, [number, number]> = {
@@ -51,9 +56,7 @@ const DEFENSE_43: Record<string, [number, number]> = {
   LDE1: [30, 70], LDT2: [43, 70], RDT3: [57, 70], RDE4: [70, 70], WLB5: [30, 46], MLB6: [50, 44], SLB7: [70, 46],
   LCB8: [6, 64], SS9: [63, 18], FS10: [37, 14], RCB11: [94, 64], NB12: [17, 40],
 };
-// (a slot's label on the field: its position, the receivers by their roles)
-const LABEL: Record<string, string> = { WR1: 'X', WR2: 'Z', WR8: 'SLOT', NB12: 'NICKEL' };
-const OLINE = new Set(['LT3', 'LG4', 'C5', 'RG6', 'RT7']);
+const OLINE = new Set(['LT', 'LG', 'C', 'RG', 'RT']);
 
 // The usage list's groups, in order
 const UNITS: [string, string][] = [
@@ -67,8 +70,9 @@ const STATUS: Record<string, string> = { Questionable: 'Q', Doubtful: 'D', Out: 
 
 // A headshot as a small face crop: the NFL's originals are full-size PNGs (megabytes each), and its image
 // server resizes on request (96px, cropped to the face: a few KB)
-const thumb = (url: string | null | undefined): string | null =>
-  url ? url.replace('/upload/f_auto,q_auto/', '/upload/f_auto,q_auto,w_96,h_96,c_thumb,g_face/') : null;
+const NFL_IMAGES = 'https://static.www.nfl.com/image/upload/f_auto,q_auto,w_96,h_96,c_thumb,g_face/';
+const thumb = (id: string | null | undefined): string | null =>
+  !id ? null : id.startsWith('http') ? id.replace('/upload/f_auto,q_auto/', '/upload/f_auto,q_auto,w_96,h_96,c_thumb,g_face/') : NFL_IMAGES + id;
 
 // "Lamar Jackson" -> "L. Jackson" (a suffix kept with the last name)
 function shortName(name: string): string {
@@ -78,9 +82,9 @@ function shortName(name: string): string {
   return `${parts[0][0]}. ${parts.slice(1).join(' ')}${suffix ? ' ' + suffix : ''}`;
 }
 
-export async function loadDepthChart(logo: string, position: string): Promise<DepthView> {
-  const res = await fetch(`data/depth/${logo}.json`, { cache: 'no-cache' });
-  if (!res.ok) throw new Error(`depth chart ${logo}: ${res.status}`);
+export async function loadDepthChart(logo: string, position: string, season: number, current: boolean): Promise<DepthView> {
+  const res = await fetch(current ? `data/depth/${logo}.json` : `data/seasons/${season}/depth/${logo}.json`, { cache: current ? 'no-cache' : 'default' });
+  if (!res.ok) throw new Error(`depth chart ${logo} ${season}: ${res.status}`);
   const file = (await res.json()) as DepthFile;
 
   const player = (id: string, side: 'offense' | 'defense' | 'special'): DepthPlayer => {
@@ -97,39 +101,73 @@ export async function loadDepthChart(logo: string, position: string): Promise<De
       injury: p?.injury ?? null,
     };
   };
+  const chain = (key: string) => file.slots.find((s) => s.key === key)?.depth ?? [];
 
-  const side = (id: 'offense' | 'defense'): DepthSide => {
-    const front = file.front ?? '4-3';
-    const layout = id === 'offense' ? OFFENSE : front === '3-4' ? DEFENSE_34 : DEFENSE_43;
-    const slots: DepthSlot[] = file.slots
-      .filter((s) => s.side === id && layout[s.key])
-      .map((s) => ({
-        key: s.key,
-        label: LABEL[s.key] ?? s.abb,
-        name: s.name,
-        x: layout[s.key][0],
-        y: layout[s.key][1],
-        sub: s.key === 'NB12',
-        focus: position === 'OL' ? OLINE.has(s.key) : undefined,
-        depth: s.depth.map((pid) => player(pid, id)),
-      }));
+  // The offense in its main personnel: three receivers (X, the slot, Z), or two with a second tight end
+  // (on the line's left) or a fullback (behind the quarterback), as the team mostly played
+  const offense = (): DepthSide => {
+    const p = file.personnel ?? { rb: 1, te: 1, wr: 3 };
+    const te = chain('TE10');
+    const rb = chain('RB11');
+    const fb = chain('FB12');
+    const spots: [string, string, string, string[]][] = [
+      ['X', 'X', 'Wide Receiver', chain('WR1')],
+      ['LT', 'LT', 'Left Tackle', chain('LT3')],
+      ['LG', 'LG', 'Left Guard', chain('LG4')],
+      ['C', 'C', 'Center', chain('C5')],
+      ['RG', 'RG', 'Right Guard', chain('RG6')],
+      ['RT', 'RT', 'Right Tackle', chain('RT7')],
+      ['QB', 'QB', 'Quarterback', chain('QB9')],
+      // (two tight ends: the second on the chart lines up on the left, the rest behind the first)
+      ['TE', 'TE', 'Tight End', p.te >= 2 ? [te[0], ...te.slice(2)].filter(Boolean) : te],
+      ['RB', 'RB', 'Running Back', p.rb >= 2 && !fb.length ? [rb[0], ...rb.slice(2)].filter(Boolean) : rb],
+    ];
+    if (p.wr >= 2) spots.push(['Z', 'Z', 'Wide Receiver', chain('WR2')]);
+    if (p.wr >= 3) spots.push(['SLOT', 'SLOT', 'Slot Receiver', chain('WR8')]);
+    if (p.te >= 2 && te[1]) spots.push(['TE2', 'TE', 'Tight End', [te[1]]]);
+    if (p.rb >= 2) spots.push(['FB', 'FB', 'Fullback', fb.length ? fb : rb[1] ? [rb[1]] : []]);
+    const slots: DepthSlot[] = spots.map(([key, label, name, depth]) => ({
+      key,
+      label,
+      name,
+      x: SPOT[key][0],
+      y: SPOT[key][1],
+      focus: position === 'OL' ? OLINE.has(key) : undefined,
+      depth: depth.map((id) => player(id, 'offense')),
+    }));
     return {
-      id,
-      title: id === 'offense' ? 'Offense' : 'Defense',
-      set: id === 'offense' ? '3WR 1TE' : `Base ${front}`,
-      los: id === 'offense' ? OFFENSE_LOS : DEFENSE_LOS,
+      id: 'offense',
+      title: 'Offense',
+      set: file.personnel ? `${p.rb}${p.te} Personnel` : null,
+      los: OFFENSE_LOS,
       slots,
     };
   };
 
-  // (the card's side first: the Defense card leads with its defense)
-  const sides = position === 'DEF' ? [side('defense'), side('offense')] : [side('offense'), side('defense')];
+  const defense = (): DepthSide => {
+    const front = file.front ?? '4-3';
+    const layout = front === '3-4' ? DEFENSE_34 : DEFENSE_43;
+    const slots: DepthSlot[] = file.slots
+      .filter((s) => s.side === 'defense' && layout[s.key])
+      .map((s) => ({
+        key: s.key,
+        label: s.key === 'NB12' ? 'NICKEL' : s.abb,
+        name: s.name,
+        x: layout[s.key][0],
+        y: layout[s.key][1],
+        sub: s.key === 'NB12',
+        depth: s.depth.map((id) => player(id, 'defense')),
+      }));
+    return { id: 'defense', title: 'Defense', set: `Base ${front}`, los: DEFENSE_LOS, slots };
+  };
 
-  const specialSlot = (abb: string) => file.slots.find((s) => s.side === 'special' && s.abb === abb);
+  // (the card's side first: the Defense card leads with its defense)
+  const sides = position === 'DEF' ? [defense(), offense()] : [offense(), defense()];
+
   const special = [
     ['K', 'PK'], ['P', 'P'], ['LS', 'LS'], ['KR', 'KR'], ['PR', 'PR'],
-  ].map(([label, abb]) => {
-    const id = specialSlot(abb)?.depth[0];
+  ].map(([label, key]) => {
+    const id = file.slots.find((s) => s.side === 'special' && s.key === key)?.depth[0];
     return { label, player: id ? player(id, 'special') : null };
   });
 
@@ -148,11 +186,20 @@ export async function loadDepthChart(logo: string, position: string): Promise<De
     if (rows.length) usage.push({ title, rows });
   }
 
+  const LABEL: Record<string, string> = { WR1: 'X', WR2: 'Z', WR8: 'SLOT', NB12: 'NICKEL' };
   const changes = file.changes.map((c) => ({
     label: LABEL[c.key] ?? c.key.replace(/\d+$/, ''),
     from: file.players[c.from]?.name ?? c.from,
     to: file.players[c.to]?.name ?? c.to,
   }));
 
-  return { asOf: file.at, sides, special, usage, changes, teamGames: file.teamGames };
+  return {
+    asOf: file.at,
+    sides,
+    special,
+    usage,
+    changes,
+    changesTitle: current ? 'New Starters Since Week 1' : 'Starters Who Changed',
+    teamGames: file.teamGames,
+  };
 }

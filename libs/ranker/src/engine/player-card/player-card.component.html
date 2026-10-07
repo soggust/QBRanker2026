@@ -387,7 +387,6 @@
             @for (side of d.sides; track side.id) {
               <card-panel
                 class="tab-card depth-panel"
-                [startOpen]="true"
                 [label]="side.title + (side.set ? ' · ' + side.set : '')"
                 [icon]="side.id === 'offense' ? 'sports_football' : 'shield'"
               >
@@ -446,7 +445,7 @@
               </card-panel>
             }
 
-            <card-panel class="tab-card depth-special" [startOpen]="true" label="Special Teams" icon="sports">
+            <card-panel class="tab-card depth-special" label="Special Teams" icon="sports">
               <div class="group-body depth-special-row">
                 @for (s of d.special; track s.label) {
                   <span class="depth-special-item">
@@ -465,7 +464,7 @@
             </card-panel>
 
             @if (d.changes.length) {
-              <card-panel class="tab-card depth-changes" [startOpen]="true" label="New Starters Since Week 1" icon="swap_horiz">
+              <card-panel class="tab-card depth-changes" [label]="d.changesTitle" icon="swap_horiz">
                 <div class="group-body">
                   @for (ch of d.changes; track ch.label + ch.to) {
                     <div class="depth-change">
@@ -479,9 +478,8 @@
               </card-panel>
             }
 
-            <card-panel class="tab-card depth-usage" [startOpen]="true" label="Who's Played" icon="groups">
+            <card-panel class="tab-card depth-usage" label="Who's Played" icon="groups">
               <div class="group-body">
-                <p class="depth-note">Share of the snaps in the games he played ({{ d.teamGames }} so far). Updated {{ d.asOf | date: 'MMM d' }}.</p>
                 @for (g of d.usage; track g.title) {
                   <h4 class="depth-unit">{{ g.title }}</h4>
                   @for (p of g.rows; track p.name) {
