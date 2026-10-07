@@ -33,35 +33,52 @@
   padding: 26px 16px;
 }
 
+// The panel a slot machine: its top a scoreboard (the header), the rest dark brushed gunmetal, and on
+// wide screens a handle on its right side
 .bets-panel {
   @include v.scoreboard-panel(12px);
-  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.5);
+  background:
+    // (a soft sheen down the middle, the metal's fine horizontal brushing, gunmetal)
+    linear-gradient(90deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.06) 50%, rgba(255, 255, 255, 0.02)),
+    repeating-linear-gradient(180deg, rgba(255, 255, 255, 0.025) 0 1px, transparent 1px 3px),
+    linear-gradient(180deg, #3b4148, #2c3136 45%, #22262a);
+  border-color: #4a5058;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    0 18px 40px rgba(0, 0, 0, 0.5);
   display: flex;
   flex-direction: column;
   max-height: 100%;
   min-height: 0;
   padding: 18px 20px 20px;
+  position: relative;
 }
 
 // One row: the game dropdown on the left, the update time on the right
+// (the machine's top: the scoreboard, out to the panel's edges)
 .bets-head {
   align-items: center;
+  background: var(--scoreboard-dots), var(--scoreboard);
   border-bottom: 1px solid color-mix(in srgb, var(--scoreboard-led) 60%, transparent);
+  border-radius: 11px 11px 0 0;
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
   justify-content: space-between;
-  margin-bottom: 12px;
-  padding-bottom: 14px;
+  margin: -18px -20px 14px;
+  padding: 18px 20px 14px;
 }
 
-// The filter chips, a row of their own under the dropdown: small casino chips in each type's color (the
-// game dropdown's spotted rim), dim until they're on
+// The filter chips, a row of their own under the dropdown: round casino chips in each type's color (a
+// thick rim with cream spots, an inlay ring), the type's short label and its count; dim until they're on.
+// A key (the info icon) says what the labels mean.
 .bets-kinds {
+  align-items: center;
   display: flex;
   flex-basis: 100%;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 10px;
+  margin: 6px 0 2px;
   order: 3;
 }
 
@@ -69,70 +86,82 @@
   --clay: #555;
   align-items: center;
   background:
-    radial-gradient(ellipse at 30% 0%, rgba(255, 255, 255, 0.2), transparent 65%),
-    linear-gradient(180deg, transparent 40%, rgba(0, 0, 0, 0.2)),
+    radial-gradient(circle at 35% 25%, rgba(255, 255, 255, 0.22), transparent 60%),
+    linear-gradient(180deg, transparent 45%, rgba(0, 0, 0, 0.22)),
     var(--clay);
-  border: 3px solid var(--clay);
-  border-radius: 999px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+  border: 6px solid var(--clay);
+  border-radius: 50%;
+  box-shadow:
+    inset 0 0 0 2px var(--clay),
+    inset 0 0 0 3px rgba(255, 236, 196, 0.45),
+    0 2px 4px rgba(0, 0, 0, 0.45);
   color: #fff;
   cursor: pointer;
   display: inline-flex;
+  flex-direction: column;
   font-family: v.$font-base;
-  font-size: 12px;
-  font-weight: 800;
-  gap: 6px;
-  height: 32px;
-  opacity: 0.55;
-  padding: 0 14px;
+  height: 58px;
+  justify-content: center;
+  opacity: 0.5;
+  padding: 0;
   position: relative;
   text-shadow: 0 1px 1.5px rgba(0, 0, 0, 0.6);
   transition:
     opacity 0.15s ease,
     transform 0.15s ease,
     box-shadow 0.15s ease;
+  width: 58px;
 
   &:hover {
     opacity: 0.85;
   }
 
-  // on: full color, lifted, its inlay ring showing
+  // on: full color, lifted
   &.on {
     box-shadow:
       inset 0 0 0 2px var(--clay),
-      inset 0 0 0 3px rgba(255, 236, 196, 0.55),
-      0 3px 8px rgba(0, 0, 0, 0.5);
+      inset 0 0 0 3px rgba(255, 236, 196, 0.7),
+      0 4px 10px rgba(0, 0, 0, 0.55);
     opacity: 1;
-    transform: translateY(-1px);
+    transform: translateY(-2px);
+  }
+
+  .kind-label {
+    font-size: 12px;
+    font-weight: 900;
+    letter-spacing: 0.3px;
+    line-height: 1;
   }
 
   .kind-count {
-    font-size: 11px;
+    font-size: 10px;
+    font-weight: 800;
+    line-height: 1;
+    margin-top: 2px;
     opacity: 0.75;
   }
 
-  // (its rim: the dropdown's spots, smaller)
+  // (its rim: the dropdown's spots, around the circle)
   .chip-rim {
-    height: calc(100% + 6px);
-    left: -3px;
+    height: calc(100% + 12px);
+    left: -6px;
     overflow: visible;
     pointer-events: none;
     position: absolute;
-    top: -3px;
-    width: calc(100% + 6px);
+    top: -6px;
+    width: calc(100% + 12px);
   }
 
   rect {
     fill: none;
-    height: calc(100% - 3px);
-    // (round ends: half its height, the 32px chip less its 3px border)
-    rx: 14.5px;
+    height: calc(100% - 6px);
+    rx: 999px;
     stroke: #f4efe3;
-    stroke-dasharray: 4 6;
-    stroke-width: 3px;
-    width: calc(100% - 3px);
-    x: 1.5px;
-    y: 1.5px;
+    stroke-dasharray: 5 5;
+    stroke-width: 6px;
+    width: calc(100% - 6px);
+    x: 3px;
+    y: 3px;
   }
 
   // (each type its denomination's color)
@@ -158,6 +187,83 @@
 
   &.team_stat {
     --clay: #12807e;
+  }
+}
+
+// The chips' key: an info icon, its list on hover or focus (a tap on a phone)
+.kinds-key {
+  color: rgba(255, 255, 255, 0.5);
+  cursor: help;
+  display: inline-flex;
+  position: relative;
+
+  .mat-icon {
+    @include v.icon-size(18px);
+  }
+
+  &:hover,
+  &:focus {
+    color: #fff;
+    outline: none;
+
+    .kinds-key-pop {
+      display: flex;
+    }
+  }
+}
+
+.kinds-key-pop {
+  @include v.scoreboard-panel(8px);
+  display: none;
+  flex-direction: column;
+  gap: 6px;
+  left: 0;
+  padding: 10px 12px;
+  position: absolute;
+  top: calc(100% + 8px);
+  white-space: nowrap;
+  z-index: 5;
+
+  span {
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  b {
+    border-radius: 4px;
+    color: #fff;
+    display: inline-block;
+    font-size: 10.5px;
+    font-weight: 900;
+    margin-right: 6px;
+    min-width: 34px;
+    padding: 2px 5px;
+    text-align: center;
+
+    &.spread {
+      background: #1f5fbf;
+    }
+
+    &.total {
+      background: #1d8a4e;
+    }
+
+    &.team_total {
+      background: #3a3a3a;
+    }
+
+    &.moneyline {
+      background: #6b3fa0;
+    }
+
+    &.player {
+      background: #d0601c;
+    }
+
+    &.team_stat {
+      background: #12807e;
+    }
   }
 }
 
@@ -500,5 +606,145 @@ $chip-clay: #b0202b;
 
   .bet-reasons {
     padding-left: 16px;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// The slot handle (wide screens only: it hangs off the panel's right side)
+// ---------------------------------------------------------------------------
+// A chrome mount bolted to the panel's side, a hub, the arm up from it and a glossy red knob. Pulled, the
+// arm swings down through the hub (as if toward you) and springs back.
+$chrome: linear-gradient(90deg, #6d737a, #e9edf1 35%, #a5abb2 55%, #5b6168);
+$arm-length: 118px;
+
+.slot-handle {
+  display: none;
+}
+
+@media (min-width: 1240px) {
+  .slot-handle {
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: block;
+    height: 200px;
+    left: 100%;
+    padding: 0;
+    position: absolute;
+    top: calc(50% - 60px);
+    width: 64px;
+
+    &:focus-visible {
+      outline: 2px solid var(--scoreboard-led);
+      outline-offset: 4px;
+    }
+  }
+
+  // the mount: a chrome block against the panel
+  .slot-mount {
+    background: linear-gradient(180deg, #8a9097, #d9dde2 40%, #7b8188);
+    border-radius: 0 10px 10px 0;
+    box-shadow:
+      inset 0 0 0 1px rgba(0, 0, 0, 0.35),
+      2px 3px 6px rgba(0, 0, 0, 0.5);
+    height: 64px;
+    left: 0;
+    position: absolute;
+    top: 122px;
+    width: 26px;
+  }
+
+  // the hub the arm turns on
+  .slot-hub {
+    background: radial-gradient(circle at 35% 30%, #f2f4f6, #9aa0a7 55%, #4f555c);
+    border-radius: 50%;
+    box-shadow: 1px 2px 4px rgba(0, 0, 0, 0.5);
+    height: 26px;
+    left: 20px;
+    position: absolute;
+    top: 141px;
+    width: 26px;
+  }
+
+  // the arm, up from the hub's middle
+  .slot-arm {
+    background: $chrome;
+    border-radius: 3px;
+    box-shadow: 1px 0 3px rgba(0, 0, 0, 0.4);
+    height: $arm-length;
+    left: 30px;
+    position: absolute;
+    top: 154px - $arm-length;
+    transform-origin: 50% 100%;
+    width: 7px;
+  }
+
+  // the knob on its end
+  .slot-knob {
+    background: radial-gradient(circle at 35% 30%, #ffb3ad, #e3241b 45%, #7d0d08);
+    border-radius: 50%;
+    box-shadow:
+      inset -2px -3px 6px rgba(0, 0, 0, 0.35),
+      2px 3px 6px rgba(0, 0, 0, 0.5);
+    height: 34px;
+    left: 16px;
+    position: absolute;
+    top: 154px - $arm-length - 26px;
+    width: 34px;
+  }
+
+  .slot-handle:hover .slot-knob {
+    filter: brightness(1.1);
+  }
+
+  // pulled: the arm swings down past the hub and back, the knob riding its end
+  .slot-handle.pulling {
+    .slot-arm {
+      animation: slot-arm 0.7s cubic-bezier(0.3, 0, 0.3, 1);
+    }
+
+    .slot-knob {
+      animation: slot-knob 0.7s cubic-bezier(0.3, 0, 0.3, 1);
+    }
+  }
+}
+
+@keyframes slot-arm {
+  45% {
+    transform: scaleY(-0.8);
+  }
+  75% {
+    transform: scaleY(1.06);
+  }
+}
+
+@keyframes slot-knob {
+  45% {
+    transform: translateY(calc(#{$arm-length} * 1.8 + 8px)) scale(1.1);
+  }
+  75% {
+    transform: translateY(-6px);
+  }
+}
+
+// The rows spinning in like reels after a pull, one after another
+.bets-list.spinning .bet {
+  animation: reel 0.5s cubic-bezier(0.2, 0.7, 0.3, 1) backwards;
+  animation-delay: calc(min(var(--i), 12) * 40ms);
+}
+
+@keyframes reel {
+  from {
+    filter: blur(3px);
+    opacity: 0.2;
+    transform: translateY(-36px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .slot-handle.pulling .slot-arm,
+  .slot-handle.pulling .slot-knob,
+  .bets-list.spinning .bet {
+    animation: none;
   }
 }

@@ -30,12 +30,24 @@
               [ngClass]="k.kind"
               [class.on]="kinds.has(k.kind)"
               [attr.aria-pressed]="kinds.has(k.kind)"
+              [attr.aria-label]="k.name + ', ' + k.count"
+              [title]="k.name"
               (click)="toggleKind(k.kind)"
             >
-              {{ k.label }} <span class="kind-count">{{ k.count }}</span>
-              <svg class="chip-rim" aria-hidden="true"><rect pathLength="120" /></svg>
+              <span class="kind-label">{{ k.label }}</span>
+              <span class="kind-count">{{ k.count }}</span>
+              <svg class="chip-rim" aria-hidden="true"><rect pathLength="80" /></svg>
             </button>
           }
+          <!-- (the key: what each chip's short label means, on hover or tap) -->
+          <span class="kinds-key" tabindex="0" aria-label="What the chips mean">
+            <mat-icon fontIcon="info_outline"></mat-icon>
+            <span class="kinds-key-pop" role="tooltip">
+              @for (k of kindChips; track k.kind) {
+                <span><b [ngClass]="k.kind">{{ k.label }}</b> {{ k.name }}</span>
+              }
+            </span>
+          </span>
         </div>
       }
       @if (updated) {
@@ -56,9 +68,9 @@
     } @else if (!rows.length) {
       <p class="bets-note">No bets in the latest analyses.</p>
     } @else {
-      <ol class="bets-list">
+      <ol class="bets-list" [class.spinning]="spinning">
         @for (r of shown; track r.id; let i = $index) {
-          <li class="bet" [ngClass]="level(r)" [class.open]="open.has(r.id)">
+          <li class="bet" [ngClass]="level(r)" [class.open]="open.has(r.id)" [style.--i]="i">
             <button type="button" class="bet-row" (click)="toggle(r.id)" [attr.aria-expanded]="open.has(r.id)">
               <mat-icon class="bet-chevron" [fontIcon]="open.has(r.id) ? 'expand_more' : 'chevron_right'"></mat-icon>
               <!-- (the #1 bet is the lock) -->
@@ -120,5 +132,14 @@
         }
       </ol>
     }
+
+    <!-- The slot machine's handle, on its right side (wide screens): pulled, it springs back and the
+         rows spin like reels -->
+    <button type="button" class="slot-handle" [class.pulling]="pulling" (click)="pull()" aria-label="Pull the handle">
+      <span class="slot-mount"></span>
+      <span class="slot-hub"></span>
+      <span class="slot-arm"></span>
+      <span class="slot-knob"></span>
+    </button>
   </div>
 </div>

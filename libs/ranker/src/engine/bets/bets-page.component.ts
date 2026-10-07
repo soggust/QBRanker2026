@@ -73,13 +73,14 @@ interface SheetPick {
 // The types of bet, for the filter chips under the game dropdown: each a chip of its own color, like
 // casino chips' denominations
 export type BetKind = 'spread' | 'total' | 'team_total' | 'moneyline' | 'player' | 'team_stat';
-export const BET_KINDS: { kind: BetKind; label: string }[] = [
-  { kind: 'spread', label: 'Spread' },
-  { kind: 'total', label: 'Over/Under' },
-  { kind: 'team_total', label: 'Team Total' },
-  { kind: 'moneyline', label: 'Moneyline' },
-  { kind: 'player', label: 'Player' },
-  { kind: 'team_stat', label: 'Team Stat' },
+// (each chip's short label, and what it means: the chips' key)
+export const BET_KINDS: { kind: BetKind; label: string; name: string }[] = [
+  { kind: 'spread', label: 'ATS', name: 'Against the spread' },
+  { kind: 'total', label: 'O/U', name: 'Over/under (the game total)' },
+  { kind: 'team_total', label: 'TT', name: 'Team total' },
+  { kind: 'moneyline', label: 'ML', name: 'Moneyline (to win)' },
+  { kind: 'player', label: 'PROP', name: 'Player prop' },
+  { kind: 'team_stat', label: 'TEAM', name: "Team stat (a team's own numbers)" },
 ];
 
 // A bet's type: the desk's own grading kind when it has one; otherwise read from its market (a bet
@@ -324,7 +325,7 @@ export class BetsPageComponent implements OnInit {
 
   // The filter chips: the types of bet in the chosen game, each with how many; none on shows them all
   kinds = new Set<BetKind>();
-  get kindChips(): { kind: BetKind; label: string; count: number }[] {
+  get kindChips(): { kind: BetKind; label: string; name: string; count: number }[] {
     const rows = this.inGame;
     return BET_KINDS.map((k) => ({ ...k, count: rows.filter((r) => r.betType === k.kind).length })).filter((k) => k.count);
   }
@@ -382,5 +383,16 @@ export class BetsPageComponent implements OnInit {
 
   toggle(id: number): void {
     if (!this.open.delete(id)) this.open.add(id);
+  }
+
+  // The slot handle: pulled, it swings down and springs back, and as it lands the rows spin in like reels
+  pulling = false;
+  spinning = false;
+  pull(): void {
+    if (this.pulling) return;
+    this.pulling = true;
+    setTimeout(() => (this.spinning = true), 280);
+    setTimeout(() => (this.pulling = false), 700);
+    setTimeout(() => (this.spinning = false), 1400);
   }
 }
