@@ -7,8 +7,12 @@
       @if (rows?.length) {
         <select class="bets-game" aria-label="Game" [(ngModel)]="game">
           <option value="">All Games</option>
-          @for (g of games; track g.key) {
-            <option [value]="g.key">{{ g.label }} ({{ g.count }})</option>
+          @for (d of gameDays; track d.day) {
+            <optgroup [label]="d.day">
+              @for (g of d.games; track g.key) {
+                <option [value]="g.key">{{ g.label }} ({{ g.count }})</option>
+              }
+            </optgroup>
           }
         </select>
       }

@@ -46,7 +46,7 @@
 // One row: the game dropdown on the left, the update time on the right
 .bets-head {
   align-items: center;
-  border-bottom: 1px solid color-mix(in srgb, var(--scoreboard-led) 40%, transparent);
+  border-bottom: 1px solid #2a74bd;
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
@@ -96,7 +96,7 @@ $chip-side-spot: linear-gradient(
   font-size: 13px;
   font-weight: 800;
   min-width: 220px;
-  padding: 11px 34px 11px 14px;
+  padding: 13px 34px 13px 14px;
   text-shadow: 0 1px 1.5px rgba(0, 0, 0, 0.6);
   transition: filter 0.15s ease;
 
@@ -106,9 +106,16 @@ $chip-side-spot: linear-gradient(
     outline: none;
   }
 
-  option {
+  option,
+  optgroup {
     background: #5e1016;
     color: #fff;
+  }
+
+  // (the day headers in its open list, in gold)
+  optgroup {
+    color: #ffcd00;
+    font-weight: 800;
   }
 }
 

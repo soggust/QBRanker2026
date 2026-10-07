@@ -14,7 +14,7 @@ interface BetEntry {
   position: string | null;
   rowId: string;
   team: string | null;
-  game: { week: number; date: string; matchup: string; line: { line: string; overUnder: number | null } | null } | null;
+  game: { week: number; date: string; kickoff?: string | null; matchup: string; line: { line: string; overUnder: number | null } | null } | null;
   market: string;
   lean: string;
   strength: 'like' | 'lean' | 'fade';
@@ -166,17 +166,36 @@ export class BetsPageComponent implements OnInit {
     return this.game ? rows.filter((r) => this.gameKey(r) === this.game).slice(0, this.gameLimit) : rows.slice(0, this.limit);
   }
 
-  // The week's games with bets, by kickoff: the dropdown's choices, each with how many bets it has
-  get games(): { key: string; label: string; count: number }[] {
-    const byGame = new Map<string, { key: string; label: string; date: string; count: number }>();
+  // The week's games with bets: the dropdown's choices under a header for each day, by kickoff (in the
+  // viewer's time zone; London's morning game first on Sunday), each with how many bets it has
+  get gameDays(): { day: string; games: { key: string; label: string; count: number }[] }[] {
+    const byGame = new Map<string, { key: string; label: string; day: string; at: number; count: number }>();
     for (const r of this.rows ?? []) {
       if (!r.game) continue;
       const key = this.gameKey(r);
-      const game = byGame.get(key) ?? { key, label: `${r.game.matchup} · ${new Date(`${r.game.date}T12:00:00`).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}`, date: r.game.date, count: 0 };
+      let game = byGame.get(key);
+      if (!game) {
+        const kickoff = r.game.kickoff ? new Date(r.game.kickoff) : null;
+        const day = kickoff ?? new Date(`${r.game.date}T12:00:00`);
+        game = {
+          key,
+          label: kickoff
+            ? `${r.game.matchup} · ${kickoff.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}`
+            : r.game.matchup,
+          day: day.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' }),
+          at: day.getTime(),
+          count: 0,
+        };
+      }
       game.count = Math.min(game.count + 1, this.gameLimit);
       byGame.set(key, game);
     }
-    return [...byGame.values()].sort((a, b) => a.date.localeCompare(b.date) || a.label.localeCompare(b.label));
+    const days: { day: string; games: { key: string; label: string; count: number }[] }[] = [];
+    for (const game of [...byGame.values()].sort((a, b) => a.at - b.at || a.label.localeCompare(b.label))) {
+      if (days.at(-1)?.day !== game.day) days.push({ day: game.day, games: [] });
+      days.at(-1)!.games.push(game);
+    }
+    return days;
   }
 
   gameKey(r: BetRow): string {

@@ -305,11 +305,37 @@ function actionable(b, team, opp) {
   return /\b(passing|rushing|receiving|sacks?|interceptions?|touchdowns?|tds?|yards|completions)\b/i.test(b.market) ? b : null;
 }
 
+// Each game's kickoff (an ISO time, UTC) from nflverse's schedule, by its day and teams
+// ("2026-10-11 PHI@JAX"): the schedule's times are Eastern, so each gets that day's Eastern offset
+// (EDT or EST)
+function kickoffs() {
+  const file = path.join(ROOT, '.cache/nflverse/games.csv');
+  if (!existsSync(file)) return new Map();
+  const [head, ...rows] = readFileSync(file, 'utf8').split('\n');
+  const col = Object.fromEntries(head.split(',').map((name, i) => [name.trim(), i]));
+  const eastern = (day) =>
+    new Intl.DateTimeFormat('en-US', { timeZone: 'America/New_York', timeZoneName: 'shortOffset' })
+      .formatToParts(new Date(`${day}T17:00:00Z`))
+      .find((p) => p.type === 'timeZoneName')
+      .value.replace('GMT', '');
+  const out = new Map();
+  for (const row of rows) {
+    const f = row.split(',');
+    const [day, time] = [f[col.gameday], f[col.gametime]];
+    if (!/^\d{4}-\d\d-\d\d$/.test(day ?? '') || !/^\d\d:\d\d$/.test(time ?? '')) continue;
+    const offset = eastern(day).padStart(2, '0').replace(/^([+-])(\d)$/, '$10$2');
+    out.set(`${day} ${f[col.away_team]}@${f[col.home_team]}`, new Date(`${day}T${time}:00${offset}:00`).toISOString());
+  }
+  return out;
+}
+
 // ---- the site's copies: what the tab shows, each evidence with its real value (bad paths dropped), the
 // game it previews, keyed by the row ids the site uses (a QB's "QB-<ESPN id>"; a team's report under its
 // Team, Defense, O-line and Coach rows)
+
 function publish() {
-  const players = JSON.parse(readFileSync(path.join(ROOT, '.cache/analysis/index.json'), 'utf8'));
+  const kickoff = kickoffs();
+  const players =JSON.parse(readFileSync(path.join(ROOT, '.cache/analysis/index.json'), 'utf8'));
   const teams = existsSync(path.join(ROOT, '.cache/analysis/team-index.json')) ? JSON.parse(readFileSync(path.join(ROOT, '.cache/analysis/team-index.json'), 'utf8')) : [];
   const siteIds = new Map([...players.map((p) => [p.gsis, [p.siteId]]), ...teams.map((t) => [`team-${t.team}`, t.siteIds])]);
   rmSync(SITE, { recursive: true, force: true });
@@ -349,7 +375,16 @@ function publish() {
         position: dossier.player?.position ?? null,
         rowId: ids[0],
         team,
-        game: next && team ? { week: next.week, date: next.date, matchup: next.at === 'home' ? `${next.opp} @ ${team}` : `${team} @ ${next.opp}`, line: next.line ?? null } : null,
+        game:
+          next && team
+            ? {
+                week: next.week,
+                date: next.date,
+                kickoff: kickoff.get(next.at === 'home' ? `${next.date} ${next.opp}@${team}` : `${next.date} ${team}@${next.opp}`) ?? null,
+                matchup: next.at === 'home' ? `${next.opp} @ ${team}` : `${team} @ ${next.opp}`,
+                line: next.line ?? null,
+              }
+            : null,
         market: b.market,
         lean: b.lean,
         strength: b.strength === 'strong' ? 'like' : b.strength,
