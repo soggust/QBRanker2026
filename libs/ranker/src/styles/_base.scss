@@ -65,8 +65,8 @@
 // past the accent (so none lands on it); their saturation and lightness follow the accent's, kept lively
 // (never washed out, even from a soft accent) and in a range that reads on the dark panels
 $-accent-hue: color.channel(sport.$accent, "hue", $space: hsl);
-$-category-saturation: math.clamp(80%, color.channel(sport.$accent, "saturation", $space: hsl), 100%);
-$-category-lightness: math.clamp(58%, color.channel(sport.$accent, "lightness", $space: hsl), 66%);
+$-category-saturation: math.clamp(55%, color.channel(sport.$accent, "saturation", $space: hsl) * 0.6, 60%);
+$-category-lightness: math.clamp(61%, color.channel(sport.$accent, "lightness", $space: hsl), 69%);
 
 @function -category($quarter) {
   @return hsl($-accent-hue + 60deg + $quarter * 90deg, $-category-saturation, $-category-lightness);
