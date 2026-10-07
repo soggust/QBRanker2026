@@ -1,17 +1,10 @@
-// MMA: a card panel (card-panel.scss) is edged in the cage: a strip of chain-link fence (diamond mesh, in
-// its category's color) down both sides and across the bottom, inside its thin border
+@use "sport-kit" as kit;
+
+// MMA: a card panel's (card-panel.scss) outline is a painted line in its category's color (thin, solid,
+// like the table's): the line is the border, so there's no second one inside it
 @mixin box {
+  @include kit.painted-panel-border;
 }
 
 @mixin edges {
-  --wire: color-mix(in srgb, var(--group-color) 70%, #9aa0a6);
-  $mesh-a: repeating-linear-gradient(45deg, var(--wire) 0 1.2px, transparent 1.2px 7px);
-  $mesh-b: repeating-linear-gradient(-45deg, var(--wire) 0 1.2px, transparent 1.2px 7px);
-  background:
-    $mesh-a left top / 9px 100% no-repeat,
-    $mesh-b left top / 9px 100% no-repeat,
-    $mesh-a right top / 9px 100% no-repeat,
-    $mesh-b right top / 9px 100% no-repeat,
-    $mesh-a left bottom / 100% 9px no-repeat,
-    $mesh-b left bottom / 100% 9px no-repeat;
 }

@@ -24,6 +24,8 @@
     $hashes right top / 5px 100% no-repeat,
     $yard-lines left top / 11px 100% no-repeat,
     $yard-lines right top / 11px 100% no-repeat,
-    // (across the bottom, the end zone: a thick band painted in diagonal stripes)
-    repeating-linear-gradient(-45deg, color-mix(in srgb, var(--group-color) 55%, transparent) 0 5px, color-mix(in srgb, var(--group-color) 25%, transparent) 5px 10px) left bottom / 100% 10px no-repeat;
+    // (across the bottom, the end zone: a thick band in its color)
+    linear-gradient(var(--line), var(--line)) left bottom / 100% 10px no-repeat;
+  // (room for the end zone, so the content keeps as much space above it as at the top)
+  padding-bottom: 10px;
 }

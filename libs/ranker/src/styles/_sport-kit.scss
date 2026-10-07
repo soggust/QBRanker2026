@@ -199,9 +199,9 @@ $switch: "html .mat-mdc-slide-toggle.mat-accent";
 }
 
 // A panel (card-panel.scss, through a sport's _sport-panel.scss): its outline a painted line in its
-// category's color, lifted with a little white
+// category's color, lifted with a little white (and a touch see-through)
 @mixin painted-panel-border {
-  border: 1.5px solid color-mix(in srgb, var(--group-color, #fff) 85%, #fff);
+  border: 1.5px solid color-mix(in srgb, color-mix(in srgb, var(--group-color, #fff) 85%, #fff) 90%, transparent);
 }
 
 // ---------------------------------------------------------------------------

@@ -1,12 +1,30 @@
-// MLB: a card panel (card-panel.scss) has no border of its own: its body is edged in chalk lines (the
-// table's, slimmer) right at its sides and across its bottom
+// MLB: a card panel (card-panel.scss) has no border down its body: the body is edged in chalk lines (the
+// table's, slimmer, a little faded) right at its sides and across its bottom; its header bar keeps the
+// thin border in its category's color
 @mixin box {
   border-color: transparent;
+
+  > .group-bar {
+    border-radius: 6px 6px 0 0;
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--group-color) 40%, transparent);
+  }
 }
 
 @mixin edges {
-  background:
-    url("../assets/textures/chalk-line-v.svg") left top / 6px 90px repeat-y,
-    url("../assets/textures/chalk-line-v.svg") right top / 6px 90px repeat-y,
-    url("../assets/textures/chalk-line-h.svg") left bottom / 90px 6px repeat-x;
+  // (room for the chalk along the bottom, so the content keeps as much space above it as at the top)
+  padding-bottom: 6px;
+  position: relative;
+
+  // (the chalk on a layer of its own, so it can fade)
+  &::before {
+    background:
+      url("../assets/textures/chalk-line-v.svg") left top / 6px 90px repeat-y,
+      url("../assets/textures/chalk-line-v.svg") right top / 6px 90px repeat-y,
+      url("../assets/textures/chalk-line-h.svg") left bottom / 90px 6px repeat-x;
+    content: "";
+    inset: 0;
+    opacity: 0.8;
+    pointer-events: none;
+    position: absolute;
+  }
 }
