@@ -19,6 +19,7 @@ import { CAST_GRADES, GARBAGE_TIME_STAT } from './skills';
 import { buildQbUnits } from './qb-rows';
 import { OLINE_LEAN, computedValue, connectTeamGrades, fromOtherTabs } from './team-grades';
 import { blockingExtras } from './blocking';
+import { loadDepthChart } from './depth-chart';
 
 // NFL: what the engine needs to know about football (the rest is beside this file: positions,
 // skill-presets, skills, awards, team-colors, logo-eras, about/, and the NFL's own features:
@@ -191,6 +192,11 @@ export const SPORT: SportConfig = {
             chart: YARDS_CHART[position],
             fumblesLost: YARDS_CHART[position] ? 'Rushing' : undefined,
           }),
+  },
+  // The Depth Chart tab on the team rows' cards, for the season being played (data/depth: build-depth.mjs)
+  depthChart: {
+    has: (player, position, season) => TEAM_LOGS.includes(position) && season === SPORT.currentSeason && !!logoName(player),
+    load: (player, position) => loadDepthChart(logoName(player)!, position),
   },
   cardFlagsLast: castFlags,
   cardExtras: blockingExtras,

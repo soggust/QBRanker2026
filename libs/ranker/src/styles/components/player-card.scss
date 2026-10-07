@@ -2282,3 +2282,428 @@
     padding: 12px 14px 14px;
   }
 }
+
+// ---------------------------------------------------------------------------
+// Depth Chart (a team's: player-card/depth-chart.ts)
+// ---------------------------------------------------------------------------
+// Each side's formation on the chalkboard: faint yard lines, the line of scrimmage chalked bright, and a
+// chip per starter where he lines up: the spot in chalk, his headshot ringed in the team's color (the
+// injury report's flag on its corner), his name and snap share. Tap one for everyone at the spot.
+// (the tab's panels are tapped a lot: no stray text selection)
+.depth-panel,
+.depth-special,
+.depth-changes,
+.depth-usage {
+  user-select: none;
+}
+
+.depth-field {
+  aspect-ratio: 16 / 9;
+  background:
+    repeating-linear-gradient(180deg, transparent 0 calc(10% - 1px), rgba(255, 255, 255, 0.04) calc(10% - 1px) 10%),
+    v.$chalk-dust;
+  border-radius: 6px;
+  margin: 12px 16px;
+  min-height: 340px;
+  position: relative;
+
+  // (the offense: wider and shorter, its formation near the top)
+  &:not(.defense) {
+    aspect-ratio: 2 / 1;
+    min-height: 300px;
+  }
+}
+
+// the line of scrimmage: a chalk line with a soft glow
+.depth-los {
+  background: rgba(255, 255, 255, 0.55);
+  box-shadow: 0 0 6px rgba(255, 255, 255, 0.35);
+  filter: blur(0.3px);
+  height: 2px;
+  left: 3%;
+  position: absolute;
+  right: 3%;
+  top: var(--los);
+}
+
+.depth-slot {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  z-index: 1;
+
+  &.open {
+    z-index: 5;
+  }
+
+  // (a sub package's spot, the nickel back: quieter)
+  &.sub {
+    opacity: 0.7;
+  }
+
+  // (not the card's focus: the O-line card's skill players)
+  &.dim {
+    opacity: 0.45;
+  }
+}
+
+.depth-chip {
+  align-items: center;
+  background: none;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  font-family: v.$font-base;
+  gap: 3px;
+  padding: 0;
+
+  &:hover .depth-head > img,
+  &:hover .depth-head > .depth-initial {
+    border-color: #fff;
+    transform: scale(1.06);
+  }
+}
+
+// the spot, in chalk
+.depth-pos {
+  color: rgba(255, 255, 255, 0.6);
+  @include v.hand(10px);
+  letter-spacing: 0.6px;
+  line-height: 1;
+}
+
+.depth-head {
+  height: 46px;
+  position: relative;
+  width: 46px;
+
+  > img,
+  > .depth-initial {
+    background: #1b1f23;
+    border: 2px solid var(--team-badge, var(--scoreboard-led));
+    border-radius: 50%;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.5);
+    box-sizing: border-box;
+    height: 100%;
+    object-fit: cover;
+    object-position: center top;
+    transition:
+      transform 0.15s ease,
+      border-color 0.15s ease;
+    width: 100%;
+  }
+
+  > .depth-initial {
+    align-items: center;
+    color: rgba(255, 255, 255, 0.7);
+    display: flex;
+    font-weight: 900;
+    justify-content: center;
+  }
+
+  &.small {
+    height: 38px;
+    width: 38px;
+  }
+
+  &.tiny {
+    flex: 0 0 auto;
+    height: 26px;
+    width: 26px;
+
+    > img,
+    > .depth-initial {
+      border-width: 1px;
+      box-shadow: none;
+      font-size: 11px;
+    }
+  }
+}
+
+// the injury report's flag: Q yellow, D orange, O red, IR deep red
+.depth-status,
+.depth-pop em,
+.depth-row-status em {
+  border-radius: 6px;
+  font-size: 9px;
+  font-style: normal;
+  font-weight: 900;
+  letter-spacing: 0.3px;
+  line-height: 1;
+  padding: 2px 4px;
+
+  &.s-q {
+    background: #ffcd00;
+    color: #1a1a1a;
+  }
+
+  &.s-d {
+    background: #ff9a3c;
+    color: #1a1a1a;
+  }
+
+  &.s-o {
+    background: #ff5a4f;
+    color: #fff;
+  }
+
+  &.s-ir,
+  &.s-susp,
+  &.s-pup {
+    background: #a3202b;
+    color: #fff;
+  }
+
+  &.s-gone {
+    background: rgba(255, 255, 255, 0.12);
+    color: rgba(255, 255, 255, 0.75);
+  }
+}
+
+.depth-status {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+  position: absolute;
+  right: -8px;
+  top: -4px;
+}
+
+.depth-name {
+  font-size: 11px;
+  font-weight: 800;
+  max-width: 84px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+  white-space: nowrap;
+}
+
+.depth-snaps {
+  color: var(--scoreboard-led);
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+// everyone at the spot, by depth: a small scoreboard panel under the chip (over it near the bottom,
+// tucked in near the sides)
+.depth-pop {
+  @include v.scoreboard-panel(8px, 0 8px 20px rgba(0, 0, 0, 0.6));
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  left: 50%;
+  min-width: 200px;
+  padding: 8px 10px 10px;
+  position: absolute;
+  top: calc(100% + 6px);
+  transform: translateX(-50%);
+
+  > b {
+    color: rgba(255, 255, 255, 0.55);
+    font-size: 10px;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+  }
+}
+
+.depth-slot.pop-up .depth-pop {
+  bottom: calc(100% + 6px);
+  top: auto;
+}
+
+.depth-slot.pop-left .depth-pop {
+  left: 0;
+  transform: none;
+}
+
+.depth-slot.pop-right .depth-pop {
+  left: auto;
+  right: 0;
+  transform: none;
+}
+
+.depth-pop-row {
+  align-items: center;
+  display: grid;
+  font-size: 12px;
+  gap: 8px;
+  grid-template-columns: 16px minmax(0, 1fr) auto auto;
+  white-space: nowrap;
+
+  > i {
+    color: var(--scoreboard-led);
+    font-style: normal;
+    font-weight: 900;
+  }
+
+  > span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  > small {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 11px;
+    font-weight: 700;
+    grid-column: 4;
+  }
+}
+
+// the special teams: a row of chips
+.depth-special-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  justify-content: space-around;
+}
+
+.depth-special-item {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+// the starters who've changed: the spot, who it was (struck), who it is
+.depth-change {
+  align-items: center;
+  display: flex;
+  font-size: 13px;
+  gap: 10px;
+  padding: 5px 0;
+
+  s {
+    color: rgba(255, 255, 255, 0.45);
+  }
+
+  b {
+    color: #fff;
+  }
+
+  .mat-icon {
+    color: var(--scoreboard-led);
+    @include v.icon-size(16px);
+  }
+}
+
+.depth-change-pos {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 900;
+  min-width: 42px;
+  padding: 2px 6px;
+  text-align: center;
+}
+
+// who's played: by unit, the most-used first, a bar for his snap share
+.depth-note {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 12px;
+  margin: 0 0 6px;
+}
+
+.depth-unit {
+  @include group-heading;
+  margin: 16px 0 6px;
+}
+
+.depth-row {
+  align-items: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  display: grid;
+  font-size: 13px;
+  gap: 10px;
+  grid-template-columns: 26px minmax(0, 1fr) 120px 40px 30px 62px;
+  padding: 5px 0;
+
+  &.off-chart {
+    opacity: 0.7;
+  }
+}
+
+.depth-row-name {
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  small {
+    color: rgba(255, 255, 255, 0.45);
+    font-size: 10px;
+    font-weight: 800;
+    margin-left: 6px;
+  }
+}
+
+.depth-bar {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 3px;
+  height: 6px;
+  overflow: hidden;
+
+  i {
+    background: linear-gradient(90deg, color-mix(in srgb, var(--group-color) 55%, transparent), var(--group-color));
+    display: block;
+    height: 100%;
+  }
+}
+
+.depth-row-pct {
+  font-weight: 800;
+  text-align: right;
+}
+
+.depth-row-games {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.depth-row-status {
+  text-align: right;
+}
+
+// Phones: a taller field (as wide as the panel: no minimum height pushing it wider), and each chip just
+// its spot and headshot (the names and shares would run together at this width: a tap shows them)
+@media (max-width: 640px) {
+  .depth-field {
+    aspect-ratio: 3 / 4;
+    margin: 10px 6px;
+    min-height: 0;
+
+    // (the offense's formation is shallower: square)
+    &:not(.defense) {
+      aspect-ratio: 1;
+      min-height: 0;
+    }
+  }
+
+  .depth-head {
+    height: 30px;
+    width: 30px;
+  }
+
+  .depth-chip .depth-name,
+  .depth-chip .depth-snaps {
+    display: none;
+  }
+
+  .depth-status {
+    font-size: 8px;
+    right: -6px;
+  }
+
+  .depth-pop {
+    min-width: 180px;
+  }
+
+  .depth-row {
+    grid-template-columns: 26px minmax(0, 1fr) 40px 30px 54px;
+
+    .depth-bar {
+      display: none;
+    }
+  }
+}

@@ -2,6 +2,7 @@ import type { Observable } from 'rxjs';
 import type { SkillPlayer, SkillStat } from '@sport/positions';
 import type { CardSkill } from './skills';
 import type { RosterGrade } from './roster-grades';
+import type { DepthView } from './player-card/depth-chart';
 
 // How a stat's value reads (every sport's SkillStat.format is one of these): int, dec1, dec2; avg3, a
 // batting-average style rate (".287"); ip, innings (175.1); pct, a 0-1 share as a whole percent;
@@ -335,6 +336,12 @@ export interface SportConfig {
     load: (player: SkillPlayer, position: string, season: number) => Promise<GameLog>;
     // ESPN's name for the league ("football/nfl"): the row's team's next games show above the log
     league?: string;
+  };
+  // The card's Depth Chart tab (a team's rows: the NFL's Team, O-Line, Defense and Head Coach): whether a
+  // row has one for a season, and its chart laid out (player-card/depth-chart.ts)
+  depthChart?: {
+    has: (player: SkillPlayer, position: string, season: number) => boolean;
+    load: (player: SkillPlayer, position: string, season: number) => Promise<DepthView>;
   };
   // The card's big hero logo when the sport has a sharper one than the grid's icon (the NFL's, 256px)
   cardLogo?: (logo: string) => string;

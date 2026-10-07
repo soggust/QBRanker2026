@@ -374,6 +374,144 @@
           }
         }
 
+        <!-- A team's depth chart (SPORT.depthChart, player-card/depth-chart.ts): each side's formation drawn on a
+             chalk field, a chip per starter (tap one for the players behind him), then the special teams,
+             the starters who've changed since week 1, and everyone who's played, by snap share -->
+        @case ('depth') {
+          @let d = cards.depthChart(c);
+          @if (d === 'loading') {
+            <p class="card-note">Loading…</p>
+          } @else if (d === 'error') {
+            <p class="card-note">The depth chart couldn't be loaded.</p>
+          } @else {
+            @for (side of d.sides; track side.id) {
+              <card-panel
+                class="tab-card depth-panel"
+                [startOpen]="true"
+                [label]="side.title + (side.set ? ' · ' + side.set : '')"
+                [icon]="side.id === 'offense' ? 'sports_football' : 'shield'"
+              >
+                <div class="depth-field" [class.defense]="side.id === 'defense'" [style.--los]="side.los + '%'">
+                  <span class="depth-los" aria-hidden="true"></span>
+                  @for (slot of side.slots; track slot.key) {
+                    @let starter = slot.depth[0];
+                    @let open = cards.depthOpen === side.id + slot.key;
+                    <div
+                      class="depth-slot"
+                      [class.sub]="slot.sub"
+                      [class.dim]="slot.focus === false"
+                      [class.open]="open"
+                      [class.pop-up]="slot.y > 55"
+                      [class.pop-left]="slot.x < 18"
+                      [class.pop-right]="slot.x > 82"
+                      [style.left.%]="slot.x"
+                      [style.top.%]="slot.y"
+                    >
+                      <button type="button" class="depth-chip" [attr.aria-expanded]="open" [title]="slot.name" (click)="cards.toggleDepthSlot(side.id + slot.key)">
+                        <span class="depth-pos">{{ slot.label }}</span>
+                        <span class="depth-head">
+                          @if (starter?.headshot) {
+                            <img [src]="starter!.headshot" alt="" loading="lazy" (error)="starter!.headshot = null" />
+                          } @else {
+                            <span class="depth-initial">{{ starter?.name?.[0] ?? '?' }}</span>
+                          }
+                          @if (starter?.status; as status) {
+                            <span class="depth-status" [ngClass]="'s-' + status.toLowerCase()" [title]="starter!.statusText + (starter!.injury ? ' (' + starter!.injury + ')' : '')">{{ status }}</span>
+                          }
+                        </span>
+                        <span class="depth-name">{{ starter?.short ?? 'Open' }}</span>
+                        @if (starter?.snaps != null) {
+                          <span class="depth-snaps">{{ starter!.snaps | percent: '1.0-0' }}</span>
+                        }
+                      </button>
+                      <!-- (open: everyone at the spot, by depth) -->
+                      @if (open && slot.depth.length) {
+                        <div class="depth-pop">
+                          <b>{{ slot.name }}</b>
+                          @for (p of slot.depth; track $index) {
+                            <span class="depth-pop-row">
+                              <i>{{ $index + 1 }}</i>
+                              <span>{{ p.name }}</span>
+                              @if (p.status) {
+                                <em [ngClass]="'s-' + p.status.toLowerCase()">{{ p.status }}</em>
+                              }
+                              <small>{{ p.snaps != null ? (p.snaps | percent: '1.0-0') : '—' }}</small>
+                            </span>
+                          }
+                        </div>
+                      }
+                    </div>
+                  }
+                </div>
+              </card-panel>
+            }
+
+            <card-panel class="tab-card depth-special" [startOpen]="true" label="Special Teams" icon="sports">
+              <div class="group-body depth-special-row">
+                @for (s of d.special; track s.label) {
+                  <span class="depth-special-item">
+                    <span class="depth-pos">{{ s.label }}</span>
+                    <span class="depth-head small">
+                      @if (s.player?.headshot) {
+                        <img [src]="s.player!.headshot" alt="" loading="lazy" (error)="s.player!.headshot = null" />
+                      } @else {
+                        <span class="depth-initial">{{ s.player?.name?.[0] ?? '?' }}</span>
+                      }
+                    </span>
+                    <span class="depth-name">{{ s.player?.short ?? 'Open' }}</span>
+                  </span>
+                }
+              </div>
+            </card-panel>
+
+            @if (d.changes.length) {
+              <card-panel class="tab-card depth-changes" [startOpen]="true" label="New Starters Since Week 1" icon="swap_horiz">
+                <div class="group-body">
+                  @for (ch of d.changes; track ch.label + ch.to) {
+                    <div class="depth-change">
+                      <span class="depth-change-pos">{{ ch.label }}</span>
+                      <s>{{ ch.from }}</s>
+                      <mat-icon fontIcon="arrow_forward"></mat-icon>
+                      <b>{{ ch.to }}</b>
+                    </div>
+                  }
+                </div>
+              </card-panel>
+            }
+
+            <card-panel class="tab-card depth-usage" [startOpen]="true" label="Who's Played" icon="groups">
+              <div class="group-body">
+                <p class="depth-note">Share of the snaps in the games he played ({{ d.teamGames }} so far). Updated {{ d.asOf | date: 'MMM d' }}.</p>
+                @for (g of d.usage; track g.title) {
+                  <h4 class="depth-unit">{{ g.title }}</h4>
+                  @for (p of g.rows; track p.name) {
+                    <div class="depth-row" [class.off-chart]="!p.onChart">
+                      <span class="depth-head tiny">
+                        @if (p.headshot) {
+                          <img [src]="p.headshot" alt="" loading="lazy" (error)="p.headshot = null" />
+                        } @else {
+                          <span class="depth-initial">{{ p.name[0] }}</span>
+                        }
+                      </span>
+                      <span class="depth-row-name">{{ p.name }}<small>{{ p.pos }}</small></span>
+                      <span class="depth-bar"><i [style.width.%]="(p.snaps ?? 0) * 100"></i></span>
+                      <span class="depth-row-pct">{{ p.snaps != null ? (p.snaps | percent: '1.0-0') : '—' }}</span>
+                      <span class="depth-row-games">{{ p.games }}G</span>
+                      <span class="depth-row-status">
+                        @if (p.status) {
+                          <em [ngClass]="'s-' + p.status.toLowerCase()" [title]="p.statusText + (p.injury ? ' (' + p.injury + ')' : '')">{{ p.status }}</em>
+                        } @else if (!p.onChart) {
+                          <em class="s-gone" title="Not on the depth chart now">Off chart</em>
+                        }
+                      </span>
+                    </div>
+                  }
+                }
+              </div>
+            </card-panel>
+          }
+        }
+
         <!-- This season's games (SPORT.gameLog): a bar per game of the key stat (a team's margin), oldest
              first, then the table, newest first, each value tinted against their own average -->
         @case ('games') {

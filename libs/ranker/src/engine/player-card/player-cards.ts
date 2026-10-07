@@ -15,6 +15,7 @@ import { DEFAULT_SPORT_SETTINGS, SKILL_UNITS, defaultRanking, statValue } from '
 import { StatReader } from '@ranker/engine/stat-reader';
 import { SeasonDataService } from '@ranker/engine/season-data.service';
 import { NUMBER, grade, innings, ordinal, rankPct, rankTone } from '@ranker/core/format';
+import type { DepthView } from './depth-chart';
 import { CardOverview, CardSeason, CardStat, CardTab, CareerSeason, PlayerCard, SeasonContext } from './card.model';
 import { archetypeFor, overviewBlurb, profileFlags, scoutingReport, skillScores } from './overview';
 import { careerHistory } from './career-history';
@@ -45,7 +46,7 @@ export interface CardHost {
 
 const TABS: { id: CardTab; title: string }[] = [
   { id: 'overview', title: 'Overview' },
-  { id: 'stats', title: 'Season' },
+  { id: 'stats', title: 'Stats' },
   { id: 'seasons', title: 'Career' },
 ];
 
@@ -77,6 +78,8 @@ export class PlayerCards {
     const [overview, stats, seasons] = TABS;
     const tabs: { id: CardTab; title: string }[] = [overview];
     if (this.analysisFile(card)) tabs.push({ id: 'analysis', title: 'Analysis' });
+    // (a team's Roster, its depth chart, before its Stats)
+    if (SPORT.depthChart?.has(card.player, this.position, card.season)) tabs.push({ id: 'depth', title: 'Roster' });
     tabs.push(stats);
     if (this.hasGameLog(card)) tabs.push({ id: 'games', title: 'Game Log' });
     if (!SPORT.careerOnly && (!card.seasons || card.seasons.length > 1)) tabs.push({ ...seasons, title: this.careerTitle });
@@ -142,6 +145,26 @@ export class PlayerCards {
         .catch(() => this.gameLogs.set(key, 'error'));
     }
     return this.gameLogs.get(key) ?? 'error';
+  }
+
+  // A team card's depth chart for its season, loaded the first time its tab asks (then kept): the chart,
+  // or still loading, or failed. depthOpen: the slot whose backups are showing (one at a time)
+  private depthCharts = new Map<string, DepthView | 'loading' | 'error'>();
+  depthOpen: string | null = null;
+  depthChart(card: PlayerCard): DepthView | 'loading' | 'error' {
+    const key = `${this.position}/${card.player.gsisId}/${card.season}`;
+    if (!this.depthCharts.has(key) && SPORT.depthChart) {
+      this.depthCharts.set(key, 'loading');
+      SPORT.depthChart
+        .load(card.player, this.position, card.season)
+        .then((view) => this.depthCharts.set(key, view))
+        .catch(() => this.depthCharts.set(key, 'error'));
+    }
+    return this.depthCharts.get(key) ?? 'error';
+  }
+
+  toggleDepthSlot(key: string): void {
+    this.depthOpen = this.depthOpen === key ? null : key;
   }
 
   // A name in the table: their card for the table's season, ranked as the table has them (always on

@@ -42,6 +42,10 @@ jobs:
       - name: Pull game results from ESPN
         run: npm run update-data
 
+      # The card's Roster tab: each team's depth chart, who's played and the injury report (nflverse, ESPN)
+      - name: Build depth charts
+        run: node apps/nfl/scripts/build-depth.mjs
+
       - name: Commit updated data
         id: commit
         run: |
