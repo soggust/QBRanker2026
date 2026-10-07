@@ -93,6 +93,16 @@ const DEFENSE_43 = [
 const SECONDARY = [['LCB8', 'LCB', 'Left Cornerback'], ['SS9', 'SS', 'Strong Safety'], ['FS10', 'FS', 'Free Safety'], ['RCB11', 'RCB', 'Right Cornerback'], ['NB12', 'NB', 'Nickel Back']];
 const SPECIAL = [['PK', 'PK', 'Kicker'], ['P', 'P', 'Punter'], ['LS', 'LS', 'Long Snapper'], ['KR', 'KR', 'Kick Returner'], ['PR', 'PR', 'Punt Returner']];
 
+// The spots whose starters can trade labels without anything changing (the receivers, the corners, the
+// safeties, the ends, the tackles, the inside and outside linebackers), and each spot's short label
+const FAMILY = {
+  WR1: 'WR', WR2: 'WR', WR8: 'WR', LCB8: 'CB', RCB11: 'CB', SS9: 'S', FS10: 'S', LDE1: 'DE', RDE3: 'DE', RDE4: 'DE',
+  LDT2: 'DT', RDT3: 'DT', LILB5: 'ILB', RILB6: 'ILB', WLB4: 'OLB', SLB7: 'OLB', WLB5: 'OLB',
+};
+const LABEL_OF = Object.fromEntries(
+  [...OFFENSE_SLOTS, ...DEFENSE_34, ...DEFENSE_43, ...SECONDARY].map(([key, abb]) => [key, { WR1: 'X', WR2: 'Z', WR8: 'slot', NB12: 'nickel' }[key] ?? abb]),
+);
+
 // ---- the daily charts (2025 on): the snapshot as of a date, each slot's players by depth
 function dailyChart(rows, dt) {
   const at = rows.filter((r) => r.dt === dt);
@@ -186,7 +196,8 @@ function weeklyChart(rows) {
       return n ? deal(list, n).map((chain) => ({ fam: f, chain })) : [];
     });
   const dl = chainsOf(['LDE', 'DE', 'RDE', 'LDT', 'DT', 'RDT', 'NT']);
-  const front = dl.some((c) => c.fam === 'NT') || dl.length === 3 ? '3-4' : '4-3';
+  // (four starting linemen: a 4-3, whatever one of them is called; three, or fewer with a nose tackle: a 3-4)
+  const front = dl.length >= 4 ? '4-3' : dl.length === 3 || dl.some((c) => c.fam === 'NT') ? '3-4' : '4-3';
   const lb = chainsOf(['LILB', 'ILB', 'MLB', 'LB', 'RILB', 'WLB', 'OLB', 'SLB', ...(front === '3-4' ? ['EDGE'] : [])]);
   const edgeDl = front === '4-3' ? chainsOf(['EDGE']) : [];
   // (pull a chain out of a pool: the first label listed that has one, or any left when none fits)
@@ -290,6 +301,27 @@ async function buildSeason(season, players) {
     download('games.csv', SCHEDULE_URL).then(readCsv),
   ]);
   const injuries = current ? await espnInjuries().catch(() => new Map()) : new Map();
+  // (the weekly injury reports, 2009 on: who was out or doubtful each week, and with what)
+  const injuryRows =
+    season >= 2009
+      ? await download(`injuries_${season}.csv.gz`, `${NFLVERSE}/injuries/injuries_${season}.csv.gz`, { optional: true, current })
+          .then(readCsv)
+          .catch(() => [])
+      : [];
+  // (the weekly rosters, 2002 on: each player's status each week, active, on injured reserve, cut, traded,
+  // on the practice squad, and his team)
+  const rosterRows =
+    season >= 2002
+      ? await download(`roster_weekly_${season}.csv.gz`, `${NFLVERSE}/weekly_rosters/roster_weekly_${season}.csv.gz`, { optional: true, current })
+          .then(readCsv)
+          .catch(() => [])
+      : [];
+  const rosterStatus = new Map(rosterRows.filter((r) => r.game_type === 'REG').map((r) => [`${r.week}|${r.gsis_id}`, { status: r.status, team: r.team }]));
+  const injuryReports = new Map(
+    injuryRows
+      .filter((r) => r.game_type === 'REG' && /^(Out|Doubtful)$/.test(r.report_status))
+      .map((r) => [`${r.week}|${r.gsis_id}`, `${r.report_status}${r.report_primary_injury ? ` (${r.report_primary_injury.toLowerCase()})` : ''}`]),
+  );
   const byGsis = new Map(players.map((p) => [p.gsis_id, p]));
   const byPfr = new Map(players.filter((p) => p.pfr_id && p.pfr_id !== 'NA').map((p) => [p.pfr_id, p]));
   // (each team's logo name, from that season's own rows: "BAL" -> "Ravens")
@@ -317,21 +349,17 @@ async function buildSeason(season, players) {
 
     // the chart now (or at the season's end), and at its start
     let now;
-    let then;
     let asOf;
     if (daily) {
       const stamps = [...new Set(rows.map((r) => r.dt))].sort();
       const end = current ? stamps.at(-1) : (stamps.filter((dt) => dt.slice(0, 10) <= lastGame).at(-1) ?? stamps.at(-1));
-      const start = stamps.filter((dt) => dt.slice(0, 10) <= firstGame).at(-1) ?? stamps[0];
       now = dailyChart(rows, end);
-      then = dailyChart(rows, start);
       asOf = end;
     } else {
       const regular = rows.filter((r) => r.game_type === 'REG');
       const weeks = [...new Set(regular.map((r) => Number(r.week)))].sort((a, b) => a - b);
       const last = weeks.filter((w) => w <= lastWeek).at(-1) ?? weeks.at(-1);
       now = weeklyChart(regular.filter((r) => Number(r.week) === last));
-      then = weeklyChart(regular.filter((r) => Number(r.week) === weeks[0]));
       asOf = lastGame;
     }
 
@@ -386,14 +414,80 @@ async function buildSeason(season, players) {
       if (hit) Object.assign(hit, { status: i.status, injury: i.injury });
     }
 
-    // the starters who changed over the season
-    const changes = [];
-    for (const [key, s] of now.slots) {
-      const was = then.slots.get(key)?.depth[0];
-      if (was && s.depth[0] && was !== s.depth[0]) {
-        person(was, then.names.get(was));
-        changes.push({ side: s.side, key, name: s.name, from: was, to: s.depth[0] });
+    // The season's evolution: the chart before each game, each week's starters against the week before.
+    // A change is a starter gone from his spot (not two players only trading labels), and who took it;
+    // with why: hurt (the injury report), on injured reserve, released or traded (the weekly rosters),
+    // still on the chart behind him (the coach's decision), or the new one moved over from another spot.
+    // (The season being played: its games so far and the next one, whose chart is the one now.)
+    const weekCharts = [];
+    if (daily) {
+      const stamps = [...new Set(rows.map((r) => r.dt))].sort();
+      const games = reg.filter((x) => x.home_team === code || x.away_team === code).sort((a, b) => Number(a.week) - Number(b.week));
+      const next = games.findIndex((g) => num(g.home_score) === null);
+      for (const g of next < 0 ? games : games.slice(0, next + 1)) {
+        const dt = stamps.filter((d) => d.slice(0, 10) <= g.gameday).at(-1);
+        if (dt) weekCharts.push({ week: Number(g.week), chart: dailyChart(rows, dt) });
       }
+    } else {
+      const regular = rows.filter((r) => r.game_type === 'REG');
+      for (const w of [...new Set(regular.map((r) => Number(r.week)))].filter((w) => w <= lastWeek).sort((a, b) => a - b)) {
+        weekCharts.push({ week: w, chart: weeklyChart(regular.filter((r) => Number(r.week) === w)) });
+      }
+    }
+    const report = (week, id) => injuryReports.get(`${week}|${id}`);
+    const timeline = [];
+    for (let i = 1; i < weekCharts.length; i++) {
+      const before = weekCharts[i - 1].chart;
+      const after = weekCharts[i].chart;
+      // (where a player starts in a chart: his spot, by key)
+      const spotOf = (chart) => new Map([...chart.slots.values()].filter((s) => s.side !== 'special' && s.depth[0]).map((s) => [s.depth[0], s.key]));
+      const beforeSpot = spotOf(before);
+      const afterSpot = spotOf(after);
+      const changes = [];
+      for (const [key, s] of after.slots) {
+        if (s.side === 'special') continue;
+        const was = before.slots.get(key)?.depth[0];
+        const is = s.depth[0];
+        if (!was || !is || was === is) continue;
+        // (two starters only trading labels within a group, the receivers' X and Z or the corners' sides: no
+        // change; a starter moving to another spot, the right guard to center, is one, marked a move)
+        const group = FAMILY[key];
+        if (group && FAMILY[beforeSpot.get(is)] === group && FAMILY[afterSpot.get(was)] === group) continue;
+        // (two starters exchanging spots outright: how the old charts' labels fell, not a change)
+        if (beforeSpot.get(is) && beforeSpot.get(is) === afterSpot.get(was)) continue;
+        person(was, before.names.get(was));
+        person(is, after.names.get(is));
+        const week = weekCharts[i].week;
+        const movedFrom = beforeSpot.get(is);
+        const moved = movedFrom ? `moved from ${LABEL_OF[movedFrom] ?? movedFrom}` : null;
+        const hurt = report(week, was);
+        const roster = rosterStatus.get(`${week}|${was}`);
+        const stillListed = [...after.slots.values()].some((x) => x.depth.includes(was));
+        const nowAt = afterSpot.get(was);
+        const [reason, note] = hurt
+          ? ['injury', hurt]
+          : nowAt
+            ? ['moved', `Moved to ${LABEL_OF[nowAt] ?? nowAt}`]
+          : roster?.status === 'RES'
+            ? ['ir', 'Injured reserve']
+            : roster?.status === 'CUT'
+              ? ['released', 'Released']
+              : roster?.status === 'TRD' || (roster && roster.team !== code)
+                ? ['traded', 'Traded']
+                : roster?.status === 'RET'
+                  ? ['retired', 'Retired']
+                  : roster?.status === 'INA'
+                    ? ['inactive', 'Inactive']
+                  : stillListed || roster?.status === 'ACT' || roster?.status === 'DEV'
+                    ? ['coach', moved ? `Coach's decision, ${moved}` : "Coach's decision"]
+                    : !roster && rosterStatus.size
+                      ? ['released', 'Off the roster']
+                      : moved
+                        ? ['moved', moved]
+                        : [null, null];
+        changes.push({ side: s.side, key, name: s.name, from: was, to: is, reason, note });
+      }
+      if (changes.length) timeline.push({ week: weekCharts[i].week, changes });
     }
 
     const out = {
@@ -406,7 +500,7 @@ async function buildSeason(season, players) {
       personnel: personnel(teamSnaps),
       slots: [...now.slots.values()].map(({ side, key, abb, name, depth }) => ({ side, key, abb, name, depth })),
       players: Object.fromEntries(people),
-      changes,
+      timeline,
     };
     writeFileSync(path.join(dir, `${logo}.json`), JSON.stringify(out));
     written++;

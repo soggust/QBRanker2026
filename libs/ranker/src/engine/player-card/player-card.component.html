@@ -276,7 +276,7 @@
               </div>
             </card-panel>
 
-            <card-panel class="tab-card ai-card ai-season group-results" label="Current Performance" icon="insights" [open]="cards.aiOpen.has('season')" (toggled)="cards.toggleAi('season')">
+            <card-panel class="tab-card ai-card ai-season" label="Current Performance" icon="insights" [open]="cards.aiOpen.has('season')" (toggled)="cards.toggleAi('season')">
               <div class="group-body">
                 <div class="ai-columns">
                   <div class="ai-points strengths">
@@ -353,7 +353,7 @@
               </div>
             </card-panel>
 
-            <card-panel class="tab-card ai-card ai-bets" label="Betting Angles" icon="paid" [open]="cards.aiOpen.has('bets')" (toggled)="cards.toggleAi('bets')">
+            <card-panel class="tab-card ai-card ai-bets group-results" label="Betting Angles" icon="paid" [open]="cards.aiOpen.has('bets')" (toggled)="cards.toggleAi('bets')">
               <div class="group-body">
                 @if (!r.bets.length) {
                   <p class="card-note">Nothing in this matchup looks mispriced.</p>
@@ -386,7 +386,7 @@
           } @else {
             @for (side of d.sides; track side.id) {
               <card-panel
-                class="tab-card depth-panel"
+                class="tab-card depth-panel group-results"
                 [label]="side.title + (side.set ? ' · ' + side.set : '')"
                 [icon]="side.id === 'offense' ? 'sports_football' : 'shield'"
               >
@@ -445,7 +445,7 @@
               </card-panel>
             }
 
-            <card-panel class="tab-card depth-special" label="Special Teams" icon="sports">
+            <card-panel class="tab-card depth-special group-results" label="Special Teams" icon="sports">
               <div class="group-body depth-special-row">
                 @for (s of d.special; track s.label) {
                   <span class="depth-special-item">
@@ -463,22 +463,33 @@
               </div>
             </card-panel>
 
-            @if (d.changes.length) {
-              <card-panel class="tab-card depth-changes" [label]="d.changesTitle" icon="swap_horiz">
+            <!-- (the season's positional changes, week by week: who went out, who came in, and why when it's known) -->
+            @if (d.timeline.length) {
+              <card-panel class="tab-card depth-changes" label="Positional Changes" icon="swap_horiz">
                 <div class="group-body">
-                  @for (ch of d.changes; track ch.label + ch.to) {
-                    <div class="depth-change">
-                      <span class="depth-change-pos">{{ ch.label }}</span>
-                      <s>{{ ch.from }}</s>
-                      <mat-icon fontIcon="arrow_forward"></mat-icon>
-                      <b>{{ ch.to }}</b>
-                    </div>
+                  @for (w of d.timeline; track w.week) {
+                    <h4 class="depth-unit">Week {{ w.week }}</h4>
+                    @for (ch of w.changes; track ch.label + ch.to) {
+                      <div class="depth-change">
+                        <span class="depth-change-pos">{{ ch.label }}</span>
+                        <s>{{ ch.from }}</s>
+                        <mat-icon fontIcon="arrow_forward"></mat-icon>
+                        <b>{{ ch.to }}</b>
+                        <!-- (why: a tag in its color, the detail beside it) -->
+                        @if (ch.tag) {
+                          <span class="depth-reason" [ngClass]="'r-' + ch.reason">{{ ch.tag }}</span>
+                        }
+                        @if (ch.note) {
+                          <small class="depth-change-note">{{ ch.note }}</small>
+                        }
+                      </div>
+                    }
                   }
                 </div>
               </card-panel>
             }
 
-            <card-panel class="tab-card depth-usage" label="Who's Played" icon="groups">
+            <card-panel class="tab-card depth-usage" label="Full Roster" icon="groups">
               <div class="group-body">
                 @for (g of d.usage; track g.title) {
                   <h4 class="depth-unit">{{ g.title }}</h4>

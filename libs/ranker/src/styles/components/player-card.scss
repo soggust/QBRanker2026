@@ -789,14 +789,28 @@
   }
 }
 
-.card-career {
-  --group-color: var(--scoreboard-led);
+// The card's team accent: the team's own color (--team-badge, set on the card), its lightness kept in a
+// range that reads on the dark panels (a navy or a black lifted, its hue kept); the sport's accent
+// without one, or where the browser can't work it out
+.player-card {
+  --team-accent: var(--team-badge, var(--scoreboard-led));
 }
 
-// The Game Log and Career tabs: one card each, like a Season group (its bar a title, not a fold). The
-// yellow is only a default (:where: no weight), so a card with a category class takes that color
+@supports (color: oklch(from red l c h)) {
+  .player-card {
+    --team-accent: oklch(from var(--team-badge, var(--scoreboard-led)) clamp(0.68, l, 0.86) c h);
+  }
+}
+
+.card-career {
+  --group-color: var(--team-accent);
+}
+
+// The card's panels without a category of their own (Game Log, Career, Overview's summaries, the Roster's
+// changes and full roster): the team's accent. Only a default (:where: no weight), so a panel with a
+// category class takes that color
 :where(.tab-card) {
-  --group-color: var(--scoreboard-led);
+  --group-color: var(--team-accent);
 }
 
 .tab-card {
@@ -1892,7 +1906,8 @@
   }
 
   // (the season, next game and rest of season take the site's category colors: their group-* class)
-  &.ai-bets {
+  // (the season's performance in the sport's accent; the betting angles take the results' green)
+  &.ai-season {
     --group-color: var(--scoreboard-led);
   }
 }
@@ -2595,6 +2610,60 @@
   min-width: 42px;
   padding: 2px 6px;
   text-align: center;
+}
+
+// (why: a tag in its kind's color: hurt in red, out of the picture in purple, the coach's call in blue, a
+// move in gray)
+.depth-reason {
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.4px;
+  margin-left: auto;
+  padding: 2px 6px;
+  text-transform: uppercase;
+  white-space: nowrap;
+
+  &.r-injury {
+    background: rgba(255, 90, 79, 0.2);
+    color: #ff8a80;
+  }
+
+  &.r-ir {
+    background: rgba(163, 32, 43, 0.35);
+    color: #ff9aa2;
+  }
+
+  &.r-released,
+  &.r-traded,
+  &.r-retired {
+    background: rgba(179, 136, 255, 0.2);
+    color: #c9b2ff;
+  }
+
+  &.r-coach {
+    background: rgba(91, 157, 255, 0.2);
+    color: #9cc3ff;
+  }
+
+  &.r-moved,
+  &.r-inactive {
+    background: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.75);
+  }
+}
+
+// (and its detail: the injury, where someone moved)
+.depth-change-note {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+// (no tag: the detail itself on the right)
+.depth-change > b + .depth-change-note {
+  margin-left: auto;
 }
 
 // who's played: by unit, the most-used first, a bar for his snap share

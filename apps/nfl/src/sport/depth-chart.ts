@@ -34,7 +34,8 @@ interface DepthFile {
       injury: string | null;
     }
   >;
-  changes: { side: string; key: string; name: string; from: string; to: string }[];
+  // the season's positional changes, week by week (why, when known: the injury report, or a move)
+  timeline: { week: number; changes: { side: string; key: string; name: string; from: string; to: string; reason: string | null; note: string | null }[] }[];
 }
 
 // Where each spot sits (x across, y down, in percent of the field): the offense facing up from the line
@@ -186,20 +187,23 @@ export async function loadDepthChart(logo: string, position: string, season: num
     if (rows.length) usage.push({ title, rows });
   }
 
+  // The season's positional changes, week by week, each tagged with why
+  const REASON_TAG: Record<string, string> = {
+    injury: 'Injury', ir: 'IR', released: 'Released', traded: 'Traded', retired: 'Retired', inactive: 'Inactive', coach: "Coach's Decision", moved: 'Moved',
+  };
   const LABEL: Record<string, string> = { WR1: 'X', WR2: 'Z', WR8: 'SLOT', NB12: 'NICKEL' };
-  const changes = file.changes.map((c) => ({
-    label: LABEL[c.key] ?? c.key.replace(/\d+$/, ''),
-    from: file.players[c.from]?.name ?? c.from,
-    to: file.players[c.to]?.name ?? c.to,
+  const timeline = (file.timeline ?? []).map((w) => ({
+    week: w.week,
+    changes: w.changes.map((c) => ({
+      label: LABEL[c.key] ?? c.key.replace(/\d+$/, ''),
+      from: file.players[c.from]?.name ?? c.from,
+      to: file.players[c.to]?.name ?? c.to,
+      reason: c.reason ?? null,
+      tag: c.reason ? (REASON_TAG[c.reason] ?? null) : null,
+      // (the detail when it adds to the tag: the injury, where someone moved)
+      note: c.reason === 'injury' || c.reason === 'moved' ? c.note : c.reason === 'coach' ? c.note?.replace(/^Coach's decision,?\s*/, '') || null : null,
+    })),
   }));
 
-  return {
-    asOf: file.at,
-    sides,
-    special,
-    usage,
-    changes,
-    changesTitle: current ? 'New Starters Since Week 1' : 'Starters Who Changed',
-    teamGames: file.teamGames,
-  };
+  return { asOf: file.at, sides, special, usage, timeline, teamGames: file.teamGames };
 }

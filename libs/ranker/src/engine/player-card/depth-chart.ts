@@ -52,6 +52,11 @@ export interface DepthChange {
   label: string;
   from: string;
   to: string;
+  // why, when it's known: its kind (injury, ir, released, traded, retired, inactive, coach, moved: the tag's
+  // color), the tag ("Injury", "Coach's Decision"), and the detail ("Out (ankle)", "Moved to C")
+  reason: string | null;
+  tag: string | null;
+  note: string | null;
 }
 
 export interface DepthView {
@@ -60,8 +65,7 @@ export interface DepthView {
   sides: DepthSide[];
   special: { label: string; player: DepthPlayer | null }[];
   usage: DepthUsageGroup[];
-  changes: DepthChange[];
-  // (the changes panel's title: "New Starters Since Week 1", a past season's "Starters Who Changed")
-  changesTitle: string;
+  // the season's positional changes, week by week (the weeks with any)
+  timeline: { week: number; changes: DepthChange[] }[];
   teamGames: number;
 }
