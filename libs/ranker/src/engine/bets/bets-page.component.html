@@ -141,8 +141,11 @@
     <button type="button" class="slot-handle" [class.pulling]="pulling" (click)="pull()" aria-label="Pull the handle">
       <span class="slot-mount"></span>
       <span class="slot-hub"></span>
-      <span class="slot-arm"></span>
-      <span class="slot-knob"></span>
+      <!-- (the arm and its knob, one lever turning on the hub) -->
+      <span class="slot-lever">
+        <span class="slot-arm"></span>
+        <span class="slot-knob"></span>
+      </span>
     </button>
   </div>
 </div>

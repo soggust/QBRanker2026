@@ -683,20 +683,28 @@ $arm-length: 175px;
     width: 26px;
   }
 
-  // the arm, up from the hub's middle
+  // the lever: the arm up from the hub's middle with the knob on its end, turning on the hub (its bottom
+  // middle is the hub's center)
+  .slot-lever {
+    height: $arm-length + 26px;
+    left: 16px;
+    position: absolute;
+    top: 154px - $arm-length - 26px;
+    transform-origin: 50% 100%;
+    width: 34px;
+  }
+
   .slot-arm {
     background: $chrome;
     border-radius: 3px;
     box-shadow: 1px 0 3px rgba(0, 0, 0, 0.4);
     height: $arm-length;
-    left: 30px;
+    left: 13.5px;
     position: absolute;
-    top: 154px - $arm-length;
-    transform-origin: 50% 100%;
+    top: 26px;
     width: 7px;
   }
 
-  // the knob on its end
   .slot-knob {
     // (the poker chip's red clay)
     background: radial-gradient(circle at 35% 30%, #f0838a, $chip-clay 48%, #5e1016);
@@ -705,43 +713,66 @@ $arm-length: 175px;
       inset -2px -3px 6px rgba(0, 0, 0, 0.35),
       2px 3px 6px rgba(0, 0, 0, 0.5);
     height: 34px;
-    left: 16px;
+    left: 0;
     position: absolute;
-    top: 154px - $arm-length - 26px;
+    top: 0;
     width: 34px;
+  }
+
+  // (the hub over the arm's end)
+  .slot-hub {
+    z-index: 1;
   }
 
   .slot-handle:hover .slot-knob {
     filter: brightness(1.1);
   }
+}
 
-  // pulled: the arm swings down past the hub and back, the knob riding its end
-  .slot-handle.pulling {
-    .slot-arm {
-      animation: slot-arm 0.7s cubic-bezier(0.3, 0, 0.3, 1);
-    }
+// Pulled: the lever swings out and down on the hub, then springs back up past upright and settles (outside
+// the media query: Angular scopes the keyframes' name and only rewrites references outside one)
+.slot-handle.pulling .slot-lever {
+  animation: slot-pull 0.85s cubic-bezier(0.35, 0, 0.25, 1);
+}
 
-    .slot-knob {
-      animation: slot-knob 0.7s cubic-bezier(0.3, 0, 0.3, 1);
-    }
+// (the knob turning back against it, so its shine stays up and to the left)
+.slot-handle.pulling .slot-knob {
+  animation: slot-pull-knob 0.85s cubic-bezier(0.35, 0, 0.25, 1);
+}
+
+@keyframes slot-pull-knob {
+  40% {
+    transform: rotate(-150deg);
+  }
+  50% {
+    transform: rotate(-150deg);
+  }
+  80% {
+    transform: rotate(8deg);
+  }
+  92% {
+    transform: rotate(-3deg);
+  }
+  100% {
+    transform: rotate(0);
   }
 }
 
-@keyframes slot-arm {
-  45% {
-    transform: scaleY(-0.8);
+@keyframes slot-pull {
+  40% {
+    transform: rotate(150deg);
   }
-  75% {
-    transform: scaleY(1.06);
+  50% {
+    transform: rotate(150deg);
   }
-}
-
-@keyframes slot-knob {
-  45% {
-    transform: translateY(calc(#{$arm-length} * 1.8 + 8px)) scale(1.1);
+  80% {
+    transform: rotate(-8deg);
   }
-  75% {
-    transform: translateY(-6px);
+  92% {
+    transform: rotate(3deg);
+  }
+  100% {
+    transform: rotate(0);
   }
 }
 
@@ -804,7 +835,7 @@ $arm-length: 175px;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .slot-handle.pulling .slot-arm,
+  .slot-handle.pulling .slot-lever,
   .slot-handle.pulling .slot-knob,
   .bets-list.spinning .bet-row > * {
     animation: none;
