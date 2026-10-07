@@ -1,6 +1,5 @@
 @use "sass:meta";
 @use "../variables" as v;
-@use "group-bar";
 @use "awards";
 
 // ===========================================================================
@@ -817,10 +816,6 @@
     margin-top: 0;
   }
 
-  &:not(.closed) .group-bar {
-    border-bottom: 1px solid color-mix(in srgb, var(--group-color) 40%, transparent);
-  }
-
   &.closed {
     margin-top: 10px;
   }
@@ -846,11 +841,6 @@
   }
 }
 
-// A card's title bar (the Game Log and Career cards: a title, not a fold; the expandable panels draw
-// their own, card-panel.scss)
-.group-bar {
-  @include group-bar.bar;
-}
 
 .card-stats {
   display: grid;

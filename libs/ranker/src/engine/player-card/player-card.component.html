@@ -201,8 +201,7 @@
                the stats behind it -->
           @for (side of o.report; track side.title) {
             @if (side.list.length) {
-              <div class="ov-section stat-group tab-card" [ngClass]="side.tone">
-                <div class="group-bar static"><mat-icon class="group-bar-icon" [fontIcon]="side.icon"></mat-icon><span>{{ side.title }}</span></div>
+              <card-panel class="ov-section tab-card" [ngClass]="side.tone" [expandable]="false" [label]="side.title" [icon]="side.icon">
                 <div class="group-body">
                 <div class="ov-skills">
                   @for (s of side.list; track s.id) {
@@ -221,14 +220,13 @@
                   }
                 </div>
                 </div>
-              </div>
+              </card-panel>
             }
           }
 
           <!-- The three closest seasons by anyone else, 2000 on (finished seasons only) -->
           @if (c.season !== currentSeason && c.comps?.length) {
-            <div class="ov-section similar stat-group tab-card">
-              <div class="group-bar static"><mat-icon class="group-bar-icon" fontIcon="compare_arrows"></mat-icon><span>Similar Seasons</span></div>
+            <card-panel class="ov-section similar tab-card" [expandable]="false" label="Similar Seasons" icon="compare_arrows">
               <div class="group-body">
               <div class="comps-row">
                 @for (m of c.comps; track m.season + m.gsisId) {
@@ -248,7 +246,7 @@
                 }
               </div>
               </div>
-            </div>
+            </card-panel>
           }
         }
 
@@ -379,8 +377,7 @@
         <!-- This season's games (SPORT.gameLog): a bar per game of the key stat (a team's margin), oldest
              first, then the table, newest first, each value tinted against their own average -->
         @case ('games') {
-          <div class="stat-group tab-card card-games">
-            <div class="group-bar static"><mat-icon class="group-bar-icon" fontIcon="event_note"></mat-icon><span>Game Log</span></div>
+          <card-panel class="tab-card card-games" [expandable]="false" label="Game Log" icon="event_note">
             <div class="group-body">
             @let log = cards.gameLog(c);
             @if (log === 'loading') {
@@ -541,7 +538,7 @@
               }
             }
             </div>
-          </div>
+          </card-panel>
         }
 
         <!-- The sport's history (SPORT.cardHistory: a fighter's fights), newest first -->
@@ -566,8 +563,7 @@
 
         <!-- Every season they're in: each opens that season's card (the table stays as it is) -->
         @case ('seasons') {
-          <div class="stat-group tab-card card-career">
-            <div class="group-bar static"><mat-icon class="group-bar-icon" fontIcon="calendar_month"></mat-icon><span>{{ cards.careerTitle }}</span></div>
+          <card-panel class="tab-card card-career" [expandable]="false" [label]="cards.careerTitle" icon="calendar_month">
             <div class="group-body">
             @if (!c.seasons) {
               <p class="card-note">Loading…</p>
@@ -629,7 +625,7 @@
               </div>
             }
             </div>
-          </div>
+          </card-panel>
         }
       }
     </div>

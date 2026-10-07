@@ -1,18 +1,40 @@
 @use "../variables" as v;
-@use "group-bar";
 
-// The player card's expandable panels (card-panel.component.ts): global (no view encapsulation), so these
-// reach the bar the component draws; scoped to card-panel. The panel's box (its border in its category
-// color, the spacing between panels) and its content's look stay the card's (player-card.scss .stat-group).
+// The player card's panels (card-panel.component.ts): global (no view encapsulation), so these reach the
+// bar the component draws; scoped to card-panel. The panel's box (its border in its category color, the
+// spacing between panels) and its content's look stay the card's (player-card.scss .stat-group).
 card-panel {
   display: block;
 
+  // The bar: the label in caps on the scoreboard, tinted in its category color, its icon before it
   > .group-bar {
-    @include group-bar.bar;
+    --bar-tint: color-mix(in srgb, var(--group-color) 16%, transparent);
+    align-items: center;
+    background: linear-gradient(var(--bar-tint), var(--bar-tint)), var(--scoreboard-dots), var(--scoreboard);
+    border: none;
+    color: #fff;
+    display: flex;
+    font-family: v.$font-base;
+    font-size: 13px;
+    font-weight: 800;
+    gap: 8px;
+    letter-spacing: 1px;
+    padding: 12px;
+    text-align: left;
+    text-transform: uppercase;
+    width: 100%;
+
+    .group-bar-icon {
+      color: var(--group-color);
+      @include v.icon-size(19px);
+    }
+  }
+
+  // (an expandable one clicks; on hover the bar lifts and the chevron lightens, like every row and panel
+  // that opens; never the accent color)
+  > button.group-bar {
     cursor: pointer;
 
-    // (hover: the bar lifts and the chevron lightens, like every row and panel that opens; never the
-    // accent color)
     &:hover {
       --bar-tint: color-mix(in srgb, var(--group-color) 24%, transparent);
 
