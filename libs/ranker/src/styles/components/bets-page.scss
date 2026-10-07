@@ -390,39 +390,9 @@ $chip-clay: #b0202b;
   flex-shrink: 0;
   // (its confidence color, the row and its open section washed in it)
   --soft: var(--tint);
+  border: 1px solid color-mix(in srgb, var(--soft) 45%, transparent);
   border-radius: 6px;
   overflow: hidden;
-  position: relative;
-
-  // Its rim a poker chip's, in its confidence color: a dark band with bright spots around it, over the
-  // row's edge (an outline, so it follows the corners and grows when the row opens)
-  .bet-rim {
-    height: 100%;
-    inset: 0;
-    pointer-events: none;
-    position: absolute;
-    width: 100%;
-    z-index: 1;
-
-    rect {
-      fill: none;
-      height: calc(100% - 3px);
-      rx: 5px;
-      stroke-width: 3px;
-      width: calc(100% - 3px);
-      x: 1.5px;
-      y: 1.5px;
-    }
-
-    .rim-band {
-      stroke: color-mix(in srgb, var(--soft) 35%, #101214);
-    }
-
-    .rim-spots {
-      stroke: color-mix(in srgb, var(--soft) 85%, #fff);
-      stroke-dasharray: 8 10;
-    }
-  }
 
   &.high {
     --tint: #3ecf6e;
@@ -433,7 +403,7 @@ $chip-clay: #b0202b;
   }
 
   &.open .bet-row {
-    border-bottom: 1px solid color-mix(in srgb, var(--soft) 35%, transparent);
+    border-bottom: 1px solid color-mix(in srgb, var(--soft) 45%, transparent);
   }
 }
 
