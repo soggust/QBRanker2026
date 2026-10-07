@@ -1,4 +1,1 @@
-@use "sport-kit" as kit;
-
-// NBA player card touches: the stat groups' edges are painted court lines (solid, like the table's) instead of sidelines with hash marks
-@include kit.painted-card-edges;
+// The NBA player card has no touches of its own (its panels' painted edges: _sport-panel.scss)

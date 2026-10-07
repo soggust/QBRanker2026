@@ -1,4 +1,1 @@
-@use "sport-kit" as kit;
-
-// NHL player card touches: the stat groups' edges are painted rink lines (solid, like the table's) instead of sidelines with hash marks
-@include kit.painted-card-edges;
+// The NHL player card has no touches of its own (its panels' painted edges: _sport-panel.scss)

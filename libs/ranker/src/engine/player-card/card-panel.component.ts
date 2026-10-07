@@ -22,7 +22,7 @@ import { Component, EventEmitter, Input, Output, ViewEncapsulation } from '@angu
       </div>
     }
     @if (open || !expandable) {
-      <ng-content></ng-content>
+      <div class="panel-body"><ng-content></ng-content></div>
     }
   `,
   styleUrls: ['../../styles/components/card-panel.scss'],

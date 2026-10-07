@@ -1,0 +1,7 @@
+@use "sport-kit" as kit;
+
+// MMA: a card panel's edges (card-panel.scss) are painted lines (solid, like the table's) down both sides
+// and across the bottom
+@mixin edges {
+  @include kit.painted-panel-edges;
+}

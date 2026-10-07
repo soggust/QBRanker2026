@@ -1,0 +1,24 @@
+// NFL: a card panel's edges (card-panel.scss) are the field's sidelines down both sides, in its category's
+// color: a solid line with short hash marks off it, pointing in, and every fifth a longer one (the yard
+// lines)
+@mixin edges {
+  --hash-gap: 12px;
+  --line: color-mix(in srgb, var(--group-color) 75%, transparent);
+  $hashes: repeating-linear-gradient(
+    180deg,
+    transparent 0 calc(var(--hash-gap) - 1px),
+    var(--line) calc(var(--hash-gap) - 1px) var(--hash-gap)
+  );
+  $yard-lines: repeating-linear-gradient(
+    180deg,
+    transparent 0 calc(var(--hash-gap) * 5 - 1px),
+    var(--line) calc(var(--hash-gap) * 5 - 1px) calc(var(--hash-gap) * 5)
+  );
+  background:
+    linear-gradient(var(--line), var(--line)) left / 1px 100% no-repeat,
+    linear-gradient(var(--line), var(--line)) right / 1px 100% no-repeat,
+    $hashes left top / 5px 100% no-repeat,
+    $hashes right top / 5px 100% no-repeat,
+    $yard-lines left top / 11px 100% no-repeat,
+    $yard-lines right top / 11px 100% no-repeat;
+}

@@ -1,4 +1,5 @@
 @use "../variables" as v;
+@use "sport-panel";
 
 // The player card's panels (card-panel.component.ts): global (no view encapsulation), so these reach the
 // bar the component draws; scoped to card-panel. The panel's box (its border in its category color, the
@@ -47,6 +48,11 @@ card-panel {
   // (open: a line in its category color under the bar)
   &:not(.closed) > .group-bar {
     border-bottom: 1px solid color-mix(in srgb, var(--group-color) 40%, transparent);
+  }
+
+  // The body: its edges the sport's (the NFL's sidelines, MLB's chalk, the painted lines; _sport-panel.scss)
+  > .panel-body {
+    @include sport-panel.edges;
   }
 
   .panel-chevron {

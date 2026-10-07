@@ -1,0 +1,8 @@
+// MLB: a card panel's edges (card-panel.scss) are chalk lines (the table's) down both sides and across
+// the bottom
+@mixin edges {
+  background:
+    url("../assets/textures/chalk-line-v.svg") left top / 10px 150px repeat-y,
+    url("../assets/textures/chalk-line-v.svg") right top / 10px 150px repeat-y,
+    url("../assets/textures/chalk-line-h.svg") left bottom / 150px 10px repeat-x;
+}
