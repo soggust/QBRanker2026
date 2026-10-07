@@ -5,16 +5,20 @@
     <!-- The game dropdown on the left, when the analyses were updated on the right -->
     <header class="bets-head">
       @if (rows?.length) {
-        <select class="bets-game" aria-label="Game" [(ngModel)]="game">
-          <option value="">All Games</option>
-          @for (d of gameDays; track d.day) {
-            <optgroup [label]="d.day">
-              @for (g of d.games; track g.key) {
-                <option [value]="g.key">{{ g.label }} ({{ g.count }})</option>
-              }
-            </optgroup>
-          }
-        </select>
+        <!-- (the chip's rim: its spots drawn as dashes along an outline, so they follow the round ends) -->
+        <span class="bets-chip">
+          <select class="bets-game" aria-label="Game" [(ngModel)]="game">
+            <option value="">All Games</option>
+            @for (d of gameDays; track d.day) {
+              <optgroup [label]="d.day">
+                @for (g of d.games; track g.key) {
+                  <option [value]="g.key">{{ g.label }} ({{ g.count }})</option>
+                }
+              </optgroup>
+            }
+          </select>
+          <svg class="chip-rim" aria-hidden="true"><rect pathLength="220" /></svg>
+        </span>
       }
       @if (updated) {
         <span class="bets-updated">Updated {{ updated | date: 'EEE MMM d, h:mm a' }}</span>
@@ -69,12 +73,19 @@
                   } @else {
                     <b>{{ r.game.matchup }}</b>
                   }
+                  <!-- (the kickoff weather and where it's played; the wind in amber when it could matter) -->
+                  @if (where(r); as w) {
+                    <small class="bet-where" [class.windy]="w.windy"><mat-icon [fontIcon]="w.icon"></mat-icon>{{ w.text }}</small>
+                  }
                 }
               </span>
             </button>
             @if (open.has(r.id)) {
               <div class="bet-reasons">
                 <p>{{ r.reason }}</p>
+                @if (r.risk) {
+                  <p class="bet-risk"><b>What could go wrong:</b> {{ r.risk }}</p>
+                }
                 <!-- (the confidence shown is the bet's own; the report's overall confidence stays on its card) -->
                 <p class="bet-meta bet-confidence">{{ level(r) }} Confidence</p>
               </div>

@@ -21,6 +21,8 @@ interface BetEntry {
   // how likely it wins, 1-10 (reports written before the score have none)
   score?: number | null;
   reason: string;
+  // (a bet desk pick: the most likely way it loses)
+  risk?: string;
   confidence: 'low' | 'medium' | 'high' | null;
   at: string;
 }
@@ -36,6 +38,41 @@ export interface BetRow extends BetEntry {
   // its score, or for an older report an estimate from its grade and the report's confidence
   sureness: number;
   estimated: boolean;
+}
+
+// The bet desk's sheet (data/analysis/bet-sheet.json, scripts/analysis/bet-desk.mjs): the week's picks
+// from every report's bets, each with its case and its risk, and each game's venue and kickoff weather
+interface Forecast {
+  roof: 'outdoors' | 'retractable' | 'indoors';
+  tempF?: number | null;
+  windMph?: number | null;
+  gustMph?: number | null;
+  precipChance?: number | null;
+  sky?: string;
+}
+interface GameInfo {
+  city: string | null;
+  stadium: string | null;
+  weather: Forecast | null;
+}
+interface SheetPick {
+  sport: string;
+  bet: string;
+  label: string;
+  side: 'like' | 'fade';
+  fades: string | null;
+  strength: number;
+  case: string;
+  risk: string;
+  sources: string[];
+  game: BetEntry['game'];
+}
+interface Sheet {
+  at: string;
+  week: number;
+  summary: string;
+  games: Record<string, GameInfo>;
+  picks: SheetPick[];
 }
 
 // (an older report's bet, without a score: like 7, fade 6, lean 5, one more for a sure report, one less
@@ -94,18 +131,47 @@ export class BetsPageComponent implements OnInit {
   readonly gameLimit = 15;
   open = new Set<number>();
   readonly insteadText = insteadText;
+  // each game's venue and kickoff weather, from the bet desk's sheet ("nfl|CHI @ GB")
+  places = new Map<string, GameInfo>();
+
+  // Under a matchup: the kickoff weather and where it's played ("57° · 8 mph · Lambeau Field"); windy (15+ mph,
+  // or gusts of 25+) when the wind could matter
+  where(r: BetRow): { icon: string; text: string; windy: boolean } | null {
+    const info = r.game ? this.places.get(`${r.sport}|${r.game.matchup}`) : undefined;
+    if (!info) return null;
+    const w = info.weather;
+    // (where: the stadium's name, or its city when the schedule has none)
+    const place = info.stadium ?? info.city ?? '';
+    if (!w) return place ? { icon: 'place', text: place, windy: false } : null;
+    if (w.roof === 'indoors') return { icon: 'stadium', text: ['Indoors', place].filter(Boolean).join(' · '), windy: false };
+    const sky = w.sky ?? '';
+    const icon = /thunder/.test(sky) ? 'thunderstorm' : /snow/.test(sky) ? 'ac_unit' : /rain|drizzle|shower/.test(sky) ? 'umbrella' : /cloud|overcast|fog/.test(sky) ? 'cloud' : 'wb_sunny';
+    const windy = (w.windMph ?? 0) >= 15 || (w.gustMph ?? 0) >= 25;
+    const parts = [
+      w.tempF !== null && w.tempF !== undefined ? `${w.tempF}°` : null,
+      w.windMph !== null && w.windMph !== undefined ? `${w.windMph} mph${windy && w.gustMph ? ` (gusts ${w.gustMph})` : ''}` : null,
+      w.roof === 'retractable' ? 'Roof' : null,
+      place || null,
+    ];
+    return { icon: windy ? 'air' : icon, text: parts.filter(Boolean).join(' · '), windy };
+  }
 
   async ngOnInit(): Promise<void> {
     // the bets of every sport with AI analyses (sports.json's analysis)
+    const get = (url: string) =>
+      fetch(url, { cache: 'no-cache' })
+        .then((res) => (res.ok ? res.json() : null))
+        .catch(() => null);
     const files = await Promise.all(
-      SPORT_LINKS.filter((s) => s.analysis).map((s) =>
-        fetch(`/${s.id}/data/analysis/bets.json`, { cache: 'no-cache' })
-          .then((res) => (res.ok ? res.json() : null))
-          .catch(() => null),
-      ),
+      SPORT_LINKS.filter((s) => s.analysis).map(async (s) => ({
+        sport: s.id,
+        bets: await get(`/${s.id}/data/analysis/bets.json`),
+        sheet: (await get(`/${s.id}/data/analysis/bet-sheet.json`)) as Sheet | null,
+      })),
     );
     const entries: BetEntry[] = [];
-    for (const file of files) {
+    const sheetRows: BetRow[] = [];
+    for (const { sport, bets: file, sheet } of files) {
       if (!file?.bets?.length) continue;
       // (the latest run only: reports written within 6 hours of its newest, not an older pilot's)
       const newest = Math.max(...file.bets.map((b: BetEntry) => Date.parse(b.at)));
@@ -113,6 +179,39 @@ export class BetsPageComponent implements OnInit {
       // (the coming week's games only: a team on a bye previews the week after, which would list its
       // opponent twice)
       const week = Math.min(...latest.map((b: BetEntry) => b.game?.week ?? Infinity));
+      // The bet desk's sheet for this week, when there is one: its picks instead of the reports' own
+      if (sheet?.week === week && sheet.picks?.length) {
+        for (const [matchup, info] of Object.entries(sheet.games ?? {})) this.places.set(`${sport}|${matchup}`, info);
+        for (const p of sheet.picks) {
+          sheetRows.push({
+            sport,
+            source: p.sources.join(' · '),
+            kind: 'team',
+            position: null,
+            rowId: '',
+            team: null,
+            game: p.game,
+            // (a fade names what it goes against; its pick is the bet to make instead)
+            market: p.side === 'fade' && p.fades ? p.fades : p.label,
+            lean: p.bet,
+            strength: p.side,
+            score: p.strength,
+            reason: p.case,
+            risk: p.risk,
+            confidence: null,
+            at: sheet.at,
+            id: 10000 + sheetRows.length,
+            key: `${sport}|sheet|${sheetRows.length}`,
+            pick: p.bet,
+            marketLabel: p.label,
+            agree: 0,
+            sureness: p.strength,
+            estimated: false,
+          });
+        }
+        if (!this.updated || sheet.at > this.updated) this.updated = sheet.at;
+        continue;
+      }
       entries.push(...latest.filter((b: BetEntry) => b.game?.week === week));
       if (!this.updated || file.at > this.updated) this.updated = file.at;
     }
@@ -157,7 +256,8 @@ export class BetsPageComponent implements OnInit {
       const tied = ranked[0].count === ranked[1].count;
       for (const [i, side] of ranked.entries()) if (tied || i > 0) for (const r of side.rs) kept.delete(r.key);
     }
-    this.rows = [...kept.values()];
+    // (the desk's picks and any sport without a sheet, most sure first)
+    this.rows = [...sheetRows, ...kept.values()].sort((a, b) => b.sureness - a.sureness);
   }
 
   // All games: the top 50 bets; a game: its top 15 (from all of its bets, not just those in the top 50)

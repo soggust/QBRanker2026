@@ -1,0 +1,261 @@
+// The bet desk: one pass over every bet the week's reports suggested (data/analysis/bets.json), with each
+// game's fresh line, injury report and kickoff forecast. Claude merges the same call from different
+// reports, rejects the weak or contradicted ones (saying why), and writes the week's sheet: the best
+// ideas, each with its case, what would make it wrong, and how strong it is. The Bets page shows the
+// sheet (data/analysis/bet-sheet.json) and falls back to the reports' own ranking without one.
+//
+//   node apps/nfl/scripts/analysis/bet-desk.mjs            (a live call; after the reports, and again
+//                                                          before the games for fresh lines and weather)
+//   node apps/nfl/scripts/analysis/bet-desk.mjs --dry-run  (no call: prints what it would send, and its size)
+//
+// Every run is kept in .cache/analysis/desk/ with its rejections, token usage and cost.
+// Needs ANTHROPIC_API_KEY (not for --dry-run).
+
+import Anthropic from '@anthropic-ai/sdk';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import path from 'node:path';
+import { espnInjuries, espnLines, kickoffForecast, kickoffIso, venue } from './live.mjs';
+
+const ROOT = path.resolve(import.meta.dirname, '../../../..');
+const SITE = path.join(ROOT, 'apps/nfl/src/StaticData/analysis');
+const TEAMS = path.join(ROOT, '.cache/analysis/teams');
+const LOG = path.join(ROOT, '.cache/analysis/desk');
+const MODEL = 'claude-opus-5-5';
+const EFFORT = process.env.EFFORT ?? 'high';
+// $ per million tokens (Opus 5.5)
+const PRICE = { input: 4, output: 20 };
+
+const SYSTEM = `You run the bet desk for a football rankings site. Every week the site's analysts write a report on each team and each starting quarterback, and each report suggests up to five betting angles for its coming game. You get all of those suggestions at once, grouped by game, with each game's current line, injury report and kickoff forecast. Your job is the editor's: decide which ideas really hold up, and write the week's bet sheet.
+
+The reader is an independent bettor who will decide for himself whether to act. He doesn't want hype or a promise of winning; he wants good ideas with reasoning strong enough to weigh, and honesty about what could go wrong. Quality over count.
+
+What you get, per game: the matchup, kickoff, venue, the current line (line names the favorite and the spread; overUnder; moneylines) and the line when the reports were written if it has moved, each team's season profile ([value, rank of 32], 1 = best; for "allowed" stats rank 1 is the fewest), the injury report's regulars (snapPct is this season's share of snaps; "new" means reported since the analysts wrote), the kickoff forecast, and the candidates: each suggestion's id, the report it came from, its market, the bet (lean), like (backing the side named) or fade (going against the side named; the lean is the bet to make), the analyst's 1-10 score, and the analyst's reason.
+
+How to edit:
+- Merge: when several reports make the same call (the Raiders' report and the Patriots' report both on "LV +3.5"), it is one pick with all of their candidate ids. Agreement from both sides of a game is worth noting; it isn't proof.
+- Judge the logic, not the confidence. A pick needs a real mechanism in the numbers: a matchup edge (a strong run game into a defense that can't stop the run), a mispriced line (the market leaning on a record the efficiency doesn't support), a situation (rest, travel, injuries that change a unit). Reject reasons that are only a streak, a record, a narrative, or a stat that doesn't bear on the bet.
+- Check every pick against the rest of the game: contradictions between reports (one says the Bears run all day, another bets the Bears' passing over), the line having moved past the number the reasoning needed, injuries reported since (a key player now out, or a questionable star whose status decides the bet), and the weather.
+- Weather: only for outdoor games (a retractable roof is likely closed in bad weather). Sustained wind of 15+ mph or gusts of 25+ hurt passing, the deep game and kicking, and lean totals and passing numbers down; heavy rain or snow (a high precipChance with real precipIn) hurts passing and ball security somewhat; cold alone matters little. early: true means the forecast is more than 3 days out and rough: mention a big system, hedged, but don't build a pick on it. A pick that bad weather undercuts (an over, a passing over) must answer it or be rejected. A pick weather supports can say so.
+- Player bets are framed against the player's own average ("over his 250-a-game average"): the site has no prop lines. Keep that framing honest; don't invent a line.
+- No new bets: every pick is one or more candidates. You can restate a candidate's bet more cleanly, but not change it.
+- Pick as many as genuinely hold up: usually 8 to 20, fewer in a thin week. Reject the rest (group rejections that fail for the same reason), each with one specific line of under 15 words; your rejections teach the analysts what doesn't hold up, so be specific.
+
+Each pick:
+- bet: the wager in a few words, as a bettor would say it ("LV +3.5", "Under 42.5", "MIA team total under 17.5", "Jackson under his 36-a-game rushing average").
+- label: the market, short ("Spread", "Game total", "Moneyline", "Team total", "Jackson rushing yards").
+- side: like, or fade (going against what the market or the obvious read favors); for a fade, fades names the side it goes against ("BUF -3.5"), otherwise fades is "".
+- strength: 1-10, how convincing the case is and how likely it is to win: 8-9 when the matchup, the number, the injuries and the weather all point the same way; 6-7 a solid edge with a real risk; 5 a lean. Use the range; don't park everything at 7.
+- case: 2-4 sentences, the argument a sharp friend would make, built on specific numbers from the candidates' reasons and the game's data. Use no numbers that aren't there or directly derivable from them.
+- risk: 1-2 sentences, the most likely way it loses.
+
+summary: 2-3 sentences on the slate: its themes, and anything that shapes several picks (a weather system, a wave of injuries, a market overreacting to records).`;
+
+const SCHEMA = {
+  type: 'object',
+  properties: {
+    summary: { type: 'string' },
+    picks: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          candidates: { type: 'array', items: { type: 'integer' }, description: 'the ids of the candidates this pick is' },
+          bet: { type: 'string' },
+          label: { type: 'string' },
+          side: { type: 'string', enum: ['like', 'fade'] },
+          fades: { type: 'string' },
+          strength: { type: 'integer' },
+          case: { type: 'string' },
+          risk: { type: 'string' },
+        },
+        required: ['candidates', 'bet', 'label', 'side', 'fades', 'strength', 'case', 'risk'],
+        additionalProperties: false,
+      },
+    },
+    rejected: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: { candidates: { type: 'array', items: { type: 'integer' } }, why: { type: 'string', description: 'one line, under 15 words' } },
+        required: ['candidates', 'why'],
+        additionalProperties: false,
+      },
+    },
+  },
+  required: ['summary', 'picks', 'rejected'],
+  additionalProperties: false,
+};
+
+// ---- the week's candidates: the latest run's bets (reports written within 6 hours of its newest), the
+// coming week's games only (as the Bets page reads them)
+function candidates() {
+  const file = JSON.parse(readFileSync(path.join(SITE, 'bets.json'), 'utf8'));
+  const newest = Math.max(...file.bets.map((b) => Date.parse(b.at)));
+  const latest = file.bets.filter((b) => newest - Date.parse(b.at) < 6 * 3600e3 && b.game);
+  const week = Math.min(...latest.map((b) => b.game.week));
+  return { reportsAt: file.at, week, bets: latest.filter((b) => b.game.week === week).map((b, id) => ({ ...b, id })) };
+}
+
+// ---- the schedule's facts for a game: its stadium, roof and kickoff
+function schedule() {
+  const [head, ...rows] = readFileSync(path.join(ROOT, '.cache/nflverse/games.csv'), 'utf8').trim().split('\n');
+  const col = Object.fromEntries(head.split(',').map((name, i) => [name.trim(), i]));
+  const games = new Map();
+  for (const row of rows) {
+    const f = row.split(',').map((x) => x.replace(/^"|"$/g, ''));
+    games.set(`${f[col.gameday]} ${f[col.away_team]}@${f[col.home_team]}`, {
+      stadiumId: f[col.stadium_id],
+      stadium: f[col.stadium],
+      roof: f[col.roof],
+      kickoff: kickoffIso(f[col.gameday], f[col.gametime]),
+    });
+  }
+  return games;
+}
+
+// A team's season profile, from its Tuesday dossier: the numbers that bear on a bet
+const PROFILE = {
+  team: ['pointDiffPerGame', 'netEpa', 'offEpa', 'defEpaAllowed', 'atsPct', 'turnoverDiffPerGame', 'oneScoreWinPct'],
+  playByPlay: ['offPassEpa', 'offRushEpa', 'passRateOverExp', 'defPassEpa', 'defRushEpa'],
+  defense: ['pressureRate'],
+};
+function profile(dossier) {
+  const out = { record: dossier.team.record };
+  for (const [part, keys] of Object.entries(PROFILE)) for (const k of keys) if (dossier.season?.[part]?.[k]) out[k] = dossier.season[part][k];
+  return out;
+}
+
+// A team's regulars on the injury report: the Tuesday report's (with snap shares), each status as of
+// now, and anyone ruled out or doubtful since ("new")
+const REGULAR = 40;
+function injuries(dossier, fresh) {
+  const now = new Map((fresh ?? []).map((i) => [i.name, i]));
+  const known = new Set();
+  const list = [];
+  for (const i of dossier.injuries ?? []) {
+    known.add(i.name);
+    if ((i.snapPct ?? 0) < REGULAR) continue;
+    const today = now.get(i.name);
+    // (off today's report: back to full go)
+    list.push({ name: i.name, pos: i.pos, snapPct: i.snapPct, status: today ? today.status : 'Active (off the report)', injury: today?.injury ?? i.injury, news: today?.news ?? i.news });
+  }
+  for (const i of fresh ?? []) {
+    if (known.has(i.name) || !/^(out|doubtful|injured reserve)/i.test(i.status)) continue;
+    list.push({ name: i.name, pos: i.pos, status: i.status, injury: i.injury, news: i.news, new: true });
+  }
+  return list;
+}
+
+async function main() {
+  const { reportsAt, week, bets } = candidates();
+  if (!bets.length) {
+    console.log('no bets to edit');
+    return;
+  }
+  const facts = schedule();
+  const dates = [...new Set(bets.map((b) => b.game.date))].sort();
+  const [lines, report] = await Promise.all([espnLines(dates), espnInjuries().catch(() => null)]);
+
+  // ---- each game: its facts now, and its candidates
+  const byGame = new Map();
+  for (const b of bets) {
+    if (!byGame.has(b.game.matchup)) byGame.set(b.game.matchup, { game: b.game, candidates: [] });
+    byGame.get(b.game.matchup).candidates.push(b);
+  }
+  const games = [];
+  const site = {};
+  for (const [matchup, { game, candidates: list }] of byGame) {
+    const [away, home] = matchup.split(' @ ');
+    const fact = facts.get(`${game.date} ${away}@${home}`) ?? {};
+    const forecast = await kickoffForecast(fact);
+    const now = lines.get(`${away}@${home}`);
+    const line = now ? { line: now.line, overUnder: now.overUnder, awayMoneyline: now.awayMoneyline, homeMoneyline: now.homeMoneyline } : game.line;
+    const moved = now && game.line && (now.line !== game.line.line || now.overUnder !== game.line.overUnder) ? { line: game.line.line, overUnder: game.line.overUnder } : undefined;
+    const team = (abbr) => {
+      const file = path.join(TEAMS, `${abbr}.json`);
+      if (!existsSync(file)) return { abbr };
+      const d = JSON.parse(readFileSync(file, 'utf8'));
+      return { abbr, ...profile(d), injuries: injuries(d, report?.get(abbr)) };
+    };
+    const where = venue(fact);
+    games.push({
+      matchup,
+      kickoff: fact.kickoff ?? game.date,
+      venue: [where.stadium, where.city].filter(Boolean).join(', ') || undefined,
+      line,
+      lineWhenWritten: moved,
+      forecast: forecast ?? 'unavailable',
+      away: team(away),
+      home: team(home),
+      candidates: list.map((b) => ({ id: b.id, from: `${b.source}${b.kind === 'team' ? ' (team report)' : ` (${b.position ?? 'player'} report)`}`, market: b.market, lean: b.lean, side: b.strength === 'fade' ? 'fade' : 'like', score: b.score ?? null, reason: b.reason })),
+    });
+    // (what the page shows under each matchup: where, and the weather)
+    site[matchup] = { kickoff: fact.kickoff ?? null, city: where.city, stadium: where.stadium, line, weather: forecast };
+  }
+  games.sort((a, b) => String(a.kickoff).localeCompare(String(b.kickoff)));
+  const input = JSON.stringify({ week, games });
+  console.log(`${bets.length} candidates in ${games.length} games (${Math.round(input.length / 1000)}k characters)`);
+  if (process.argv.includes('--dry-run')) {
+    mkdirSync(LOG, { recursive: true });
+    writeFileSync(path.join(LOG, 'dry-run.json'), JSON.stringify({ week, games }, null, 2));
+    console.log(`(dry run: ${path.join(LOG, 'dry-run.json')})`);
+    return;
+  }
+
+  const client = new Anthropic();
+  const message = await client.messages
+    .stream({
+      model: MODEL,
+      max_tokens: 64000,
+      thinking: { type: 'adaptive' },
+      output_config: { effort: EFFORT, format: { type: 'json_schema', schema: SCHEMA } },
+      system: SYSTEM,
+      messages: [{ role: 'user', content: `This week's games and candidates:\n${input}` }],
+    })
+    .finalMessage();
+  const usage = message.usage;
+  const cost = ((usage.input_tokens + (usage.cache_creation_input_tokens ?? 0)) * PRICE.input + usage.output_tokens * PRICE.output) / 1e6;
+  const text = message.content.find((b) => b.type === 'text')?.text;
+  if (message.stop_reason !== 'end_turn' || !text) throw new Error(`the desk stopped early (${message.stop_reason})`);
+  const sheet = JSON.parse(text);
+
+  // ---- checked: each pick's candidates real, from one game; its strength in range
+  const byId = new Map(bets.map((b) => [b.id, b]));
+  const problems = [];
+  const picks = [];
+  for (const p of sheet.picks) {
+    const from = p.candidates.map((id) => byId.get(id)).filter(Boolean);
+    const matchups = new Set(from.map((b) => b.game.matchup));
+    if (!from.length || matchups.size > 1) {
+      problems.push(`dropped "${p.bet}": candidates ${p.candidates.join(', ')}`);
+      continue;
+    }
+    const game = from[0].game;
+    picks.push({
+      sport: 'nfl',
+      bet: p.bet,
+      label: p.label,
+      side: p.side,
+      fades: p.side === 'fade' ? p.fades || null : null,
+      strength: Math.max(1, Math.min(10, p.strength)),
+      case: p.case,
+      risk: p.risk,
+      sources: [...new Set(from.map((b) => b.source))],
+      game: { week: game.week, date: game.date, kickoff: game.kickoff ?? site[game.matchup]?.kickoff ?? null, matchup: game.matchup, teams: game.teams, line: site[game.matchup]?.line ?? game.line },
+    });
+  }
+  const at = new Date().toISOString();
+  mkdirSync(LOG, { recursive: true });
+  writeFileSync(
+    path.join(LOG, `${at.slice(0, 16).replace(':', '')}.json`),
+    JSON.stringify({ at, model: MODEL, effort: EFFORT, week, reportsAt, usage, cost, problems, sheet }, null, 2),
+  );
+  writeFileSync(path.join(SITE, 'bet-sheet.json'), JSON.stringify({ at, week, reportsAt, summary: sheet.summary, games: site, picks }));
+  console.log(`${picks.length} picks, ${sheet.rejected.length} rejections; $${cost.toFixed(2)} (${usage.input_tokens} in, ${usage.output_tokens} out)`);
+  for (const p of problems) console.log(`  ${p}`);
+}
+
+main().catch((e) => {
+  console.error(e);
+  process.exit(1);
+});

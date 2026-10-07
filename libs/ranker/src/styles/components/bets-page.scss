@@ -46,7 +46,7 @@
 // One row: the game dropdown on the left, the update time on the right
 .bets-head {
   align-items: center;
-  border-bottom: 1px solid #2a74bd;
+  border-bottom: 1px solid color-mix(in srgb, var(--scoreboard-led) 60%, transparent);
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
@@ -65,12 +65,35 @@
 // The game dropdown a casino chip (as the sports' dropdowns are leather, rubber...): red clay with a
 // speckle and a sheen, the white edge spots around its rim and a cream inlay ring just inside them
 $chip-clay: #b0202b;
-$chip-side-spot: linear-gradient(
-  180deg,
-  $chip-clay calc(50% - 4.5px),
-  #f4efe3 0 calc(50% + 4.5px),
-  $chip-clay 0
-);
+
+// The chip's rim: an outline along the middle of its border, dashed into 22 evenly spaced cream spots
+// (pathLength 220: a spot of 4 in every 10), round ends and all
+.bets-chip {
+  display: inline-flex;
+  position: relative;
+
+  .chip-rim {
+    height: 100%;
+    inset: 0;
+    overflow: visible;
+    pointer-events: none;
+    position: absolute;
+    width: 100%;
+  }
+
+  rect {
+    fill: none;
+    height: calc(100% - 4px);
+    // (round ends: half its height, the 52px chip less its 4px border)
+    rx: 24px;
+    stroke: #f4efe3;
+    stroke-dasharray: 4 6;
+    stroke-width: 4px;
+    width: calc(100% - 4px);
+    x: 2px;
+    y: 2px;
+  }
+}
 
 .bets-game {
   appearance: none;
@@ -79,12 +102,7 @@ $chip-side-spot: linear-gradient(
     radial-gradient(ellipse at 30% 0%, rgba(255, 255, 255, 0.22), transparent 65%) padding-box,
     linear-gradient(180deg, transparent 40%, rgba(0, 0, 0, 0.2)) padding-box,
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='c'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.35 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23c)'/%3E%3C/svg%3E") 0 0 / 120px padding-box,
-    linear-gradient($chip-clay, $chip-clay) padding-box,
-    // (a spot on each side too, as the rim turns the corner; the top and bottom's spots run along them)
-    $chip-side-spot left center / 4px 100% no-repeat border-box,
-    $chip-side-spot right center / 4px 100% no-repeat border-box,
-    // (the top and bottom spots along the straight edges, clear of the rounded ends)
-    repeating-linear-gradient(90deg, #f4efe3 0 9px, $chip-clay 9px 24px) center / calc(100% - 56px) 100% no-repeat border-box,
+    // (the clay under its rim too: the spots are drawn over it, .bets-chip)
     linear-gradient($chip-clay, $chip-clay) border-box;
   border: 4px solid transparent;
   border-radius: 999px;
@@ -278,6 +296,12 @@ $chip-side-spot: linear-gradient(
   letter-spacing: 0.2px;
 }
 
+// the game, pinned to the row's right edge (the matchup and the weather under it both end there)
+.bet-game {
+  align-items: flex-end;
+  text-align: right;
+}
+
 // the matchup: each team's little logo before its abbreviation
 .bet-game .bet-matchup {
   align-items: center;
@@ -295,6 +319,21 @@ $chip-side-spot: linear-gradient(
   }
 }
 
+// under it: the kickoff weather and where it's played, the wind in amber when it could matter
+.bet-game .bet-where {
+  align-items: center;
+  display: flex;
+  gap: 4px;
+
+  .mat-icon {
+    @include v.icon-size(14px);
+  }
+
+  &.windy {
+    color: #ffc864;
+  }
+}
+
 .bet-chevron {
   color: rgba(255, 255, 255, 0.55);
   @include v.icon-size(20px);
@@ -309,6 +348,18 @@ $chip-side-spot: linear-gradient(
     font-size: 14px;
     line-height: 1.6;
     margin: 0;
+  }
+
+  // (a desk pick's risk: the most likely way it loses)
+  .bet-risk {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 13px;
+    margin-top: 10px;
+
+    b {
+      color: rgba(255, 255, 255, 0.85);
+      font-weight: 800;
+    }
   }
 
   .bet-meta {

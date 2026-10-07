@@ -14,6 +14,7 @@ import { createReadStream, existsSync, mkdirSync, statSync, writeFileSync, readF
 import { createGunzip } from 'node:zlib';
 import { createInterface } from 'node:readline';
 import path from 'node:path';
+import { espnInjuries, espnLines, kickoffForecast, kickoffIso } from './live.mjs';
 
 const ROOT = path.resolve(import.meta.dirname, '../../../..');
 const DATA = path.join(ROOT, 'apps/nfl/src/StaticData');
@@ -38,9 +39,6 @@ const FILES = {
   players: 'players/players.csv.gz',
   draft: 'draft_picks/draft_picks.csv.gz',
 };
-const ESPN = 'https://site.api.espn.com/apis/site/v2/sports/football/nfl';
-// ESPN's abbreviations that aren't nflverse's
-const ESPN_ABBR = { WSH: 'WAS', LAR: 'LA' };
 const SCHEDULE_URL = 'https://raw.githubusercontent.com/nflverse/nfldata/master/data/games.csv';
 
 const TEAMS = {
@@ -122,53 +120,6 @@ const group = (rows, key) => {
   return m;
 };
 
-// ---- ESPN: the injury report (everyone not Active, with ESPN's note) by nflverse team, and a day's
-// DraftKings lines by matchup
-
-async function espnInjuries() {
-  const res = await fetch(`${ESPN}/injuries`);
-  if (!res.ok) throw new Error(`ESPN injuries: ${res.status}`);
-  const data = await res.json();
-  const byTeam = new Map();
-  for (const team of data.injuries ?? []) {
-    for (const i of team.injuries ?? []) {
-      if (!i.status || i.status === 'Active') continue;
-      const abbr = i.athlete?.team?.abbreviation;
-      const t = ESPN_ABBR[abbr] ?? abbr;
-      if (!byTeam.has(t)) byTeam.set(t, []);
-      byTeam.get(t).push({
-        espnId: i.athlete?.links?.[0]?.href?.match(/\/id\/(\d+)/)?.[1] ?? null,
-        name: i.athlete?.displayName,
-        pos: i.athlete?.position?.abbreviation,
-        status: i.status,
-        injury: [i.details?.type, i.details?.detail].filter((x) => x && x !== 'Not Specified').join(', ') || null,
-        returnDate: i.details?.returnDate ?? null,
-        reported: i.date?.slice(0, 10) ?? null,
-        news: i.shortComment ?? null,
-      });
-    }
-  }
-  return byTeam;
-}
-
-async function espnLines(dates) {
-  const lines = new Map();
-  for (const d of dates) {
-    const res = await fetch(`${ESPN}/scoreboard?dates=${d.replace(/-/g, '')}`).catch(() => null);
-    if (!res?.ok) continue;
-    for (const e of (await res.json()).events ?? []) {
-      const c = e.competitions?.[0];
-      const o = c?.odds?.[0];
-      if (!o?.details) continue;
-      const team = (side) => {
-        const a = c.competitors.find((x) => x.homeAway === side)?.team?.abbreviation;
-        return ESPN_ABBR[a] ?? a;
-      };
-      lines.set(`${team('away')}@${team('home')}`, { line: o.details, overUnder: o.overUnder ?? null, homeMoneyline: o.moneyline?.home?.close?.odds ?? null, awayMoneyline: o.moneyline?.away?.close?.odds ?? null, book: o.provider?.name ?? null });
-    }
-  }
-  return lines;
-}
 
 // ---- ranking: [value, rank, of] among a pool (higher first unless low)
 
@@ -226,6 +177,9 @@ async function main() {
     week: Number(g.week),
     type: g.game_type,
     date: g.gameday,
+    time: g.gametime,
+    stadiumId: g.stadium_id,
+    stadium: g.stadium,
     home: g.home_team,
     away: g.away_team,
     homeScore: num(g.home_score),
@@ -270,12 +224,22 @@ async function main() {
   };
   const nextGame = (team) => {
     const g = games.filter((x) => (x.home === team || x.away === team) && x.homeScore === null).sort((a, b) => a.date.localeCompare(b.date))[0];
-    return g ? { ...side(g, team), oppCoach: g.home === team ? g.awayCoach : g.homeCoach } : null;
+    if (!g) return null;
+    // (its weather: the kickoff forecast at the stadium, early this far out; indoors, just that)
+    const forecast = forecasts.get(g.id);
+    return { ...side(g, team), weather: forecast ?? side(g, team).weather, oppCoach: g.home === team ? g.awayCoach : g.homeCoach };
   };
 
   // The coming week's lines (ESPN's DraftKings), for next games nflverse hasn't a line for yet
   const nextDates = [...new Set(games.filter((g) => g.homeScore === null).map((g) => g.date))].sort().slice(0, 4);
   const lines = await espnLines(nextDates);
+
+  // The coming games' kickoff forecasts (Open-Meteo, at each stadium)
+  const forecasts = new Map();
+  for (const g of games.filter((x) => x.homeScore === null && nextDates.includes(x.date))) {
+    const forecast = await kickoffForecast({ stadiumId: g.stadiumId, stadium: g.stadium, roof: g.roof, kickoff: kickoffIso(g.date, g.time) });
+    if (forecast) forecasts.set(g.id, forecast);
+  }
 
   // Who started at QB each game for a team (the schedule's starters)
   const qbStarts = (team) =>

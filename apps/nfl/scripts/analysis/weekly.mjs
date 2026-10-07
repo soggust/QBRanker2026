@@ -2,7 +2,11 @@
 // most, and only once nflverse has every finished game. Rebuilds the dossiers from fresh data, batch-runs
 // every team and QB, publishes them for the site and pushes them live.
 //
+// Then the bet desk (bet-desk.mjs) edits the reports' bets into the week's sheet.
+//
 //   node apps/nfl/scripts/analysis/weekly.mjs               (npm run nfl:analysis)
+//   node apps/nfl/scripts/analysis/weekly.mjs --desk        (just the bet desk, then push: before the games,
+//                                                            for fresh lines, injuries and weather)
 //   node apps/nfl/scripts/analysis/weekly.mjs --push-only   (just commit and push what's published)
 //
 // A run that's already done today, or whose data is behind (dossier.mjs exits 3), stops without spending
@@ -70,6 +74,13 @@ function push() {
 
 if (process.argv.includes('--push-only')) process.exit(push() ? 0 : 1);
 
+// The bet desk alone (its own scheduled runs before the games): a fresh sheet from this week's reports
+if (process.argv.includes('--desk')) {
+  console.log(`${stamp()}: bet desk`);
+  if (run('bet-desk.mjs', []) !== 0) process.exit(1);
+  process.exit(push() ? 0 : 1);
+}
+
 if (existsSync(MARK) && JSON.parse(readFileSync(MARK, 'utf8')).date === today) {
   console.log(`${stamp()}: already ran today`);
   process.exit(0);
@@ -104,5 +115,8 @@ const analyzed = run('analyze.mjs', ['--batch', '--teams', '--qbs']);
 if (analyzed !== 0) process.exit(analyzed ?? 1);
 
 writeFileSync(MARK, JSON.stringify({ date: today, at: new Date().toISOString() }));
+// (the reports go live even if the desk fails: the Bets page falls back to their own ranking)
+console.log(`${stamp()}: bet desk`);
+if (run('bet-desk.mjs', []) !== 0) console.log(`${stamp()}: the bet desk failed; publishing the reports without a sheet`);
 push();
 console.log(`${stamp()}: done`);

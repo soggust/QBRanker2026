@@ -14,6 +14,7 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
+import { kickoffIso } from './live.mjs';
 
 const ROOT = path.resolve(import.meta.dirname, '../../../..');
 const DOSSIERS = path.join(ROOT, '.cache/analysis/dossiers');
@@ -37,6 +38,7 @@ How to read the dossier:
 - team: his offense and defense, ranked (defense ranks: 1 = stingiest); qbStarts: who started at QB each week; injuries: his offensive teammates on the injury report, most-used first (snapPct = their share of snaps this season: 90+ is a starter, under 30 a backup). nextGame: the coming opponent, the sportsbook line (line like "BAL -2.5" names the favorite and the spread; overUnder; his team's moneyline), the opponent's injury report, its defense profile and what it allows to his position (pprPerGame etc.: rank 1 = allows the least).
 - career: past seasons, each stat ranked within that season. Use it to separate a real change from a blip, and to see what he has always been.
 - Injuries: player.injury is his own status, with ESPN's news note and an expected return date (an estimate, not a promise). Notes are reports as of their "reported" date: news, not certainty. When availability matters — his own, his QB's, his blockers', his key targets', or a starter on the other side who bears on his matchup — say what it changes and why, concretely. Don't list injuries that don't touch him.
+- Weather: nextGame.weather is the kickoff forecast at the stadium (roof: outdoors; retractable, likely closed in bad weather; or indoors, where weather doesn't matter). early: true means it's more than 3 days out and rough, especially wind: mention a big system, hedged, but don't build a case on it. What moves games: sustained wind of 15+ mph (or gusts of 25+) hurts passing, the deep game and kicking, and leans totals and passing numbers down; heavy rain or snow (a high precipChance with real precipIn) hurts passing and ball security somewhat; cold alone matters little. When it's mild, say nothing about it.
 - Early in a season samples are small: weigh them honestly (a 15-attempt split is a hint, not a fact) and say so when it matters, without hedging everything.
 
 Think like a football analyst, not a spreadsheet. Before you call any number a strength or a weakness, ask what produces it, and judge the cause, not the number:
@@ -69,6 +71,7 @@ How to read the dossier:
 - qbStarts: who started at QB each week. usage: who carries the offense (top passers, rushers by carries, receivers by targets).
 - gameLog: each game: the score, Vegas (favoredBy: negative = underdog; covered; overUnder), the QB, the opponent's offense and defense EPA ranks today, and the box score (yards, EPA, turnovers, sacks both ways, takeaways, penalties).
 - injuries: the team's injury report, most-used first (snapPct: 90+ is a starter, under 30 a backup), with ESPN's news notes and return estimates (estimates, not promises).
+- Weather: nextGame.weather is the kickoff forecast at the stadium (roof: outdoors; retractable, likely closed in bad weather; or indoors, where weather doesn't matter). early: true means it's more than 3 days out and rough, especially wind: mention a big system, hedged, but don't build a case on it. What moves games: sustained wind of 15+ mph (or gusts of 25+) hurts passing, the deep game and kicking, and leans totals and passing numbers down; heavy rain or snow (a high precipChance with real precipIn) hurts passing and ball security somewhat; cold alone matters little. When it's mild, say nothing about it.
 - nextGame: the coming opponent, the line (line like "BAL -2.5" names the favorite and the spread; overUnder; this team's moneyline), the opponent's record, its season profile, its QB starts and its injury report. restOfSchedule: each remaining opponent's record and offense/defense EPA ranks today (division games marked).
 - history: the team's recent seasons, ranked within each season.
 - Early in a season samples are small: weigh them honestly and say so when it matters, without hedging everything.
@@ -313,18 +316,11 @@ function kickoffs() {
   if (!existsSync(file)) return new Map();
   const [head, ...rows] = readFileSync(file, 'utf8').split('\n');
   const col = Object.fromEntries(head.split(',').map((name, i) => [name.trim(), i]));
-  const eastern = (day) =>
-    new Intl.DateTimeFormat('en-US', { timeZone: 'America/New_York', timeZoneName: 'shortOffset' })
-      .formatToParts(new Date(`${day}T17:00:00Z`))
-      .find((p) => p.type === 'timeZoneName')
-      .value.replace('GMT', '');
   const out = new Map();
   for (const row of rows) {
     const f = row.split(',');
-    const [day, time] = [f[col.gameday], f[col.gametime]];
-    if (!/^\d{4}-\d\d-\d\d$/.test(day ?? '') || !/^\d\d:\d\d$/.test(time ?? '')) continue;
-    const offset = eastern(day).padStart(2, '0').replace(/^([+-])(\d)$/, '$10$2');
-    out.set(`${day} ${f[col.away_team]}@${f[col.home_team]}`, new Date(`${day}T${time}:00${offset}:00`).toISOString());
+    const kickoff = kickoffIso(f[col.gameday], f[col.gametime]);
+    if (kickoff) out.set(`${f[col.gameday]} ${f[col.away_team]}@${f[col.home_team]}`, kickoff);
   }
   return out;
 }

@@ -157,6 +157,13 @@ about-panel ::-webkit-scrollbar-track {
   background-color: #2e2e2e !important;
 }
 
+// On the Bets page the accent is the card room's: a bright royal blue that goes with its felt (bluer and
+// deeper than the NHL's ice blue), in the sport bar, the logo and the lit dots
+:root:has(bets-page) {
+  --scoreboard-led: #5b9dff;
+  --scoreboard-glow: 0 0 6px rgba(91, 157, 255, 0.6);
+}
+
 // The Bets page's list scrolls in its panel: a felt-blue thumb
 bets-page .bets-list::-webkit-scrollbar {
   height: 10px;
