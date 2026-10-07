@@ -168,7 +168,7 @@ $chip-side-spot: linear-gradient(
   display: grid;
   font-family: v.$font-base;
   gap: 12px;
-  grid-template-columns: 20px 42px 58px minmax(0, 1fr) minmax(0, 220px) 72px;
+  grid-template-columns: 20px 42px 58px minmax(0, 1fr) auto;
   padding: 10px 14px 10px 10px;
   text-align: left;
   width: 100%;
@@ -284,28 +284,6 @@ $chip-side-spot: linear-gradient(
   }
 }
 
-// the confidence in words: light green high, yellow medium, dim white low
-.bet-score {
-  color: rgba(255, 255, 255, 0.92);
-  font-size: 10px;
-  font-weight: 900;
-  letter-spacing: 0.8px;
-  text-align: right;
-  text-transform: uppercase;
-
-  &.high {
-    color: #8ff0ae;
-  }
-
-  &.medium {
-    color: #ffd84d;
-  }
-
-  &.low {
-    color: rgba(255, 255, 255, 0.55);
-  }
-}
-
 .bet-chevron {
   color: rgba(255, 255, 255, 0.55);
   @include v.icon-size(20px);
@@ -328,11 +306,16 @@ $chip-side-spot: linear-gradient(
     font-weight: 600;
     margin-top: 8px;
   }
+
+  // ("High confidence": the row's tint says it too)
+  .bet-confidence::first-letter {
+    text-transform: uppercase;
+  }
 }
 
 @media (max-width: 700px) {
   .bet-row {
-    grid-template-columns: 20px 42px 50px minmax(0, 1fr) 56px;
+    grid-template-columns: 20px 42px 50px minmax(0, 1fr);
   }
 
   .bet-game {

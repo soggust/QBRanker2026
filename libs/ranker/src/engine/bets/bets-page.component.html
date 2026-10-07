@@ -32,7 +32,8 @@
             <button type="button" class="bet-row" (click)="toggle(r.id)" [attr.aria-expanded]="open.has(r.id)">
               <mat-icon class="bet-chevron" [fontIcon]="open.has(r.id) ? 'expand_more' : 'chevron_right'"></mat-icon>
               <span class="bet-rank" [class.top]="i < 10">{{ i + 1 }}</span>
-              <span class="bet-grade" [ngClass]="side(r)">{{ side(r) }}</span>
+              <!-- (a like reads "Bet": it's the bet to make, as a fade is the side to go against) -->
+              <span class="bet-grade" [ngClass]="side(r)">{{ side(r) === 'like' ? 'bet' : 'fade' }}</span>
               <span class="bet-main">
                 <!-- (a fade says what it fades, and the bet to make instead) -->
                 @if (r.strength === 'fade') {
@@ -63,15 +64,12 @@
                   }
                 }
               </span>
-              <span class="bet-score" [ngClass]="level(r)">{{ level(r) }}</span>
             </button>
             @if (open.has(r.id)) {
               <div class="bet-reasons">
                 <p>{{ r.reason }}</p>
                 <!-- (the confidence shown is the bet's own; the report's overall confidence stays on its card) -->
-                @if (r.agree) {
-                  <p class="bet-meta">{{ r.agree }} other analys{{ r.agree > 1 ? 'es' : 'is' }} make{{ r.agree > 1 ? '' : 's' }} the same call</p>
-                }
+                <p class="bet-meta bet-confidence">{{ level(r) }} confidence</p>
               </div>
             }
           </li>
