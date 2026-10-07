@@ -2,24 +2,38 @@
      reasoning -->
 <div class="bets-page">
   <div class="bets-panel">
-    <!-- The game dropdown on the left, when the analyses were updated on the right -->
+    <!-- The game dropdown on the left (when it was updated under it), the filter chips on the right -->
     <header class="bets-head">
-      @if (rows?.length) {
-        <!-- (the chip's rim: its spots drawn as dashes along an outline, so they follow the round ends) -->
-        <span class="bets-chip">
-          <select class="bets-game" aria-label="Game" [(ngModel)]="game">
-            <option value="">All Games</option>
-            @for (d of gameDays; track d.day) {
-              <optgroup [label]="d.day">
-                @for (g of d.games; track g.key) {
-                  <option [value]="g.key">{{ g.label }} ({{ g.count }})</option>
-                }
-              </optgroup>
+      <!-- (the left: the game dropdown, and when the sheet was updated under it) -->
+      <div class="bets-head-left">
+        @if (rows?.length) {
+          <!-- (the chip's rim: its spots drawn as dashes along an outline, so they follow the round ends) -->
+          <span class="bets-chip">
+            <select class="bets-game" aria-label="Game" [(ngModel)]="game">
+              <option value="">All Games</option>
+              @for (d of gameDays; track d.day) {
+                <optgroup [label]="d.day">
+                  @for (g of d.games; track g.key) {
+                    <option [value]="g.key">{{ g.label }} ({{ g.count }})</option>
+                  }
+                </optgroup>
+              }
+            </select>
+            <svg class="chip-rim" aria-hidden="true"><rect pathLength="220" /></svg>
+          </span>
+        }
+        @if (updated) {
+          <span class="bets-updated">
+            Updated {{ updated | date: 'EEE MMM d, h:mm a' }}
+            <!-- (the desk's record so far: overall, then by confidence) -->
+            @if (record) {
+              <span class="bets-record">
+                Record {{ wl(record.overall) }} · High {{ wl(record.byLevel.high) }} · Medium {{ wl(record.byLevel.medium) }} · Low {{ wl(record.byLevel.low) }}
+              </span>
             }
-          </select>
-          <svg class="chip-rim" aria-hidden="true"><rect pathLength="220" /></svg>
-        </span>
-      }
+          </span>
+        }
+      </div>
       <!-- The filter chips: a type of bet each, in its own chip color; on, only those (none: all) -->
       @if (kindChips.length > 1) {
         <div class="bets-kinds" role="group" aria-label="Bet types">
@@ -49,17 +63,6 @@
             </span>
           </span>
         </div>
-      }
-      @if (updated) {
-        <span class="bets-updated">
-          Updated {{ updated | date: 'EEE MMM d, h:mm a' }}
-          <!-- (the desk's record so far: overall, then by confidence) -->
-          @if (record) {
-            <span class="bets-record">
-              Record {{ wl(record.overall) }} · High {{ wl(record.byLevel.high) }} · Medium {{ wl(record.byLevel.medium) }} · Low {{ wl(record.byLevel.low) }}
-            </span>
-          }
-        </span>
       }
     </header>
 

@@ -393,6 +393,6 @@ export class BetsPageComponent implements OnInit {
     this.pulling = true;
     setTimeout(() => (this.spinning = true), 280);
     setTimeout(() => (this.pulling = false), 700);
-    setTimeout(() => (this.spinning = false), 1400);
+    setTimeout(() => (this.spinning = false), 2400);
   }
 }
