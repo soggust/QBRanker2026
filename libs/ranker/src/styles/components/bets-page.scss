@@ -43,28 +43,16 @@
   padding: 18px 20px 20px;
 }
 
+// One row: the game dropdown on the left, the update time on the right
 .bets-head {
-  border-bottom: 1px solid color-mix(in srgb, var(--scoreboard-led) 40%, transparent);
-  margin-bottom: 12px;
-  padding-bottom: 14px;
-}
-
-.bets-title {
   align-items: center;
+  border-bottom: 1px solid color-mix(in srgb, var(--scoreboard-led) 40%, transparent);
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
-
-  .mat-icon {
-    color: var(--scoreboard-led);
-    @include v.icon-size(24px);
-  }
-
-  h1 {
-    color: #fff;
-    @include v.hand(28px);
-    margin: 0;
-  }
+  justify-content: space-between;
+  margin-bottom: 12px;
+  padding-bottom: 14px;
 }
 
 .bets-updated {
@@ -72,12 +60,6 @@
   font-size: 12px;
   font-weight: 600;
   margin-left: auto;
-}
-
-// the game dropdown, on the left under the title
-.bets-sub {
-  display: flex;
-  margin-top: 2em;
 }
 
 .bets-game {

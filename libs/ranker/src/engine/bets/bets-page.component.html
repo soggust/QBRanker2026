@@ -2,24 +2,19 @@
      reasoning -->
 <div class="bets-page">
   <div class="bets-panel">
+    <!-- The game dropdown on the left, when the analyses were updated on the right -->
     <header class="bets-head">
-      <div class="bets-title">
-        <mat-icon fontIcon="paid"></mat-icon>
-        <h1>Bets</h1>
-        @if (updated) {
-          <span class="bets-updated">Updated {{ updated | date: 'EEE MMM d, h:mm a' }}</span>
-        }
-      </div>
-      <div class="bets-sub">
-        @if (rows?.length) {
-          <select class="bets-game" aria-label="Game" [(ngModel)]="game">
-            <option value="">All Games</option>
-            @for (g of games; track g.key) {
-              <option [value]="g.key">{{ g.label }} ({{ g.count }})</option>
-            }
-          </select>
-        }
-      </div>
+      @if (rows?.length) {
+        <select class="bets-game" aria-label="Game" [(ngModel)]="game">
+          <option value="">All Games</option>
+          @for (g of games; track g.key) {
+            <option [value]="g.key">{{ g.label }} ({{ g.count }})</option>
+          }
+        </select>
+      }
+      @if (updated) {
+        <span class="bets-updated">Updated {{ updated | date: 'EEE MMM d, h:mm a' }}</span>
+      }
     </header>
 
     @if (rows === null) {
