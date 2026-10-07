@@ -388,7 +388,9 @@ $chip-clay: #b0202b;
   --tint: #9aa0a6;
   // (its full height in the scrolling list, never squeezed to fit)
   flex-shrink: 0;
-  border: 1px solid color-mix(in srgb, var(--tint) 40%, transparent);
+  border: 1px solid color-mix(in srgb, var(--tint) 35%, transparent);
+  // (its confidence as a crisp stripe down its left edge)
+  border-left: 4px solid var(--tint);
   border-radius: 6px;
   overflow: hidden;
 
@@ -406,10 +408,11 @@ $chip-clay: #b0202b;
 }
 
 .bet-row {
-  --bar-tint: color-mix(in srgb, var(--tint) 16%, transparent);
+  --bar-tint: color-mix(in srgb, var(--tint) 7%, transparent);
   align-items: center;
-  // (plain: on the gunmetal, not the scoreboard, so no dot matrix)
-  background: linear-gradient(var(--bar-tint), var(--bar-tint)), var(--scoreboard);
+  // (clean charcoal with a faint wash of its confidence: a strong tint on near-black goes muddy; no dot
+  // matrix either, on the gunmetal rather than the scoreboard)
+  background: linear-gradient(var(--bar-tint), var(--bar-tint)), #17191c;
   border: none;
   color: #fff;
   cursor: pointer;
@@ -422,7 +425,7 @@ $chip-clay: #b0202b;
   width: 100%;
 
   &:hover {
-    --bar-tint: color-mix(in srgb, var(--tint) 24%, transparent);
+    --bar-tint: color-mix(in srgb, var(--tint) 13%, transparent);
 
     .bet-chevron {
       color: rgba(255, 255, 255, 0.85);
@@ -567,12 +570,13 @@ $chip-clay: #b0202b;
   @include v.icon-size(20px);
 }
 
+// (open: a slightly lighter, neutral panel, so the reading is clean)
 .bet-reasons {
-  background: rgba(0, 0, 0, 0.25);
+  background: #1f2226;
   padding: 14px 20px 16px;
 
   p {
-    color: rgba(255, 255, 255, 0.85);
+    color: rgba(255, 255, 255, 0.9);
     font-size: 14px;
     line-height: 1.6;
     margin: 0;
@@ -580,7 +584,7 @@ $chip-clay: #b0202b;
 
   // (a desk pick's risk, its devil's advocate: the most likely way it loses, labeled in orange)
   .bet-risk {
-    color: rgba(255, 255, 255, 0.7);
+    color: rgba(255, 255, 255, 0.78);
     font-size: 13px;
     margin-top: 10px;
 
@@ -597,9 +601,14 @@ $chip-clay: #b0202b;
     margin-top: 8px;
   }
 
-  // ("High Confidence": the row's tint says it too)
-  .bet-confidence::first-letter {
-    text-transform: uppercase;
+  // ("High Confidence", in its level's color, lightened to read on the dark)
+  .bet-confidence {
+    color: color-mix(in srgb, var(--tint) 75%, #fff);
+    font-weight: 800;
+
+    &::first-letter {
+      text-transform: uppercase;
+    }
   }
 }
 
