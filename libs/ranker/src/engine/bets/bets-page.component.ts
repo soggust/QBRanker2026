@@ -38,6 +38,8 @@ export interface BetRow extends BetEntry {
   // its score, or for an older report an estimate from its grade and the report's confidence
   sureness: number;
   estimated: boolean;
+  // its type, for the filter chips
+  betType: BetKind;
 }
 
 // The bet desk's sheet (data/analysis/bet-sheet.json, scripts/analysis/bet-desk.mjs): the week's picks
@@ -63,10 +65,35 @@ interface SheetPick {
   fades: string | null;
   strength: number;
   case: string;
+  grade?: { kind: BetKind } | null;
   risk: string;
   sources: string[];
   game: BetEntry['game'];
 }
+// The types of bet, for the filter chips under the game dropdown: each a chip of its own color, like
+// casino chips' denominations
+export type BetKind = 'spread' | 'total' | 'team_total' | 'moneyline' | 'player' | 'team_stat';
+export const BET_KINDS: { kind: BetKind; label: string }[] = [
+  { kind: 'spread', label: 'Spread' },
+  { kind: 'total', label: 'Over/Under' },
+  { kind: 'team_total', label: 'Team Total' },
+  { kind: 'moneyline', label: 'Moneyline' },
+  { kind: 'player', label: 'Player' },
+  { kind: 'team_stat', label: 'Team Stat' },
+];
+
+// A bet's type: the desk's own grading kind when it has one; otherwise read from its market (a bet
+// on one of the game's teams' own numbers, "BAL under its rushing average", is a team stat)
+function kindOf(graded: BetKind | null | undefined, label: string, bet: string, game: BetEntry['game']): BetKind {
+  if (graded) return graded;
+  if (/^spread$/i.test(label)) return 'spread';
+  if (/moneyline/i.test(label)) return 'moneyline';
+  if (/^game total$/i.test(label)) return 'total';
+  if (/team total/i.test(label)) return 'team_total';
+  const team = bet.match(/^([A-Z]{2,3})\b/)?.[1];
+  return team && game?.teams?.some((t) => t.abbr === team) ? 'team_stat' : 'player';
+}
+
 // The desk's record, its picks graded after their games (scripts/analysis/grade.mjs)
 interface Tally {
   wins: number;
@@ -229,6 +256,7 @@ export class BetsPageComponent implements OnInit {
             agree: 0,
             sureness: p.strength,
             estimated: false,
+            betType: kindOf(p.grade?.kind, p.label, p.bet, p.game),
           });
         }
         if (!this.updated || sheet.at > this.updated) this.updated = sheet.at;
@@ -255,7 +283,7 @@ export class BetsPageComponent implements OnInit {
             : [b.lean, b.market];
       const estimated = !b.score;
       const sureness = b.score ?? Math.max(1, Math.min(10, ESTIMATE[b.strength] + SURE[b.confidence ?? 'medium'] - 2));
-      return { ...b, id: i, key: keys[i], pick, marketLabel, agree: (counts.get(keys[i]) ?? 1) - 1, sureness, estimated };
+      return { ...b, id: i, key: keys[i], pick, marketLabel, agree: (counts.get(keys[i]) ?? 1) - 1, sureness, estimated, betType: kindOf(null, marketLabel, pick, b.game) };
     });
     rows.sort((a, b) => b.sureness - a.sureness || b.agree - a.agree || (a.game?.date ?? '').localeCompare(b.game?.date ?? ''));
     // the same call from several reports: listed once, as its highest-ranked report has it
@@ -284,8 +312,25 @@ export class BetsPageComponent implements OnInit {
 
   // All games: the top 50 bets; a game: its top 15 (from all of its bets, not just those in the top 50)
   get shown(): BetRow[] {
+    const rows = this.inGame.filter((r) => !this.kinds.size || this.kinds.has(r.betType));
+    return rows.slice(0, this.game ? this.gameLimit : this.limit);
+  }
+
+  // The bets in the chosen game (all of them for All Games)
+  private get inGame(): BetRow[] {
     const rows = this.rows ?? [];
-    return this.game ? rows.filter((r) => this.gameKey(r) === this.game).slice(0, this.gameLimit) : rows.slice(0, this.limit);
+    return this.game ? rows.filter((r) => this.gameKey(r) === this.game) : rows;
+  }
+
+  // The filter chips: the types of bet in the chosen game, each with how many; none on shows them all
+  kinds = new Set<BetKind>();
+  get kindChips(): { kind: BetKind; label: string; count: number }[] {
+    const rows = this.inGame;
+    return BET_KINDS.map((k) => ({ ...k, count: rows.filter((r) => r.betType === k.kind).length })).filter((k) => k.count);
+  }
+
+  toggleKind(kind: BetKind): void {
+    if (!this.kinds.delete(kind)) this.kinds.add(kind);
   }
 
   // The week's games with bets: the dropdown's choices under a header for each day, by kickoff (in the

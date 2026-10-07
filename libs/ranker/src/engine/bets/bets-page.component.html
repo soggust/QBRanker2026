@@ -20,6 +20,24 @@
           <svg class="chip-rim" aria-hidden="true"><rect pathLength="220" /></svg>
         </span>
       }
+      <!-- The filter chips: a type of bet each, in its own chip color; on, only those (none: all) -->
+      @if (kindChips.length > 1) {
+        <div class="bets-kinds" role="group" aria-label="Bet types">
+          @for (k of kindChips; track k.kind) {
+            <button
+              type="button"
+              class="kind-chip"
+              [ngClass]="k.kind"
+              [class.on]="kinds.has(k.kind)"
+              [attr.aria-pressed]="kinds.has(k.kind)"
+              (click)="toggleKind(k.kind)"
+            >
+              {{ k.label }} <span class="kind-count">{{ k.count }}</span>
+              <svg class="chip-rim" aria-hidden="true"><rect pathLength="120" /></svg>
+            </button>
+          }
+        </div>
+      }
       @if (updated) {
         <span class="bets-updated">
           Updated {{ updated | date: 'EEE MMM d, h:mm a' }}
