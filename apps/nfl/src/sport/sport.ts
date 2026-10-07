@@ -214,11 +214,11 @@ export const SPORT: SportConfig = {
     },
     {
       key: 'rankBasis',
-      label: 'Unit Ranks',
+      label: 'Rank Base',
       title: "Click to switch what the head coaches' Off Rank and Def Rank columns rank on: points per game or yards per game (their EPA per play has its own columns in Advanced Stats)",
       options: RANK_BASIS_LABELS,
       default: 'points',
-      slot: 'formatMid',
+      slot: 'beforeRanks',
       icon: 'leaderboard',
     },
     {

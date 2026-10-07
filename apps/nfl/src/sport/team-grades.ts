@@ -18,7 +18,7 @@ import { dataWeight, preseasonCoaching, preseasonOline, preseasonWeapons, teamGa
 // better O-line on the Offensive Lines tab is a better O-line grade on every tab).
 
 // ---------------------------------------------------------------------------
-// League ranks (1 = best) for the head coaches' offense and defense, on the stat the Unit Ranks
+// League ranks (1 = best) for the head coaches' offense and defense, on the stat the Rank Base
 // setting picks. Ties share a rank. Worked out once per season's rows and setting.
 // ---------------------------------------------------------------------------
 export type UnitRankKey = keyof typeof RANK_METRICS;

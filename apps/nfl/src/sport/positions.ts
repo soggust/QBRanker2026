@@ -112,7 +112,7 @@ export type SkillStatKey =
   | 'badThrowPct'
   | 'aggressiveness'
   | 'responsibility'
-  // Head coaches' units (ranked in the app by the Unit Ranks setting)
+  // Head coaches' units (ranked in the app by the Rank Base setting)
   | 'offEpa'
   | 'defEpaAllowed'
   | 'ptsPerGame'
@@ -681,7 +681,7 @@ const TEAM_STATS: SkillStat[] = [
     key: 'offRank',
     label: 'Off Rank',
     name: 'Offense Rank',
-    description: "The offense's league rank (by points or yards per game: Unit Ranks setting)",
+    description: "The offense's league rank (by points or yards per game: Rank Base setting)",
     kind: 'efficiency',
     format: 'rank',
     negative: true,
@@ -690,7 +690,7 @@ const TEAM_STATS: SkillStat[] = [
     key: 'defRank',
     label: 'Def Rank',
     name: 'Defense Rank',
-    description: "The defense's league rank (by points or yards allowed per game: Unit Ranks setting)",
+    description: "The defense's league rank (by points or yards allowed per game: Rank Base setting)",
     kind: 'efficiency',
     format: 'rank',
     negative: true,
@@ -1134,12 +1134,12 @@ export const SKILL_STATS: Record<SkillPosition, SkillStat[]> = {
       kind: 'efficiency',
       format: 'pct',
     },
-    // Where the coach's units rank in the league (1 = best), by the Unit Ranks setting
+    // Where the coach's units rank in the league (1 = best), by the Rank Base setting
     {
       key: 'offRank',
       label: 'Off Rank',
       name: 'Offense Rank',
-      description: "The offense's league rank (by points or yards per game: Unit Ranks setting)",
+      description: "The offense's league rank (by points or yards per game: Rank Base setting)",
       kind: 'efficiency',
       format: 'rank',
       negative: true,
@@ -1148,7 +1148,7 @@ export const SKILL_STATS: Record<SkillPosition, SkillStat[]> = {
       key: 'defRank',
       label: 'Def Rank',
       name: 'Defense Rank',
-      description: "The defense's league rank (by points or yards allowed per game: Unit Ranks setting)",
+      description: "The defense's league rank (by points or yards allowed per game: Rank Base setting)",
       kind: 'efficiency',
       format: 'rank',
       negative: true,

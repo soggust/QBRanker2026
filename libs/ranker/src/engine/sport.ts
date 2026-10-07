@@ -110,7 +110,7 @@ export interface FlagContext {
   grade: (value: number) => string;
 }
 
-// A sport's own setting in the settings menu (the NFL's Fantasy Scoring, Unit Ranks, Garbage Time)
+// A sport's own setting in the settings menu (the NFL's Fantasy Scoring, Rank Base, Garbage Time)
 export interface SportSetting {
   key: string;
   label: string;
@@ -123,9 +123,10 @@ export interface SportSetting {
   optionGroups?: { label: string; options: Record<string, string> }[];
   default: string | boolean;
   // Where it sits: the Format section's top, after Stat Base, among the Display switches (before
-  // Injured Players), at the bottom of the menu, or (a choice) as the footer's dropdown in the year
+  // Injured Players), in the Display list right above Show As Ranks (a choice, its value where the
+  // switches' toggles are), at the bottom of the menu, or (a choice) as the footer's dropdown in the year
   // selector's place (MMA's Current / All-Time)
-  slot: 'formatTop' | 'formatMid' | 'display' | 'displayEnd' | 'footer';
+  slot: 'formatTop' | 'formatMid' | 'display' | 'beforeRanks' | 'displayEnd' | 'footer';
   // Its menu icon (a cycled choice): a Material icon, or a class the styles draw ('lombardi')
   icon?: string;
   iconClass?: string;

@@ -14,6 +14,8 @@ interface MenuSwitch {
   title: string;
   on: () => boolean;
   flip: () => void;
+  // (a choice among the switches: its value, shown where the toggle would be; a click cycles it)
+  value?: () => string;
 }
 
 // The settings menu (the footer's gear): how stats are counted (Stat Base, Min Games, the sport's
@@ -67,9 +69,10 @@ export class SettingsMenuComponent {
     ...settingsAt('display').map((setting) => this.sportSwitch(setting)),
     ...(SPORT.noSwitches?.includes('showInjured') ? [] : [this.switch('showInjured', 'Injured Players', SPORT.copy.injuredHelp)]),
     ...(SPORT.noSwitches?.includes('rookiesOnly') ? [] : [this.switch('rookiesOnly', 'Rookies Only', this.rookiesTitle)]),
+    ...settingsAt('beforeRanks').map((setting) => this.sportChoice(setting)),
     this.switch(
       'showRanks',
-      'Show Ranks',
+      'Show As Ranks',
       "Show each value as its place in the list (#1 the best; lower first for lower-is-better stats). Display only: the ranking doesn't change",
     ),
     this.switch(
@@ -84,6 +87,16 @@ export class SettingsMenuComponent {
 
   private switch(key: 'categoryColors' | 'colorValues' | 'combineStats' | 'showInjured' | 'rookiesOnly' | 'showUnused' | 'showRanks', label: string, title: string): MenuSwitch {
     return { label, title, on: () => this.settings[key], flip: () => this.set({ [key]: !this.settings[key] }) };
+  }
+
+  private sportChoice(setting: SportSetting): MenuSwitch {
+    return {
+      label: setting.label,
+      title: setting.title,
+      on: () => false,
+      flip: () => this.stepSportSetting(setting.key),
+      value: () => this.settingText(setting),
+    };
   }
 
   private sportSwitch(setting: SportSetting): MenuSwitch {
