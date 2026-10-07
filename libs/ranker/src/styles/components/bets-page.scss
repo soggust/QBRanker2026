@@ -388,9 +388,9 @@ $chip-clay: #b0202b;
   --tint: #9aa0a6;
   // (its full height in the scrolling list, never squeezed to fit)
   flex-shrink: 0;
-  border: 1px solid color-mix(in srgb, var(--tint) 35%, transparent);
-  // (its confidence as a crisp stripe down its left edge)
-  border-left: 4px solid var(--tint);
+  // (its confidence color softened: desaturated toward gray, so it tints without going muddy)
+  --soft: color-mix(in srgb, var(--tint) 55%, #8a9097);
+  border: 1px solid color-mix(in srgb, var(--soft) 45%, transparent);
   border-radius: 6px;
   overflow: hidden;
 
@@ -403,16 +403,16 @@ $chip-clay: #b0202b;
   }
 
   &.open .bet-row {
-    border-bottom: 1px solid color-mix(in srgb, var(--tint) 40%, transparent);
+    border-bottom: 1px solid color-mix(in srgb, var(--soft) 45%, transparent);
   }
 }
 
 .bet-row {
-  --bar-tint: color-mix(in srgb, var(--tint) 7%, transparent);
+  --bar-tint: color-mix(in srgb, var(--soft) 18%, transparent);
   align-items: center;
-  // (clean charcoal with a faint wash of its confidence: a strong tint on near-black goes muddy; no dot
-  // matrix either, on the gunmetal rather than the scoreboard)
-  background: linear-gradient(var(--bar-tint), var(--bar-tint)), #17191c;
+  // (a lighter slate washed in its softened confidence color; no dot matrix, on the gunmetal rather than
+  // the scoreboard)
+  background: linear-gradient(var(--bar-tint), var(--bar-tint)), #24282d;
   border: none;
   color: #fff;
   cursor: pointer;
@@ -425,7 +425,7 @@ $chip-clay: #b0202b;
   width: 100%;
 
   &:hover {
-    --bar-tint: color-mix(in srgb, var(--tint) 13%, transparent);
+    --bar-tint: color-mix(in srgb, var(--soft) 26%, transparent);
 
     .bet-chevron {
       color: rgba(255, 255, 255, 0.85);
@@ -572,7 +572,7 @@ $chip-clay: #b0202b;
 
 // (open: a slightly lighter, neutral panel, so the reading is clean)
 .bet-reasons {
-  background: #1f2226;
+  background: color-mix(in srgb, var(--soft) 7%, #2a2e33);
   padding: 14px 20px 16px;
 
   p {
