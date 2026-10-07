@@ -112,6 +112,11 @@ $chip-side-spot: linear-gradient(
     color: #fff;
   }
 
+  // (the games in monospace, so their matchups and times line up in columns)
+  option {
+    font-family: Consolas, ui-monospace, monospace;
+  }
+
   // (the day headers in its open list, in gold)
   optgroup {
     color: #ffcd00;
