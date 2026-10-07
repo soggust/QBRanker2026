@@ -39,10 +39,10 @@
   @include v.scoreboard-panel(12px);
   background:
     // (a soft sheen down the middle, the metal's fine horizontal brushing, gunmetal)
-    linear-gradient(90deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.06) 50%, rgba(255, 255, 255, 0.02)),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.015), rgba(255, 255, 255, 0.045) 50%, rgba(255, 255, 255, 0.015)),
     repeating-linear-gradient(180deg, rgba(255, 255, 255, 0.025) 0 1px, transparent 1px 3px),
-    linear-gradient(180deg, #3b4148, #2c3136 45%, #22262a);
-  border-color: #4a5058;
+    linear-gradient(180deg, #282d32, #1d2125 45%, #16191c);
+  border-color: #3a4047;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.12),
     0 18px 40px rgba(0, 0, 0, 0.5);
@@ -408,7 +408,8 @@ $chip-clay: #b0202b;
 .bet-row {
   --bar-tint: color-mix(in srgb, var(--tint) 16%, transparent);
   align-items: center;
-  background: linear-gradient(var(--bar-tint), var(--bar-tint)), var(--scoreboard-dots), var(--scoreboard);
+  // (plain: on the gunmetal, not the scoreboard, so no dot matrix)
+  background: linear-gradient(var(--bar-tint), var(--bar-tint)), var(--scoreboard);
   border: none;
   color: #fff;
   cursor: pointer;
