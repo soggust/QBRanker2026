@@ -350,14 +350,14 @@ $chip-clay: #b0202b;
     margin: 0;
   }
 
-  // (a desk pick's risk: the most likely way it loses)
+  // (a desk pick's risk, its devil's advocate: the most likely way it loses, labeled in orange)
   .bet-risk {
     color: rgba(255, 255, 255, 0.7);
     font-size: 13px;
     margin-top: 10px;
 
     b {
-      color: rgba(255, 255, 255, 0.85);
+      color: #ff9a3c;
       font-weight: 800;
     }
   }
