@@ -2,3 +2,7 @@
 
 // Lit (active) tabs and items: their label's weight (null keeps the item's own)
 $lit-label-weight: 800;
+
+// The accent (the old-park chalk cream, --scoreboard-led): the stat categories' colors are worked out from it
+// (_base.scss), so they sit in this sport's palette
+$accent: #f1ece0;

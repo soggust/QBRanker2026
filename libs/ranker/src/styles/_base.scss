@@ -2,6 +2,9 @@
 // Global styles, shared by every sport. Each app's styles.scss loads this, then its own theme
 // (apps/<sport>/src/theme/_sport-global.scss), which can override the tokens below.
 // ===========================================================================
+@use "sass:color";
+@use "sass:math";
+@use "sport-settings" as sport;
 @use "theme";
 @use "variables" as v;
 @use "sport-kit" as kit;
@@ -56,24 +59,36 @@
   }
 }
 
-// Column-group colors, shared by the filter cards, the grid chips and the column markers
+// Column-group colors, shared by the filter panels, the grid chips, the column markers and the card's
+// panels: worked out from the sport's accent (sport-settings $accent), so each sport's sit in its own
+// palette. Their hues are spread evenly around the wheel, a quarter turn apart, starting a sixth of a turn
+// past the accent (so none lands on it); their saturation and lightness follow the accent's, kept lively
+// (never washed out, even from a soft accent) and in a range that reads on the dark panels
+$-accent-hue: color.channel(sport.$accent, "hue", $space: hsl);
+$-category-saturation: math.clamp(80%, color.channel(sport.$accent, "saturation", $space: hsl), 100%);
+$-category-lightness: math.clamp(58%, color.channel(sport.$accent, "lightness", $space: hsl), 66%);
+
+@function -category($quarter) {
+  @return hsl($-accent-hue + 60deg + $quarter * 90deg, $-category-saturation, $-category-lightness);
+}
+
 .group-results {
-  --group-color: #66d17a;
+  --group-color: #{-category(0)};
   --group-icon: "emoji_events";
 }
 
 .group-box {
-  --group-color: #4fc3f7;
+  --group-color: #{-category(1)};
   --group-icon: "bar_chart";
 }
 
 .group-advanced {
-  --group-color: #b388ff;
+  --group-color: #{-category(2)};
   --group-icon: "insights";
 }
 
 .group-support {
-  --group-color: #ff8a65;
+  --group-color: #{-category(3)};
   --group-icon: "groups";
 }
 
