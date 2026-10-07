@@ -765,8 +765,8 @@ async function main() {
     const out = new Map([...rows.keys()].map((t) => [t, {}]));
     for (const k of keys) {
       if (skip.includes(k)) continue;
-      // (the O-line's pressure rate is pressure allowed: lower is better; the defense's is pressure made)
-      const low = LOW.has(k) || (rows === olRows && k === 'pressureRate');
+      // (the O-line's pressure and QB hit rates are allowed: lower is better; the defense's are made)
+      const low = (LOW.has(k) && !(rows === defRows && k === 'qbHitRate')) || (rows === olRows && k === 'pressureRate');
       const rank = ranker([...rows.values()].map((row) => row.stats?.[k] ?? null), low);
       for (const [t, row] of rows) {
         const v = rank(row.stats?.[k] ?? null);

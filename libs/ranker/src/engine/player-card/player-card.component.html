@@ -260,7 +260,7 @@
           }
         }
 
-        <!-- The AI write-up (player-card/analysis.ts): the archetype and headline, the overview, the season's
+        <!-- The AI write-up (player-card/analysis.ts): the headline and the archetype's definition, the overview, the season's
              strengths and concerns, the coming game, the rest of the season, betting angles -->
         @case ('analysis') {
           @let a = cards.analysis(c);
@@ -271,7 +271,6 @@
           } @else {
             @let r = a.report;
             <div class="ai-hero">
-              <span class="ai-archetype">{{ r.archetype.name }}</span>
               <h2 class="ai-headline">{{ r.headline }}</h2>
               <p class="ai-definition">{{ r.archetype.definition }}</p>
               <p class="ai-meta">

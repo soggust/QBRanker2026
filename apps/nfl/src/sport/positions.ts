@@ -304,7 +304,7 @@ export const STAT_NAMES: Partial<Record<SkillColumnKey, string>> = {
   fourthDownGoPct: 'Fourth-Down Go-For-It Rate',
   turnoverDiffPerGame: 'Turnover Differential per Game',
   sacksAllowed: 'Sacks Allowed',
-  qbHitRate: 'QB Hit Rate Allowed',
+  qbHitRate: 'QB Hit Rate',
   sackRate: 'Sack Rate Allowed',
   stuffRate: 'Stuffed Run Rate',
   yardsBeforeContact: 'Yards Before Contact per Carry',
@@ -967,7 +967,15 @@ export const SKILL_STATS: Record<SkillPosition, SkillStat[]> = {
     {
       key: 'pressureRate',
       label: 'Pressure %',
-      description: 'Pressures per opponent dropback',
+      description:
+        "Pressures per opponent dropback, as Pro Football Reference's charters count them (a judgment call: other sources, like Next Gen Stats, count differently)",
+      kind: 'efficiency',
+      format: 'pct',
+    },
+    {
+      key: 'qbHitRate',
+      label: 'QB Hit %',
+      description: 'QB hits per opponent dropback, sacks included (from the play-by-play: no charting)',
       kind: 'efficiency',
       format: 'pct',
     },
@@ -1258,6 +1266,7 @@ const ADVANCED_STATS = new Set<SkillColumnKey>([
   'rushEpaAllowed',
   'successAllowed',
   'pressureRate',
+  'qbHitRate',
   'missedTacklePct',
   'sackRate',
   'yardsBeforeContact',

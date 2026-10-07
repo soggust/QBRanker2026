@@ -17,6 +17,7 @@
         "fantasyStd": 106,
         "receptions": 0,
         "pressureRate": null,
+        "qbHitRate": 0.07,
         "missedTacklePct": null,
         "thirdDownPct": 0.34,
         "redZoneTdPct": 0.545
@@ -27,6 +28,7 @@
         "rushEpaAllowed": -0.038,
         "successAllowed": 0.44,
         "sacks": 27,
+        "qbHitRate": 0.067,
         "takeaways": 20,
         "thirdDownPct": 0.343,
         "redZoneTdPct": 0.636
@@ -49,6 +51,7 @@
         "fantasyStd": 133,
         "receptions": 0,
         "pressureRate": null,
+        "qbHitRate": 0.066,
         "missedTacklePct": null,
         "thirdDownPct": 0.302,
         "redZoneTdPct": 0.531
@@ -59,6 +62,7 @@
         "rushEpaAllowed": 0.005,
         "successAllowed": 0.46,
         "sacks": 22,
+        "qbHitRate": 0.054,
         "takeaways": 21,
         "thirdDownPct": 0.316,
         "redZoneTdPct": 0.541
@@ -81,6 +85,7 @@
         "fantasyStd": 137,
         "receptions": 0,
         "pressureRate": null,
+        "qbHitRate": 0.075,
         "missedTacklePct": null,
         "thirdDownPct": 0.361,
         "redZoneTdPct": 0.452
@@ -91,6 +96,7 @@
         "rushEpaAllowed": -0.161,
         "successAllowed": 0.407,
         "sacks": 33,
+        "qbHitRate": 0.073,
         "takeaways": 17,
         "thirdDownPct": 0.378,
         "redZoneTdPct": 0.486
@@ -113,6 +119,7 @@
         "fantasyStd": 111,
         "receptions": 0,
         "pressureRate": null,
+        "qbHitRate": 0.071,
         "missedTacklePct": null,
         "thirdDownPct": 0.465,
         "redZoneTdPct": 0.635
@@ -123,6 +130,7 @@
         "rushEpaAllowed": 0.024,
         "successAllowed": 0.477,
         "sacks": 29,
+        "qbHitRate": 0.069,
         "takeaways": 20,
         "thirdDownPct": 0.479,
         "redZoneTdPct": 0.628
@@ -145,6 +153,7 @@
         "fantasyStd": 180,
         "receptions": 0,
         "pressureRate": null,
+        "qbHitRate": 0.077,
         "missedTacklePct": null,
         "thirdDownPct": 0.407,
         "redZoneTdPct": 0.41
@@ -155,6 +164,7 @@
         "rushEpaAllowed": -0.214,
         "successAllowed": 0.375,
         "sacks": 32,
+        "qbHitRate": 0.078,
         "takeaways": 26,
         "thirdDownPct": 0.414,
         "redZoneTdPct": 0.323
@@ -177,6 +187,7 @@
         "fantasyStd": 203,
         "receptions": 0,
         "pressureRate": null,
+        "qbHitRate": 0.068,
         "missedTacklePct": null,
         "thirdDownPct": 0.319,
         "redZoneTdPct": 0.317
@@ -187,6 +198,7 @@
         "rushEpaAllowed": -0.145,
         "successAllowed": 0.356,
         "sacks": 30,
+        "qbHitRate": 0.068,
         "takeaways": 28,
         "thirdDownPct": 0.342,
         "redZoneTdPct": 0.343
@@ -209,6 +221,7 @@
         "fantasyStd": 132,
         "receptions": 0,
         "pressureRate": null,
+        "qbHitRate": 0.053,
         "missedTacklePct": null,
         "thirdDownPct": 0.426,
         "redZoneTdPct": 0.542
@@ -219,6 +232,7 @@
         "rushEpaAllowed": -0.013,
         "successAllowed": 0.486,
         "sacks": 21,
+        "qbHitRate": 0.06,
         "takeaways": 32,
         "thirdDownPct": 0.423,
         "redZoneTdPct": 0.543
@@ -241,6 +255,7 @@
         "fantasyStd": 107,
         "receptions": 0,
         "pressureRate": null,
+        "qbHitRate": 0.051,
         "missedTacklePct": null,
         "thirdDownPct": 0.405,
         "redZoneTdPct": 0.44
@@ -251,6 +266,7 @@
         "rushEpaAllowed": -0.037,
         "successAllowed": 0.433,
         "sacks": 16,
+        "qbHitRate": 0.041,
         "takeaways": 18,
         "thirdDownPct": 0.401,
         "redZoneTdPct": 0.462
@@ -273,6 +289,7 @@
         "fantasyStd": 119,
         "receptions": 0,
         "pressureRate": null,
+        "qbHitRate": 0.07,
         "missedTacklePct": null,
         "thirdDownPct": 0.346,
         "redZoneTdPct": 0.486
@@ -283,6 +300,7 @@
         "rushEpaAllowed": -0.001,
         "successAllowed": 0.419,
         "sacks": 28,
+        "qbHitRate": 0.064,
         "takeaways": 20,
         "thirdDownPct": 0.353,
         "redZoneTdPct": 0.485
@@ -305,6 +323,7 @@
         "fantasyStd": 155,
         "receptions": 0,
         "pressureRate": null,
+        "qbHitRate": 0.045,
         "missedTacklePct": null,
         "thirdDownPct": 0.367,
         "redZoneTdPct": 0.553
@@ -315,6 +334,7 @@
         "rushEpaAllowed": -0.106,
         "successAllowed": 0.404,
         "sacks": 21,
+        "qbHitRate": 0.049,
         "takeaways": 25,
         "thirdDownPct": 0.385,
         "redZoneTdPct": 0.552
@@ -337,6 +357,7 @@
         "fantasyStd": 123,
         "receptions": 0,
         "pressureRate": null,
+        "qbHitRate": 0.06,
         "missedTacklePct": null,
         "thirdDownPct": 0.394,
         "redZoneTdPct": 0.509
@@ -347,6 +368,7 @@
         "rushEpaAllowed": -0.071,
         "successAllowed": 0.427,
         "sacks": 21,
+        "qbHitRate": 0.055,
         "takeaways": 24,
         "thirdDownPct": 0.381,
         "redZoneTdPct": 0.513
@@ -369,6 +391,7 @@
         "fantasyStd": 109,
         "receptions": 0,
         "pressureRate": null,
+        "qbHitRate": 0.077,
         "missedTacklePct": null,
         "thirdDownPct": 0.359,
         "redZoneTdPct": 0.532
@@ -379,6 +402,7 @@
         "rushEpaAllowed": -0.143,
         "successAllowed": 0.414,
         "sacks": 28,
+        "qbHitRate": 0.075,
         "takeaways": 15,
         "thirdDownPct": 0.379,
         "redZoneTdPct": 0.512
@@ -401,6 +425,7 @@
         "fantasyStd": 57,
         "receptions": 0,
         "pressureRate": null,
+        "qbHitRate": 0.073,
         "missedTacklePct": null,
         "thirdDownPct": 0.383,
         "redZoneTdPct": 0.6
@@ -411,6 +436,7 @@
         "rushEpaAllowed": 0.012,
         "successAllowed": 0.479,
         "sacks": 26,
+        "qbHitRate": 0.067,
         "takeaways": 10,
         "thirdDownPct": 0.381,
         "redZoneTdPct": 0.532
@@ -433,6 +459,7 @@
         "fantasyStd": 174,
         "receptions": 0,
         "pressureRate": null,
+        "qbHitRate": 0.081,
         "missedTacklePct": null,
         "thirdDownPct": 0.367,
         "redZoneTdPct": 0.475
@@ -443,6 +470,7 @@
         "rushEpaAllowed": -0.07,
         "successAllowed": 0.428,
         "sacks": 26,
+        "qbHitRate": 0.075,
         "takeaways": 18,
         "thirdDownPct": 0.356,
         "redZoneTdPct": 0.393
@@ -465,6 +493,7 @@
         "fantasyStd": 141,
         "receptions": 0,
         "pressureRate": null,
+        "qbHitRate": 0.087,
         "missedTacklePct": null,
         "thirdDownPct": 0.327,
         "redZoneTdPct": 0.541
@@ -475,6 +504,7 @@
         "rushEpaAllowed": -0.129,
         "successAllowed": 0.389,
         "sacks": 43,
+        "qbHitRate": 0.104,
         "takeaways": 20,
         "thirdDownPct": 0.308,
         "redZoneTdPct": 0.484
@@ -497,6 +527,7 @@
         "fantasyStd": 111,
         "receptions": 0,
         "pressureRate": null,
+        "qbHitRate": 0.047,
         "missedTacklePct": null,
         "thirdDownPct": 0.379,
         "redZoneTdPct": 0.457
@@ -507,6 +538,7 @@
         "rushEpaAllowed": -0.1,
         "successAllowed": 0.437,
         "sacks": 18,
+        "qbHitRate": 0.043,
         "takeaways": 19,
         "thirdDownPct": 0.407,
         "redZoneTdPct": 0.417
@@ -529,6 +561,7 @@
         "fantasyStd": 90,
         "receptions": 0,
         "pressureRate": null,
+        "qbHitRate": 0.069,
         "missedTacklePct": null,
         "thirdDownPct": 0.407,
         "redZoneTdPct": 0.458
@@ -539,6 +572,7 @@
         "rushEpaAllowed": -0.072,
         "successAllowed": 0.442,
         "sacks": 28,
+        "qbHitRate": 0.062,
         "takeaways": 15,
         "thirdDownPct": 0.426,
         "redZoneTdPct": 0.48
@@ -561,6 +595,7 @@
         "fantasyStd": 115,
         "receptions": 0,
         "pressureRate": null,
+        "qbHitRate": 0.075,
         "missedTacklePct": null,
         "thirdDownPct": 0.373,
         "redZoneTdPct": 0.527
@@ -571,6 +606,7 @@
         "rushEpaAllowed": -0.166,
         "successAllowed": 0.423,
         "sacks": 33,
+        "qbHitRate": 0.077,
         "takeaways": 13,
         "thirdDownPct": 0.351,
         "redZoneTdPct": 0.556
@@ -593,6 +629,7 @@
         "fantasyStd": 105,
         "receptions": 0,
         "pressureRate": null,
+        "qbHitRate": 0.075,
         "missedTacklePct": null,
         "thirdDownPct": 0.402,
         "redZoneTdPct": 0.571
@@ -603,6 +640,7 @@
         "rushEpaAllowed": 0.043,
         "successAllowed": 0.453,
         "sacks": 38,
+        "qbHitRate": 0.078,
         "takeaways": 22,
         "thirdDownPct": 0.398,
         "redZoneTdPct": 0.547
@@ -625,6 +663,7 @@
         "fantasyStd": 135,
         "receptions": 0,
         "pressureRate": null,
+        "qbHitRate": 0.082,
         "missedTacklePct": null,
         "thirdDownPct": 0.403,
         "redZoneTdPct": 0.51
@@ -635,6 +674,7 @@
         "rushEpaAllowed": -0.098,
         "successAllowed": 0.401,
         "sacks": 40,
+        "qbHitRate": 0.087,
         "takeaways": 17,
         "thirdDownPct": 0.422,
         "redZoneTdPct": 0.523
@@ -657,6 +697,7 @@
         "fantasyStd": 132,
         "receptions": 0,
         "pressureRate": null,
+        "qbHitRate": 0.058,
         "missedTacklePct": null,
         "thirdDownPct": 0.432,
         "redZoneTdPct": 0.472
@@ -667,6 +708,7 @@
         "rushEpaAllowed": -0.157,
         "successAllowed": 0.418,
         "sacks": 27,
+        "qbHitRate": 0.073,
         "takeaways": 23,
         "thirdDownPct": 0.448,
         "redZoneTdPct": 0.429
@@ -689,6 +731,7 @@
         "fantasyStd": 95,
         "receptions": 0,
         "pressureRate": null,
+        "qbHitRate": 0.057,
         "missedTacklePct": null,
         "thirdDownPct": 0.42,
         "redZoneTdPct": 0.563
@@ -699,6 +742,7 @@
         "rushEpaAllowed": -0.073,
         "successAllowed": 0.403,
         "sacks": 21,
+        "qbHitRate": 0.054,
         "takeaways": 14,
         "thirdDownPct": 0.399,
         "redZoneTdPct": 0.579
@@ -721,6 +765,7 @@
         "fantasyStd": 68,
         "receptions": 0,
         "pressureRate": null,
+        "qbHitRate": 0.059,
         "missedTacklePct": null,
         "thirdDownPct": 0.405,
         "redZoneTdPct": 0.483
@@ -731,6 +776,7 @@
         "rushEpaAllowed": 0.015,
         "successAllowed": 0.429,
         "sacks": 18,
+        "qbHitRate": 0.049,
         "takeaways": 14,
         "thirdDownPct": 0.459,
         "redZoneTdPct": 0.542
@@ -753,6 +799,7 @@
         "fantasyStd": 156,
         "receptions": 0,
         "pressureRate": null,
+        "qbHitRate": 0.066,
         "missedTacklePct": null,
         "thirdDownPct": 0.4,
         "redZoneTdPct": 0.558
@@ -763,6 +810,7 @@
         "rushEpaAllowed": -0.199,
         "successAllowed": 0.376,
         "sacks": 33,
+        "qbHitRate": 0.07,
         "takeaways": 25,
         "thirdDownPct": 0.409,
         "redZoneTdPct": 0.568
@@ -785,6 +833,7 @@
         "fantasyStd": 123,
         "receptions": 0,
         "pressureRate": null,
+        "qbHitRate": 0.063,
         "missedTacklePct": null,
         "thirdDownPct": 0.415,
         "redZoneTdPct": 0.5
@@ -795,6 +844,7 @@
         "rushEpaAllowed": 0.005,
         "successAllowed": 0.445,
         "sacks": 19,
+        "qbHitRate": 0.051,
         "takeaways": 21,
         "thirdDownPct": 0.439,
         "redZoneTdPct": 0.524
@@ -817,6 +867,7 @@
         "fantasyStd": 105,
         "receptions": 0,
         "pressureRate": null,
+        "qbHitRate": 0.055,
         "missedTacklePct": null,
         "thirdDownPct": 0.343,
         "redZoneTdPct": 0.558
@@ -827,6 +878,7 @@
         "rushEpaAllowed": -0.132,
         "successAllowed": 0.39,
         "sacks": 24,
+        "qbHitRate": 0.056,
         "takeaways": 21,
         "thirdDownPct": 0.339,
         "redZoneTdPct": 0.545
@@ -849,6 +901,7 @@
         "fantasyStd": 164,
         "receptions": 0,
         "pressureRate": null,
+        "qbHitRate": 0.079,
         "missedTacklePct": null,
         "thirdDownPct": 0.397,
         "redZoneTdPct": 0.469
@@ -859,6 +912,7 @@
         "rushEpaAllowed": -0.192,
         "successAllowed": 0.397,
         "sacks": 29,
+        "qbHitRate": 0.066,
         "takeaways": 27,
         "thirdDownPct": 0.42,
         "redZoneTdPct": 0.452
@@ -881,6 +935,7 @@
         "fantasyStd": 108,
         "receptions": 0,
         "pressureRate": null,
+        "qbHitRate": 0.046,
         "missedTacklePct": null,
         "thirdDownPct": 0.385,
         "redZoneTdPct": 0.508
@@ -891,6 +946,7 @@
         "rushEpaAllowed": -0.191,
         "successAllowed": 0.447,
         "sacks": 22,
+        "qbHitRate": 0.046,
         "takeaways": 21,
         "thirdDownPct": 0.365,
         "redZoneTdPct": 0.469
@@ -913,6 +969,7 @@
         "fantasyStd": 157,
         "receptions": 0,
         "pressureRate": null,
+        "qbHitRate": 0.079,
         "missedTacklePct": null,
         "thirdDownPct": 0.38,
         "redZoneTdPct": 0.404
@@ -923,6 +980,7 @@
         "rushEpaAllowed": -0.143,
         "successAllowed": 0.408,
         "sacks": 37,
+        "qbHitRate": 0.082,
         "takeaways": 17,
         "thirdDownPct": 0.408,
         "redZoneTdPct": 0.366
@@ -945,6 +1003,7 @@
         "fantasyStd": 148,
         "receptions": 0,
         "pressureRate": null,
+        "qbHitRate": 0.069,
         "missedTacklePct": null,
         "thirdDownPct": 0.35,
         "redZoneTdPct": 0.489
@@ -955,6 +1014,7 @@
         "rushEpaAllowed": -0.141,
         "successAllowed": 0.377,
         "sacks": 27,
+        "qbHitRate": 0.064,
         "takeaways": 26,
         "thirdDownPct": 0.354,
         "redZoneTdPct": 0.486
@@ -977,6 +1037,7 @@
         "fantasyStd": 107,
         "receptions": 0,
         "pressureRate": null,
+        "qbHitRate": 0.08,
         "missedTacklePct": null,
         "thirdDownPct": 0.355,
         "redZoneTdPct": 0.6
@@ -987,6 +1048,7 @@
         "rushEpaAllowed": -0.079,
         "successAllowed": 0.452,
         "sacks": 33,
+        "qbHitRate": 0.087,
         "takeaways": 10,
         "thirdDownPct": 0.364,
         "redZoneTdPct": 0.537
@@ -1009,6 +1071,7 @@
         "fantasyStd": 121,
         "receptions": 0,
         "pressureRate": null,
+        "qbHitRate": 0.062,
         "missedTacklePct": null,
         "thirdDownPct": 0.365,
         "redZoneTdPct": 0.447
@@ -1019,6 +1082,7 @@
         "rushEpaAllowed": -0.132,
         "successAllowed": 0.394,
         "sacks": 25,
+        "qbHitRate": 0.052,
         "takeaways": 20,
         "thirdDownPct": 0.385,
         "redZoneTdPct": 0.467

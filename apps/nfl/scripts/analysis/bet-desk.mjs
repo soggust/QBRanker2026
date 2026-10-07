@@ -144,7 +144,7 @@ function schedule() {
 const PROFILE = {
   team: ['pointDiffPerGame', 'netEpa', 'offEpa', 'defEpaAllowed', 'atsPct', 'turnoverDiffPerGame', 'oneScoreWinPct'],
   playByPlay: ['offPassEpa', 'offRushEpa', 'passRateOverExp', 'defPassEpa', 'defRushEpa'],
-  defense: ['pressureRate'],
+  defense: ['pressureRate', 'qbHitRate'],
 };
 function profile(dossier) {
   const out = { record: dossier.team.record };

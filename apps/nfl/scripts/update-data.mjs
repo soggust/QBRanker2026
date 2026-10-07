@@ -543,6 +543,8 @@ function defenseUnits({ pbp, games, pfr }) {
           sacks + takeaways * 2 + tds * 6 + safeties * 2 + allowed.reduce((sum, p) => sum + pointsAllowedFantasy(p), 0),
         receptions: 0,
         pressureRate: pressure && dropbacks ? ratio(pressure.def_pressures, dropbacks) : null,
+        // (QB hits per dropback, sacks included: straight from the play-by-play, no charter's judgment)
+        qbHitRate: ratio(count((play) => play.qb_dropback === '1' && (play.qb_hit === '1' || play.sack === '1')), dropbacks),
         missedTacklePct: pressure
           ? ratio(pressure.def_missed_tackles, pressure.def_tackles_combined + pressure.def_missed_tackles)
           : null,
@@ -1064,7 +1066,7 @@ const competitivePlay = (play) => {
 };
 
 const COMPETITIVE_KEYS = {
-  DEF: ['epaAllowed', 'passEpaAllowed', 'rushEpaAllowed', 'successAllowed', 'sacks', 'takeaways', 'thirdDownPct', 'redZoneTdPct'],
+  DEF: ['epaAllowed', 'passEpaAllowed', 'rushEpaAllowed', 'successAllowed', 'sacks', 'qbHitRate', 'takeaways', 'thirdDownPct', 'redZoneTdPct'],
   HC: ['netEpa', 'offEpa', 'defEpaAllowed'],
   OL: ['sacksAllowed', 'qbHitRate', 'sackRate', 'ypc', 'stuffRate', 'runEpa', 'runSuccess', 'shortYardagePct', 'linePenaltiesPerGame'],
   QB: ['epaPerPlay', 'cpoe', 'successRate'],

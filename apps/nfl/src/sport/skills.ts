@@ -52,7 +52,7 @@ export const SKILLS: Record<SkillPosition, SkillDef[]> = {
     { id: 'overall', name: 'Down-to-Down Defense', short: 'Overall', parts: [['epaAllowed', -1], ['successAllowed', -1]] },
     { id: 'pass', name: 'Pass Defense', short: 'Pass D', parts: [['passEpaAllowed', -1]] },
     { id: 'run', name: 'Run Defense', short: 'Run D', parts: [['rushEpaAllowed', -1]] },
-    { id: 'rush', name: 'Pass Rush', short: 'Pass Rush', parts: [['sacks', 1], ['pressureRate', 1]] },
+    { id: 'rush', name: 'Pass Rush', short: 'Pass Rush', parts: [['sacks', 1], ['pressureRate', 1], ['qbHitRate', 1]] },
     { id: 'takeaways', name: 'Takeaways', short: 'Takeaways', parts: [['takeaways', 1]] },
     { id: 'scoring', name: 'Keeping Points Off', short: 'Scoring D', parts: [['ptsAllowedPerGame', -1], ['redZoneTdPct', -1]] },
     { id: 'thirdDown', name: 'Getting Off the Field', short: '3rd Down', parts: [['thirdDownPct', -1]] },

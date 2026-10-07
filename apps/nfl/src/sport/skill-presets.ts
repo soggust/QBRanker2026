@@ -249,8 +249,8 @@ export const SKILL_PRESETS: Record<SkillPosition, SkillPresetDef[]> = {
     {
       key: 'passRush',
       label: 'Pass Rush',
-      description: 'Gets home: sacks, pressure rate, and pass EPA allowed',
-      weights: { sacks: 100, pressureRate: 100, passEpaAllowed: 75 },
+      description: 'Gets home: sacks, pressure rate, QB hit rate, and pass EPA allowed',
+      weights: { sacks: 100, pressureRate: 100, qbHitRate: 100, passEpaAllowed: 75 },
     },
     {
       key: 'ballHawks',

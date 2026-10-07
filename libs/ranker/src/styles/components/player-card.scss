@@ -1898,20 +1898,7 @@
   padding: 16px 18px 14px;
 }
 
-// The header's order of attention: the headline (big, in the sport's light), the definition under it, the
-// archetype a quiet tag above
-.ai-archetype {
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  border-radius: 999px;
-  color: rgba(255, 255, 255, 0.55);
-  display: inline-block;
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: 1px;
-  padding: 2px 9px;
-  text-transform: uppercase;
-}
-
+// The header's order of attention: the headline (big, in the sport's light), the definition under it
 .ai-headline {
   color: var(--scoreboard-led);
   @include v.headline(24px);
