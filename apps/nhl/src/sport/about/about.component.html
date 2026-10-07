@@ -189,16 +189,14 @@
 
     @case ('faq') {
       <h3>FAQ</h3>
-      <details>
-        <summary>How do past seasons work?</summary>
+      <card-panel class="faq-panel panel-plain" label="How do past seasons work?">
         <p>
           Pick a season from the dropdown above the list. Your sliders, eyes and column order stay as they
           are; the list re-ranks with that season's stats. Each season keeps its own hand-dragged order
           while the page is open. A season is named for both years it spans (2024-25).
         </p>
-      </details>
-      <details>
-        <summary>What are the badges under names?</summary>
+      </card-panel>
+      <card-panel class="faq-panel panel-plain" label="What are the badges under names?">
         <p>
           That season's honors, hover one for the details. A gold <b>cup</b> for the Stanley Cup champion and
           a silver <b>cup</b> for both conference champions (the two Final teams), on every row from that
@@ -208,16 +206,14 @@
           scoring titles won on the stat sheet: the <b>Rocket</b> Richard (goals) and the Art <b>Ross</b>
           (points). A traded player's cup follows the team he finished the season with.
         </p>
-      </details>
-      <details open>
-        <summary>Why is my guy ranked so low?</summary>
+      </card-panel>
+      <card-panel class="faq-panel panel-plain" [startOpen]="true" label="Why is my guy ranked so low?">
         <p>
           The ranking only reflects the sliders. Try a preset that fits his game, or check Min Games if
           he missed time. And if you still disagree, drag him where he belongs.
         </p>
-      </details>
-      <details>
-        <summary>What are Game Score, xGF % and GSAx?</summary>
+      </card-panel>
+      <card-panel class="faq-panel panel-plain" label="What are Game Score, xGF % and GSAx?">
         <p>
           MoneyPuck's numbers built on <b>expected goals</b>: every shot gets the odds it goes in, from where
           and how it was taken. <b>Game Score</b> rolls a skater's goals, assists, shots, blocks, penalties,
@@ -226,35 +222,31 @@
           generating more and better chances). <b>GSAx</b> is a goalie's goals saved above what an average
           goalie would have on the same shots. Each is one slider like any other.
         </p>
-      </details>
-      <details>
-        <summary>What does "-" mean?</summary>
+      </card-panel>
+      <card-panel class="faq-panel panel-plain" label="What does &quot;-&quot; mean?">
         <p>
           The stat isn't available for that player, usually a rate from too small a sample. Those count as
           league average.
         </p>
-      </details>
-      <details>
-        <summary>When do the stats update?</summary>
+      </card-panel>
+      <card-panel class="faq-panel panel-plain" label="When do the stats update?">
         <p>
           The current season updates every night during the season, once the day's games are final.
           Finished seasons don't change.
         </p>
-      </details>
-      <details>
-        <summary>Is my ranking saved?</summary>
+      </card-panel>
+      <card-panel class="faq-panel panel-plain" label="Is my ranking saved?">
         <p>
           No. Everything resets when you reload the page: sliders, drags, column changes, the settings menu
           and the season (back to the current one). Copy your list if you want to keep it.
         </p>
-      </details>
-      <details>
-        <summary>A player I'm looking for isn't listed.</summary>
+      </card-panel>
+      <card-panel class="faq-panel panel-plain" label="A player I'm looking for isn't listed.">
         <p>
           He may be under the Min Games setting (lower it to see more), or listed at a different position
           (the one the NHL lists for him that season). At 1, everyone who got into a game is listed.
         </p>
-      </details>
+      </card-panel>
     }
 
     @case ('data') {

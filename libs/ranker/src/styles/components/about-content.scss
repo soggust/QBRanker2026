@@ -121,44 +121,15 @@ dl.glossary {
   }
 }
 
-// FAQ: questions open like the filter cards
-details {
-  border: 1px solid #2f2f2f;
-  border-radius: 8px;
+// FAQ: each question a panel (card-panel, like the filter menu's and the card's), all in one quiet color
+// (the accent, muted toward gray) rather than a category's each
+.faq-panel {
+  --group-color: color-mix(in srgb, var(--scoreboard-led) 45%, #8a9097);
   margin-bottom: 8px;
 
-  summary {
-    cursor: pointer;
-    font-weight: 800;
-    list-style: none;
-    padding: 11px 14px;
-    position: relative;
-
-    &::-webkit-details-marker {
-      display: none;
-    }
-
-    &::after {
-      color: var(--scoreboard-led);
-      content: "+";
-      font-size: 18px;
-      line-height: 1;
-      position: absolute;
-      right: 14px;
-      top: 12px;
-    }
-
-    &:hover {
-      color: var(--scoreboard-led);
-    }
-  }
-
-  &[open] summary::after {
-    content: "\2212";
-  }
-
   p {
-    padding: 0 14px 4px;
+    margin: 0;
+    padding: 12px 16px 14px;
   }
 }
 

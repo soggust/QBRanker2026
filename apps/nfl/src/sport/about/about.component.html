@@ -186,8 +186,7 @@
 
     @case ('faq') {
       <h3>FAQ</h3>
-      <details>
-        <summary>How do past seasons work?</summary>
+      <card-panel class="faq-panel panel-plain" label="How do past seasons work?">
         <p>
           Pick a year from the season dropdown above the list. Your sliders, eyes and column
           order stay as they are; the list re-ranks with that year's stats. Each season keeps its own
@@ -198,9 +197,8 @@
           start in 2016, CPOE, YAC and air yards in 2006,
           and 2003 to 2008 have no targets (so no target share or catch rate either).
         </p>
-      </details>
-      <details>
-        <summary>What are the badges under names?</summary>
+      </card-panel>
+      <card-panel class="faq-panel panel-plain" label="What are the badges under names?">
         <p>
           That season's honors, hover one for the details. A gold <b>Lombardi</b> for the Super Bowl
           champion and a silver <b>cup</b> for both conference champions, on every row from that team.
@@ -211,24 +209,21 @@
           <b>PB</b> for the Pro Bowl (players voted in, plus alternates called up as replacements). Badges
           show for finished seasons, back to 2000; a fullback or defender only gets one on a tab he's on.
         </p>
-      </details>
-      <details open>
-        <summary>Why is my guy ranked so low?</summary>
+      </card-panel>
+      <card-panel class="faq-panel panel-plain" [startOpen]="true" label="Why is my guy ranked so low?">
         <p>
           The ranking only reflects the sliders. Try a preset that fits his game, check whether a support
           grade is pulling him down, or switch Stat Base to Per Game or 17-Game Pace if he missed time. And if you still
           disagree, drag him where he belongs.
         </p>
-      </details>
-      <details>
-        <summary>Why does a better supporting cast hurt a player?</summary>
+      </card-panel>
+      <card-panel class="faq-panel panel-plain" label="Why does a better supporting cast hurt a player?">
         <p>
           It's credit for doing more with less (see Grades &amp; Support). It's a small effect and you can
           switch it off with the Support card's eye.
         </p>
-      </details>
-      <details>
-        <summary>What is the QB's Responsibility grade?</summary>
+      </card-panel>
+      <card-panel class="faq-panel panel-plain" label="What is the QB's Responsibility grade?">
         <p>
           How much of the offense runs through the QB. In each game he led (the most dropbacks for his team),
           it measures his share of the team's plays (his dropbacks, scrambles and designed runs, leaving out
@@ -242,9 +237,8 @@
           credit), at the same light strength as the rest. Turn its slider up or down, or to 0% to leave it
           out.
         </p>
-      </details>
-      <details>
-        <summary>How is the Weapons grade worked out?</summary>
+      </card-panel>
+      <card-panel class="faq-panel panel-plain" label="How is the Weapons grade worked out?">
         <p>
           From the RB, WR and TE tabs. Each player gets a grade from his spot in his own tab (#1 is an A+,
           last is an F), and a team's grade at each position averages its players by how much they're used:
@@ -255,9 +249,8 @@
           leans on this season's rankings more with every game played. Finally the 32 teams are ranked by
           that score and graded on a curve: the best group of weapons is an A+, the worst an F.
         </p>
-      </details>
-      <details>
-        <summary>How do I change a grade I disagree with?</summary>
+      </card-panel>
+      <card-panel class="faq-panel panel-plain" label="How do I change a grade I disagree with?">
         <p>
           Team grades (QB Play, RB Play, Weapons, O-Line, Defense, Coaching) come from the other tabs'
           rankings, so re-rank the tab they come from: drag a team's line up the Offensive Lines tab, or a
@@ -265,52 +258,46 @@
           worked out from each QB's share of his team's plays and yards; if you think it counts too much or
           too little, turn its slider up or down.
         </p>
-      </details>
-      <details>
-        <summary>What does "-" mean?</summary>
+      </card-panel>
+      <card-panel class="faq-panel panel-plain" label="What does &quot;-&quot; mean?">
         <p>
           The stat isn't available for that player yet, usually because a data source doesn't cover him or
           he hasn't had the chance (no kicks from 50+, no short-yardage runs). Missing rate stats like 4th
           Down Go % count as league average; most others count as the worst value.
         </p>
-      </details>
-      <details>
-        <summary>When do the stats update?</summary>
+      </card-panel>
+      <card-panel class="faq-panel panel-plain" label="When do the stats update?">
         <p>
           The current season updates every night, early in the morning Eastern time, once the day's games
           are final and the data sources have caught up. Monday night games show up the following morning.
           Finished seasons don't change.
         </p>
-      </details>
-      <details>
-        <summary>Is my ranking saved?</summary>
+      </card-panel>
+      <card-panel class="faq-panel panel-plain" label="Is my ranking saved?">
         <p>
           No. Everything resets when you reload the page: sliders, drags, column changes, the settings menu
           and the season (back to the current one). Copy your list if you want to keep it.
         </p>
-      </details>
-      <details>
-        <summary>Why don't some stats change with Garbage Time Stats off?</summary>
+      </card-panel>
+      <card-panel class="faq-panel panel-plain" label="Why don't some stats change with Garbage Time Stats off?">
         <p>
           Only stats built play by play can be filtered: EPA, success rate, CPOE and most defense and O-line
           stats. Season totals like yards and touchdowns, and tracking stats like separation, stay the same.
         </p>
-      </details>
-      <details>
-        <summary>Why do early-season rankings jump around?</summary>
+      </card-panel>
+      <card-panel class="faq-panel panel-plain" label="Why do early-season rankings jump around?">
         <p>
           Small samples. One big game can swing a rate stat a lot in September (raise Min Games in the
           settings to leave out players with too few). The team grades lean on preseason grades early and
           shift to this season's results as games are played.
         </p>
-      </details>
-      <details>
-        <summary>A QB I'm looking for isn't listed.</summary>
+      </card-panel>
+      <card-panel class="faq-panel panel-plain" label="A QB I'm looking for isn't listed.">
         <p>
           The QB tab lists quarterbacks who started a game that season. If he's there but hidden, he may be
           injured with Injured Players turned off, or under the Min Games setting.
         </p>
-      </details>
+      </card-panel>
     }
 
     @case ('data') {

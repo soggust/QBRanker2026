@@ -170,55 +170,48 @@
 
     @case ('faq') {
       <h3>FAQ</h3>
-      <details open>
-        <summary>Why is my guy ranked so low?</summary>
+      <card-panel class="faq-panel panel-plain" [startOpen]="true" label="Why is my guy ranked so low?">
         <p>
           The ranking only reflects the sliders. Try a preset that fits his style, or check Min Fights if
           he's new. And if you still disagree, drag him where he belongs.
         </p>
-      </details>
-      <details>
-        <summary>Why careers and not seasons?</summary>
+      </card-panel>
+      <card-panel class="faq-panel panel-plain" label="Why careers and not seasons?">
         <p>
           A fighter has two or three fights a year: a season is too small to rank on. His whole career
           gives the rates enough fight time to mean something, and the rating keeps it current: recent
           wins and losses move it, and it grows less certain while he sits out.
         </p>
-      </details>
-      <details>
-        <summary>What's "significant" about a significant strike?</summary>
+      </card-panel>
+      <card-panel class="faq-panel panel-plain" label="What's &quot;significant&quot; about a significant strike?">
         <p>
           It's the official count of the strikes that matter: everything at distance, and the power shots
           in the clinch and on the ground (not the little pitter-patter ones). It's what the UFC's own
           stats use.
         </p>
-      </details>
-      <details>
-        <summary>Who counts as active?</summary>
+      </card-panel>
+      <card-panel class="faq-panel panel-plain" label="Who counts as active?">
         <p>
           Anyone with a fight in the UFC, PFL, Bellator or Rizin in the last two years. A fighter who hasn't
           fought there in two years moves to the all-time lists (with 6+ fights in the big promotions).
         </p>
-      </details>
-      <details>
-        <summary>What does "-" mean?</summary>
+      </card-panel>
+      <card-panel class="faq-panel panel-plain" label="What does &quot;-&quot; mean?">
         <p>
           Too small a sample: under 15 minutes of fight time for a rate, or too few attempts for an
           accuracy. Or not kept at all (the striking and grappling stats outside the UFC and PFL). A stat he
           doesn't have is left out of his score, not counted against him.
         </p>
-      </details>
-      <details>
-        <summary>When do the stats update?</summary>
+      </card-panel>
+      <card-panel class="faq-panel panel-plain" label="When do the stats update?">
         <p>Every night: the night after an event, its fights are in.</p>
-      </details>
-      <details>
-        <summary>Is my ranking saved?</summary>
+      </card-panel>
+      <card-panel class="faq-panel panel-plain" label="Is my ranking saved?">
         <p>
           No. Everything resets when you reload the page: sliders, drags, column changes and the settings
           menu. Copy your list if you want to keep it.
         </p>
-      </details>
+      </card-panel>
     }
 
     @case ('data') {

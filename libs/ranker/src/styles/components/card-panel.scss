@@ -72,6 +72,13 @@ card-panel {
     }
   }
 
+  // (plain, the FAQ's questions: the label in its own case, a touch larger, without the caps spacing)
+  &.panel-plain > .group-bar {
+    font-size: 14px;
+    letter-spacing: normal;
+    text-transform: none;
+  }
+
   // (switched off: its title faded, the filter menu's switched-off group)
   &.panel-dimmed > .group-bar .panel-toggle > :not(.panel-chevron) {
     opacity: 0.4;
