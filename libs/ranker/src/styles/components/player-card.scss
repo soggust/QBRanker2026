@@ -1,5 +1,6 @@
 @use "sass:meta";
 @use "../variables" as v;
+@use "group-bar";
 @use "awards";
 
 // ===========================================================================
@@ -800,19 +801,6 @@
 }
 
 .tab-card {
-
-  .group-bar.static {
-    cursor: default;
-
-    &:hover {
-      --bar-tint: color-mix(in srgb, var(--group-color) 16%, transparent);
-
-      span {
-        color: #fff;
-      }
-    }
-  }
-
   .log-chart:first-child,
   .career-chart:first-child {
     margin-top: 0;
@@ -858,43 +846,10 @@
   }
 }
 
+// A card's title bar (the Game Log and Career cards: a title, not a fold; the expandable panels draw
+// their own, card-panel.scss)
 .group-bar {
-  --bar-tint: color-mix(in srgb, var(--group-color) 16%, transparent);
-  align-items: center;
-  background: linear-gradient(var(--bar-tint), var(--bar-tint)), var(--scoreboard-dots), var(--scoreboard);
-  border: none;
-  color: #fff;
-  cursor: pointer;
-  display: flex;
-  font-family: v.$font-base;
-  font-size: 13px;
-  font-weight: 800;
-  gap: 8px;
-  letter-spacing: 1px;
-  padding: 10px 12px;
-  text-align: left;
-  text-transform: uppercase;
-  width: 100%;
-
-  .group-bar-icon {
-    color: var(--group-color);
-    @include v.icon-size(19px);
-  }
-
-  .group-bar-chevron {
-    color: rgba(255, 255, 255, 0.6);
-    @include v.icon-size(20px);
-    margin-left: auto;
-  }
-
-  &:hover {
-    --bar-tint: color-mix(in srgb, var(--group-color) 24%, transparent);
-
-    span,
-    .group-bar-chevron {
-      color: var(--scoreboard-led);
-    }
-  }
+  @include group-bar.bar;
 }
 
 .card-stats {
@@ -1955,26 +1910,6 @@
   // folded shut (each starts that way): just the bar
   &.closed {
     margin-top: 10px;
-
-    .group-body {
-      display: none;
-    }
-  }
-
-  .ai-bar {
-    padding-bottom: 14px;
-    padding-top: 14px;
-  }
-
-  .ai-bar .ai-chevron {
-    color: rgba(255, 255, 255, 0.55);
-    @include v.icon-size(20px);
-    margin: 0 -4px 0 -4px;
-  }
-
-  // (on hover the chevron lightens with the rest of the bar: never the accent color)
-  .ai-bar:hover .ai-chevron {
-    color: rgba(255, 255, 255, 0.9);
   }
 
   .group-body {

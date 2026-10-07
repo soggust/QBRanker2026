@@ -1,0 +1,27 @@
+@use "../variables" as v;
+
+// A card section's bar: the label in caps on the scoreboard, tinted in its category color (--group-color),
+// the category's icon before it. The expandable panels' (card-panel.scss) and the Game Log and Career
+// cards' title bars (player-card.scss) both wear it.
+@mixin bar {
+  --bar-tint: color-mix(in srgb, var(--group-color) 16%, transparent);
+  align-items: center;
+  background: linear-gradient(var(--bar-tint), var(--bar-tint)), var(--scoreboard-dots), var(--scoreboard);
+  border: none;
+  color: #fff;
+  display: flex;
+  font-family: v.$font-base;
+  font-size: 13px;
+  font-weight: 800;
+  gap: 8px;
+  letter-spacing: 1px;
+  padding: 12px;
+  text-align: left;
+  text-transform: uppercase;
+  width: 100%;
+
+  .group-bar-icon {
+    color: var(--group-color);
+    @include v.icon-size(19px);
+  }
+}

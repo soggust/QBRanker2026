@@ -192,6 +192,9 @@ export class PlayerCards {
 
   selectTab(tab: CardTab): void {
     this.tab = tab;
+    // (each tab's panels back to their defaults when it's opened: the Season groups open, the Analysis
+    // sections shut)
+    if (tab === 'stats') this.closedGroups.clear();
     if (tab === 'analysis') this.aiOpen.clear();
     if (tab === 'seasons' && this.card) this.rankCareer(this.card);
   }

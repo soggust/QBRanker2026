@@ -13,6 +13,7 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { SkillRankingsComponent } from './skill-rankings/skill-rankings.component';
 import { SettingsMenuComponent } from './skill-rankings/settings-menu.component';
 import { PlayerCardComponent } from './player-card/player-card.component';
+import { CardPanelComponent } from './player-card/card-panel.component';
 import { ColumnHighlightDirective } from '@ranker/core/column-highlight.directive';
 import { COLUMN_MOVER, ColumnDragDirective } from '@ranker/core/column-drag.directive';
 import { MatMenuModule } from '@angular/material/menu';
@@ -28,6 +29,7 @@ import { BetsPageComponent } from './bets/bets-page.component';
     SkillRankingsComponent,
     SettingsMenuComponent,
     PlayerCardComponent,
+    CardPanelComponent,
     ColumnHighlightDirective,
     ColumnDragDirective,
     AboutComponent,
