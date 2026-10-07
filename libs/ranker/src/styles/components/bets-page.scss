@@ -647,6 +647,9 @@ $arm-length: 175px;
     height: 200px;
     left: 100%;
     padding: 0;
+    // (seen from in front of the hub, so the lever tilts toward you around it)
+    perspective: 420px;
+    perspective-origin: 33px 154px;
     position: absolute;
     top: calc(50% - 20px);
     width: 64px;
@@ -691,6 +694,7 @@ $arm-length: 175px;
     position: absolute;
     top: 154px - $arm-length - 26px;
     transform-origin: 50% 100%;
+    transform-style: preserve-3d;
     width: 34px;
   }
 
@@ -729,50 +733,55 @@ $arm-length: 175px;
   }
 }
 
-// Pulled: the lever swings out and down on the hub, then springs back up past upright and settles (outside
-// the media query: Angular scopes the keyframes' name and only rewrites references outside one)
+// Pulled: the lever tilts toward you on the hub, down past it, then springs back up past upright and
+// settles; the knob turns back against it so it stays a ball facing you (outside the media query: Angular
+// scopes the keyframes' names and only rewrites references outside one)
 .slot-handle.pulling .slot-lever {
   animation: slot-pull 0.85s cubic-bezier(0.35, 0, 0.25, 1);
 }
 
-// (the knob turning back against it, so its shine stays up and to the left)
 .slot-handle.pulling .slot-knob {
   animation: slot-pull-knob 0.85s cubic-bezier(0.35, 0, 0.25, 1);
 }
 
-@keyframes slot-pull-knob {
-  40% {
-    transform: rotate(-150deg);
-  }
-  50% {
-    transform: rotate(-150deg);
-  }
-  80% {
-    transform: rotate(8deg);
-  }
-  92% {
-    transform: rotate(-3deg);
-  }
-  100% {
-    transform: rotate(0);
-  }
+// (mid-pull the knob comes toward you, in front of the hub)
+.slot-handle.pulling .slot-hub {
+  z-index: 0;
 }
 
 @keyframes slot-pull {
   40% {
-    transform: rotate(150deg);
+    transform: rotateX(-155deg);
   }
   50% {
-    transform: rotate(150deg);
+    transform: rotateX(-155deg);
   }
   80% {
-    transform: rotate(-8deg);
+    transform: rotateX(12deg);
   }
   92% {
-    transform: rotate(3deg);
+    transform: rotateX(-4deg);
   }
   100% {
-    transform: rotate(0);
+    transform: rotateX(0);
+  }
+}
+
+@keyframes slot-pull-knob {
+  40% {
+    transform: rotateX(155deg);
+  }
+  50% {
+    transform: rotateX(155deg);
+  }
+  80% {
+    transform: rotateX(-12deg);
+  }
+  92% {
+    transform: rotateX(4deg);
+  }
+  100% {
+    transform: rotateX(0);
   }
 }
 
