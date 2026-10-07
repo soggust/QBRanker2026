@@ -14,7 +14,7 @@ interface BetEntry {
   position: string | null;
   rowId: string;
   team: string | null;
-  game: { week: number; date: string; kickoff?: string | null; matchup: string; line: { line: string; overUnder: number | null } | null } | null;
+  game: { week: number; date: string; kickoff?: string | null; matchup: string; teams?: { abbr: string; logo: string | null }[]; line: { line: string; overUnder: number | null } | null } | null;
   market: string;
   lean: string;
   strength: 'like' | 'lean' | 'fade';

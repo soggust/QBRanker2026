@@ -45,13 +45,22 @@
               </span>
               <span class="bet-game">
                 @if (r.game) {
-                  <b>{{ r.game.matchup }}</b>
-                  <small>
-                    {{ r.sport | uppercase }} · Wk {{ r.game.week }}
-                    @if (r.game.line) {
-                      · {{ r.game.line.line }}@if (r.game.line.overUnder) { · O/U {{ r.game.line.overUnder }}}
-                    }
-                  </small>
+                  <!-- (each team with its little logo, when the data has them) -->
+                  @if (r.game.teams?.length === 2) {
+                    <b class="bet-matchup">
+                      @for (t of r.game.teams; track t.abbr; let last = $last) {
+                        @if (t.logo) {
+                          <img [src]="'/' + r.sport + '/' + t.logo" alt="" />
+                        }
+                        {{ t.abbr }}
+                        @if (!last) {
+                          <span class="bet-at">&#64;</span>
+                        }
+                      }
+                    </b>
+                  } @else {
+                    <b>{{ r.game.matchup }}</b>
+                  }
                 }
               </span>
               <span class="bet-score" [ngClass]="level(r)">{{ level(r) }}</span>

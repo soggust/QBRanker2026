@@ -335,7 +335,11 @@ function kickoffs() {
 
 function publish() {
   const kickoff = kickoffs();
-  const players =JSON.parse(readFileSync(path.join(ROOT, '.cache/analysis/index.json'), 'utf8'));
+  // each team's logo on the site, by abbreviation (from its defense's row: "DEF-CHI")
+  const logos = new Map(
+    JSON.parse(readFileSync(path.join(ROOT, 'apps/nfl/src/StaticData/skill-players.json'), 'utf8')).DEF.map((unit) => [unit.gsisId.slice(4), unit.teamLogo]),
+  );
+  const players = JSON.parse(readFileSync(path.join(ROOT, '.cache/analysis/index.json'), 'utf8'));
   const teams = existsSync(path.join(ROOT, '.cache/analysis/team-index.json')) ? JSON.parse(readFileSync(path.join(ROOT, '.cache/analysis/team-index.json'), 'utf8')) : [];
   const siteIds = new Map([...players.map((p) => [p.gsis, [p.siteId]]), ...teams.map((t) => [`team-${t.team}`, t.siteIds])]);
   rmSync(SITE, { recursive: true, force: true });
@@ -382,6 +386,8 @@ function publish() {
                 date: next.date,
                 kickoff: kickoff.get(next.at === 'home' ? `${next.date} ${next.opp}@${team}` : `${next.date} ${team}@${next.opp}`) ?? null,
                 matchup: next.at === 'home' ? `${next.opp} @ ${team}` : `${team} @ ${next.opp}`,
+                // (its two teams, each with its logo: the away team first, as in the matchup)
+                teams: (next.at === 'home' ? [next.opp, team] : [team, next.opp]).map((abbr) => ({ abbr, logo: logos.get(abbr) ?? null })),
                 line: next.line ?? null,
               }
             : null,

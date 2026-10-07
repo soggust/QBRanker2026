@@ -261,10 +261,27 @@ $chip-side-spot: linear-gradient(
   font-size: 13px;
 }
 
-// the bet itself in the hand (DynaPuff), like the card's headline numbers
+// the bet itself in the headline font (Outfit)
 .bet-main b {
   @include v.headline(17px);
   letter-spacing: 0.2px;
+}
+
+// the matchup: each team's little logo before its abbreviation
+.bet-game .bet-matchup {
+  align-items: center;
+  display: flex;
+  gap: 4px;
+
+  img {
+    height: 16px;
+    object-fit: contain;
+    width: 16px;
+  }
+
+  .bet-at {
+    margin: 0 2px;
+  }
 }
 
 // the confidence in words: light green high, yellow medium, dim white low
