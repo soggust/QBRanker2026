@@ -74,6 +74,8 @@
       <ol class="bets-list" [class.spinning]="spinning">
         @for (r of shown; track r.id; let i = $index) {
           <li class="bet" [ngClass]="level(r)" [class.open]="open.has(r.id)" [style.--i]="i">
+            <!-- (its rim a chip's: spots in its confidence color around its edge) -->
+            <svg class="bet-rim" aria-hidden="true"><rect class="rim-band" /><rect class="rim-spots" /></svg>
             <button type="button" class="bet-row" (click)="toggle(r.id)" [attr.aria-expanded]="open.has(r.id)">
               <mat-icon class="bet-chevron" [fontIcon]="open.has(r.id) ? 'expand_more' : 'chevron_right'"></mat-icon>
               <!-- (the #1 bet is the lock) -->
