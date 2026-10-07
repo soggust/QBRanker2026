@@ -179,9 +179,7 @@ export class BetsPageComponent implements OnInit {
         const day = kickoff ?? new Date(`${r.game.date}T12:00:00`);
         game = {
           key,
-          label: kickoff
-            ? `${r.game.matchup} · ${kickoff.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}`
-            : r.game.matchup,
+          label: r.game.matchup,
           day: day.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' }),
           at: day.getTime(),
           count: 0,
