@@ -131,6 +131,11 @@ export class SkillRankingsComponent implements OnChanges, CardHost {
     return this.positionService.settings;
   }
 
+  // (the card opening a roster's player on his own tab)
+  switchPosition(position: SkillPosition): void {
+    this.positionService.setPosition(position);
+  }
+
   get sportSettings(): SportSettings {
     return this.settings.sport;
   }

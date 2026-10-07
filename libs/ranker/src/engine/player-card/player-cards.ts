@@ -15,7 +15,7 @@ import { DEFAULT_SPORT_SETTINGS, SKILL_UNITS, defaultRanking, statValue } from '
 import { StatReader } from '@ranker/engine/stat-reader';
 import { SeasonDataService } from '@ranker/engine/season-data.service';
 import { NUMBER, grade, innings, ordinal, rankPct, rankTone } from '@ranker/core/format';
-import type { DepthView } from './depth-chart';
+import type { DepthPlayer, DepthView } from './depth-chart';
 import { CardOverview, CardSeason, CardStat, CardTab, CareerSeason, PlayerCard, SeasonContext } from './card.model';
 import { archetypeFor, overviewBlurb, profileFlags, scoutingReport, skillScores } from './overview';
 import { careerHistory } from './career-history';
@@ -42,6 +42,8 @@ export interface CardHost {
   headshot(unit: { id?: number | null }, w?: number): string | null;
   // (one failed to load: the next headshot() is the next place to look)
   noHeadshot(unit: { id?: number | null }): void;
+  // The table onto another tab (a roster's player opened on his own)
+  switchPosition(position: SkillPosition): void;
 }
 
 const TABS: { id: CardTab; title: string }[] = [
@@ -157,10 +159,41 @@ export class PlayerCards {
       this.depthCharts.set(key, 'loading');
       SPORT.depthChart
         .load(card.player, this.position, card.season)
-        .then((view) => this.depthCharts.set(key, view))
+        .then(async (view) => {
+          await this.linkRoster(view, card.season);
+          this.depthCharts.set(key, view);
+        })
         .catch(() => this.depthCharts.set(key, 'error'));
     }
     return this.depthCharts.get(key) ?? 'error';
+  }
+
+  // A roster's players the site has: each one's card (his tab and row id), found among that season's rows
+  // by his id (the QBs' rows by ESPN's: "QB-<id>")
+  private async linkRoster(view: DepthView, season: number): Promise<void> {
+    const rows = season === this.host.season ? SKILL_UNITS : await this.data.rows(season).catch(() => null);
+    if (!rows) return;
+    const index = new Map<string, { position: string; gsisId: string }>();
+    for (const [position, list] of Object.entries(rows)) {
+      for (const p of (list ?? []) as SkillPlayer[]) if (p.gsisId) index.set(p.gsisId, { position, gsisId: p.gsisId });
+    }
+    const link = (p: DepthPlayer | null | undefined) => {
+      if (p) p.link = index.get(p.id) ?? (p.espnId ? index.get(`QB-${p.espnId}`) : undefined) ?? null;
+    };
+    for (const side of view.sides) for (const slot of side.slots) slot.depth.forEach(link);
+    view.special.forEach((s) => link(s.player));
+    for (const g of view.usage) g.rows.forEach(link);
+    for (const w of view.timeline) for (const ch of w.changes) [ch.from, ch.to].forEach(link);
+  }
+
+  // A roster's player opened: his card for that season, the table switched to his tab first
+  async openLinked(link: { position: string; gsisId: string }, season: number): Promise<void> {
+    if (link.position !== this.position) {
+      this.host.switchPosition(link.position as SkillPosition);
+      // (the table takes its new tab on the next turn)
+      await new Promise((resolve) => setTimeout(resolve));
+    }
+    await this.openSeason(season, link.gsisId);
   }
 
   toggleDepthSlot(key: string): void {

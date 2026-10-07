@@ -5,6 +5,11 @@
 
 // A player on the chart or in the usage list
 export interface DepthPlayer {
+  // his ids (the sport's: the NFL's gsis id, and ESPN's), to find him among the site's players
+  id: string;
+  espnId: string | null;
+  // his card, when the site has him (filled in by the card: player-cards.ts)
+  link?: { position: string; gsisId: string } | null;
   name: string;
   // (the chip's short name: "L. Jackson")
   short: string;
@@ -50,8 +55,8 @@ export interface DepthUsageGroup {
 
 export interface DepthChange {
   label: string;
-  from: string;
-  to: string;
+  from: DepthPlayer;
+  to: DepthPlayer;
   // why, when it's known: its kind (injury, ir, released, traded, retired, inactive, coach, moved: the tag's
   // color), the tag ("Injury", "Coach's Decision"), and the detail ("Out (ankle)", "Moved to C")
   reason: string | null;

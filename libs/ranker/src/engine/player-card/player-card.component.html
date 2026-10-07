@@ -430,7 +430,7 @@
                           @for (p of slot.depth; track $index) {
                             <span class="depth-pop-row">
                               <i>{{ $index + 1 }}</i>
-                              <span>{{ p.name }}</span>
+                              @if (p.link; as link) {<button type="button" class="depth-link" [title]="'Open ' + p.name" (click)="$event.stopPropagation(); cards.openLinked(link, c.season)">{{ p.name }}</button>} @else {<span>{{ p.name }}</span>}
                               @if (p.status) {
                                 <em [ngClass]="'s-' + p.status.toLowerCase()">{{ p.status }}</em>
                               }
@@ -472,9 +472,9 @@
                     @for (ch of w.changes; track ch.label + ch.to) {
                       <div class="depth-change">
                         <span class="depth-change-pos">{{ ch.label }}</span>
-                        <s>{{ ch.from }}</s>
+                        <s>@if (ch.from.link; as link) {<button type="button" class="depth-link" [title]="'Open ' + ch.from.name" (click)="$event.stopPropagation(); cards.openLinked(link, c.season)">{{ ch.from.name }}</button>} @else {<span>{{ ch.from.name }}</span>}</s>
                         <mat-icon fontIcon="arrow_forward"></mat-icon>
-                        <b>{{ ch.to }}</b>
+                        <b>@if (ch.to.link; as link) {<button type="button" class="depth-link" [title]="'Open ' + ch.to.name" (click)="$event.stopPropagation(); cards.openLinked(link, c.season)">{{ ch.to.name }}</button>} @else {<span>{{ ch.to.name }}</span>}</b>
                         <!-- (why: a tag in its color, the detail beside it) -->
                         @if (ch.tag) {
                           <span class="depth-reason" [ngClass]="'r-' + ch.reason">{{ ch.tag }}</span>
@@ -502,7 +502,7 @@
                           <span class="depth-initial">{{ p.name[0] }}</span>
                         }
                       </span>
-                      <span class="depth-row-name">{{ p.name }}<small>{{ p.pos }}</small></span>
+                      <span class="depth-row-name">@if (p.link; as link) {<button type="button" class="depth-link" [title]="'Open ' + p.name" (click)="$event.stopPropagation(); cards.openLinked(link, c.season)">{{ p.name }}</button>} @else {<span>{{ p.name }}</span>}<small>{{ p.pos }}</small></span>
                       <span class="depth-bar"><i [style.width.%]="(p.snaps ?? 0) * 100"></i></span>
                       <span class="depth-row-pct">{{ p.snaps != null ? (p.snaps | percent: '1.0-0') : '—' }}</span>
                       <span class="depth-row-games">{{ p.games }}G</span>

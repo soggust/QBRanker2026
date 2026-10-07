@@ -92,6 +92,8 @@ export async function loadDepthChart(logo: string, position: string, season: num
     const p = file.players[id];
     const snaps = !p ? null : side === 'offense' ? p.off : side === 'defense' ? p.def : p.st;
     return {
+      id,
+      espnId: p?.espnId ?? null,
       name: p?.name ?? id,
       short: shortName(p?.name ?? id),
       headshot: thumb(p?.headshot) ?? (p?.espnId ? `https://a.espncdn.com/combiner/i?img=/i/headshots/nfl/players/full/${p.espnId}.png&w=96&h=70` : null),
@@ -196,8 +198,8 @@ export async function loadDepthChart(logo: string, position: string, season: num
     week: w.week,
     changes: w.changes.map((c) => ({
       label: LABEL[c.key] ?? c.key.replace(/\d+$/, ''),
-      from: file.players[c.from]?.name ?? c.from,
-      to: file.players[c.to]?.name ?? c.to,
+      from: player(c.from, c.side === 'defense' ? 'defense' : 'offense'),
+      to: player(c.to, c.side === 'defense' ? 'defense' : 'offense'),
       reason: c.reason ?? null,
       tag: c.reason ? (REASON_TAG[c.reason] ?? null) : null,
       // (the detail when it adds to the tag: the injury, where someone moved)
