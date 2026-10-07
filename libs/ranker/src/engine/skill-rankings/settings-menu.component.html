@@ -55,19 +55,14 @@
   <div class="menu-section section-display" (click)="$event.stopPropagation()"><mat-icon fontIcon="visibility"></mat-icon>Display</div>
   @for (item of switches; track item.label) {
     <div mat-menu-item [title]="item.title" (click)="$event.stopPropagation(); item.flip()">
-      <!-- (a choice among them, the NFL's Rank Base: its value where the toggle would be) -->
-      @if (item.value) {
-        <span class="menu-switch-value menu-value">{{ item.value() }}</span>
-      } @else {
-        <mat-slide-toggle
-          hideIcon
-          color="accent"
-          class="slide-toggle"
-          [ngModel]="item.on()"
-          (ngModelChange)="item.flip()"
-          (click)="$event.stopPropagation()"
-        ></mat-slide-toggle>
-      }
+      <mat-slide-toggle
+        hideIcon
+        color="accent"
+        class="slide-toggle"
+        [ngModel]="item.on()"
+        (ngModelChange)="item.flip()"
+        (click)="$event.stopPropagation()"
+      ></mat-slide-toggle>
       <span>{{ item.label }}</span>
     </div>
   }

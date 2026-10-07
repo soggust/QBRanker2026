@@ -344,15 +344,6 @@ html {
       color: var(--scoreboard-led) !important;
     }
 
-    // ...one among the Display switches: as wide as a toggle and its gap, so the labels line up
-    .menu-switch-value {
-      display: inline-block;
-      flex: 0 0 auto;
-      font-weight: 800;
-      white-space: nowrap;
-      width: 78px;
-    }
-
     &:hover .mat-icon.menu-icon {
       color: var(--scoreboard-led) !important;
     }

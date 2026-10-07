@@ -122,11 +122,10 @@ export interface SportSetting {
   // Men's and Women's under it); the closed dropdown still shows the full label from options
   optionGroups?: { label: string; options: Record<string, string> }[];
   default: string | boolean;
-  // Where it sits: the Format section's top, after Stat Base, among the Display switches (before
-  // Injured Players), in the Display list right above Show As Ranks (a choice, its value where the
-  // switches' toggles are), at the bottom of the menu, or (a choice) as the footer's dropdown in the year
-  // selector's place (MMA's Current / All-Time)
-  slot: 'formatTop' | 'formatMid' | 'display' | 'beforeRanks' | 'displayEnd' | 'footer';
+  // Where it sits: the Format section's top (above Stat Base), after Stat Base, among the Display
+  // switches (before Injured Players), at the bottom of the menu, or (a choice) as the footer's dropdown in
+  // the year selector's place (MMA's Current / All-Time)
+  slot: 'formatTop' | 'formatMid' | 'display' | 'displayEnd' | 'footer';
   // Its menu icon (a cycled choice): a Material icon, or a class the styles draw ('lombardi')
   icon?: string;
   iconClass?: string;
