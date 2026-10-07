@@ -820,16 +820,13 @@
   }
 }
 
-// (a panel's spacing on the card; its box is the panel's, card-panel.scss)
+// (a panel's spacing on the card, the same open or shut so nothing shifts; its box is the panel's,
+// card-panel.scss)
 .stat-group {
-  margin-top: 14px;
+  margin-top: 12px;
 
   &:first-child {
     margin-top: 0;
-  }
-
-  &.closed {
-    margin-top: 10px;
   }
 
   // (the body's spacing; its edges are the panel's, card-panel.scss)
@@ -1894,12 +1891,7 @@
 }
 
 .ai-card {
-  margin-top: 14px;
-
-  // folded shut (each starts that way): just the bar
-  &.closed {
-    margin-top: 10px;
-  }
+  margin-top: 12px;
 
   .group-body {
     padding: 20px 20px 22px;

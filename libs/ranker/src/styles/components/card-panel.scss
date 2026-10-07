@@ -85,8 +85,13 @@ card-panel {
   }
 
   // (open: a line in its category color under the bar)
+  // (the line's always there, see-through when shut, so opening a panel never moves what's below it)
+  > .group-bar {
+    border-bottom: 1px solid transparent;
+  }
+
   &:not(.closed) > .group-bar {
-    border-bottom: 1px solid color-mix(in srgb, var(--group-color) 40%, transparent);
+    border-bottom-color: color-mix(in srgb, var(--group-color) 40%, transparent);
   }
 
   // The body: its edges the sport's (the NFL's sidelines, MLB's chalk, the painted lines; _sport-panel.scss)
