@@ -1357,31 +1357,55 @@
     width: calc(100vw - 16px);
   }
 
+  // The hero one compact row (on a phone it's the least of what the card is for): a small team card with
+  // the player in it, the name and team, and a small rank tile under the card's buttons
   .card-hero {
-    gap: 14px 16px;
-    grid-template-columns: 1fr auto;
-    padding: 48px 16px 16px;
+    align-items: end;
+    gap: 12px;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    padding: 14px 12px 12px;
   }
 
   .hero-badge {
-    --w: 150px;
-    --h: 100px;
-    --shot-h: 124px;
-    --hang: 30px;
-    grid-column: 1 / -1;
-    justify-self: center;
+    --w: 82px;
+    --h: 56px;
+    --shot-h: 70px;
+    --hang: 14px;
+  }
+
+  .hero-kicker {
+    margin-bottom: 2px;
+
+    .season-chip {
+      font-size: 11px;
+      padding: 1px 8px;
+    }
   }
 
   .hero-text h2 {
-    font-size: 30px;
+    font-size: 22px;
+    line-height: 1.1;
+    margin: 2px 0;
   }
 
+  .hero-team {
+    font-size: 10.5px;
+    letter-spacing: 0.5px;
+  }
+
+  // (under the back, next and close buttons)
   .hero-rank {
-    min-width: 76px;
-    padding: 6px 10px 8px;
+    margin-top: 34px;
+    min-width: 54px;
+    padding: 3px 7px 5px;
+
+    .rank-label,
+    .rank-of {
+      font-size: 8px;
+    }
 
     .rank-number {
-      font-size: 28px;
+      font-size: 20px;
     }
   }
 
