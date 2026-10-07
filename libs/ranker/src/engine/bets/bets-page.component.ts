@@ -67,6 +67,18 @@ interface SheetPick {
   sources: string[];
   game: BetEntry['game'];
 }
+// The desk's record, its picks graded after their games (scripts/analysis/grade.mjs)
+interface Tally {
+  wins: number;
+  losses: number;
+  pushes: number;
+  winPct: number | null;
+}
+interface BetRecord {
+  graded: number;
+  overall: Tally;
+  byLevel: { high: Tally; medium: Tally; low: Tally };
+}
 interface Sheet {
   at: string;
   week: number;
@@ -133,6 +145,13 @@ export class BetsPageComponent implements OnInit {
   readonly insteadText = insteadText;
   // each game's venue and kickoff weather, from the bet desk's sheet ("nfl|CHI @ GB")
   places = new Map<string, GameInfo>();
+  // how the desk's earlier picks did (data/analysis/ledger.json)
+  record: BetRecord | null = null;
+
+  // A record as "14-9" ("14-9-1" with a push)
+  wl(t: Tally): string {
+    return `${t.wins}–${t.losses}${t.pushes ? `–${t.pushes}` : ''}`;
+  }
 
   // Under a matchup: the kickoff weather and where it's played ("57° · 8 mph · Lambeau Field"); windy (15+ mph,
   // or gusts of 25+) when the wind could matter
@@ -167,11 +186,14 @@ export class BetsPageComponent implements OnInit {
         sport: s.id,
         bets: await get(`/${s.id}/data/analysis/bets.json`),
         sheet: (await get(`/${s.id}/data/analysis/bet-sheet.json`)) as Sheet | null,
+        ledger: (await get(`/${s.id}/data/analysis/ledger.json`)) as { record: BetRecord | null } | null,
       })),
     );
     const entries: BetEntry[] = [];
     const sheetRows: BetRow[] = [];
-    for (const { sport, bets: file, sheet } of files) {
+    for (const { sport, bets: file, sheet, ledger } of files) {
+      // (the desk's graded record, once any of its picks are graded)
+      if (ledger?.record?.graded) this.record = ledger.record;
       if (!file?.bets?.length) continue;
       // (the latest run only: reports written within 6 hours of its newest, not an older pilot's)
       const newest = Math.max(...file.bets.map((b: BetEntry) => Date.parse(b.at)));

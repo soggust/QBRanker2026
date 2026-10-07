@@ -60,6 +60,14 @@
   font-size: 12px;
   font-weight: 600;
   margin-left: auto;
+  text-align: right;
+}
+
+// ...and under it, the desk's record so far
+.bets-record {
+  color: rgba(255, 255, 255, 0.7);
+  display: block;
+  margin-top: 4px;
 }
 
 // The game dropdown a casino chip (as the sports' dropdowns are leather, rubber...): red clay with a

@@ -15,6 +15,7 @@ import Anthropic from '@anthropic-ai/sdk';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { espnInjuries, espnLines, kickoffForecast, kickoffIso, venue } from './live.mjs';
+import { readLedger, seasonOf, writeLedger } from './ledger.mjs';
 
 const ROOT = path.resolve(import.meta.dirname, '../../../..');
 const SITE = path.join(ROOT, 'apps/nfl/src/StaticData/analysis');
@@ -27,7 +28,7 @@ const PRICE = { input: 4, output: 20 };
 
 const SYSTEM = `You run the bet desk for a football rankings site. Every week the site's analysts write a report on each team and each starting quarterback, and each report suggests up to five betting angles for its coming game. You get all of those suggestions at once, grouped by game, with each game's current line, injury report and kickoff forecast. Your job is the editor's: decide which ideas really hold up, and write the week's bet sheet.
 
-The reader is an independent bettor who will decide for himself whether to act. He doesn't want hype or a promise of winning; he wants good ideas with reasoning strong enough to weigh, and honesty about what could go wrong. Quality over count.
+The reader is an independent bettor who will decide for themselves whether to act. They don't want hype or a promise of winning; they want a full menu of ideas, each with reasoning strong enough to weigh, honestly rated, and honesty about what could go wrong.
 
 What you get, per game: the matchup, kickoff, venue, the current line (line names the favorite and the spread; overUnder; moneylines) and the line when the reports were written if it has moved, each team's season profile ([value, rank of 32], 1 = best; for "allowed" stats rank 1 is the fewest), the injury report's regulars (snapPct is this season's share of snaps; "new" means reported since the analysts wrote), the kickoff forecast, and the candidates: each suggestion's id, the report it came from, its market, the bet (lean), like (backing the side named) or fade (going against the side named; the lean is the bet to make), the analyst's 1-10 score, and the analyst's reason.
 
@@ -38,17 +39,42 @@ How to edit:
 - Weather: only for outdoor games (a retractable roof is likely closed in bad weather). Sustained wind of 15+ mph or gusts of 25+ hurt passing, the deep game and kicking, and lean totals and passing numbers down; heavy rain or snow (a high precipChance with real precipIn) hurts passing and ball security somewhat; cold alone matters little. early: true means the forecast is more than 3 days out and rough: mention a big system, hedged, but don't build a pick on it. A pick that bad weather undercuts (an over, a passing over) must answer it or be rejected. A pick weather supports can say so.
 - Player bets are framed against the player's own average ("over his 250-a-game average"): the site has no prop lines. Keep that framing honest; don't invent a line.
 - No new bets: every pick is one or more candidates. You can restate a candidate's bet more cleanly, but not change it.
-- Pick as many as genuinely hold up: usually 8 to 20, fewer in a thin week. Reject the rest (group rejections that fail for the same reason), each with one specific line of under 15 words; your rejections teach the analysts what doesn't hold up, so be specific.
+- Keep every idea with a real case, up to 50 picks (aim for 35-50 in a full week): the reader wants the whole menu, rated, not just the best few. Thin but reasonable ideas stay with a low strength; that's what the low end is for. Reject only what doesn't hold up at all: the line has moved past the number the reasoning needed, an injury or another report undercuts it, it contradicts a stronger pick, or its reason is only a streak or a narrative. Group rejections that fail for the same reason, each with one specific line of under 15 words; your rejections teach the analysts what doesn't hold up, so be specific.
 
 Each pick:
 - bet: the wager in a few words, as a bettor would say it ("LV +3.5", "Under 42.5", "MIA team total under 17.5", "Jackson under his 36-a-game rushing average").
 - label: the market, short ("Spread", "Game total", "Moneyline", "Team total", "Jackson rushing yards").
 - side: like, or fade (going against what the market or the obvious read favors); for a fade, fades names the side it goes against ("BUF -3.5"), otherwise fades is "".
-- strength: 1-10, how convincing the case is and how likely it is to win: 8-9 when the matchup, the number, the injuries and the weather all point the same way; 6-7 a solid edge with a real risk; 5 a lean. Use the range; don't park everything at 7.
+- strength: 1-10, how convincing the case is and how likely it is to win: 8-9 when the matchup, the number, the injuries and the weather all point the same way; 7 a strong case with a real risk; 5-6 a modest edge; 3-4 a reasonable idea with a thin edge or a serious counter-case. The site shows 7+ as High, 5-6 as Medium and below 5 as Low confidence. Use the whole range; don't park everything at 7.
 - case: 2-4 sentences, the argument a sharp friend would make, built on specific numbers from the candidates' reasons and the game's data. Use no numbers that aren't there or directly derivable from them.
 - risk: 1-2 sentences, the most likely way it loses.
+- grade: what settles it after the game, from the bettor's side (the bet you wrote, not what a fade goes against): "LV +3.5" is spread, team LV, line 3.5; "Under 42.5" is total, under, 42.5; "MIA team total under 17.75" is team_total, MIA, under, 17.75; "Love under his 260-a-game passing average" is player, Jordan Love, GB, passing_yards, under, 260; "Ravens under their 153.5 rushing average" is team_stat, BAL, rushing_yards, under, 153.5.
+
+trackRecord, when there is one: how your earlier sheets' picks did, graded after their games, by confidence level and by kind of bet. Use it to calibrate: if a level wins less often than its label claims, rate more conservatively; if a kind of bet keeps losing, hold it to a higher bar, and if one keeps winning, trust that reasoning a little more. Samples are small and football is noisy: below about 30 graded picks in a group, it's a nudge, not a rule.
 
 summary: 2-3 sentences on the slate: its themes, and anything that shapes several picks (a weather system, a wave of injuries, a market overreacting to records).`;
+
+// How a pick is graded after its game (grade.mjs): what it bets on, from the bettor's side
+const STATS = [
+  'passing_yards', 'passing_tds', 'passing_interceptions', 'completions', 'attempts', 'sacks_suffered',
+  'rushing_yards', 'carries', 'rushing_tds', 'receptions', 'targets', 'receiving_yards', 'receiving_tds',
+  'def_sacks', 'def_interceptions',
+];
+const GRADE = {
+  type: 'object',
+  description:
+    'what settles the bet, from the bettor\'s side: spread (team + its line, e.g. LV and 3.5, or BUF and -3.5), moneyline (team), total (direction + line), team_total (team + direction + line), player (player + team + stat + direction + line: for a bet against his average, the average), team_stat (team + stat + direction + line). Fields that don\'t apply are null.',
+  properties: {
+    kind: { type: 'string', enum: ['spread', 'moneyline', 'total', 'team_total', 'player', 'team_stat'] },
+    team: { type: ['string', 'null'], description: 'the team the bet is on (its abbreviation, as in the matchup)' },
+    player: { type: ['string', 'null'], description: 'the player\'s full name, as in the candidates' },
+    stat: { type: ['string', 'null'], enum: [...STATS, null] },
+    direction: { type: ['string', 'null'], enum: ['over', 'under', null] },
+    line: { type: ['number', 'null'] },
+  },
+  required: ['kind', 'team', 'player', 'stat', 'direction', 'line'],
+  additionalProperties: false,
+};
 
 const SCHEMA = {
   type: 'object',
@@ -67,8 +93,9 @@ const SCHEMA = {
           strength: { type: 'integer' },
           case: { type: 'string' },
           risk: { type: 'string' },
+          grade: GRADE,
         },
-        required: ['candidates', 'bet', 'label', 'side', 'fades', 'strength', 'case', 'risk'],
+        required: ['candidates', 'bet', 'label', 'side', 'fades', 'strength', 'case', 'risk', 'grade'],
         additionalProperties: false,
       },
     },
@@ -167,6 +194,8 @@ async function main() {
   for (const [matchup, { game, candidates: list }] of byGame) {
     const [away, home] = matchup.split(' @ ');
     const fact = facts.get(`${game.date} ${away}@${home}`) ?? {};
+    // (a game that's kicked off is settled: its picks stay as they were locked in the ledger)
+    if (fact.kickoff && Date.parse(fact.kickoff) <= Date.now()) continue;
     const forecast = await kickoffForecast(fact);
     const now = lines.get(`${away}@${home}`);
     const line = now ? { line: now.line, overUnder: now.overUnder, awayMoneyline: now.awayMoneyline, homeMoneyline: now.homeMoneyline } : game.line;
@@ -192,9 +221,17 @@ async function main() {
     // (what the page shows under each matchup: where, and the weather)
     site[matchup] = { kickoff: fact.kickoff ?? null, city: where.city, stadium: where.stadium, line, weather: forecast };
   }
+  if (!games.length) {
+    console.log('every game this week has kicked off');
+    return;
+  }
   games.sort((a, b) => String(a.kickoff).localeCompare(String(b.kickoff)));
-  const input = JSON.stringify({ week, games });
-  console.log(`${bets.length} candidates in ${games.length} games (${Math.round(input.length / 1000)}k characters)`);
+  // (how the earlier sheets' picks did, once any are graded: grade.mjs)
+  const ledger = readLedger();
+  const trackRecord = ledger.record?.graded ? ledger.record : undefined;
+  const input = JSON.stringify({ week, trackRecord, games });
+  const count = games.reduce((n, g) => n + g.candidates.length, 0);
+  console.log(`${count} candidates in ${games.length} games (${Math.round(input.length / 1000)}k characters)`);
   if (process.argv.includes('--dry-run')) {
     mkdirSync(LOG, { recursive: true });
     writeFileSync(path.join(LOG, 'dry-run.json'), JSON.stringify({ week, games }, null, 2));
@@ -206,7 +243,7 @@ async function main() {
   const message = await client.messages
     .stream({
       model: MODEL,
-      max_tokens: 64000,
+      max_tokens: 100000,
       thinking: { type: 'adaptive' },
       output_config: { effort: EFFORT, format: { type: 'json_schema', schema: SCHEMA } },
       system: SYSTEM,
@@ -240,6 +277,7 @@ async function main() {
       strength: Math.max(1, Math.min(10, p.strength)),
       case: p.case,
       risk: p.risk,
+      grade: p.grade,
       sources: [...new Set(from.map((b) => b.source))],
       game: { week: game.week, date: game.date, kickoff: game.kickoff ?? site[game.matchup]?.kickoff ?? null, matchup: game.matchup, teams: game.teams, line: site[game.matchup]?.line ?? game.line },
     });
@@ -251,6 +289,20 @@ async function main() {
     JSON.stringify({ at, model: MODEL, effort: EFFORT, week, reportsAt, usage, cost, problems, sheet }, null, 2),
   );
   writeFileSync(path.join(SITE, 'bet-sheet.json'), JSON.stringify({ at, week, reportsAt, summary: sheet.summary, games: site, picks }));
+  // The ledger: each game's picks as this sheet has them, until it kicks off (then they're what's graded)
+  const season = seasonOf(picks[0]?.game.date ?? games[0].kickoff);
+  if (ledger.season !== season) Object.assign(ledger, { season, weeks: {}, record: null });
+  const thisWeek = (ledger.weeks[week] ??= {});
+  for (const g of games) {
+    thisWeek[g.matchup] = {
+      kickoff: g.kickoff,
+      lockedAt: at,
+      picks: picks
+        .filter((p) => p.game.matchup === g.matchup)
+        .map((p) => ({ bet: p.bet, label: p.label, side: p.side, strength: p.strength, grade: p.grade, result: null, actual: null })),
+    };
+  }
+  writeLedger(ledger);
   console.log(`${picks.length} picks, ${sheet.rejected.length} rejections; $${cost.toFixed(2)} (${usage.input_tokens} in, ${usage.output_tokens} out)`);
   for (const p of problems) console.log(`  ${p}`);
 }

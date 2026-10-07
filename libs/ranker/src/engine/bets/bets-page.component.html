@@ -21,7 +21,15 @@
         </span>
       }
       @if (updated) {
-        <span class="bets-updated">Updated {{ updated | date: 'EEE MMM d, h:mm a' }}</span>
+        <span class="bets-updated">
+          Updated {{ updated | date: 'EEE MMM d, h:mm a' }}
+          <!-- (the desk's record so far: overall, then by confidence) -->
+          @if (record) {
+            <span class="bets-record">
+              Record {{ wl(record.overall) }} · High {{ wl(record.byLevel.high) }} · Medium {{ wl(record.byLevel.medium) }} · Low {{ wl(record.byLevel.low) }}
+            </span>
+          }
+        </span>
       }
     </header>
 
