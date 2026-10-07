@@ -4455,7 +4455,7 @@
         "epaPerCarry": -0.257,
         "epaPerTarget": 0.62
       },
-      "injuryStatus": "Active",
+      "injuryStatus": "Questionable",
       "injured": false
     },
     {
@@ -9429,7 +9429,7 @@
         "epaPerCarry": 0,
         "epaPerTarget": 0.255
       },
-      "injuryStatus": "Active",
+      "injuryStatus": "Questionable",
       "injured": false
     },
     {
@@ -9649,7 +9649,7 @@
         "epaPerCarry": 0,
         "epaPerTarget": 1.053
       },
-      "injuryStatus": "Active",
+      "injuryStatus": "Questionable",
       "injured": false
     },
     {
@@ -10749,7 +10749,7 @@
         "epaPerCarry": 1.649,
         "epaPerTarget": 1.643
       },
-      "injuryStatus": "Active",
+      "injuryStatus": "Questionable",
       "injured": false
     }
   ],
