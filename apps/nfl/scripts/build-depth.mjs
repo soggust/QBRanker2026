@@ -460,13 +460,20 @@ async function buildSeason(season, players) {
         const week = weekCharts[i].week;
         const movedFrom = beforeSpot.get(is);
         const moved = movedFrom ? `moved from ${LABEL_OF[movedFrom] ?? movedFrom}` : null;
-        const hurt = report(week, was);
+        // (the coming game's week has no weekly injury report yet: ESPN's live one says, for the season
+        // being played)
+        const live = current && i === weekCharts.length - 1 ? people.get(was) : null;
+        const liveIr = live?.status === 'Injured Reserve';
+        const liveHurt = live?.status && !liveIr ? `${live.status}${live.injury ? ` (${live.injury.toLowerCase()})` : ''}` : null;
+        const hurt = report(week, was) ?? liveHurt;
         const roster = rosterStatus.get(`${week}|${was}`);
         const stillListed = [...after.slots.values()].some((x) => x.depth.includes(was));
         const nowAt = afterSpot.get(was);
         const [reason, note] = hurt
           ? ['injury', hurt]
-          : nowAt
+          : liveIr
+            ? ['ir', 'Injured reserve']
+            : nowAt
             ? ['moved', `Moved to ${LABEL_OF[nowAt] ?? nowAt}`]
           : roster?.status === 'RES'
             ? ['ir', 'Injured reserve']
