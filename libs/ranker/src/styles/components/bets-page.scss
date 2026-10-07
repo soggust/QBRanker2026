@@ -206,6 +206,15 @@ $chip-side-spot: linear-gradient(
     color: var(--tint-good, #3ee07a);
     text-shadow: 0 0 8px rgba(62, 224, 122, 0.6);
   }
+
+  // the #1 bet: a lock, glowing like the digits
+  &.lock {
+    padding-top: 0;
+
+    .mat-icon {
+      @include v.icon-size(19px);
+    }
+  }
 }
 
 .bet-grade {
