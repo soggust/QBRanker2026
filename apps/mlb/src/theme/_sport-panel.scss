@@ -18,9 +18,11 @@
   // (the chalk on a layer of its own, so it can fade)
   &::before {
     background:
-      url("../assets/textures/chalk-line-v.svg") left top / 6px 90px repeat-y,
-      url("../assets/textures/chalk-line-v.svg") right top / 6px 90px repeat-y,
-      url("../assets/textures/chalk-line-h.svg") left bottom / 90px 6px repeat-x;
+      // (each line is drawn down the middle of its tile: the tiles shifted out 2px, so it runs on the edge,
+      // in line with the header's border)
+      url("../assets/textures/chalk-line-v.svg") left -2px top / 6px 90px repeat-y,
+      url("../assets/textures/chalk-line-v.svg") right -2px top / 6px 90px repeat-y,
+      url("../assets/textures/chalk-line-h.svg") left bottom -2px / 90px 6px repeat-x;
     content: "";
     inset: 0;
     opacity: 0.8;

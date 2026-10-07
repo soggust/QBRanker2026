@@ -17,37 +17,64 @@ card-panel {
     --bar-tint: color-mix(in srgb, var(--group-color) 16%, transparent);
     align-items: center;
     background: linear-gradient(var(--bar-tint), var(--bar-tint)), var(--scoreboard-dots), var(--scoreboard);
-    border: none;
     color: #fff;
     display: flex;
     font-family: v.$font-base;
     font-size: 13px;
     font-weight: 800;
-    gap: 8px;
     letter-spacing: 1px;
-    padding: 12px;
-    text-align: left;
     text-transform: uppercase;
-    width: 100%;
+
+    // its title (the toggle, on an expandable one): the chevron, the icon and the label
+    .panel-toggle,
+    .panel-title {
+      align-items: center;
+      background: none;
+      border: none;
+      color: inherit;
+      display: flex;
+      flex: 1;
+      font: inherit;
+      gap: 8px;
+      letter-spacing: inherit;
+      min-width: 0;
+      padding: 12px;
+      text-align: left;
+      text-transform: inherit;
+    }
+
+    .panel-toggle {
+      cursor: pointer;
+    }
 
     .group-bar-icon {
       color: var(--group-color);
       @include v.icon-size(19px);
     }
+
+    // (the page's controls: on the right, with a little room at the end)
+    > [panel-actions] {
+      align-items: center;
+      display: flex;
+      flex: 0 0 auto;
+      gap: 2px;
+      padding-right: 8px;
+    }
   }
 
-  // (an expandable one clicks; on hover the bar lifts and the chevron lightens, like every row and panel
-  // that opens; never the accent color)
-  > button.group-bar {
-    cursor: pointer;
+  // (on hover the bar lifts and the chevron lightens, like every row and panel that opens; never the
+  // accent color)
+  > .group-bar:has(> .panel-toggle:hover) {
+    --bar-tint: color-mix(in srgb, var(--group-color) 24%, transparent);
 
-    &:hover {
-      --bar-tint: color-mix(in srgb, var(--group-color) 24%, transparent);
-
-      .panel-chevron {
-        color: rgba(255, 255, 255, 0.9);
-      }
+    .panel-chevron {
+      color: rgba(255, 255, 255, 0.9);
     }
+  }
+
+  // (switched off: its title faded, the filter menu's switched-off group)
+  &.panel-dimmed > .group-bar .panel-toggle > :not(.panel-chevron) {
+    opacity: 0.4;
   }
 
   // (open: a line in its category color under the bar)

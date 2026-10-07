@@ -125,97 +125,33 @@
 }
 
 // ---------------------------------------------------------------------------
-// A stat group's card: a header in the group's color (drag grip, icon, title, eye, chevron), its
-// sliders inside when open
+// A stat group: a panel (card-panel, like the player card's) in the group's color, its eye and drag grip
+// on the bar's right, its sliders inside when open
 // ---------------------------------------------------------------------------
 .sidebar .filters .filter-group {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid #2c2c2c;
-  border-radius: 0.5em;
   margin: 0 1em 1em;
-  overflow: hidden;
-  padding: 0;
 
-  &.open {
-    border-color: #3a3a3a;
+  // The eye (white; yellow while the group is switched off) and the drag grip, lightening on hover
+  .group-actions {
+    gap: 0.15em;
   }
 
-  div.group-header {
+  button.group-eye {
     align-items: center;
-    background: color-mix(in srgb, var(--group-color) 16%, transparent);
+    background: transparent;
+    border: none;
+    border-radius: 0.3em;
+    cursor: pointer;
     display: flex;
-    padding: 0 0.4em 0 0;
-    position: relative;
+    justify-content: center;
+    padding: 0.3em;
 
-    &:hover {
-      background: color-mix(in srgb, var(--group-color) 24%, transparent);
-
-      button.group-toggle span.group-title {
-        color: var(--scoreboard-led);
-      }
+    .mat-icon {
+      @include em-icon(1.45em);
+      color: rgba(255, 255, 255, 0.8);
     }
 
-    button {
-      background: transparent;
-      border: none;
-      color: #fff;
-      cursor: pointer;
-      font-family: inherit;
-      height: auto;
-      margin: 0;
-      text-shadow: none;
-    }
-
-    // Icon and title (past the grip), opening and closing the card
-    button.group-toggle {
-      align-items: center;
-      display: flex;
-      flex: 1;
-      font-size: 0.92em;
-      font-weight: 800;
-      // (the same 12px between the icon and the title as between the grip and the icon)
-      gap: 12px;
-      letter-spacing: 1px;
-      padding: 0.95em 1em 0.95em calc(1em + 21px);
-      text-align: left;
-      text-transform: uppercase;
-
-      .group-icon {
-        @include em-icon(1.55em);
-        color: var(--group-color);
-      }
-
-      span.group-title {
-        color: #fff;
-        font-family: v.$font-base;
-        font-size: 1em;
-        font-weight: bold;
-        margin: 0;
-        text-shadow: none;
-        text-transform: uppercase;
-      }
-    }
-
-    // The eye (white) and the chevron (gray), yellow on hover
-    button.group-eye,
-    button.group-chevron-button {
-      align-items: center;
-      border-radius: 0.3em;
-      display: flex;
-      justify-content: center;
-      padding: 0.3em;
-
-      .mat-icon {
-        @include em-icon(1.45em);
-        color: rgba(255, 255, 255, 0.6);
-      }
-
-      &:hover .mat-icon {
-        color: var(--scoreboard-led);
-      }
-    }
-
-    button.group-eye .mat-icon {
+    &:hover .mat-icon {
       color: #fff;
     }
   }
@@ -224,15 +160,13 @@
     padding: 1em 0 0.5em;
   }
 
-  // A switched-off group: its title and sliders dimmed, its eye yellow
-  &.group-hidden {
-    .group-toggle .group-title,
-    .group-toggle .group-icon,
+  // A switched-off group: its title (card-panel fades it) and sliders dimmed, its eye yellow
+  &.panel-dimmed {
     .slider-row {
       opacity: 0.4;
     }
 
-    div.group-header button.group-eye .mat-icon {
+    button.group-eye .mat-icon {
       color: var(--scoreboard-led);
     }
   }
@@ -383,8 +317,8 @@
 }
 
 // ---------------------------------------------------------------------------
-// Drag to reorder: a small grip in each card's header (before its icon) and before each slider row, in
-// the room to their left
+// Drag to reorder: a small grip on each group's bar (on its right) and before each slider row (in the
+// room to its left)
 // ---------------------------------------------------------------------------
 .sidebar .filters {
   .row-drag {
@@ -396,21 +330,25 @@
   .row-handle {
     color: rgba(255, 255, 255, 0.35);
     cursor: grab;
+
+    &:hover {
+      color: rgba(255, 255, 255, 0.8);
+    }
+  }
+
+  // (a group's, on its bar's right after the eye)
+  .group-handle {
+    @include em-icon(1.3em);
+  }
+
+  // (a row's, in the room to its left)
+  .row-handle {
     height: 1em;
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
     width: 1em;
     z-index: 4;
-
-    &:hover {
-      color: var(--scoreboard-led);
-    }
-  }
-
-  .group-handle {
-    font-size: 0.85em;
-    left: 10px;
   }
 
   // (between the card's edge and the slider, whose touch area starts about 31px in; on a row with its

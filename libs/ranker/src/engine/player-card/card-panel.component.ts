@@ -5,22 +5,28 @@ import { Component, EventEmitter, Input, Output, ViewEncapsulation } from '@angu
 // sections), the bar opens and shuts it, the chevron on its left (right when shut, down when open), and on
 // hover the bar lifts and the chevron lightens, never the accent color; not expandable (Overview's
 // sections, Similar Seasons, Game Log, Career), the bar is just its title and the content always shows.
-// Its category color is the host's --group-color (a group-* class on it, or a tab card's default).
+// Its category color is the host's --group-color (a group-* class on it, or a tab card's default). The
+// filter menu's stat groups are panels too: their eye and drag grip ride on the bar's right (an element
+// marked panel-actions), and a switched-off group is dimmed (the panel-dimmed class).
 @Component({
   selector: 'card-panel',
   template: `
-    @if (expandable) {
-      <button type="button" class="group-bar" [attr.aria-expanded]="open" (click)="toggled.emit()">
-        <mat-icon class="panel-chevron" [fontIcon]="open ? 'expand_more' : 'chevron_right'"></mat-icon>
-        <mat-icon class="group-bar-icon" [fontIcon]="icon"></mat-icon>
-        <span>{{ label }}</span>
-      </button>
-    } @else {
-      <div class="group-bar">
-        <mat-icon class="group-bar-icon" [fontIcon]="icon"></mat-icon>
-        <span>{{ label }}</span>
-      </div>
-    }
+    <div class="group-bar">
+      @if (expandable) {
+        <button type="button" class="panel-toggle" [attr.aria-expanded]="open" (click)="toggled.emit()">
+          <mat-icon class="panel-chevron" [fontIcon]="open ? 'expand_more' : 'chevron_right'"></mat-icon>
+          <mat-icon class="group-bar-icon" [fontIcon]="icon"></mat-icon>
+          <span>{{ label }}</span>
+        </button>
+      } @else {
+        <span class="panel-title">
+          <mat-icon class="group-bar-icon" [fontIcon]="icon"></mat-icon>
+          <span>{{ label }}</span>
+        </span>
+      }
+      <!-- (the page's own controls on the bar's right: the filter menu's eye and drag grip) -->
+      <ng-content select="[panel-actions]"></ng-content>
+    </div>
     @if (open || !expandable) {
       <div class="panel-body"><ng-content></ng-content></div>
     }
