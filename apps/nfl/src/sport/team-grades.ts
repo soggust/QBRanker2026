@@ -109,12 +109,15 @@ const WEAPONS_SHARES: [SkillPosition, number, (player: SkillPlayer) => number][]
 // The O-line grade's two leans, from the Offensive Lines tab's sliders: for QBs pass protection counts
 // five times run blocking, for RBs the reverse (penalties count the same either way); head coaches
 // get the balanced grade. OLINE_LEAN: which, by tab (the column reads "O-Line (Pass)").
-const PASS_PRO = ['sacksAllowed', 'qbHitsAllowed', 'pressureRate', 'sackRate', 'timeToThrow'];
+// The pass lean leans on the per-dropback stats; total sacks stay at their usual weight, since a team
+// that runs a lot drops back less and gives up fewer whatever its line.
+const PASS_PRO = ['qbHitRate', 'pressureRate', 'sackRate', 'timeToThrow'];
+const PASS_TOTALS = ['sacksAllowed'];
 const RUN_BLOCKING = ['ypc', 'stuffRate', 'shortYardagePct', 'runEpa', 'runSuccess', 'yardsBeforeContact'];
 const lean = (more: string[], less: string[]) =>
   Object.fromEntries([...more.map((key) => [key, 1.5]), ...less.map((key) => [key, 0.3])]);
 const PASS_LEAN = lean(PASS_PRO, RUN_BLOCKING);
-const RUN_LEAN = lean(RUN_BLOCKING, PASS_PRO);
+const RUN_LEAN = lean(RUN_BLOCKING, [...PASS_PRO, ...PASS_TOTALS]);
 export const OLINE_LEAN: Record<string, 'Pass' | 'Run'> = { QB: 'Pass', RB: 'Run' };
 
 // The grades every tab reads (team logo -> 0-12), kept current by connectTeamGrades

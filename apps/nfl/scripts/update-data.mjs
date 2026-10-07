@@ -587,7 +587,7 @@ function olineUnits({ pbp, games, pfr, ngs }) {
       games: played,
       stats: {
         sacksAllowed: sacks,
-        qbHitsAllowed: dropbacks.filter((play) => play.qb_hit === '1' || play.sack === '1').length,
+        qbHitRate: ratio(dropbacks.filter((play) => play.qb_hit === '1' || play.sack === '1').length, dropbacks.length),
         pressureRate: pass && dropbacks.length ? ratio(pass.times_pressured, dropbacks.length) : null,
         sackRate: ratio(sacks, dropbacks.length),
         ypc: runs.length ? round(yards / runs.length, 2) : null,
@@ -1066,7 +1066,7 @@ const competitivePlay = (play) => {
 const COMPETITIVE_KEYS = {
   DEF: ['epaAllowed', 'passEpaAllowed', 'rushEpaAllowed', 'successAllowed', 'sacks', 'takeaways', 'thirdDownPct', 'redZoneTdPct'],
   HC: ['netEpa', 'offEpa', 'defEpaAllowed'],
-  OL: ['sacksAllowed', 'qbHitsAllowed', 'sackRate', 'ypc', 'stuffRate', 'runEpa', 'runSuccess', 'shortYardagePct', 'linePenaltiesPerGame'],
+  OL: ['sacksAllowed', 'qbHitRate', 'sackRate', 'ypc', 'stuffRate', 'runEpa', 'runSuccess', 'shortYardagePct', 'linePenaltiesPerGame'],
   QB: ['epaPerPlay', 'cpoe', 'successRate'],
 };
 

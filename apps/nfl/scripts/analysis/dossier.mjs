@@ -795,7 +795,7 @@ async function main() {
   const defRows = siteRows('DEF');
   const olRows = siteRows('OL');
   // each site stat ranked across the teams (the lower-is-better ones the other way)
-  const LOW = new Set(['losses', 'defEpaAllowed', 'ptsAllowedPerGame', 'yardsAllowedPerGame', 'penaltiesPerGame', 'epaAllowed', 'passEpaAllowed', 'rushEpaAllowed', 'successAllowed', 'thirdDownPct', 'redZoneTdPct', 'missedTacklePct', 'sacksAllowed', 'qbHitsAllowed', 'sackRate', 'stuffRate', 'linePenaltiesPerGame']);
+  const LOW = new Set(['losses', 'defEpaAllowed', 'ptsAllowedPerGame', 'yardsAllowedPerGame', 'penaltiesPerGame', 'epaAllowed', 'passEpaAllowed', 'rushEpaAllowed', 'successAllowed', 'thirdDownPct', 'redZoneTdPct', 'missedTacklePct', 'sacksAllowed', 'qbHitRate', 'sackRate', 'stuffRate', 'linePenaltiesPerGame']);
   const rankRows = (rows, skip = []) => {
     const keys = new Set([...rows.values()].flatMap((row) => Object.keys(row.stats ?? {})));
     const out = new Map([...rows.keys()].map((t) => [t, {}]));

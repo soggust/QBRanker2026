@@ -59,7 +59,7 @@ export const SKILLS: Record<SkillPosition, SkillDef[]> = {
     { id: 'tackling', name: 'Tackling', short: 'Tackling', parts: [['missedTacklePct', -1]] },
   ],
   OL: [
-    { id: 'pass', name: 'Pass Protection', short: 'Pass Pro', parts: [['sacksAllowed', -1], ['qbHitsAllowed', -1], ['pressureRate', -1], ['sackRate', -1]] },
+    { id: 'pass', name: 'Pass Protection', short: 'Pass Pro', parts: [['sacksAllowed', -1], ['qbHitRate', -1], ['pressureRate', -1], ['sackRate', -1]] },
     { id: 'run', name: 'Run Blocking', short: 'Run Block', parts: [['ypc', 1], ['runEpa', 1], ['runSuccess', 1], ['yardsBeforeContact', 1]] },
     { id: 'push', name: 'Winning at the Line', short: 'Push', parts: [['stuffRate', -1], ['yardsBeforeContact', 1]] },
     { id: 'shortYardage', name: 'Short Yardage', short: 'Short Yd', parts: [['shortYardagePct', 1]] },

@@ -2092,7 +2092,7 @@
       "games": 16,
       "stats": {
         "sacksAllowed": 52,
-        "qbHitsAllowed": 109,
+        "qbHitRate": 0.194,
         "pressureRate": 0.261,
         "sackRate": 0.092,
         "ypc": 3.52,
@@ -2106,7 +2106,7 @@
       },
       "competitive": {
         "sacksAllowed": 33,
-        "qbHitsAllowed": 67,
+        "qbHitRate": 0.177,
         "sackRate": 0.087,
         "ypc": 3.58,
         "stuffRate": 0.192,
@@ -2124,7 +2124,7 @@
       "games": 16,
       "stats": {
         "sacksAllowed": 42,
-        "qbHitsAllowed": 108,
+        "qbHitRate": 0.159,
         "pressureRate": 0.21,
         "sackRate": 0.062,
         "ypc": 4.31,
@@ -2138,7 +2138,7 @@
       },
       "competitive": {
         "sacksAllowed": 36,
-        "qbHitsAllowed": 82,
+        "qbHitRate": 0.164,
         "sackRate": 0.072,
         "ypc": 3.91,
         "stuffRate": 0.28,
@@ -2156,7 +2156,7 @@
       "games": 16,
       "stats": {
         "sacksAllowed": 32,
-        "qbHitsAllowed": 66,
+        "qbHitRate": 0.109,
         "pressureRate": 0.237,
         "sackRate": 0.053,
         "ypc": 4.47,
@@ -2170,7 +2170,7 @@
       },
       "competitive": {
         "sacksAllowed": 26,
-        "qbHitsAllowed": 52,
+        "qbHitRate": 0.108,
         "sackRate": 0.054,
         "ypc": 4.55,
         "stuffRate": 0.177,
@@ -2188,7 +2188,7 @@
       "games": 16,
       "stats": {
         "sacksAllowed": 41,
-        "qbHitsAllowed": 101,
+        "qbHitRate": 0.169,
         "pressureRate": 0.288,
         "sackRate": 0.069,
         "ypc": 3.47,
@@ -2202,7 +2202,7 @@
       },
       "competitive": {
         "sacksAllowed": 19,
-        "qbHitsAllowed": 66,
+        "qbHitRate": 0.182,
         "sackRate": 0.052,
         "ypc": 3.17,
         "stuffRate": 0.231,
@@ -2220,7 +2220,7 @@
       "games": 16,
       "stats": {
         "sacksAllowed": 32,
-        "qbHitsAllowed": 78,
+        "qbHitRate": 0.125,
         "pressureRate": 0.201,
         "sackRate": 0.051,
         "ypc": 5.02,
@@ -2234,7 +2234,7 @@
       },
       "competitive": {
         "sacksAllowed": 23,
-        "qbHitsAllowed": 52,
+        "qbHitRate": 0.112,
         "sackRate": 0.05,
         "ypc": 5.39,
         "stuffRate": 0.16,
@@ -2252,7 +2252,7 @@
       "games": 16,
       "stats": {
         "sacksAllowed": 33,
-        "qbHitsAllowed": 64,
+        "qbHitRate": 0.109,
         "pressureRate": 0.206,
         "sackRate": 0.056,
         "ypc": 3.82,
@@ -2266,7 +2266,7 @@
       },
       "competitive": {
         "sacksAllowed": 30,
-        "qbHitsAllowed": 54,
+        "qbHitRate": 0.114,
         "sackRate": 0.064,
         "ypc": 4.19,
         "stuffRate": 0.206,
@@ -2284,7 +2284,7 @@
       "games": 16,
       "stats": {
         "sacksAllowed": 37,
-        "qbHitsAllowed": 71,
+        "qbHitRate": 0.118,
         "pressureRate": 0.219,
         "sackRate": 0.061,
         "ypc": 4.42,
@@ -2298,7 +2298,7 @@
       },
       "competitive": {
         "sacksAllowed": 26,
-        "qbHitsAllowed": 52,
+        "qbHitRate": 0.121,
         "sackRate": 0.06,
         "ypc": 4.22,
         "stuffRate": 0.24,
@@ -2316,7 +2316,7 @@
       "games": 16,
       "stats": {
         "sacksAllowed": 38,
-        "qbHitsAllowed": 71,
+        "qbHitRate": 0.11,
         "pressureRate": 0.264,
         "sackRate": 0.059,
         "ypc": 4.3,
@@ -2330,7 +2330,7 @@
       },
       "competitive": {
         "sacksAllowed": 32,
-        "qbHitsAllowed": 58,
+        "qbHitRate": 0.12,
         "sackRate": 0.066,
         "ypc": 4.47,
         "stuffRate": 0.258,
@@ -2348,7 +2348,7 @@
       "games": 16,
       "stats": {
         "sacksAllowed": 56,
-        "qbHitsAllowed": 107,
+        "qbHitRate": 0.175,
         "pressureRate": 0.292,
         "sackRate": 0.092,
         "ypc": 4.38,
@@ -2362,7 +2362,7 @@
       },
       "competitive": {
         "sacksAllowed": 47,
-        "qbHitsAllowed": 87,
+        "qbHitRate": 0.179,
         "sackRate": 0.097,
         "ypc": 4.3,
         "stuffRate": 0.219,
@@ -2380,7 +2380,7 @@
       "games": 16,
       "stats": {
         "sacksAllowed": 34,
-        "qbHitsAllowed": 91,
+        "qbHitRate": 0.144,
         "pressureRate": 0.256,
         "sackRate": 0.054,
         "ypc": 4.75,
@@ -2394,7 +2394,7 @@
       },
       "competitive": {
         "sacksAllowed": 29,
-        "qbHitsAllowed": 75,
+        "qbHitRate": 0.16,
         "sackRate": 0.062,
         "ypc": 4.9,
         "stuffRate": 0.214,
@@ -2412,7 +2412,7 @@
       "games": 16,
       "stats": {
         "sacksAllowed": 41,
-        "qbHitsAllowed": 84,
+        "qbHitRate": 0.133,
         "pressureRate": 0.209,
         "sackRate": 0.065,
         "ypc": 4,
@@ -2426,7 +2426,7 @@
       },
       "competitive": {
         "sacksAllowed": 27,
-        "qbHitsAllowed": 57,
+        "qbHitRate": 0.136,
         "sackRate": 0.064,
         "ypc": 4.2,
         "stuffRate": 0.248,
@@ -2444,7 +2444,7 @@
       "games": 16,
       "stats": {
         "sacksAllowed": 53,
-        "qbHitsAllowed": 102,
+        "qbHitRate": 0.14,
         "pressureRate": 0.26,
         "sackRate": 0.073,
         "ypc": 4.57,
@@ -2458,7 +2458,7 @@
       },
       "competitive": {
         "sacksAllowed": 39,
-        "qbHitsAllowed": 72,
+        "qbHitRate": 0.144,
         "sackRate": 0.078,
         "ypc": 4.79,
         "stuffRate": 0.179,
@@ -2476,7 +2476,7 @@
       "games": 16,
       "stats": {
         "sacksAllowed": 62,
-        "qbHitsAllowed": 126,
+        "qbHitRate": 0.203,
         "pressureRate": 0.319,
         "sackRate": 0.1,
         "ypc": 3.92,
@@ -2490,7 +2490,7 @@
       },
       "competitive": {
         "sacksAllowed": 50,
-        "qbHitsAllowed": 97,
+        "qbHitRate": 0.201,
         "sackRate": 0.104,
         "ypc": 4.22,
         "stuffRate": 0.243,
@@ -2508,7 +2508,7 @@
       "games": 16,
       "stats": {
         "sacksAllowed": 18,
-        "qbHitsAllowed": 77,
+        "qbHitRate": 0.113,
         "pressureRate": 0.177,
         "sackRate": 0.026,
         "ypc": 4.14,
@@ -2522,7 +2522,7 @@
       },
       "competitive": {
         "sacksAllowed": 17,
-        "qbHitsAllowed": 69,
+        "qbHitRate": 0.122,
         "sackRate": 0.03,
         "ypc": 3.76,
         "stuffRate": 0.228,
@@ -2540,7 +2540,7 @@
       "games": 16,
       "stats": {
         "sacksAllowed": 53,
-        "qbHitsAllowed": 111,
+        "qbHitRate": 0.172,
         "pressureRate": 0.24,
         "sackRate": 0.082,
         "ypc": 3.67,
@@ -2554,7 +2554,7 @@
       },
       "competitive": {
         "sacksAllowed": 36,
-        "qbHitsAllowed": 72,
+        "qbHitRate": 0.18,
         "sackRate": 0.09,
         "ypc": 3.8,
         "stuffRate": 0.227,
@@ -2572,7 +2572,7 @@
       "games": 16,
       "stats": {
         "sacksAllowed": 26,
-        "qbHitsAllowed": 106,
+        "qbHitRate": 0.166,
         "pressureRate": 0.336,
         "sackRate": 0.041,
         "ypc": 4.7,
@@ -2586,7 +2586,7 @@
       },
       "competitive": {
         "sacksAllowed": 20,
-        "qbHitsAllowed": 75,
+        "qbHitRate": 0.152,
         "sackRate": 0.041,
         "ypc": 5.33,
         "stuffRate": 0.167,
@@ -2604,7 +2604,7 @@
       "games": 16,
       "stats": {
         "sacksAllowed": 52,
-        "qbHitsAllowed": 89,
+        "qbHitRate": 0.146,
         "pressureRate": 0.248,
         "sackRate": 0.085,
         "ypc": 4.18,
@@ -2618,7 +2618,7 @@
       },
       "competitive": {
         "sacksAllowed": 31,
-        "qbHitsAllowed": 59,
+        "qbHitRate": 0.133,
         "sackRate": 0.07,
         "ypc": 4.03,
         "stuffRate": 0.227,
@@ -2636,7 +2636,7 @@
       "games": 16,
       "stats": {
         "sacksAllowed": 34,
-        "qbHitsAllowed": 86,
+        "qbHitRate": 0.154,
         "pressureRate": 0.229,
         "sackRate": 0.061,
         "ypc": 4.74,
@@ -2650,7 +2650,7 @@
       },
       "competitive": {
         "sacksAllowed": 26,
-        "qbHitsAllowed": 68,
+        "qbHitRate": 0.169,
         "sackRate": 0.065,
         "ypc": 4.84,
         "stuffRate": 0.226,
@@ -2668,7 +2668,7 @@
       "games": 16,
       "stats": {
         "sacksAllowed": 33,
-        "qbHitsAllowed": 73,
+        "qbHitRate": 0.117,
         "pressureRate": 0.214,
         "sackRate": 0.053,
         "ypc": 5.05,
@@ -2682,7 +2682,7 @@
       },
       "competitive": {
         "sacksAllowed": 26,
-        "qbHitsAllowed": 55,
+        "qbHitRate": 0.115,
         "sackRate": 0.054,
         "ypc": 5.04,
         "stuffRate": 0.17,
@@ -2700,7 +2700,7 @@
       "games": 16,
       "stats": {
         "sacksAllowed": 52,
-        "qbHitsAllowed": 107,
+        "qbHitRate": 0.207,
         "pressureRate": 0.302,
         "sackRate": 0.101,
         "ypc": 4.64,
@@ -2714,7 +2714,7 @@
       },
       "competitive": {
         "sacksAllowed": 34,
-        "qbHitsAllowed": 83,
+        "qbHitRate": 0.205,
         "sackRate": 0.084,
         "ypc": 4.73,
         "stuffRate": 0.213,
@@ -2732,7 +2732,7 @@
       "games": 16,
       "stats": {
         "sacksAllowed": 40,
-        "qbHitsAllowed": 95,
+        "qbHitRate": 0.143,
         "pressureRate": 0.265,
         "sackRate": 0.06,
         "ypc": 4.1,
@@ -2746,7 +2746,7 @@
       },
       "competitive": {
         "sacksAllowed": 32,
-        "qbHitsAllowed": 69,
+        "qbHitRate": 0.152,
         "sackRate": 0.07,
         "ypc": 4.4,
         "stuffRate": 0.237,
@@ -2764,7 +2764,7 @@
       "games": 16,
       "stats": {
         "sacksAllowed": 21,
-        "qbHitsAllowed": 68,
+        "qbHitRate": 0.114,
         "pressureRate": 0.18,
         "sackRate": 0.035,
         "ypc": 4.29,
@@ -2778,7 +2778,7 @@
       },
       "competitive": {
         "sacksAllowed": 14,
-        "qbHitsAllowed": 42,
+        "qbHitRate": 0.093,
         "sackRate": 0.031,
         "ypc": 4.24,
         "stuffRate": 0.198,
@@ -2796,7 +2796,7 @@
       "games": 16,
       "stats": {
         "sacksAllowed": 20,
-        "qbHitsAllowed": 52,
+        "qbHitRate": 0.095,
         "pressureRate": 0.169,
         "sackRate": 0.036,
         "ypc": 4.48,
@@ -2810,7 +2810,7 @@
       },
       "competitive": {
         "sacksAllowed": 16,
-        "qbHitsAllowed": 40,
+        "qbHitRate": 0.091,
         "sackRate": 0.036,
         "ypc": 4.37,
         "stuffRate": 0.136,
@@ -2828,7 +2828,7 @@
       "games": 16,
       "stats": {
         "sacksAllowed": 47,
-        "qbHitsAllowed": 97,
+        "qbHitRate": 0.152,
         "pressureRate": 0.243,
         "sackRate": 0.074,
         "ypc": 4.56,
@@ -2842,7 +2842,7 @@
       },
       "competitive": {
         "sacksAllowed": 38,
-        "qbHitsAllowed": 76,
+        "qbHitRate": 0.152,
         "sackRate": 0.076,
         "ypc": 4.48,
         "stuffRate": 0.263,
@@ -2860,7 +2860,7 @@
       "games": 16,
       "stats": {
         "sacksAllowed": 37,
-        "qbHitsAllowed": 74,
+        "qbHitRate": 0.128,
         "pressureRate": 0.241,
         "sackRate": 0.064,
         "ypc": 3.82,
@@ -2874,7 +2874,7 @@
       },
       "competitive": {
         "sacksAllowed": 22,
-        "qbHitsAllowed": 45,
+        "qbHitRate": 0.112,
         "sackRate": 0.055,
         "ypc": 3.61,
         "stuffRate": 0.301,
@@ -2892,7 +2892,7 @@
       "games": 16,
       "stats": {
         "sacksAllowed": 40,
-        "qbHitsAllowed": 102,
+        "qbHitRate": 0.156,
         "pressureRate": 0.231,
         "sackRate": 0.061,
         "ypc": 3.87,
@@ -2906,7 +2906,7 @@
       },
       "competitive": {
         "sacksAllowed": 34,
-        "qbHitsAllowed": 86,
+        "qbHitRate": 0.16,
         "sackRate": 0.063,
         "ypc": 4.16,
         "stuffRate": 0.252,
@@ -2924,7 +2924,7 @@
       "games": 16,
       "stats": {
         "sacksAllowed": 24,
-        "qbHitsAllowed": 72,
+        "qbHitRate": 0.099,
         "pressureRate": 0.167,
         "sackRate": 0.033,
         "ypc": 4.11,
@@ -2938,7 +2938,7 @@
       },
       "competitive": {
         "sacksAllowed": 18,
-        "qbHitsAllowed": 61,
+        "qbHitRate": 0.099,
         "sackRate": 0.029,
         "ypc": 4.5,
         "stuffRate": 0.163,
@@ -2956,7 +2956,7 @@
       "games": 16,
       "stats": {
         "sacksAllowed": 48,
-        "qbHitsAllowed": 125,
+        "qbHitRate": 0.209,
         "pressureRate": 0.283,
         "sackRate": 0.08,
         "ypc": 4.49,
@@ -2970,7 +2970,7 @@
       },
       "competitive": {
         "sacksAllowed": 31,
-        "qbHitsAllowed": 89,
+        "qbHitRate": 0.212,
         "sackRate": 0.074,
         "ypc": 4.44,
         "stuffRate": 0.237,
@@ -2988,7 +2988,7 @@
       "games": 16,
       "stats": {
         "sacksAllowed": 51,
-        "qbHitsAllowed": 94,
+        "qbHitRate": 0.188,
         "pressureRate": 0.328,
         "sackRate": 0.102,
         "ypc": 4.48,
@@ -3002,7 +3002,7 @@
       },
       "competitive": {
         "sacksAllowed": 42,
-        "qbHitsAllowed": 77,
+        "qbHitRate": 0.189,
         "sackRate": 0.103,
         "ypc": 4.65,
         "stuffRate": 0.196,
@@ -3020,7 +3020,7 @@
       "games": 16,
       "stats": {
         "sacksAllowed": 41,
-        "qbHitsAllowed": 109,
+        "qbHitRate": 0.15,
         "pressureRate": 0.225,
         "sackRate": 0.056,
         "ypc": 3.36,
@@ -3034,7 +3034,7 @@
       },
       "competitive": {
         "sacksAllowed": 26,
-        "qbHitsAllowed": 74,
+        "qbHitRate": 0.151,
         "sackRate": 0.053,
         "ypc": 3.52,
         "stuffRate": 0.279,
@@ -3052,7 +3052,7 @@
       "games": 16,
       "stats": {
         "sacksAllowed": 47,
-        "qbHitsAllowed": 69,
+        "qbHitRate": 0.133,
         "pressureRate": 0.254,
         "sackRate": 0.091,
         "ypc": 4.15,
@@ -3066,7 +3066,7 @@
       },
       "competitive": {
         "sacksAllowed": 33,
-        "qbHitsAllowed": 50,
+        "qbHitRate": 0.12,
         "sackRate": 0.079,
         "ypc": 4.15,
         "stuffRate": 0.226,
@@ -3084,7 +3084,7 @@
       "games": 16,
       "stats": {
         "sacksAllowed": 44,
-        "qbHitsAllowed": 98,
+        "qbHitRate": 0.165,
         "pressureRate": 0.281,
         "sackRate": 0.074,
         "ypc": 3.96,
@@ -3098,7 +3098,7 @@
       },
       "competitive": {
         "sacksAllowed": 25,
-        "qbHitsAllowed": 66,
+        "qbHitRate": 0.167,
         "sackRate": 0.063,
         "ypc": 3.93,
         "stuffRate": 0.254,

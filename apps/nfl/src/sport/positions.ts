@@ -89,7 +89,7 @@ export type SkillStatKey =
   | 'turnoverDiffPerGame'
   // Offensive lines
   | 'sacksAllowed'
-  | 'qbHitsAllowed'
+  | 'qbHitRate'
   | 'sackRate'
   | 'stuffRate'
   | 'yardsBeforeContact'
@@ -304,7 +304,7 @@ export const STAT_NAMES: Partial<Record<SkillColumnKey, string>> = {
   fourthDownGoPct: 'Fourth-Down Go-For-It Rate',
   turnoverDiffPerGame: 'Turnover Differential per Game',
   sacksAllowed: 'Sacks Allowed',
-  qbHitsAllowed: 'QB Hits Allowed',
+  qbHitRate: 'QB Hit Rate Allowed',
   sackRate: 'Sack Rate Allowed',
   stuffRate: 'Stuffed Run Rate',
   yardsBeforeContact: 'Yards Before Contact per Carry',
@@ -345,7 +345,6 @@ export const PER_GAME_LABELS: Partial<Record<SkillColumnKey, string>> = {
   sacks: 'Sacks / Game',
   takeaways: 'TOs / Game',
   sacksAllowed: 'Sacks / Game',
-  qbHitsAllowed: 'QB Hits / Game',
 };
 
 export type SkillWeights = Partial<Record<SkillColumnKey, number>>;
@@ -1031,11 +1030,11 @@ export const SKILL_STATS: Record<SkillPosition, SkillStat[]> = {
       negative: true,
     },
     {
-      key: 'qbHitsAllowed',
-      label: 'QB Hits',
-      description: 'QB hits allowed, sacks included (lower is better)',
-      kind: 'volume',
-      format: 'int',
+      key: 'qbHitRate',
+      label: 'QB Hit %',
+      description: 'QB hits allowed per dropback, sacks included (lower is better)',
+      kind: 'efficiency',
+      format: 'pct',
       negative: true,
     },
     { key: 'ypc', label: 'Yds / Carry', description: 'Yards per designed run', kind: 'efficiency', format: 'dec1' },
