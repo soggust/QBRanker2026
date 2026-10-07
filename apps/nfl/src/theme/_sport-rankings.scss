@@ -20,13 +20,3 @@ section.category-colors ul li.player:not(.header-row):not(.cdk-drag-preview) > .
   border-bottom: 1px solid color-mix(in srgb, var(--group-color) 25%, transparent);
   height: 0;
 }
-
-// The yard lines every other row, like a field's 10-yard lines (rows 1, 3, 5... go without: the line comes
-// after each pair; counted among the player rows, not the header)
-section ul li.player:nth-child(odd of :not(.header-row)):not(.header-row):not(.cdk-drag-preview) {
-  border-bottom-color: transparent;
-}
-
-section.category-colors ul li.player:nth-child(odd of :not(.header-row)):not(.header-row):not(.cdk-drag-preview) > .col-group > div::after {
-  border-bottom-color: transparent;
-}
