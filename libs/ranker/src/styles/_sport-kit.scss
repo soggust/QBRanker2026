@@ -198,14 +198,10 @@ $switch: "html .mat-mdc-slide-toggle.mat-accent";
   }
 }
 
-// The player card: a panel's edges painted solid in its color, down both sides and across the bottom
-// (on its body: card-panel.scss, through a sport's _sport-panel.scss)
-@mixin painted-panel-edges {
-  $paint: color-mix(in srgb, var(--group-color, #fff) 85%, #fff);
-  background:
-    linear-gradient($paint, $paint) left top / 3px 100% no-repeat,
-    linear-gradient($paint, $paint) right top / 3px 100% no-repeat,
-    linear-gradient($paint, $paint) left bottom / 100% 3px no-repeat;
+// A panel (card-panel.scss, through a sport's _sport-panel.scss): its outline a painted line in its
+// category's color, lifted with a little white
+@mixin painted-panel-border {
+  border: 1.5px solid color-mix(in srgb, var(--group-color, #fff) 85%, #fff);
 }
 
 // ---------------------------------------------------------------------------

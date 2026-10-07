@@ -1,8 +1,12 @@
-// MLB: a card panel's edges (card-panel.scss) are chalk lines (the table's) down both sides and across
-// the bottom
+// MLB: a card panel (card-panel.scss) has no border of its own: its body is edged in chalk lines (the
+// table's, slimmer) right at its sides and across its bottom
+@mixin box {
+  border-color: transparent;
+}
+
 @mixin edges {
   background:
-    url("../assets/textures/chalk-line-v.svg") left top / 10px 150px repeat-y,
-    url("../assets/textures/chalk-line-v.svg") right top / 10px 150px repeat-y,
-    url("../assets/textures/chalk-line-h.svg") left bottom / 150px 10px repeat-x;
+    url("../assets/textures/chalk-line-v.svg") left top / 6px 90px repeat-y,
+    url("../assets/textures/chalk-line-v.svg") right top / 6px 90px repeat-y,
+    url("../assets/textures/chalk-line-h.svg") left bottom / 90px 6px repeat-x;
 }

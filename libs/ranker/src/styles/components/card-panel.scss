@@ -1,11 +1,16 @@
 @use "../variables" as v;
 @use "sport-panel";
 
-// The player card's panels (card-panel.component.ts): global (no view encapsulation), so these reach the
-// bar the component draws; scoped to card-panel. The panel's box (its border in its category color, the
-// spacing between panels) and its content's look stay the card's (player-card.scss .stat-group).
+// The panels (card-panel.component.ts): global (no view encapsulation), so these reach the bar the
+// component draws; scoped to card-panel. The spacing between panels and their content's look stay the
+// page's own (player-card.scss .stat-group).
 card-panel {
+  // The box: a thin border in its category's color, rounded (each sport's own touch: _sport-panel.scss)
+  border: 1px solid color-mix(in srgb, var(--group-color) 40%, transparent);
+  border-radius: 6px;
   display: block;
+  overflow: hidden;
+  @include sport-panel.box;
 
   // The bar: the label in caps on the scoreboard, tinted in its category color, its icon before it
   > .group-bar {

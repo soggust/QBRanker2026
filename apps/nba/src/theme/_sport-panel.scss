@@ -1,7 +1,10 @@
 @use "sport-kit" as kit;
 
-// NBA: a card panel's edges (card-panel.scss) are painted court lines (solid, like the table's) down both sides
-// and across the bottom
+// NBA: a card panel's (card-panel.scss) outline is a painted court line in its category's color (thin,
+// solid, like the table's): the line is the border, so there's no second one inside it
+@mixin box {
+  @include kit.painted-panel-border;
+}
+
 @mixin edges {
-  @include kit.painted-panel-edges;
 }

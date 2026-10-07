@@ -806,11 +806,9 @@
   }
 }
 
+// (a panel's spacing on the card; its box is the panel's, card-panel.scss)
 .stat-group {
-  border: 1px solid color-mix(in srgb, var(--group-color) 40%, transparent);
-  border-radius: 6px;
   margin-top: 14px;
-  overflow: hidden;
 
   &:first-child {
     margin-top: 0;
