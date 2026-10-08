@@ -534,6 +534,8 @@ export class PlayerCards {
   private async loadPrevSkills(card: PlayerCard): Promise<void> {
     const prevSeason = card.season - 1;
     if (prevSeason < SEASONS[SEASONS.length - 1]) return;
+    // (a playoffs or both row against last season's regular season: no "up from" lines)
+    if (card.season === dataSeason && dataPart !== 'regular') return;
     const { host } = this;
     try {
       let unit: SkillPlayer | undefined;
