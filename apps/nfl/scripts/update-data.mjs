@@ -220,12 +220,16 @@ async function pfrSeasonRows(type, sacksByPfr) {
 }
 
 // The season's nflverse files, read once for every part the run builds (nflversePart picks a part's games)
-async function loadNflverse() {
+// (the player list and the schedule, read once a run: the QB records read them first, scheduleIndex)
+const loadPlayers = (shared) => once(shared, 'players', () => getCsvGz(`${NFLVERSE}/players/players.csv.gz`));
+const loadSchedule = (shared) => once(shared, 'schedule', () => getCsv(SCHEDULE_URL));
+
+async function loadNflverse(shared) {
   let [players, pbp, schedule, ngsPass, ngsRush, ngsRec, pfrPass, pfrRush, pfrRec, pfrDef, snaps, ...partStats] =
     await Promise.all([
-      getCsvGz(`${NFLVERSE}/players/players.csv.gz`),
+      loadPlayers(shared),
       getCsvGz(`${NFLVERSE}/pbp/play_by_play_${SEASON}.csv.gz`),
-      getCsv(SCHEDULE_URL),
+      loadSchedule(shared),
       ...['passing', 'rushing', 'receiving'].map((type) =>
         optionalCsvGz(`${NFLVERSE}/nextgen_stats/ngs_${type}.csv.gz`)
       ),
@@ -233,7 +237,10 @@ async function loadNflverse() {
         optionalCsvGz(`${NFLVERSE}/pfr_advstats/advstats_week_${type}_${SEASON}.csv.gz`)
       ),
       optionalCsvGz(`${NFLVERSE}/snap_counts/snap_counts_${SEASON}.csv.gz`),
-      ...PARTS.map((part) => getCsvGz(`${NFLVERSE}/stats_player/stats_player_${PLAYER_STATS[part]}_${SEASON}.csv.gz`)),
+      // (the playoffs' and both's files only exist once the playoffs have begun: updatePart waits for them)
+      ...PARTS.map((part) =>
+        (part === 'regular' ? getCsvGz : optionalCsvGz)(`${NFLVERSE}/stats_player/stats_player_${PLAYER_STATS[part]}_${SEASON}.csv.gz`)
+      ),
     ]);
   // (the weekly files cover any part's games; the season totals standing in for them, the regular season's alone)
   const pfrWeekly = pfrPass.length > 0;
@@ -1487,6 +1494,128 @@ async function readStarters(game) {
   return starters;
 }
 
+// nflverse's schedule by ESPN game id (its espn column): each side's team, final score and starting QB
+// (gsis id), and the QBs' ESPN ids and names from its player list
+// Also the QB on each team's first dropback of each game in the play-by-play (none if nflverse's files
+// can't be loaded: the schedule alone then)
+async function scheduleIndex(shared) {
+  const season = await once(shared, 'nflverse', () => loadNflverse(shared)).catch(() => null);
+  const [rows, players] = await Promise.all([loadSchedule(shared), loadPlayers(shared)]);
+  const seasonRows = rows.filter((row) => row.season === String(SEASON));
+  const byGame = new Map(seasonRows.filter((row) => row.espn && row.espn !== 'NA').map((row) => [row.espn, row]));
+  const espnId = new Map();
+  const names = new Map();
+  const qbs = new Set();
+  for (const p of players) {
+    if (p.espn_id && p.espn_id !== 'NA') espnId.set(p.gsis_id, String(Number(p.espn_id)));
+    names.set(p.gsis_id, p.display_name);
+    if (p.position === 'QB') qbs.add(p.gsis_id);
+  }
+  const firstDropback = new Map();
+  for (const play of season?.seasonPbp ?? []) {
+    if (play.qb_dropback !== '1') continue;
+    const key = `${play.game_id}|${teamAbbr(play.posteam)}`;
+    if (firstDropback.has(key)) continue;
+    const id = play.passer_player_id && play.passer_player_id !== 'NA' ? play.passer_player_id : play.rusher_player_id;
+    if (id && id !== 'NA') firstDropback.set(key, id);
+  }
+  return { byGame, rows: seasonRows, espnId, names, qbs, firstDropback };
+}
+
+// (today's abbreviation for a team that moved: sameTeamAbbrs)
+const teamAbbr = (team) => MOVED_TEAMS[team] ?? (team === 'LAR' ? 'LA' : team);
+
+// A game's starters checked against nflverse's schedule (ESPN's summaries name no winner for some old
+// games, a few 0-0, and list no passers for others; and its starter is only the QB with the most pass
+// attempts, where the schedule names who started):
+//   - the result: the schedule's final where ESPN's summary has none (a "tie" with no winner, or no
+//     result at all); a real tie stays a tie, and a result ESPN has stays as it is
+//   - the starter: the quarterback on the team's first dropback (the play-by-play), else the schedule's
+//     starting QB, as ESPN names him among the game's passers; ESPN's most pass attempts only where
+//     nflverse has neither (or names someone who didn't throw a pass in ESPN's box score)
+// fixes: a line for each change (the run's log)
+// espnNames: the ESPN starters of the part's games by name (nameKey)
+async function scheduleStarters(game, espn, { byGame, rows, espnId, names, qbs, firstDropback }, espnNames, fixes) {
+  const abbr = teamAbbr;
+  // The game in the schedule: by its ESPN id, unless that row's teams aren't the ones in ESPN's box score
+  // (the schedule has a few old games' ids crossed), then by those teams within a day or two
+  const espnTeams = espn.map((s) => teamLogo(s.team));
+  const isGame = (r) => !!r && espnTeams.every((logo) => [r.home_team, r.away_team].some((t) => TEAM_ICONS[abbr(t)] && teamIcon(abbr(t)) === logo));
+  let row = byGame.get(String(game.id));
+  if (espnTeams.length && !isGame(row)) {
+    const day = Date.parse(String(game.date).slice(0, 10));
+    row = rows.find((r) => isGame(r) && Math.abs(Date.parse(r.gameday) - day) <= 2 * 864e5);
+  }
+  if (!row) return espn;
+  const home = num(row.home_score);
+  const away = num(row.away_score);
+  const final = home !== null && away !== null;
+  const sides = [
+    { team: abbr(row.home_team), other: abbr(row.away_team), home: true, score: home, against: away, qb: row.home_qb_id },
+    { team: abbr(row.away_team), other: abbr(row.home_team), home: false, score: away, against: home, qb: row.away_qb_id },
+  ];
+  const day = String(game.date).slice(0, 10);
+  const out = await Promise.all(sides.map(async (side) => {
+    if (!TEAM_ICONS[side.team]) return [];
+    const was = espn.find((s) => teamLogo(s.team) === teamIcon(side.team));
+    let result = was?.result;
+    if (final && (result === undefined || (result === 0.5 && side.score !== side.against))) {
+      result = side.score > side.against ? 1 : side.score < side.against ? 0 : 0.5;
+      fixes.push(`${day} ${side.team}: result ${was ? 'tie' : 'none'} -> ${result === 1 ? 'win' : result === 0 ? 'loss' : 'tie'} (${side.score}-${side.against})`);
+    }
+    if (result === undefined) return [];
+    let athlete = was?.athlete;
+    // (the play-by-play's first dropback where that was a quarterback, so a trick play's receiver doesn't
+    // count; the schedule's starter otherwise: its column lags a week now and then, 2024's most of all)
+    const first = firstDropback.get(`${row.game_id}|${side.team}`);
+    if (first && qbs.has(first)) side.qb = first;
+    const name = side.qb && side.qb !== 'NA' ? names.get(side.qb) : undefined;
+    if (name && !sameName(name, athlete?.displayName)) {
+      // ESPN's own id and spelling for him: one of the game's passers by name, else the player list's id
+      // if it passed in the game (the list's ESPN ids are wrong for a few old players); where ESPN has
+      // no starter for the team at all (no box score, or another game's), the list's id
+      const passers = await gamePassers(game.id);
+      const id = espnId.get(side.qb);
+      const passer = passers.find((p) => sameName(p.name, name)) ?? passers.find((p) => p.id === id);
+      // (ESPN's id for him from his other games first: the list's can be another of ESPN's)
+      const known = espnNames.get(nameKey(name));
+      const found = passer
+        ? { id: passer.id, displayName: passer.name }
+        : !was && (known ?? id)
+          ? { id: known?.id ?? id, displayName: known?.name ?? name, fromSchedule: !known }
+          : null;
+      if (found) {
+        fixes.push(`${day} ${side.team}: starter ${athlete?.displayName ?? 'none'} -> ${found.displayName}`);
+        athlete = found;
+      } else fixes.push(`${day} ${side.team}: starter ${athlete?.displayName ?? 'none'} kept (the schedule's ${name} isn't among ESPN's passers)`);
+    }
+    if (!athlete) return [];
+    return [
+      {
+        athlete,
+        team: was?.team ?? TEAM_NAMES[side.team],
+        result,
+        opponent: was?.opponent ?? atOrVs(!side.home, TEAM_NAMES[side.other]),
+      },
+    ];
+  }));
+  return out.flat();
+}
+
+// "Mike Vick" and "Michael Vick" aren't the same here, but "Odell Beckham Jr." and "Odell Beckham" are
+const nameKey = (name) => String(name ?? '').toLowerCase().replace(/\b(jr|sr|ii|iii|iv)\b\.?/g, '').replace(/[^a-z]/g, '');
+const sameName = (a, b) => !!a && !!b && nameKey(a) === nameKey(b);
+
+// Everyone who threw a pass in a game, as ESPN names them (its summary; a past season's kept in .cache)
+function gamePassers(id) {
+  return espnCached(`passers.${id}`, async () => {
+    const summary = await getJson(`${SITE}/summary?event=${id}`);
+    return (summary.boxscore?.players ?? []).flatMap((team) =>
+      (team.statistics.find((s) => s.name === 'passing')?.athletes ?? []).map((a) => ({ id: String(a.athlete.id), name: a.athlete.displayName }))
+    );
+  });
+}
+
 // Each part of the season in turn (PARTS: the regular season first). The regular season holding off for
 // ESPN's stats holds the whole run, so the parts stay in step.
 async function main() {
@@ -1514,6 +1643,16 @@ async function updatePart(part, shared) {
     return false;
   }
   console.log(`Season ${SEASON}${label}: ${games.length} completed games`);
+  // (nflverse's playoff player stats can come a day after the first playoff games: until they do, the
+  // part's files stay as they are)
+  if (part !== 'regular') {
+    const season = await once(shared, 'nflverse', () => loadNflverse(shared)).catch(() => null);
+    if (season && !season.playerStatsByPart[part].length) {
+      if (PAST_SEASON) throw new Error(`No nflverse ${PART_NAMES[part]} player stats for ${SEASON}`);
+      console.log(`nflverse has no ${PART_NAMES[part]} player stats yet: ${part} files left as they are`);
+      return false;
+    }
+  }
 
   const fresh = games.filter((g) => !summaryCache.has(String(g.id))).length;
   // (each part counts its own games' attempts: gamesBehind)
@@ -1523,10 +1662,27 @@ async function updatePart(part, shared) {
   await mkdir(new URL('.', SUMMARY_CACHE), { recursive: true });
   await writeFile(SUMMARY_CACHE, JSON.stringify(Object.fromEntries(summaryCache)));
 
+  // Each game's starters and results as nflverse's schedule has them, where ESPN's summary differs
+  const schedule = await once(shared, 'scheduleIndex', () =>
+    scheduleIndex(shared).catch((err) => {
+      if (PAST_SEASON) throw err;
+      console.warn(`Could not load nflverse's schedule, keeping ESPN's starters and results: ${err.message}`);
+      return null;
+    })
+  );
+  const fixes = [];
+  const espnNames = new Map(perGame.flat().map((s) => [nameKey(s.athlete.displayName), { id: String(s.athlete.id), name: s.athlete.displayName }]));
+  const starters = schedule
+    ? await mapBatched(games.map((game, i) => [game, perGame[i]]), 8, ([game, espn]) => scheduleStarters(game, espn, schedule, espnNames, fixes))
+    : perGame;
+  if (fixes.length) console.log(`From nflverse's schedule (${fixes.length}):\n  ${fixes.join('\n  ')}`);
+
   // Games are in date order, so results accumulate chronologically
   const qbs = new Map();
-  for (const { athlete, team, result, opponent } of perGame.flat()) {
+  for (const { athlete, team, result, opponent } of starters.flat()) {
     const qb = qbs.get(athlete.id) ?? { id: Number(athlete.id), name: athlete.displayName, results: [], opponents: [], starts: {} };
+    // (ESPN's spelling of his name wherever it has one)
+    if (!athlete.fromSchedule) qb.name = athlete.displayName;
     qb.team = team;
     qb.results.push(result);
     qb.opponents.push(opponent);
@@ -1581,7 +1737,7 @@ async function updatePart(part, shared) {
   // (a past season's injury flags: who finished it on injured reserve)
   let seasonEndInjuries = new Map();
   try {
-    const nflverse = nflversePart(await once(shared, 'nflverse', loadNflverse), part);
+    const nflverse = nflversePart(await once(shared, 'nflverse', () => loadNflverse(shared)), part);
     if (PAST_SEASON) seasonEndInjuries = await once(shared, 'seasonEnd', () => seasonEndReserve(nflverse.espnByGsis));
     // ESPN's staff pages show today's coach, so a past season names its coaches from the schedule
     nflverse.headCoaches = PAST_SEASON ? new Map() : await once(shared, 'coaches', () => espnHeadCoaches().catch((err) => {
