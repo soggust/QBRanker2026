@@ -216,11 +216,15 @@ export class SkillRankingsComponent implements OnChanges, CardHost {
   }
 
   // Best first by the sliders: switched-off groups and stats don't count, and each combined pair's
-  // parts count by their parent slider (another tab's, for a card opened on it)
+  // parts count by their parent slider (another tab's, for a card opened on it). Combined (the setting),
+  // a pair counts as its column, the total its sliders mix, so the list goes by the number it shows.
   private ranked(reader: StatReader, players: SkillPlayer[], position = this.position): SkillPlayer[] {
-    const { stats, hidden, weights: sliders } = this.tab(position);
-    const counted = stats.filter((stat) => !hidden[statGroup(stat)] && !this.statHidden(stat.key, position) && !reader.recentOff(stat));
-    const weights = combinedWeights(position, sliders);
+    const { stats, hidden } = this.tab(position);
+    const combined = this.settings.combineStats;
+    const counted = (combined ? this.combine(stats, position, false) : stats).filter(
+      (stat) => !hidden[statGroup(stat)] && !this.statHidden(stat.key, position) && !reader.recentOff(stat),
+    );
+    const weights = combinedWeights(position, this.mixWeights(position), combined);
     const totals = weightedTotals(players, counted, weights, (player, stat) => reader.value(player, stat), undefined, this.sportSettings);
     return byTotals(players, totals, this.sportSettings);
   }
@@ -300,14 +304,14 @@ export class SkillRankingsComponent implements OnChanges, CardHost {
 
   // Combine setting: a pair (rushing + receiving yards) shows as one total column where the first of the
   // two sits, when the tab has both
-  private combine(stats: SkillStat[], position = this.position): SkillStat[] {
+  private combine(stats: SkillStat[], position = this.position, columns = true): SkillStat[] {
     if (!this.settings.combineStats) return stats;
     let out = stats;
     for (const { stat: total, parts } of combinedFor(position)) {
       const at = out.findIndex((stat) => (parts as string[]).includes(stat.key));
       if (at === -1 || !parts.every((part) => out.some((stat) => stat.key === part))) continue;
       // (the grid's columns only)
-      if (position === this.position) this.combinedSpot[total.key] = out[at].key;
+      if (columns && position === this.position) this.combinedSpot[total.key] = out[at].key;
       out = out.flatMap((stat, i) => (i === at ? [total] : (parts as string[]).includes(stat.key) ? [] : [stat]));
     }
     return out;
@@ -369,6 +373,9 @@ export class SkillRankingsComponent implements OnChanges, CardHost {
       get season() {
         return table.season;
       },
+      get weights() {
+        return table.mixWeights(table.position);
+      },
       tableSeason: true,
       empty: (key: string) => statIsEmpty(table.position, key),
     };
@@ -376,15 +383,27 @@ export class SkillRankingsComponent implements OnChanges, CardHost {
 
   readerFor(context: SeasonContext | null): StatReader {
     if (!context) return this.reader;
+    const table = this;
+    const position = context.position ?? this.position;
     return new StatReader({
-      position: context.position ?? this.position,
+      position,
       settings: this.settings,
       rows: context.rows,
       list: context.list,
       tableSeason: false,
       season: context.season,
       empty: context.empty,
+      get weights() {
+        return table.mixWeights(position);
+      },
     });
+  }
+
+  // A tab's sliders as its combined totals mix their parts: a part switched off with its eye at 0
+  private mixWeights(position: SkillPosition): SkillWeights {
+    const weights = this.tab(position).weights;
+    const off = combinedFor(position).flatMap(({ parts }) => parts.filter((part) => this.statHidden(part, position)));
+    return off.length ? { ...weights, ...Object.fromEntries(off.map((part) => [part, 0])) } : weights;
   }
 
   // Another season's list: the same filters as the table, ranked with the current sliders (or as

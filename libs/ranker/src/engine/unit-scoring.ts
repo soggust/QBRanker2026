@@ -67,14 +67,28 @@ export function combinedFor(position: string) {
   return SPORT.combined?.stats(position) ?? [];
 }
 
-// Slider weights with each combined pair's parts scaled by their parent slider (50 = as set, 0 = off)
-export function combinedWeights(position: string, weights: SkillWeights): SkillWeights {
+// Slider weights with each combined pair's parts scaled by their parent slider (50 = as set, 0 = off).
+// Combined (the Combine setting: the pair one column), the pair counts as its total instead, at the
+// parent's weight times its parts' (what the two counted for apart), the total read as the parts mixed
+// by their sliders (combinedMix)
+export function combinedWeights(position: string, weights: SkillWeights, combined = false): SkillWeights {
   const effective = { ...weights };
   for (const { stat, parts } of combinedFor(position)) {
     const parent = weights[stat.key] ?? 50;
+    const sum = parts.reduce((total, part) => total + (weights[part as keyof SkillWeights] ?? 0), 0);
     for (const part of parts) effective[part as keyof SkillWeights] = ((effective[part as keyof SkillWeights] ?? 0) * parent) / 50;
+    if (combined) effective[stat.key as keyof SkillWeights] = (sum * parent) / 50;
   }
   return effective;
+}
+
+// A combined total's parts mixed by their sliders: each part counts as its slider's share of the larger
+// one's, so even sliders add the two up (rushing + receiving yards) and a part at 0% drops out (Total
+// Yds with rushing at 0% is passing yards). Without sliders (or both at 0%), the plain sum.
+function combinedMix(values: (number | null)[], parts: string[], weights?: SkillWeights): number {
+  const shares = parts.map((part) => weights?.[part as keyof SkillWeights] ?? 0);
+  const top = Math.max(...shares);
+  return values.reduce<number>((sum, v, i) => sum + (v ?? 0) * (top > 0 ? shares[i] / top : 1), 0);
 }
 
 // A stat's value for a row: from the data, or worked out in the app (Games, recent form, a combined
@@ -85,7 +99,7 @@ export function statValue(unit: SkillPlayer, stat: SkillStat, context: ValueCont
   const pair = combinedFor(context.position).find(({ stat: total }) => total.key === stat.key);
   if (pair) {
     const values = pair.parts.map((part) => unitStat(unit, part as SkillStatKey, context.settings));
-    return values.every((v) => v === null) ? null : values.reduce<number>((sum, v) => sum + (v ?? 0), 0);
+    return values.every((v) => v === null) ? null : combinedMix(values, pair.parts, context.weights);
   }
   const roster = rosterGradeValue(unit, stat.key, context);
   if (roster !== undefined) return roster;

@@ -1,7 +1,7 @@
 // Reads a tab's stats for one season's list: values as the settings show them (season totals, per game
 // or a full season's pace), as text, their labels and names, and the list's averages and color scale.
 // The table has one for its season; the player card makes one for any other season it shows.
-import { PACE_GAMES, PER_GAME_LABELS, STAT_NAMES, SkillPlayer, SkillPosition, SkillStat } from '@sport/positions';
+import { PACE_GAMES, PER_GAME_LABELS, STAT_NAMES, SkillPlayer, SkillPosition, SkillStat, SkillWeights } from '@sport/positions';
 import { SPORT } from '@sport/sport';
 import { ValueContext } from '@ranker/engine/sport';
 import { recentCount, statValue } from '@ranker/engine/unit-scoring';
@@ -31,6 +31,8 @@ export interface ReaderSource {
   empty: (key: string) => boolean;
   // Bumped when the values change underneath (the sport's values from other tabs)
   version?: number;
+  // The tab's sliders, its switched-off stats at 0 (a combined total mixes its parts by them)
+  weights?: SkillWeights;
 }
 
 export class StatReader {
@@ -92,6 +94,7 @@ export class StatReader {
       rows: this.source.rows,
       tableSeason: this.source.tableSeason,
       defaults: false,
+      weights: this.source.weights,
     };
     return statValue(player, stat, context);
   }

@@ -595,7 +595,8 @@
           @case ('fantasy') {
             <card-panel class="tab-card group-results game-fantasy" [expandable]="false" label="Fantasy Points" icon="emoji_events">
               <div class="group-body">
-                @for (p of g.fantasy; track p.side + p.name; let i = $index) {
+                @let rows = fantasyRows(g);
+                @for (p of rows; track p.side + p.name; let i = $index) {
                   @let team = p.side === 'away' ? g.away : g.home;
                   <div class="game-fantasy-row">
                     <span class="game-fantasy-rank">{{ i + 1 }}</span>
@@ -615,12 +616,11 @@
                         <ng-container *ngTemplateOutlet="gem; context: { $implicit: team }"></ng-container>
                       </b>
                       <small>{{ p.parts.join(' · ') }}</small>
-                      <span class="game-fantasy-bar"><i [style.width.%]="fantasyShare(g, p.points) * 100"></i></span>
+                      <span class="game-fantasy-bar"><i [style.width.%]="(rows[0].total > 0 ? (p.total > 0 ? p.total : 0) / rows[0].total : 0) * 100"></i></span>
                     </span>
-                    <span class="game-fantasy-points" [class.negative]="p.points < 0">{{ p.points | number: '1.1-1' }}</span>
+                    <span class="game-fantasy-points" [class.negative]="p.total < 0">{{ p.total | number: '1.1-1' }}</span>
                   </div>
                 }
-                <p class="game-fantasy-note">{{ g.fantasyScoring }}</p>
               </div>
             </card-panel>
           }

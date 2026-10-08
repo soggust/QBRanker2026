@@ -3121,3 +3121,19 @@
     filter: brightness(1.25);
   }
 }
+
+// Every link's hover, the same everywhere: lit in the board's light with a soft glow (a result or a game's time,
+// already in that light, still answers the pointer)
+.depth-link,
+.log-team,
+.log-game {
+  transition:
+    color 0.15s,
+    text-shadow 0.15s;
+
+  &:hover:not(:disabled),
+  &:focus-visible {
+    color: var(--scoreboard-led);
+    text-shadow: 0 0 8px color-mix(in srgb, var(--scoreboard-led) 65%, transparent);
+  }
+}

@@ -636,10 +636,16 @@
       font-weight: 800;
     }
 
-    img {
+    // (his team's badge, small: the grid's gem scaled down, its logo filling it the same way)
+    .mini-gem {
+      border-radius: 4px;
       height: 16px;
-      object-fit: contain;
-      width: 16px;
+      width: 22px;
+
+      img {
+        height: 19px;
+        width: 19px;
+      }
     }
   }
 
@@ -1060,7 +1066,8 @@
 .mini-gem {
   align-items: center;
   background: var(--team-badge);
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  // (an edge that shows on the darkest badge too: every one reads its full size)
+  border: 1px solid rgba(255, 255, 255, 0.4);
   border-radius: 6px;
   box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.25);
   display: inline-flex;
@@ -1368,4 +1375,19 @@
   &:hover {
     filter: brightness(1.35);
   }
+}
+
+// (the game view's links: the same hover as every link, the glow included)
+.game-form-team,
+.game-form-score,
+.game-team-name {
+  &:hover:not(:disabled) {
+    color: var(--scoreboard-led);
+    text-shadow: 0 0 8px color-mix(in srgb, var(--scoreboard-led) 65%, transparent);
+  }
+}
+
+// (a last five's score in bold: the button's inherited font would undo it)
+.game-form-row .game-form-score {
+  font-weight: 800;
 }

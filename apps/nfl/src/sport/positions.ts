@@ -361,8 +361,8 @@ const GAMES_STAT: SkillStat = {
   infoOnly: true,
 };
 
-// Columns shown in place of a rushing + receiving pair when Combined Rush/Pass is on (display only:
-// ranking still uses the two sliders, like the QB page)
+// Columns shown in place of a rushing + receiving pair when Combined Rush/Pass is on, and ranked
+// as that total, its parts mixed by their sliders (unit-scoring combinedMix)
 export const TOTAL_YARDS_STAT: SkillStat = {
   key: 'totalYards',
   label: 'Total Yds',

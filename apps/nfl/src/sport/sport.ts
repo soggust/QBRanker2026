@@ -237,7 +237,7 @@ export const SPORT: SportConfig = {
   ],
   combined: {
     label: 'Combine Rush/Pass Stats',
-    title: "Show rushing + passing / receiving yards and touchdowns (and a QB's turnovers) as one total column each (display only: the ranking still uses both sliders)",
+    title: "Show rushing + passing / receiving yards and touchdowns (and a QB's turnovers) as one total column each, ranked by that total: the two sliders set how much of each it counts (one at 0%, the total is the other)",
     stats: (position) => combinedFor(position as SkillPosition),
   },
   // The unit ranks say what they're ranked on ("Off Rank (Pts)", "Offensive Rank (by Points)"), and

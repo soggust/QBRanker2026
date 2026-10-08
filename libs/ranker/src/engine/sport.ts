@@ -1,5 +1,5 @@
 import type { Observable } from 'rxjs';
-import type { SkillPlayer, SkillStat } from '@sport/positions';
+import type { SkillPlayer, SkillStat, SkillWeights } from '@sport/positions';
 import type { CardSkill } from './skills';
 import type { RosterGrade } from './roster-grades';
 import type { DepthLoadContext, DepthView } from './player-card/depth-chart';
@@ -231,6 +231,8 @@ export interface ValueContext {
   tableSeason: boolean;
   // A default ranking (the default sliders, other tabs' grades as average), not the table
   defaults: boolean;
+  // The tab's sliders (a combined total mixes its parts by them; the plain sum without)
+  weights?: SkillWeights;
 }
 
 // What a sport's card extras (SportConfig.cardExtras) get: the card being built, and ways to add to it

@@ -5,7 +5,8 @@ import { logoForSeason } from '@sport/logo-eras';
 import { SKILL_UNITS } from '@ranker/engine/unit-scoring';
 import { pitchColor } from '../player-card/zones';
 import { HOME, TracedPark, fieldSpot, loadTracedParks, tracedPark, wallPath } from './parks';
-import { GameArsenal, GameChart, GameMark, GamePitch, GameTeam, GameView, GameWeather } from './game';
+import { GameArsenal, GameChart, GameFantasy, GameMark, GamePitch, GameTeam, GameView, GameWeather } from './game';
+import { PositionService } from '../position.service';
 
 import { GameTab, GameViewService } from './game-view.service';
 
@@ -23,7 +24,10 @@ import { GameTab, GameViewService } from './game-view.service';
   standalone: false,
 })
 export class GameViewComponent {
-  constructor(readonly games: GameViewService) {}
+  constructor(
+    readonly games: GameViewService,
+    private positions: PositionService,
+  ) {}
 
   // The tabs: Fantasy when the box score scores anyone
   tabsFor(game: GameView): { id: GameTab; title: string }[] {
@@ -277,9 +281,13 @@ export class GameViewComponent {
   }
 
   // A fantasy line's bar: its points against the game's best
-  fantasyShare(game: GameView, points: number): number {
-    const best = game.fantasy[0]?.points ?? 0;
-    return best > 0 ? Math.max(0, points) / best : 0;
+  // The fantasy board in the Fantasy Scoring setting (the NFL's: a catch worth 1, a half or nothing), best first
+  fantasyRows(game: GameView): (GameFantasy & { total: number })[] {
+    const scoring = this.positions.settings.sport['fantasyScoring'];
+    const perCatch = scoring === 'std' ? 0 : scoring === 'half' ? 0.5 : 1;
+    return game.fantasy
+      .map((p) => ({ ...p, total: Math.round((p.points + p.receptions * perCatch) * 10) / 10 }))
+      .sort((a, b) => b.total - a.total);
   }
 
   // The plays the filter leaves (Scoring Only: just the ones that scored)

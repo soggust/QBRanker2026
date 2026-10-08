@@ -56,7 +56,10 @@ export interface GameFantasy {
   name: string;
   position: string | null;
   headshot: string | null;
+  // his points before catches (the NFL's catches count as the Fantasy Scoring setting says: PPR, half, none),
+  // and his catches
   points: number;
+  receptions: number;
   // what scored it ("285 pass yds", "2 pass TD", "6 rec")
   parts: string[];
 }
@@ -776,7 +779,7 @@ export async function loadWeather(game: GameView): Promise<GameWeather | null> {
 // (a hit that isn't a home run counts as a single: the box score doesn't split them)
 
 const FANTASY_SCORING: Record<string, string> = {
-  football: 'PPR: 1 pt per 25 pass yds, 4 per pass TD, -2 per INT, 1 per 10 rush or rec yds, 6 per TD, 1 per catch, -2 per fumble lost; kickers 3 per FG, 1 per XP',
+  football: '1 pt per 25 pass yds, 4 per pass TD, -2 per INT, 1 per 10 rush or rec yds, 6 per TD, a catch by the Fantasy Scoring setting, -2 per fumble lost; kickers 3 per FG, 1 per XP',
   basketball: 'DraftKings: 1 per pt, +0.5 per 3, 1.25 per reb, 1.5 per ast, 2 per stl or blk, -0.5 per TO, +1.5 double-double, +3 triple-double',
   hockey: 'DraftKings: 8.5 per goal, 5 per assist, 1.5 per shot, 1.3 per block; goalies 0.7 per save, -3.5 per goal against',
   baseball: 'DraftKings: 3 per hit (10 a HR), 2 per RBI, run or walk; pitchers 2.25 per inning, 2 per K, -2 per ER, -0.6 per hit or walk',
@@ -804,7 +807,7 @@ function fantasyPoints(league: string, box: GameView['box']): { fantasy: GameFan
           const i = g.labels.indexOf(label);
           return i < 0 ? undefined : row.values[i];
         };
-        const p = players.get(team.side + row.name) ?? { side: team.side, name: row.name, position: row.position, headshot: row.headshot, points: 0, parts: [] };
+        const p = players.get(team.side + row.name) ?? { side: team.side, name: row.name, position: row.position, headshot: row.headshot, points: 0, receptions: 0, parts: [] };
         // (its points, and the line as the box score writes it: "6.1 IP" for 6 1/3 innings)
         const add = (pts: number, amount: number, label: string, shown?: string) => {
           if (!amount) return;
@@ -820,7 +823,9 @@ function fantasyPoints(league: string, box: GameView['box']): { fantasy: GameFan
             add(num(v('YDS')) * 0.1, num(v('YDS')), 'rush yds');
             add(num(v('TD')) * 6, num(v('TD')), 'rush TD');
           } else if (g.key === 'receiving') {
-            add(num(v('REC')), num(v('REC')), 'rec');
+            // (catches: scored by the setting, on the page)
+            p.receptions += num(v('REC'));
+            add(0, num(v('REC')), 'rec');
             add(num(v('YDS')) * 0.1, num(v('YDS')), 'rec yds');
             add(num(v('TD')) * 6, num(v('TD')), 'rec TD');
           } else if (g.key === 'fumbles') {
@@ -1095,4 +1100,18 @@ export function heroColor(league: string, names: (string | undefined)[]): Promis
     );
   }
   return teamColors.get(key)!;
+}
+
+// A venue's photo when ESPN has none (a game abroad: Tottenham Hotspur Stadium, a Munich or São Paulo
+// game): Wikipedia's lead photo for the venue, else for its city (its summary API: free, open to the page)
+export async function venuePhoto(name: string, city: string | null): Promise<string | null> {
+  for (const title of [name, city].filter((t): t is string => !!t)) {
+    const res = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title.replace(/ /g, '_'))}`).catch(() => null);
+    if (!res?.ok) continue;
+    const page = (await res.json().catch(() => null)) as { thumbnail?: { source?: string }; originalimage?: { source?: string } } | null;
+    // (its thumbnail at a wider size; the original can be huge)
+    const thumb = page?.thumbnail?.source?.replace(/\/\d+px-/, '/1280px-');
+    if (thumb || page?.originalimage?.source) return thumb ?? page!.originalimage!.source!;
+  }
+  return null;
 }

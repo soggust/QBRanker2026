@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { SPORT } from '@sport/sport';
 import { espnTeamId } from '@ranker/core/game-logs';
-import { GameView, GameWeather, TeamResult, findGame, findGameOn, loadGame, loadWeather, nthMeeting, teamResults } from './game';
+import { GameView, GameWeather, TeamResult, findGame, findGameOn, loadGame, loadWeather, nthMeeting, teamResults, venuePhoto } from './game';
 
 // Which game to open: ESPN's id (a game log's row), a date and a team in it (a row without one), or a
 // Recent dot (its team, the opponent and where, the season, and which meeting: 0 the latest)
@@ -69,6 +69,13 @@ export class GameViewService {
       this.tab = game.preview ? 'preview' : 'summary';
       // (the Plays tab's first group open, the rest shut)
       if (game.plays.length) this.openPlays.add(0);
+      // (no photo of the venue from ESPN: Wikipedia's of it, or of its city)
+      if (game.venue && !game.venue.image) {
+        const venue = game.venue;
+        venuePhoto(venue.name, venue.city)
+          .then((photo) => ticket === this.opened && photo && (venue.image = photo))
+          .catch(() => null);
+      }
       this.weather = 'loading';
       loadWeather(game)
         .then((w) => ticket === this.opened && (this.weather = w))
