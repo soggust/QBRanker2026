@@ -142,6 +142,11 @@ card-panel {
     ::ng-deep > .panel-body {
       flex: 1;
     }
+
+    // (a table wider than its third of the row scrolls sideways rather than running past the edge)
+    .group-body {
+      overflow-x: auto;
+    }
   }
 }
 
@@ -279,4 +284,33 @@ card-panel {
 
 .desk-off {
   opacity: 0.45;
+}
+
+// (a graded bet's post-mortem: the line saying why, wrapping; a mark when its premise broke, the recap's link)
+.desk-why {
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 11.5px;
+  max-width: 420px;
+  min-width: 240px;
+  text-align: left !important;
+  white-space: normal !important;
+
+  mat-icon {
+    font-size: 14px;
+    height: 14px;
+    vertical-align: -2px;
+    width: 14px;
+  }
+
+  a {
+    color: rgba(255, 255, 255, 0.55);
+
+    &:hover {
+      color: #fff;
+    }
+  }
+}
+
+.desk-broke {
+  color: v.$bad;
 }

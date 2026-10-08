@@ -7,10 +7,19 @@
 // since the last): box scores' who-played for the NBA and NHL, MLB's probable pitchers, their game logs and
 // ballpark weather, and the coordinates of every place a game is played. The NFL's come from nflverse each run.
 // Any fact a source couldn't give leaves its term at 0 for that game: no effect, nothing guessed.
+//
+// More of it lives beside this file: officials.mjs (every sport's officials), football.mjs (neutral-script
+// EPA, the line's continuity, the wind across the field), hockey.mjs (expected goals, goaltending above
+// expected, last change), baseball.mjs (the air, the bullpens, the umpire's zone), teamstats.mjs (the
+// ranker's own numbers); this file gathers and weaves them in with the rest.
 
 import { injuries, summary, teamNames, teamSchedule, gameOf } from './espn.mjs';
 import { RANKER_TERMS, rankerOf } from './teamstats.mjs';
-import { forecast, geocode, miles, mlbHands, mlbPitching, mlbSchedule, nflverseGames, pitchLine, pool } from './sources.mjs';
+import { OFFICIAL_TERMS, gatherOfficials, officialsOf, refereesOf } from './officials.mjs';
+import { FOOTBALL_TERMS, footballOf, gatherFootball } from './football.mjs';
+import { HOCKEY_TERMS, gatherHockey, hockeyOf } from './hockey.mjs';
+import { BASEBALL_TERMS, baseballOf, gatherBaseball } from './baseball.mjs';
+import { elevations, forecast, geocode, miles, mlbHands, mlbPitching, mlbSchedule, nflverseGames, pitchLine, pool } from './sources.mjs';
 
 const DAY = 864e5;
 
@@ -20,6 +29,12 @@ const term = (key, group, on, label, unit) => ({ key, group, on, label, unit });
 const REST = term('rest', 'rest', 'm', 'Rest edge', 'per day more rest than the other side');
 const B2B = term('b2b', 'rest', 'm', 'Back-to-back', 'when the other side played yesterday');
 const B2BT = term('b2bT', 'rest', 't', 'Back-to-backs (total)', 'to the total per side that played yesterday');
+// (the schedule's grind, the NBA's and NHL's: a third game in four nights, a fourth in five, a back-to-back
+// flying east (an hour or more of clock lost), a back-to-back climbing (Denver, Salt Lake City))
+const DENSE3 = term('dense3', 'rest', 'm', '3 in 4 nights', 'when the other side plays its third game in four nights');
+const DENSE4 = term('dense4', 'rest', 'm', '4 in 5 nights', 'when the other side plays its fourth game in five nights');
+const EAST = term('b2bEast', 'rest', 'm', 'Back-to-back flying east', 'when the other side played last night a time zone or more west');
+const ALTITUDE = term('altitude', 'travel', 'm', 'Back-to-back at altitude', "per 1,000 meters the other side climbed since last night's game");
 const TRAVEL = term('travel', 'travel', 'm', 'Travel edge', 'per 1,000 miles less travel since its last game');
 
 export const TERMS = {
@@ -35,6 +50,10 @@ export const TERMS = {
     REST,
     B2B,
     B2BT,
+    DENSE3,
+    DENSE4,
+    EAST,
+    ALTITUDE,
     TRAVEL,
     term('out', 'starters', 'm', 'Players out', "per 10 of the other side's missing production (pts+reb+ast+stl+blk-to a game)"),
     term('outT', 'starters', 't', 'Players out (total)', 'to the total per 10 of production missing on both sides'),
@@ -43,6 +62,9 @@ export const TERMS = {
     REST,
     B2B,
     B2BT,
+    DENSE3,
+    EAST,
+    ALTITUDE,
     TRAVEL,
     term('goalie', 'starters', 'm', 'Goalie edge', "per goal a game its starting goalie saves over its usual, against the other side's"),
     term('goalieT', 'starters', 't', 'Goalies (total)', 'to the total per goal a game both starters save over their usual'),
@@ -166,6 +188,10 @@ export async function gather(sport, cfg, history, upcoming, facts) {
   if (sport === 'nba') await step('box scores', () => boxFacts(cfg, history, facts, 'nba'));
   if (sport === 'nhl') await step('box scores', () => boxFacts(cfg, history, facts, 'nhl'));
   if (sport === 'mlb') await step('StatsAPI', () => mlbFacts(history, upcoming, facts, live));
+  if (sport === 'nfl') await step('plays, lines and fields', () => gatherFootball(cfg, history, upcoming, facts, live));
+  if (sport === 'nhl') await step('expected goals', () => gatherHockey(history, facts));
+  if (sport === 'mlb') await step('air and bullpens', () => gatherBaseball(history, upcoming, facts, live));
+  await step('officials', () => gatherOfficials(sport, cfg, upcoming, live));
   if (sport !== 'mlb') {
     await step('injuries', async () => {
       const report = await injuries(cfg.league);
@@ -192,6 +218,13 @@ async function places(history, upcoming, facts) {
   const fresh = [...wanted].filter((p) => !(p in facts.places));
   const found = await pool(fresh, 3, geocode);
   fresh.forEach((p, i) => found[i] !== undefined && (facts.places[p] = found[i]));
+  // (and each place's elevation, meters)
+  facts.elev ??= {};
+  const high = Object.keys(facts.places).filter((p) => facts.places[p] && !(p in facts.elev));
+  if (high.length) {
+    const got = await elevations(high.map((p) => facts.places[p]));
+    high.forEach((p, i) => Number.isFinite(got[i]) && (facts.elev[p] = got[i]));
+  }
 }
 
 // The NFL: nflverse's schedule (each game's starting quarterbacks, roof, temperature and wind; the coming
@@ -215,9 +248,12 @@ async function nflForecasts(upcoming, facts, live) {
 }
 
 // The NBA's and NHL's box scores (ESPN's summaries, new finals only): each side's players and minutes and
-// production (NBA), or its goalies and their shots and goals against, the starter first (NHL)
+// production (NBA), or its goalies and their shots and goals against, the starter first, and its scorers
+// (NHL); the game's referees (r) and their whistle (w: each side's free throws and fouls in the NBA, power
+// plays and penalty minutes in the NHL). (v: 2, the facts' version: a game kept before officials were is
+// asked again once)
 async function boxFacts(cfg, history, facts, sport) {
-  const todo = history.filter((g) => g.final && g.hs !== null && !(g.id in facts.games));
+  const todo = history.filter((g) => g.final && g.hs !== null && facts.games[g.id]?.v !== 2);
   if (!todo.length) return;
   const t0 = Date.now();
   let done = 0;
@@ -225,11 +261,20 @@ async function boxFacts(cfg, history, facts, sport) {
     const body = await summary(cfg.league, g.id);
     const box = body?.boxscore?.players;
     if (!box?.length) return;
-    const side = {};
+    const side = { v: 2 };
+    const whereOf = (t) => (String(t?.id) === String(g.home) ? 'h' : String(t?.id) === String(g.away) ? 'a' : null);
     for (const p of box) {
-      const where = String(p.team?.id) === String(g.home) ? 'h' : String(p.team?.id) === String(g.away) ? 'a' : null;
+      const where = whereOf(p.team);
       if (!where) continue;
       side[where] = sport === 'nba' ? nbaPlayers(p) : nhlGoalies(p);
+      if (sport === 'nhl') side[`${where}g`] = nhlScorers(p);
+    }
+    side.r = refereesOf(body);
+    const stat = (t, name) => Number(t.statistics?.find((x) => x.name === name)?.displayValue?.split('-').at(-1)) || 0;
+    const teams = Object.fromEntries((body.boxscore?.teams ?? []).map((t) => [whereOf(t.team), t]));
+    if (teams.h && teams.a) {
+      const keys = sport === 'nba' ? ['freeThrowsMade-freeThrowsAttempted', 'fouls'] : ['powerPlayOpportunities', 'penaltyMinutes'];
+      side.w = keys.flatMap((k) => [stat(teams.h, k), stat(teams.a, k)]);
     }
     if (side.h && side.a) facts.games[g.id] = side;
     if (++done % 250 === 0) console.log(`${sport}: box scores ${done}/${todo.length} (${Math.round((Date.now() - t0) / 1000)}s)`);
@@ -253,6 +298,14 @@ function nbaPlayers(p) {
     .filter((x) => x[1] > 0);
 }
 
+// (an NHL side's scorers: [ESPN id, goals], skaters with one or more)
+function nhlScorers(p) {
+  return (p.statistics ?? [])
+    .filter((x) => x.name === 'forwards' || x.name === 'defenses')
+    .flatMap((s) => (s.athletes ?? []).map((a) => [String(a.athlete.id), Number(a.stats[s.labels.indexOf('G')]) || 0]))
+    .filter((x) => x[1] > 0);
+}
+
 // (an NHL side's goalies: [ESPN id, shots against, goals against], the starter first)
 function nhlGoalies(p) {
   const s = (p.statistics ?? []).find((x) => x.name === 'goalies');
@@ -272,7 +325,10 @@ async function mlbFacts(history, upcoming, facts, live) {
   facts.venues ??= {};
   const today = ymdDash(Date.now());
   // (a final StatsAPI has no match for is tried once, then left neutral)
-  const todo = history.filter((g) => g.final && !facts.games[g.id]?.v && !facts.games[g.id]?.tried);
+  facts.umps ??= {};
+  facts.mlbTeams ??= {};
+  // (a game kept before its umpire was is asked again once: u, null when StatsAPI hasn't one)
+  const todo = history.filter((g) => g.final && (!facts.games[g.id]?.v || !('u' in facts.games[g.id])) && !facts.games[g.id]?.tried);
   const wanted = [...todo.map((g) => g.date), ...upcoming.map(({ game }) => game.date)].sort();
   const rows = [];
   if (wanted.length) {
@@ -286,6 +342,7 @@ async function mlbFacts(history, upcoming, facts, live) {
   const byTeams = new Map();
   for (const r of rows) {
     const code = (t) => MLB_CODES[t.team?.abbreviation] ?? t.team?.abbreviation;
+    for (const side of [r.teams.home, r.teams.away]) if (side.team?.id) facts.mlbTeams[side.team.id] = code(side);
     const key = `${code(r.teams.home)}|${code(r.teams.away)}`;
     byTeams.set(key, [...(byTeams.get(key) ?? []), r]);
   }
@@ -313,6 +370,11 @@ async function mlbFacts(history, upcoming, facts, live) {
       roof: r.venue?.fieldInfo?.roofType ?? null,
       names: [r.teams.home.probablePitcher?.fullName ?? null, r.teams.away.probablePitcher?.fullName ?? null],
       v: r.venue?.id ? String(r.venue.id) : null,
+      u: (() => {
+        const o = (r.officials ?? []).find((x) => x.officialType === 'Home Plate');
+        if (o) facts.umps[o.official.id] = o.official.fullName;
+        return o ? String(o.official.id) : null;
+      })(),
       vn: r.venue?.name ?? null,
       lineups: r.lineups?.homePlayers?.length && r.lineups?.awayPlayers?.length ? [r.lineups.homePlayers.map((p) => String(p.id)), r.lineups.awayPlayers.map((p) => String(p.id))] : null,
     };
@@ -328,9 +390,9 @@ async function mlbFacts(history, upcoming, facts, live) {
   const found = matched.map(([g, r]) => [g, factsOf(r)]);
   await handsFor(found.map(([, f]) => f));
   const hit = new Set(matched.map(([g]) => g.id));
-  if (rows.length) for (const g of todo) if (!hit.has(g.id)) facts.games[g.id] = { tried: 1 };
+  if (rows.length) for (const g of todo) if (!hit.has(g.id)) facts.games[g.id] = { ...(facts.games[g.id] ?? {}), tried: 1 };
   for (const [g, f] of found) {
-    facts.games[g.id] = { pk: f.pk, hp: f.hp, ap: f.ap, w: f.w, at: f.at, v: f.v, lu: f.lineups ? f.lineups.map(counts) : null };
+    facts.games[g.id] = { ...(facts.games[g.id] ?? {}), pk: f.pk, hp: f.hp, ap: f.ap, w: f.w, at: f.at, v: f.v, u: f.u, lu: f.lineups ? f.lineups.map(counts) : null };
     if (f.v) facts.venues[f.v] = f.vn;
     for (const [id, name] of [
       [f.hp, f.names[0]],
@@ -429,7 +491,8 @@ async function pitcherLines(history, upcoming, facts, live, today) {
 export function featurize(sport, cfg, games, facts, live) {
   const list = [...games].sort((a, b) => a.date.localeCompare(b.date));
   const lineups = sport === 'mlb' ? lineupsOf(list, facts, live) : null;
-  const terms = [...TERMS[sport], ...RANKER_TERMS[sport], ...(lineups?.terms ?? [])];
+  const more = { nfl: FOOTBALL_TERMS, nhl: HOCKEY_TERMS, mlb: BASEBALL_TERMS }[sport] ?? [];
+  const terms = [...TERMS[sport], ...more, ...OFFICIAL_TERMS[sport], ...RANKER_TERMS[sport], ...(lineups?.terms ?? [])];
   const mTerms = terms.filter((t) => t.on === 'm');
   const tTerms = terms.filter((t) => t.on === 't');
   const ranker = rankerOf(sport, facts.teams ?? []);
@@ -443,15 +506,26 @@ export function featurize(sport, cfg, games, facts, live) {
   const last = new Map();
   const starters = STARTERS[sport](cfg, facts, live);
   const weather = WEATHER[sport]?.(facts, live) ?? (() => null);
+  const bb = sport === 'mlb' ? baseballOf(facts, live) : null;
+  const second = sport === 'nfl' ? footballOf(facts, live) : sport === 'nhl' ? hockeyOf(facts, live) : sport === 'mlb' ? bb.of : () => null;
+  const officials = officialsOf(sport, facts, live, bb?.extra);
+  const elevOf = (g) => facts.elev?.[g.venue] ?? facts.elev?.[home.get(g.home)] ?? null;
   for (const g of list) {
     const t = Date.parse(g.date);
     const at = where(g);
+    const elev = elevOf(g);
     const side = (id) => {
       const prev = last.get(id);
       const fresh = !prev || prev.season !== g.season;
       const rest = fresh ? cfg.context.restCap : Math.min(cfg.context.restCap, Math.round((t - prev.t) / DAY));
       const from = fresh ? (facts.places?.[home.get(id)] ?? null) : prev.at;
-      return { rest, b2b: !fresh && rest <= 1 ? 1 : 0, miles: at && from ? Math.round(miles(from, at)) : 0 };
+      const b2b = !fresh && rest <= 1 ? 1 : 0;
+      // (games in the last four and five nights, this one counted; a back-to-back's clock and climb)
+      const times = fresh ? [t] : [...prev.times, t];
+      const within = (days) => times.filter((x) => t - x < days * DAY - 6 * 36e5).length;
+      const east = b2b && at && prev.at && at[1] - prev.at[1] >= 10 ? 1 : 0;
+      const climb = b2b && elev !== null && prev.elev !== null ? Math.max(0, elev - prev.elev) / 1000 : 0;
+      return { rest, b2b, miles: at && from ? Math.round(miles(from, at)) : 0, times: times.slice(-5), dense3: within(4) >= 3 ? 1 : 0, dense4: within(5) >= 4 ? 1 : 0, east, climb };
     };
     const h = side(g.home);
     const a = side(g.away);
@@ -459,7 +533,15 @@ export function featurize(sport, cfg, games, facts, live) {
     const w = weather(g);
     const r = ranker(g);
     const lu = lineups?.of(g);
+    const x2 = second(g);
+    const o = officials(g);
     const v = {
+      ...(x2?.terms ?? {}),
+      ...(o?.terms ?? {}),
+      dense3: a.dense3 - h.dense3,
+      dense4: a.dense4 - h.dense4,
+      b2bEast: a.east - h.east,
+      altitude: a.climb - h.climb,
       ...(r?.terms ?? {}),
       ...(lu?.terms ?? {}),
       rest: h.rest - a.rest,
@@ -472,9 +554,17 @@ export function featurize(sport, cfg, games, facts, live) {
     out.set(g.id, {
       m: mTerms.map((x) => v[x.key] ?? 0),
       t: tTerms.map((x) => v[x.key] ?? 0),
-      info: { rest: [h.rest, a.rest], b2b: [h.b2b, a.b2b], miles: [h.miles, a.miles], ...(s?.info ? { starters: s.info } : {}), ...(w?.info ? { weather: w.info } : {}), ...(r ? { ranker: r.info } : {}), ...(lu?.info ? { lineups: lu.info } : {}), flags: [...(s?.flags ?? [])] },
+      info: { rest: [h.rest, a.rest], b2b: [h.b2b, a.b2b], miles: [h.miles, a.miles], ...(s?.info ? { starters: s.info } : {}), ...(w?.info ? { weather: w.info } : {}), ...(r ? { ranker: r.info } : {}), ...(lu?.info ? { lineups: lu.info } : {}), ...(x2?.info ? { more: x2.info } : {}), ...(o?.info ? { officials: o.info } : {}), schedule: { dense: [h.dense3 + h.dense4, a.dense3 + a.dense4], east: [h.east, a.east], climb: [h.climb, a.climb] }, flags: [...(s?.flags ?? []), ...(x2?.flags ?? [])] },
     });
-    for (const id of [g.home, g.away]) last.set(id, { t, season: g.season, at });
+    for (const [id, x] of [
+      [g.home, h],
+      [g.away, a],
+    ])
+      last.set(id, { t, season: g.season, at, elev, times: x.times });
+    if (g.final) {
+      x2?.learn?.();
+      o?.learn?.();
+    }
     if (g.final) s?.learn?.();
     if (g.final) lineups?.learn?.();
   }

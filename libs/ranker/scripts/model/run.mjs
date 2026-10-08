@@ -4,7 +4,7 @@
 //      teams' schedules the first time, then the last few days' scoreboards)
 //   2. the ratings refit on it (ratings.mjs: the grid's best settings at predicting the games they hadn't
 //      seen yet), each setting that moves logged with why
-//   2b. the context (context.mjs: rest, travel, starters, weather) gathered for every game, and the size of
+//   2b. the context (context.mjs: rest, travel, starters, weather, officials and more) gathered for every game, and the size of
 //      each of its terms fit on the same held-out games (ratings.mjs fitContext: a term that doesn't help is
 //      left out), each size that moves logged the same way
 //   3. each market's trust in the model refit on the desk's own graded bets, logged the same way
@@ -27,6 +27,7 @@ import { LEAGUES } from './leagues.mjs';
 import { gameOf, json, linesOf, scoreboard, teamIds, teamSchedule, ymd } from './espn.mjs';
 import { adjust, expect, fit, fitContext, gateOf, replay, round } from './ratings.mjs';
 import { enrich, featurize, gather } from './context.mjs';
+import { postmortems } from './postmortem.mjs';
 import { BANKROLL, MARKETS, choose, fitTrust, pickText, price, record, settle } from './desk.mjs';
 
 const ROOT = path.resolve(import.meta.dirname, '../../../..');
@@ -34,6 +35,9 @@ const ROOT = path.resolve(import.meta.dirname, '../../../..');
 const EV_SCALE = 0.08;
 // (the trust a market starts at, before 40 of its bets are graded: halfway between the book and the model)
 const START_TRUST = 0.5;
+// (what a graded bet whose premise broke in the game counts for in the trust fit and the calibration: set by
+// hand, not fit: there aren't graded bets enough yet to fit it on)
+const DISRUPTED_WEIGHT = 0.3;
 const DAY = 864e5;
 
 const read = (file, fallback) => (existsSync(file) ? JSON.parse(readFileSync(file, 'utf8')) : fallback);
@@ -154,6 +158,13 @@ async function runSport(sport) {
     Object.assign(bet, settle(bet, g), { gradedAt: at });
     graded++;
   }
+  // (each graded bet's post-mortem: the ones just graded, and any graded before there were post-mortems)
+  try {
+    const todo = ledger.bets.filter((b) => b.status !== 'open' && !b.why);
+    if (todo.length) console.log(`${sport}: post-mortems for ${await postmortems(sport, cfg.league, todo, games, facts, history, DISRUPTED_WEIGHT)} of ${todo.length} graded bets`);
+  } catch (err) {
+    console.warn(`${sport}: post-mortems skipped (${err.message})`);
+  }
 
   // (--replace: the open bets on games not started yet taken back, to be priced again with what the model
   // knows now; logged)
@@ -217,7 +228,7 @@ async function runSport(sport) {
     }
   }
 
-  if (replaced) state.changelog.push({ at, what: 'Open bets replaced', from: replaced, to: newBets, why: 'Priced again with the context the model has now (starters, weather, parks, the line-move guard)' });
+  if (replaced) state.changelog.push({ at, what: 'Open bets replaced', from: replaced, to: newBets, why: 'Priced again with the context the model has now (its terms as fit this run: see Context)' });
 
   // The state: the settings and how they test, the trust, the changelog, the teams by rating
   const abbr = new Map();
@@ -235,6 +246,10 @@ async function runSport(sport) {
     trust,
     evScale: EV_SCALE,
     context,
+    postmortem: (() => {
+      const done = ledger.bets.filter((b) => b.status !== 'open' && b.why);
+      return { graded: done.length, disrupted: done.filter((b) => (b.weight ?? 1) < 1).length, weight: DISRUPTED_WEIGHT, fitted: false };
+    })(),
     history: { games: history.length, finals: history.filter((g) => g.final).length, from: history[0]?.date ?? null },
     teams: [...teams.r.entries()]
       .map(([id, r]) => ({ id, abbr: abbr.get(id) ?? id, rating: round(r, 2), off: round(teams.o.get(id), 2), def: round(teams.d.get(id), 2) }))

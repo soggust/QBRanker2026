@@ -5,7 +5,7 @@ import { Component, OnInit } from '@angular/core';
 // data/model/ledger.json and state.json. Its bankroll and record, broken down by sport, market and stake,
 // how well its chances match what happened, its bankroll over time, the bets still open, the latest graded,
 // every change it's made to itself and why, and the context it weighs beyond the ratings (rest, travel,
-// starters, weather, parks, the ranker's own numbers) with each term's fitted size.
+// starters, weather, parks, officials, the ranker's own numbers) with each term's fitted size.
 
 interface ModelBet {
   id: string;
@@ -25,6 +25,12 @@ interface ModelBet {
   status: 'open' | 'won' | 'lost' | 'push';
   profit: number;
   final?: string;
+  // (its post-mortem, once graded: the story, what broke its premise, the line saying why; weight under 1
+  // when the premise broke in the game)
+  why?: string;
+  recap?: { headline: string | null; lede: string | null; link: string | null };
+  disrupted?: { severe: boolean; kind: string; text: string }[];
+  weight?: number;
 }
 
 type TestNumbers = { maeMargin: number; maeTotal: number; winHit: number; winLogLoss: number };
@@ -52,6 +58,7 @@ interface ModelState {
   changelog: { at: string; what: string; from: number; to: number; why: string; sport?: string }[];
   teams: { abbr: string; rating: number }[];
   context?: { lambda: number; terms: ContextTerm[]; test: { games: number; before: TestNumbers; after: TestNumbers } } | null;
+  postmortem?: { graded: number; disrupted: number; weight: number; fitted: boolean };
 }
 
 type ContextRow = ContextTerm & { sport: string; unitWord: string };
@@ -137,7 +144,8 @@ export class ModelDeskComponent implements OnInit {
     this.byMarket = Object.keys(MARKET_NAMES).map((m) => tally(MARKET_NAMES[m], bets.filter((b) => b.market === m)));
     this.byStake = [0.5, 1, 1.5, 2, 2.5, 3].map((u) => tally(`${u}u`, bets.filter((b) => b.units === u))).filter((t) => t.bets || t.open);
 
-    // (how often the sides it gave each chance actually won: by its chance, five points wide)
+    // (how often the sides it gave each chance actually won: by its chance, five points wide; a bet whose
+    // premise broke in the game counts for its weight)
     const decided = bets.filter((b) => b.status === 'won' || b.status === 'lost');
     const buckets = new Map<number, ModelBet[]>();
     for (const b of decided) {
@@ -149,8 +157,8 @@ export class ModelDeskComponent implements OnInit {
       .map(([at, list]) => ({
         label: `${Math.round(at * 100)}-${Math.round(at * 100) + 5}%`,
         n: list.length,
-        said: list.reduce((s, b) => s + b.p, 0) / list.length,
-        was: list.filter((b) => b.status === 'won').length / list.length,
+        said: list.reduce((s, b) => s + (b.weight ?? 1) * b.p, 0) / list.reduce((s, b) => s + (b.weight ?? 1), 0),
+        was: list.reduce((s, b) => s + (b.status === 'won' ? (b.weight ?? 1) : 0), 0) / list.reduce((s, b) => s + (b.weight ?? 1), 0),
       }));
 
     // (the bankroll after each graded bet, in grading order)
@@ -244,7 +252,18 @@ export class ModelDeskComponent implements OnInit {
   readonly tallyValue = (t: Tally, key: string): unknown =>
     key === 'label' ? t.label : key === 'record' ? (t.won + t.lost ? t.won / (t.won + t.lost) : null) : key === 'profit' ? t.profit : key === 'roi' ? t.roi : key === 'open' ? t.open : null;
 
-  readonly sportValue = (t: Tally & { state: ModelState | null }, key: string): unknown => (key === 'test' ? (t.state?.test?.winHit ?? null) : this.tallyValue(t, key));
+  readonly sportValue = (t: Tally & { state: ModelState | null }, key: string): unknown =>
+    key === 'test' ? (t.state?.test?.winHit ?? null) : key === 'disrupted' ? (t.state?.postmortem?.disrupted ?? null) : this.tallyValue(t, key);
+
+  // (a graded bet's premise broke in the game: a starter hurt, a goalie pulled)
+  broke(b: ModelBet): boolean {
+    return (b.weight ?? 1) < 1;
+  }
+
+  // (its post-mortem's hover: the story's headline and opening, and everything noted in the game)
+  recapText(b: ModelBet): string {
+    return [b.recap?.headline, b.recap?.lede, ...(b.disrupted ?? []).map((d) => `${d.severe ? '! ' : ''}${d.text}`)].filter(Boolean).join('\n');
+  }
 
   // (a bet's value by column)
   readonly betValue = (b: ModelBet, key: string): unknown =>
@@ -255,6 +274,7 @@ export class ModelDeskComponent implements OnInit {
     : key === 'market' ? b.market
     : key === 'pick' ? b.pick
     : key === 'result' ? b.profit
+    : key === 'why' ? (b.why ?? null)
     : (b as unknown as Record<string, unknown>)[key];
 
   readonly calibrationValue = (c: { label: string; n: number; said: number; was: number }, key: string): unknown => (key === 'label' ? c.said : (c as unknown as Record<string, unknown>)[key]);
@@ -287,7 +307,7 @@ export class ModelDeskComponent implements OnInit {
     result: 'Won, lost or pushed, and what it paid',
     calibLabel: 'The chance it gave its picks, in 5-point bands',
     n: 'Bets graded in the band',
-    said: 'The average chance it gave them',
+    said: 'The average chance it gave them (a bet whose premise broke in the game counts less: see Why)',
     was: 'How often they actually won (close to "Said" is honest)',
     k: "Learning rate: how far one game's surprise moves a team's rating (0.08 moves it 8% of the miss)",
     hfa: "Home edge: how much playing at home is worth, in the sport's scoring unit (points, goals, runs)",
@@ -297,7 +317,9 @@ export class ModelDeskComponent implements OnInit {
     sigmaT: 'Total spread: the same for game totals',
     trust: "How much each market counts the model against the sportsbook: 0 the book's alone, 1 the model's alone (starts at 0.5; refit on the market's graded bets once 40 are; * not yet)",
     history: 'Finished games the ratings are built on',
-    term: "What it weighs beyond the ratings (hover a name for its unit): rest, travel, starters, weather, ballparks, and last season's numbers from the ranker",
+    why: "Why it won or lost, from the game's box score and story: what broke the bet's premise in the game (a quarterback replaced, a top player's minutes or snaps cut short, a goalie pulled, a starter gone early: ! marks one, and such a bet counts less in what the desk learns), overtime or a blowout, and how far off its call was. Hover for the story; the link opens ESPN's recap",
+    disrupted: "Graded bets whose premise broke in the game (a starter hurt, a goalie pulled...): they count less in the trust fit and the calibration, in full in the record",
+    term: "What it weighs beyond the ratings (hover a name for its unit): rest and the schedule's grind, travel, starters and bullpens, weather and air, ballparks, the officials, expected goals and neutral-script EPA, and last season's numbers from the ranker",
     on: 'What it moves: the margin (toward the side it names) or the game total',
     size: "Its fitted size, in the sport's scoring unit per unit of the term (hover the name for the unit); refit every run on every game before, pulled toward 0 unless the games bear it out",
     kept: 'Kept if the held-out games were predicted better with it; left out (size 0) if not',

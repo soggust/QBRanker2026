@@ -89,6 +89,9 @@
                 <ng-container *ngTemplateOutlet="th; context: { $implicit: 'sport', key: 'roi', label: 'ROI' }"></ng-container>
                 <ng-container *ngTemplateOutlet="th; context: { $implicit: 'sport', key: 'open', label: 'Open' }"></ng-container>
                 <ng-container *ngTemplateOutlet="th; context: { $implicit: 'sport', key: 'test', label: 'Model test' }"></ng-container>
+                @if (overall.bets) {
+                  <ng-container *ngTemplateOutlet="th; context: { $implicit: 'sport', key: 'disrupted', label: 'Disrupted' }"></ng-container>
+                }
               </tr>
             </thead>
             <tbody>
@@ -100,6 +103,9 @@
                       winners {{ pct(test.winHit) }} · margin ±{{ test.maeMargin }} · total ±{{ test.maeTotal }}
                     }
                   </td>
+                  @if (overall.bets) {
+                    <td [title]="help['disrupted']">{{ t.state?.postmortem?.disrupted ?? '-' }}</td>
+                  }
                 </tr>
               }
             </tbody>
@@ -220,6 +226,7 @@
                 <ng-container *ngTemplateOutlet="th; context: { $implicit: 'recent', key: 'p', label: 'Its chance' }"></ng-container>
                 <ng-container *ngTemplateOutlet="th; context: { $implicit: 'recent', key: 'final', label: 'Final' }"></ng-container>
                 <ng-container *ngTemplateOutlet="th; context: { $implicit: 'recent', key: 'result', label: 'Result' }"></ng-container>
+                <ng-container *ngTemplateOutlet="th; context: { $implicit: 'recent', key: 'why', label: 'Why' }"></ng-container>
               </tr>
             </thead>
             <tbody>
@@ -234,6 +241,15 @@
                   <td>{{ pct(b.p) }}</td>
                   <td>{{ b.final }}</td>
                   <td [class.up]="b.profit > 0" [class.down]="b.profit < 0">{{ b.status }} {{ units(b.profit) }}</td>
+                  <td class="desk-why" [title]="recapText(b)">
+                    @if (broke(b)) {
+                      <mat-icon class="desk-broke" fontIcon="healing" aria-label="Premise broke in the game"></mat-icon>
+                    }
+                    {{ b.why ?? '-' }}
+                    @if (b.recap?.link; as link) {
+                      <a [href]="link" target="_blank" rel="noopener" aria-label="ESPN recap"><mat-icon aria-hidden="true" fontIcon="open_in_new"></mat-icon></a>
+                    }
+                  </td>
                 </tr>
               }
             </tbody>
