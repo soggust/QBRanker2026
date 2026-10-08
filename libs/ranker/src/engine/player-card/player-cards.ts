@@ -582,7 +582,7 @@ export class PlayerCards {
   private async loadSeasons(card: PlayerCard): Promise<void> {
     // (a career-only sport has no seasons to link, and no similar seasons)
     if (SPORT.careerOnly) return;
-    // (a playoffs or both row, Stats From: its career history and similar seasons would weigh it against
+    // (a playoffs or both row, Length: its career history and similar seasons would weigh it against
     // whole regular seasons, a 58-PA October reading as a career year, so the card leaves them out)
     const partRow = card.season === dataSeason && dataPart !== 'regular';
     try {

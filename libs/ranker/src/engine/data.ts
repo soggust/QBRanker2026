@@ -67,7 +67,7 @@ export function linkedSeason(): number {
 // The current season is fetched with "no-cache" (it still uses the browser's copy, but checks with
 // the server first, so a nightly data update shows up on the next visit); a finished season never
 // changes, so the browser's copy is used as is
-// Whether a season has its playoffs built (Stats From greys out until it does): asked for the file's
+// Whether a season has its playoffs built (Length greys out until it does): asked for the file's
 // headers only, once a season. (A missing file is a 404, or the site's page in its place: not JSON.)
 const partsKnown = new Map<number, Promise<boolean>>();
 export function hasSeasonParts(season: number): Promise<boolean> {

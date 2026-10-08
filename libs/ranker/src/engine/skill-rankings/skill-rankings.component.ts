@@ -131,7 +131,7 @@ export class SkillRankingsComponent implements OnChanges, CardHost {
     service.settings$.pipe(takeUntilDestroyed()).subscribe(() => this.position && this.sortPlayers());
     service.statHidden$.pipe(takeUntilDestroyed()).subscribe(() => this.position && this.sortPlayers());
 
-    // Another season from the year dropdown (or its playoffs, Stats From): its rows from the top, in
+    // Another season from the year dropdown (or its playoffs, Length): its rows from the top, in
     // that season's order for this tab (dragged or not) if it has one, otherwise sorted by the sliders
     service.season$.pipe(takeUntilDestroyed()).subscribe((season) => {
       const changed = season !== this.season || service.seasonPart !== this.seasonPart;

@@ -16,7 +16,7 @@
   @if (sport.seasonParts) {
     <div mat-menu-item [disabled]="!seasonPartsAvailable" [title]="seasonPartsAvailable ? seasonPartTitle : noSeasonPartsTitle" (click)="$event.stopPropagation(); seasonPartsAvailable && cycleSeasonPart()">
       <span class="menu-slot"><span class="menu-value" aria-live="polite">{{ seasonPartNote || seasonPartLabels[seasonPart] }}</span></span>
-      <span>Stats From</span>
+      <span>Length</span>
     </div>
   }
   @for (setting of settingsAt('formatTop'); track setting.key) {

@@ -209,7 +209,7 @@ export const SPORT: SportConfig = {
     teamGrades: 'team-grades.json',
     dataGrades: 'data-grades.json',
   },
-  // Stats From: the playoffs, or the regular season and the playoffs, beside the regular season
+  // Length: the playoffs, or the regular season and the playoffs, beside the regular season
   // (update-data.mjs). The QBs (games.json) and the stats grades (data-grades.json) are built from the
   // part's games too; the preseason grades and QB scores are the season's either way
   seasonParts: true,

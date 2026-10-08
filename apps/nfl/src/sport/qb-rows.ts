@@ -123,7 +123,7 @@ const dataGrades = () => DATA['dataGrades'] as DataGrades;
 // can't swing a grade on its own. It was (games / 14) ^ 0.68, still mostly preseason after 4 games.)
 // Only the season being played blends: a finished season (a past one, or this one once it's over) is
 // all its own results, however few games a team or a backup QB played.
-// The playoffs (Stats From) are all their own results too: a grade from before the season says nothing
+// The playoffs (Length) are all their own results too: a grade from before the season says nothing
 // about them.
 const FULL_WEIGHT_GAMES = 10;
 export function dataWeight(games: number): number {

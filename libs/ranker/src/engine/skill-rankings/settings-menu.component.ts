@@ -46,7 +46,7 @@ export class SettingsMenuComponent {
     `On: list only players in their first season (and first-year head coaches), across every tab but the team ones. ` +
     `A first season is the first one they're in our data, so ${SPORT.seasonText(SPORT.firstSeason)} lists everyone`;
 
-  // Stats From (SPORT.seasonParts): the regular season, the playoffs, or both; a season without
+  // Length (SPORT.seasonParts): the regular season, the playoffs, or both; a season without
   // playoffs (none yet, or none built) says so for a moment and stays on its regular season
   readonly seasonPartLabels: Record<SeasonPart, string> = { regular: 'Season', post: 'Playoffs', all: 'Both' };
   readonly seasonPartTitle =

@@ -368,7 +368,7 @@ export interface SportConfig {
   // More files in each season's folder (key -> file), read into DATA beside skill-players.json
   dataFiles?: Record<string, string>;
   // The stats can count the playoffs, or the regular season and the playoffs together (the settings
-  // menu's Stats From; data.ts SeasonPart): skill-players.json's playoff and combined files, and the
+  // menu's Length; data.ts SeasonPart): skill-players.json's playoff and combined files, and the
   // dataFiles keys named here (whichever of them have their own)
   seasonParts?: boolean;
   seasonPartFiles?: string[];

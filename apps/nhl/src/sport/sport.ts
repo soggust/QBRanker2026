@@ -171,7 +171,7 @@ export const SPORT: SportConfig = {
   firstSeason: 2009,
   // (after the Final: 2026-27 is over; 2027-28 becomes current at the October rollover)
   currentSeasonEnds: '2027-06-30',
-  // Stats From: the regular season, the playoffs or both (skill-players.post.json and .all.json beside
+  // Length: the regular season, the playoffs or both (skill-players.post.json and .all.json beside
   // a season's skill-players.json, scripts/update-data.mjs; the Teams tab is built from its coach rows)
   seasonParts: true,
   seasonText: seasonName,

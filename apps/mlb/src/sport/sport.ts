@@ -71,7 +71,7 @@ export const SPORT: SportConfig = {
   firstSeason: 2000,
   // (after the World Series)
   currentSeasonEnds: '2026-11-10',
-  // Stats From: the regular season, the playoffs or both (skill-players.post.json and .all.json beside a
+  // Length: the regular season, the playoffs or both (skill-players.post.json and .all.json beside a
   // season's skill-players.json, once its postseason has begun: scripts/update-data.mjs)
   seasonParts: true,
   seasonText: (season) => `${season}`,
