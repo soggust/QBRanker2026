@@ -206,7 +206,7 @@ for (const season of seasons) {
       }
     }
   }
-  fs.writeFileSync(path.join(SEASONS_DIR, String(season), 'skill-players.json'), JSON.stringify(units, null, 2) + '\n');
+  fs.writeFileSync(path.join(SEASONS_DIR, String(season), 'skill-players.json'), JSON.stringify(units));
   console.log(`${season}: ${Object.keys(out).length} players, ${runFilled} with Run Block EPA, ${passFilled} RBs with Pass Pro`);
 }
 
@@ -222,4 +222,4 @@ for (const pos of POSITIONS) {
     } else unit.stats.runBlockEpa ??= null;
   }
 }
-fs.writeFileSync(currentFile, JSON.stringify(current, null, 2) + '\n');
+fs.writeFileSync(currentFile, JSON.stringify(current));

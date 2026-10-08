@@ -1429,7 +1429,7 @@ async function main() {
     console.warn(`Could not load nflverse data, keeping previous values: ${err.message}`);
   }
   if (dataGrades) {
-    await writeFile(DATA_GRADES_FILE, JSON.stringify(dataGrades, null, 2) + '\n');
+    await writeFile(DATA_GRADES_FILE, JSON.stringify(dataGrades));
     console.log(`Wrote data grades: ${Object.keys(dataGrades.teams).length} teams, ${Object.keys(dataGrades.qbs).length} QBs`);
   }
   for (const qb of gameData) {
@@ -1485,14 +1485,14 @@ async function main() {
         if (player.injured) hurtSkill.push(`${player.name} (${pos}, ${player.injuryStatus})`);
       }
     }
-    await writeFile(SKILL_FILE, JSON.stringify(skillOut, null, 2) + '\n');
+    await writeFile(SKILL_FILE, JSON.stringify(skillOut));
     console.log(
       `Wrote skill players: ${Object.entries(skillOut).map(([pos, list]) => `${list.length} ${pos}`).join(', ')}`
     );
     if (hurtSkill.length) console.log(`Injured players: ${hurtSkill.join(', ')}`);
   }
 
-  await writeFile(GAMES_FILE, JSON.stringify(gameData, null, 2) + '\n');
+  await writeFile(GAMES_FILE, JSON.stringify(gameData));
   console.log(`Wrote ${gameData.length} QBs to games.json`);
 
   // Add any new QBs to subjective.json. Weapons/O-line/coaching come from team-grades.json and
