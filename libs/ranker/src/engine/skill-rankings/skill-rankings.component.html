@@ -164,7 +164,12 @@
                     <div class="last-five" [class.many]="manyRecent">
                       <div>
                         @for (result of reader.lastFive(player); track $index) {
-                          <p [ngClass]="result === 1 ? 'green' : result === 0.5 ? 'tie' : 'red'" [title]="reader.recentTitle(player, $index)">
+                          <p
+                            [ngClass]="result === 1 ? 'green' : result === 0.5 ? 'tie' : 'red'"
+                            [class.game-link]="games.available"
+                            [title]="reader.recentTitle(player, $index)"
+                            (click)="openRecent(player, $index, $event)"
+                          >
                             {{ result === 1 ? 'W' : result === 0.5 ? 'T' : 'L' }}
                           </p>
                         }
@@ -321,3 +326,5 @@
 <!-- The settings menu (the gear opens it) and the player card (a name clicked) -->
 <settings-menu #settings [position]="position"></settings-menu>
 <player-card [cards]="cards"></player-card>
+<!-- (a game: from a Recent dot, or a game log's row) -->
+<game-view></game-view>

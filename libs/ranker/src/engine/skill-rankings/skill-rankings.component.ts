@@ -25,6 +25,7 @@ import { StatReader } from '@ranker/engine/stat-reader';
 import { hasMin, minCount, seasonLength } from '@ranker/engine/playing-time';
 import { settingGroups, settingOptions, settingText, settingsAt } from '@ranker/engine/setting-options';
 import { CardHost, PlayerCards } from '@ranker/engine/player-card/player-cards';
+import { GameViewService, recentRef } from '@ranker/engine/game-view/game-view.service';
 import { SeasonContext } from '@ranker/engine/player-card/card.model';
 import { copyRankingsToClipboard } from '@ranker/core/clipboard';
 import { RowGlide } from './row-glide';
@@ -79,6 +80,7 @@ export class SkillRankingsComponent implements OnChanges, CardHost {
   constructor(
     private positionService: PositionService,
     private seasonData: SeasonDataService,
+    readonly games: GameViewService,
   ) {
     this.cards = new PlayerCards(this, seasonData);
     const service = this.positionService;
@@ -433,6 +435,17 @@ export class SkillRankingsComponent implements OnChanges, CardHost {
     const name = this.reader.name(stat);
     const value = this.reader.format(player, stat);
     return value === '-' ? name : `${value} ${name}`;
+  }
+
+  // A Recent dot: its game (the row's team's nth meeting with that opponent, newest first)
+  openRecent(player: SkillPlayer, index: number, event: Event): void {
+    if (!this.games.available) return;
+    const vs = (player as { lastFiveVs?: (string | null)[] }).lastFiveVs;
+    const team = [(player as { teamName?: string | null }).teamName ?? undefined, player.name, player.teamLogo?.match(/([^/]+)\.\w+$/)?.[1]];
+    const ref = recentRef(team, vs, index, this.season);
+    if (!ref) return;
+    event.stopPropagation();
+    this.games.open(ref);
   }
 
   // Empty Recent slots for games not played yet (up to the tab's count: SPORT.recentGames)

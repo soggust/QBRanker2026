@@ -40,6 +40,13 @@
   background: transparent;
 }
 
+// (set aside while a game opened from it is showing: hidden but kept, its tab and scroll as they were)
+.card-backdrop.suspended,
+.player-card.suspended {
+  pointer-events: none;
+  visibility: hidden;
+}
+
 .card-backdrop {
   animation: card-fade 0.15s ease;
   backdrop-filter: blur(2px);
@@ -682,7 +689,7 @@
 
 .skill-name {
   color: #fff;
-  @include v.hand(16px);
+  @include v.hand(14px);
   line-height: 1.1;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
 }
@@ -699,11 +706,13 @@
   flex-wrap: wrap;
   font-size: 11px;
   gap: 3px 12px;
+  margin-top: 0.25em;
 
   // The rank, in a muted take on its rank color (the grey mixed in keeps it from shouting)
   b {
     color: color-mix(in srgb, var(--tone, #bdbdbd) 55%, #9a9a9a);
     font-weight: 800;
+    margin-right: 0.25em;
   }
 }
 
@@ -1740,6 +1749,33 @@
     color: rgba(255, 255, 255, 0.6);
   }
 
+  // (the opponent: its team's card; the result, in the primary color: the game)
+  .log-team,
+  .log-game {
+    background: none;
+    border: none;
+    color: inherit;
+    cursor: pointer;
+    font: inherit;
+    padding: 0;
+    text-align: left;
+    white-space: nowrap;
+
+    &:hover:not(:disabled) {
+      color: var(--scoreboard-led);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+
+    &:disabled {
+      cursor: default;
+    }
+  }
+
+  .log-game:not(:disabled) {
+    color: var(--scoreboard-led);
+  }
+
   td.log-opp {
     font-weight: 700;
 
@@ -1830,7 +1866,7 @@
   }
 
   .log-line {
-    color: var(--scoreboard-led, #ffcd00);
+    color: #fff;
     font-weight: 700;
   }
 
@@ -2528,8 +2564,7 @@
 }
 
 .depth-name {
-  font-size: 11px;
-  font-weight: 800;
+  @include v.hand(11px);
   max-width: 84px;
   overflow: hidden;
   text-overflow: ellipsis;

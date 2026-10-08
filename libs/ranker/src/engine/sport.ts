@@ -176,6 +176,8 @@ export interface GameLogChart {
 // A game still to play (the Game Log's last rows): when, where, the opponent's logo, the TV, and the
 // sportsbook's line once one is posted ("BAL -3", "O/U 45.5", his team's moneyline "-150")
 export interface UpcomingGame {
+  // ESPN's id (its preview: the game view)
+  event?: string;
   date: string;
   time: string;
   vs: string;
@@ -200,6 +202,9 @@ export interface GameLogRow {
   values: string[];
   // a playoff game (the log sets them apart from the regular season)
   playoff?: boolean;
+  // the game, to open it (the game view): ESPN's id when the log has it, and its date (ISO, or a day)
+  event?: string;
+  when?: string;
 }
 
 // What the engine gives a sport's connect hook (SportConfig.connect)

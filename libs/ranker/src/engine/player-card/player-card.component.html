@@ -1,7 +1,9 @@
 @if (cards.card; as c) {
-  <div class="card-backdrop" (click)="cards.close()"></div>
+  <!-- (a game opened from it: the card set aside, kept as it is, until the game closes) -->
+  <div class="card-backdrop" [class.suspended]="games.game" (click)="cards.close()"></div>
   <div
     class="player-card"
+    [class.suspended]="games.game"
     role="dialog"
     aria-modal="true"
     [attr.aria-label]="c.name"
@@ -207,7 +209,8 @@
                the stats behind it -->
           @for (side of o.report; track side.title) {
             @if (side.list.length) {
-              <card-panel class="ov-section tab-card" [ngClass]="side.tone" [expandable]="false" [label]="side.title" [icon]="side.icon">
+              <!-- (each folds; all start shut) -->
+              <card-panel class="ov-section tab-card" [ngClass]="side.tone" [label]="side.title" [icon]="side.icon">
                 <div class="group-body">
                 <div class="ov-skills">
                   @for (s of side.list; track s.id) {
@@ -697,18 +700,24 @@
                       }
                       <tr [class.log-playoff]="g.playoff">
                         <td class="log-date">{{ g.date }}</td>
+                        <!-- (the opponent: its team's card that season) -->
                         <td class="log-opp">
-                          <span class="log-vs">{{ g.vs.split(' ')[0] }}</span>
-                          @if (g.logo) {
-                            <img [src]="g.logo" alt="" loading="lazy" />
-                          }
-                          {{ g.vs.split(' ').slice(1).join(' ') }}
+                          <button type="button" class="log-team" title="Open their season" (click)="cards.openOpponent(c, g.vs)">
+                            <span class="log-vs">{{ g.vs.split(' ')[0] }}</span>
+                            @if (g.logo) {
+                              <img [src]="g.logo" alt="" loading="lazy" />
+                            }
+                            {{ g.vs.split(' ').slice(1).join(' ') }}
+                          </button>
                         </td>
+                        <!-- (the result: the game itself, the game view) -->
                         <td class="log-result">
-                          @if (g.outcome) {
-                            <span class="log-outcome" [ngClass]="g.outcome">{{ g.outcome }}</span>
-                          }
-                          {{ g.score }}
+                          <button type="button" class="log-game" [disabled]="!games.available" [title]="games.available ? 'Open the game' : ''" (click)="openGame(c, g)">
+                            @if (g.outcome) {
+                              <span class="log-outcome" [ngClass]="g.outcome">{{ g.outcome }}</span>
+                            }
+                            {{ g.score }}
+                          </button>
                         </td>
                         @for (cell of g.cells; track $index) {
                           <td
@@ -743,14 +752,19 @@
                     @for (u of log.upcoming; track $index) {
                       <tr class="log-next" [class.first]="$first">
                         <td class="log-date">{{ u.date }}</td>
+                        <!-- (the opponent: its team's card; the time: the game's preview) -->
                         <td class="log-opp">
-                          <span class="log-vs">{{ u.vs.split(' ')[0] }}</span>
-                          @if (u.logo) {
-                            <img [src]="u.logo" alt="" loading="lazy" />
-                          }
-                          {{ u.vs.split(' ').slice(1).join(' ') }}
+                          <button type="button" class="log-team" title="Open their season" (click)="cards.openOpponent(c, u.vs)">
+                            <span class="log-vs">{{ u.vs.split(' ')[0] }}</span>
+                            @if (u.logo) {
+                              <img [src]="u.logo" alt="" loading="lazy" />
+                            }
+                            {{ u.vs.split(' ').slice(1).join(' ') }}
+                          </button>
                         </td>
-                        <td class="log-result">{{ u.time }}</td>
+                        <td class="log-result">
+                          <button type="button" class="log-game" [disabled]="!games.available || !u.event" [title]="u.event ? 'Preview the game' : ''" (click)="u.event && games.open({ event: u.event })">{{ u.time }}</button>
+                        </td>
                         <td class="log-next-detail" [attr.colspan]="log.columns.length">
                           @if (u.tv) {
                             <span>{{ u.tv }}</span>

@@ -15,6 +15,14 @@ interface NhlGameLogs {
 // (whether the earlier seasons' files are there: player logs for past seasons)
 const PAST_SEASON_LOGS = true;
 const nhlGameLogFiles = new Map<number, Promise<NhlGameLogs>>();
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+function nhlDay(date: string, season: number): string | undefined {
+  const [mon, d] = date.split(' ');
+  const m = MONTHS.indexOf(mon);
+  if (m < 0 || !d) return undefined;
+  const year = m >= 8 ? season - 1 : season;
+  return `${year}-${String(m + 1).padStart(2, '0')}-${d.padStart(2, '0')}`;
+}
 function nhlGameLogs(season: number): Promise<NhlGameLogs> {
   if (!nhlGameLogFiles.has(season)) {
     const file = season === SPORT.currentSeason ? 'data/game-logs.json' : `data/game-logs/${season}.json`;
@@ -209,6 +217,8 @@ export const SPORT: SportConfig = {
         rows: rows.map(([date, vs, result, ...values], i) => ({
           playoff: i < (file.playoffs?.[String(player.id)] ?? 0),
           date: String(date),
+          // (its day: "Apr 9" in the season's second year, "Oct 12" in its first)
+          when: nhlDay(String(date), season),
           vs: String(vs),
           // (the opponent's logo, from the abbreviation in "@ TOR")
           logo: `https://assets.nhle.com/logos/nhl/svg/${String(vs).split(' ').pop()}_dark.svg`,

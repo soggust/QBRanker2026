@@ -6,6 +6,9 @@ import type { GameLog, GameLogColumn, UpcomingGame } from '@ranker/engine/sport'
 export interface GameLogViewRow {
   date: string;
   vs: string;
+  // (the game, to open it: ESPN's id, or its date)
+  event?: string;
+  when?: string;
   playoff: boolean;
   logo?: string;
   outcome: 'W' | 'L' | 'T' | '';
@@ -78,6 +81,8 @@ export function gameLogView(log: GameLog, upcoming: UpcomingGame[] = []): GameLo
   const rows: GameLogViewRow[] = [...log.rows].reverse().map((row) => ({
     date: row.date,
     vs: row.vs,
+    event: row.event,
+    when: row.when,
     logo: row.logo,
     playoff: !!row.playoff,
     outcome: OUTCOME(row.result),

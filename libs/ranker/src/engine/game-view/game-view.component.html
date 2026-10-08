@@ -1,0 +1,634 @@
+@if (games.game; as g) {
+  <div class="card-backdrop game-backdrop" (click)="games.close()"></div>
+  <div class="player-card game-card" role="dialog" aria-modal="true" aria-label="Game">
+    @if (g === 'loading' || g === 'error') {
+      <header class="card-hero game-hero game-hero-empty">
+        <div class="card-controls">
+          <button type="button" aria-label="Close" title="Close (Esc)" (click)="games.close()">
+            <mat-icon fontIcon="close"></mat-icon>
+          </button>
+        </div>
+      </header>
+      <div class="card-body">
+        <p class="card-note">{{ g === 'loading' ? 'Loading the game…' : "The game couldn't be found." }}</p>
+      </div>
+    } @else {
+      <!-- The two teams, away on the left, the final between them on the scoreboard -->
+      <header class="card-hero game-hero" [style.--away-color]="g.away.color" [style.--home-color]="g.home.color">
+        <span class="hero-texture game-texture" aria-hidden="true">
+          @if (g.away.logo) {
+            <img class="away" [src]="g.away.logo" alt="" />
+          }
+          @if (g.home.logo) {
+            <img class="home" [src]="g.home.logo" alt="" />
+          }
+        </span>
+        @for (side of ['away', 'home']; track side) {
+          @let t = side === 'away' ? g.away : g.home;
+          <div class="game-team" [ngClass]="side" [class.lost]="!t.winner && (g.away.winner || g.home.winner)">
+            <span class="hero-card game-logo-card">
+              @if (t.logo) {
+                <img class="hero-logo" [src]="t.logo" alt="" />
+              }
+            </span>
+            <span class="game-team-name">{{ t.short }}</span>
+            @if (t.record) {
+              <span class="game-team-record">{{ t.record }}</span>
+            }
+          </div>
+          @if (side === 'away') {
+            <div class="game-center">
+              @if (g.label) {
+                <span class="season-chip">{{ g.label }}</span>
+              }
+              <!-- (a game to come: its start on the board, in place of the score) -->
+              @if (g.preview) {
+                @let start = startTime(g);
+                <div class="hero-rank game-board">
+                  <span class="rank-label">{{ g.broadcast ?? 'Upcoming' }}</span>
+                  <span class="game-scores">
+                    <span class="rank-number game-start"><span class="rank-lit">{{ start[0] }}</span></span>
+                    <span class="game-start-half">{{ start[1] }}</span>
+                  </span>
+                </div>
+              } @else {
+              <div class="hero-rank game-board">
+                <span class="rank-label">{{ g.status }}</span>
+                <span class="game-scores">
+                  <span class="rank-number" [class.won]="g.away.winner" [class.lost]="g.home.winner"
+                    ><span class="rank-unlit" aria-hidden="true">{{ '8'.repeat(g.away.score.length) }}</span><span class="rank-lit">{{ g.away.score }}</span></span
+                  >
+                  <span class="game-dash">-</span>
+                  <span class="rank-number" [class.won]="g.home.winner" [class.lost]="g.away.winner"
+                    ><span class="rank-unlit" aria-hidden="true">{{ '8'.repeat(g.home.score.length) }}</span><span class="rank-lit">{{ g.home.score }}</span></span
+                  >
+                </span>
+              </div>
+              }
+              <span class="game-when">{{ when(g) }}</span>
+            </div>
+          }
+        }
+        <div class="card-controls">
+          <button type="button" aria-label="Close" title="Close (Esc)" (click)="games.close()">
+            <mat-icon fontIcon="close"></mat-icon>
+          </button>
+        </div>
+      </header>
+
+      <nav class="card-tabs" role="tablist">
+        @for (tab of tabsFor(g); track tab.id) {
+          <button
+            type="button"
+            role="tab"
+            [class.active]="games.tab === tab.id"
+            [attr.aria-selected]="games.tab === tab.id"
+            (click)="games.tab = tab.id; body.scrollTop = 0"
+          >
+            {{ tab.title }}
+          </button>
+        }
+      </nav>
+
+      <div class="card-body" #body>
+        @switch (games.tab) {
+          <!-- A game to come: ESPN's predictor, the line, each team's season leaders and its last five -->
+          @case ('preview') {
+            @if (g.predictor; as p) {
+              <div class="chart-card game-predictor" [style.--away-color]="g.away.color" [style.--home-color]="g.home.color">
+                <div class="log-chart-head">
+                  <span class="log-chart-label">Matchup Predictor<small>ESPN</small></span>
+                </div>
+                <div class="predictor-row">
+                  <span class="predictor-side away"><b>{{ p.away | percent: '1.0-1' }}</b><small>{{ g.away.abbr }}</small></span>
+                  <span class="game-stat-bar predictor-bar"><i class="away" [style.width.%]="p.away * 100"></i><i class="home" [style.width.%]="p.home * 100"></i></span>
+                  <span class="predictor-side home"><b>{{ p.home | percent: '1.0-1' }}</b><small>{{ g.home.abbr }}</small></span>
+                </div>
+              </div>
+            }
+            @if (g.line; as line) {
+              <card-panel class="tab-card group-results game-info" [expandable]="false" label="The Line" icon="paid">
+                <div class="group-body">
+                  <div class="game-line flush">
+                    <div><small>Spread{{ line.book ? ' · ' + line.book : '' }}</small><b>{{ line.details }}</b></div>
+                    @if (line.overUnder !== null) {
+                      <div><small>Total</small><b>O/U {{ line.overUnder }}</b></div>
+                    }
+                  </div>
+                </div>
+              </card-panel>
+            }
+            @if (g.leaders.length) {
+              <card-panel class="tab-card group-box game-leaders" [expandable]="false" label="Season Leaders" icon="military_tech">
+                <div class="group-body game-two">
+                  @for (t of g.leaders; track t.side) {
+                    @let team = t.side === 'away' ? g.away : g.home;
+                    <div class="game-leader-col">
+                      <h4 class="depth-unit">{{ team.short }}</h4>
+                      @for (l of t.rows; track $index) {
+                        <div class="game-leader">
+                          <span class="depth-head tiny">
+                            @if (l.headshot) {
+                              <img [src]="l.headshot" alt="" loading="lazy" (error)="l.headshot = null" />
+                            } @else {
+                              <span class="depth-initial">{{ l.name[0] }}</span>
+                            }
+                          </span>
+                          <span class="game-leader-main">
+                            <small>{{ l.category }}</small>
+                            <b>{{ l.name }}</b>
+                          </span>
+                          <span class="game-leader-line">{{ l.line }}</span>
+                        </div>
+                      }
+                    </div>
+                  }
+                </div>
+              </card-panel>
+            }
+            @if (g.form.length) {
+              <card-panel class="tab-card group-advanced game-form" [expandable]="false" label="Last Five" icon="history">
+                <div class="group-body game-two">
+                  @for (t of g.form; track t.side) {
+                    @let team = t.side === 'away' ? g.away : g.home;
+                    <div class="game-leader-col">
+                      <h4 class="depth-unit">{{ team.short }}</h4>
+                      @for (x of t.games; track x.event) {
+                        <button type="button" class="game-form-row" [disabled]="!x.event" (click)="games.open({ event: x.event })">
+                          <span class="log-outcome" [ngClass]="x.result">{{ x.result }}</span>
+                          <span class="log-vs">{{ x.vs.split(' ')[0] }}</span>
+                          @if (x.logo) {
+                            <img [src]="x.logo" alt="" loading="lazy" />
+                          }
+                          <b>{{ x.vs.split(' ').slice(1).join(' ') }}</b>
+                          <span class="game-form-score">{{ x.score }}</span>
+                        </button>
+                      }
+                    </div>
+                  }
+                </div>
+              </card-panel>
+            }
+          }
+
+          <!-- A game to come's injury report, each team's -->
+          @case ('injuries') {
+            @for (t of g.injuries; track t.side) {
+              @let team = t.side === 'away' ? g.away : g.home;
+              <card-panel class="tab-card game-injuries" [expandable]="false" [label]="team.name" icon="healing">
+                <div class="group-body">
+                  @for (i of t.rows; track $index) {
+                    <div class="game-leader">
+                      <span class="depth-head tiny">
+                        @if (i.headshot) {
+                          <img [src]="i.headshot" alt="" loading="lazy" (error)="i.headshot = null" />
+                        } @else {
+                          <span class="depth-initial">{{ i.name[0] }}</span>
+                        }
+                      </span>
+                      <span class="game-leader-main">
+                        <small>{{ i.position }}{{ i.detail ? ' · ' + i.detail : '' }}</small>
+                        <b>{{ i.name }}</b>
+                      </span>
+                      <span class="game-injury-status" [ngClass]="'s-' + i.status.toLowerCase().replace(' ', '-')">{{ i.status }}</span>
+                    </div>
+                  }
+                </div>
+              </card-panel>
+            }
+          }
+
+          <!-- The score by period, the win probability, the venue and the line, the leaders -->
+          @case ('summary') {
+            <div class="chart-card game-linescore">
+              <table>
+                <thead>
+                  <tr>
+                    <th></th>
+                    @for (p of g.periodLabels; track $index) {
+                      <th>{{ p }}</th>
+                    }
+                    <th class="total">{{ g.league.includes('baseball') ? 'R' : 'T' }}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (t of [g.away, g.home]; track t.id) {
+                    <tr [class.won]="t.winner">
+                      <th>
+                        @if (t.logo) {
+                          <img [src]="t.logo" alt="" />
+                        }
+                        {{ t.abbr }}
+                      </th>
+                      @for (p of g.periodLabels; track $index) {
+                        <td>{{ t.periods[$index] ?? '' }}</td>
+                      }
+                      <td class="total">{{ t.score }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+
+            @if (g.winProbability; as wp) {
+              <div class="chart-card game-wp" [style.--away-color]="g.away.color" [style.--home-color]="g.home.color">
+                <div class="log-chart-head">
+                  <span class="log-chart-label">Win probability<small>play by play</small></span>
+                  <span class="log-legend">
+                    <span><i class="wp-key home"></i>{{ g.home.abbr }}</span>
+                    <span><i class="wp-key away"></i>{{ g.away.abbr }}</span>
+                  </span>
+                </div>
+                <div class="wp-chart">
+                  <svg viewBox="0 0 1000 200" preserveAspectRatio="none" aria-hidden="true">
+                    <defs>
+                      <clipPath id="wp-top"><rect x="0" y="0" width="1000" height="100" /></clipPath>
+                      <clipPath id="wp-bottom"><rect x="0" y="100" width="1000" height="100" /></clipPath>
+                    </defs>
+                    <line class="wp-mid" x1="0" y1="100" x2="1000" y2="100" />
+                    <path class="wp-fill home" clip-path="url(#wp-top)" [attr.d]="probabilityPath(wp, true)" />
+                    <path class="wp-fill away" clip-path="url(#wp-bottom)" [attr.d]="probabilityPath(wp, true)" />
+                    <path class="wp-line" [attr.d]="probabilityPath(wp)" />
+                  </svg>
+                  <span class="wp-edge top">{{ g.home.abbr }} 100%</span>
+                  <span class="wp-edge mid">50%</span>
+                  <span class="wp-edge bottom">{{ g.away.abbr }} 100%</span>
+                </div>
+              </div>
+            }
+
+            @if (g.leaders.length) {
+              <card-panel class="tab-card group-box game-leaders" [expandable]="false" label="Game Leaders" icon="military_tech">
+                <div class="group-body game-two">
+                  @for (t of g.leaders; track t.side) {
+                    @let team = t.side === 'away' ? g.away : g.home;
+                    <div class="game-leader-col">
+                      <h4 class="depth-unit">{{ team.short }}</h4>
+                      @for (l of t.rows; track $index) {
+                        <div class="game-leader">
+                          <span class="depth-head tiny">
+                            @if (l.headshot) {
+                              <img [src]="l.headshot" alt="" loading="lazy" (error)="l.headshot = null" />
+                            } @else {
+                              <span class="depth-initial">{{ l.name[0] }}</span>
+                            }
+                          </span>
+                          <span class="game-leader-main">
+                            <small>{{ l.category }}</small>
+                            <b>{{ l.name }}</b>
+                          </span>
+                          <span class="game-leader-line">{{ l.line }}</span>
+                        </div>
+                      }
+                    </div>
+                  }
+                </div>
+              </card-panel>
+            }
+
+          }
+
+          <!-- The team stats side by side, then each team's players -->
+          @case ('box') {
+            @if (g.teamStats.length) {
+              <card-panel class="tab-card group-results game-team-stats" [startOpen]="true" label="Team Stats" icon="compare_arrows" [style.--away-color]="g.away.color" [style.--home-color]="g.home.color">
+                <div class="group-body">
+                  <div class="game-stat head">
+                    <b>{{ g.away.abbr }}</b><span></span><b>{{ g.home.abbr }}</b>
+                  </div>
+                  @for (st of g.teamStats; track st.label) {
+                    <div class="game-stat">
+                      <b>{{ st.away }}</b>
+                      <span class="game-stat-mid">
+                        <small>{{ st.label }}</small>
+                        @if (st.awayShare !== null) {
+                          <span class="game-stat-bar"><i class="away" [style.width.%]="st.awayShare * 100"></i><i class="home" [style.width.%]="(1 - st.awayShare) * 100"></i></span>
+                        }
+                      </span>
+                      <b>{{ st.home }}</b>
+                    </div>
+                  }
+                </div>
+              </card-panel>
+            }
+            @for (t of g.box; track t.side) {
+              @let team = t.side === 'away' ? g.away : g.home;
+              <!-- (each team's players fold, both starting shut) -->
+              <card-panel class="tab-card game-box" [label]="team.name" icon="groups">
+                <div class="group-body">
+                  @for (grp of t.groups; track $index) {
+                    @if (grp.title) {
+                      <h4 class="depth-unit">{{ grp.title }}</h4>
+                    }
+                    <div class="game-log game-box-table">
+                      <table>
+                        <thead>
+                          <tr>
+                            <th class="name">Player</th>
+                            @for (l of grp.labels; track $index) {
+                              <th>{{ l }}</th>
+                            }
+                          </tr>
+                        </thead>
+                        <tbody>
+                          @for (r of grp.rows; track $index) {
+                            <tr [class.bench-start]="$index > 0 && grp.rows[$index - 1].starter && !r.starter">
+                              <td class="name">
+                                {{ r.short }}
+                                @if (r.position) {
+                                  <small>{{ r.position }}</small>
+                                }
+                              </td>
+                              @if (r.dnp) {
+                                <td class="dnp" [attr.colspan]="grp.labels.length">{{ r.dnp }}</td>
+                              } @else {
+                                @for (v of r.values; track $index) {
+                                  <td>{{ v }}</td>
+                                }
+                              }
+                            </tr>
+                          }
+                          @if (grp.totals; as totals) {
+                            <tr class="log-avg">
+                              <td class="name">Team</td>
+                              @for (v of totals; track $index) {
+                                <td>{{ v }}</td>
+                              }
+                            </tr>
+                          }
+                        </tbody>
+                      </table>
+                    </div>
+                  }
+                </div>
+              </card-panel>
+            }
+            @if (!g.teamStats.length && !g.box.length) {
+              <p class="card-note">No box score for this game.</p>
+            }
+          }
+
+          <!-- The chart: the shots on a court or a rink, the balls in play on a diamond (each team's in its color,
+               made or a goal filled, missed hollow), or the NFL's drives across the field and its passes by zone -->
+          @case ('chart') {
+            @if (g.chart; as ch) {
+              <div class="game-play-filters">
+                <button type="button" class="game-filter" [class.active]="games.chartSide === 'both'" (click)="games.chartSide = 'both'">Both</button>
+                <button type="button" class="game-filter" [class.active]="games.chartSide === 'away'" (click)="games.chartSide = 'away'">{{ g.away.abbr }}</button>
+                <button type="button" class="game-filter" [class.active]="games.chartSide === 'home'" (click)="games.chartSide = 'home'">{{ g.home.abbr }}</button>
+              </div>
+              @if (ch.kind === 'football') {
+                <card-panel class="tab-card group-results game-chart-panel" [startOpen]="true" label="Drives" icon="sports_football" [style.--away-color]="g.away.color" [style.--home-color]="g.home.color">
+                  <div class="group-body">
+                    <div class="drive-field">
+                      <span class="drive-endzone home">{{ g.home.abbr }}</span>
+                      <span class="drive-endzone away">{{ g.away.abbr }}</span>
+                      @for (d of ch.drives; track $index) {
+                        @if (games.chartSide === 'both' || games.chartSide === d.side) {
+                          <div class="drive-row" [title]="d.label + ' · ' + d.result">
+                            <span
+                              class="drive-bar"
+                              [ngClass]="d.side"
+                              [class.scoring]="d.scoring"
+                              [style.left.%]="(d.start < d.end ? d.start : d.end)"
+                              [style.width.%]="(d.start < d.end ? d.end - d.start : d.start - d.end) || 0.6"
+                            ></span>
+                            <span class="drive-result" [class.scoring]="d.scoring" [class.turnover]="turnover(d.result)">{{ d.result }}</span>
+                          </div>
+                        }
+                      }
+                    </div>
+                  </div>
+                </card-panel>
+                @for (t of ch.teams; track t.side) {
+                  @if (games.chartSide === 'both' || games.chartSide === t.side) {
+                    @let team = t.side === 'away' ? g.away : g.home;
+                    <card-panel class="tab-card game-chart-panel" [label]="team.short + ' Passing'" icon="call_made" [style.--zone-color]="team.color">
+                      <div class="group-body">
+                        <p class="game-drive-sub">{{ t.passers.join(', ') }}</p>
+                        <div class="pass-zones">
+                          @for (z of t.zones; track z.key) {
+                            <div class="pass-zone" [style.--share]="zoneShare(t.zones, z.att)">
+                              <small>{{ z.key }}</small>
+                              <b>{{ z.comp }}/{{ z.att }}</b>
+                              <span>{{ z.yds }} yds{{ z.td ? ' · ' + z.td + ' TD' : '' }}{{ z.int ? ' · ' + z.int + ' INT' : '' }}</span>
+                            </div>
+                          }
+                        </div>
+                      </div>
+                    </card-panel>
+                  }
+                }
+              } @else {
+                <div class="chart-card game-surface" [ngClass]="ch.kind" [style.--away-color]="g.away.color" [style.--home-color]="g.home.color">
+                  <div class="log-chart-head">
+                    <span class="log-chart-label">{{ chartTitle(g) }}<small>{{ ch.kind === 'diamond' ? 'balls in play' : 'every shot' }}</small></span>
+                    <span class="log-legend">
+                      <span><i class="wp-key away"></i>{{ g.away.abbr }}</span>
+                      <span><i class="wp-key home"></i>{{ g.home.abbr }}</span>
+                      <span><i class="mark-key made"></i>{{ ch.kind === 'diamond' ? 'Hit' : ch.kind === 'rink' ? 'Goal' : 'Made' }}</span>
+                      <span><i class="mark-key"></i>{{ ch.kind === 'diamond' ? 'Out' : 'Missed' }}</span>
+                    </span>
+                  </div>
+                  @switch (ch.kind) {
+                    @case ('court') {
+                      <svg viewBox="0 0 50 47" aria-hidden="true">
+                        <g class="marks-lines">
+                          <rect x="0" y="0" width="50" height="47" />
+                          <rect x="17" y="0" width="16" height="19" />
+                          <circle cx="25" cy="19" r="6" />
+                          <path d="M3 0 L3 14.2 A23.75 23.75 0 0 0 47 14.2 L47 0" />
+                          <line x1="22" y1="4" x2="28" y2="4" />
+                          <circle cx="25" cy="5.25" r="0.75" />
+                          <path d="M19 47 A6 6 0 0 1 31 47" />
+                        </g>
+                        @for (m of marks(ch); track $index) {
+                          <circle class="mark" [ngClass]="[m.side, m.result]" [attr.cx]="m.x" [attr.cy]="m.y" r="0.8"><title>{{ m.text }}</title></circle>
+                        }
+                      </svg>
+                    }
+                    @case ('rink') {
+                      <svg viewBox="0 0 200 85" aria-hidden="true">
+                        <g class="marks-lines">
+                          <rect x="0.5" y="0.5" width="199" height="84" rx="26" ry="26" />
+                          <line class="red" x1="100" y1="0.5" x2="100" y2="84.5" />
+                          <line class="blue" x1="75" y1="0.5" x2="75" y2="84.5" />
+                          <line class="blue" x1="125" y1="0.5" x2="125" y2="84.5" />
+                          <line class="red" x1="11" y1="4" x2="11" y2="81" />
+                          <line class="red" x1="189" y1="4" x2="189" y2="81" />
+                          <circle cx="100" cy="42.5" r="15" />
+                          <circle cx="31" cy="20.5" r="15" />
+                          <circle cx="31" cy="64.5" r="15" />
+                          <circle cx="169" cy="20.5" r="15" />
+                          <circle cx="169" cy="64.5" r="15" />
+                        </g>
+                        @for (m of marks(ch); track $index) {
+                          <circle class="mark" [ngClass]="[m.side, m.result]" [attr.cx]="m.x" [attr.cy]="m.y" [attr.r]="m.result === 'goal' ? 2.6 : 1.6"><title>{{ m.text }}</title></circle>
+                        }
+                      </svg>
+                    }
+                    @case ('diamond') {
+                      <svg viewBox="0 18 250 192" aria-hidden="true">
+                        <g class="marks-lines">
+                          <path d="M125 200 L1.3 76.3 A175 175 0 0 1 248.7 76.3 Z" />
+                          <path class="dirt" d="M125 200 L152.8 172.2 L125 144.4 L97.2 172.2 Z" />
+                          <circle cx="125" cy="174" r="3" />
+                        </g>
+                        @for (m of marks(ch); track $index) {
+                          <circle class="mark" [ngClass]="[m.side, m.result === 'out' ? 'missed' : 'made', m.result]" [attr.cx]="m.x" [attr.cy]="m.y" [attr.r]="m.result === 'hr' ? 4 : 2.6"><title>{{ m.text }}</title></circle>
+                        }
+                      </svg>
+                    }
+                  }
+                </div>
+              }
+            }
+          }
+
+          <!-- Each player's fantasy points from his line, best first (the sport's usual scoring) -->
+          @case ('fantasy') {
+            <card-panel class="tab-card group-results game-fantasy" [expandable]="false" label="Fantasy Points" icon="emoji_events">
+              <div class="group-body">
+                @for (p of g.fantasy; track p.side + p.name; let i = $index) {
+                  @let team = p.side === 'away' ? g.away : g.home;
+                  <div class="game-fantasy-row">
+                    <span class="game-fantasy-rank">{{ i + 1 }}</span>
+                    <span class="depth-head tiny">
+                      @if (p.headshot) {
+                        <img [src]="p.headshot" alt="" loading="lazy" (error)="p.headshot = null" />
+                      } @else {
+                        <span class="depth-initial">{{ p.name[0] }}</span>
+                      }
+                    </span>
+                    <span class="game-fantasy-main">
+                      <b>
+                        {{ p.name }}
+                        @if (p.position) {
+                          <small>{{ p.position }}</small>
+                        }
+                        @if (team.logo) {
+                          <img [src]="team.logo" alt="" />
+                        }
+                      </b>
+                      <small>{{ p.parts.join(' · ') }}</small>
+                      <span class="game-fantasy-bar"><i [style.width.%]="fantasyShare(g, p.points) * 100"></i></span>
+                    </span>
+                    <span class="game-fantasy-points" [class.negative]="p.points < 0">{{ p.points | number: '1.1-1' }}</span>
+                  </div>
+                }
+                <p class="game-fantasy-note">{{ g.fantasyScoring }}</p>
+              </div>
+            </card-panel>
+          }
+
+          <!-- The venue (its photo, its weather at game time), the crowd, the line and how it came out, the officials -->
+          @case ('info') {
+            <card-panel class="tab-card group-advanced game-info" [expandable]="false" label="Game Info" icon="stadium">
+              <div class="group-body">
+                @if (g.venue; as v) {
+                  @if (v.image) {
+                    <img class="game-venue-photo" [src]="v.image" alt="" loading="lazy" (error)="v.image = null" />
+                  }
+                  <div class="game-facts">
+                    <div><small>Venue</small><b>{{ v.name }}</b></div>
+                    @if (v.city) {
+                      <div><small>Location</small><b>{{ v.city }}{{ v.state ? ', ' + v.state : '' }}</b></div>
+                    }
+                    <div>
+                      <small>Roof</small><b>{{ v.roof === 'indoors' ? 'Indoors' : v.roof === 'retractable' ? 'Retractable' : 'Open air' }}</b>
+                    </div>
+                    @if (v.grass !== null && !g.league.includes('basketball') && !g.league.includes('hockey')) {
+                      <div><small>Surface</small><b>{{ v.grass ? 'Grass' : 'Turf' }}</b></div>
+                    }
+                    @if (v.roof !== 'indoors') {
+                      <div>
+                        <small>Weather</small>
+                        @if (games.weather === 'loading') {
+                          <b class="muted">Checking…</b>
+                        } @else if (weather; as w) {
+                          <b>{{ w.tempF }}°F · {{ w.sky }}</b>
+                          <i>Wind {{ w.windMph }} mph{{ w.precipIn ? ' · ' + w.precipIn + ' in precip' : '' }}</i>
+                        } @else {
+                          <b class="muted">Unknown</b>
+                        }
+                      </div>
+                    }
+                    @if (g.broadcast) {
+                      <div><small>Broadcast</small><b>{{ g.broadcast }}</b></div>
+                    }
+                    @if (g.attendance) {
+                      <div><small>Attendance</small><b>{{ g.attendance | number }}</b></div>
+                    }
+                    @if (g.duration) {
+                      <div><small>Duration</small><b>{{ g.duration }}</b></div>
+                    }
+                  </div>
+                }
+                @if (g.line; as line) {
+                  <div class="game-line">
+                    <div><small>Line{{ line.book ? ' · ' + line.book : '' }}</small><b>{{ line.details }}</b>@if (line.spread) {<i>{{ line.spread }}</i>}</div>
+                    @if (line.overUnder !== null) {
+                      <div><small>Total</small><b>O/U {{ line.overUnder }}</b>@if (line.total) {<i [class.over]="line.total === 'Over'">{{ line.total }}</i>}</div>
+                    }
+                  </div>
+                }
+                @if (g.officials.length) {
+                  <div class="game-officials">
+                    <small>Officials</small>
+                    <span>
+                      @for (o of g.officials; track $index) {
+                        <span class="ai-chip" [title]="o.role ?? ''">{{ o.name }}</span>
+                      }
+                    </span>
+                  </div>
+                }
+              </div>
+            </card-panel>
+          }
+
+          <!-- Every play: the NFL's by drive (each drive's summary and result), the rest by period -->
+          @case ('plays') {
+            <div class="game-play-filters">
+              <button type="button" class="game-filter" [class.active]="!games.scoringOnly" (click)="games.scoringOnly = false">All Plays</button>
+              <button type="button" class="game-filter" [class.active]="games.scoringOnly" (click)="games.scoringOnly = true">Scoring</button>
+            </div>
+            @for (grp of g.plays; track $index; let i = $index) {
+              @if (!games.scoringOnly || grp.scoring) {
+                <card-panel
+                  class="tab-card game-plays"
+                  [class.group-results]="grp.scoring"
+                  [label]="grp.title + (grp.result ? ' · ' + grp.result : '')"
+                  [open]="games.openPlays.has(i) || games.scoringOnly"
+                  (toggled)="games.togglePlays(i)"
+                >
+                  <div class="group-body">
+                    @if (grp.sub) {
+                      <p class="game-drive-sub">{{ grp.sub }}</p>
+                    }
+                    @for (p of shownPlays(grp); track $index) {
+                      <div class="game-play" [class.scoring]="p.scoring" [ngClass]="p.side ?? ''">
+                        @if (p.clock) {
+                          <span class="game-play-clock">{{ p.clock }}</span>
+                        }
+                        <!-- (a scoring play: the scorer, right before what he did) -->
+                        @if (p.scoring && p.headshot) {
+                          <img class="game-play-head" [src]="p.headshot" alt="" loading="lazy" (error)="p.headshot = null" />
+                        }
+                        <span class="game-play-text">{{ p.text }}</span>
+                        @if (p.scoring && p.score) {
+                          <span class="game-play-score">{{ p.score }}</span>
+                        }
+                      </div>
+                    }
+                  </div>
+                </card-panel>
+              }
+            } @empty {
+              <p class="card-note">No play-by-play for this game.</p>
+            }
+          }
+        }
+      </div>
+    }
+  </div>
+}

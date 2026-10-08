@@ -782,6 +782,11 @@ section ul li.player {
         // says the result and the opponent)
         &:not(.unplayed) {
           cursor: default;
+
+          // (one that opens its game: the game view)
+          &.game-link {
+            cursor: pointer;
+          }
           transition:
             filter 0.12s ease,
             transform 0.12s ease;

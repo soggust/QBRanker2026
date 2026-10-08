@@ -108,10 +108,13 @@ card-panel {
   }
 }
 
-// (on the player card: a little more room each side of the bar; the filter menu keeps its own)
+// (on the player card, and the game view: a little more room each side of the bar, the title in the hand;
+// the filter menu keeps its own)
 .player-card card-panel > .group-bar {
   > .panel-toggle,
   > .panel-title {
+    font-family: v.$font-hand;
+    font-weight: 400;
     padding-left: 16px;
     padding-right: 16px;
   }

@@ -22,7 +22,7 @@ import { careerHistory } from './career-history';
 import { radar, radarShape } from './radar';
 import { GameLogView, gameLogView } from './game-log-view';
 import { PlayerAnalysis, analysisIndex, loadAnalysis } from './analysis';
-import { espnUpcoming } from '@ranker/core/game-logs';
+import { espnTeamNames, espnUpcoming } from '@ranker/core/game-logs';
 
 // What the card needs from the table it opens from
 export interface CardHost {
@@ -221,6 +221,22 @@ export class PlayerCards {
     if (!position || this.position === position || !player.teamLogo) return null;
     const team = rows[position]?.find((t) => t.teamLogo === player.teamLogo);
     return team ? { position, gsisId: team.gsisId } : null;
+  }
+
+  // A game log's opponent ("@ IND"): its team's card for the card's season (the sport's team tab), found
+  // by ESPN's name for the abbreviation, or the row's logo file ("LAK_2002..." for the NHL's own)
+  async openOpponent(card: PlayerCard, vs: string): Promise<void> {
+    const position = SPORT.teamTabs?.[0];
+    if (!position) return;
+    const abbr = vs.split(' ').slice(1).join(' ').toLowerCase();
+    const rows = card.season === this.host.season ? SKILL_UNITS : await this.data.rows(card.season).catch(() => null);
+    const teams = (rows?.[position as SkillPosition] ?? []) as SkillPlayer[];
+    const names = espnTeamNames(SPORT.gameLog?.league ?? '', abbr).map((n) => n.toLowerCase());
+    const file = (p: SkillPlayer) => p.teamLogo?.match(/([^/]+)\.\w+$/)?.[1]?.toLowerCase() ?? '';
+    const team =
+      teams.find((t) => names.includes(t.name.toLowerCase()) || names.includes(((t as { teamName?: string | null }).teamName ?? '').toLowerCase())) ??
+      teams.find((t) => file(t).split('_')[0] === abbr || names.includes(file(t)));
+    if (team) await this.openLinked({ position, gsisId: team.gsisId }, card.season);
   }
 
   toggleDepthSlot(key: string): void {

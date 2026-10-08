@@ -81,7 +81,7 @@ export async function espnGameLog(league: string, id: number | string, season: n
     columns[to] = { label: 'FL', group: lastInGroup < 0 ? (columns.some((c) => c.group) ? 'Fumbles' : undefined) : options.fumblesLost };
     for (const row of rows) move(row.values);
   }
-  return { columns, rows: rows.map(({ at: _at, event: _event, ...row }) => row), chart: options.chart };
+  return { columns, rows: rows.map(({ at, ...row }) => ({ ...row, when: at })), chart: options.chart };
 }
 
 // An athlete's fumbles lost each game this season, by ESPN event id, from ESPN's per-game box scores
@@ -135,6 +135,7 @@ export async function mlbGameLog(
     columns: cols,
     rows: splits.map((split) => ({
       date: day(`${split.date}T12:00:00`),
+      when: split.date,
       vs: `${split.isHome ? 'vs' : '@'} ${split.opponent?.abbreviation ?? split.opponent?.name ?? ''}`.trim(),
       logo: split.opponent?.id ? `https://www.mlbstatic.com/team-logos/${split.opponent.id}.svg` : undefined,
       result: split.isWin ? 'W' : 'L',
@@ -310,7 +311,13 @@ const NICKNAMES: Record<string, string> = {
   'phoenix coyotes': 'id:24',
   'arizona coyotes': 'id:24',
 };
-function espnTeamId(league: string, names: (string | undefined)[]): string {
+// A team's names on ESPN (its full name and its nickname) by its abbreviation, or none
+export function espnTeamNames(league: string, abbreviation: string): string[] {
+  const team = (ESPN_TEAMS[league] ?? []).find((t) => t[1].toLowerCase() === abbreviation.toLowerCase());
+  return team ? [team[2], team[3]] : [];
+}
+
+export function espnTeamId(league: string, names: (string | undefined)[]): string {
   const teams = ESPN_TEAMS[league] ?? [];
   const wanted = names.filter((n): n is string => !!n).map((n) => NICKNAMES[n.toLowerCase()] ?? n.toLowerCase());
   for (const name of wanted) {
@@ -377,6 +384,8 @@ export async function espnTeamGameLog(league: string, names: (string | undefined
     const leader = us.leaders?.[0]?.leaders?.[0];
     rows.push({
       at: event.date,
+      event: event.id,
+      when: event.date,
       playoff: event.seasonType?.type === 3,
       date: day(event.date),
       vs: `${us.homeAway === 'home' ? 'vs' : '@'} ${them.team.abbreviation}`,
@@ -437,6 +446,7 @@ export async function espnUpcoming(league: string, names: (string | undefined)[]
       const them = game.competitors.find((c) => c.team.id !== id);
       const when = new Date(event.date);
       const upcoming: UpcomingGame = {
+        event: event.id,
         date: day(event.date),
         time: when.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }),
         vs: `${us?.homeAway === 'home' ? 'vs' : '@'} ${them?.team.abbreviation ?? ''}`.trim(),
