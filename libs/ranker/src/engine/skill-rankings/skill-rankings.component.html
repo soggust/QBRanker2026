@@ -239,17 +239,13 @@
     </button>
 
     <!-- Copy the list (text and a table with logos) -->
-    <button
-      (click)="copyList($any($event.currentTarget))"
-      aria-label="Copy To Clipboard Button"
-      title="Copy to Clipboard"
-      class="copy-toggle"
-    >
-      <mat-icon
-        aria-hidden="false"
-        aria-label="Copy To Clipboard Icon"
-        fontIcon="content_copy"
-      ></mat-icon>
+    <button type="button" #copyButton (click)="copyList(copyButton)" aria-label="Copy the list" title="Copy to clipboard" class="copy-toggle">
+      <mat-icon aria-hidden="true" fontIcon="content_copy"></mat-icon>
+    </button>
+
+    <!-- Share the list: a link with its tab, season, sliders and settings (share.ts) -->
+    <button type="button" #shareButton (click)="shareList(shareButton)" aria-label="Share a link to this list" title="Share a link to this list" class="share-toggle">
+      <mat-icon aria-hidden="true" fontIcon="share"></mat-icon>
     </button>
 
     <!-- The sport's footer dropdowns (MMA's Current / All-Time), in the year selector's place -->
@@ -310,7 +306,7 @@
     </button>
 
     <!-- "List copied", under the copy button -->
-    <div class="toast" [class.show]="toastVisible" [style.top.px]="toastAt.top" [style.left.px]="toastAt.left">List copied to clipboard!</div>
+    <div class="toast" [class.show]="toastVisible" [style.top.px]="toastAt.top" [style.left.px]="toastAt.left" role="status" aria-live="polite">{{ toastText }}</div>
 
     <!-- The settings menu (settings-menu.component) -->
     <button

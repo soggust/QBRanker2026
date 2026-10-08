@@ -96,7 +96,9 @@ export class SkillRankingsComponent implements OnChanges, CardHost {
 
   // "List copied" under the copy button
   toastVisible = false;
+  toastText = '';
   toastAt = { top: 0, left: 0 };
+  private toastTimer?: ReturnType<typeof setTimeout>;
 
   constructor(
     private positionService: PositionService,
@@ -503,13 +505,32 @@ export class SkillRankingsComponent implements OnChanges, CardHost {
 
   // The list as text, then "List copied" for two seconds, just under the button
   copyList(button: HTMLElement): void {
+    copyRankingsToClipboard(this.rankingsList.nativeElement, this.settings.copyStats)
+      .then(() => this.toast(button, 'List copied to clipboard!'))
+      .catch((err) => console.error('Failed to copy: ', err));
+  }
+
+  // The list's link (its tab, season, sliders, eyes and settings: share.ts): a phone's share sheet, else
+  // copied, "Link copied" under the button
+  shareList(button: HTMLElement): void {
+    const url = this.positionService.shareLink();
+    const phone = matchMedia('(pointer: coarse)').matches && typeof navigator.share === 'function';
+    if (phone) {
+      navigator.share({ title: document.title, url }).catch(() => null);
+      return;
+    }
+    navigator.clipboard
+      .writeText(url)
+      .then(() => this.toast(button, 'Link copied: anyone who opens it sees this list'))
+      .catch((err) => console.error('Failed to copy: ', err));
+  }
+
+  private toast(button: HTMLElement, text: string): void {
     const rect = button.getBoundingClientRect();
     this.toastAt = { top: rect.bottom + 8, left: rect.left + rect.width / 2 };
-    copyRankingsToClipboard(this.rankingsList.nativeElement, this.settings.copyStats)
-      .then(() => {
-        this.toastVisible = true;
-        setTimeout(() => (this.toastVisible = false), 2000);
-      })
-      .catch((err) => console.error('Failed to copy: ', err));
+    this.toastText = text;
+    this.toastVisible = true;
+    clearTimeout(this.toastTimer);
+    this.toastTimer = setTimeout(() => (this.toastVisible = false), 2200);
   }
 }

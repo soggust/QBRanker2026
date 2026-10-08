@@ -57,6 +57,7 @@ section footer {
   .filter-toggle,
   .settings-toggle,
   .copy-toggle,
+  .share-toggle,
   .info-toggle {
     align-items: center;
     @include v.leather;
@@ -128,6 +129,10 @@ section.rankings-wrapper > footer {
 
   .copy-toggle {
     margin-left: auto !important;
+    order: 3;
+  }
+
+  .share-toggle {
     order: 3;
   }
 
@@ -1285,6 +1290,7 @@ section ul li.empty-list {
     .filter-toggle,
     .settings-toggle,
     .copy-toggle,
+  .share-toggle,
     .info-toggle {
       height: 36px;
       min-width: 36px;

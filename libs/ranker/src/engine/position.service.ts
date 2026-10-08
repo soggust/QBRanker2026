@@ -4,6 +4,7 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject, EMPTY, Observable, combineLatest, distinctUntilChanged, map, merge } from 'rxjs';
 import { connectRosterGrades } from '@ranker/engine/roster-grades';
 import { DEFAULT_SPORT_SETTINGS, SKILL_UNITS, defaultRanking, rebuildUnits } from '@ranker/engine/unit-scoring';
+import { applySharedLink, shareLink } from '@ranker/engine/share';
 import type { EngineHost, SportSettings } from '@ranker/engine/sport';
 import {
   POSITIONS,
@@ -52,7 +53,7 @@ export interface RankerSettings {
 // The Min setting: a share of the season so far, in steps of MIN_SHARE_STEP, or a whole game when that's
 // less than one (0 is 1, everyone)
 export const MIN_SHARE_STEP = 10;
-const DEFAULT_SETTINGS: RankerSettings = {
+export const DEFAULT_SETTINGS: RankerSettings = {
   statBasis: SPORT.defaultStatBasis,
   showUnused: false,
   showInjured: true,
@@ -82,6 +83,16 @@ export interface UnitOrder {
   providedIn: 'root',
 })
 export class PositionService {
+  // (a shared list's link opened: its sliders, eyes and settings, applied once everything's set up)
+  constructor() {
+    applySharedLink(this, DEFAULT_SETTINGS);
+  }
+
+  // The link to this list as it is now (the tab, the season, and what's changed from the defaults)
+  shareLink(): string {
+    return shareLink(this, DEFAULT_SETTINGS);
+  }
+
   private settingsSubject = new BehaviorSubject<RankerSettings>({ ...DEFAULT_SETTINGS });
   public settings$ = this.settingsSubject.asObservable();
 
