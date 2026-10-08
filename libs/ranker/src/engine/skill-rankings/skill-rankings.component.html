@@ -167,6 +167,7 @@
                         @for (result of reader.lastFive(player); track $index) {
                           <p
                             [ngClass]="result === 1 ? 'green' : result === 0.5 ? 'tie' : 'red'"
+                            [class.ot]="recentOt(player, $index)"
                             [class.game-link]="games.available"
                             [title]="dotTitle(player, $index)"
                             (click)="openRecent(player, $index, $event)"

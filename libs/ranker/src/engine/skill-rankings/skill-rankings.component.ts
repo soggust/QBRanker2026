@@ -489,6 +489,11 @@ export class SkillRankingsComponent implements OnChanges, CardHost {
     this.cards.open(player);
   }
 
+  // A Recent square decided past regulation (the NHL's overtime or shootout: a lighter square)
+  recentOt(player: SkillPlayer, index: number): boolean {
+    return !!extras(player).lastFiveOt?.[index];
+  }
+
   // A row's team, by the names the row knows (its team's name, its own, its logo's file)
   recentTeam(player: SkillPlayer): (string | undefined)[] {
     return rowTeamNames(player);

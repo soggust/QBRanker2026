@@ -2,6 +2,7 @@ import { Component, HostListener, Input } from '@angular/core';
 import { AWARD_INFO } from '@sport/awards';
 import { SPORT } from '@sport/sport';
 import { extras, rowTeamNames } from '@ranker/engine/row-fields';
+import { recentWord } from '@ranker/engine/stat-reader';
 import { whiteLogo } from '@sport/team-colors';
 import { CURRENT_SEASON, isLiveSeason } from '@ranker/engine/data';
 import { rankPct, rankTone } from '@ranker/core/format';
@@ -46,10 +47,14 @@ export class PlayerCardComponent {
   }
 
   recentTitle(card: PlayerCard, result: number, index: number): string {
-    const word = result === 1 ? 'W' : result === 0.5 ? 'T' : 'L';
+    const word = recentWord(result, extras(card.player).lastFiveOt?.[index]);
     const vs = this.recentVs(card)?.[index];
     const score = this.games.recentScore(this.recentTeam(card), this.recentVs(card), index, card.season);
     return [word, score, vs ? (/^(@|vs) /.test(vs) ? vs : 'vs ' + vs) : null].filter(Boolean).join(' ');
+  }
+
+  recentOt(card: PlayerCard, index: number): boolean {
+    return !!extras(card.player).lastFiveOt?.[index];
   }
 
   openRecent(card: PlayerCard, index: number): void {

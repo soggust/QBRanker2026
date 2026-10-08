@@ -170,6 +170,7 @@ export const SPORT: SportConfig = {
   positionNames: { TM: 'Team', C: 'Center', LW: 'Left Wing', RW: 'Right Wing', D: 'Defenseman', G: 'Goalie', HC: 'Head Coach' },
   tabNames: { TM: 'Teams', C: 'Centers', LW: 'Left Wings', RW: 'Right Wings', D: 'Defensemen', G: 'Goalies', HC: 'Head Coaches' },
   coachTab: 'HC',
+  teamTabs: ['TM'],
   rowHeader: (position) => (position === 'HC' ? 'Coach' : position === 'TM' ? 'Team' : 'Player'),
   extraRows: () => ({ TM: teamRows() }),
   // The Teams tab's roster grades: each spot by your rankings, weighted by ice time (a goalie by games)

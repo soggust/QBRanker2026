@@ -362,7 +362,8 @@ async function buildSeason(season) {
     delete u._team;
   }
   // (each team's last seven games, newest first, from its season schedule: the Teams tab's Recent; the
-  // regular season's and the playoffs', 1 a win, 0 a loss, overtime and shootout ones too)
+  // regular season's and the playoffs', 1 a win, 0 a loss, 0.5 a tie (before shootouts); and which went to
+  // overtime or a shootout, "OT" or "SO" (a lighter square on the site, the same result))
   const lastSeven = new Map();
   for (const tri of new Set(coached.rows.map((c) => c._team).filter(Boolean))) {
     const games = (await get(`${WEB}/club-schedule-season/${tri}/${seasonId(season)}`).catch(() => null))?.games ?? [];
@@ -370,16 +371,20 @@ async function buildSeason(season) {
       .filter((g) => (g.gameType === 2 || g.gameType === 3) && (g.gameState === 'OFF' || g.gameState === 'FINAL'))
       .sort((x, y) => y.gameDate.localeCompare(x.gameDate) || y.id - x.id)
       .slice(0, 7)
-      .map((g) => (g.homeTeam.abbrev === tri ? [g.homeTeam, g.awayTeam, 'vs'] : [g.awayTeam, g.homeTeam, '@']));
+      .map((g) => (g.homeTeam.abbrev === tri ? [g.homeTeam, g.awayTeam, 'vs', g] : [g.awayTeam, g.homeTeam, '@', g]));
     lastSeven.set(tri, {
-      results: last.map(([mine, theirs]) => (mine.score > theirs.score ? 1 : 0)),
+      results: last.map(([mine, theirs]) => (mine.score > theirs.score ? 1 : mine.score === theirs.score ? 0.5 : 0)),
+      ot: last.map(([, , , g]) => (['OT', 'SO'].includes(g.gameOutcome?.lastPeriodType) ? g.gameOutcome.lastPeriodType : null)),
       // (whom each came against, "@ Toronto Maple Leafs" away or "vs Boston Bruins" at home)
       vs: last.map(([, theirs, where]) => `${where} ${[theirs.placeName?.default, theirs.commonName?.default].filter(Boolean).join(' ') || theirs.abbrev}`),
     });
   }
   for (const c of coached.rows) {
     const recent = lastSeven.get(c._team);
-    if (recent?.results.length) Object.assign(c, { teamLastFive: recent.results, teamLastFiveVs: recent.vs });
+    if (recent?.results.length) {
+      Object.assign(c, { teamLastFive: recent.results, teamLastFiveVs: recent.vs });
+      if (recent.ot.some(Boolean)) c.teamLastFiveOt = recent.ot;
+    }
     delete c._team;
   }
   out.HC = coached.rows;

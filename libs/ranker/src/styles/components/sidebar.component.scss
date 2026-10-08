@@ -304,7 +304,7 @@
 
 // Breakdowns: indented under their row, with a yellow guide line; their eyes line up with every other
 .sidebar .filters .sub-rows {
-  border-left: 2px solid rgba(255, 205, 0, 0.35);
+  border-left: 2px solid color-mix(in srgb, var(--scoreboard-led) 35%, transparent);
   margin: 0 0 0.35em 1.4em;
   padding: 0 0 0 1.5em;
 

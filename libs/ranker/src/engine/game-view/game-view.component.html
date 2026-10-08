@@ -575,7 +575,7 @@
                 @for (p of rows; track p.side + p.name; let i = $index) {
                   @let team = p.side === 'away' ? g.away : g.home;
                   <div class="game-fantasy-row">
-                    <span class="game-fantasy-rank">{{ i + 1 }}</span>
+                    <span class="game-fantasy-rank" [class.first]="i === 0" [class.top]="i > 0 && i < 10">{{ i + 1 }}</span>
                     <span class="depth-head tiny">
                       @if (p.headshot) {
                         <img [src]="p.headshot" alt="" loading="lazy" (error)="p.headshot = null" />

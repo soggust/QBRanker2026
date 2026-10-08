@@ -6,6 +6,13 @@ import type { SkillPlayer } from '@sport/positions';
 
 type Stats = SkillPlayer['stats'];
 
+// A coach row's team results (the sport's data puts the team's Recent on its coaches)
+interface CoachRecent {
+  teamLastFive?: number[];
+  teamLastFiveVs?: (string | null)[];
+  teamLastFiveOt?: (string | null)[];
+}
+
 // stats: the sport's team stats from its coach rows (sum: a stat added up across them)
 export function teamRowsFromCoaches(stats: (coaches: SkillPlayer[], sum: (key: string) => number) => Partial<Stats>): SkillPlayer[] {
   const coaches = (DATA.skillPlayers as Record<string, SkillPlayer[]>)['HC'] ?? [];
@@ -13,6 +20,8 @@ export function teamRowsFromCoaches(stats: (coaches: SkillPlayer[], sum: (key: s
   for (const coach of coaches) teams.set(coach.teamLogo, [...(teams.get(coach.teamLogo) ?? []), coach]);
   return [...teams].map(([logo, list]) => {
     const sum = (key: string) => list.reduce((total, c) => total + ((c.stats as Record<string, number | null>)[key] ?? 0), 0);
+    // (the coach row with the team's latest games)
+    const recent = list.find((c) => (c as CoachRecent).teamLastFive) as CoachRecent | undefined;
     return {
       id: null,
       gsisId: `TM-${logo.split('/').pop()!.replace('.svg', '')}`,
@@ -20,9 +29,10 @@ export function teamRowsFromCoaches(stats: (coaches: SkillPlayer[], sum: (key: s
       teamLogo: logo,
       teamName: list[0].teamName,
       games: list.reduce((total, c) => total + c.games, 0),
-      // (the team's last five games, newest first, from its coaches' rows: the Recent column)
-      lastFive: (list.find((c) => (c as { teamLastFive?: number[] }).teamLastFive) as { teamLastFive?: number[] } | undefined)?.teamLastFive,
-      lastFiveVs: (list.find((c) => (c as { teamLastFive?: number[] }).teamLastFive) as { teamLastFiveVs?: (string | null)[] } | undefined)?.teamLastFiveVs,
+      // (the team's last games, newest first, from its coaches' rows: the Recent column)
+      lastFive: recent?.teamLastFive,
+      lastFiveVs: recent?.teamLastFiveVs,
+      lastFiveOt: recent?.teamLastFiveOt,
       stats: { ...list[0].stats, ...stats(list, sum) },
       awards: [...new Set(list.flatMap((c) => (c.awards ?? []).filter((award) => award !== 'coy')))],
     } as SkillPlayer;

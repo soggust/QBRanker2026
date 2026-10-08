@@ -36,6 +36,10 @@ export interface ReaderSource {
   weights?: SkillWeights;
 }
 
+// A Recent result's letter (W, T, L), and on hover how it was decided past regulation (the NHL's OT or SO:
+// "L (SO)")
+export const recentWord = (result: number, ot?: string | null): string => (result === 1 ? 'W' : result === 0.5 ? 'T' : 'L') + (ot ? ` (${ot})` : '');
+
 export class StatReader {
   // Each column's average and spread over the list, computed once and reused by every cell and the
   // header hover (per cell, it made the table slow to update), until the list or the settings change
@@ -131,8 +135,7 @@ export class StatReader {
   // One Recent dot's hover: the result and whom it came against ("W @ Denver Broncos", "L vs Seattle
   // Seahawks": the data writes the @ or vs; the result alone when the data doesn't say)
   recentTitle(player: SkillPlayer, i: number): string {
-    const result = this.lastFive(player)[i];
-    const word = result === 1 ? 'W' : result === 0.5 ? 'T' : 'L';
+    const word = recentWord(this.lastFive(player)[i], extras(player).lastFiveOt?.[i]);
     const vs = extras(player).lastFiveVs?.[i];
     return vs ? `${word} ${/^(@|vs) /.test(vs) ? vs : `vs ${vs}`}` : word;
   }

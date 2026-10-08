@@ -559,8 +559,8 @@
   }
 
   .shape {
-    fill: rgba(255, 205, 0, 0.22);
-    filter: drop-shadow(0 0 6px rgba(255, 205, 0, 0.35));
+    fill: color-mix(in srgb, var(--scoreboard-led) 22%, transparent);
+    filter: drop-shadow(0 0 6px color-mix(in srgb, var(--scoreboard-led) 35%, transparent));
     stroke: var(--scoreboard-led);
     stroke-linejoin: round;
     stroke-width: 2;
@@ -930,6 +930,15 @@
     background: v.$neutral;
   }
 
+  // (decided in overtime or a shootout: the same result, lighter)
+  &.W.ot {
+    background: v.$good-ot;
+  }
+
+  &.L.ot {
+    background: v.$bad-ot;
+  }
+
   &:hover:not(:disabled) {
     filter: brightness(1.15);
     transform: scale(1.15);
@@ -1041,7 +1050,7 @@
   }
 
   &.active {
-    background: rgba(255, 205, 0, 0.08);
+    background: color-mix(in srgb, var(--scoreboard-led) 8%, transparent);
     cursor: default;
 
     .arc-year {
@@ -1174,9 +1183,9 @@
       // (with Color-Coded Values on, the bar keeps its tint; the star and yellow number mark the best)
       &:not(.tinted) i {
         background:
-          linear-gradient(90deg, rgba(255, 205, 0, 0.5), var(--scoreboard-led)) left / 100% 100% no-repeat,
+          linear-gradient(90deg, color-mix(in srgb, var(--scoreboard-led) 50%, transparent), var(--scoreboard-led)) left / 100% 100% no-repeat,
           rgba(255, 255, 255, 0.1);
-        box-shadow: 0 0 6px rgba(255, 205, 0, 0.45);
+        box-shadow: 0 0 6px color-mix(in srgb, var(--scoreboard-led) 45%, transparent);
       }
     }
   }
@@ -1539,7 +1548,7 @@
 }
 
 .log-chart {
-  --log-seg-0: var(--scoreboard-led, #ffcd00);
+  --log-seg-0: var(--scoreboard-led);
   --log-seg-1: #5ab4ff;
 }
 
@@ -1751,7 +1760,7 @@
 
   // the charted column stands out a little
   th.key {
-    color: var(--scoreboard-led, #ffcd00);
+    color: var(--scoreboard-led);
   }
 
   td.key {
@@ -2138,7 +2147,7 @@
   }
 
   &.volatile b {
-    background: #ffcd00;
+    background: v.$caution;
   }
 }
 
@@ -2295,8 +2304,8 @@
   }
 
   &.lean {
-    background: #ffcd00;
-    border-color: #ffcd00;
+    background: v.$caution;
+    border-color: v.$caution;
     color: #111;
   }
 
@@ -2548,7 +2557,7 @@
   padding: 2px 4px;
 
   &.s-q {
-    background: #ffcd00;
+    background: v.$caution;
     color: #1a1a1a;
   }
 
@@ -2663,12 +2672,16 @@
   }
 }
 
-// the special teams: a row of chips
+// the special teams: a row of chips, with room above and below them
 .depth-special-row {
   display: flex;
   flex-wrap: wrap;
   gap: 14px;
   justify-content: space-around;
+}
+
+.depth-special .depth-special-row {
+  padding-block: 26px;
 }
 
 .depth-special-item {

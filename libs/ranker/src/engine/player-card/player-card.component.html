@@ -138,6 +138,7 @@
                   type="button"
                   class="recent-square"
                   [ngClass]="d === 1 ? 'W' : d === 0.5 ? 'T' : 'L'"
+                  [class.ot]="recentOt(c, i)"
                   [disabled]="!games.available"
                   [title]="recentTitle(c, d, i)"
                   (click)="openRecent(c, i)"

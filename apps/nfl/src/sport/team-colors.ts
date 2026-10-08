@@ -55,7 +55,7 @@ const BADGE_ON_SECONDARY = new Set([
 ]);
 
 // Logos shown in white on their primary-color badge (the way the team itself uses them)
-const WHITE_LOGOS = new Set(['Giants']);
+const WHITE_LOGOS = new Set(['Giants', 'Rams']);
 
 const teamKey = (teamLogo: string) => teamLogo.split('/').pop()!.replace('.png', '');
 

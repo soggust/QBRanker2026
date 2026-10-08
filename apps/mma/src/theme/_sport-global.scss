@@ -147,7 +147,7 @@ $edge: 2px;
 }
 
 // The footer's Current / All-Time dropdown and the presets dropdown: octagon-cut, the buttons' height,
-// white text in the sport and weight bars' lettering (Nunito capitals, light), a red caret
+// white text in capitals (the headline font: _base.scss sets it for every sport's dropdowns), a red caret
 #{kit.$dropdowns} {
   @include octagon;
   align-items: center;
@@ -165,10 +165,8 @@ $edge: 2px;
   .mat-mdc-select-value-text,
   .mat-mdc-select-placeholder {
     color: $white-text !important;
-    font-family: "Nunito", sans-serif !important;
     font-size: 12px !important;
     font-weight: 500 !important;
-    letter-spacing: normal !important;
     text-transform: uppercase;
   }
 

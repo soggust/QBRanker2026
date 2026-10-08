@@ -11,7 +11,10 @@ import { rosterGradeValue } from '@ranker/engine/roster-grades';
 export const SKILL_UNITS = {} as Record<SkillPosition, SkillPlayer[]>;
 
 export function rebuildUnits(): void {
-  Object.assign(SKILL_UNITS, DATA.skillPlayers as Record<string, SkillPlayer[]>, SPORT.extraRows?.());
+  const rows = { ...(DATA.skillPlayers as Record<string, SkillPlayer[]>), ...SPORT.extraRows?.() };
+  // (a tab the new season doesn't have is emptied, not left with the last season's rows)
+  for (const tab of Object.keys(SKILL_UNITS)) if (!(tab in rows)) delete SKILL_UNITS[tab as SkillPosition];
+  Object.assign(SKILL_UNITS, rows);
 }
 rebuildUnits();
 

@@ -767,6 +767,15 @@ section ul li.player {
           background: v.$neutral;
         }
 
+        // (decided in overtime or a shootout: the same result, lighter)
+        &.green.ot {
+          background: v.$good-ot;
+        }
+
+        &.red.ot {
+          background: v.$bad-ot;
+        }
+
         &.unplayed {
           background: none;
           box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.35);
@@ -1297,6 +1306,19 @@ section ul li.empty-list {
 
     &.header-row {
       height: 36px;
+    }
+
+    // (the grid scrolls sideways here anyway: the name column takes the room for a whole name)
+    div.player-info {
+      flex-basis: 30em;
+      min-width: 30em;
+      width: 30em;
+    }
+
+    div .player-name strong {
+      overflow: visible;
+      text-overflow: clip;
+      white-space: nowrap;
     }
   }
 

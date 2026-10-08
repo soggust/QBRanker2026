@@ -139,6 +139,7 @@ export const SPORT: SportConfig = {
     HC: 'Head Coaches',
   },
   coachTab: 'HC',
+  teamTabs: ['TM'],
   rowHeader: (position) => (position === 'HC' ? 'Coach' : position === 'TM' ? 'Team' : 'Player'),
   extraRows: () => ({ TM: teamRows() }),
   // The Teams tab's roster grades: each spot by your rankings, weighted by minutes

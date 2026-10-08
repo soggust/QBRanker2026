@@ -1,10 +1,12 @@
 // The fields some sports' rows carry and others don't (each sport has its own row type; the engine reads
 // these when they're there): the team's full name, the last few results (1 win, 0.5 tie, 0 loss, newest
-// first) and whom they came against ("@ Denver Broncos")
+// first), whom they came against ("@ Denver Broncos") and which went to overtime or a shootout
 export interface RowExtras {
   teamName?: string | null;
   lastFive?: number[];
   lastFiveVs?: (string | null)[];
+  // (and how each was decided past regulation, when it was: the NHL's "OT" or "SO")
+  lastFiveOt?: (string | null)[];
 }
 
 export const extras = (row: object): RowExtras => row as RowExtras;
