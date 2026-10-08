@@ -14,7 +14,12 @@ interface ModelBet {
   placedAt: string;
   gradedAt?: string;
   matchup: string;
-  market: 'spread' | 'total' | 'ml';
+  market: 'spread' | 'total' | 'ml' | 'prop';
+  // (a prop's: its type, the player, his projection; its price the desk's estimate)
+  propType?: string;
+  statLabel?: string;
+  player?: string;
+  projection?: { mean: number; pOver: number; fairOver: number };
   pick: string;
   odds: number;
   model: number;
@@ -59,7 +64,19 @@ interface ModelState {
   teams: { abbr: string; rating: number }[];
   context?: { lambda: number; terms: ContextTerm[]; test: { games: number; before: TestNumbers; after: TestNumbers } } | null;
   postmortem?: { graded: number; disrupted: number; weight: number; fitted: boolean };
+  props?: { types: PropType[]; lastRun?: { games: number; priced: number; bet: number } } | null;
 }
+
+interface PropType {
+  key: string;
+  label: string;
+  rows: number;
+  params: { K: number; w: number; a: number; b: number; c: number; r: number; cal?: number[] };
+  check: { n: number; mae: number; maeBase: number | null; logLoss: number | null; logLossBase: number | null; brier: number | null; brierBase: number | null; sideHit: number | null } | null;
+  trust: { trust: number; n: number; fitted: boolean } | null;
+}
+
+type PropRow = PropType & { sport: string };
 
 type ContextRow = ContextTerm & { sport: string; unitWord: string };
 
@@ -76,7 +93,7 @@ export interface Tally {
 }
 
 const SPORTS = ['nfl', 'nba', 'nhl', 'mlb'];
-const MARKET_NAMES: Record<string, string> = { spread: 'Spread', total: 'Total', ml: 'Moneyline' };
+const MARKET_NAMES: Record<string, string> = { spread: 'Spread', total: 'Total', ml: 'Moneyline', prop: 'Props' };
 // (each sport's scoring unit, for a context term's size)
 const UNIT_WORDS: Record<string, string> = { nfl: 'pts', nba: 'pts', nhl: 'goals', mlb: 'runs' };
 
@@ -120,6 +137,8 @@ export class ModelDeskComponent implements OnInit {
   changes: (ModelState['changelog'][number] & { sport: string })[] = [];
   contextRows: ContextRow[] = [];
   contextTests: { label: string; games: number; before: TestNumbers; after: TestNumbers }[] = [];
+  propRows: PropRow[] = [];
+  byProp: Tally[] = [];
 
   async ngOnInit(): Promise<void> {
     const get = (url: string) =>
@@ -181,6 +200,12 @@ export class ModelDeskComponent implements OnInit {
     // (each sport's context terms, the kept ones first, and its held-out numbers with and without them)
     this.contextRows = this.states.flatMap((s) => (s.context?.terms ?? []).map((t) => ({ ...t, sport: s.label, unitWord: UNIT_WORDS[s.sport] ?? '' })));
     this.contextTests = this.states.filter((s) => s.context?.test).map((s) => ({ label: s.label, ...s.context!.test }));
+
+    // (the props: each sport's prop types and their projections' fit and check; the bets by type)
+    this.propRows = this.states.flatMap((s) => (s.props?.types ?? []).map((t) => ({ ...t, sport: s.label })));
+    const typeOf = (b: ModelBet) => `${b.sport.toUpperCase()} ${b.statLabel}`;
+    const types = [...new Set(bets.filter((b) => b.market === 'prop').map(typeOf))];
+    this.byProp = types.map((label) => tally(label, bets.filter((b) => b.market === 'prop' && typeOf(b) === label)));
   }
 
   signed(v: number): string {
@@ -210,6 +235,7 @@ export class ModelDeskComponent implements OnInit {
   trustText(state: ModelState | null): string {
     if (!state) return '-';
     return Object.entries(state.trust)
+      .filter(([m]) => !m.startsWith('prop:'))
       .map(([m, t]) => `${MARKET_NAMES[m] ?? m} ${t.trust}${t.fitted ? '' : '*'}`)
       .join(' · ');
   }
@@ -282,6 +308,17 @@ export class ModelDeskComponent implements OnInit {
   readonly stateValue = (s: ModelState, key: string): unknown =>
     key === 'label' ? s.label : key === 'history' ? s.history.finals : key === 'trust' ? (s.trust['spread']?.trust ?? null) : s.params[key];
 
+  // (a prop type's value by column)
+  readonly propValue = (t: PropRow, key: string): unknown =>
+    key === 'sport' ? t.sport
+    : key === 'prop' ? t.label
+    : key === 'rows' ? t.rows
+    : key === 'mae' ? (t.check && t.check.maeBase ? t.check.mae / t.check.maeBase : null)
+    : key === 'overLine' ? (t.check?.logLoss ?? null)
+    : key === 'sideHit' ? (t.check?.sideHit ?? null)
+    : key === 'propTrust' ? (t.trust?.trust ?? null)
+    : null;
+
   // (a context term's value by column)
   readonly contextValue = (t: ContextRow, key: string): unknown =>
     key === 'sport' ? t.sport : key === 'term' ? t.label : key === 'on' ? t.on : key === 'size' ? Math.abs(t.size) : key === 'kept' ? (t.kept ? 1 : 0) : key === 'games' ? t.games : key === 'gain' ? t.gain : null;
@@ -319,6 +356,13 @@ export class ModelDeskComponent implements OnInit {
     history: 'Finished games the ratings are built on',
     why: "Why it won or lost, from the game's box score and story: what broke the bet's premise in the game (a quarterback replaced, a top player's minutes or snaps cut short, a goalie pulled, a starter gone early: ! marks one, and such a bet counts less in what the desk learns), overtime or a blowout, and how far off its call was. Hover for the story; the link opens ESPN's recap",
     disrupted: "Graded bets whose premise broke in the game (a starter hurt, a goalie pulled...): they count less in the trust fit and the calibration, in full in the record",
+    prop: "The player stat (DraftKings' main line; its price isn't in the free feed, so each side's is estimated from the player's own record at the line with -110's cut)",
+    rows: 'Player games its projection was fit and checked on',
+    mae: "On the last 30% of the history (never fit on): how far its projection missed on average, against a plain season average's miss",
+    overLine: "On the same held-out games, at a line at each player's median so far: its chance of going over against what happened (log loss, lower is better), against the player's own over-rate",
+    sideHit: 'On those lines, how often the side it leaned (by 5 points or more) was right',
+    propSettings: 'Its fitted settings: K (games of pull toward his position), recent weight, opponent power, game-script power, context size, spread (r: lower is wider)',
+    propTrust: "How much the prop type counts its projection against the player's own record (starts 0.5; refit on its graded props once 40 are; * not yet)",
     term: "What it weighs beyond the ratings (hover a name for its unit): rest and the schedule's grind, travel, starters and bullpens, weather and air, ballparks, the officials, expected goals and neutral-script EPA, and last season's numbers from the ranker",
     on: 'What it moves: the margin (toward the side it names) or the game total',
     size: "Its fitted size, in the sport's scoring unit per unit of the term (hover the name for the unit); refit every run on every game before, pulled toward 0 unless the games bear it out",
@@ -329,4 +373,4 @@ export class ModelDeskComponent implements OnInit {
 }
 
 // (the columns that sort as text, A first)
-const TEXT_KEYS = new Set(['label', 'sport', 'game', 'market', 'pick', 'start', 'term', 'on']);
+const TEXT_KEYS = new Set(['prop', 'label', 'sport', 'game', 'market', 'pick', 'start', 'term', 'on']);

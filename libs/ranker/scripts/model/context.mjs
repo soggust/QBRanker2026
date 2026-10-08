@@ -377,6 +377,7 @@ async function mlbFacts(history, upcoming, facts, live) {
       })(),
       vn: r.venue?.name ?? null,
       lineups: r.lineups?.homePlayers?.length && r.lineups?.awayPlayers?.length ? [r.lineups.homePlayers.map((p) => String(p.id)), r.lineups.awayPlayers.map((p) => String(p.id))] : null,
+      lineupNames: [r.lineups?.homePlayers?.map((p) => p.fullName) ?? [], r.lineups?.awayPlayers?.map((p) => p.fullName) ?? []],
     };
   };
   // (every lineup's batters and every probable starter: how each bats and throws, asked once per player)

@@ -23,11 +23,13 @@
 
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
-import { LEAGUES } from './leagues.mjs';
+import { LEAGUES, PROP_CAPS } from './leagues.mjs';
 import { gameOf, json, linesOf, scoreboard, teamIds, teamSchedule, ymd } from './espn.mjs';
 import { adjust, expect, fit, fitContext, gateOf, replay, round } from './ratings.mjs';
 import { enrich, featurize, gather } from './context.mjs';
-import { postmortems } from './postmortem.mjs';
+import { finalSummary, postmortems, propPostmortem, usualRoles } from './postmortem.mjs';
+import { playerRows } from './playerlogs.mjs';
+import { PER_GAME, STATS, board, fitProps, priceProps, rowsIndex, settleProp, statInFinal } from './props.mjs';
 import { BANKROLL, MARKETS, choose, fitTrust, pickText, price, record, settle } from './desk.mjs';
 
 const ROOT = path.resolve(import.meta.dirname, '../../../..');
@@ -108,9 +110,10 @@ async function runSport(sport) {
   const facts = read(contextFile, {});
   let ctxFit = null;
   let feats = null;
+  let live = new Map();
   try {
     const t0 = Date.now();
-    const live = await gather(sport, cfg, history, upcoming, facts);
+    live = await gather(sport, cfg, history, upcoming, facts);
     const { nfl: _rows, ...kept } = facts;
     write(contextFile, kept);
     feats = featurize(sport, cfg, history, facts, live);
@@ -121,7 +124,22 @@ async function runSport(sport) {
   }
   // (with the context, the spreads around its expectations are the ones it priced with)
   if (ctxFit) Object.assign(params, { sigma: round(ctxFit.after.sigma, 3), sigmaT: round(ctxFit.after.sigmaT, 3) });
-  const { state: teams } = replay(history, params, 0, ctxFit?.ctx ?? null);
+  // (each final's expected score, for the props' game script)
+  const expPts = new Map();
+  const { state: teams } = replay(history, params, 0, ctxFit?.ctx ?? null, (g, e) => expPts.set(g.id, [e.homePts, e.awayPts]));
+
+  // 2c. the props: every player's game lines, and each prop type's projection fit and checked on them
+  let props = null;
+  let rows = [];
+  try {
+    const t0 = Date.now();
+    rows = await playerRows(sport, cfg, history, facts);
+    const info = new Map([...(feats?.feats ?? new Map())].map(([id, f]) => [id, f.info]));
+    props = fitProps(sport, rows, expPts, info);
+    console.log(`${sport}: props' projections fit on ${rows.length} player games in ${Math.round((Date.now() - t0) / 1000)}s`);
+  } catch (err) {
+    console.warn(`${sport}: props left out (${err.stack ?? err})`);
+  }
   const weights = teams.weights ?? null;
   const context = ctxFit ? contextState(ctxFit, weights) : (state.context ?? null);
   // (logged: a term joining or leaving, or its size moving a tenth or more; the first fit logs each it keeps)
@@ -148,19 +166,44 @@ async function runSport(sport) {
     }
     trust[market] = t;
   }
+  // (each prop type's trust in its projection, the same way: start 0.5, refit once 40 of its bets are graded)
+  for (const st of STATS[sport]) {
+    const key = `prop:${st.key}`;
+    const t = fitTrust(
+      ledger.bets.filter((b) => b.market === 'prop' && b.propType === st.key && b.status !== 'open' && !b.void),
+      START_TRUST,
+    );
+    if (trust[key] && trust[key].trust !== t.trust) state.changelog.push({ at, what: `${st.label} props' trust in the projection`, from: trust[key].trust, to: t.trust, why: `best fit to ${t.n} graded ${st.label} props (log loss ${t.logLoss})` });
+    trust[key] = t;
+  }
 
   // 4. the open bets, graded
   let graded = 0;
   for (const bet of ledger.bets) {
-    if (bet.status !== 'open') continue;
+    if (bet.status !== 'open' || bet.market === 'prop') continue;
     const g = games.get(bet.event);
     if (!g?.final || g.hs === null) continue;
     Object.assign(bet, settle(bet, g), { gradedAt: at });
     graded++;
   }
+  // (the props: each player's stat in the final, from its box score; a player who didn't play: no action)
+  for (const bet of ledger.bets) {
+    if (bet.status !== 'open' || bet.market !== 'prop') continue;
+    const g = games.get(bet.event);
+    if (!g?.final || g.hs === null) continue;
+    try {
+      const body = await finalSummary(sport, cfg.league, g.id);
+      if (!body) continue;
+      Object.assign(bet, settleProp(bet, await statInFinal(sport, bet, body, facts.games?.[g.id]?.pk)), { gradedAt: at });
+      Object.assign(bet, propPostmortem(sport, bet, g, body, rows, DISRUPTED_WEIGHT, await usualRoles(sport, g, facts, history).catch(() => null)));
+      graded++;
+    } catch (err) {
+      console.warn(`${sport}: prop ${bet.id} not graded (${err.message})`);
+    }
+  }
   // (each graded bet's post-mortem: the ones just graded, and any graded before there were post-mortems)
   try {
-    const todo = ledger.bets.filter((b) => b.status !== 'open' && !b.why);
+    const todo = ledger.bets.filter((b) => b.status !== 'open' && !b.why && b.market !== 'prop');
     if (todo.length) console.log(`${sport}: post-mortems for ${await postmortems(sport, cfg.league, todo, games, facts, history, DISRUPTED_WEIGHT)} of ${todo.length} graded bets`);
   } catch (err) {
     console.warn(`${sport}: post-mortems skipped (${err.message})`);
@@ -228,6 +271,98 @@ async function runSport(sport) {
     }
   }
 
+  // 6. the props of the coming games: each main line projected and priced; the ones with an edge bet, best
+  // first, at most PER_GAME a game (props.mjs)
+  const propRun = { games: 0, priced: 0, under: 0, even: 0, evenUnder: 0, bet: 0, units: 0 };
+  if (props && Object.keys(props).length) {
+    const idx = rowsIndex(sport, rows);
+    const candidates = [];
+    const dumped = [];
+    // (the caps: a prop type not yet tested (its trust unfit) stakes little; the day is the game's US date)
+    const dayOf = (iso) => new Date(Date.parse(iso) - 5 * 36e5).toISOString().slice(0, 10);
+    const capsOf = (key) => (trust[`prop:${key}`]?.fitted ? PROP_CAPS.tested : PROP_CAPS.untested);
+    const untestedUnits = (day) => ledger.bets.filter((b) => b.market === 'prop' && !b.tested && dayOf(b.start) === day).reduce((t, b) => t + b.units, 0);
+    if (JSON.stringify(state.propCaps ?? null) !== JSON.stringify(PROP_CAPS)) {
+      state.changelog.push({ at, what: 'Prop caps', from: state.propCaps ? 'before' : 'none', to: `${PROP_CAPS.untested.maxUnits}u, ${PROP_CAPS.untested.perGame} a game, ${PROP_CAPS.untested.perDay}u a day`, why: 'Props are untested and priced at an assumed -110: until a type has 40 graded (its trust fit), at most 1 unit a prop, 3 props a game, 10 units a day in the sport; then 3 units and 8 a game' });
+      state.propCaps = PROP_CAPS;
+    }
+    for (const { game } of upcoming) {
+      try {
+        const board_ = await board(sport, cfg.league, game);
+        if (!board_.length) continue;
+        propRun.games++;
+        const base = expect(teams, game, params);
+        const f = feats?.feats.get(game.id);
+        const adjM = f && weights ? f.m.reduce((s, v, i) => s + v * weights.m[i], 0) : 0;
+        const adjT = f && weights ? f.t.reduce((s, v, i) => s + v * weights.t[i], 0) : 0;
+        const exp = adjust(base, adjM, adjT);
+        const { priced, bets } = priceProps(sport, game, board_, props, idx, exp, f?.info ?? null, live.get(game.id), trust, EV_SCALE);
+        propRun.priced += priced.length;
+        propRun.under += priced.filter((x) => x.side === 'under').length;
+        // (the ones at an even line: the ones it could bet)
+        const even = priced.filter((x) => !x.guard?.skip);
+        propRun.even += even.length;
+        propRun.evenUnder += even.filter((x) => x.side === 'under').length;
+        for (const x of bets) candidates.push({ game, x, exp });
+        if (DRY) dumped.push(...priced.map((x) => ({ game: game.id, player: x.prop.athlete.name, stat: x.prop.stat.key, line: x.prop.line, side: x.side, skip: !!x.guard?.skip, ...x.projection })));
+      } catch (err) {
+        console.warn(`${sport}: props for ${game.id} skipped (${err.message})`);
+      }
+    }
+    // (the day's best first: every game's candidates by expected return, placed under the caps)
+    for (const { game, x, exp } of candidates.sort((a, b) => b.x.ev - a.x.ev)) {
+      const mine = ledger.bets.filter((b) => b.event === game.id && b.market === 'prop');
+      const id = `${game.id}:prop:${x.prop.stat.key}:${x.prop.athlete.id}`;
+      if (placed.has(id) && !DRY) continue;
+      const caps = capsOf(x.prop.stat.key);
+      const tested = caps === PROP_CAPS.tested;
+      const inGame = mine.filter((b) => (tested ? true : !b.tested)).length;
+      if (inGame >= caps.perGame || mine.length >= PER_GAME) continue;
+      x.units = Math.min(x.units, caps.maxUnits);
+      if (!tested && untestedUnits(dayOf(game.date)) + x.units > caps.perDay) continue;
+      const bet = {
+        id,
+        event: game.id,
+        sport,
+        start: game.date,
+        placedAt: at,
+        matchup: `${game.awayAbbr} @ ${game.homeAbbr}`,
+        market: 'prop',
+        propType: x.prop.stat.key,
+        statLabel: x.prop.stat.label,
+        player: x.prop.athlete.name,
+        athlete: x.prop.athlete.id,
+        side: x.side,
+        line: x.prop.line,
+        odds: x.odds,
+        oddsAssumed: true,
+        model: round(x.model, 4),
+        fair: round(x.fair, 4),
+        p: round(x.p, 4),
+        ev: round(x.ev, 4),
+        units: x.units,
+        expMargin: round(exp.margin, 2),
+        expTotal: round(exp.total, 2),
+        book: 'DraftKings',
+        projection: x.projection,
+        tested,
+        context: { move: x.move, ...(x.guard ? { guard: x.guard.why } : {}) },
+        status: 'open',
+        profit: 0,
+      };
+      bet.pick = `${bet.player} ${bet.side === 'over' ? 'Over' : 'Under'} ${bet.line} ${bet.statLabel}`;
+      if (DRY) console.log(`${sport} (dry) prop ${bet.matchup} ${bet.pick} ${bet.units}u p ${bet.p} ev ${bet.ev}: ${JSON.stringify(bet.projection)}${x.guard ? ` [${x.guard.why}]` : ''}`);
+      ledger.bets.push(bet);
+      mine.push(bet);
+      placed.add(id);
+      propRun.bet++;
+      propRun.units += bet.units;
+      newBets++;
+    }
+    if (DRY && dumped.length) write(path.join(ROOT, '.cache/model', `priced-${sport}.json`), dumped);
+    if (propRun.priced) console.log(`${sport}: props priced ${propRun.priced} in ${propRun.games} games (${Math.round((100 * propRun.under) / propRun.priced)}% under; at even lines ${propRun.even}, ${Math.round((100 * propRun.evenUnder) / Math.max(1, propRun.even))}% under), bet ${propRun.bet} for ${propRun.units}u`);
+  }
+
   if (replaced) state.changelog.push({ at, what: 'Open bets replaced', from: replaced, to: newBets, why: 'Priced again with the context the model has now (its terms as fit this run: see Context)' });
 
   // The state: the settings and how they test, the trust, the changelog, the teams by rating
@@ -246,6 +381,14 @@ async function runSport(sport) {
     trust,
     evScale: EV_SCALE,
     context,
+    props: props
+      ? {
+          odds: 'assumed -110 a side (the board has no prices); lines far from the player usual not bet',
+          perGame: PER_GAME,
+          lastRun: propRun,
+          types: Object.entries(props).map(([key, f]) => ({ key, label: f.stat.label, rows: f.rows, eligible: f.eligible, params: f.params, check: f.check, allPlayersBias: f.checkAll?.bias ?? null, trust: trust[`prop:${key}`] ?? null })),
+        }
+      : (state.props ?? null),
     postmortem: (() => {
       const done = ledger.bets.filter((b) => b.status !== 'open' && b.why);
       return { graded: done.length, disrupted: done.filter((b) => (b.weight ?? 1) < 1).length, weight: DISRUPTED_WEIGHT, fitted: false };

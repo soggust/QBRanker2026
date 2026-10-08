@@ -123,6 +123,17 @@
               }
             </tbody>
           </table>
+          <!-- (the props by type, once there are any) -->
+          @if (byProp.length) {
+            <table class="desk-table desk-sub">
+              <thead><ng-container *ngTemplateOutlet="tallyHead; context: { $implicit: 'propType' }"></ng-container></thead>
+              <tbody>
+                @for (t of sorted('propType', byProp, tallyValue); track t.label) {
+                  <tr><ng-container *ngTemplateOutlet="tallyRow; context: { $implicit: t }"></ng-container></tr>
+                }
+              </tbody>
+            </table>
+          }
         </div>
       </card-panel>
 
@@ -318,6 +329,37 @@
           </table>
         } @else {
           <p class="desk-note">No context fit yet: each run gathers it and fits each term's size.</p>
+        }
+        <!-- (the props: each type's projection, fit on the history and checked on its last 30%) -->
+        @if (propRows.length) {
+          <table class="desk-table desk-bets desk-sub">
+            <thead>
+              <tr>
+                <ng-container *ngTemplateOutlet="th; context: { $implicit: 'props', key: 'sport', label: 'Sport' }"></ng-container>
+                <ng-container *ngTemplateOutlet="th; context: { $implicit: 'props', key: 'prop', label: 'Prop' }"></ng-container>
+                <ng-container *ngTemplateOutlet="th; context: { $implicit: 'props', key: 'rows', label: 'Games' }"></ng-container>
+                <ng-container *ngTemplateOutlet="th; context: { $implicit: 'props', key: 'mae', label: 'Miss (vs avg)' }"></ng-container>
+                <ng-container *ngTemplateOutlet="th; context: { $implicit: 'props', key: 'overLine', label: 'Over a line (vs own)' }"></ng-container>
+                <ng-container *ngTemplateOutlet="th; context: { $implicit: 'props', key: 'sideHit', label: 'Side right' }"></ng-container>
+                <th [title]="help['propSettings']">Settings</th>
+                <ng-container *ngTemplateOutlet="th; context: { $implicit: 'props', key: 'propTrust', label: 'Trust' }"></ng-container>
+              </tr>
+            </thead>
+            <tbody>
+              @for (t of sorted('props', propRows, propValue); track t.sport + t.key) {
+                <tr>
+                  <th>{{ t.sport }}</th>
+                  <td class="desk-left">{{ t.label }}</td>
+                  <td>{{ t.rows }}</td>
+                  <td>{{ t.check?.mae ?? '-' }} ({{ t.check?.maeBase ?? '-' }})</td>
+                  <td [class.up]="(t.check?.logLoss ?? 1) < (t.check?.logLossBase ?? 0)">{{ t.check?.logLoss ?? '-' }} ({{ t.check?.logLossBase ?? '-' }})</td>
+                  <td>{{ pct(t.check?.sideHit ?? null) }}</td>
+                  <td class="desk-test">K {{ t.params.K }} · recent {{ t.params.w }} · opp {{ t.params.a }} · script {{ t.params.b }} · ctx {{ t.params.c }} · r {{ t.params.r }}</td>
+                  <td>{{ t.trust?.trust ?? 0.5 }}{{ t.trust?.fitted ? '' : '*' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
         }
       </div>
     </card-panel>

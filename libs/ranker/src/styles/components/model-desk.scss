@@ -314,3 +314,8 @@ card-panel {
 .desk-broke {
   color: v.$bad;
 }
+
+// (a second table in a panel: the props by type under the markets, the props' projections under the terms)
+.desk-sub {
+  margin-top: 14px;
+}

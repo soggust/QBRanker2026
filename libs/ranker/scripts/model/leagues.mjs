@@ -16,6 +16,14 @@
 // moved this far since it opened (spread or total in points, moneyline in the home side's fair chance) cuts
 // the bet to the 0.5-unit minimum, twice as far skips it
 // deepen   the season the history reaches back to (the NFL's older ones from nflverse)
+//
+// PROP_CAPS (props.mjs, run.mjs): how much the props may stake. untested: a prop type whose trust isn't fit
+// yet (fewer than 40 graded): at most maxUnits a prop, perGame of them a game, perDay units of them a day in
+// the sport. tested: once its trust is fit (perDay null: no daily cap)
+export const PROP_CAPS = {
+  untested: { maxUnits: 1, perGame: 3, perDay: 10 },
+  tested: { maxUnits: 3, perGame: 8, perDay: null },
+};
 
 export const LEAGUES = {
   nfl: {

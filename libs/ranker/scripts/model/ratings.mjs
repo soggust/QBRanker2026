@@ -80,7 +80,8 @@ function learn(state, game, exp, params) {
 // ratings' expectation (least squares), each pulled toward 0 by lambda made-up games where it did nothing
 // (ridge). So a game is only ever predicted with sizes learned from games before it, and a term that explains
 // nothing stays near 0. ctx.off: terms left out.
-export function replay(games, params, burnIn = 0.3, ctx = null) {
+// onGame: told each final's expectation before it's learned from (the props' game script)
+export function replay(games, params, burnIn = 0.3, ctx = null, onGame = null) {
   const state = start(params);
   const fitM = ctx ? online(ctx, 'm') : null;
   const fitT = ctx ? online(ctx, 't') : null;
@@ -97,6 +98,7 @@ export function replay(games, params, burnIn = 0.3, ctx = null) {
     const base = expect(state, g, params);
     const f = ctx?.feats.get(g.id);
     const exp = f ? adjust(base, fitM.predict(f.m), fitT.predict(f.t)) : base;
+    onGame?.(g, exp);
     if (i >= from) {
       const m = g.hs - g.as - exp.margin;
       const t = g.hs + g.as - exp.total;
