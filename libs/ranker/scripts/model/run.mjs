@@ -189,9 +189,9 @@ async function runSport(sport) {
       const id = `${game.id}:${market.market}`;
       if (placed.has(id) && !DRY) continue;
       const pick = choose(market, trust[market.market]?.trust ?? START_TRUST, EV_SCALE);
-      // (the guard: a line that's moved a lot since it opened, or a key player questionable, cuts the stake
-      // to the minimum; a line that's moved twice that far skips the market this run)
-      const guard = guardOf(cfg.guard, market.market, lines.move, f?.info.flags ?? []);
+      // (the guard: a line that's moved a lot since it opened (less what the context explains), or a key player
+      // questionable, cuts the stake to the minimum; a line that's moved twice that far skips the market this run)
+      const guard = guardOf(cfg.guard, market.market, lines.move, f?.info.flags ?? [], { m: adjM, t: adjT }, params.sigma);
       if (guard?.skip) {
         if (DRY) console.log(`${sport} (dry) skipped ${game.awayAbbr} @ ${game.homeAbbr} ${market.market}: ${guard.why}; ${JSON.stringify(seen)}`);
         continue;
@@ -265,12 +265,26 @@ async function runSport(sport) {
 }
 
 // The guard for a market: why to cut its stake (or skip it), or null
-function guardOf(limits, market, move, flags) {
+// A move the model's own context explains (it saw the backup QB the line moved for, and moved its number
+// the same way) doesn't count against the bet: only what's left of the move once the context's shift is
+// taken off it does. A context shift the other way explains nothing. Each in the line's own units: the
+// home side's points (a home spread moving down is the market moving toward home), the total's points,
+// the moneyline's home chance (its points through the margin spread: a chance near even moves about
+// 0.4 / sigma a point).
+function guardOf(limits, market, move, flags, adj = { m: 0, t: 0 }, sigma = null) {
   const limit = limits?.[market];
   const moved = move?.[market];
-  if (limit && moved !== null && moved !== undefined && Math.abs(moved) >= limit) {
-    const why = `line moved ${moved > 0 ? '+' : ''}${moved} since it opened`;
-    return Math.abs(moved) >= 2 * limit ? { skip: true, why } : { why };
+  if (limit && moved !== null && moved !== undefined) {
+    const toPoints = market === 'ml' ? (sigma ? sigma / 0.4 : null) : 1;
+    // (the market's move and the context's shift, both as points toward home / onto the total)
+    const market_ = market === 'spread' ? -moved : market === 'total' ? moved : toPoints ? moved * toPoints : null;
+    const shift = market === 'total' ? adj.t : adj.m;
+    const explained = market_ !== null && Math.sign(shift) === Math.sign(market_) ? Math.min(Math.abs(shift), Math.abs(market_)) : 0;
+    const left = market_ === null ? Math.abs(moved) : (Math.abs(market_) - explained) / (toPoints ?? 1);
+    if (left >= limit) {
+      const why = `line moved ${moved > 0 ? '+' : ''}${moved} since it opened${explained ? ` (${round(explained, 1)} of it explained by the context)` : ''}`;
+      return left >= 2 * limit ? { skip: true, why } : { why };
+    }
   }
   if (flags.length) return { why: flags.join('; ') };
   return null;
