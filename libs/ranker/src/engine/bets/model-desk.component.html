@@ -1,27 +1,59 @@
-<!-- The model desk's admin panel (dev only): its bankroll and record up top, then the breakdowns, the
-     bankroll over time, the bets open, the latest graded, and the changes it's made to itself -->
+<!-- The algorithm's admin panel (dev only): its bankroll and record up top, then the breakdowns, the bankroll
+     over time, the bets open, the latest graded, the changes it's made to itself, and its settings. Every
+     column sorts (a click on its header; again, the other way) and explains itself on hover. -->
+
+<!-- (a column's header: its name, sorting its table, its explanation on hover) -->
+<ng-template #th let-table let-key="key" let-label="label" let-help="help">
+  <th [attr.aria-sort]="ariaSort(table, key)" [title]="help ?? this.help[key] ?? ''">
+    <button type="button" class="desk-sort" [class.sorted]="ariaSort(table, key)" (click)="sortBy(table, key)">
+      {{ label }}
+      @if (ariaSort(table, key); as dir) {
+        <mat-icon aria-hidden="true" [fontIcon]="dir === 'ascending' ? 'arrow_upward' : 'arrow_downward'"></mat-icon>
+      }
+    </button>
+  </th>
+</ng-template>
+
+<!-- (a breakdown's columns) -->
+<ng-template #tallyHead let-table>
+  <tr>
+    <ng-container *ngTemplateOutlet="th; context: { $implicit: table, key: 'label', label: '', help: 'Sort by name' }"></ng-container>
+    <ng-container *ngTemplateOutlet="th; context: { $implicit: table, key: 'record', label: 'Record' }"></ng-container>
+    <ng-container *ngTemplateOutlet="th; context: { $implicit: table, key: 'profit', label: 'Profit' }"></ng-container>
+    <ng-container *ngTemplateOutlet="th; context: { $implicit: table, key: 'roi', label: 'ROI' }"></ng-container>
+    <ng-container *ngTemplateOutlet="th; context: { $implicit: table, key: 'open', label: 'Open' }"></ng-container>
+  </tr>
+</ng-template>
+<ng-template #tallyRow let-t>
+  <th>{{ t.label }}</th>
+  <td>{{ t.won }}-{{ t.lost }}-{{ t.push }}</td>
+  <td [class.up]="t.profit > 0" [class.down]="t.profit < 0">{{ units(t.profit) }}</td>
+  <td>{{ pct(t.roi) }}</td>
+  <td>{{ t.open }}</td>
+</ng-template>
+
 <section class="model-desk">
   <header class="desk-head">
-    <span class="desk-title"><mat-icon fontIcon="smart_toy"></mat-icon>Model Desk <small>dev only · play money · code, no AI</small></span>
+    <h2 class="desk-title"><mat-icon aria-hidden="true" fontIcon="smart_toy"></mat-icon>Algorithm</h2>
     @if (!loading) {
       <div class="desk-tiles">
-        <div class="desk-tile">
+        <div class="desk-tile" title="Play money: 100 units to start">
           <small>Bankroll</small>
           <b [class.up]="overall.profit > 0" [class.down]="overall.profit < 0">{{ balance.toFixed(2) }}u</b>
         </div>
-        <div class="desk-tile">
+        <div class="desk-tile" [title]="help['record']">
           <small>Record</small>
           <b>{{ overall.won }}-{{ overall.lost }}-{{ overall.push }}</b>
         </div>
-        <div class="desk-tile">
+        <div class="desk-tile" [title]="help['profit']">
           <small>Profit</small>
           <b [class.up]="overall.profit > 0" [class.down]="overall.profit < 0">{{ units(overall.profit) }}</b>
         </div>
-        <div class="desk-tile">
+        <div class="desk-tile" [title]="help['roi']">
           <small>ROI</small>
           <b [class.up]="(overall.roi ?? 0) > 0" [class.down]="(overall.roi ?? 0) < 0">{{ pct(overall.roi) }}</b>
         </div>
-        <div class="desk-tile">
+        <div class="desk-tile" [title]="help['open']">
           <small>Open</small>
           <b>{{ overall.open }}</b>
         </div>
@@ -30,15 +62,15 @@
   </header>
 
   @if (loading) {
-    <p class="desk-note">Loading the desk…</p>
+    <p class="desk-note" role="status">Loading…</p>
   } @else if (!states.length) {
-    <p class="desk-note">No desk yet: run <code>node libs/ranker/scripts/model/run.mjs</code>.</p>
+    <p class="desk-note">Nothing yet: run <code>node libs/ranker/scripts/model/run.mjs</code>.</p>
   } @else {
     <!-- (the bankroll after each graded bet) -->
     @if (overall.bets) {
-      <div class="chart-card desk-curve">
+      <div class="desk-curve">
         <span class="log-chart-label">Bankroll<small>after each graded bet · {{ curveRange.min.toFixed(1) }}u to {{ curveRange.max.toFixed(1) }}u</small></span>
-        <svg viewBox="0 0 600 120" preserveAspectRatio="none">
+        <svg viewBox="0 0 600 120" preserveAspectRatio="none" role="img" [attr.aria-label]="'Bankroll from ' + bankroll + ' to ' + balance.toFixed(1) + ' units'">
           <line class="desk-start" x1="0" x2="600" [attr.y1]="110 - ((bankroll - curveRange.min) / (curveRange.max - curveRange.min || 1)) * 100" [attr.y2]="110 - ((bankroll - curveRange.min) / (curveRange.max - curveRange.min || 1)) * 100" />
           <path [attr.d]="curve" />
         </svg>
@@ -50,16 +82,19 @@
         <div class="group-body">
           <table class="desk-table">
             <thead>
-              <tr><th></th><th>Record</th><th>Profit</th><th>ROI</th><th>Open</th><th>Model test</th></tr>
+              <tr>
+                <ng-container *ngTemplateOutlet="th; context: { $implicit: 'sport', key: 'label', label: '', help: 'Sort by sport' }"></ng-container>
+                <ng-container *ngTemplateOutlet="th; context: { $implicit: 'sport', key: 'record', label: 'Record' }"></ng-container>
+                <ng-container *ngTemplateOutlet="th; context: { $implicit: 'sport', key: 'profit', label: 'Profit' }"></ng-container>
+                <ng-container *ngTemplateOutlet="th; context: { $implicit: 'sport', key: 'roi', label: 'ROI' }"></ng-container>
+                <ng-container *ngTemplateOutlet="th; context: { $implicit: 'sport', key: 'open', label: 'Open' }"></ng-container>
+                <ng-container *ngTemplateOutlet="th; context: { $implicit: 'sport', key: 'test', label: 'Model test' }"></ng-container>
+              </tr>
             </thead>
             <tbody>
-              @for (t of bySport; track t.label) {
+              @for (t of sorted('sport', bySport, sportValue); track t.label) {
                 <tr>
-                  <th>{{ t.label }}</th>
-                  <td>{{ t.won }}-{{ t.lost }}-{{ t.push }}</td>
-                  <td [class.up]="t.profit > 0" [class.down]="t.profit < 0">{{ units(t.profit) }}</td>
-                  <td>{{ pct(t.roi) }}</td>
-                  <td>{{ t.open }}</td>
+                  <ng-container *ngTemplateOutlet="tallyRow; context: { $implicit: t }"></ng-container>
                   <td class="desk-test">
                     @if (t.state?.test; as test) {
                       winners {{ pct(test.winHit) }} · margin ±{{ test.maeMargin }} · total ±{{ test.maeTotal }}
@@ -75,18 +110,10 @@
       <card-panel class="tab-card group-box" [expandable]="false" label="By Market" icon="category">
         <div class="group-body">
           <table class="desk-table">
-            <thead>
-              <tr><th></th><th>Record</th><th>Profit</th><th>ROI</th><th>Open</th></tr>
-            </thead>
+            <thead><ng-container *ngTemplateOutlet="tallyHead; context: { $implicit: 'market' }"></ng-container></thead>
             <tbody>
-              @for (t of byMarket; track t.label) {
-                <tr>
-                  <th>{{ t.label }}</th>
-                  <td>{{ t.won }}-{{ t.lost }}-{{ t.push }}</td>
-                  <td [class.up]="t.profit > 0" [class.down]="t.profit < 0">{{ units(t.profit) }}</td>
-                  <td>{{ pct(t.roi) }}</td>
-                  <td>{{ t.open }}</td>
-                </tr>
+              @for (t of sorted('market', byMarket, tallyValue); track t.label) {
+                <tr><ng-container *ngTemplateOutlet="tallyRow; context: { $implicit: t }"></ng-container></tr>
               }
             </tbody>
           </table>
@@ -97,18 +124,10 @@
         <div class="group-body">
           <!-- (whether the bigger stakes, the bigger edges, do better: the staking working) -->
           <table class="desk-table">
-            <thead>
-              <tr><th></th><th>Record</th><th>Profit</th><th>ROI</th><th>Open</th></tr>
-            </thead>
+            <thead><ng-container *ngTemplateOutlet="tallyHead; context: { $implicit: 'stake' }"></ng-container></thead>
             <tbody>
-              @for (t of byStake; track t.label) {
-                <tr>
-                  <th>{{ t.label }}</th>
-                  <td>{{ t.won }}-{{ t.lost }}-{{ t.push }}</td>
-                  <td [class.up]="t.profit > 0" [class.down]="t.profit < 0">{{ units(t.profit) }}</td>
-                  <td>{{ pct(t.roi) }}</td>
-                  <td>{{ t.open }}</td>
-                </tr>
+              @for (t of sorted('stake', byStake, tallyValue); track t.label) {
+                <tr><ng-container *ngTemplateOutlet="tallyRow; context: { $implicit: t }"></ng-container></tr>
               }
             </tbody>
           </table>
@@ -121,10 +140,15 @@
           @if (calibration.length) {
             <table class="desk-table">
               <thead>
-                <tr><th>Its chance</th><th>Bets</th><th>Said</th><th>Won</th></tr>
+                <tr>
+                  <ng-container *ngTemplateOutlet="th; context: { $implicit: 'calib', key: 'label', label: 'Its chance', help: help['calibLabel'] }"></ng-container>
+                  <ng-container *ngTemplateOutlet="th; context: { $implicit: 'calib', key: 'n', label: 'Bets' }"></ng-container>
+                  <ng-container *ngTemplateOutlet="th; context: { $implicit: 'calib', key: 'said', label: 'Said' }"></ng-container>
+                  <ng-container *ngTemplateOutlet="th; context: { $implicit: 'calib', key: 'was', label: 'Won' }"></ng-container>
+                </tr>
               </thead>
               <tbody>
-                @for (c of calibration; track c.label) {
+                @for (c of sorted('calib', calibration, calibrationValue); track c.label) {
                   <tr>
                     <th>{{ c.label }}</th>
                     <td>{{ c.n }}</td>
@@ -141,43 +165,30 @@
       </card-panel>
     </div>
 
-    <card-panel class="tab-card group-box" label="Settings" icon="settings_suggest">
-      <div class="group-body">
-        <!-- (each sport's fitted settings and how much each market trusts the model: * not fitted yet) -->
-        <table class="desk-table">
-          <thead>
-            <tr><th></th><th>k</th><th>Home</th><th>Carryover</th><th>kO</th><th>σ margin</th><th>σ total</th><th>Trust (book 0 → model 1)</th><th>History</th></tr>
-          </thead>
-          <tbody>
-            @for (s of states; track s.sport) {
-              <tr>
-                <th>{{ s.label }}</th>
-                <td>{{ s.params['k'] }}</td>
-                <td>{{ s.params['hfa'] }}</td>
-                <td>{{ s.params['revert'] }}</td>
-                <td>{{ s.params['kO'] }}</td>
-                <td>{{ s.params['sigma'] }}</td>
-                <td>{{ s.params['sigmaT'] }}</td>
-                <td class="desk-test">{{ trustText(s) }}</td>
-                <td>{{ s.history.finals }} games</td>
-              </tr>
-            }
-          </tbody>
-        </table>
-      </div>
-    </card-panel>
-
     <card-panel class="tab-card group-results" label="Open Bets" icon="schedule" [startOpen]="true">
       <div class="group-body">
         @if (open.length) {
           <table class="desk-table desk-bets">
             <thead>
-              <tr><th>Game</th><th>Market</th><th>Pick</th><th>Odds</th><th>Units</th><th>Its chance</th><th>Book's</th><th>EV</th></tr>
+              <tr>
+                <ng-container *ngTemplateOutlet="th; context: { $implicit: 'open', key: 'sport', label: 'Sport' }"></ng-container>
+                <ng-container *ngTemplateOutlet="th; context: { $implicit: 'open', key: 'game', label: 'Game' }"></ng-container>
+                <ng-container *ngTemplateOutlet="th; context: { $implicit: 'open', key: 'start', label: 'Starts' }"></ng-container>
+                <ng-container *ngTemplateOutlet="th; context: { $implicit: 'open', key: 'market', label: 'Market' }"></ng-container>
+                <ng-container *ngTemplateOutlet="th; context: { $implicit: 'open', key: 'pick', label: 'Pick' }"></ng-container>
+                <ng-container *ngTemplateOutlet="th; context: { $implicit: 'open', key: 'odds', label: 'Odds' }"></ng-container>
+                <ng-container *ngTemplateOutlet="th; context: { $implicit: 'open', key: 'units', label: 'Units' }"></ng-container>
+                <ng-container *ngTemplateOutlet="th; context: { $implicit: 'open', key: 'p', label: 'Its chance' }"></ng-container>
+                <ng-container *ngTemplateOutlet="th; context: { $implicit: 'open', key: 'fair', label: 'Book\'s' }"></ng-container>
+                <ng-container *ngTemplateOutlet="th; context: { $implicit: 'open', key: 'ev', label: 'EV' }"></ng-container>
+              </tr>
             </thead>
             <tbody>
-              @for (b of open; track b.id) {
+              @for (b of sorted('open', open, betValue); track b.id) {
                 <tr>
-                  <th>{{ b.sport.toUpperCase() }} · {{ b.matchup }}<small>{{ b.start | date: 'EEE h:mm a' }}</small></th>
+                  <th>{{ b.sport.toUpperCase() }}</th>
+                  <td class="desk-left">{{ b.matchup }}</td>
+                  <td>{{ b.start | date: 'EEE h:mm a' }}</td>
                   <td>{{ marketName(b.market) }}</td>
                   <td><b>{{ b.pick }}</b></td>
                   <td>{{ odds(b.odds) }}</td>
@@ -200,12 +211,24 @@
         @if (recent.length) {
           <table class="desk-table desk-bets">
             <thead>
-              <tr><th>Game</th><th>Pick</th><th>Odds</th><th>Units</th><th>Its chance</th><th>Final</th><th>Result</th></tr>
+              <tr>
+                <ng-container *ngTemplateOutlet="th; context: { $implicit: 'recent', key: 'sport', label: 'Sport' }"></ng-container>
+                <ng-container *ngTemplateOutlet="th; context: { $implicit: 'recent', key: 'game', label: 'Game' }"></ng-container>
+                <ng-container *ngTemplateOutlet="th; context: { $implicit: 'recent', key: 'start', label: 'Played' }"></ng-container>
+                <ng-container *ngTemplateOutlet="th; context: { $implicit: 'recent', key: 'pick', label: 'Pick' }"></ng-container>
+                <ng-container *ngTemplateOutlet="th; context: { $implicit: 'recent', key: 'odds', label: 'Odds' }"></ng-container>
+                <ng-container *ngTemplateOutlet="th; context: { $implicit: 'recent', key: 'units', label: 'Units' }"></ng-container>
+                <ng-container *ngTemplateOutlet="th; context: { $implicit: 'recent', key: 'p', label: 'Its chance' }"></ng-container>
+                <ng-container *ngTemplateOutlet="th; context: { $implicit: 'recent', key: 'final', label: 'Final' }"></ng-container>
+                <ng-container *ngTemplateOutlet="th; context: { $implicit: 'recent', key: 'result', label: 'Result' }"></ng-container>
+              </tr>
             </thead>
             <tbody>
-              @for (b of recent; track b.id) {
+              @for (b of sorted('recent', recent, betValue); track b.id) {
                 <tr>
-                  <th>{{ b.sport.toUpperCase() }} · {{ b.matchup }}<small>{{ b.start | date: 'MMM d' }}</small></th>
+                  <th>{{ b.sport.toUpperCase() }}</th>
+                  <td class="desk-left">{{ b.matchup }}</td>
+                  <td>{{ b.start | date: 'MMM d' }}</td>
                   <td><b>{{ b.pick }}</b><small>{{ marketName(b.market) }}</small></td>
                   <td>{{ odds(b.odds) }}</td>
                   <td>{{ b.units }}</td>
@@ -237,6 +260,43 @@
         } @else {
           <p class="desk-note">No changes yet: each run refits the ratings and each market's trust, and logs what moves here.</p>
         }
+      </div>
+    </card-panel>
+
+    <card-panel class="tab-card group-box" label="Settings" icon="settings_suggest">
+      <div class="group-body">
+        <!-- (each sport's fitted settings and how much each market trusts the model; hover a header for what
+             it means) -->
+        <table class="desk-table">
+          <thead>
+            <tr>
+              <ng-container *ngTemplateOutlet="th; context: { $implicit: 'settings', key: 'label', label: '', help: 'Sort by sport' }"></ng-container>
+              <ng-container *ngTemplateOutlet="th; context: { $implicit: 'settings', key: 'k', label: 'Learning rate' }"></ng-container>
+              <ng-container *ngTemplateOutlet="th; context: { $implicit: 'settings', key: 'hfa', label: 'Home edge' }"></ng-container>
+              <ng-container *ngTemplateOutlet="th; context: { $implicit: 'settings', key: 'revert', label: 'Carryover' }"></ng-container>
+              <ng-container *ngTemplateOutlet="th; context: { $implicit: 'settings', key: 'kO', label: 'Scoring rate' }"></ng-container>
+              <ng-container *ngTemplateOutlet="th; context: { $implicit: 'settings', key: 'sigma', label: 'Margin spread' }"></ng-container>
+              <ng-container *ngTemplateOutlet="th; context: { $implicit: 'settings', key: 'sigmaT', label: 'Total spread' }"></ng-container>
+              <ng-container *ngTemplateOutlet="th; context: { $implicit: 'settings', key: 'trust', label: 'Trust in the model' }"></ng-container>
+              <ng-container *ngTemplateOutlet="th; context: { $implicit: 'settings', key: 'history', label: 'Games' }"></ng-container>
+            </tr>
+          </thead>
+          <tbody>
+            @for (s of sorted('settings', states, stateValue); track s.sport) {
+              <tr>
+                <th>{{ s.label }}</th>
+                <td>{{ s.params['k'] }}</td>
+                <td>{{ s.params['hfa'] }}</td>
+                <td>{{ s.params['revert'] }}</td>
+                <td>{{ s.params['kO'] }}</td>
+                <td>{{ s.params['sigma'] }}</td>
+                <td>{{ s.params['sigmaT'] }}</td>
+                <td class="desk-test">{{ trustText(s) }}</td>
+                <td>{{ s.history.finals }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
       </div>
     </card-panel>
   }

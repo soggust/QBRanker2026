@@ -32,15 +32,6 @@
   mat-icon {
     color: var(--scoreboard-led);
   }
-
-  small {
-    color: rgba(255, 255, 255, 0.5);
-    font-family: v.$font-base;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-  }
 }
 
 .desk-tiles {
@@ -124,9 +115,20 @@
   }
 }
 
+// (the panels spaced as on the card: 12px apart, the body well in from the edges)
+card-panel {
+  display: block;
+  margin-top: 12px;
+}
+
+.group-body {
+  margin: 0;
+  padding: 12px 22px;
+}
+
 .desk-grid {
   display: grid;
-  gap: 0 14px;
+  gap: 0 12px;
   grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
 }
 
@@ -149,6 +151,7 @@
 
   thead th {
     color: rgba(255, 255, 255, 0.55);
+    cursor: help;
     font-size: 10.5px;
     font-weight: 800;
     letter-spacing: 0.04em;
@@ -179,6 +182,38 @@
 
 .desk-bets td {
   text-align: right;
+}
+
+// (the matchup reads from the left, its header with it)
+.desk-left,
+.desk-bets thead th:nth-child(2) {
+  text-align: left !important;
+}
+
+// (a column's header: a button sorting its table, the sorted one lit)
+.desk-sort {
+  align-items: center;
+  background: none;
+  border: 0;
+  color: inherit;
+  cursor: pointer;
+  display: inline-flex;
+  font: inherit;
+  gap: 2px;
+  letter-spacing: inherit;
+  padding: 0;
+  text-transform: inherit;
+
+  &:hover,
+  &.sorted {
+    color: #fff;
+  }
+
+  mat-icon {
+    font-size: 13px;
+    height: 13px;
+    width: 13px;
+  }
 }
 
 .desk-changes {

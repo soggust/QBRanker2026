@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 
-// The model desk's admin panel (the Bets page, dev only): the code-only desk's play-money betting
+// The algorithm's admin panel (the Bets page, dev only): the code-only desk's play-money betting
 // (libs/ranker/scripts/model/run.mjs: every market of every game, 0.5 to 3 units), read from each sport's
 // data/model/ledger.json and state.json. Its bankroll and record, broken down by sport, market and stake,
 // how well its chances match what happened, its bankroll over time, the bets still open, the latest graded,
@@ -175,4 +175,95 @@ export class ModelDeskComponent implements OnInit {
       .map(([m, t]) => `${MARKET_NAMES[m] ?? m} ${t.trust}${t.fitted ? '' : '*'}`)
       .join(' · ');
   }
+
+  // ---------------------------------------------------------------------------
+  // Sorting: a click on a column's header sorts its table by it (again: the other way); each table keeps
+  // its own
+  // ---------------------------------------------------------------------------
+  private sorts: Record<string, { key: string; dir: 1 | -1 }> = {
+    open: { key: 'start', dir: 1 },
+    recent: { key: 'graded', dir: -1 },
+  };
+
+  sortBy(table: string, key: string): void {
+    const now = this.sorts[table];
+    // (a number column starts with its biggest; text from A)
+    this.sorts[table] = now?.key === key ? { key, dir: now.dir === 1 ? -1 : 1 } : { key, dir: TEXT_KEYS.has(key) ? 1 : -1 };
+  }
+
+  ariaSort(table: string, key: string): 'ascending' | 'descending' | null {
+    const s = this.sorts[table];
+    return s?.key === key ? (s.dir === 1 ? 'ascending' : 'descending') : null;
+  }
+
+  sorted<T>(table: string, rows: T[], value: (row: T, key: string) => unknown): T[] {
+    const s = this.sorts[table];
+    if (!s) return rows;
+    return [...rows].sort((a, b) => {
+      const x = value(a, s.key);
+      const y = value(b, s.key);
+      if (x === y) return 0;
+      if (x === null || x === undefined) return 1;
+      if (y === null || y === undefined) return -1;
+      return (x < y ? -1 : 1) * s.dir;
+    });
+  }
+
+  // (a tally's value by column)
+  readonly tallyValue = (t: Tally, key: string): unknown =>
+    key === 'label' ? t.label : key === 'record' ? (t.won + t.lost ? t.won / (t.won + t.lost) : null) : key === 'profit' ? t.profit : key === 'roi' ? t.roi : key === 'open' ? t.open : null;
+
+  readonly sportValue = (t: Tally & { state: ModelState | null }, key: string): unknown => (key === 'test' ? (t.state?.test?.winHit ?? null) : this.tallyValue(t, key));
+
+  // (a bet's value by column)
+  readonly betValue = (b: ModelBet, key: string): unknown =>
+    key === 'sport' ? b.sport
+    : key === 'game' ? b.matchup
+    : key === 'start' ? b.start
+    : key === 'graded' ? (b.gradedAt ?? b.start)
+    : key === 'market' ? b.market
+    : key === 'pick' ? b.pick
+    : key === 'result' ? b.profit
+    : (b as unknown as Record<string, unknown>)[key];
+
+  readonly calibrationValue = (c: { label: string; n: number; said: number; was: number }, key: string): unknown => (key === 'label' ? c.said : (c as unknown as Record<string, unknown>)[key]);
+
+  readonly stateValue = (s: ModelState, key: string): unknown =>
+    key === 'label' ? s.label : key === 'history' ? s.history.finals : key === 'trust' ? (s.trust['spread']?.trust ?? null) : s.params[key];
+
+  // Each column's hover: what it is
+  readonly help: Record<string, string> = {
+    record: 'Won-lost-pushed (sorts by the share won)',
+    profit: 'Units won or lost, stakes included',
+    roi: 'Return on the units staked: profit ÷ staked',
+    open: 'Bets placed on games not played yet',
+    test: "How the ratings did on games they hadn't seen yet: winners picked right, and how far off the margins and totals were on average",
+    sport: 'The league',
+    game: 'Away @ home',
+    start: 'When the game starts',
+    market: 'Spread, total (over/under) or moneyline',
+    pick: 'The side it took',
+    odds: "The sportsbook's price when it bet (American odds)",
+    units: 'Stake: 0.5 units at no edge, up to 3 at an 8% expected return',
+    p: "The chance it gave this side: the model's own, pulled toward the book's by how much that market trusts the model",
+    fair: "The sportsbook's chance for this side, its cut (the vig) taken out",
+    ev: "Expected return per unit at its chance and the book's odds",
+    final: 'The final score',
+    result: 'Won, lost or pushed, and what it paid',
+    calibLabel: 'The chance it gave its picks, in 5-point bands',
+    n: 'Bets graded in the band',
+    said: 'The average chance it gave them',
+    was: 'How often they actually won (close to "Said" is honest)',
+    k: "Learning rate: how far one game's surprise moves a team's rating (0.08 moves it 8% of the miss)",
+    hfa: "Home edge: how much playing at home is worth, in the sport's scoring unit (points, goals, runs)",
+    revert: "Season carryover: how much of a team's rating carries into the next season (the rest drifts back to average)",
+    kO: "Scoring rate: how fast a team's points-for and points-against rates move with each game",
+    sigma: 'Margin spread: how far real margins land from what it expects (one standard deviation; bigger means less sure)',
+    sigmaT: 'Total spread: the same for game totals',
+    trust: "How much each market counts the model against the sportsbook: 0 the book's alone, 1 the model's alone (starts at 0.5; refit on the market's graded bets once 40 are; * not yet)",
+    history: 'Finished games the ratings are built on',
+  };
 }
+
+// (the columns that sort as text, A first)
+const TEXT_KEYS = new Set(['label', 'sport', 'game', 'market', 'pick', 'start']);

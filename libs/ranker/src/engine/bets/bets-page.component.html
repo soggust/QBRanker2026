@@ -6,7 +6,7 @@
   @if (dev) {
     <nav class="bets-views" aria-label="View">
       <button type="button" [class.active]="view === 'bets'" (click)="view = 'bets'">Bets</button>
-      <button type="button" [class.active]="view === 'desk'" (click)="view = 'desk'">Model Desk</button>
+      <button type="button" [class.active]="view === 'desk'" (click)="view = 'desk'">Algorithm</button>
     </nav>
   }
   @if (view === 'desk') {
