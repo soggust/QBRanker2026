@@ -18,7 +18,8 @@
 // apps/<sport>/scripts/model/context.json, the facts the context is built from. The Bets page's admin panel
 // (dev only) reads them.
 //
-//   node libs/ranker/scripts/model/run.mjs [nfl nba nhl mlb] [--dry]   (--dry: no bets placed, state and ledger untouched)
+//   node libs/ranker/scripts/model/run.mjs [nfl nba nhl mlb] [--dry] [--replace]   (--dry: no bets placed, state and ledger
+//   untouched; --replace: open bets on games not started yet are taken back and priced again)
 
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
@@ -154,6 +155,15 @@ async function runSport(sport) {
     graded++;
   }
 
+  // (--replace: the open bets on games not started yet taken back, to be priced again with what the model
+  // knows now; logged)
+  let replaced = 0;
+  if (REPLACE && !DRY) {
+    const before = ledger.bets.length;
+    ledger.bets = ledger.bets.filter((b) => !(b.status === 'open' && Date.parse(b.start) > Date.now()));
+    replaced = before - ledger.bets.length;
+  }
+
   // 5. every market of the coming games, bet once
   const placed = new Set(ledger.bets.map((b) => b.id));
   let newBets = 0;
@@ -206,6 +216,8 @@ async function runSport(sport) {
       newBets++;
     }
   }
+
+  if (replaced) state.changelog.push({ at, what: 'Open bets replaced', from: replaced, to: newBets, why: 'Priced again with the context the model has now (starters, weather, parks, the line-move guard)' });
 
   // The state: the settings and how they test, the trust, the changelog, the teams by rating
   const abbr = new Map();
@@ -297,6 +309,7 @@ function contextState(fitted, weights) {
 }
 
 const DRY = process.argv.includes('--dry');
+const REPLACE = process.argv.includes('--replace');
 const args = process.argv.slice(2).filter((a) => !a.startsWith('--'));
 const sports = args.length ? args : Object.keys(LEAGUES);
 for (const sport of sports) {
