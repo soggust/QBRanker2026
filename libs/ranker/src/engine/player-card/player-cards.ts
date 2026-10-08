@@ -167,8 +167,10 @@ export class PlayerCards {
     const key = `${this.position}/${card.player.gsisId}/${card.season}`;
     if (!this.depthCharts.has(key) && SPORT.depthChart) {
       this.depthCharts.set(key, 'loading');
-      SPORT.depthChart
-        .load(card.player, this.position, card.season)
+      // (the sport builds it from that season's rows: every tab's, the table's own for its season)
+      const rows = card.season === this.host.season ? Promise.resolve(SKILL_UNITS) : this.data.rows(card.season);
+      rows
+        .then((rows) => SPORT.depthChart!.load(card.player, this.position, card.season, { rows, headshot: (p) => this.host.headshot(p, 96) }))
         .then(async (view) => {
           await this.linkRoster(view, card.season);
           this.depthCharts.set(key, view);

@@ -1,5 +1,7 @@
 import type { CardFlag, FlagContext, SportConfig } from '@ranker/engine/sport';
 import { espnTeamGameLog, mlbGameLog } from '@ranker/core/game-logs';
+import { loadTeamRoster } from './team-roster';
+import type { SkillPlayer } from './positions';
 
 // MLB: what the engine needs to know about baseball (the rest is beside this file: positions,
 // skill-presets, skills, awards, team-colors, logo-eras, about/)
@@ -122,6 +124,12 @@ export const SPORT: SportConfig = {
   // MLB's headshot cutouts (square)
   headshot: (id, w) => `https://img.mlbstatic.com/mlb-photos/image/upload/w_${w},q_auto:best/v1/people/${id}/headshot/silo/current`,
   cardFlags,
+  // The card's Team tab (teams): the lineup on a diamond, the pitching staff, the manager and coaches,
+  // everyone who played (team-roster.ts)
+  depthChart: {
+    has: (player, position) => position === 'TM' && !!player.teamLogo,
+    load: (player, position, season, context) => loadTeamRoster(player as SkillPlayer, season, season === SPORT.currentSeason, context),
+  },
   // The card's Game Log tab: a player's games this season, from MLB's stats API (a pitcher's pitching, a
   // hitter's hitting; teams have none)
   gameLog: {

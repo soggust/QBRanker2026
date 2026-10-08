@@ -1,5 +1,6 @@
 import type { CardFlag, FlagContext, SportConfig } from '@ranker/engine/sport';
 import { espnTeamGameLog } from '@ranker/core/game-logs';
+import { loadTeamRoster } from './team-roster';
 
 // A season's game logs (the NHL's API doesn't let the site ask): this season's in game-logs.json, kept
 // nightly; an earlier one's in game-logs/<season>.json, written once. Each loaded the first time a card
@@ -184,6 +185,12 @@ export const SPORT: SportConfig = {
   // The NHL's player headshots
   headshot: (id) => `https://assets.nhle.com/mugs/nhl/latest/${id}.png`,
   cardFlags,
+  // The card's Team tab (teams and head coaches): the top unit on a rink, every line, the head coaches,
+  // everyone who played (team-roster.ts)
+  depthChart: {
+    has: (player, position) => ['TM', 'HC'].includes(position) && !!player.teamLogo,
+    load: async (player, position, season, context) => loadTeamRoster(player as SkillPlayer, context),
+  },
   // The card's Game Log tab: a team's (or coach's) games from ESPN, any season; a player's from the game-log
   // files (this season's, and earlier ones once they're written)
   gameLog: {

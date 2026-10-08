@@ -95,7 +95,9 @@ card-panel {
   }
 
   // The body: its edges the sport's (the NFL's sidelines, MLB's chalk, the painted lines; _sport-panel.scss)
+  // (its own block: a first child's top margin stays inside it, so its edges start right under the bar)
   > .panel-body {
+    display: flow-root;
     @include sport-panel.edges;
   }
 
@@ -103,5 +105,14 @@ card-panel {
     color: rgba(255, 255, 255, 0.55);
     @include v.icon-size(20px);
     margin: 0 -4px;
+  }
+}
+
+// (on the player card: a little more room each side of the bar; the filter menu keeps its own)
+.player-card card-panel > .group-bar {
+  > .panel-toggle,
+  > .panel-title {
+    padding-left: 16px;
+    padding-right: 16px;
   }
 }

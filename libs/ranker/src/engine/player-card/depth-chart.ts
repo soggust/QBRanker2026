@@ -1,7 +1,15 @@
-// The card's Depth Chart tab (a team's: SPORT.depthChart), as the sport lays it out: each side's
-// formation on a field (every slot placed by the sport, its starter and the ones behind him), the special
-// teams, who's played this season, and the starters who've changed. The engine draws it; the sport
-// (apps/<sport>/src/sport/depth-chart.ts) builds it from its data.
+// The card's Team tab (a team's: SPORT.depthChart), as the sport lays it out: each side's lineup on its
+// surface (a football field, a basketball court, a rink, a diamond: every slot placed by the sport, its
+// starter and the ones behind him), the special teams (or a bench), the coaching staff, who's played this
+// season, and the starters who've changed. The engine draws it; the sport (apps/<sport>/src/sport/
+// depth-chart.ts, team-roster.ts) builds it from its data.
+import type { SkillPlayer } from '@sport/positions';
+
+// What a sport's loader gets besides the row: that season's rows (every tab's), and a player's headshot
+export interface DepthLoadContext {
+  rows: Record<string, SkillPlayer[]>;
+  headshot: (player: SkillPlayer) => string | null;
+}
 
 // A player on the chart or in the usage list
 export interface DepthPlayer {
@@ -14,7 +22,8 @@ export interface DepthPlayer {
   // (the chip's short name: "L. Jackson")
   short: string;
   headshot: string | null;
-  // his share of his side's snaps this season, 0-1 (null: none yet)
+  // his share of his side's snaps this season, 0-1 (null: none yet; another sport's usage: minutes, ice
+  // time, plate appearances, starts)
   snaps: number | null;
   games: number;
   // the injury report: "Q", "D", "O", "IR" (and its words), or null
@@ -39,15 +48,20 @@ export interface DepthSlot {
 }
 
 export interface DepthSide {
-  id: 'offense' | 'defense';
+  id: string;
   title: string;
+  // the panel bar's icon (a football field's: by its id)
+  icon?: string;
   // its set ("3WR 1TE", "Base 3-4")
   set: string | null;
-  // the line of scrimmage, y in percent
-  los: number;
+  // the line of scrimmage, y in percent (none: no line, a court or a rink's own markings)
+  los: number | null;
   slots: DepthSlot[];
-  // just a line (an O-Line card's five): a short strip of field
-  line?: boolean;
+  // what it's drawn on: a football field (the default), a basketball half court, a rink, a diamond, or
+  // a plain chalkboard
+  surface?: 'field' | 'court' | 'rink' | 'diamond' | 'plain';
+  // a set height in pixels (a strip: an O-Line card's five, a pitching staff), not the surface's shape
+  height?: number;
 }
 
 // A coach on the staff: his role, and his card when the site has him (a head coach)
@@ -83,6 +97,9 @@ export interface DepthView {
   asOf: string;
   sides: DepthSide[];
   special: { label: string; player: DepthPlayer | null }[];
+  // the panels' titles when not the football ones ("Special Teams", "Full Roster")
+  specialTitle?: string;
+  usageTitle?: string;
   usage: DepthUsageGroup[];
   // the season's positional changes, week by week (the weeks with any)
   timeline: { week: number; changes: DepthChange[] }[];

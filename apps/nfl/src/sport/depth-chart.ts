@@ -49,7 +49,7 @@ interface CoachesFile {
 const OFFENSE_LOS = 22;
 const SPOT: Record<string, [number, number]> = {
   X: [6, 26], SLOT: [18, 36], Z: [94, 26], LT: [30, 22], LG: [40, 22], C: [50, 22], RG: [60, 22], RT: [70, 22],
-  TE: [81, 26], TE2: [20, 24], QB: [50, 50], FB: [50, 64], RB: [50, 78],
+  TE: [81, 26], TE2: [20, 24], QB: [50, 45], FB: [50, 65], RB: [50, 85],
 };
 const DEFENSE_LOS = 87;
 const DEFENSE_34: Record<string, [number, number]> = {
@@ -145,14 +145,15 @@ export async function loadDepthChart(logo: string, position: string, season: num
       label,
       name,
       x: SPOT[key][0],
-      y: SPOT[key][1],
+      // (a lone back closer behind the quarterback; with a fullback, the I: deeper)
+      y: key === 'RB' && p.rb < 2 ? 68 : SPOT[key][1],
       focus: position === 'OL' ? OLINE.has(key) : undefined,
       depth: depth.map((id) => player(id, 'offense')),
     }));
     // (an O-Line card: its five alone)
     if (position === 'OL') {
       const line = slots.filter((s) => OLINE.has(s.key)).map((s) => ({ ...s, y: 50 }));
-      return { id: 'offense', title: 'Offensive Line', set: null, los: 50, slots: line, line: true };
+      return { id: 'offense', title: 'Offensive Line', set: null, los: 50, slots: line, height: 150 };
     }
     return {
       id: 'offense',
@@ -242,5 +243,7 @@ export async function loadDepthChart(logo: string, position: string, season: num
     for (const [title, rows] of groups) if (rows.length) coaches.push({ title, rows: rows.map((c) => ({ ...c })) });
   }
 
-  return { asOf: file.at, sides, special, usage, timeline: timeline.filter((w) => w.changes.length), coaches, teamGames: file.teamGames };
+  // (an O-Line or Defense card's list is its unit's players, not the whole roster)
+  const usageTitle = unit ? 'Players' : undefined;
+  return { asOf: file.at, sides, special, usage, usageTitle, timeline: timeline.filter((w) => w.changes.length), coaches, teamGames: file.teamGames };
 }

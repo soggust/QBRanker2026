@@ -3,6 +3,7 @@ import { espnGameLog, espnTeamGameLog } from '@ranker/core/game-logs';
 import { teamRowsFromCoaches } from '@ranker/engine/team-rows';
 import type { SkillPlayer } from './positions';
 import { seasonName } from './awards';
+import { loadTeamRoster } from './team-roster';
 
 // The Teams tab's rows, from the head coach rows: the coaches' records added up, the team's ratings,
 // ranks and pace (every coach row carries them), its playoff wins and title badges (the coach who
@@ -171,6 +172,12 @@ export const SPORT: SportConfig = {
       ['TM', 'HC'].includes(position)
         ? espnTeamGameLog('basketball/nba', [player.teamName ?? undefined, player.name, player.teamLogo?.match(/([^/]+)\.\w+$/)?.[1]], season, 4)
         : espnGameLog('basketball/nba', player.id!, season, { chart: { label: 'Points', stack: ['PTS'] } }),
+  },
+  // The card's Team tab (teams and head coaches): the starting five on a half court, the second unit, the
+  // staff, everyone who played (team-roster.ts)
+  depthChart: {
+    has: (player, position) => ['TM', 'HC'].includes(position) && !!player.teamLogo,
+    load: (player, position, season, context) => loadTeamRoster(player as SkillPlayer, season, season === SPORT.currentSeason, context),
   },
   // (the Teams tab's Recent: the last 7 games)
   recentGames: (position) => (position === 'TM' ? 7 : 5),

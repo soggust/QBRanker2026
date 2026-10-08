@@ -39,6 +39,10 @@ jobs:
       - name: Pull stats from Basketball-Reference and ESPN
         run: npm run nba:update-data
 
+      # (Wikipedia's coaching staffs: a failed fetch keeps yesterday's file)
+      - name: Build coaching staffs
+        run: node apps/nba/scripts/build-coaches.mjs || echo "coaches skipped"
+
       - name: Commit updated data
         id: commit
         run: |

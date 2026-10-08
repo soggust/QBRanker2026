@@ -71,7 +71,7 @@
   position: fixed;
   top: 50%;
   transform: translate(-50%, -50%);
-  width: min(880px, calc(100vw - 32px));
+  width: min(999px, calc(100vw - 32px));
   z-index: 1001;
 
   // Another season loading: the card dims until it swaps
@@ -826,7 +826,7 @@
   .card-stats,
   .group-body {
     margin: 0;
-    padding: 12px 16px;
+    padding: 12px 22px;
   }
 }
 
@@ -1892,7 +1892,7 @@
   margin-top: 12px;
 
   .group-body {
-    padding: 20px 20px 22px;
+    padding: 20px 24px 22px;
   }
 
   // (the season, next game and rest of season take the site's category colors: their group-* class)
@@ -2309,7 +2309,7 @@
     repeating-linear-gradient(180deg, transparent 0 calc(10% - 1px), rgba(255, 255, 255, 0.04) calc(10% - 1px) 10%),
     v.$chalk-dust;
   border-radius: 6px;
-  margin: 12px 16px;
+  margin: 12px 22px;
   min-height: 340px;
   position: relative;
 
@@ -2319,11 +2319,57 @@
     min-height: 300px;
   }
 
-  // (a line alone: a strip)
-  &.line {
+  // (a strip at its set height: an O-Line card's five, a pitching staff)
+  &.fixed {
     aspect-ratio: auto;
-    height: 150px;
     min-height: 0;
+  }
+
+  // Another sport's surface: the chalkboard without yard lines, its own markings drawn over it in chalk
+  &:not(.surface-field) {
+    background: v.$chalk-dust;
+  }
+
+  &.surface-rink {
+    aspect-ratio: 200 / 85;
+    min-height: 0;
+  }
+}
+
+// a court's, a rink's, a diamond's lines: chalk, a rink's red and blue lines tinted
+.depth-marks {
+  fill: none;
+  height: 100%;
+  inset: 0;
+  pointer-events: none;
+  position: absolute;
+  stroke: rgba(255, 255, 255, 0.28);
+  stroke-width: 1.2px;
+  vector-effect: non-scaling-stroke;
+  width: 100%;
+
+  * {
+    vector-effect: non-scaling-stroke;
+  }
+
+  .red {
+    stroke: rgba(255, 110, 110, 0.4);
+    stroke-width: 2px;
+  }
+
+  .blue {
+    stroke: rgba(110, 170, 255, 0.45);
+    stroke-width: 3px;
+  }
+
+  .crease {
+    fill: rgba(110, 170, 255, 0.15);
+  }
+
+  // (the infield's dirt)
+  .dirt {
+    fill: rgba(196, 140, 90, 0.1);
+    stroke: rgba(196, 140, 90, 0.3);
   }
 }
 
@@ -2760,7 +2806,7 @@
     min-height: 0;
 
     // (the offense's formation is shallower: square)
-    &:not(.defense):not(.line) {
+    &:not(.defense):not(.fixed):not(.surface-rink) {
       aspect-ratio: 1;
       min-height: 0;
     }

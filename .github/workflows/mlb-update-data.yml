@@ -39,6 +39,10 @@ jobs:
       - name: Pull stats from the MLB Stats API and Baseball Savant
         run: npm run mlb:update-data
 
+      # (Wikipedia's coaching staffs: a failed fetch keeps yesterday's file)
+      - name: Build coaching staffs
+        run: node apps/mlb/scripts/build-coaches.mjs || echo "coaches skipped"
+
       - name: Commit updated data
         id: commit
         run: |

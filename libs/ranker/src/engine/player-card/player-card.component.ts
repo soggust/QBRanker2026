@@ -51,10 +51,18 @@ export class PlayerCardComponent {
     return SPORT.cardHistory?.rows(card.player) ?? [];
   }
 
+  // A spot's popover (everyone at a depth chart spot) shuts on a click anywhere outside its spot
+  @HostListener('document:click', ['$event'])
+  outside(event: MouseEvent): void {
+    if (this.cards.depthOpen && !(event.target as Element | null)?.closest?.('.depth-slot')) this.cards.depthOpen = null;
+  }
+
   @HostListener('document:keydown', ['$event'])
   keys(event: KeyboardEvent): void {
     if (!this.cards.card) return;
-    if (event.key === 'Escape') this.cards.close();
+    // (Escape shuts an open popover first, then the card)
+    if (event.key === 'Escape' && this.cards.depthOpen) this.cards.depthOpen = null;
+    else if (event.key === 'Escape') this.cards.close();
     else if (event.key === 'ArrowRight' || event.key === 'ArrowDown') this.cards.step(1);
     else if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') this.cards.step(-1);
     else return;
