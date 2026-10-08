@@ -7,6 +7,15 @@
 // Usage: npm run nhl:update-data                 this season, to src/StaticData/
 //        SEASON=2019 npm run nhl:update-data     a finished season, to src/StaticData/seasons/2019/
 //        ALL=1 npm run nhl:update-data           every finished season from 2008-09 to last year
+//        PART=post,all ...                       only those parts of the season (default: all three)
+//
+// Each season in three parts, the settings menu's Stats From (libs/ranker/src/engine/data.ts): the
+// regular season (skill-players.json), the playoffs (skill-players.post.json) and both together
+// (skill-players.all.json), the same tabs, rows and stats. The playoffs come from the same sources (the
+// stats API's gameTypeId=3, MoneyPuck's playoffs files, the schedule's playoff games); both is the two
+// added up, its rates worked out again from the summed counts (addUp). A season with no playoff games yet
+// has neither file (the current one's are removed: the app falls back to the regular season), and a
+// player or team with no playoff games isn't in the playoff file.
 //
 // A season is named for the year it ends in, like the NBA app: 2026 is 2025-26 (the NHL calls it
 // 20252026, MoneyPuck 2025).
@@ -15,7 +24,8 @@
 // G: [...] }, each player { id, gsisId, name, teamLogo, teamName, games, stats, awards, rookie }. id
 // (headshots) and gsisId are the NHL player id. Team logos are the NHL's own for that season (an era's
 // logo in its file name), saved to src/assets/NHL_Icons/ the first time they're seen.
-import { writeFile, mkdir, access } from 'node:fs/promises';
+import { writeFile, mkdir, access, readFile, rm } from 'node:fs/promises';
+import { createHash } from 'node:crypto';
 import path from 'node:path';
 import { curve } from '../../../libs/ranker/scripts/grades.mjs';
 import { blendWithLastSeason } from '../../../libs/ranker/scripts/early-season.mjs';
@@ -32,6 +42,16 @@ const STATS = 'https://api.nhle.com/stats/rest/en';
 const WEB = 'https://api-web.nhle.com/v1';
 const RECORDS = 'https://records.nhl.com/site/api';
 const MONEYPUCK = 'https://moneypuck.com/moneypuck/playerData/seasonSummary';
+// (a finished season's answers, kept on disk so a rebuild doesn't ask again: gitignored, .cache/)
+const CACHE_DIR = path.join(import.meta.dirname, '.cache');
+
+// The parts of a season (Stats From): the game types each counts (2 the regular season, 3 the
+// playoffs) and its file
+const PARTS = {
+  regular: { types: [2], file: 'skill-players.json' },
+  post: { types: [3], file: 'skill-players.post.json' },
+  all: { types: [2, 3], file: 'skill-players.all.json' },
+};
 
 // The NHL's position codes -> the app's tabs
 const TABS = { C: 'C', L: 'LW', R: 'RW', D: 'D', G: 'G' };
@@ -42,13 +62,37 @@ const PLAYER_AWARDS = { 8: 'hart', 18: 'vezina', 11: 'norris', 4: 'calder', 17: 
 const CUP = 1;
 const CONFERENCE_TITLES = [5, 19];
 
-// A polite pace for every source (a few requests a second at most)
-let lastRequest = 0;
-async function get(url, as = 'json') {
+// A polite pace for every source (a few requests a second at most, one slot each even when asked
+// together). Each answer is asked once a run (the parts share them); a finished season's (cacheable,
+// set per season) are kept in CACHE_DIR too
+let nextSlot = 0;
+let cacheable = false;
+const asked = new Map();
+function get(url, as = 'json') {
+  if (!asked.has(url)) asked.set(url, cached(url, as, cacheable));
+  return asked.get(url);
+}
+async function cached(url, as, keep) {
+  const file = path.join(CACHE_DIR, createHash('sha1').update(url).digest('hex') + '.json');
+  if (keep) {
+    try {
+      return JSON.parse(await readFile(file, 'utf8')).body;
+    } catch {
+      // (not asked before)
+    }
+  }
+  const body = await fetchPolitely(url, as);
+  if (keep) {
+    await mkdir(CACHE_DIR, { recursive: true });
+    await writeFile(file, JSON.stringify({ url, body }));
+  }
+  return body;
+}
+async function fetchPolitely(url, as) {
   for (let attempt = 1; ; attempt++) {
-    const wait = lastRequest + 350 - Date.now();
-    if (wait > 0) await new Promise((r) => setTimeout(r, wait));
-    lastRequest = Date.now();
+    const slot = Math.max(nextSlot, Date.now());
+    nextSlot = slot + 350;
+    if (slot > Date.now()) await new Promise((r) => setTimeout(r, slot - Date.now()));
     try {
       const res = await fetch(url, { headers: { 'User-Agent': 'sports-ranker data script' } });
       if (res.status === 404) return null;
@@ -121,20 +165,85 @@ const share = (row, ice) => {
   return f !== null && a !== null && f + a > 0 ? f / (f + a) : null;
 };
 
-// Every row of one of the stats API's reports for a season (regular season), in one request (its
-// pages aren't in a stable order, so paging skips and repeats rows)
-async function report(kind, season) {
-  const exp = encodeURIComponent(`seasonId=${seasonId(season)} and gameTypeId=2`);
+// Every row of one of the stats API's reports for a season (type 2 the regular season, 3 the playoffs),
+// in one request (its pages aren't in a stable order, so paging skips and repeats rows)
+async function report(kind, season, type = 2) {
+  const exp = encodeURIComponent(`seasonId=${seasonId(season)} and gameTypeId=${type}`);
   return (await get(`${STATS}/${kind}?limit=-1&cayenneExp=${exp}`))?.data ?? [];
 }
 
-// A MoneyPuck season file (skaters, goalies or teams), parsed: rows by situation ("all", "5on5")
-async function moneypuck(kind, season) {
-  const text = await get(`${MONEYPUCK}/${season - 1}/regular/${kind}.csv`, 'text');
+// A MoneyPuck season file (skaters, goalies or teams; the regular season's or the playoffs'), parsed:
+// rows by situation ("all", "5on5")
+async function moneypuck(kind, season, type = 2) {
+  const text = await get(`${MONEYPUCK}/${season - 1}/${type === 3 ? 'playoffs' : 'regular'}/${kind}.csv`, 'text');
   if (!text) return [];
   const [head, ...lines] = text.trim().split('\n');
   const keys = head.split(',');
   return lines.map((line) => Object.fromEntries(line.split(',').map((v, i) => [keys[i], v])));
+}
+
+// A part's rows of a report or a MoneyPuck file: one game type's as they come, both added up
+const partReport = async (kind, season, part) => addUp(await Promise.all(PARTS[part].types.map((type) => report(kind, season, type))), (r) => r.playerId ?? r.teamId);
+const partMoneypuck = async (kind, season, part) =>
+  addUp(await Promise.all(PARTS[part].types.map((type) => moneypuck(kind, season, type))), (r) => `${r.playerId ?? r.team}/${r.situation}`);
+
+// Rates worked out again from the summed counts (a rate is never averaged): the stats API's and
+// MoneyPuck's, where a row has them; any other rate in a summed row is left null
+const RATES = {
+  shootingPct: (r) => r.goals / r.shots,
+  faceoffWinPct: (r) => r.totalFaceoffWins / r.totalFaceoffs,
+  savePct: (r) => r.saves / r.shotsAgainst,
+  goalsAgainstAverage: (r) => (r.goalsAgainst * 3600) / r.timeOnIce,
+  pointPct: (r) => (2 * r.wins + (r.otLosses ?? 0)) / (2 * r.gamesPlayed),
+  powerPlayPct: (r) => r.powerPlayGoalsFor / r.ppOpportunities,
+  penaltyKillPct: (r) => 1 - r.ppGoalsAgainst / r.timesShorthanded,
+  onIce_corsiPercentage: (r) => r.OnIce_F_shotAttempts / (r.OnIce_F_shotAttempts + r.OnIce_A_shotAttempts),
+  offIce_corsiPercentage: (r) => r.OffIce_F_shotAttempts / (r.OffIce_F_shotAttempts + r.OffIce_A_shotAttempts),
+  onIce_xGoalsPercentage: (r) => r.OnIce_F_xGoals / (r.OnIce_F_xGoals + r.OnIce_A_xGoals),
+  offIce_xGoalsPercentage: (r) => r.OffIce_F_xGoals / (r.OffIce_F_xGoals + r.OffIce_A_xGoals),
+  corsiPercentage: (r) => r.shotAttemptsFor / (r.shotAttemptsFor + r.shotAttemptsAgainst),
+  xGoalsPercentage: (r) => r.xGoalsFor / (r.xGoalsFor + r.xGoalsAgainst),
+};
+const IDS = new Set(['playerId', 'teamId', 'seasonId', 'season']);
+const IS_RATE = /(Pct|Pctg|Percentage|Per60|Average)$/;
+const isNumber = (v) => typeof v === 'number' || (typeof v === 'string' && /^-?\d+(\.\d+)?(e-?\d+)?$/i.test(v));
+// One list as it is; two (the regular season's and the playoffs') added up by key: counts summed, a
+// per-game figure weighted by games (exact: the total over the games), a rate from RATES, the team
+// list in order ("TOR,BOS"), any other text the playoffs'
+function addUp(lists, keyOf) {
+  if (lists.length === 1) return lists[0];
+  const rows = new Map();
+  const gp = (r) => Number(r.gamesPlayed ?? r.games_played ?? 0);
+  // (a row in only one list is kept as it came)
+  const summed = new Set();
+  for (const row of lists.flat()) {
+    const key = keyOf(row);
+    const sum = rows.get(key);
+    if (!sum) {
+      rows.set(key, Object.fromEntries(Object.entries(row).map(([k, v]) => [k, isNumber(v) && !IDS.has(k) ? Number(v) : v])));
+      continue;
+    }
+    summed.add(sum);
+    const games = [gp(sum), gp(row)];
+    for (const [k, v] of Object.entries(row)) {
+      const was = sum[k];
+      if (IDS.has(k)) sum[k] = was ?? v;
+      else if (k === 'teamAbbrevs') sum[k] = [...new Set([was, v].filter(Boolean).flatMap((t) => t.split(',')))].join(',');
+      else if (isNumber(v) || isNumber(was)) {
+        const [a, b] = [isNumber(was) ? Number(was) : null, isNumber(v) ? Number(v) : null];
+        if (k.endsWith('PerGame')) sum[k] = games[0] + games[1] ? ((a ?? 0) * games[0] + (b ?? 0) * games[1]) / (games[0] + games[1]) : null;
+        else sum[k] = a === null && b === null ? null : (a ?? 0) + (b ?? 0);
+      } else sum[k] = v ?? was;
+    }
+  }
+  for (const row of summed) {
+    for (const k of Object.keys(row)) {
+      if (!IS_RATE.test(k)) continue;
+      const v = RATES[k]?.(row);
+      row[k] = Number.isFinite(v) ? v : null;
+    }
+  }
+  return [...rows.values()];
 }
 
 // The standings at the end of a season: each team's name, record and logo that season
@@ -202,28 +311,51 @@ async function rookies(season, bios, kind) {
   return out;
 }
 
-async function buildSeason(season) {
+// A season's part (PARTS): the regular season, the playoffs or both. Who won what, the rookies, the
+// teams' names and logos and the head coaches' stints are the season's either way; the games counted
+// are the part's
+async function buildSeason(season, part = 'regular') {
   const current = season === CURRENT_SEASON;
+  const dir = current ? STATIC : path.join(STATIC, 'seasons', String(season));
+  const file = path.join(dir, PARTS[part].file);
+  // (no playoff games yet: no playoffs or both, and the current season's left from last year removed)
+  if (part !== 'regular' && !(await report('skater/summary', season, 3)).length) {
+    if (current) await rm(file, { force: true });
+    console.log(`${season} ${part}: no playoff games yet, no ${PARTS[part].file}`);
+    return;
+  }
   const [skaters, realtime, faceoffs, skaterBios, goalies, goalieBios, teams, awardRows, teamList] = await Promise.all([
-    report('skater/summary', season),
-    report('skater/realtime', season),
-    report('skater/faceoffwins', season),
+    partReport('skater/summary', season, part),
+    partReport('skater/realtime', season, part),
+    partReport('skater/faceoffwins', season, part),
     report('skater/bios', season),
-    report('goalie/summary', season),
+    partReport('goalie/summary', season, part),
     report('goalie/bios', season),
     standings(season),
     get(`${RECORDS}/award-details?cayenneExp=${encodeURIComponent(`seasonId=${seasonId(season)}`)}`),
     get(`${STATS}/team`),
   ]);
-  const [mpSkaters, mpGoalies] = [await moneypuck('skaters', season), await moneypuck('goalies', season)];
-  // (the head coaches' team expected goals, and last season's skaters for their Coaching Lift)
-  const [mpTeams, priorSkaters] = [await moneypuck('teams', season), await moneypuck('skaters', season - 1)];
+  const [mpSkaters, mpGoalies] = [await partMoneypuck('skaters', season, part), await partMoneypuck('goalies', season, part)];
+  // (the head coaches' team expected goals, and last season's skaters for their Coaching Lift: the
+  // regular season's, what the roster was before these games)
+  const [mpTeams, priorSkaters] = [await partMoneypuck('teams', season, part), await moneypuck('skaters', season - 1)];
   const skaterRookies = await rookies(season, skaterBios, 'skater');
   const goalieRookies = await rookies(season, goalieBios, 'goalie');
 
   const triCode = new Map((teamList?.data ?? []).map((t) => [t.id, t.triCode]));
+  // (each team's record over the part's games: the final standings for the regular season, the
+  // stats API's team totals otherwise: in the playoffs an overtime loss is a loss)
+  const records =
+    part === 'regular'
+      ? teams
+      : new Map(
+          (await partReport('team/summary', season, part)).map((t) => [
+            triCode.get(t.teamId),
+            { wins: t.wins, losses: t.losses, otLosses: t.otLosses ?? 0, gp: t.gamesPlayed, pointPct: t.pointPct },
+          ]),
+        );
   const hits = new Map(realtime.map((r) => [r.playerId, r]));
-  const draws = new Map(faceoffs.map((r) => [r.playerId, r.totalFaceoffs ?? 0]));
+  const draws = new Map(faceoffs.map((r) => [r.playerId, r]));
   const mp = (rows, situation) => new Map(rows.filter((r) => r.situation === situation).map((r) => [Number(r.playerId), r]));
   const mpAll = mp(mpSkaters, 'all');
   const mp5 = mp(mpSkaters, '5on5');
@@ -237,8 +369,10 @@ async function buildSeason(season) {
     const badge = PLAYER_AWARDS[a.trophyId];
     if (badge && a.playerId) playerAwards.set(a.playerId, [...(playerAwards.get(a.playerId) ?? []), badge]);
     const team = triCode.get(a.teamId);
-    if (team && a.trophyId === CUP) teamAwards.set(team, [...(teamAwards.get(team) ?? []), 'cup']);
-    if (team && CONFERENCE_TITLES.includes(a.trophyId)) teamAwards.set(team, [...(teamAwards.get(team) ?? []), 'conf']);
+    // (once a team: the records list the Cup once for each of its players)
+    const badges = teamAwards.get(team) ?? [];
+    if (team && a.trophyId === CUP && !badges.includes('cup')) teamAwards.set(team, [...badges, 'cup']);
+    if (team && CONFERENCE_TITLES.includes(a.trophyId) && !badges.includes('conf')) teamAwards.set(team, [...badges, 'conf']);
   }
 
   // A row's team: the last of a traded player's teams
@@ -247,12 +381,12 @@ async function buildSeason(season) {
   const teamOf = async (abbrevs) => {
     const code = String(abbrevs ?? '').split(',').pop().trim();
     if (code && !logos.has(code)) logos.set(code, await logoFile(null, code));
-    const t = teams.get(code);
+    const t = records.get(code);
     return {
       code,
       logo: logos.get(code) ?? 'assets/NHL_Icons/NHL.svg',
-      name: t?.name ?? null,
-      // (his last team's record: W-L-OTL, ranked on points percentage)
+      name: teams.get(code)?.name ?? null,
+      // (his last team's record over the part's games: W-L-OTL, ranked on points percentage)
       record: t ? { wins: t.wins, losses: t.losses, ties: t.otLosses, winPct: round(t.pointPct) } : { wins: null, losses: null, ties: null, winPct: null },
     };
   };
@@ -295,7 +429,7 @@ async function buildSeason(season) {
         takeaways: rt.takeaways ?? null,
         giveaways: rt.giveaways ?? null,
         // (a winger's handful of draws says little: 50+ faceoffs)
-        faceoffPct: row.faceoffWinPct !== null && (draws.get(row.playerId) ?? 0) >= 50 ? round(row.faceoffWinPct) : null,
+        faceoffPct: (draws.get(row.playerId)?.totalFaceoffs ?? 0) >= 50 ? round(draws.get(row.playerId).faceoffWinPct) : null,
         gameScore: round(num(all?.gameScore), 1),
         ixg: round(ixg, 1),
         goalsAboveX: ixg === null ? null : round(row.goals - ixg, 1),
@@ -366,20 +500,36 @@ async function buildSeason(season) {
 
   // Head coaches (coaches.mjs), and every player's Coaching grade: his team's Coaching Lift, curved
   // over the teams
-  const coached = await coachesFor({ season, current, get, web: WEB, records: RECORDS, report, teams, logos, teamAwards, mpSkaters, priorSkaters, mpTeams, share });
+  const coached = await coachesFor({
+    season,
+    part,
+    get,
+    web: WEB,
+    records: RECORDS,
+    report: (kind) => partReport(kind, season, part),
+    teams,
+    logos,
+    teamAwards,
+    mpSkaters,
+    priorSkaters,
+    mpTeams,
+    share,
+  });
   const coaching = curve(coached.lift);
   for (const u of [...skaterRows, ...out.G]) {
     u.stats.coaching = coaching.get(u._team) ?? null;
     delete u._team;
   }
   // (each team's last seven games, newest first, from its season schedule: the Teams tab's Recent; the
-  // regular season's and the playoffs', 1 a win, 0 a loss, 0.5 a tie (before shootouts); and which went to
-  // overtime or a shootout, "OT" or "SO" (a lighter square on the site, the same result))
+  // regular season's and the playoffs' (the playoffs' alone for the playoffs), 1 a win, 0 a loss, 0.5 a tie
+  // (before shootouts); and which went to overtime or a shootout, "OT" or "SO" (a lighter square on the
+  // site, the same result))
+  const recentTypes = part === 'post' ? [3] : [2, 3];
   const lastSeven = new Map();
   for (const tri of new Set(coached.rows.map((c) => c._team).filter(Boolean))) {
     const games = (await get(`${WEB}/club-schedule-season/${tri}/${seasonId(season)}`).catch(() => null))?.games ?? [];
     const last = games
-      .filter((g) => (g.gameType === 2 || g.gameType === 3) && (g.gameState === 'OFF' || g.gameState === 'FINAL'))
+      .filter((g) => recentTypes.includes(g.gameType) && (g.gameState === 'OFF' || g.gameState === 'FINAL'))
       .sort((x, y) => y.gameDate.localeCompare(x.gameDate) || y.id - x.id)
       .slice(0, 7)
       .map((g) => (g.homeTeam.abbrev === tri ? [g.homeTeam, g.awayTeam, 'vs', g] : [g.awayTeam, g.homeTeam, '@', g]));
@@ -401,24 +551,30 @@ async function buildSeason(season) {
   out.HC = coached.rows;
   console.log(coached.log);
   // (early in the season, Linemates, Defense and Coaching start from the team's last season: libs/ranker/scripts/early-season)
-  if (current) console.log(await blendWithLastSeason({ staticDir: STATIC, season, rows: out, keys: ['linemates', 'defense', 'coaching'], fullAt: 20 }));
+  if (current && part === 'regular') console.log(await blendWithLastSeason({ staticDir: STATIC, season, rows: out, keys: ['linemates', 'defense', 'coaching'], fullAt: 20 }));
 
   for (const tab of Object.keys(out)) out[tab].sort((a, b) => a.name.localeCompare(b.name));
-  const dir = current ? STATIC : path.join(STATIC, 'seasons', String(season));
   await mkdir(dir, { recursive: true });
   // (compact: the files are served to the browser as is)
-  await writeFile(path.join(dir, 'skill-players.json'), JSON.stringify(out));
+  await writeFile(file, JSON.stringify(out));
   // (this season's game logs, for the card's Game Log tab: the NHL's API doesn't let the site ask it)
-  if (current) await writeGameLogs(season, skaterRows, out.G);
+  if (current && part === 'regular') await writeGameLogs(season, skaterRows, out.G);
   const champion = [...teamAwards].find(([, a]) => a.includes('cup'))?.[0] ?? '?';
   const rookieCount = [...skaterRows, ...out.G].filter((u) => u.rookie).length;
   console.log(
-    `${season}: ${Object.keys(out).map((tab) => `${out[tab].length} ${tab}`).join(', ')} (${mpAll.size ? 'MoneyPuck' : 'no MoneyPuck'}; ${rookieCount} rookies; Cup ${champion})`,
+    `${season} ${part}: ${Object.keys(out).map((tab) => `${out[tab].length} ${tab}`).join(', ')} (${mpAll.size ? 'MoneyPuck' : 'no MoneyPuck'}; ${rookieCount} rookies; Cup ${champion})`,
   );
 }
 
-// Newest first
+// Newest first, each season's parts in turn (PART=post,all: only those)
 const seasons = process.env.ALL
   ? Array.from({ length: CURRENT_SEASON - FIRST_SEASON }, (_, i) => CURRENT_SEASON - 1 - i)
   : [Number(process.env.SEASON ?? CURRENT_SEASON)];
-for (const season of seasons) await buildSeason(season);
+const parts = process.env.PART ? process.env.PART.split(',').map((p) => p.trim()) : Object.keys(PARTS);
+for (const p of parts) if (!PARTS[p]) throw new Error(`PART: ${p}? (${Object.keys(PARTS).join(', ')})`);
+const started = Date.now();
+for (const season of seasons) {
+  cacheable = season < CURRENT_SEASON;
+  for (const part of parts) await buildSeason(season, part);
+}
+console.log(`Done in ${Math.round((Date.now() - started) / 1000)}s`);

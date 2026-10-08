@@ -43,6 +43,7 @@ function nhlGameLogs(season: number, id: number): Promise<NhlGameLogs> {
   });
 }
 import { teamRowsFromCoaches } from '@ranker/engine/team-rows';
+import { dataPart } from '@ranker/engine/data';
 import type { SkillPlayer } from './positions';
 import { seasonName } from './awards';
 
@@ -92,7 +93,8 @@ export function cardFlags({ player, position, current }: FlagContext): CardFlag[
 
   // Coaches: an interim stint, and how the team played against its roster and its goal differential
   if (position === 'HC') {
-    if (games < 60 && !current) flags.push({ icon: 'swap_horiz', tone: 'info', text: `Part of the season: ${games} games coached` });
+    // (a regular season's: every coach's playoffs are short)
+    if (games < 60 && !current && dataPart === 'regular') flags.push({ icon: 'swap_horiz', tone: 'info', text: `Part of the season: ${games} games coached` });
     if (st.lift !== null && st.lift >= 3) {
       flags.push({ icon: 'trending_up', tone: 'good', text: `Got more from the roster: ${signed(st.lift)} points of 5-on-5 expected-goal share over its talent` });
     } else if (st.lift !== null && st.lift <= -3) {
@@ -169,6 +171,9 @@ export const SPORT: SportConfig = {
   firstSeason: 2009,
   // (after the Final: 2026-27 is over; 2027-28 becomes current at the October rollover)
   currentSeasonEnds: '2027-06-30',
+  // Stats From: the regular season, the playoffs or both (skill-players.post.json and .all.json beside
+  // a season's skill-players.json, scripts/update-data.mjs; the Teams tab is built from its coach rows)
+  seasonParts: true,
   seasonText: seasonName,
   positionNames: { TM: 'Team', C: 'Center', LW: 'Left Wing', RW: 'Right Wing', D: 'Defenseman', G: 'Goalie', HC: 'Head Coach' },
   tabNames: { TM: 'Teams', C: 'Centers', LW: 'Left Wings', RW: 'Right Wings', D: 'Defensemen', G: 'Goalies', HC: 'Head Coaches' },

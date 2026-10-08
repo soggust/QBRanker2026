@@ -5,6 +5,10 @@
 // finds the game the new coach took over (a firing mid-season), about 7 lookups. What's found is kept
 // in coaches-cache.json, so a night's update only checks the games since.
 //
+// A season's part (update-data.mjs PARTS): the stints are the regular season's either way; the playoffs
+// are the games of the coach who finished it (a team without any has no row), both his regular-season
+// stint and them together. In the playoffs an overtime loss is a loss and earns no point.
+//
 // Each coach's own games: his record (W-L-OTL, ranked on points percentage), goal differential per game,
 // and his points over what his goals for and against imply (close games, overtime and shootouts: a
 // Pythagorean expectation, exponent 2, for the 2 points of a game, plus the league's rate of extra
@@ -38,7 +42,7 @@ const slug = (name) =>
     .replace(/^-|-$/g, '');
 
 // The coach rows, and each team's Coaching Lift (for the players' grades)
-export async function coachesFor({ season, current, get, web, records, report, teams, logos, teamAwards, mpSkaters, priorSkaters, mpTeams, share }) {
+export async function coachesFor({ season, part = 'regular', get, web, records, report, teams, logos, teamAwards, mpSkaters, priorSkaters, mpTeams, share }) {
   let cache = {};
   try {
     cache = JSON.parse(await readFile(CACHE, 'utf8'));
@@ -57,6 +61,7 @@ export async function coachesFor({ season, current, get, web, records, report, t
   // Each team's games and coaches
   const stints = new Map();
   const playoffWins = new Map();
+  const playoffGames = new Map();
   let lookups = 0;
   for (const code of codes) {
     const schedule = (await get(`${web}/club-schedule-season/${code}/${sid}`))?.games ?? [];
@@ -99,6 +104,7 @@ export async function coachesFor({ season, current, get, web, records, report, t
     }
     cache[key] = entry;
     stints.set(code, { games, list: entry.stints });
+    playoffGames.set(code, playoffs);
     const won = playoffs.filter((g) => {
       const us = g.homeTeam.abbrev === code ? g.homeTeam : g.awayTeam;
       const them = g.homeTeam.abbrev === code ? g.awayTeam : g.homeTeam;
@@ -109,12 +115,15 @@ export async function coachesFor({ season, current, get, web, records, report, t
   await writeFile(CACHE, JSON.stringify(cache));
 
   // The team's season: special teams and goals per game (the stats API), 5-on-5 expected-goal share
-  const summary = await report('team/summary', season);
+  // (over the part's games; report is the part's, both added up from the counts)
+  const [summary, powerPlay, penaltyKill] = await Promise.all([report('team/summary'), report('team/powerplay'), report('team/penaltykill')]);
   const teamIds = new Map(((await get('https://api.nhle.com/stats/rest/en/team'))?.data ?? []).map((t) => [t.id, t.triCode]));
+  const pp = new Map(powerPlay.map((r) => [r.teamId, r.powerPlayPct]));
+  const pk = new Map(penaltyKill.map((r) => [r.teamId, r.penaltyKillPct]));
   const season5 = new Map();
   for (const row of summary) {
     const code = teamIds.get(row.teamId);
-    if (code) season5.set(code, { pp: row.powerPlayPct, pk: row.penaltyKillPct, gf: row.goalsForPerGame, ga: row.goalsAgainstPerGame });
+    if (code) season5.set(code, { pp: pp.get(row.teamId) ?? row.powerPlayPct, pk: pk.get(row.teamId) ?? row.penaltyKillPct, gf: row.goalsForPerGame, ga: row.goalsAgainstPerGame });
   }
   const xgf = new Map();
   // (and for the Teams tab: 5-on-5 shot-attempt share and PDO, its shooting plus save percentage, the
@@ -127,7 +136,7 @@ export async function coachesFor({ season, current, get, web, records, report, t
     const sogF = Number(row.shotsOnGoalFor);
     const sogA = Number(row.shotsOnGoalAgainst);
     team5.set(mpCode(row.team), {
-      cfPct: Number(row.corsiPercentage) || null,
+      cfPct: Math.round(Number(row.corsiPercentage) * 1000) / 1000 || null,
       pdo: sogF && sogA ? Math.round((Number(row.goalsFor) / sogF + 1 - Number(row.goalsAgainst) / sogA) * 1000) / 10 : null,
     });
   }
@@ -189,8 +198,11 @@ export async function coachesFor({ season, current, get, web, records, report, t
   for (const [code, { games, list }] of stints) {
     list.forEach((stint, i) => {
       if (!stint.coach) return;
-      const mine = games.slice(stint.from, list[i + 1]?.from ?? games.length);
       const last = i === list.length - 1;
+      // (his games in the part: his stint's regular-season games, the playoffs' for whoever finished it)
+      const regular = part === 'post' ? [] : games.slice(stint.from, list[i + 1]?.from ?? games.length);
+      const mine = [...regular, ...(part !== 'regular' && last ? playoffGames.get(code) : [])];
+      if (!mine.length) return;
       // (every stint, however short: the Teams tab adds a team's up; the Head Coaches tab's Min Games
       // setting hides the shortest)
       let w = 0;
@@ -204,7 +216,7 @@ export async function coachesFor({ season, current, get, web, records, report, t
         gf += us.score;
         ga += them.score;
         if (us.score > them.score) w++;
-        else if (g.gameOutcome?.lastPeriodType === 'OT' || g.gameOutcome?.lastPeriodType === 'SO') otl++;
+        else if (g.gameType === 2 && (g.gameOutcome?.lastPeriodType === 'OT' || g.gameOutcome?.lastPeriodType === 'SO')) otl++;
         else l++;
       }
       const gp = mine.length;
@@ -229,7 +241,8 @@ export async function coachesFor({ season, current, get, web, records, report, t
           winPct: Math.round(((2 * w + otl) / (2 * gp)) * 1000) / 1000,
           playoffWins: finished ? (playoffWins.get(code) ?? 0) : 0,
           goalDiff: Math.round(((gf - ga) / gp) * 100) / 100,
-          ptsOver: Math.round((2 * w + otl - gp * (2 * pyth + otRate / 2)) * 10) / 10,
+          // (the extra point past regulation only in the regular season)
+          ptsOver: Math.round((2 * w + otl - gp * 2 * pyth - (regular.length * otRate) / 2) * 10) / 10,
           xgfPct: xgf.has(code) ? Math.round(xgf.get(code) * 1000) / 1000 : null,
           ppPct: t?.pp === null || t?.pp === undefined ? null : Math.round(t.pp * 1000) / 1000,
           pkPct: t?.pk === null || t?.pk === undefined ? null : Math.round(t.pk * 1000) / 1000,

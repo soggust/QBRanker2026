@@ -37,6 +37,8 @@ jobs:
       - name: Roll over to a new season
         run: node scripts/rollover.mjs nhl --if-due
 
+      # (the regular season, and from the first playoff game on the playoffs and both as well:
+      # skill-players.post.json and .all.json; until then neither, last season's taken out)
       - name: Pull NHL stats
         run: npm run nhl:update-data
 
