@@ -34,6 +34,13 @@ jobs:
       - name: Pull MMA fights and stats
         run: npm run mma:update-data
 
+      # (the data checked before it's committed: a broken file stays out of master and off the site; npm test)
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check the data
+        run: npm test
+
       - name: Commit updated data
         id: commit
         run: |

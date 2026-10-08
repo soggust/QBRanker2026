@@ -1,0 +1,77 @@
+name: CI
+
+# The safety net before a deploy: the test suite (npm test: tests/*.test.mjs, Node's own runner) and a
+# production build of every app, each app its own job so they build side by side. Runs on pull requests
+# and on every push to master. (Pushes made by the nightly data workflows with GITHUB_TOKEN don't
+# trigger other workflows, so those commits are checked by the next push or by a manual run.)
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+# (a newer push to the same branch or PR replaces a run still going)
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test
+
+  build:
+    name: Build ${{ matrix.app }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      # (every app's result, not just the first to fail; the run still fails if any does)
+      fail-fast: false
+      matrix:
+        app: [nfl, mlb, nba, nhl, mma]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Production build (angular.json's default configuration), as the deploy builds it. Fails on the
+      # build's exit code, and also on any ERROR line in its output (Sass deprecation warnings are fine)
+      - name: Build ${{ matrix.app }} (production)
+        shell: bash
+        env:
+          CI: "1"
+          NG_CLI_ANALYTICS: "false"
+        run: |
+          npx ng build ${{ matrix.app }} 2>&1 | tee build.log
+          if sed 's/\x1b\[[0-9;]*m//g' build.log | grep -E "\[ERROR\]|^Error:|ERROR in"; then
+            echo "::error::ng build ${{ matrix.app }} reported errors"
+            exit 1
+          fi

@@ -11,16 +11,20 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: "22"
           cache: "npm"
 
       - name: Install dependencies
         run: npm install
+
+      # Nothing deploys unless the test suite passes (the same suite ci.yml runs; ~30 seconds)
+      - name: Run tests
+        run: npm test
 
       - name: Build project
         run: npm run build

@@ -46,6 +46,13 @@ jobs:
       - name: Keep game highlights
         run: node libs/ranker/scripts/highlights.mjs nhl || echo "highlights skipped"
 
+      # (the data checked before it's committed: a broken file stays out of master and off the site; npm test)
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check the data
+        run: npm test
+
       - name: Commit updated data
         id: commit
         run: |
@@ -63,10 +70,6 @@ jobs:
           echo "changed=true" >> "$GITHUB_OUTPUT"
 
       # Pushes made with GITHUB_TOKEN don't trigger other workflows, so deploy here
-      - name: Install dependencies
-        if: steps.commit.outputs.changed == 'true'
-        run: npm install
-
       - name: Build project
         if: steps.commit.outputs.changed == 'true'
         run: npm run build
