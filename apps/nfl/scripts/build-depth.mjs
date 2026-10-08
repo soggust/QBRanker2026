@@ -42,6 +42,15 @@ async function download(file, url, { optional = false, current = true } = {}) {
   return to;
 }
 
+// One of nflverse's season files: gzipped where it has that (the recent seasons'), else plain (its older
+// injury reports and every season's weekly rosters are plain only); null when it has neither
+async function nflverseCsv(release, name, current) {
+  return (
+    (await download(`${name}.csv.gz`, `${NFLVERSE}/${release}/${name}.csv.gz`, { optional: true, current })) ??
+    (await download(`${name}.csv`, `${NFLVERSE}/${release}/${name}.csv`, { optional: true, current }))
+  );
+}
+
 // A CSV (quoted fields allowed) as objects
 function parseCsv(text) {
   const rows = [];
@@ -124,17 +133,25 @@ function dailyChart(rows, dt) {
 
 // ---- the weekly charts (before 2025): each team's own labels read into the same slots
 // (a label's family: which slot it can fill, and its side when it says)
+// (and the old charts' other names for the same spots: SE and FL the split end and flanker, H-B the
+// halfback, OC the center, J a joker tight end; every label a starter had in 2001-2024, checked)
 const OFF_FAMILY = {
-  LT: 'LT', LOT: 'LT', RT: 'RT', ROT: 'RT', T: 'T', LG: 'LG', RG: 'RG', G: 'G', C: 'C', QB: 'QB', RB: 'RB', HB: 'RB',
-  FB: 'FB', F: 'FB', TE: 'TE', 'TE/FB': 'TE', WR: 'WR',
+  LT: 'LT', LOT: 'LT', RT: 'RT', ROT: 'RT', T: 'T', LG: 'LG', RG: 'RG', G: 'G', C: 'C', OC: 'C', QB: 'QB', RB: 'RB', HB: 'RB',
+  'H-B': 'RB', 'RB/TE': 'RB', FB: 'FB', F: 'FB', 'FB/TE': 'FB', TE: 'TE', 'TE/FB': 'TE', 'TE/HB': 'TE', 'HB-TE': 'TE', 'HB/TE': 'TE',
+  LTE: 'TE', RTE: 'TE', J: 'TE', WR: 'WR', WR1: 'WR', WR2: 'WR', LWR: 'WR', RWR: 'WR', SE: 'WR', FL: 'WR', WRE: 'WR',
 };
+// (the old charts' defense: LT and RT, or T, its tackles; LLB and RLB the outside linebackers; JACK, LEO and
+// the hybrids the edge; OTTO and $LB the Sam; NOSE and NG the nose; LS and RS the safeties; MCB the nickel)
 const DEF_FAMILY = {
-  LDE: 'LDE', RDE: 'RDE', LE: 'LDE', RE: 'RDE', DE: 'DE', END: 'DE', EDGE: 'EDGE', RUSH: 'EDGE',
-  LDT: 'LDT', RDT: 'RDT', DT: 'DT', UT: 'DT', DL: 'DT', NT: 'NT',
-  LOLB: 'WLB', WLB: 'WLB', WILL: 'WLB', ROLB: 'SLB', SLB: 'SLB', SAM: 'SLB', OLB: 'OLB', JLB: 'OLB',
-  LILB: 'LILB', RILB: 'RILB', ILB: 'ILB', MLB: 'MLB', MIKE: 'MLB', BLB: 'ILB', LB: 'LB',
-  LCB: 'LCB', RCB: 'RCB', CB: 'CB', DB: 'CB', SS: 'SS', FS: 'FS', S: 'S',
-  NB: 'NB', NCB: 'NB', NICK: 'NB', NKL: 'NB', NICKE: 'NB', N: 'NB', NDB: 'NB',
+  LDE: 'LDE', RDE: 'RDE', LE: 'LDE', RE: 'RDE', DE: 'DE', END: 'DE', WE: 'DE', DDE: 'DE', OE: 'DE',
+  EDGE: 'EDGE', RUSH: 'EDGE', JACK: 'EDGE', LEO: 'EDGE', 'LB/DE': 'EDGE', 'DE/LB': 'EDGE', LBE: 'EDGE',
+  LDT: 'LDT', RDT: 'RDT', LT: 'LDT', RT: 'RDT', DT: 'DT', T: 'DT', UT: 'DT', DL: 'DT', NT: 'NT', NOSE: 'NT', NG: 'NT',
+  LOLB: 'WLB', WLB: 'WLB', WILL: 'WLB', WIL: 'WLB', WL: 'WLB', LLB: 'WLB', ROLB: 'SLB', SLB: 'SLB', SAM: 'SLB', SL: 'SLB',
+  RLB: 'SLB', OTTO: 'SLB', $LB: 'SLB', OLB: 'OLB', JLB: 'OLB', MOLB: 'OLB', TED: 'OLB',
+  LILB: 'LILB', LILBI: 'LILB', RILB: 'RILB', ILB: 'ILB', WILB: 'ILB', MLB: 'MLB', MIKE: 'MLB', MILB: 'MLB', MO: 'MLB', ML: 'MLB',
+  MIL: 'MLB', BLB: 'ILB', LB: 'LB',
+  LCB: 'LCB', LCR: 'LCB', RCB: 'RCB', RBC: 'RCB', CB: 'CB', DB: 'CB', SS: 'SS', FS: 'FS', WS: 'FS', S: 'S', LS: 'S', RS: 'S',
+  NB: 'NB', NCB: 'NB', NICK: 'NB', NKL: 'NB', NICKE: 'NB', N: 'NB', NDB: 'NB', MCB: 'NB',
 };
 const ST_FAMILY = { K: 'PK', PK: 'PK', P: 'P', LS: 'LS', KR: 'KR', KOR: 'KR', PR: 'PR' };
 
@@ -283,6 +300,38 @@ const SLOT_UNIT = {
 // A headshot, kept short: the part of the NFL's image link after its transforms ("league/abc123")
 const headshotId = (url) => (url && url !== 'NA' ? (url.match(/\/upload\/[^/]+\/(.+)$/)?.[1] ?? url) : null);
 
+// Each player's games played that season by ESPN athlete id (ESPN's season stats: every position, the
+// linemen too), for the seasons before snap counts. Asked once and kept in .cache (a finished season's
+// don't change), a few at a time.
+const ESPN_CORE = 'https://sports.core.api.espn.com/v2/sports/football/leagues/nfl';
+async function espnGamesPlayed(season, ids) {
+  const file = path.join(CACHE, `espn-games-${season}.json`);
+  const known = existsSync(file) ? JSON.parse(readFileSync(file, 'utf8')) : {};
+  const todo = [...new Set(ids)].filter((id) => !(id in known));
+  if (!todo.length) return known;
+  const one = async (id) => {
+    for (let attempt = 1; attempt <= 6; attempt++) {
+      const res = await fetch(`${ESPN_CORE}/seasons/${season}/types/2/athletes/${id}/statistics`).catch(() => null);
+      if (res?.status === 404) return (known[id] = 0);
+      if (res?.ok) {
+        const body = await res.json();
+        const general = (body.splits?.categories ?? []).find((c) => c.name === 'general');
+        return (known[id] = general?.stats?.find((s) => s.name === 'gamesPlayed')?.value ?? 0);
+      }
+      await new Promise((r) => setTimeout(r, 2000 * attempt));
+    }
+  };
+  // (four at a time; ESPN turns a burst away, so a refused one waits longer each try; then the ones still
+  // refused one at a time)
+  for (let i = 0; i < todo.length; i += 4) await Promise.all(todo.slice(i, i + 4).map(one));
+  for (const id of todo.filter((x) => !(x in known))) await one(id);
+  const missed = todo.filter((x) => !(x in known)).length;
+  if (missed) console.warn(`  ${season}: ESPN games played missing for ${missed} players (asked again next run)`);
+  mkdirSync(CACHE, { recursive: true });
+  writeFileSync(file, JSON.stringify(known));
+  return known;
+}
+
 async function buildSeason(season, players) {
   const current = season === CURRENT_SEASON;
   const dir = current ? path.join(DATA, 'depth') : path.join(DATA, 'seasons', String(season), 'depth');
@@ -296,7 +345,7 @@ async function buildSeason(season, players) {
     Promise.resolve(readCsv(chartFile)),
     // (snap counts start in 2012; one that won't read just leaves its season without them)
     season >= 2012
-      ? download(`snap_counts_${season}.csv.gz`, `${NFLVERSE}/snap_counts/snap_counts_${season}.csv.gz`, { optional: true, current })
+      ? nflverseCsv('snap_counts', `snap_counts_${season}`, current)
           .then(readCsv)
           .catch(() => [])
       : [],
@@ -306,7 +355,7 @@ async function buildSeason(season, players) {
   // (the weekly injury reports, 2009 on: who was out or doubtful each week, and with what)
   const injuryRows =
     season >= 2009
-      ? await download(`injuries_${season}.csv.gz`, `${NFLVERSE}/injuries/injuries_${season}.csv.gz`, { optional: true, current })
+      ? await nflverseCsv('injuries', `injuries_${season}`, current)
           .then(readCsv)
           .catch(() => [])
       : [];
@@ -314,7 +363,7 @@ async function buildSeason(season, players) {
   // on the practice squad, and his team)
   const rosterRows =
     season >= 2002
-      ? await download(`roster_weekly_${season}.csv.gz`, `${NFLVERSE}/weekly_rosters/roster_weekly_${season}.csv.gz`, { optional: true, current })
+      ? await nflverseCsv('weekly_rosters', `roster_weekly_${season}`, current)
           .then(readCsv)
           .catch(() => [])
       : [];
@@ -362,6 +411,24 @@ async function buildSeason(season, players) {
       const weeks = [...new Set(regular.map((r) => Number(r.week)))].sort((a, b) => a - b);
       const last = weeks.filter((w) => w <= lastWeek).at(-1) ?? weeks.at(-1);
       now = weeklyChart(regular.filter((r) => Number(r.week) === last));
+      // (a spot the final week's chart leaves empty, a week it listed two linebackers or one safety: the
+      // latest earlier week's that had it, so the chart is as late as the season's charts allow)
+      const expected = [...OFFENSE_SLOTS.filter(([key]) => !['WR8', 'FB12'].includes(key)), ...(now.front === '3-4' ? DEFENSE_34 : DEFENSE_43), ...SECONDARY.filter(([key]) => key !== 'NB12'), ...SPECIAL].map(([key]) => key);
+      for (const w of weeks.filter((x) => x < last).reverse()) {
+        const missing = expected.filter((key) => !now.slots.has(key));
+        if (!missing.length) break;
+        const earlier = weeklyChart(regular.filter((r) => Number(r.week) === w));
+        // (not a player the final chart starts somewhere else: he moved)
+        const starting = new Set([...now.slots.values()].map((slot) => slot.depth[0]));
+        for (const key of missing) {
+          const slot = earlier.slots.get(key);
+          const depth = slot?.depth.filter((id) => !starting.has(id)) ?? [];
+          if (!depth.length) continue;
+          now.slots.set(key, { ...slot, depth });
+          for (const id of depth) if (!now.names.has(id)) now.names.set(id, earlier.names.get(id));
+          starting.add(depth[0]);
+        }
+      }
       asOf = lastGame;
     }
 
@@ -410,6 +477,15 @@ async function buildSeason(season, players) {
       const p = person(id, { name: u.name, pos: u.pos });
       Object.assign(p, { off: round(u.off / u.games), def: round(u.def / u.games), st: round(u.st / u.games), games: u.games, pos: u.pos ?? p.pos });
       p.unit = UNIT[u.pos] ?? p.unit;
+    }
+    // (no snap counts, 2012 and earlier: the team's weekly rosters say who was on it, ESPN's season stats how
+    // many games each played; their share of the snaps isn't known: null, not 0)
+    if (!teamSnaps.length) {
+      for (const r of rosterRows) {
+        if (r.game_type !== 'REG' || (ALIAS[r.team] ?? r.team) !== team || !r.gsis_id || r.gsis_id === 'NA') continue;
+        const p = person(r.gsis_id, { name: r.full_name, pos: r.position });
+        p.unit ??= UNIT[r.position] ?? null;
+      }
     }
     for (const i of injuries.get(team) ?? []) {
       const hit = [...people.values()].find((p) => p.name === i.name);
@@ -499,12 +575,19 @@ async function buildSeason(season, players) {
       if (changes.length) timeline.push({ week: weekCharts[i].week, changes });
     }
 
+    // (no snap counts: everyone's games from ESPN, the ones the timeline added too; snap shares unknown)
+    if (!teamSnaps.length) {
+      const played = await espnGamesPlayed(season, [...people.values()].map((p) => p.espnId).filter(Boolean));
+      for (const p of people.values()) Object.assign(p, { off: null, def: null, st: null, games: p.espnId ? (played[p.espnId] ?? 0) : 0 });
+    }
+
     const out = {
       team,
       logo,
       season,
       at: asOf,
-      teamGames: games.size,
+      // (the snap counts' games; before them, 2012 and earlier, the schedule's)
+      teamGames: games.size || reg.filter((g) => [g.home_team, g.away_team].some((t) => t === code || (ALIAS[t] ?? t) === team)).length,
       front: now.front,
       personnel: personnel(teamSnaps),
       slots: [...now.slots.values()].map(({ side, key, abb, name, depth }) => ({ side, key, abb, name, depth })),

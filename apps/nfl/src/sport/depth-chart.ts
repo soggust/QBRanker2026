@@ -25,9 +25,9 @@ interface DepthFile {
       headshot: string | null;
       pos: string | null;
       unit: string | null;
-      off: number;
-      def: number;
-      st: number;
+      off: number | null;
+      def: number | null;
+      st: number | null;
       games: number;
       chart: { key: string; depth: number } | null;
       status: string | null;
@@ -204,7 +204,8 @@ export async function loadDepthChart(logo: string, position: string, season: num
         const sideOf = unit === 'ST' ? 'special' : DEFENSE_UNITS.has(unit) ? 'defense' : 'offense';
         return { ...player(id, sideOf), pos: p.pos, onChart: !!p.chart };
       })
-      .sort((a, b) => (b.snaps ?? -1) - (a.snaps ?? -1));
+      // (most snaps first; before snap counts, most games)
+      .sort((a, b) => (b.snaps ?? -1) - (a.snaps ?? -1) || b.games - a.games);
     if (rows.length) usage.push({ title, rows });
   }
 

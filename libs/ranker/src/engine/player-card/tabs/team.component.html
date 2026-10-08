@@ -194,7 +194,7 @@
       @for (g of d.usage; track g.title) {
         <h4 class="depth-unit">{{ g.title }}</h4>
         @for (p of g.rows; track p.name) {
-          <div class="depth-row" [class.off-chart]="!p.onChart" [class.unused]="!p.snaps">
+          <div class="depth-row" [class.off-chart]="!p.onChart" [class.unused]="p.snaps === 0 || !p.games">
             <span class="depth-head tiny" [class.face-link]="p.link" [title]="p.link ? 'Open ' + p.name : ''" (click)="openLink(p.link, c.season)">
               @if (p.headshot) {
                 <img [src]="p.headshot" alt="" loading="lazy" (error)="p.headshot = null" />
