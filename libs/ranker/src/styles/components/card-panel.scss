@@ -116,3 +116,24 @@ card-panel {
     padding-right: 16px;
   }
 }
+
+// (a depth chart's field: a spot's popover may run past the panel, over the ones below it (a short strip,
+// an O-Line card's five, has no room for it), so the panel doesn't clip; its bar and body round their own
+// corners instead)
+card-panel.depth-panel {
+  overflow: visible;
+  position: relative;
+  z-index: 2;
+
+  > .group-bar {
+    border-radius: 5px 5px 0 0;
+  }
+
+  &.closed > .group-bar {
+    border-radius: 5px;
+  }
+
+  > .panel-body {
+    border-radius: 0 0 5px 5px;
+  }
+}
