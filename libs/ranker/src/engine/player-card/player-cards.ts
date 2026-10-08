@@ -11,7 +11,7 @@ import { logoForSeason } from '@sport/logo-eras';
 import { SKILLS } from '@sport/skills';
 import { CardFlag, FlagContext, ValueContext } from '@ranker/engine/sport';
 import { CardSkill, standing, tierWord } from '@ranker/engine/skills';
-import { CURRENT_SEASON, SEASONS, isLiveSeason } from '@ranker/engine/data';
+import { CURRENT_SEASON, SEASONS, dataPart, dataSeason, isLiveSeason } from '@ranker/engine/data';
 import { DEFAULT_SPORT_SETTINGS, SKILL_UNITS, defaultRanking, statValue } from '@ranker/engine/unit-scoring';
 import { StatReader } from '@ranker/engine/stat-reader';
 import { SeasonDataService } from '@ranker/engine/season-data.service';
@@ -580,18 +580,21 @@ export class PlayerCards {
   private async loadSeasons(card: PlayerCard): Promise<void> {
     // (a career-only sport has no seasons to link, and no similar seasons)
     if (SPORT.careerOnly) return;
+    // (a playoffs or both row, Stats From: its career history and similar seasons would weigh it against
+    // whole regular seasons, a 58-PA October reading as a career year, so the card leaves them out)
+    const partRow = card.season === dataSeason && dataPart !== 'regular';
     try {
       const seasons = await this.seasonLines(card.player.gsisId);
       if (this.card !== card) return;
       card.seasons = seasons;
       if (this.tab === 'seasons' && seasons.length < 2) this.tab = 'overview';
       if (this.tab === 'seasons') this.rankCareer(card);
-      this.loadHistory(card);
+      if (!partRow) this.loadHistory(card);
       this.loadExtras(card);
     } catch (err) {
       console.error(err);
     }
-    if (card.season !== CURRENT_SEASON) this.loadComps(card);
+    if (card.season !== CURRENT_SEASON && !partRow) this.loadComps(card);
   }
 
   // A line per season they're in, ranked with the default sliders (careers/<tab>.json for the finished

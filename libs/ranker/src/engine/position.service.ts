@@ -95,6 +95,13 @@ export class PositionService {
   // (a shared list's link opened: its sliders, eyes and settings, applied once everything's set up)
   constructor() {
     applySharedLink(this, DEFAULT_SETTINGS);
+    // (a linked part the season doesn't have loaded its regular season: the address says so too)
+    const url = new URL(location.href);
+    if (url.searchParams.has('part') && url.searchParams.get('part') !== dataPart) {
+      if (dataPart === 'regular') url.searchParams.delete('part');
+      else url.searchParams.set('part', dataPart);
+      history.replaceState(null, '', url);
+    }
   }
 
   // The link to this list as it is now (the tab, the season, and what's changed from the defaults)
