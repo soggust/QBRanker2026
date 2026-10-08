@@ -1287,6 +1287,63 @@ section ul li.empty-list {
   width: min(100%, calc(100vw - 80px));
 }
 
+// Scrolled sideways (ScrolledSidewaysDirective), at every width: the rank and the card pinned at the left
+// edge on a strip of board, the name faded (the stats pass under where it was), so every stat keeps its
+// owner beside it. Nothing changes width, so the list never jumps under a finger or the pointer.
+section ul.scrolled-x li.player > div.player-info {
+  left: 0;
+  pointer-events: none;
+  position: sticky;
+  z-index: 3;
+
+  // (the strip: the rank and the card, a little room past it, the row's yard line, a shadow off its edge;
+  // as tall as the row, its padding too)
+  align-self: stretch;
+  height: auto;
+
+  &::before {
+    background:
+      linear-gradient(rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.12)) left bottom / 100% 0.5px no-repeat,
+      #1c2420;
+    bottom: -0.25em;
+    box-shadow: 4px 0 8px rgba(0, 0, 0, 0.4);
+    content: "";
+    left: -0.5em;
+    position: absolute;
+    top: -0.25em;
+    width: 12em;
+    z-index: -1;
+  }
+
+  .count,
+  .badge-slot {
+    pointer-events: auto;
+  }
+
+  .player-name,
+  .header-name {
+    opacity: 0;
+  }
+}
+
+// (a hovered row's piece: the row's light wash over it too, so the crosshair runs across)
+section ul.scrolled-x li.player:not(.header-row):hover > div.player-info::before {
+  box-shadow:
+    inset 0 0 0 100vmax rgba(255, 255, 255, 0.07),
+    4px 0 8px rgba(0, 0, 0, 0.4);
+}
+
+// (the header's piece of it: the scoreboard)
+section ul.scrolled-x li.player.header-row > div.player-info::before {
+  background: var(--scoreboard-dots), var(--scoreboard);
+  bottom: -0.6em;
+  top: -0.6em;
+}
+
+section ul li.player > div.player-info .player-name {
+  transition: opacity 0.15s ease;
+}
+
 // Phones: a compact grid, so more rows fit (44px rows: --row-h; everything in a row is sized in em, so
 // an 11px base scales it all down together, and the team card, sized in px, steps down with it),
 // slimmer buttons, less room between the bars, just the year in the dropdown
@@ -1335,56 +1392,6 @@ section ul li.empty-list {
       text-overflow: clip;
       white-space: nowrap;
     }
-  }
-
-  // Scrolled sideways (ScrolledSidewaysDirective): the rank and the card pinned at the left edge on a strip
-  // of board, the name faded (the stats pass under where it was), so every stat keeps its owner beside
-  // it. Nothing changes width, so the list never jumps under a finger.
-  section ul.scrolled-x li.player > div.player-info {
-    left: 0;
-    pointer-events: none;
-    position: sticky;
-    z-index: 3;
-
-    // (the strip: the rank and the card, a little room past it, the row's yard line, a shadow off its edge;
-    // as tall as the row, its padding too)
-    align-self: stretch;
-    height: auto;
-
-    &::before {
-      background:
-        linear-gradient(rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.12)) left bottom / 100% 0.5px no-repeat,
-        #1c2420;
-      bottom: -0.25em;
-      box-shadow: 4px 0 8px rgba(0, 0, 0, 0.4);
-      content: "";
-      left: -0.5em;
-      position: absolute;
-      top: -0.25em;
-      width: 12em;
-      z-index: -1;
-    }
-
-    .count,
-    .badge-slot {
-      pointer-events: auto;
-    }
-
-    .player-name,
-    .header-name {
-      opacity: 0;
-    }
-  }
-
-  // (the header's piece of it: the scoreboard)
-  section ul.scrolled-x li.player.header-row > div.player-info::before {
-    background: var(--scoreboard-dots), var(--scoreboard);
-    bottom: -0.6em;
-    top: -0.6em;
-  }
-
-  section ul li.player > div.player-info .player-name {
-    transition: opacity 0.15s ease;
   }
 
   section ul li.player:not(.header-row) .badge-slot {
