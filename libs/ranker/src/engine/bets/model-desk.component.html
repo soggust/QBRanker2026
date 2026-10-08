@@ -134,10 +134,11 @@
         </div>
       </card-panel>
 
+      <!-- (the chance it gave its picks against how often they won: close together is honest; once there are
+           graded bets) -->
+      @if (calibration.length) {
       <card-panel class="tab-card group-support" [expandable]="false" label="Calibration" icon="tune">
         <div class="group-body">
-          <!-- (the chance it gave its picks against how often they won: close together is honest) -->
-          @if (calibration.length) {
             <table class="desk-table">
               <thead>
                 <tr>
@@ -158,14 +159,12 @@
                 }
               </tbody>
             </table>
-          } @else {
-            <p class="desk-note">Nothing graded yet.</p>
-          }
         </div>
       </card-panel>
+      }
     </div>
 
-    <card-panel class="tab-card group-results" label="Open Bets" icon="schedule" [startOpen]="true">
+    <card-panel class="tab-card group-results" label="Open Bets" icon="schedule">
       <div class="group-body">
         @if (open.length) {
           <table class="desk-table desk-bets">

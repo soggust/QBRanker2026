@@ -131,6 +131,18 @@ card-panel {
   display: grid;
   gap: 0 12px;
   grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+
+  // (a shorter panel in a row stretches to the tallest, its body with it: the sport's edges, the NFL's
+  // end zone, run all the way down)
+  card-panel {
+    display: flex;
+    flex-direction: column;
+
+    // (the panel's own element: past this component's scoped styles)
+    ::ng-deep > .panel-body {
+      flex: 1;
+    }
+  }
 }
 
 .desk-table {
