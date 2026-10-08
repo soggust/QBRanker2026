@@ -17,6 +17,7 @@ import { CARD_TABS } from '@ranker/engine/player-card/tabs/card-tabs';
 import { CardPanelComponent } from './player-card/card-panel.component';
 import { GameViewComponent } from './game-view/game-view.component';
 import { ColumnHighlightDirective } from '@ranker/core/column-highlight.directive';
+import { ScrolledSidewaysDirective } from '@ranker/core/scrolled-sideways.directive';
 import { COLUMN_MOVER, ColumnDragDirective } from '@ranker/core/column-drag.directive';
 import { SelectOriginDirective } from '@ranker/core/select-origin.directive';
 import { A11Y_DIRECTIVES } from '@ranker/core/a11y.directives';
@@ -38,6 +39,7 @@ import { ModelDeskComponent } from './bets/model-desk.component';
     CardPanelComponent,
     GameViewComponent,
     ColumnHighlightDirective,
+    ScrolledSidewaysDirective,
     ColumnDragDirective,
     SelectOriginDirective,
     ...A11Y_DIRECTIVES,

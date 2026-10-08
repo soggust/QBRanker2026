@@ -3,7 +3,7 @@
   @let groups = visibleGroups;
   <!-- The position tabs (from the app), between the button bar and the grid -->
   <ng-content></ng-content>
-  <ul #rankingsList id="rankings" tabindex="-1" aria-label="Rankings" cdkDropList (cdkDropListDropped)="drop($event)" columnHighlight>
+  <ul #rankingsList id="rankings" tabindex="-1" aria-label="Rankings" cdkDropList (cdkDropListDropped)="drop($event)" columnHighlight scrolledSideways>
     <!-- Column headers (stat groups switch on / off with the sidebar eyes) -->
     <li class="player header-row">
       <mat-icon fontIcon="drag_indicator" class="drag-indicator" style="visibility: hidden"></mat-icon>

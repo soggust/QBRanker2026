@@ -1073,6 +1073,15 @@ section ul li.player.header-row:hover {
       @media (prefers-reduced-motion: reduce) {
         transition: none;
       }
+
+      // (touch: a thumb-sized target around the small icon, the icon the same)
+      @media (pointer: coarse) {
+        &::after {
+          content: "";
+          inset: -12px;
+          position: absolute;
+        }
+      }
     }
 
     // (a collapsed strip's "…" lights up with its icon)
@@ -1290,7 +1299,7 @@ section ul li.empty-list {
     .filter-toggle,
     .settings-toggle,
     .copy-toggle,
-  .share-toggle,
+    .share-toggle,
     .info-toggle {
       height: 36px;
       min-width: 36px;
@@ -1326,6 +1335,56 @@ section ul li.empty-list {
       text-overflow: clip;
       white-space: nowrap;
     }
+  }
+
+  // Scrolled sideways (ScrolledSidewaysDirective): the rank and the card pinned at the left edge on a strip
+  // of board, the name faded (the stats pass under where it was), so every stat keeps its owner beside
+  // it. Nothing changes width, so the list never jumps under a finger.
+  section ul.scrolled-x li.player > div.player-info {
+    left: 0;
+    pointer-events: none;
+    position: sticky;
+    z-index: 3;
+
+    // (the strip: the rank and the card, a little room past it, the row's yard line, a shadow off its edge;
+    // as tall as the row, its padding too)
+    align-self: stretch;
+    height: auto;
+
+    &::before {
+      background:
+        linear-gradient(rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.12)) left bottom / 100% 0.5px no-repeat,
+        #1c2420;
+      bottom: -0.25em;
+      box-shadow: 4px 0 8px rgba(0, 0, 0, 0.4);
+      content: "";
+      left: -0.5em;
+      position: absolute;
+      top: -0.25em;
+      width: 12em;
+      z-index: -1;
+    }
+
+    .count,
+    .badge-slot {
+      pointer-events: auto;
+    }
+
+    .player-name,
+    .header-name {
+      opacity: 0;
+    }
+  }
+
+  // (the header's piece of it: the scoreboard)
+  section ul.scrolled-x li.player.header-row > div.player-info::before {
+    background: var(--scoreboard-dots), var(--scoreboard);
+    bottom: -0.6em;
+    top: -0.6em;
+  }
+
+  section ul li.player > div.player-info .player-name {
+    transition: opacity 0.15s ease;
   }
 
   section ul li.player:not(.header-row) .badge-slot {

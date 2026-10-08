@@ -575,8 +575,17 @@
     width: 78px;
   }
 
+  // (sized to its column, a third of the hero less the board: "Avalanche" fits a 390 phone, and a long
+  // one word ("Timberwolves") breaks with a hyphen rather than running off the card)
+  .game-team {
+    container-type: inline-size;
+  }
+
   .game-team-name {
-    font-size: 18px;
+    font-size: clamp(13px, 17cqi, 18px);
+    hyphens: auto;
+    max-width: 100%;
+    overflow-wrap: break-word;
   }
 
   .game-board {
