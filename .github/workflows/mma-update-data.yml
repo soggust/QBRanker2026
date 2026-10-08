@@ -36,7 +36,11 @@ jobs:
 
       # (the data checked before it's committed: a broken file stays out of master and off the site; npm test)
       - name: Install dependencies
-        run: npm ci
+        # (npm install, not npm ci: GitHub's npm wants lock entries ours resolves without; the lock is put back
+        # as it was, so the commit step's pull --rebase sees a clean tree)
+        run: |
+          npm install
+          git checkout -- package-lock.json
 
       - name: Check the data
         run: npm test

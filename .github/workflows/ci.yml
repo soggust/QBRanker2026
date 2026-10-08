@@ -35,7 +35,7 @@ jobs:
           cache: "npm"
 
       - name: Install dependencies
-        run: npm ci
+        run: npm install
 
       - name: Run tests
         run: npm test
@@ -60,7 +60,7 @@ jobs:
           cache: "npm"
 
       - name: Install dependencies
-        run: npm ci
+        run: npm install
 
       # Production build (angular.json's default configuration), as the deploy builds it. Fails on the
       # build's exit code, and also on any ERROR line in its output (Sass deprecation warnings are fine)
