@@ -850,3 +850,52 @@ $arm-length: 175px;
     animation: none;
   }
 }
+
+// (dev only) The view switch over the panel: the bets or the model desk, two pills; the desk scrolls on
+// its own (the page itself never does)
+.bets-views {
+  align-self: center;
+  display: flex;
+  flex: none;
+  gap: 8px;
+  margin-bottom: 14px;
+
+  button {
+    background: rgba(0, 0, 0, 0.35);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 999px;
+    color: rgba(255, 255, 255, 0.75);
+    cursor: pointer;
+    font: inherit;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    padding: 6px 16px;
+    text-transform: uppercase;
+    transition:
+      color 0.15s,
+      background 0.15s;
+
+    &:hover {
+      color: #fff;
+    }
+
+    &.active {
+      background: rgba(0, 0, 0, 0.6);
+      color: var(--scoreboard-led);
+      outline: 2px solid var(--scoreboard-led);
+      outline-offset: 2px;
+    }
+  }
+}
+
+.bets-page.desk-view {
+  max-width: 1240px;
+
+  model-desk {
+    display: block;
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+  }
+}

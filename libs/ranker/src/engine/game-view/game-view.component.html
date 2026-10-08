@@ -619,7 +619,7 @@
                 <p class="game-video-title">{{ v.title }}</p>
               </div>
               @if (videos.length > 1) {
-                <card-panel class="tab-card group-box" [expandable]="false" label="Clips" icon="smart_display">
+                <card-panel class="tab-card group-box" label="Clips" icon="smart_display">
                   <div class="group-body game-clips">
                     @for (clip of videos; track $index) {
                       <button type="button" class="game-clip" [class.active]="$index === games.video" [title]="clip.title" (click)="games.video = $index">

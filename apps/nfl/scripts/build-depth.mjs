@@ -429,6 +429,32 @@ async function buildSeason(season, players) {
           starting.add(depth[0]);
         }
       }
+      // (a defense its charts never gave a third linebacker or a third down lineman: a nickel defense, its
+      // fifth defensive back the eleventh man; a chart with no nickel listed has its best backup corner
+      // there, else its next safety)
+      const base = [...(now.front === '3-4' ? DEFENSE_34 : DEFENSE_43), ...SECONDARY.filter(([key]) => key !== 'NB12')].filter(([key]) => now.slots.has(key)).length;
+      if (base < 11 && !now.slots.has('NB12')) {
+        const starting = new Set([...now.slots.values()].map((slot) => slot.depth[0]));
+        const backup = ['LCB8', 'RCB11', 'SS9', 'FS10']
+          .flatMap((key) => (now.slots.get(key)?.depth ?? []).slice(1))
+          .find((id) => id && !starting.has(id));
+        if (backup) now.slots.set('NB12', { side: 'defense', key: 'NB12', abb: 'NB', name: 'Nickel Back', depth: [backup] });
+      }
+      // (still short of eleven: each empty spot its unit's best backup, the line's from the line, the
+      // linebackers' from the linebackers, the secondary's from the secondary)
+      const unitOf = (key) => (/^(LDE|RDE|LDT|RDT|NT)/.test(key) ? 'DL' : /LB/.test(key) ? 'LB' : 'DB');
+      const layout = [...(now.front === '3-4' ? DEFENSE_34 : DEFENSE_43), ...SECONDARY.filter(([key]) => key !== 'NB12')];
+      const defenders = () => [...now.slots.values()].filter((slot) => slot.side === 'defense').length;
+      for (const [key, abb, name] of layout) {
+        if (defenders() >= 11) break;
+        if (now.slots.has(key)) continue;
+        const starting = new Set([...now.slots.values()].map((slot) => slot.depth[0]));
+        const backup = [...now.slots.values()]
+          .filter((slot) => slot.side === 'defense' && unitOf(slot.key) === unitOf(key))
+          .flatMap((slot) => slot.depth.slice(1))
+          .find((id) => id && !starting.has(id));
+        if (backup) now.slots.set(key, { side: 'defense', key, abb, name, depth: [backup] });
+      }
       asOf = lastGame;
     }
 

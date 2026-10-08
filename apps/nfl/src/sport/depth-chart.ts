@@ -167,18 +167,29 @@ export async function loadDepthChart(logo: string, position: string, season: num
   const defense = (): DepthSide => {
     const front = file.front ?? '4-3';
     const layout = front === '3-4' ? DEFENSE_34 : DEFENSE_43;
-    const slots: DepthSlot[] = file.slots
-      .filter((s) => s.side === 'defense' && layout[s.key])
-      .map((s) => ({
-        key: s.key,
-        label: s.key === 'NB12' ? 'NICKEL' : s.abb,
-        name: s.name,
-        x: layout[s.key][0],
-        y: layout[s.key][1],
-        sub: s.key === 'NB12',
-        depth: s.depth.map((id) => player(id, 'defense')),
-      }));
-    return { id: 'defense', title: 'Defense', set: `Base ${front}`, los: DEFENSE_LOS, slots };
+    const listed = file.slots.filter((s) => s.side === 'defense' && layout[s.key]);
+    // (a defense whose base has only two linebackers, or two down linemen: a nickel, its fifth defensive
+    // back one of the eleven, and its formation by count, "Nickel 4-2-5")
+    const nickel = listed.some((s) => s.key === 'NB12') && listed.filter((s) => s.key !== 'NB12').length < 11;
+    const unit = (key: string) => (/^(LDE|RDE|LDT|RDT|NT)/.test(key) ? 'DL' : /LB/.test(key) ? 'LB' : 'DB');
+    const count = (u: string) => listed.filter((s) => unit(s.key) === u).length;
+    // (the linebackers left spread evenly across the middle, not a gap where the missing one stood)
+    const backers = listed.filter((s) => unit(s.key) === 'LB');
+    const spread = (s: (typeof listed)[number]): number => {
+      const i = backers.indexOf(s);
+      return i < 0 || !nickel ? layout[s.key][0] : backers.length === 1 ? 50 : 35 + (30 * i) / (backers.length - 1);
+    };
+    const slots: DepthSlot[] = listed.map((s) => ({
+      key: s.key,
+      label: s.key === 'NB12' ? 'NICKEL' : s.abb,
+      name: s.name,
+      x: spread(s),
+      y: layout[s.key][1],
+      sub: s.key === 'NB12' && !nickel,
+      depth: s.depth.map((id) => player(id, 'defense')),
+    }));
+    const set = nickel ? `Nickel ${count('DL')}-${count('LB')}-${count('DB')}` : `Base ${front}`;
+    return { id: 'defense', title: 'Defense', set, los: DEFENSE_LOS, slots };
   };
 
   // An O-Line or Defense card keeps to its own unit: its spots, its players, its changes; a team's

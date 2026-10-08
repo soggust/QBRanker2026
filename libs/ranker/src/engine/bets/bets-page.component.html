@@ -1,10 +1,17 @@
 <!-- Every betting angle in the latest analyses, one row per bet, most confident first; a row opens to its
      reasoning -->
-<div class="bets-page">
-  <!-- The code-only model desk's play-money betting, its record and its changes to itself (dev only) -->
+<div class="bets-page" [class.desk-view]="view === 'desk'">
+  <!-- (dev only: the bets, or the code-only model desk's play-money betting, its record and its changes to
+       itself; one at a time) -->
   @if (dev) {
-    <model-desk></model-desk>
+    <nav class="bets-views" aria-label="View">
+      <button type="button" [class.active]="view === 'bets'" (click)="view = 'bets'">Bets</button>
+      <button type="button" [class.active]="view === 'desk'" (click)="view = 'desk'">Model Desk</button>
+    </nav>
   }
+  @if (view === 'desk') {
+    <model-desk></model-desk>
+  } @else {
   <div class="bets-panel">
     <!-- The game dropdown on the left (when it was updated under it), the filter chips on the right -->
     <header class="bets-head">
@@ -152,4 +159,5 @@
       </span>
     </button>
   </div>
+  }
 </div>
