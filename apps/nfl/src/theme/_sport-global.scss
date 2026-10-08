@@ -1,4 +1,5 @@
 @use "sport-kit" as kit;
+@use "variables" as v;
 
 // NFL theme: field turf, footballs and leather
 // (imported by styles.scss after the shared base, libs/ranker/src/styles/_base.scss)
@@ -29,12 +30,7 @@ $on-leather:
 // The year dropdown and the presets dropdown (instead of scoreboard panels): the rows' pebbled texture
 // and sheen, white text and caret (a drop shadow on the caret: it's a CSS triangle, not text)
 #{kit.$dropdowns} {
-  background:
-    radial-gradient(ellipse at 35% 20%, rgba(255, 255, 255, 0.2), transparent 60%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(0, 0, 0, 0.18)),
-    var(--tex-leather) center / 96px,
-    var(--leather) !important;
-  background-blend-mode: normal, normal, soft-light, normal !important;
+  @include v.leather($important: true);
 
   @include kit.dropdown-text {
     color: #fff !important;
@@ -88,12 +84,7 @@ section footer .mat-mdc-select.season-select {
 
 // The selectable pills (the game view's filters) in the dropdowns' leather, with its welt and white text
 html .game-filter {
-  background:
-    radial-gradient(ellipse at 35% 20%, rgba(255, 255, 255, 0.2), transparent 60%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(0, 0, 0, 0.18)),
-    var(--tex-leather) center / 96px,
-    var(--leather) !important;
-  background-blend-mode: normal, normal, soft-light, normal !important;
+  @include v.leather($important: true);
   border: 1px solid #1a120c !important;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.18),

@@ -385,7 +385,7 @@ $chip-clay: #b0202b;
 // Each row a panel like the card's Analysis sections: a thin edge and a scoreboard bar tinted by its bet's
 // confidence (green high, yellow medium, gray low), the chevron on the left; open, its reasoning below
 .bet {
-  --tint: #9aa0a6;
+  --tint: #{v.$neutral};
   // (its full height in the scrolling list, never squeezed to fit)
   flex-shrink: 0;
   // (its confidence color, the row and its open section washed in it)
@@ -395,7 +395,7 @@ $chip-clay: #b0202b;
   overflow: hidden;
 
   &.high {
-    --tint: #3ecf6e;
+    --tint: #{v.$good};
   }
 
   &.medium {
@@ -479,7 +479,7 @@ $chip-clay: #b0202b;
   text-transform: uppercase;
 
   &.like {
-    background: #3ecf6e;
+    background: v.$good;
   }
 
   &.lean {
@@ -487,7 +487,7 @@ $chip-clay: #b0202b;
   }
 
   &.fade {
-    background: #ff5a4f;
+    background: v.$bad;
   }
 
 }

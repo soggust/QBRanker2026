@@ -10,7 +10,7 @@ $footer-buttons: "section footer .filter-toggle, section footer .settings-toggle
 
 // The filter menu's Reset and Clear All, in every state
 // (and the selectable pills, in the same hide: the game view's filters, All Plays / Scoring and the chart's
-// team; the chosen one ringed in the accent, game-view.scss)
+// team; the chosen one ringed in the accent: .game-filter in player-card.scss)
 $menu-buttons: ".sidebar footer button, .sidebar footer button.negative, .sidebar footer button:hover, .sidebar footer button.negative:hover, .game-filter, .game-filter:hover, .game-filter.active";
 
 // A grid button whose panel is open, and any button pressed (open or hovered)

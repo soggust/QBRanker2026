@@ -1,7 +1,10 @@
 import { Injectable } from '@angular/core';
 import { SPORT } from '@sport/sport';
 import { espnTeamId, findEspnTeamId } from '@ranker/core/game-logs';
-import { GameView, GameWeather, TeamResult, findGame, findGameOn, loadGame, loadWeather, nthMeeting, teamResults, venuePhoto } from './game';
+import { TeamResult, findGame, findGameOn, nthMeeting, teamResults } from './find-game';
+import { loadGame } from './game';
+import { GameView } from './game.model';
+import { GameWeather, loadWeather, venuePhoto } from './venue';
 
 // Which game to open: ESPN's id (a game log's row), a date and a team in it (a row without one), or a
 // Recent dot (its team, the opponent and where, the season, and which meeting: 0 the latest)

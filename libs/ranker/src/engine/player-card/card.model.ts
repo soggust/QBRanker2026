@@ -1,4 +1,4 @@
-// The player card's data (click a name): built by player-card.ts, drawn by the player card component
+// The player card's data (click a name): built by player-cards.ts, drawn by the player card component
 import { SkillPlayer, SkillPosition } from '@sport/positions';
 import { AwardWin } from '@sport/awards';
 import { CardFlag } from '@ranker/engine/sport';

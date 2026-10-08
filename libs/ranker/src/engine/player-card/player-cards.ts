@@ -25,7 +25,7 @@ import { radar, radarShape } from './radar';
 import { GameLogView, gameLogView } from './game-log-view';
 import { PlayerAnalysis, analysisIndex, loadAnalysis } from './analysis';
 import { espnTeamNames, espnUpcoming } from '@ranker/core/game-logs';
-import { heroColor } from '../game-view/game';
+import { heroColor } from '../game-view/team-color';
 
 // What the card needs from the table it opens from
 export interface CardHost {
@@ -85,10 +85,8 @@ export class PlayerCards {
     return this.onTable ? this.host.stats : SKILL_STATS[this.position];
   }
 
-  // Seasons only when they're in more than one (shown while loading; never for a career-only sport),
-  // and the sport's history tab when it has one (SPORT.cardHistory: MMA's fights)
-  // Overview, Analysis (when written up), Season, Game Log (the season being played), Career ("History"
-  // for a team, a defense or a line)
+  // The card's tabs: Overview, Analysis (when written up), Team, Stats, Zones, Game Log and Seasons or
+  // History (a team's, a defense's or a line's; the sport's own history tab when it has one: MMA's fights)
   tabsFor(card: PlayerCard): { id: CardTab; title: string }[] {
     const [overview, stats, seasons] = TABS;
     const tabs: { id: CardTab; title: string }[] = [overview];

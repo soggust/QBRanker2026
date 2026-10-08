@@ -11,10 +11,7 @@
 }
 
 // Scrollbars 10px, like the filter menu's and the grid's (their colors are global: _base.scss)
-::-webkit-scrollbar {
-  height: 10px;
-  width: 10px;
-}
+@include v.scrollbars($corner: false);
 
 .about-backdrop {
   animation: about-fade 0.15s ease;
@@ -135,9 +132,7 @@ nav {
     }
 
     &.active {
-      @include v.lit-dots;
-      color: var(--scoreboard-led);
-      text-shadow: var(--scoreboard-glow);
+      @include v.lit-tab;
     }
   }
 }

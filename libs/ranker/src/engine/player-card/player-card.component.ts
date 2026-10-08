@@ -14,8 +14,8 @@ import type { GameLogViewRow } from './game-log-view';
 import { ZoneStat, ZoneView, pitchColor } from './zones';
 
 // The player card: a scoreboard panel over the dimmed page, the hero (team card, name, awards, overall
-// rank) over the Overview, Stats, Seasons and the sport's history tab. Arrow keys flip through the
-// list, Escape closes it.
+// rank) over its tabs (PlayerCards.tabsFor: Overview, Analysis, Team, Stats, Zones, Game Log, the history).
+// Escape closes it.
 @Component({
   selector: 'player-card',
   templateUrl: './player-card.component.html',

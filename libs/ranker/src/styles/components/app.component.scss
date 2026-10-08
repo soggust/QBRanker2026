@@ -236,9 +236,7 @@ main {
     }
 
     &.active {
-      @include v.lit-dots;
-      color: var(--scoreboard-led);
-      text-shadow: var(--scoreboard-glow);
+      @include v.lit-tab;
     }
 
     // The position's name, or (below 1750px, where nine names don't fit) its abbreviation

@@ -31,14 +31,7 @@
 }
 
 // Scrollbars 10px, like the grid's (their colors are global: _base.scss)
-::-webkit-scrollbar {
-  height: 10px;
-  width: 10px;
-}
-
-::-webkit-scrollbar-corner {
-  background: transparent;
-}
+@include v.scrollbars;
 
 // (set aside while a game opened from it is showing: hidden but kept, its tab and scroll as they were)
 .card-backdrop.suspended,
@@ -431,9 +424,7 @@
     }
 
     &.active {
-      @include v.lit-dots;
-      color: var(--scoreboard-led);
-      text-shadow: var(--scoreboard-glow);
+      @include v.lit-tab;
     }
   }
 }
@@ -928,15 +919,15 @@
   width: 17px;
 
   &.W {
-    background: #3ecf6e;
+    background: v.$good;
   }
 
   &.L {
-    background: #ff5a4f;
+    background: v.$bad;
   }
 
   &.T {
-    background: #9aa0a6;
+    background: v.$neutral;
   }
 
   &:hover:not(:disabled) {
@@ -1244,15 +1235,15 @@
   text-align: center;
 
   &.win {
-    background: #3ecf6e;
+    background: v.$good;
   }
 
   &.loss {
-    background: #ff5a4f;
+    background: v.$bad;
   }
 
   &.draw {
-    background: #9aa0a6;
+    background: v.$neutral;
   }
 }
 
@@ -1537,12 +1528,12 @@
   width: 6px;
 
   &.plus {
-    background: #3ecf6e;
+    background: v.$good;
     box-shadow: 0 0 4px rgba(62, 207, 110, 0.6);
   }
 
   &.minus {
-    background: #ff5a4f;
+    background: v.$bad;
     box-shadow: 0 0 4px rgba(255, 90, 79, 0.6);
   }
 }
@@ -1631,17 +1622,17 @@
 
 .log-bar.single.W .seg-0,
 .log-chart.diverging .log-bar.W .seg-0 {
-  --log-seg-0: #3ecf6e;
+  --log-seg-0: #{v.$good};
 }
 
 .log-bar.single.L .seg-0,
 .log-chart.diverging .log-bar.L .seg-0 {
-  --log-seg-0: #ff5a4f;
+  --log-seg-0: #{v.$bad};
 }
 
 // the result under each bar (stacked bars, whose colors are the pieces)
 .log-outcome-tick {
-  background: #9aa0a6;
+  background: v.$neutral;
   border-radius: 1px;
   flex: none;
   height: 3px;
@@ -1649,11 +1640,11 @@
   width: 100%;
 
   &.W {
-    background: #3ecf6e;
+    background: v.$good;
   }
 
   &.L {
-    background: #ff5a4f;
+    background: v.$bad;
   }
 }
 
@@ -1792,9 +1783,11 @@
     padding: 0;
     text-align: left;
     white-space: nowrap;
+    @include v.link-fade;
 
-    &:hover:not(:disabled) {
-      color: var(--scoreboard-led);
+    &:hover:not(:disabled),
+    &:focus-visible {
+      @include v.link-lit;
     }
 
     &:disabled {
@@ -1841,15 +1834,15 @@
     width: 17px;
 
     &.W {
-      background: #3ecf6e;
+      background: v.$good;
     }
 
     &.L {
-      background: #ff5a4f;
+      background: v.$bad;
     }
 
     &.T {
-      background: #9aa0a6;
+      background: v.$neutral;
     }
   }
 
@@ -1998,7 +1991,7 @@
   }
 
   &.strengths h4 {
-    --group-color: #3ecf6e;
+    --group-color: #{v.$good};
   }
 
   &.concerns h4 {
@@ -2019,7 +2012,7 @@
   }
 
   .strengths & {
-    --point: #3ecf6e;
+    --point: #{v.$good};
   }
 
   .concerns & {
@@ -2133,7 +2126,7 @@
   }
 
   &.rising b {
-    background: #3ecf6e;
+    background: v.$good;
   }
 
   &.falling b {
@@ -2141,7 +2134,7 @@
   }
 
   &.steady b {
-    background: #9aa0a6;
+    background: v.$neutral;
   }
 
   &.volatile b {
@@ -2167,7 +2160,7 @@
   text-transform: uppercase;
 
   &.favorable {
-    background: #3ecf6e;
+    background: v.$good;
   }
 
   &.tough {
@@ -2175,7 +2168,7 @@
   }
 
   &.neutral {
-    background: #9aa0a6;
+    background: v.$neutral;
   }
 }
 
@@ -2296,8 +2289,8 @@
 
   // like green, lean yellow, fade red
   &.like {
-    background: #3ecf6e;
-    border-color: #3ecf6e;
+    background: v.$good;
+    border-color: v.$good;
     color: #111;
   }
 
@@ -2308,8 +2301,8 @@
   }
 
   &.fade {
-    background: #ff5a4f;
-    border-color: #ff5a4f;
+    background: v.$bad;
+    border-color: v.$bad;
     color: #111;
   }
 }
@@ -2345,10 +2338,6 @@
 }
 
 @media (max-width: 700px) {
-  .ai-columns {
-    grid-template-columns: 1fr;
-  }
-
   .ai-card .group-body {
     padding: 12px 14px 14px;
   }
@@ -2569,7 +2558,7 @@
   }
 
   &.s-o {
-    background: #ff5a4f;
+    background: v.$bad;
     color: #fff;
   }
 
@@ -2910,11 +2899,11 @@
   letter-spacing: inherit;
   padding: 0;
   text-align: left;
-  transition: color 0.15s;
+  @include v.link-fade;
 
-  &:hover,
+  &:hover:not(:disabled),
   &:focus-visible {
-    color: var(--scoreboard-led);
+    @include v.link-lit;
   }
 }
 
@@ -3113,21 +3102,5 @@
 
   &:hover {
     filter: brightness(1.25);
-  }
-}
-
-// Every link's hover, the same everywhere: lit in the board's light with a soft glow (a result or a game's time,
-// already in that light, still answers the pointer)
-.depth-link,
-.log-team,
-.log-game {
-  transition:
-    color 0.15s,
-    text-shadow 0.15s;
-
-  &:hover:not(:disabled),
-  &:focus-visible {
-    color: var(--scoreboard-led);
-    text-shadow: 0 0 8px color-mix(in srgb, var(--scoreboard-led) 65%, transparent);
   }
 }

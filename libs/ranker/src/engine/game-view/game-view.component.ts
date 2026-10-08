@@ -6,7 +6,8 @@ import { logoForSeason } from '@sport/logo-eras';
 import { SKILL_UNITS } from '@ranker/engine/unit-scoring';
 import { pitchColor } from '../player-card/zones';
 import { HOME, TracedPark, fieldSpot, loadTracedParks, tracedPark, wallPath } from './parks';
-import { GameArsenal, GameChart, GameFantasy, GameMark, GamePitch, GameTeam, GameView, GameWeather } from './game';
+import { GameArsenal, GameChart, GameFantasy, GameMark, GamePitch, GameTeam, GameView } from './game.model';
+import { GameWeather } from './venue';
 import { PositionService } from '../position.service';
 
 import { GameTab, GameViewService } from './game-view.service';
@@ -14,10 +15,11 @@ import { GameTab, GameViewService } from './game-view.service';
 // The game view: a game over the page (in place of a player card it was opened from: the card is set
 // aside, and closing the game brings it back as it was), in the player
 // card's look (its stylesheet, plus this one's). Its hero is the two teams and the final on the
-// scoreboard; its tabs the Summary (the score by period, the win probability, the leaders), the Box Score
-// (the team stats side by side, every player's line), the Plays (the NFL's drives, the other sports'
-// periods), Fantasy (each player's points from his line) and Game Info (the venue, weather, line,
-// officials). Escape closes it.
+// scoreboard; its tabs (tabsFor) the Summary (the score by period, the win probability, the leaders), the
+// Box Score (the team stats side by side, every player's line), the Plays (the NFL's drives, the other
+// sports' periods), the Chart (shots, balls in play or drives), MLB's Pitches, Fantasy (each player's
+// points from his line) and Game Info (the venue, weather, line, officials); a game not played yet its
+// Preview and Injuries instead. Escape closes it.
 @Component({
   selector: 'game-view',
   templateUrl: './game-view.component.html',
