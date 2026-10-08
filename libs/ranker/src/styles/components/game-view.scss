@@ -354,14 +354,6 @@
   }
 }
 
-.game-play-logo {
-  align-self: center;
-  flex: none;
-  height: 20px;
-  object-fit: contain;
-  width: 20px;
-}
-
 .game-play-clock {
   color: rgba(255, 255, 255, 0.5);
   flex: none;
@@ -681,12 +673,6 @@
   }
 }
 
-.game-fantasy-note {
-  color: rgba(255, 255, 255, 0.45);
-  font-size: 11px;
-  margin: 12px 0 0;
-}
-
 // ---- the chart: a surface in chalk with each team's marks (made or a goal filled in its color, missed
 // hollow), or the NFL's drives across a field and its passes by zone
 
@@ -961,12 +947,6 @@
 
 .predictor-bar {
   height: 10px;
-}
-
-.game-line.flush {
-  border-top: none;
-  margin-top: 0;
-  padding-top: 0;
 }
 
 // (a team's last five: each a row that opens its game)

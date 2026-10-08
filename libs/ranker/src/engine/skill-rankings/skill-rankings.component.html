@@ -26,7 +26,7 @@
               <mat-icon class="group-icon" [fontIcon]="group.icon" [title]="collapseTitle(group)" (click)="toggleCollapsed(group.id, $event)"></mat-icon>
               @for (stat of group.stats; track stat.key) {
                 <div [columnDrag]="{ list: position + '.' + group.id, id: columnId(stat) }">
-                  <p class="stat-label" [title]="labelTitle(stat)">{{ labelParts(stat)[0] }}@if (labelParts(stat)[1]; as tag) {<span class="label-tag">{{ ' ' + tag }}</span>}</p>
+                  @let parts = labelParts(stat);<p class="stat-label" [title]="labelTitle(stat)">{{ parts[0] }}@if (parts[1]; as tag) {<span class="label-tag">{{ ' ' + tag }}</span>}</p>
                 </div>
               }
             </div>
@@ -39,7 +39,7 @@
                   }
                   <div class="last-five">
                     <div></div>
-                    <p class="stat-label" [title]="labelTitle(stat)">{{ labelParts(stat)[0] }}@if (labelParts(stat)[1]; as tag) {<span class="label-tag">{{ ' ' + tag }}</span>}</p>
+                    @let parts = labelParts(stat);<p class="stat-label" [title]="labelTitle(stat)">{{ parts[0] }}@if (parts[1]; as tag) {<span class="label-tag">{{ ' ' + tag }}</span>}</p>
                   </div>
                 </div>
               } @else {
@@ -47,7 +47,7 @@
                   @if (first) {
                     <mat-icon class="group-icon" [fontIcon]="group.icon" [title]="collapseTitle(group)" (click)="toggleCollapsed(group.id, $event)"></mat-icon>
                   }
-                  <p class="stat-label" [title]="labelTitle(stat)">{{ labelParts(stat)[0] }}@if (labelParts(stat)[1]; as tag) {<span class="label-tag">{{ ' ' + tag }}</span>}</p>
+                  @let parts = labelParts(stat);<p class="stat-label" [title]="labelTitle(stat)">{{ parts[0] }}@if (parts[1]; as tag) {<span class="label-tag">{{ ' ' + tag }}</span>}</p>
                 </div>
               }
             }

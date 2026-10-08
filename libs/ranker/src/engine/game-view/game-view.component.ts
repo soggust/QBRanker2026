@@ -1,5 +1,6 @@
 import { Component, HostListener } from '@angular/core';
 import { SPORT } from '@sport/sport';
+import { extras } from '@ranker/engine/row-fields';
 import { badgeColor, whiteLogo } from '@sport/team-colors';
 import { logoForSeason } from '@sport/logo-eras';
 import { SKILL_UNITS } from '@ranker/engine/unit-scoring';
@@ -68,7 +69,7 @@ export class GameViewComponent {
       this.siteLogos = new Map();
       for (const [pos, list] of Object.entries(SKILL_UNITS)) {
         for (const p of list ?? []) {
-          const name = (p as { teamName?: string | null }).teamName;
+          const name = extras(p).teamName;
           if (name) this.siteLogos.set(name.toLowerCase(), p.teamLogo);
           if (SPORT.teamTabs?.includes(pos)) this.siteLogos.set(p.name.toLowerCase(), p.teamLogo);
         }
@@ -201,23 +202,15 @@ export class GameViewComponent {
     return 'arsenals' in chart ? chart.arsenals.filter((a) => (side === 'both' || a.side === side) && (!one || a.pitcher === one)) : [];
   }
 
-  // The pitchers on the team filter's side(s), each with his team's color, for the pills
-  pitchers(chart: GameChart, game: GameView): { name: string; color: string }[] {
+  // The pitchers on the team filter's side(s), for the dropdown
+  pitcherNames(chart: GameChart): string[] {
     const side = this.games.chartSide;
-    return 'arsenals' in chart
-      ? chart.arsenals.filter((a) => side === 'both' || a.side === side).map((a) => ({ name: a.pitcher, color: (a.side === 'away' ? game.away : game.home).color }))
-      : [];
+    return 'arsenals' in chart ? chart.arsenals.filter((a) => side === 'both' || a.side === side).map((a) => a.pitcher) : [];
   }
 
   // A pitch's height on the chart: ESPN's, stretched from the chart's top (its heights run squashed)
   py(y: number): number {
     return 100 + (y - 100) * 1.6;
-  }
-
-  // "Max Fried" -> "M. Fried" (a pill's; its hover the whole name)
-  shortName(name: string): string {
-    const [first, ...rest] = name.split(' ');
-    return rest.length ? `${first[0]}. ${rest.join(' ')}` : name;
   }
 
   // What the pitch chart shows: the pitcher picked, a team's, or both
@@ -228,8 +221,8 @@ export class GameViewComponent {
   }
 
   // (a player picked from the dropdown, or none: everyone)
-  pickPlayer(name: string): void {
-    this.games.player = name || null;
+  pickPlayer(event: Event): void {
+    this.games.player = (event.target as HTMLSelectElement).value || null;
   }
 
   // The chart's shooters or hitters on the team pills' side, the busiest first

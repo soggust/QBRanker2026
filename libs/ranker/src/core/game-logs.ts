@@ -1,4 +1,5 @@
 import type { GameLog, GameLogChart, GameLogColumn, GameLogRow, UpcomingGame } from '@ranker/engine/sport';
+import { fetchJson, memo } from '@ranker/core/http';
 
 // Game logs for the card's Game Log tab, read live from the leagues' public APIs when the tab opens:
 // ESPN's (the NFL and NBA players by their ESPN ids, and every sport's teams) and MLB's stats API. Both
@@ -318,6 +319,13 @@ export function espnTeamNames(league: string, abbreviation: string): string[] {
 }
 
 export function espnTeamId(league: string, names: (string | undefined)[]): string {
+  const id = findEspnTeamId(league, names);
+  if (id === null) throw new Error(`no ESPN team for ${names.join(' / ')}`);
+  return id;
+}
+
+// (null when none matches: for the places that just do without)
+export function findEspnTeamId(league: string, names: (string | undefined)[]): string | null {
   const teams = ESPN_TEAMS[league] ?? [];
   const wanted = names.filter((n): n is string => !!n).map((n) => NICKNAMES[n.toLowerCase()] ?? n.toLowerCase());
   for (const name of wanted) {
@@ -325,10 +333,10 @@ export function espnTeamId(league: string, names: (string | undefined)[]): strin
     const team = teams.find((t) => t.slice(1).some((x) => x.toLowerCase() === name));
     if (team) return team[0];
   }
-  throw new Error(`no ESPN team for ${names.join(' / ')}`);
+  return null;
 }
 
-interface EspnScheduleEvent {
+export interface EspnScheduleEvent {
   id: string;
   date: string;
   seasonType?: { type?: number };
@@ -346,23 +354,17 @@ interface EspnScheduleEvent {
   }[];
 }
 
-// A team's schedule this season, regular season and playoffs (each team's asked once a visit)
+export const ESPN_API = 'https://site.api.espn.com/apis/site/v2/sports';
+
+// A team's schedule this season, regular season and playoffs (each team's asked once a visit, for its
+// game log, its games to come, its Recent squares and the game view alike)
 const schedules = new Map<string, Promise<EspnScheduleEvent[]>>();
-function espnSchedule(league: string, id: string, season: number): Promise<EspnScheduleEvent[]> {
-  const key = `${league}/${id}/${season}`;
-  if (!schedules.has(key)) {
-    schedules.set(
-      key,
-      Promise.all(
-        [2, 3].map((type) =>
-          fetch(`https://site.api.espn.com/apis/site/v2/sports/${league}/teams/${id}/schedule?season=${season}&seasontype=${type}`)
-            .then((res) => (res.ok ? res.json() : { events: [] }))
-            .catch(() => ({ events: [] })),
-        ),
-      ).then((pages) => pages.flatMap((p) => (p.events ?? []) as EspnScheduleEvent[])),
-    );
-  }
-  return schedules.get(key)!;
+export function espnSchedule(league: string, id: string, season: number): Promise<EspnScheduleEvent[]> {
+  return memo(schedules, `${league}/${id}/${season}`, () =>
+    Promise.all(
+      [2, 3].map((type) => fetchJson<{ events?: EspnScheduleEvent[] }>(`${ESPN_API}/${league}/teams/${id}/schedule?season=${season}&seasontype=${type}`, { events: [] })),
+    ).then((pages) => pages.flatMap((p) => p.events ?? [])),
+  );
 }
 
 // A team's games this season, newest first: PF, PA, the record after the game and its leader (the first
@@ -417,17 +419,11 @@ interface EspnOdds {
 const boards = new Map<string, Promise<Map<string, EspnOdds>>>();
 function oddsOn(league: string, date: Date): Promise<Map<string, EspnOdds>> {
   const day = date.toLocaleDateString('en-CA', { timeZone: 'America/New_York' }).replace(/-/g, '');
-  const key = `${league}/${day}`;
-  if (!boards.has(key)) {
-    boards.set(
-      key,
-      fetch(`https://site.api.espn.com/apis/site/v2/sports/${league}/scoreboard?dates=${day}`)
-        .then((res) => (res.ok ? res.json() : { events: [] }))
-        .then((data) => new Map<string, EspnOdds>((data.events ?? []).map((e: { id: string; competitions?: { odds?: EspnOdds[] }[] }) => [e.id, e.competitions?.[0]?.odds?.[0] ?? {}])))
-        .catch(() => new Map<string, EspnOdds>()),
-    );
-  }
-  return boards.get(key)!;
+  return memo(boards, `${league}/${day}`, () =>
+    fetchJson<{ events?: { id: string; competitions?: { odds?: EspnOdds[] }[] }[] }>(`${ESPN_API}/${league}/scoreboard?dates=${day}`, { events: [] }).then(
+      (data) => new Map<string, EspnOdds>((data.events ?? []).map((e) => [e.id, e.competitions?.[0]?.odds?.[0] ?? {}])),
+    ),
+  );
 }
 
 // The rest of a row's team's season (by the names it knows, as for its log), soonest first; the games in

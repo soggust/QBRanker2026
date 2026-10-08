@@ -14,6 +14,7 @@ import {
 } from '@sport/positions';
 import { AWARD_INFO, AwardWin, awardsFor } from '@sport/awards';
 import { SPORT } from '@sport/sport';
+import { extras, rowTeamNames } from '@ranker/engine/row-fields';
 import { badgeColor, whiteLogo } from '@sport/team-colors';
 import { logoForSeason } from '@sport/logo-eras';
 import { SportSetting, SportSettings } from '@ranker/engine/sport';
@@ -475,7 +476,7 @@ export class SkillRankingsComponent implements OnChanges, CardHost {
   // A Recent dot: its game (the row's team's nth meeting with that opponent, newest first)
   openRecent(player: SkillPlayer, index: number, event: Event): void {
     if (!this.games.available) return;
-    const vs = (player as { lastFiveVs?: (string | null)[] }).lastFiveVs;
+    const vs = extras(player).lastFiveVs;
     const ref = recentRef(this.recentTeam(player), vs, index, this.season);
     if (!ref) return;
     event.stopPropagation();
@@ -490,13 +491,13 @@ export class SkillRankingsComponent implements OnChanges, CardHost {
 
   // A row's team, by the names the row knows (its team's name, its own, its logo's file)
   recentTeam(player: SkillPlayer): (string | undefined)[] {
-    return [(player as { teamName?: string | null }).teamName ?? undefined, player.name, player.teamLogo?.match(/([^/]+)\.\w+$/)?.[1]];
+    return rowTeamNames(player);
   }
 
   // A Recent square's hover: "W 24-17 @ Miami Dolphins" (the score once the team's results are in)
   dotTitle(player: SkillPlayer, index: number): string {
     const title = this.reader.recentTitle(player, index);
-    const vs = (player as { lastFiveVs?: (string | null)[] }).lastFiveVs;
+    const vs = extras(player).lastFiveVs;
     const score = this.games.recentScore(this.recentTeam(player), vs, index, this.season);
     return score ? title.replace(/^(\S+)/, `$1 ${score}`) : title;
   }

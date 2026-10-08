@@ -2,6 +2,7 @@
 // any betting angles (written nightly by the sport's analysis script, from his numbers only: e.g.
 // apps/nfl/scripts/analysis). The site reads the index of who has one, then a player's file when the tab
 // opens.
+import { fetchJson } from '@ranker/core/http';
 
 // A number behind a point: its name, the value, its rank in the position this season (when ranked)
 export interface AnalysisEvidence {
@@ -46,9 +47,7 @@ export interface PlayerAnalysis {
 // The written-up players: row id -> its file (loaded once a visit; empty when there are none)
 let index: Promise<Record<string, string>> | null = null;
 export function analysisIndex(): Promise<Record<string, string>> {
-  index ??= fetch('data/analysis/index.json', { cache: 'no-cache' })
-    .then((res) => (res.ok ? res.json() : {}))
-    .catch(() => ({}));
+  index ??= fetchJson<Record<string, string>>('data/analysis/index.json', {}, { cache: 'no-cache' });
   return index;
 }
 

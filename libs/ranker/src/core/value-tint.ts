@@ -27,12 +27,3 @@ export function tintFrom(value: number | null, scale: TintScale | null, lowerIsB
   return `color-mix(in srgb, ${hue} ${strength}%, var(--tint-base, #fff))`;
 }
 
-export function tintColor(value: number | null, values: (number | null)[], lowerIsBetter = false): string | null {
-  return tintFrom(value, tintScale(values), lowerIsBetter);
-}
-
-// The list average the tint is centered on (null when nothing to compare)
-export function tintAverage(values: (number | null)[]): number | null {
-  const known = values.filter((v): v is number => v !== null && !Number.isNaN(v));
-  return known.length ? known.reduce((a, b) => a + b, 0) / known.length : null;
-}

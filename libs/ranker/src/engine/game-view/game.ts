@@ -8,7 +8,8 @@
 // A game is found by ESPN's event id when the page has it (a game log's row), or by its team, season
 // and opponent (a Recent dot: the nth game against that opponent, newest first, on the team's schedule).
 
-import { espnTeamId } from '@ranker/core/game-logs';
+import { ESPN_API, espnSchedule, findEspnTeamId } from '@ranker/core/game-logs';
+import { fetchJson, memo } from '@ranker/core/http';
 
 // ---- what the view shows
 
@@ -169,7 +170,6 @@ export interface GameView {
   status: string;
   // "Week 5", "Wild Card", "World Series - Game 3"
   label: string | null;
-  neutral: boolean;
   away: GameTeam;
   home: GameTeam;
   periodLabels: string[];
@@ -186,12 +186,9 @@ export interface GameView {
   box: { side: 'away' | 'home'; groups: GameBoxGroup[] }[];
   // the chart (none when the play-by-play doesn't place anything)
   chart: GameChart | null;
-  // each player's fantasy points from his line (the sport's usual scoring), best first, and the scoring
+  // each player's fantasy points from his line, best first (the component scores catches by the setting)
   fantasy: GameFantasy[];
-  fantasyScoring: string;
   plays: GamePlayGroup[];
-  // the plays are drives (the NFL's)
-  drives: boolean;
 }
 
 // ---- ESPN's game summary, the parts read
@@ -310,21 +307,12 @@ interface EspnSummary {
   };
 }
 
-const API = 'https://site.api.espn.com/apis/site/v2/sports';
+const API = ESPN_API;
 
 // ---- finding a game
 
 // A Recent dot's game: its team's nth game against that opponent (home or away), newest first, among the
 // season's finished games (the regular season's and the playoffs')
-interface ScheduleEvent {
-  id: string;
-  date: string;
-  competitions: {
-    status?: { type?: { completed?: boolean } };
-    competitors: { homeAway: 'home' | 'away'; team: { id: string }; score?: { value?: number; displayValue?: string } }[];
-  }[];
-}
-
 // A team's finished games that season, newest first (the regular season's and the playoffs'): each one's
 // id, its opponent and where, and the score the team's way ("24-17"); read once a visit
 export interface TeamResult {
@@ -335,19 +323,9 @@ export interface TeamResult {
 }
 const results = new Map<string, Promise<TeamResult[]>>();
 export function teamResults(league: string, teamId: string, season: number): Promise<TeamResult[]> {
-  const key = `${league}/${teamId}/${season}`;
-  if (!results.has(key)) {
-    results.set(
-      key,
-      Promise.all(
-        [2, 3].map((type) =>
-          fetch(`${API}/${league}/teams/${teamId}/schedule?season=${season}&seasontype=${type}`)
-            .then((r) => (r.ok ? r.json() : { events: [] }))
-            .catch(() => ({ events: [] })),
-        ),
-      ).then((pages) =>
-        pages
-          .flatMap((p) => (p.events ?? []) as ScheduleEvent[])
+  return memo(results, `${league}/${teamId}/${season}`, () =>
+    espnSchedule(league, teamId, season).then((events) =>
+        events
           .filter((e) => e.competitions[0]?.status?.type?.completed)
           .sort((a, b) => b.date.localeCompare(a.date))
           .map((e) => {
@@ -356,10 +334,8 @@ export function teamResults(league: string, teamId: string, season: number): Pro
             const points = (c: typeof us) => c?.score?.displayValue ?? String(c?.score?.value ?? '');
             return { event: e.id, opponent: them?.team.id ?? '', home: us?.homeAway === 'home', score: `${points(us)}-${points(them)}` };
           }),
-      ),
-    );
-  }
-  return results.get(key)!;
+    ),
+  );
 }
 
 // The nth game against an opponent (home or away), newest first: a Recent dot's
@@ -382,11 +358,9 @@ export async function findGame(
 // logs): that day's scoreboard, the game with that team's abbreviation or name
 export async function findGameOn(league: string, date: string, names: string[]): Promise<string | null> {
   const day = date.slice(0, 10).replace(/-/g, '');
-  const board = await fetch(`${API}/${league}/scoreboard?dates=${day}`)
-    .then((r) => (r.ok ? r.json() : null))
-    .catch(() => null);
+  const board = await fetchJson<{ events?: { id: string; competitions: { competitors: { team: EspnTeamRef }[] }[] }[] }>(`${API}/${league}/scoreboard?dates=${day}`, {});
   const wanted = names.map((n) => n.toLowerCase());
-  const events = (board?.events ?? []) as { id: string; competitions: { competitors: { team: EspnTeamRef }[] }[] }[];
+  const events = board.events ?? [];
   const event = events.find((e) =>
     e.competitions[0]?.competitors.some((c) =>
       [c.team.abbreviation, c.team.displayName, c.team.shortDisplayName, c.team.name].some((x) => x && wanted.includes(x.toLowerCase())),
@@ -397,6 +371,8 @@ export async function findGameOn(league: string, date: string, names: string[]):
 
 // ---- reading it
 
+// (the away team's first, as the score reads)
+const awayFirst = (a: { side: 'away' | 'home' | null }, b: { side: 'away' | 'home' | null }): number => (a.side === b.side ? 0 : a.side === 'away' ? -1 : 1);
 const headshotOf = (a: EspnAthlete | undefined): string | null => (typeof a?.headshot === 'string' ? a.headshot : (a?.headshot?.href ?? null));
 const logoOf = (t: EspnTeamRef | undefined): string | null => t?.logos?.[0]?.href ?? t?.logo ?? null;
 const numberOf = (text: string): number | null => {
@@ -500,7 +476,7 @@ export async function loadGame(league: string, eventId: string): Promise<GameVie
         .filter((r): r is GameLeader => !!r),
     }))
     .filter((t): t is { side: 'away' | 'home'; rows: GameLeader[] } => !!t.side && t.rows.length > 0)
-    .sort((a) => (a.side === 'away' ? -1 : 1));
+    .sort(awayFirst);
 
   // The team stats side by side (MLB's in groups: its batting and fielding lines that matter)
   const MLB_STATS = ['R', 'H', 'HR', 'RBI', 'BB', 'K', 'SB', 'LOB', 'E'];
@@ -554,7 +530,7 @@ export async function loadGame(league: string, eventId: string): Promise<GameVie
         })),
     }))
     .filter((t): t is { side: 'away' | 'home'; groups: GameBoxGroup[] } => !!t.side)
-    .sort((a) => (a.side === 'away' ? -1 : 1));
+    .sort(awayFirst);
 
   // The players' headshots by ESPN id, and by the play-by-play's short name ("D.Henry")
   const shortKey = (name: string) => name.toLowerCase().replace(/[\s.]/g, '');
@@ -609,9 +585,9 @@ export async function loadGame(league: string, eventId: string): Promise<GameVie
   };
 
   let plays: GamePlayGroup[] = [];
-  const drives = !!s.drives?.previous?.length;
-  if (drives) {
-    plays = s.drives!.previous!.map((d) => {
+  const drives = s.drives?.previous ?? [];
+  if (drives.length) {
+    plays = drives.map((d) => {
       const side = sideOf(d.team?.id);
       return {
         title: `${d.team?.abbreviation ?? ''} · Q${d.start?.period?.number ?? ''} ${d.start?.clock?.displayValue ?? ''}`.trim(),
@@ -647,7 +623,7 @@ export async function loadGame(league: string, eventId: string): Promise<GameVie
   const fantasy = fantasyPoints(league, box);
   if (!leaders.length) {
     for (const side of ['away', 'home'] as const) {
-      const rows = fantasy.fantasy
+      const rows = fantasy
         .filter((p) => p.side === side)
         .slice(0, 3)
         .map((p) => ({ category: p.position ?? '', name: p.name, short: p.name, line: p.parts.join(', '), headshot: p.headshot }));
@@ -677,7 +653,7 @@ export async function loadGame(league: string, eventId: string): Promise<GameVie
       })),
     }))
     .filter((t): t is GameView['injuries'][number] => !!t.side && t.rows.length > 0)
-    .sort((a) => (a.side === 'away' ? -1 : 1));
+    .sort(awayFirst);
   const form = (s.lastFiveGames ?? [])
     .map((t) => ({
       side: sideOf(t.team?.id),
@@ -690,7 +666,7 @@ export async function loadGame(league: string, eventId: string): Promise<GameVie
       })),
     }))
     .filter((t): t is GameView['form'][number] => !!t.side && t.games.length > 0)
-    .sort((a) => (a.side === 'away' ? -1 : 1));
+    .sort(awayFirst);
 
   return {
     id: eventId,
@@ -704,7 +680,6 @@ export async function loadGame(league: string, eventId: string): Promise<GameVie
     broadcast: comp.broadcasts?.[0]?.media?.shortName ?? null,
     status,
     label,
-    neutral: !!comp.neutralSite,
     away,
     home,
     periodLabels,
@@ -718,9 +693,8 @@ export async function loadGame(league: string, eventId: string): Promise<GameVie
     teamStats,
     box,
     chart,
-    ...fantasy,
+    fantasy,
     plays,
-    drives,
   };
 }
 
@@ -739,10 +713,11 @@ const SKY = (code: number): string =>
 
 export async function loadWeather(game: GameView): Promise<GameWeather | null> {
   if (!game.venue || game.venue.roof === 'indoors' || !game.venue.city || !game.date) return null;
-  const place = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(game.venue.city)}&count=5`)
-    .then((r) => (r.ok ? r.json() : null))
-    .catch(() => null);
-  const results = (place?.results ?? []) as { latitude: number; longitude: number; admin1?: string; country_code?: string }[];
+  const place = await fetchJson<{ results?: { latitude: number; longitude: number; admin1?: string; country_code?: string }[] }>(
+    `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(game.venue.city)}&count=5`,
+    {},
+  );
+  const results = place.results ?? [];
   const state = (game.venue.state ?? '').toLowerCase();
   const at = results.find((r) => state && (r.admin1 ?? '').toLowerCase().startsWith(state.slice(0, 4))) ?? results[0];
   if (!at) return null;
@@ -754,10 +729,8 @@ export async function loadWeather(game: GameView): Promise<GameWeather | null> {
   const url =
     `${base}?latitude=${at.latitude}&longitude=${at.longitude}&hourly=temperature_2m,precipitation,wind_speed_10m,weather_code` +
     `&temperature_unit=fahrenheit&wind_speed_unit=mph&precipitation_unit=inch&timezone=GMT&start_date=${day(start)}&end_date=${day(end)}`;
-  const data = await fetch(url)
-    .then((r) => (r.ok ? r.json() : null))
-    .catch(() => null);
-  const h = data?.hourly as { time: string[]; temperature_2m: (number | null)[]; precipitation: (number | null)[]; wind_speed_10m: (number | null)[]; weather_code: (number | null)[] } | undefined;
+  const data = await fetchJson<{ hourly?: { time: string[]; temperature_2m: (number | null)[]; precipitation: (number | null)[]; wind_speed_10m: (number | null)[]; weather_code: (number | null)[] } }>(url, {});
+  const h = data.hourly;
   if (!h?.time?.length) return null;
   const hours = h.time.map((t, i) => ({ t: new Date(`${t}:00Z`), i })).filter(({ t }) => t >= new Date(start.getTime() - 36e5 + 1) && t < end).map(({ i }) => i);
   if (!hours.length) return null;
@@ -775,18 +748,18 @@ export async function loadWeather(game: GameView): Promise<GameWeather | null> {
   };
 }
 
-// ---- fantasy points from the box score: the NFL's PPR scoring; DraftKings' for the NBA, the NHL and MLB
-// (a hit that isn't a home run counts as a single: the box score doesn't split them)
+// ---- fantasy points from the box score. Football: 1 pt per 25 pass yds, 4 per pass TD, -2 per INT, 1 per
+// 10 rush or rec yds, 6 per TD, -2 per fumble lost, kickers 3 per FG and 1 per XP (catches kept apart: the
+// Fantasy Scoring setting prices them). DraftKings' for the rest: basketball 1 per pt, +0.5 per 3, 1.25
+// per reb, 1.5 per ast, 2 per stl or blk, -0.5 per TO, +1.5 double-double, +3 triple-double; hockey 8.5
+// per goal, 5 per assist, 1.5 per shot, 1.3 per block, goalies 0.7 per save and -3.5 per goal against;
+// baseball 3 per hit (10 a HR; a hit that isn't a home run counts as a single: the box score doesn't
+// split them), 2 per RBI, run or walk, pitchers 2.25 per inning, 2 per K, -2 per ER, -0.6 per hit or walk
 
-const FANTASY_SCORING: Record<string, string> = {
-  football: '1 pt per 25 pass yds, 4 per pass TD, -2 per INT, 1 per 10 rush or rec yds, 6 per TD, a catch by the Fantasy Scoring setting, -2 per fumble lost; kickers 3 per FG, 1 per XP',
-  basketball: 'DraftKings: 1 per pt, +0.5 per 3, 1.25 per reb, 1.5 per ast, 2 per stl or blk, -0.5 per TO, +1.5 double-double, +3 triple-double',
-  hockey: 'DraftKings: 8.5 per goal, 5 per assist, 1.5 per shot, 1.3 per block; goalies 0.7 per save, -3.5 per goal against',
-  baseball: 'DraftKings: 3 per hit (10 a HR), 2 per RBI, run or walk; pitchers 2.25 per inning, 2 per K, -2 per ER, -0.6 per hit or walk',
-};
+const FANTASY_SPORTS = ['football', 'basketball', 'hockey', 'baseball'];
 
-function fantasyPoints(league: string, box: GameView['box']): { fantasy: GameFantasy[]; fantasyScoring: string } {
-  const sport = Object.keys(FANTASY_SCORING).find((k) => league.includes(k)) ?? '';
+function fantasyPoints(league: string, box: GameView['box']): GameFantasy[] {
+  const sport = FANTASY_SPORTS.find((k) => league.includes(k)) ?? '';
   const players = new Map<string, GameFantasy>();
   const num = (v: string | undefined) => {
     const n = Number(String(v ?? '').replace(/[^\d.-]/g, ''));
@@ -884,7 +857,7 @@ function fantasyPoints(league: string, box: GameView['box']): { fantasy: GameFan
     .filter((p) => p.parts.length)
     .map((p) => ({ ...p, points: Math.round(p.points * 10) / 10 }))
     .sort((a, b) => b.points - a.points);
-  return { fantasy, fantasyScoring: FANTASY_SCORING[sport] ?? '' };
+  return fantasy;
 }
 
 // ---- the chart, by sport
@@ -1080,38 +1053,26 @@ export function teamColor(main: string | undefined, alt: string | undefined): st
 // page for it (once a visit); null when it isn't found
 const teamColors = new Map<string, Promise<string | null>>();
 export function heroColor(league: string, names: (string | undefined)[]): Promise<string | null> {
-  let id: string;
-  try {
-    id = espnTeamId(league, names);
-  } catch {
-    return Promise.resolve(null);
-  }
-  const key = league + '/' + id;
-  if (!teamColors.has(key)) {
-    teamColors.set(
-      key,
-      fetch(`${API}/${league}/teams/${id}`)
-        .then((r) => (r.ok ? r.json() : null))
-        .then((j) => {
-          const t = j?.team as { color?: string; alternateColor?: string; abbreviation?: string } | undefined;
-          return t?.color ? teamColor(t.color, t.alternateColor ?? BLACK_TEAMS[t.abbreviation ?? '']) : null;
-        })
-        .catch(() => null),
-    );
-  }
-  return teamColors.get(key)!;
+  const id = findEspnTeamId(league, names);
+  if (id === null) return Promise.resolve(null);
+  return memo(teamColors, `${league}/${id}`, () =>
+    fetchJson<{ team?: { color?: string; alternateColor?: string; abbreviation?: string } }>(`${API}/${league}/teams/${id}`, {}).then(({ team: t }) =>
+      t?.color ? teamColor(t.color, t.alternateColor ?? BLACK_TEAMS[t.abbreviation ?? '']) : null,
+    ),
+  );
 }
 
 // A venue's photo when ESPN has none (a game abroad: Tottenham Hotspur Stadium, a Munich or São Paulo
 // game): Wikipedia's lead photo for the venue, else for its city (its summary API: free, open to the page)
 export async function venuePhoto(name: string, city: string | null): Promise<string | null> {
   for (const title of [name, city].filter((t): t is string => !!t)) {
-    const res = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title.replace(/ /g, '_'))}`).catch(() => null);
-    if (!res?.ok) continue;
-    const page = (await res.json().catch(() => null)) as { thumbnail?: { source?: string }; originalimage?: { source?: string } } | null;
+    const page = await fetchJson<{ thumbnail?: { source?: string }; originalimage?: { source?: string } } | null>(
+      `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title.replace(/ /g, '_'))}`,
+      null,
+    );
     // (its thumbnail at a wider size; the original can be huge)
-    const thumb = page?.thumbnail?.source?.replace(/\/\d+px-/, '/1280px-');
-    if (thumb || page?.originalimage?.source) return thumb ?? page!.originalimage!.source!;
+    const photo = page?.thumbnail?.source?.replace(/\/\d+px-/, '/1280px-') ?? page?.originalimage?.source;
+    if (photo) return photo;
   }
   return null;
 }

@@ -57,11 +57,12 @@
             ></mat-icon>
           </span>
 
+            @let rows = skillRows(group);
             <div class="group-body" cdkDropList cdkDropListLockAxis="y" (cdkDropListDropped)="dropSkillStat(group, $event)">
-              @for (row of skillRows(group); track row.key) {
-                <div class="row-drag" cdkDrag cdkDragPreviewContainer="parent" [cdkDragDisabled]="skillRows(group).length < 2">
+              @for (row of rows; track row.key) {
+                <div class="row-drag" cdkDrag cdkDragPreviewContainer="parent" [cdkDragDisabled]="rows.length < 2">
                   <!-- No grip when the category has only one row (nothing to reorder) -->
-                  @if (skillRows(group).length > 1) {
+                  @if (rows.length > 1) {
                     <mat-icon
                       cdkDragHandle
                       class="row-handle"

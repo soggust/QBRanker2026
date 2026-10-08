@@ -3,6 +3,8 @@
 // found by the venue's name (any of its names over the years); the 2000 season on, today's parks and the
 // ones since replaced. A park not here gets a standard one. Most walls are straight runs between their
 // corners; the round ones (the multipurpose bowls and a few others) are drawn as an arc.
+import { fetchJson } from '@ranker/core/http';
+
 const PARKS: [RegExp, [number, number, number, number, number]][] = [
   [/yankee stadium|steinbrenner/i, [318, 399, 408, 385, 314]],
   [/fenway/i, [310, 379, 390, 420, 302]],
@@ -134,10 +136,7 @@ export interface TracedPark {
 // The traced parks, loaded once (MLB's data file; none in another sport's)
 let traced: Promise<Record<string, TracedPark>> | null = null;
 export function loadTracedParks(): Promise<Record<string, TracedPark>> {
-  traced ??= fetch('data/parks.json')
-    .then((r) => (r.ok ? r.json() : { teams: {} }))
-    .then((j) => (j.teams ?? {}) as Record<string, TracedPark>)
-    .catch(() => ({}));
+  traced ??= fetchJson<{ teams?: Record<string, TracedPark> }>('data/parks.json', {}).then((j) => j.teams ?? {});
   return traced;
 }
 

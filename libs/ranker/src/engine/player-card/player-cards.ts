@@ -5,6 +5,7 @@
 import { PER_GAME_LABELS, SKILL_STATS, SkillPlayer, SkillPosition, SkillStat, SkillStatGroup, headlineStats, presetWeights } from '@sport/positions';
 import { awardsFor } from '@sport/awards';
 import { SPORT } from '@sport/sport';
+import { extras, logoFile, rowTeamNames } from '@ranker/engine/row-fields';
 import { badgeColor, whiteLogo } from '@sport/team-colors';
 import { logoForSeason } from '@sport/logo-eras';
 import { SKILLS } from '@sport/skills';
@@ -169,7 +170,7 @@ export class PlayerCards {
       const { load, league } = SPORT.gameLog;
       const player = card.player;
       const next = league && card.season === CURRENT_SEASON
-        ? espnUpcoming(league, [(player as { teamName?: string | null }).teamName ?? undefined, player.name, player.teamLogo?.match(/([^/]+)\.\w+$/)?.[1]], SPORT.currentSeason).catch(() => [])
+        ? espnUpcoming(league, rowTeamNames(player), SPORT.currentSeason).catch(() => [])
         : Promise.resolve([]);
       Promise.all([load(player, this.position, card.season), next])
         .then(([log, upcoming]) => this.gameLogs.set(key, gameLogView(log, upcoming)))
@@ -256,9 +257,9 @@ export class PlayerCards {
     const rows = season === this.host.season ? SKILL_UNITS : await this.data.rows(season).catch(() => null);
     const teams = (rows?.[position as SkillPosition] ?? []) as SkillPlayer[];
     const names = espnTeamNames(SPORT.gameLog?.league ?? '', abbr).map((n) => n.toLowerCase());
-    const file = (p: SkillPlayer) => p.teamLogo?.match(/([^/]+)\.\w+$/)?.[1]?.toLowerCase() ?? '';
+    const file = (p: SkillPlayer) => logoFile(p.teamLogo)?.toLowerCase() ?? '';
     const team =
-      teams.find((t) => names.includes(t.name.toLowerCase()) || names.includes(((t as { teamName?: string | null }).teamName ?? '').toLowerCase())) ??
+      teams.find((t) => names.includes(t.name.toLowerCase()) || names.includes((extras(t).teamName ?? '').toLowerCase())) ??
       teams.find((t) => file(t).split('_')[0] === abbr || names.includes(file(t)));
     if (team) await this.openLinked({ position, gsisId: team.gsisId }, season);
   }
@@ -347,8 +348,7 @@ export class PlayerCards {
     // (the hero in the team's own color, as the game view draws it, once ESPN's list is in)
     const league = SPORT.gameLog?.league;
     if (league && card.heroColor === undefined) {
-      const p = card.player as SkillPlayer & { teamName?: string | null };
-      heroColor(league, [p.teamName ?? undefined, p.name, p.teamLogo?.match(/([^/]+)\.\w+$/)?.[1]])
+      heroColor(league, rowTeamNames(card.player))
         .then((color) => (card.heroColor = color))
         .catch(() => (card.heroColor = null));
     }
@@ -383,7 +383,7 @@ export class PlayerCards {
       positionName: POSITION_NAMES[this.position],
       positionLabel: SPORT.teamTabs?.includes(this.position) || this.position === SPORT.coachTab ? POSITION_NAMES[this.position] : this.position,
       seasonLabel: SPORT.careerOnly ? 'Career' : isLiveSeason(season) ? 'This Season' : SPORT.seasonText(season),
-      teamName: SPORT.teamName ? SPORT.teamName(player, this.position, rows) : ((player as { teamName?: string | null }).teamName ?? null),
+      teamName: SPORT.teamName ? SPORT.teamName(player, this.position, rows) : (extras(player).teamName ?? null),
       teamLink: this.teamLink(player, rows),
       logo: SPORT.cardLogo ? SPORT.cardLogo(logoForSeason(player.teamLogo, season)) : logoForSeason(player.teamLogo, season),
       color: badgeColor(player.teamLogo),

@@ -1,6 +1,7 @@
 import { Component, HostListener, Input } from '@angular/core';
 import { AWARD_INFO } from '@sport/awards';
 import { SPORT } from '@sport/sport';
+import { extras, rowTeamNames } from '@ranker/engine/row-fields';
 import { whiteLogo } from '@sport/team-colors';
 import { CURRENT_SEASON, isLiveSeason } from '@ranker/engine/data';
 import { rankPct, rankTone } from '@ranker/core/format';
@@ -37,12 +38,11 @@ export class PlayerCardComponent {
   // The card's recent games (its Stats tab's Recent): the team, a game's hover ("W 24-17 @ Miami Dolphins"),
   // and a game opened (the card set aside, as from the game log)
   recentTeam(card: PlayerCard): (string | undefined)[] {
-    const p = card.player as { teamName?: string | null; name: string; teamLogo?: string };
-    return [p.teamName ?? undefined, p.name, p.teamLogo?.match(/([^/]+)\.\w+$/)?.[1]];
+    return rowTeamNames(card.player);
   }
 
   private recentVs(card: PlayerCard): (string | null)[] | undefined {
-    return (card.player as { lastFiveVs?: (string | null)[] }).lastFiveVs;
+    return extras(card.player).lastFiveVs;
   }
 
   recentTitle(card: PlayerCard, result: number, index: number): string {
@@ -66,7 +66,7 @@ export class PlayerCardComponent {
   // A game log's row: its game (ESPN's id, or its day and the two teams)
   openGame(card: PlayerCard, row: GameLogViewRow): void {
     if (row.event) this.games.open({ event: row.event });
-    else if (row.when) this.games.open({ date: row.when, names: [row.vs.split(' ').slice(1).join(' '), (card.player as { teamName?: string | null }).teamName ?? ''].filter(Boolean) });
+    else if (row.when) this.games.open({ date: row.when, names: [row.vs.split(' ').slice(1).join(' '), extras(card.player).teamName ?? ''].filter(Boolean) });
   }
 
   readonly sport = SPORT;

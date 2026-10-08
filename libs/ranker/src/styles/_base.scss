@@ -328,38 +328,13 @@ html {
     }
   }
 
-  .menu-icon {
-    color: #fff !important;
-    filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.25));
-  }
-
-  // A cycled choice's icon (the trophy, the Rank Base icon) takes a switch's width, so its label lines
-  // up with the switches' labels
-  .lombardi.menu-icon {
-    flex: 0 0 auto;
-    font-size: 1.3em;
-    margin-right: 32px;
-    width: 46px;
-  }
-
   .mat-mdc-menu-item {
-    .unit-rank-icon {
-      flex: 0 0 auto;
-      margin-right: 32px;
-      text-align: center;
-      width: 46px;
-    }
-
     .slide-toggle {
       margin-right: 25.5px;
     }
 
     // A cycled choice's current value
     .menu-value {
-      color: var(--scoreboard-led) !important;
-    }
-
-    &:hover .mat-icon.menu-icon {
       color: var(--scoreboard-led) !important;
     }
 

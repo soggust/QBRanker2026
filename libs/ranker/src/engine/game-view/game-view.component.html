@@ -117,6 +117,58 @@
         </span>
       </ng-template>
 
+      <!-- A chart's filters: both teams or one (the pills), and one player from that side (the dropdown, its
+           first choice "All ..."; none without one) -->
+      <ng-template #sides let-all let-names="names">
+        <div class="game-play-filters">
+          <button type="button" class="game-filter" [class.active]="games.chartSide === 'both'" (click)="games.chartSide = 'both'; games.player = null">Both</button>
+          <button type="button" class="game-filter" [class.active]="games.chartSide === 'away'" (click)="games.chartSide = 'away'; games.player = null">{{ g.away.abbr }}</button>
+          <button type="button" class="game-filter" [class.active]="games.chartSide === 'home'" (click)="games.chartSide = 'home'; games.player = null">{{ g.home.abbr }}</button>
+          @if (all) {
+            <span class="game-select-wrap">
+              <select class="game-filter game-select" [class.active]="games.player" (change)="pickPlayer($event)">
+                <option value="">{{ all }}</option>
+                @for (name of names; track name) {
+                  <option [value]="name" [selected]="games.player === name">{{ name }}</option>
+                }
+              </select>
+            </span>
+          }
+        </div>
+      </ng-template>
+
+      <!-- The leaders, each team's in a column: the season's (a preview's) or the game's -->
+      <ng-template #leaders let-label>
+        @if (g.leaders.length) {
+          <card-panel class="tab-card group-box game-leaders" [expandable]="false" [label]="label" icon="military_tech">
+            <div class="group-body game-two">
+              @for (t of g.leaders; track t.side) {
+                @let team = t.side === 'away' ? g.away : g.home;
+                <div class="game-leader-col">
+                  <h4 class="depth-unit">{{ team.short }}</h4>
+                  @for (l of t.rows; track $index) {
+                    <div class="game-leader">
+                      <span class="depth-head tiny">
+                        @if (l.headshot) {
+                          <img [src]="l.headshot" alt="" loading="lazy" (error)="l.headshot = null" />
+                        } @else {
+                          <span class="depth-initial">{{ l.name[0] }}</span>
+                        }
+                      </span>
+                      <span class="game-leader-main">
+                        <small>{{ l.category }}</small>
+                        <b><ng-container *ngTemplateOutlet="who; context: { $implicit: l.name }"></ng-container></b>
+                      </span>
+                      <span class="game-leader-line">{{ l.line }}</span>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          </card-panel>
+        }
+      </ng-template>
+
       <div class="card-body" #body>
         @switch (games.tab) {
           <!-- A game to come: ESPN's predictor, the line, each team's season leaders and its last five -->
@@ -133,34 +185,7 @@
                 </div>
               </div>
             }
-            @if (g.leaders.length) {
-              <card-panel class="tab-card group-box game-leaders" [expandable]="false" label="Season Leaders" icon="military_tech">
-                <div class="group-body game-two">
-                  @for (t of g.leaders; track t.side) {
-                    @let team = t.side === 'away' ? g.away : g.home;
-                    <div class="game-leader-col">
-                      <h4 class="depth-unit">{{ team.short }}</h4>
-                      @for (l of t.rows; track $index) {
-                        <div class="game-leader">
-                          <span class="depth-head tiny">
-                            @if (l.headshot) {
-                              <img [src]="l.headshot" alt="" loading="lazy" (error)="l.headshot = null" />
-                            } @else {
-                              <span class="depth-initial">{{ l.name[0] }}</span>
-                            }
-                          </span>
-                          <span class="game-leader-main">
-                            <small>{{ l.category }}</small>
-                            <b><ng-container *ngTemplateOutlet="who; context: { $implicit: l.name }"></ng-container></b>
-                          </span>
-                          <span class="game-leader-line">{{ l.line }}</span>
-                        </div>
-                      }
-                    </div>
-                  }
-                </div>
-              </card-panel>
-            }
+            <ng-container *ngTemplateOutlet="leaders; context: { $implicit: 'Season Leaders' }"></ng-container>
             @if (g.form.length) {
               <card-panel class="tab-card group-advanced game-form" [expandable]="false" label="Last Five" icon="history">
                 <div class="group-body game-two">
@@ -273,34 +298,7 @@
               </div>
             }
 
-            @if (g.leaders.length) {
-              <card-panel class="tab-card group-box game-leaders" [expandable]="false" label="Game Leaders" icon="military_tech">
-                <div class="group-body game-two">
-                  @for (t of g.leaders; track t.side) {
-                    @let team = t.side === 'away' ? g.away : g.home;
-                    <div class="game-leader-col">
-                      <h4 class="depth-unit">{{ team.short }}</h4>
-                      @for (l of t.rows; track $index) {
-                        <div class="game-leader">
-                          <span class="depth-head tiny">
-                            @if (l.headshot) {
-                              <img [src]="l.headshot" alt="" loading="lazy" (error)="l.headshot = null" />
-                            } @else {
-                              <span class="depth-initial">{{ l.name[0] }}</span>
-                            }
-                          </span>
-                          <span class="game-leader-main">
-                            <small>{{ l.category }}</small>
-                            <b><ng-container *ngTemplateOutlet="who; context: { $implicit: l.name }"></ng-container></b>
-                          </span>
-                          <span class="game-leader-line">{{ l.line }}</span>
-                        </div>
-                      }
-                    </div>
-                  }
-                </div>
-              </card-panel>
-            }
+            <ng-container *ngTemplateOutlet="leaders; context: { $implicit: 'Game Leaders' }"></ng-container>
 
           }
 
@@ -388,22 +386,12 @@
                made or a goal filled, missed hollow), or the NFL's drives across the field and its passes by zone -->
           @case ('chart') {
             @if (g.chart; as ch) {
-              <div class="game-play-filters">
-                <button type="button" class="game-filter" [class.active]="games.chartSide === 'both'" (click)="games.chartSide = 'both'; games.player = null">Both</button>
-                <button type="button" class="game-filter" [class.active]="games.chartSide === 'away'" (click)="games.chartSide = 'away'; games.player = null">{{ g.away.abbr }}</button>
-                <button type="button" class="game-filter" [class.active]="games.chartSide === 'home'" (click)="games.chartSide = 'home'; games.player = null">{{ g.home.abbr }}</button>
-                <!-- (one shooter or hitter alone, from all of them on the team pills' side) -->
-                @if (ch.kind !== 'football') {
-                  <span class="game-select-wrap">
-                    <select class="game-filter game-select" [class.active]="games.player" (change)="pickPlayer($any($event.target).value)">
-                      <option value="">{{ ch.kind === 'diamond' ? 'All hitters' : 'All shooters' }}</option>
-                      @for (name of chartPlayers(ch); track name) {
-                        <option [value]="name" [selected]="games.player === name">{{ name }}</option>
-                      }
-                    </select>
-                  </span>
-                }
-              </div>
+              <!-- (one shooter or hitter alone, from all of them on the team pills' side) -->
+              @if (ch.kind === 'football') {
+                <ng-container *ngTemplateOutlet="sides; context: { $implicit: null, names: [] }"></ng-container>
+              } @else {
+                <ng-container *ngTemplateOutlet="sides; context: { $implicit: ch.kind === 'diamond' ? 'All hitters' : 'All shooters', names: chartPlayers(ch) }"></ng-container>
+              }
               @if (ch.kind === 'football') {
                 <card-panel class="tab-card group-results game-chart-panel" [startOpen]="true" label="Drives" icon="sports_football" [style.--away-color]="g.away.color" [style.--home-color]="g.home.color">
                   <div class="group-body">
@@ -530,20 +518,8 @@
                each pitcher's arsenal -->
           @case ('pitches') {
             @if (g.chart; as ch) {
-              <div class="game-play-filters">
-                <button type="button" class="game-filter" [class.active]="games.chartSide === 'both'" (click)="games.chartSide = 'both'; games.player = null">Both</button>
-                <button type="button" class="game-filter" [class.active]="games.chartSide === 'away'" (click)="games.chartSide = 'away'; games.player = null">{{ g.away.abbr }}</button>
-                <button type="button" class="game-filter" [class.active]="games.chartSide === 'home'" (click)="games.chartSide = 'home'; games.player = null">{{ g.home.abbr }}</button>
-                <!-- (one pitcher alone, from all of them on the team pills' side) -->
-                <span class="game-select-wrap">
-                  <select class="game-filter game-select" [class.active]="games.player" (change)="pickPlayer($any($event.target).value)">
-                    <option value="">All pitchers</option>
-                    @for (p of pitchers(ch, g); track p.name) {
-                      <option [value]="p.name" [selected]="games.player === p.name">{{ p.name }}</option>
-                    }
-                  </select>
-                </span>
-              </div>
+              <!-- (one pitcher alone, from all of them on the team pills' side) -->
+              <ng-container *ngTemplateOutlet="sides; context: { $implicit: 'All pitchers', names: pitcherNames(ch) }"></ng-container>
               <div class="chart-card game-pitches">
                 <div class="log-chart-head">
                   <span class="log-chart-label">Pitch Locations<small>{{ pitchScope(g) }}</small></span>

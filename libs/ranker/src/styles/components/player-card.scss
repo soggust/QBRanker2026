@@ -2776,12 +2776,6 @@
 }
 
 // who's played: by unit, the most-used first, a bar for his snap share
-.depth-note {
-  color: rgba(255, 255, 255, 0.5);
-  font-size: 12px;
-  margin: 0 0 6px;
-}
-
 .depth-unit {
   @include group-heading;
   margin: 16px 0 6px;

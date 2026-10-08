@@ -3,6 +3,7 @@
 // The table has one for its season; the player card makes one for any other season it shows.
 import { PACE_GAMES, PER_GAME_LABELS, STAT_NAMES, SkillPlayer, SkillPosition, SkillStat, SkillWeights } from '@sport/positions';
 import { SPORT } from '@sport/sport';
+import { extras } from '@ranker/engine/row-fields';
 import { ValueContext } from '@ranker/engine/sport';
 import { recentCount, statValue } from '@ranker/engine/unit-scoring';
 import { CURRENT_SEASON } from '@ranker/engine/data';
@@ -124,7 +125,7 @@ export class StatReader {
 
   // The last five results (newest first; 1 win, 0.5 tie, 0 loss), for a sport with a 'recent' stat
   lastFive(player: SkillPlayer): number[] {
-    return ((player as { lastFive?: number[] }).lastFive ?? []).slice(0, recentCount(this.position));
+    return (extras(player).lastFive ?? []).slice(0, recentCount(this.position));
   }
 
   // One Recent dot's hover: the result and whom it came against ("W @ Denver Broncos", "L vs Seattle
@@ -132,7 +133,7 @@ export class StatReader {
   recentTitle(player: SkillPlayer, i: number): string {
     const result = this.lastFive(player)[i];
     const word = result === 1 ? 'W' : result === 0.5 ? 'T' : 'L';
-    const vs = (player as { lastFiveVs?: (string | null)[] }).lastFiveVs?.[i];
+    const vs = extras(player).lastFiveVs?.[i];
     return vs ? `${word} ${/^(@|vs) /.test(vs) ? vs : `vs ${vs}`}` : word;
   }
 

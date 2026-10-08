@@ -11,9 +11,6 @@ export type SkillPosition = Position;
 
 export const POSITIONS: Position[] = ['TM', 'C', '1B', '2B', '3B', 'SS', 'OF', 'DH', 'SP', 'RP'];
 
-export const PITCHER_TABS: Position[] = ['SP', 'RP'];
-export const isPitcherTab = (position: Position) => PITCHER_TABS.includes(position);
-
 // Keys of the stats object in skill-players.json (scripts/update-data.mjs)
 export type SkillStatKey =
   // Both: FanGraphs-style WAR from the MLB Stats API

@@ -5,6 +5,7 @@
 // The coaching staff comes from the sport's staff file (scripts/build-coaches.mjs: Wikipedia's), or
 // from the head coaches' rows.
 import type { SkillPlayer } from '@sport/positions';
+import { fetchJson, memo } from '@ranker/core/http';
 import type { DepthCoachGroup, DepthLoadContext, DepthPlayer, DepthSlot, DepthUsageGroup } from './depth-chart';
 
 // The injury report's words, short (the chip's corner flag)
@@ -82,13 +83,15 @@ interface StaffFile {
   teams: Record<string, { head: { role: string; name: string }[]; staff: { role: string; name: string }[] }>;
 }
 
+// (each season's staff file, read once a visit)
+const staffFiles = new Map<string, Promise<StaffFile | null>>();
+
 // The team's coaching staff that season: its head coach (or manager) and his assistants, when the file
 // has it (none when it isn't there)
 export async function loadStaff(season: number, current: boolean, teamName: string | null | undefined, titles: [string, string]): Promise<DepthCoachGroup[]> {
   if (!teamName) return [];
-  const file = await fetch(current ? 'data/coaches.json' : `data/seasons/${season}/coaches.json`, { cache: current ? 'no-cache' : 'default' })
-    .then((r) => (r.ok ? (r.json() as Promise<StaffFile>) : null))
-    .catch(() => null);
+  const url = current ? 'data/coaches.json' : `data/seasons/${season}/coaches.json`;
+  const file = await memo(staffFiles, url, () => fetchJson<StaffFile | null>(url, null, { cache: current ? 'no-cache' : 'default' }));
   const team = file?.teams[teamName];
   if (!team) return [];
   return [

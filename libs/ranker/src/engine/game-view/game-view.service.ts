@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { SPORT } from '@sport/sport';
-import { espnTeamId } from '@ranker/core/game-logs';
+import { espnTeamId, findEspnTeamId } from '@ranker/core/game-logs';
 import { GameView, GameWeather, TeamResult, findGame, findGameOn, loadGame, loadWeather, nthMeeting, teamResults, venuePhoto } from './game';
 
 // Which game to open: ESPN's id (a game log's row), a date and a team in it (a row without one), or a
@@ -91,7 +91,7 @@ export class GameViewService {
   private scored = new Map<string, TeamResult[]>();
   primeRecent(team: (string | undefined)[], season: number): void {
     const league = SPORT.gameLog?.league;
-    const id = league ? safeTeamId(league, team) : null;
+    const id = league ? findEspnTeamId(league, team) : null;
     if (!league || !id) return;
     const key = `${id}/${season}`;
     if (this.scored.has(key)) return;
@@ -105,9 +105,9 @@ export class GameViewService {
     const league = SPORT.gameLog?.league;
     const ref = recentRef(team, vsList, index, season);
     if (!league || !ref || !('opponent' in ref)) return null;
-    const id = safeTeamId(league, team);
+    const id = findEspnTeamId(league, team);
     const list = id ? this.scored.get(`${id}/${season}`) : undefined;
-    const opponent = safeTeamId(league, [ref.opponent]);
+    const opponent = findEspnTeamId(league, [ref.opponent]);
     return list?.length && opponent ? (nthMeeting(list, opponent, ref.home, ref.nth)?.score ?? null) : null;
   }
 
@@ -174,14 +174,6 @@ export function recentRef(
 }
 
 // A team's ESPN id, or null when it isn't found
-function safeTeamId(league: string, names: (string | undefined)[]): string | null {
-  try {
-    return espnTeamId(league, names);
-  } catch {
-    return null;
-  }
-}
-
 // A name to match on: lower case, no accents, periods or suffixes ("Kenneth Walker III" -> "kenneth walker")
 export function nameKey(name: string): string {
   return name

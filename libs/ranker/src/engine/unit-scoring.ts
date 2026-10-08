@@ -1,5 +1,6 @@
 import { AppData, DATA, dataVersion, withSeason } from '@ranker/engine/data';
 import type { SportSettings, ValueContext } from '@ranker/engine/sport';
+import { extras } from '@ranker/engine/row-fields';
 import { SKILL_STATS, SkillPlayer, SkillPosition, SkillStat, SkillStatKey, SkillWeights, unitStat } from '@sport/positions';
 import { SPORT } from '@sport/sport';
 import { rosterGradeValue } from '@ranker/engine/roster-grades';
@@ -95,7 +96,7 @@ function combinedMix(values: (number | null)[], parts: string[], weights?: Skill
 // pair's total, or the sport's own: SPORT.computedValue)
 export function statValue(unit: SkillPlayer, stat: SkillStat, context: ValueContext): number | null {
   if (stat.key === 'games') return unit.games;
-  if (stat.format === 'recent') return recencyScore((unit as { lastFive?: number[] }).lastFive, recentCount(context.position));
+  if (stat.format === 'recent') return recencyScore(extras(unit).lastFive, recentCount(context.position));
   const pair = combinedFor(context.position).find(({ stat: total }) => total.key === stat.key);
   if (pair) {
     const values = pair.parts.map((part) => unitStat(unit, part as SkillStatKey, context.settings));
