@@ -574,7 +574,7 @@ export class PlayerCards {
     if (card.season !== CURRENT_SEASON) this.loadComps(card);
   }
 
-  // A line per season they're in, ranked with the default sliders (careers.json for the finished
+  // A line per season they're in, ranked with the default sliders (careers/<tab>.json for the finished
   // seasons, this season from its rows), each headline stat's best finished season lit (lowest for a
   // stat that counts against them; a few games into this season, a hot start would take it)
   private async seasonLines(id: string): Promise<CardSeason[]> {
@@ -592,7 +592,7 @@ export class PlayerCards {
       pct: rankPct(rank, of),
       stats: headline.map((stat, i) => ({ text: totalText(stat, stats[i] ?? null), label: stat.label, value: stats[i] ?? null, share: 0, best: false })),
     });
-    const seasons = ((await this.data.careers())[position]?.[id] ?? []).map(([season, logo, games, rank, of, stats]) =>
+    const seasons = ((await this.data.careers(position))[id] ?? []).map(([season, logo, games, rank, of, stats]) =>
       line(season, SPORT.teamLogo(logo), games, rank, of, stats),
     );
     const now = (current[position] ?? []).find((p) => p.gsisId === id);

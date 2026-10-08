@@ -6,6 +6,13 @@ import { CURRENT_SEASON, fetchSeason, fetchSeasonFile } from '@ranker/engine/dat
 import { unitsForSeason } from '@ranker/engine/unit-scoring';
 import { CareersFile, CompsFile } from '@ranker/engine/player-card/card.model';
 
+// A file checked with the server each visit: {} when it isn't there (a tab without any; the host's page
+// fallback answers a missing file with the app's page, not JSON), a failure thrown (asked
+// again next time)
+function fetchOrEmpty<T>(url: string): Promise<T> {
+  return fetch(url, { cache: 'no-cache' }).then((res) => (res.ok ? res.json().catch(() => ({}) as T) : res.status === 404 ? ({} as T) : Promise.reject(new Error(String(res.status)))));
+}
+
 @Injectable({ providedIn: 'root' })
 export class SeasonDataService {
   private cache = new Map<string, Promise<unknown>>();
@@ -30,10 +37,15 @@ export class SeasonDataService {
     return this.once(`tab.${season}.${position}`, () => fetchSeasonFile<SkillPlayer[]>(season, `units/${position}.json`));
   }
 
-  // Everyone's finished seasons (checked with the server each visit: it changes once a year, at the
-  // season rollover)
-  careers(): Promise<CareersFile> {
-    return this.once('careers', () => fetch('data/careers.json', { cache: 'no-cache' }).then((res) => res.json()));
+  // A tab's finished seasons, each one's (checked with the server each visit: it changes once a year, at
+  // the season rollover; none for a tab without any)
+  careers(position: SkillPosition): Promise<CareersFile> {
+    return this.once(`careers.${position}`, () => fetchOrEmpty<CareersFile>(`data/careers/${position}.json`));
+  }
+
+  // Everyone's first season in the data (Rookies Only)
+  firstSeasons(): Promise<Record<string, number>> {
+    return this.once('first-seasons', () => fetchOrEmpty<Record<string, number>>('data/careers/first-seasons.json'));
   }
 
   // A finished season's similar seasons

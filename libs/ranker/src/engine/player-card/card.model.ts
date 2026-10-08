@@ -143,8 +143,6 @@ export interface PlayerCard {
 
 // Built by scripts/build-comps.mjs: per position, id -> [season, id, name, ESPN id, team, match]
 // (comps.json), and id -> [season, team, games, rank, of, headline stats] for every finished season
-// (careers.json)
+// (careers/<tab>.json, a tab's)
 export type CompsFile = Partial<Record<SkillPosition, Record<string, [number, string, string, number | null, string, number][]>>>;
-export type CareersFile = Partial<
-  Record<SkillPosition, Record<string, [number, string, number, number, number, (number | null)[]][]>>
->;
+export type CareersFile = Record<string, [number, string, number, number, number, (number | null)[]][]>;

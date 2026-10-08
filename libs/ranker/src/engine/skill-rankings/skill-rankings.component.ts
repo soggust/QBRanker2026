@@ -231,7 +231,7 @@ export class SkillRankingsComponent implements OnChanges, CardHost {
   }
 
   // Rookies Only (settings menu): players in their first season (first-year head coaches on a coaches'
-  // tab). A first season is the first one they're in the data (careers.json, loaded when the setting
+  // tab). A first season is the first one they're in the data (careers/first-seasons.json, loaded when the setting
   // is turned on), so the data's first season can't tell and lists everyone; so do team tabs.
   private firstSeasons: Map<string, number> | null = null;
   private firstSeasonsLoading = false;
@@ -246,7 +246,7 @@ export class SkillRankingsComponent implements OnChanges, CardHost {
       this.loadFirstSeasons();
       return true;
     }
-    // (careers.json has the finished seasons, so this season's rookies aren't in it at all)
+    // (the careers files have the finished seasons, so this season's rookies aren't in them at all)
     return (this.firstSeasons.get(player.gsisId) ?? season) >= season;
   }
 
@@ -254,15 +254,9 @@ export class SkillRankingsComponent implements OnChanges, CardHost {
     if (this.firstSeasonsLoading) return;
     this.firstSeasonsLoading = true;
     this.seasonData
-      .careers()
-      .then((careers) => {
-        const first = new Map<string, number>();
-        for (const byId of Object.values(careers)) {
-          for (const [id, seasons] of Object.entries(byId ?? {})) {
-            for (const [season] of seasons) first.set(id, Math.min(season, first.get(id) ?? Infinity));
-          }
-        }
-        this.firstSeasons = first;
+      .firstSeasons()
+      .then((first) => {
+        this.firstSeasons = new Map(Object.entries(first));
         if (this.position && this.settings.rookiesOnly) this.sortPlayers();
       })
       .catch((err) => console.error(err))

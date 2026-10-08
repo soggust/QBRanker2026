@@ -6,9 +6,10 @@
 //   anyone else in any other year. Every stat that counts in the ranking (volume stats per game) is
 //   turned into a z-score within its own season, so a season is judged by how far it stood out from
 //   that year's league; two seasons are compared on the stats both have (RMS difference).
-// - careers.json: every season each one appears in, for the card's Seasons tab: [season, team,
-//   games, rank with the default sliders, list size, headline stats (headlineStats, season totals)].
-//   The current season isn't in it: the app works it out from the rows it has.
+// - careers/<tab>.json: every season each one appears in, for the card's Seasons tab: [season, team,
+//   games, rank with the default sliders, list size, headline stats (headlineStats, season totals)],
+//   a file per tab (a card loads its own); careers/first-seasons.json each one's first season (Rookies
+//   Only). The current season isn't in them: the app works it out from the rows it has.
 // - seasons/<year>/units/<tab>.json: each tab's rows, which the Seasons tab ranks with the current
 //   sliders (and uses in place of the default ranks above once they load).
 //
@@ -19,6 +20,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
+import { writeCareers } from './careers.mjs';
 
 const Z_CAP = 3;
 const COMPS = 3;
@@ -186,7 +188,7 @@ export async function buildComps({
   for (const season of seasons) {
     fs.writeFileSync(path.join(SEASONS_DIR, String(season), 'comps.json'), JSON.stringify(comps[season]));
   }
-  fs.writeFileSync(path.join(STATIC, 'careers.json'), JSON.stringify(careers));
+  writeCareers(STATIC, careers);
 
   nearest.sort((a, b) => a - b);
   const at = (q) => nearest[Math.floor(q * (nearest.length - 1))].toFixed(2);
