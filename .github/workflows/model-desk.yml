@@ -2,19 +2,23 @@ name: Model Desk - Bets
 
 on:
   schedule:
-    # Twice a day, 14:20 and 22:20 UTC (10:20 AM and 6:20 PM Eastern): before every NFL slot (Sunday's 1 PM
-    # and the night games, Monday's, Thursday's) and MLB's day games, with the night's results graded. Each
-    # run grades what finished, refits the ratings and each market's trust on it, and bets every market of
+    # Every two hours from 12:17 to 04:17 UTC (8:17 AM to 12:17 AM Eastern): nine runs a day. GitHub runs
+    # scheduled workflows late, sometimes hours late, so no single slot can be counted on; with a run every two
+    # hours a late or missed one costs little. Between them they reach every game before it starts (NFL early
+    # and London kickoffs, MLB day games, the night's NBA, NHL and MLB) to bet it, and every game after it
+    # starts to read its close and grade it (clv.mjs: ESPN keeps the close after kickoff, so the close is never
+    # missed, only read later). At :17, off the top of the hour when GitHub's queue is longest. Each run grades
+    # what finished, refits the ratings, the context and the trust, and bets every market (and the props) of
     # every game in the next two days it hasn't bet yet (libs/ranker/scripts/model/run.mjs). Code only: free.
-    # Its context (rest, travel, starters, weather, parks: context.mjs) is kept in each sport's
-    # scripts/model/context.json, so a run only asks about the games new since the last.
-    - cron: "20 14 * * *"
-    - cron: "20 22 * * *"
+    - cron: "17 0-4/2,12-22/2 * * *"
   workflow_dispatch:
 
-# (with the data updates: one push at a time)
+# (one desk run at a time: a run that comes due while one is going waits; a second one due meanwhile
+# replaces the waiting one, which is fine, as each run does all that's due. Its own group, not the data
+# updates': GitHub keeps one waiting run a group, so in a shared group a desk run could cancel a waiting
+# data update. Its commit rebases onto whatever they've pushed meanwhile.)
 concurrency:
-  group: update-data
+  group: model-desk
   cancel-in-progress: false
 
 permissions:
@@ -26,17 +30,19 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: "22"
+          cache: "npm"
 
-      # (nflverse's schedule and anything else slow the context reads, kept between runs; none of it is
-      # needed: without it the run asks again)
+      # (the context's facts (context-<sport>.json), the players' lines, the summaries and anything else slow:
+      # kept between runs; none of it is needed: a cold cache only makes the run slower, about 6 minutes, as it
+      # asks for everything again)
       - name: Restore the desk's cache
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: .cache/model
           key: model-desk-${{ github.run_id }}
@@ -45,8 +51,20 @@ jobs:
       - name: Grade, refit and bet
         run: node libs/ranker/scripts/model/run.mjs
 
-      # (the desk's history and its ledger and state; the admin panel is dev only, so no deploy: the site
-      # picks them up with the next data update's)
+      # (the data checked before it's committed: a broken ledger or state stays out of master)
+      - name: Install dependencies
+        # (npm install, not npm ci: GitHub's npm wants lock entries ours resolves without; the lock is put back
+        # as it was, so the commit step's pull --rebase sees a clean tree)
+        run: |
+          npm install
+          git checkout -- package-lock.json
+
+      - name: Check the data
+        run: npm test
+
+      # (the desk's history, ledger and state, each written only when something in it changed, so a run that
+      # learned nothing new commits nothing; the admin panel is dev only, so no deploy: the site picks them up
+      # with the next data update's)
       - name: Commit the desk
         run: |
           git add apps/*/scripts/model apps/*/src/StaticData/model
@@ -57,5 +75,9 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git commit -m "Model desk: graded, refit, bet"
-          git pull --rebase
-          git push
+          # (a data update may have pushed meanwhile: rebase and try again, three times)
+          for attempt in 1 2 3; do
+            git pull --rebase && git push && exit 0
+            sleep $((attempt * 10))
+          done
+          exit 1

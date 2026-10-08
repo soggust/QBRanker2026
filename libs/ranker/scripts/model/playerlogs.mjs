@@ -5,28 +5,42 @@
 //   NFL  nflverse's weekly player stats (stats_player_week_<season>), ESPN ids from nflverse's players file
 //   NBA  ESPN's box scores: minutes, points, rebounds, assists, threes
 //   NHL  ESPN's box scores: skaters' time on ice, shots on goal, goals and assists; goalies' saves
-//   MLB  StatsAPI: the probable starters' game logs (strikeouts, outs: kept in context.json already) and the
+//   MLB  StatsAPI: the probable starters' game logs (strikeouts, outs: kept in the context's facts already) and the
 //        lineups' batters' game logs (hits, total bases, home runs, plate appearances)
 //
 // A row: { pid, name, pos, date, season, team (ESPN id), opp (ESPN id), game (ESPN id or null), home, s: {stat: value} }
 
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { summary } from './espn.mjs';
-import { CACHE, get, nflverseRows, pool } from './sources.mjs';
+import { CACHE, mlbPeople, nflverseRows, pool, readJson, writeJson } from './sources.mjs';
 
 const fileOf = (sport) => path.join(CACHE, `players-${sport}.json`);
+// (each sport's kept lines, read once a run; dirty: changed since)
+const kept = new Map();
 const load = (sport) => {
-  try {
-    return existsSync(fileOf(sport)) ? JSON.parse(readFileSync(fileOf(sport), 'utf8')) : {};
-  } catch {
-    return {};
+  if (!kept.has(sport)) kept.set(sport, { data: readJson(fileOf(sport), {}), dirty: false });
+  return kept.get(sport).data;
+};
+const save = (sport) => {
+  writeJson(fileOf(sport), load(sport));
+  kept.get(sport).dirty = false;
+};
+
+// An NBA or NHL final's player lines from its summary, kept: context.mjs reads each new final's summary for
+// its own facts and hands it here too, so a final's summary is asked for once
+export function recordBox(sport, g, body) {
+  const box = body?.boxscore?.players;
+  if (!box?.length || (sport !== 'nba' && sport !== 'nhl')) return;
+  const sides = {};
+  for (const p of box) {
+    const where = String(p.team?.id) === String(g.home) ? 'h' : String(p.team?.id) === String(g.away) ? 'a' : null;
+    if (where) sides[where] = sport === 'nba' ? nbaLines(p) : nhlLines(p);
   }
-};
-const save = (sport, data) => {
-  mkdirSync(CACHE, { recursive: true });
-  writeFileSync(fileOf(sport), JSON.stringify(data));
-};
+  if (sides.h && sides.a) {
+    load(sport)[g.id] = sides;
+    kept.get(sport).dirty = true;
+  }
+}
 
 // Every player row for a sport, the kept ones brought up to date
 export async function playerRows(sport, cfg, history, facts) {
@@ -96,27 +110,18 @@ async function nflRows(cfg, history, facts) {
 // NBA and NHL: ESPN's box scores, one summary a final (kept: only the new ones asked)
 // ---------------------------------------------------------------------------
 async function boxRows(sport, cfg, history) {
-  const kept = load(sport);
-  const todo = history.filter((g) => g.final && g.hs !== null && !(g.id in kept));
+  const lines = load(sport);
+  // (finals still without lines: the summaries context.mjs didn't read this run, all of them on a cold cache)
+  const todo = history.filter((g) => g.final && g.hs !== null && !(g.id in lines));
   if (todo.length) {
     const t0 = Date.now();
-    await pool(todo, 6, async (g) => {
-      const body = await summary(cfg.league, g.id);
-      const box = body?.boxscore?.players;
-      if (!box?.length) return;
-      const sides = {};
-      for (const p of box) {
-        const where = String(p.team?.id) === String(g.home) ? 'h' : String(p.team?.id) === String(g.away) ? 'a' : null;
-        if (where) sides[where] = sport === 'nba' ? nbaLines(p) : nhlLines(p);
-      }
-      if (sides.h && sides.a) kept[g.id] = sides;
-    });
-    save(sport, kept);
+    await pool(todo, 6, async (g) => recordBox(sport, g, await summary(cfg.league, g.id)));
     console.log(`${sport}: player lines for ${todo.length} new finals (${Math.round((Date.now() - t0) / 1000)}s)`);
   }
+  if (kept.get(sport).dirty) save(sport);
   const out = [];
   for (const g of history) {
-    const k = kept[g.id];
+    const k = lines[g.id];
     if (!k) continue;
     for (const [where, team, opp] of [
       ['h', g.home, g.away],
@@ -173,7 +178,7 @@ function nhlLines(p) {
 }
 
 // ---------------------------------------------------------------------------
-// MLB: the starters' lines from context.json's game logs, the batters' from StatsAPI's
+// MLB: the starters' lines from the context's game logs, the batters' from StatsAPI's
 // ---------------------------------------------------------------------------
 async function mlbRows(history, facts) {
   const out = [];
@@ -200,24 +205,24 @@ async function mlbRows(history, facts) {
     }
   }
   // (the batters: every lineup's, their game logs by season; this season's asked again once a day)
-  const kept = load('mlb');
-  kept.at ??= {};
-  kept.logs ??= {};
+  const mine = load('mlb');
+  mine.at ??= {};
+  mine.logs ??= {};
   const today = new Date().toISOString().slice(0, 10);
   const seasons = [...new Set(history.map((g) => g.season))];
   const current = Math.max(...seasons);
   const batters = Object.keys(facts.hands ?? {});
   for (const season of seasons) {
-    if (kept.logs[season] && (season < current || kept.at[season] >= today)) continue;
+    if (mine.logs[season] && (season < current || mine.at[season] >= today)) continue;
     const got = await mlbHitting(batters, season);
     if (!got) continue;
-    kept.logs[season] = got;
-    kept.at[season] = today;
-    save('mlb', kept);
+    mine.logs[season] = got;
+    mine.at[season] = today;
+    save('mlb');
     console.log(`mlb: batters' game logs for ${season} (${Object.keys(got).length})`);
   }
   const team = (id) => espnOfTeam.get(facts.mlbTeams?.[id]) ?? null;
-  for (const [season, logs] of Object.entries(kept.logs)) {
+  for (const [season, logs] of Object.entries(mine.logs)) {
     for (const [id, { n, rows }] of Object.entries(logs)) {
       for (const [ymd, pk, teamId, oppId, home, pa, h, tb, hr] of rows) {
         const g = byPk.get(pk);
@@ -232,19 +237,14 @@ async function mlbRows(history, facts) {
 // (batters' hitting game logs for a season, 40 to a call: { id: { n: name, rows: [[yyyymmdd, gamePk, team,
 // opponent, home, PA, hits, total bases, home runs]] } }; null when StatsAPI fails)
 async function mlbHitting(ids, season) {
+  const { people, failed, calls } = await mlbPeople(ids, 40, `stats(group=[hitting],type=[gameLog],season=${season})`);
+  if (failed > calls / 2) return null;
   const out = {};
-  const batches = [];
-  for (let i = 0; i < ids.length; i += 40) batches.push(ids.slice(i, i + 40));
-  let failed = 0;
-  await pool(batches, 3, async (batch) => {
-    const body = await get(`https://statsapi.mlb.com/api/v1/people?personIds=${batch.join(',')}&hydrate=stats(group=[hitting],type=[gameLog],season=${season})`);
-    if (!body) return failed++;
-    for (const p of body.people ?? []) {
-      const rows = (p.stats?.[0]?.splits ?? [])
-        .filter((s) => s.date && (s.stat.plateAppearances ?? 0) > 0)
-        .map((s) => [Number(s.date.replace(/-/g, '')), s.game?.gamePk, s.team?.id, s.opponent?.id, s.isHome ? 1 : 0, s.stat.plateAppearances, s.stat.hits, s.stat.totalBases, s.stat.homeRuns]);
-      if (rows.length) out[p.id] = { n: p.fullName, rows };
-    }
-  });
-  return failed > batches.length / 2 ? null : out;
+  for (const p of people) {
+    const rows = (p.stats?.[0]?.splits ?? [])
+      .filter((s) => s.date && (s.stat.plateAppearances ?? 0) > 0)
+      .map((s) => [Number(s.date.replace(/-/g, '')), s.game?.gamePk, s.team?.id, s.opponent?.id, s.isHome ? 1 : 0, s.stat.plateAppearances, s.stat.hits, s.stat.totalBases, s.stat.homeRuns]);
+    if (rows.length) out[p.id] = { n: p.fullName, rows };
+  }
+  return out;
 }

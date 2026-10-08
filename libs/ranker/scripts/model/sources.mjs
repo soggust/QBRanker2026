@@ -37,6 +37,22 @@ export async function pool(items, size, fn) {
   return out;
 }
 
+// A JSON file's contents (fallback when it's missing or unreadable), and one written (its folder made)
+export function readJson(file, fallback) {
+  try {
+    return existsSync(file) ? JSON.parse(readFileSync(file, 'utf8')) : fallback;
+  } catch {
+    return fallback;
+  }
+}
+export function writeJson(file, data) {
+  mkdirSync(path.dirname(file), { recursive: true });
+  writeFileSync(file, JSON.stringify(data));
+}
+
+// A time as its UTC day, "2026-10-08"
+export const isoDay = (t) => new Date(t).toISOString().slice(0, 10);
+
 // A URL's text, kept in the cache for some hours (stale beats nothing when the source is down)
 export async function cachedText(url, name, hours) {
   const file = path.join(CACHE, name);
@@ -51,27 +67,9 @@ export async function cachedText(url, name, hours) {
   return existsSync(file) ? readFileSync(file, 'utf8') : null;
 }
 
-// A CSV's rows as objects by header (quoted fields may hold commas)
+// A CSV's rows as objects by header (quoted fields may hold commas; a row a line)
 export function csv(text) {
-  const rows = [];
-  let row = [];
-  let field = '';
-  let quoted = false;
-  for (let i = 0; i < text.length; i++) {
-    const ch = text[i];
-    if (quoted) {
-      if (ch === '"' && text[i + 1] === '"') (field += '"'), i++;
-      else if (ch === '"') quoted = false;
-      else field += ch;
-    } else if (ch === '"') quoted = true;
-    else if (ch === ',') row.push(field), (field = '');
-    else if (ch === '\n' || ch === '\r') {
-      if (ch === '\r' && text[i + 1] === '\n') i++;
-      row.push(field), rows.push(row), (row = []), (field = '');
-    } else field += ch;
-  }
-  if (field || row.length) row.push(field), rows.push(row);
-  const [head, ...body] = rows;
+  const [head, ...body] = text.split('\n').filter((l) => l.replace('\r', '')).map(splitCsvLine);
   return body.filter((r) => r.length === head.length).map((r) => Object.fromEntries(head.map((h, i) => [h, r[i]])));
 }
 
@@ -93,25 +91,28 @@ export async function mlbSchedule(from, to) {
 // Pitchers' lines for a season, 40 to a call: a game log (each appearance) or the season's totals
 export async function mlbPitching(ids, season, type) {
   const out = new Map();
-  const batches = [];
-  for (let i = 0; i < ids.length; i += 40) batches.push(ids.slice(i, i + 40));
-  await pool(batches, 3, async (batch) => {
-    const body = await get(`https://statsapi.mlb.com/api/v1/people?personIds=${batch.join(',')}&hydrate=stats(group=[pitching],type=[${type}],season=${season})`);
-    for (const p of body?.people ?? []) out.set(String(p.id), { name: p.fullName, splits: p.stats?.[0]?.splits ?? [] });
-  });
+  for (const p of (await mlbPeople(ids, 40, `stats(group=[pitching],type=[${type}],season=${season})`)).people) out.set(String(p.id), { name: p.fullName, splits: p.stats?.[0]?.splits ?? [] });
   return out;
+}
+
+// StatsAPI's people, size to a call, three calls at a time (hydrate: what to bring with each): every one
+// found, and how many calls failed of how many
+export async function mlbPeople(ids, size, hydrate = null) {
+  const batches = [];
+  for (let i = 0; i < ids.length; i += size) batches.push(ids.slice(i, i + size));
+  const people = [];
+  let failed = 0;
+  await pool(batches, 3, async (batch) => {
+    const body = await get(`https://statsapi.mlb.com/api/v1/people?personIds=${batch.join(',')}${hydrate ? `&hydrate=${hydrate}` : ''}`);
+    if (!body) failed++;
+    people.push(...(body?.people ?? []));
+  });
+  return { people, failed, calls: batches.length };
 }
 
 // Players' hands, 100 to a call: how each bats (L, R or S: both) and throws, as two letters ("SR")
 export async function mlbHands(ids) {
-  const out = new Map();
-  const batches = [];
-  for (let i = 0; i < ids.length; i += 100) batches.push(ids.slice(i, i + 100));
-  await pool(batches, 3, async (batch) => {
-    const body = await get(`https://statsapi.mlb.com/api/v1/people?personIds=${batch.join(',')}`);
-    for (const p of body?.people ?? []) out.set(String(p.id), `${p.batSide?.code ?? 'R'}${p.pitchHand?.code ?? 'R'}`);
-  });
-  return out;
+  return new Map((await mlbPeople(ids, 100)).people.map((p) => [String(p.id), `${p.batSide?.code ?? 'R'}${p.pitchHand?.code ?? 'R'}`]));
 }
 
 // A pitching line as the desk keeps it: outs, runs, earned runs, strikeouts, walks, hit batters, home runs

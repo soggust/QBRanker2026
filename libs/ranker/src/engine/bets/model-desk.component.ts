@@ -36,6 +36,8 @@ interface ModelBet {
   recap?: { headline: string | null; lede: string | null; link: string | null };
   disrupted?: { severe: boolean; kind: string; text: string }[];
   weight?: number;
+  // (its closing-line value once its game has started: clv.mjs)
+  clv?: { pts: number | null; prob: number | null; ev: number | null; beat: boolean | null } | null;
 }
 
 type TestNumbers = { maeMargin: number; maeTotal: number; winHit: number; winLogLoss: number };
@@ -90,6 +92,11 @@ export interface Tally {
   profit: number;
   roi: number | null;
   open: number;
+  // (closing-line value: bets with a close, the share that beat it (of those that didn't tie), the mean
+  // expected return at the close)
+  clvN: number;
+  clvBeat: number | null;
+  clvEv: number | null;
 }
 
 const SPORTS = ['nfl', 'nba', 'nhl', 'mlb'];
@@ -98,7 +105,13 @@ const MARKET_NAMES: Record<string, string> = { spread: 'Spread', total: 'Total',
 const UNIT_WORDS: Record<string, string> = { nfl: 'pts', nba: 'pts', nhl: 'goals', mlb: 'runs' };
 
 function tally(label: string, bets: ModelBet[]): Tally {
-  const t: Tally = { label, bets: 0, won: 0, lost: 0, push: 0, staked: 0, profit: 0, roi: null, open: 0 };
+  const t: Tally = { label, bets: 0, won: 0, lost: 0, push: 0, staked: 0, profit: 0, roi: null, open: 0, clvN: 0, clvBeat: null, clvEv: null };
+  const withClv = bets.filter((b) => b.clv);
+  const decided = withClv.filter((b) => b.clv!.beat !== null);
+  const evs = withClv.map((b) => b.clv!.ev).filter((v): v is number => v !== null && v !== undefined);
+  t.clvN = withClv.length;
+  t.clvBeat = decided.length ? decided.filter((b) => b.clv!.beat).length / decided.length : null;
+  t.clvEv = evs.length ? evs.reduce((s, v) => s + v, 0) / evs.length : null;
   for (const b of bets) {
     if (b.status === 'open') {
       t.open++;
@@ -212,6 +225,21 @@ export class ModelDeskComponent implements OnInit {
     return `${v > 0 ? '+' : ''}${v}`;
   }
 
+  // (a tally's CLV: the share of its bets that beat the close, and their mean expected return at it)
+  clvText(t: Tally): string {
+    if (!t.clvN) return '-';
+    return `${this.pct(t.clvBeat, 0)}${t.clvEv !== null ? ` · ${t.clvEv >= 0 ? '+' : ''}${(t.clvEv * 100).toFixed(1)}%` : ''}`;
+  }
+
+  // (a bet's CLV: the points it beat the close by, else the chance it gained on it)
+  betClv(b: ModelBet): string {
+    const c = b.clv;
+    if (!c) return '-';
+    if (c.pts !== null && c.pts !== 0) return `${c.pts > 0 ? '+' : ''}${c.pts} pts`;
+    if (c.prob !== null) return `${c.prob >= 0 ? '+' : ''}${(c.prob * 100).toFixed(1)}%`;
+    return '0';
+  }
+
   get balance(): number {
     return this.bankroll + this.overall.profit;
   }
@@ -276,7 +304,7 @@ export class ModelDeskComponent implements OnInit {
 
   // (a tally's value by column)
   readonly tallyValue = (t: Tally, key: string): unknown =>
-    key === 'label' ? t.label : key === 'record' ? (t.won + t.lost ? t.won / (t.won + t.lost) : null) : key === 'profit' ? t.profit : key === 'roi' ? t.roi : key === 'open' ? t.open : null;
+    key === 'label' ? t.label : key === 'record' ? (t.won + t.lost ? t.won / (t.won + t.lost) : null) : key === 'profit' ? t.profit : key === 'roi' ? t.roi : key === 'open' ? t.open : key === 'clv' ? t.clvBeat : null;
 
   readonly sportValue = (t: Tally & { state: ModelState | null }, key: string): unknown =>
     key === 'test' ? (t.state?.test?.winHit ?? null) : key === 'disrupted' ? (t.state?.postmortem?.disrupted ?? null) : this.tallyValue(t, key);
@@ -301,6 +329,7 @@ export class ModelDeskComponent implements OnInit {
     : key === 'pick' ? b.pick
     : key === 'result' ? b.profit
     : key === 'why' ? (b.why ?? null)
+    : key === 'clv' ? (b.clv ? (b.clv.ev ?? b.clv.pts ?? null) : null)
     : (b as unknown as Record<string, unknown>)[key];
 
   readonly calibrationValue = (c: { label: string; n: number; said: number; was: number }, key: string): unknown => (key === 'label' ? c.said : (c as unknown as Record<string, unknown>)[key]);
@@ -363,6 +392,8 @@ export class ModelDeskComponent implements OnInit {
     sideHit: 'On those lines, how often the side it leaned (by 5 points or more) was right',
     propSettings: 'Its fitted settings: K (games of pull toward his position), recent weight, opponent power, game-script power, context size, spread (r: lower is wider)',
     propTrust: "How much the prop type counts its projection against the player's own record (starts 0.5; refit on its graded props once 40 are; * not yet)",
+    clv: "Closing-line value: how its bets' lines and prices compare with where the market closed, the market's last word before the game. The share that beat the close (a better line, or the same line at a better chance), and the mean expected return at the closing chance. The early skill signal: a few dozen results are mostly luck, but beating the close shows an edge from the first bets on; the trust in the model leans on it until results pile up",
+    betClv: "Its closing-line value: the points its line beat the close by (a spread, a total or a prop), else the chance its side gained on it; green when it beat the close",
     term: "What it weighs beyond the ratings (hover a name for its unit): rest and the schedule's grind, travel, starters and bullpens, weather and air, ballparks, the officials, expected goals and neutral-script EPA, and last season's numbers from the ranker",
     on: 'What it moves: the margin (toward the side it names) or the game total',
     size: "Its fitted size, in the sport's scoring unit per unit of the term (hover the name for the unit); refit every run on every game before, pulled toward 0 unless the games bear it out",

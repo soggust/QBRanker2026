@@ -6,13 +6,13 @@
 // report); and the wind across the field (which way each field runs, from OpenStreetMap, and where the wind
 // blew from at kickoff, Open-Meteo's archive; the forecast for a coming game).
 //
-// Kept in context.json: plays (each game's [home EPA, home plays, away EPA, away plays, flags]), ol (each
+// Kept in the context's facts (.cache/model/context-<sport>.json): plays (each game's [home EPA, home plays, away EPA, away plays, flags]), ol (each
 // game's [home, away] starters changed), olLast (each team's last five), fields (each stadium's bearing and
 // place), wdir (each outdoor game's wind direction).
 
+import { term } from './terms.mjs';
 import { fieldBearing, nflverseRows, pool, weatherHistory } from './sources.mjs';
 
-const term = (key, group, on, label, unit) => ({ key, group, on, label, unit });
 
 export const FOOTBALL_TERMS = [
   term('nsEpa', 'strength', 'm', 'Neutral-script EPA', 'per 0.1 EPA a play better (offense less defense allowed) this season, garbage time left out'),
@@ -25,7 +25,8 @@ const NEUTRAL = (p) => (p.play_type === 'pass' || p.play_type === 'run') && p.ep
 const OL = new Set(['T', 'G', 'C', 'OL', 'OT', 'OG']);
 
 // The facts above, for every final that doesn't have them yet (the seasons it needs, read once)
-export async function gatherFootball(cfg, history, upcoming, facts, live) {
+// (part: plays, snaps or fields)
+export async function gatherFootball(cfg, history, upcoming, facts, live, part) {
   facts.plays ??= {};
   facts.ol ??= {};
   facts.olLast ??= {};
@@ -34,13 +35,14 @@ export async function gatherFootball(cfg, history, upcoming, facts, live) {
   const rows = facts.nfl;
   if (!rows?.size) return;
   const espnOf = new Map([...rows.values()].map((r) => [r.game_id, r.espn]));
+  const byId = new Map(history.map((g) => [g.id, g]));
   const finals = history.filter((g) => g.final && rows.has(g.id));
   const current = Math.max(...history.map((g) => g.season));
 
   // (the plays: a season's file only when one of its finals is missing them; a past season's final the file
   // hasn't is tried once: null)
   const missing = (kept, g) => !kept[g.id] && !(g.season < current && g.id in kept);
-  const playSeasons = [...new Set(finals.filter((g) => missing(facts.plays, g)).map((g) => g.season))].sort();
+  const playSeasons = part === 'plays' ? [...new Set(finals.filter((g) => missing(facts.plays, g)).map((g) => g.season))].sort() : [];
   for (const season of playSeasons) {
     const plays = await nflverseRows('pbp', `play_by_play_${season}.csv.gz`, ['game_id', 'posteam', 'home_team', 'play_type', 'epa', 'wp', 'half_seconds_remaining', 'penalty'], season === current ? 12 : 24 * 365);
     if (!plays) continue;
@@ -58,13 +60,13 @@ export async function gatherFootball(cfg, history, upcoming, facts, live) {
       per.set(id, a);
     }
     let n = 0;
-    for (const [id, a] of per) if (a[1] + a[3] > 20 && history.find((g) => g.id === id)?.final) (facts.plays[id] = [Math.round(a[0] * 100) / 100, a[1], Math.round(a[2] * 100) / 100, a[3], a[4]]), n++;
+    for (const [id, a] of per) if (a[1] + a[3] > 20 && byId.get(id)?.final) (facts.plays[id] = [Math.round(a[0] * 100) / 100, a[1], Math.round(a[2] * 100) / 100, a[3], a[4]]), n++;
     if (season < current) for (const g of finals) if (g.season === season && !facts.plays[g.id]) facts.plays[g.id] = null;
     console.log(`nfl: plays for ${n} games of ${season}`);
   }
 
   // (the line: each team's five offensive linemen with the most snaps, against its last game's five)
-  const olSeasons = [...new Set(finals.filter((g) => missing(facts.ol, g) && g.season >= 2012).map((g) => g.season))].sort();
+  const olSeasons = part === 'snaps' ? [...new Set(finals.filter((g) => missing(facts.ol, g) && g.season >= 2012).map((g) => g.season))].sort() : [];
   for (const season of olSeasons) {
     const snaps = await nflverseRows('snap_counts', `snap_counts_${season}.csv.gz`, ['game_id', 'week', 'player', 'pfr_player_id', 'position', 'team', 'offense_snaps'], season === current ? 12 : 24 * 365);
     if (!snaps) continue;
@@ -104,12 +106,12 @@ export async function gatherFootball(cfg, history, upcoming, facts, live) {
   for (const g of history) if (g.venue && !g.neutral) homePlace.set(g.home, facts.places?.[g.venue]);
   const stadiums = new Map();
   for (const r of rows.values()) if (['outdoors', 'open', ''].includes(r.roof) && r.stadium_id) stadiums.set(r.stadium_id, r);
-  const wanted = [...stadiums.entries()].filter(([id]) => !(id in facts.fields));
+  const wanted = part === 'fields' ? [...stadiums.entries()].filter(([id]) => !(id in facts.fields)) : [];
   // (the map's server is busy at times: a minute a run at most, the rest asked next run)
   const until = Date.now() + 60e3;
   await pool(wanted, 1, async ([id, r]) => {
     if (Date.now() > until) return;
-    const g = history.find((x) => x.id === r.espn);
+    const g = byId.get(r.espn);
     const near = g ? (facts.places?.[g.venue] ?? homePlace.get(g.home)) : null;
     if (!near) return;
     const found = await fieldBearing(r.stadium, near);
@@ -121,7 +123,7 @@ export async function gatherFootball(cfg, history, upcoming, facts, live) {
   const need = new Map();
   for (const g of finals) {
     const r = rows.get(g.id);
-    if (g.id in facts.wdir || !['outdoors', 'open'].includes(r.roof) || !facts.fields[r.stadium_id]?.at) continue;
+    if (part !== 'fields' || g.id in facts.wdir || !['outdoors', 'open'].includes(r.roof) || !facts.fields[r.stadium_id]?.at) continue;
     need.set(r.stadium_id, [...(need.get(r.stadium_id) ?? []), g]);
   }
   await pool([...need], 2, async ([id, games]) => {

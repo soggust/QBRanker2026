@@ -10,6 +10,7 @@
 
 import { existsSync, readFileSync } from 'node:fs';
 import path from 'node:path';
+import { term } from './terms.mjs';
 
 const ROOT = path.resolve(import.meta.dirname, '../../../..');
 const archive = (sport, season, file) => path.join(ROOT, 'apps', sport, 'src/StaticData/seasons', String(season), file);
@@ -21,33 +22,33 @@ const readJson = (file) => {
   }
 };
 
-const term = (key, on, label, unit) => ({ key, group: 'ranker', on, label, unit });
+const ranked = (key, on, label, unit) => term(key, 'ranker', on, label, unit);
 
 export const RANKER_TERMS = {
   nfl: [
-    term('rkNet', 'm', "Last season's EPA", 'per 0.1 EPA a play better (offense less defense) last season'),
-    term('rkLine', 'm', "Last season's line grade", "per 5 points better offensive line grade (the ranker's) last season"),
-    term('rkWeapons', 'm', "Last season's weapons grade", "per 5 points better weapons grade (the ranker's) last season"),
-    term('rkRush', 'm', "Last season's pass rush", 'per 10 points more pressure on the passer last season'),
-    term('rkScoreT', 't', "Last season's EPA (total)", "to the total per 0.1 EPA a play of both offenses and both defenses' allowed"),
+    ranked('rkNet', 'm', "Last season's EPA", 'per 0.1 EPA a play better (offense less defense) last season'),
+    ranked('rkLine', 'm', "Last season's line grade", "per 5 points better offensive line grade (the ranker's) last season"),
+    ranked('rkWeapons', 'm', "Last season's weapons grade", "per 5 points better weapons grade (the ranker's) last season"),
+    ranked('rkRush', 'm', "Last season's pass rush", 'per 10 points more pressure on the passer last season'),
+    ranked('rkScoreT', 't', "Last season's EPA (total)", "to the total per 0.1 EPA a play of both offenses and both defenses' allowed"),
   ],
   nba: [
-    term('rkNet', 'm', "Last season's net rating", 'per 5 points of net rating better last season'),
-    term('rkPaceT', 't', "Last season's pace (total)", 'to the total per 5 possessions a game more for both sides'),
-    term('rkRtgT', 't', "Last season's ratings (total)", "to the total per 5 points of both offenses' and defenses' ratings over average"),
+    ranked('rkNet', 'm', "Last season's net rating", 'per 5 points of net rating better last season'),
+    ranked('rkPaceT', 't', "Last season's pace (total)", 'to the total per 5 possessions a game more for both sides'),
+    ranked('rkRtgT', 't', "Last season's ratings (total)", "to the total per 5 points of both offenses' and defenses' ratings over average"),
   ],
   nhl: [
-    term('rkXg', 'm', "Last season's expected goals", 'per 5 points more of the expected-goals share last season'),
-    term('rkGsax', 'm', "Last season's goaltending", 'per 10 goals saved above expected more last season'),
-    term('rkPdo', 'm', "Last season's PDO (luck)", 'per point more of shooting plus save percentage last season'),
+    ranked('rkXg', 'm', "Last season's expected goals", 'per 5 points more of the expected-goals share last season'),
+    ranked('rkGsax', 'm', "Last season's goaltending", 'per 10 goals saved above expected more last season'),
+    ranked('rkPdo', 'm', "Last season's PDO (luck)", 'per point more of shooting plus save percentage last season'),
   ],
   mlb: [
-    term('rkOps', 'm', "Last season's OPS", 'per .100 better OPS last season'),
-    term('rkEra', 'm', "Last season's ERA", 'per run lower ERA last season'),
-    term('rkField', 'm', "Last season's fielding", 'per 10 fielding runs more last season'),
-    term('rkOpsT', 't', "Last season's OPS (total)", "to the total per .100 of both sides' OPS over average"),
-    term('rkEraT', 't', "Last season's ERA (total)", "to the total per run of both sides' ERA over average"),
-    term('rkPark', 't', "Last season's park factor", "to the total per 10 points of the home park's run factor over 100"),
+    ranked('rkOps', 'm', "Last season's OPS", 'per .100 better OPS last season'),
+    ranked('rkEra', 'm', "Last season's ERA", 'per run lower ERA last season'),
+    ranked('rkField', 'm', "Last season's fielding", 'per 10 fielding runs more last season'),
+    ranked('rkOpsT', 't', "Last season's OPS (total)", "to the total per .100 of both sides' OPS over average"),
+    ranked('rkEraT', 't', "Last season's ERA (total)", "to the total per run of both sides' ERA over average"),
+    ranked('rkPark', 't', "Last season's park factor", "to the total per 10 points of the home park's run factor over 100"),
   ],
 };
 

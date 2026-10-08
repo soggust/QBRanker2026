@@ -4,12 +4,12 @@
 // they've thrown in the three days before: a tired closer and setup men late), and what the plate umpire's
 // zone did to the starters (their strikeouts against their own rates to date: officials.mjs weighs it).
 //
-// Kept in context.json: each game's air ([temperature, dew point, pressure]), and pen (each season's
+// Kept in the context's facts (.cache/model/context-<sport>.json): each game's air ([temperature, dew point, pressure]), and pen (each season's
 // relievers' appearances by team: [month and day, pitches, saves and holds]).
 
-import { airDensity, forecastAir, get, mlbPitching, pool, weatherHistory } from './sources.mjs';
+import { term } from './terms.mjs';
+import { airDensity, forecastAir, get, isoDay, mlbPitching, pool, weatherHistory } from './sources.mjs';
 
-const term = (key, group, on, label, unit) => ({ key, group, on, label, unit });
 
 export const BASEBALL_TERMS = [
   term('airThin', 'weather', 't', 'Thin air', 'to the total per 1% thinner air than average (warm, humid, high up; outdoors)'),
@@ -19,12 +19,12 @@ export const BASEBALL_TERMS = [
 
 // (sea-level air at 70F and half humidity, about: the average the thinness is measured from)
 const AIR = 1.18;
-const ymd = (t) => new Date(t).toISOString().slice(0, 10);
 
-export async function gatherBaseball(history, upcoming, facts, live) {
+// (part: air or bullpens)
+export async function gatherBaseball(history, upcoming, facts, live, part) {
   facts.pen ??= {};
   facts.penAt ??= {};
-  const today = ymd(Date.now());
+  const today = isoDay(Date.now());
   const current = Math.max(...history.map((g) => g.season));
 
   // (the air at each outdoor final's first pitch: one ask of the archive per park; a final the archive
@@ -32,7 +32,7 @@ export async function gatherBaseball(history, upcoming, facts, live) {
   const byPark = new Map();
   for (const g of history) {
     const f = facts.games?.[g.id];
-    if (!g.final || !f?.at || f.air || (f.w && f.w[2]) || Date.parse(g.date) > Date.now() - 6 * 864e5) continue;
+    if (part !== 'air' || !g.final || !f?.at || f.air || (f.w && f.w[2]) || Date.parse(g.date) > Date.now() - 6 * 864e5) continue;
     byPark.set(f.v ?? f.at.join(), [...(byPark.get(f.v ?? f.at.join()) ?? []), g]);
   }
   await pool([...byPark.values()], 2, async (games) => {
@@ -45,7 +45,7 @@ export async function gatherBaseball(history, upcoming, facts, live) {
       if (w) f.air = [f.w ? f.w[0] : Math.round(w.temp), Math.round(w.dew), Math.round(w.pressure)];
     }
   });
-  await pool(upcoming, 3, async ({ game }) => {
+  await pool(part === 'air' ? upcoming : [], 3, async ({ game }) => {
     const l = live.get(game.id);
     if (!l?.at || (l.w && l.w[2]) || (!l.w && l.roof && l.roof !== 'Open')) return;
     const a = await forecastAir(l.at, game.date);
@@ -54,7 +54,7 @@ export async function gatherBaseball(history, upcoming, facts, live) {
 
   // (the bullpens: each season's relievers with saves or holds, their game logs; this season's asked again
   // once a day there's been a game since)
-  const seasons = [...new Set(history.map((g) => g.season))];
+  const seasons = part === 'bullpens' ? [...new Set(history.map((g) => g.season))] : [];
   for (const season of seasons) {
     const stale = !facts.pen[season] || (season === current && facts.penAt[season] < today && history.some((g) => g.final && g.season === season && g.date.slice(0, 10) >= facts.penAt[season]));
     if (!stale) continue;

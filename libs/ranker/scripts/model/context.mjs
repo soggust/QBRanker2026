@@ -3,7 +3,8 @@
 // at an outdoor game. Each is turned into a few numbers (terms) whose sizes the replay fits from history
 // (ratings.mjs); this file only gathers the facts and turns them into the terms.
 //
-// The facts are kept in apps/<sport>/scripts/model/context.json (so each run only asks about the games new
+// The facts are kept in .cache/model/context-<sport>.json (gitignored; the workflow's cache keeps it between
+// runs, and a cold cache only makes a run slower: it asks for everything again) so each run only asks about the games new
 // since the last): box scores' who-played for the NBA and NHL, MLB's probable pitchers, their game logs and
 // ballpark weather, and the coordinates of every place a game is played. The NFL's come from nflverse each run.
 // Any fact a source couldn't give leaves its term at 0 for that game: no effect, nothing guessed.
@@ -15,17 +16,18 @@
 
 import { injuries, summary, teamNames, teamSchedule, gameOf } from './espn.mjs';
 import { RANKER_TERMS, rankerOf } from './teamstats.mjs';
+import { term } from './terms.mjs';
+import { recordBox } from './playerlogs.mjs';
 import { OFFICIAL_TERMS, gatherOfficials, officialsOf, refereesOf } from './officials.mjs';
 import { FOOTBALL_TERMS, footballOf, gatherFootball } from './football.mjs';
 import { HOCKEY_TERMS, gatherHockey, hockeyOf } from './hockey.mjs';
 import { BASEBALL_TERMS, baseballOf, gatherBaseball } from './baseball.mjs';
-import { elevations, forecast, geocode, miles, mlbHands, mlbPitching, mlbSchedule, nflverseGames, pitchLine, pool } from './sources.mjs';
+import { elevations, forecast, geocode, isoDay, miles, mlbHands, mlbPitching, mlbSchedule, nflverseGames, pitchLine, pool } from './sources.mjs';
 
 const DAY = 864e5;
 
 // A term: its key, its group (rest, travel, starters, weather), whether it moves the margin (m, the home side's
 // edge: a positive size favors the side it names) or the total (t), and its words
-const term = (key, group, on, label, unit) => ({ key, group, on, label, unit });
 const REST = term('rest', 'rest', 'm', 'Rest edge', 'per day more rest than the other side');
 const B2B = term('b2b', 'rest', 'm', 'Back-to-back', 'when the other side played yesterday');
 const B2BT = term('b2bT', 'rest', 't', 'Back-to-backs (total)', 'to the total per side that played yesterday');
@@ -79,7 +81,6 @@ export const TERMS = {
   ],
 };
 
-const ymdDash = (t) => new Date(t).toISOString().slice(0, 10);
 const QUESTIONABLE = /questionable|day-to-day|game-time/i;
 const OUT = /^out|doubtful|injured reserve|il$|-il|suspension/i;
 
@@ -165,17 +166,32 @@ function easternToUtc(day, time) {
   return new Date(t + ((hh + (daylight ? 4 : 5)) * 60 + mm) * 6e4).toISOString().slice(0, 16) + 'Z';
 }
 
+// The sources a run can do without: each one's terms. One is only asked while a term it feeds has earned its
+// place (or is new), and otherwise again once a week or once the history has 30% more games, so a term left
+// out can earn its way back in (run.mjs decides: want). The rest (each sport's schedule, box scores or
+// StatsAPI, the injury report, places) feed kept terms in every sport, and the props.
+export const OPTIONAL = {
+  nfl: { plays: ['nsEpa', 'nsEpaT', 'refWhistle'], snaps: ['olChanges'], fields: ['crosswind'], forecasts: ['cold', 'wind', 'crosswind'] },
+  nba: { officials: ['refTotal', 'refHome', 'refWhistle'] },
+  nhl: { officials: ['refTotal', 'refHome', 'refWhistle'], xg: ['xgEdge', 'xgT', 'goalieX'] },
+  mlb: { air: ['airThin'], bullpens: ['penTired', 'penTiredT'] },
+};
+
 // The facts for every game the history has and the coming ones: the kept ones brought up to date, plus each
 // coming game's live ones (injury reports, probable starters, the forecast). Never throws: a source that
-// fails just adds nothing.
-export async function gather(sport, cfg, history, upcoming, facts) {
+// fails just adds nothing. want(source): whether to ask an optional one. Each step's time and whether it
+// worked land in times.
+export async function gather(sport, cfg, history, upcoming, facts, want = () => true, times = {}) {
   facts.places ??= {};
   facts.games ??= {};
   const live = new Map(upcoming.map(({ game }) => [game.id, {}]));
   const step = async (what, fn) => {
+    const t0 = Date.now();
     try {
       await fn();
+      times[what] = { ms: Date.now() - t0, ok: true };
     } catch (err) {
+      times[what] = { ms: Date.now() - t0, ok: false, error: err.message };
       console.warn(`${sport}: ${what} skipped (${err.message})`);
     }
   };
@@ -188,10 +204,10 @@ export async function gather(sport, cfg, history, upcoming, facts) {
   if (sport === 'nba') await step('box scores', () => boxFacts(cfg, history, facts, 'nba'));
   if (sport === 'nhl') await step('box scores', () => boxFacts(cfg, history, facts, 'nhl'));
   if (sport === 'mlb') await step('StatsAPI', () => mlbFacts(history, upcoming, facts, live));
-  if (sport === 'nfl') await step('plays, lines and fields', () => gatherFootball(cfg, history, upcoming, facts, live));
-  if (sport === 'nhl') await step('expected goals', () => gatherHockey(history, facts));
-  if (sport === 'mlb') await step('air and bullpens', () => gatherBaseball(history, upcoming, facts, live));
-  await step('officials', () => gatherOfficials(sport, cfg, upcoming, live));
+  if (sport === 'nfl') for (const part of ['plays', 'snaps', 'fields']) if (want(part)) await step(part, () => gatherFootball(cfg, history, upcoming, facts, live, part));
+  if (sport === 'nhl' && want('xg')) await step('xg', () => gatherHockey(history, facts));
+  if (sport === 'mlb') for (const part of ['air', 'bullpens']) if (want(part)) await step(part, () => gatherBaseball(history, upcoming, facts, live, part));
+  if ((sport === 'nba' || sport === 'nhl') && want('officials')) await step('officials', () => gatherOfficials(sport, cfg, upcoming, live));
   if (sport !== 'mlb') {
     await step('injuries', async () => {
       const report = await injuries(cfg.league);
@@ -208,7 +224,7 @@ export async function gather(sport, cfg, history, upcoming, facts) {
       }
     }
   }
-  if (sport === 'nfl') await step('forecasts', () => nflForecasts(upcoming, facts, live));
+  if (sport === 'nfl' && want('forecasts')) await step('forecasts', () => nflForecasts(upcoming, facts, live));
   return live;
 }
 
@@ -259,6 +275,7 @@ async function boxFacts(cfg, history, facts, sport) {
   let done = 0;
   await pool(todo, 6, async (g) => {
     const body = await summary(cfg.league, g.id);
+    recordBox(sport, g, body);
     const box = body?.boxscore?.players;
     if (!box?.length) return;
     const side = { v: 2 };
@@ -323,7 +340,7 @@ async function mlbFacts(history, upcoming, facts, live) {
   facts.pitchers ??= {};
   facts.hands ??= {};
   facts.venues ??= {};
-  const today = ymdDash(Date.now());
+  const today = isoDay(Date.now());
   // (a final StatsAPI has no match for is tried once, then left neutral)
   facts.umps ??= {};
   facts.mlbTeams ??= {};
@@ -336,7 +353,7 @@ async function mlbFacts(history, upcoming, facts, live) {
     let from = Date.parse(wanted[0].slice(0, 10)) - DAY;
     const end = Date.parse(wanted.at(-1).slice(0, 10)) + DAY;
     const asks = [];
-    for (; from <= end; from += 31 * DAY) asks.push([ymdDash(from), ymdDash(Math.min(end, from + 30 * DAY))]);
+    for (; from <= end; from += 31 * DAY) asks.push([isoDay(from), isoDay(Math.min(end, from + 30 * DAY))]);
     for (const got of await pool(asks, 3, ([a, b]) => mlbSchedule(a, b))) rows.push(...(got ?? []));
   }
   const byTeams = new Map();

@@ -8,9 +8,10 @@
 // of): a coming game without one has these at 0.
 
 import { summary } from './espn.mjs';
+import { term } from './terms.mjs';
 import { pool } from './sources.mjs';
 
-const term = (key, on, label, unit) => ({ key, group: 'officials', on, label, unit });
+const official = (key, on, label, unit) => term(key, 'officials', on, label, unit);
 const WHISTLE = {
   nfl: 'per flag a game more than average its referee calls',
   nba: 'per free throw a game more than average its referees award',
@@ -22,10 +23,10 @@ export const OFFICIAL_TERMS = Object.fromEntries(
   ['nfl', 'nba', 'nhl', 'mlb'].map((sport) => [
     sport,
     [
-      term('refTotal', 't', sport === 'mlb' ? 'Plate umpire (total)' : 'Officials (total)', 'per point (run, goal) a game its crew has run over what the teams usually score'),
-      term('refHome', 'm', sport === 'mlb' ? 'Plate umpire (home lean)' : 'Officials (home lean)', "per point (run, goal) a game the home side has beaten the teams' own margins with this crew"),
-      term('refWhistle', 't', sport === 'mlb' ? 'Plate umpire (zone)' : 'Officials (whistle)', WHISTLE[sport]),
-      ...(sport === 'mlb' ? [term('refZoneX', 't', 'Umpire zone x strikeout pitchers', "per strikeout a 9 innings of his zone's lean times the starters' strikeouts over average")] : []),
+      official('refTotal', 't', sport === 'mlb' ? 'Plate umpire (total)' : 'Officials (total)', 'per point (run, goal) a game its crew has run over what the teams usually score'),
+      official('refHome', 'm', sport === 'mlb' ? 'Plate umpire (home lean)' : 'Officials (home lean)', "per point (run, goal) a game the home side has beaten the teams' own margins with this crew"),
+      official('refWhistle', 't', sport === 'mlb' ? 'Plate umpire (zone)' : 'Officials (whistle)', WHISTLE[sport]),
+      ...(sport === 'mlb' ? [official('refZoneX', 't', 'Umpire zone x strikeout pitchers', "per strikeout a 9 innings of his zone's lean times the starters' strikeouts over average")] : []),
     ],
   ]),
 );

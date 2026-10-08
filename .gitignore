@@ -44,3 +44,6 @@ Thumbs.db
 # Random Build Cache Files
 .cache/
 .firebase/hosting.*.cache
+
+# The model desk's facts (libs/ranker/scripts/model): a cache, kept under .cache/model now
+apps/*/scripts/model/context.json

@@ -1,18 +1,12 @@
 // ESPN's public site API, for the model desk: a league's teams, a team's season schedule, a day's scoreboard
 // (its games, their scores and DraftKings' current lines). Free; asked politely, again after a refusal.
 
-const ESPN = 'https://site.api.espn.com/apis/site/v2/sports';
-const HEADERS = { 'User-Agent': 'Mozilla/5.0 (sports-ranker model desk)' };
+import { get } from './sources.mjs';
 
-export async function json(url) {
-  for (let attempt = 1; attempt <= 4; attempt++) {
-    const res = await fetch(url, { headers: HEADERS, signal: AbortSignal.timeout(30e3) }).catch(() => null);
-    if (res?.ok) return res.json();
-    if (res?.status === 404) return null;
-    await new Promise((r) => setTimeout(r, 1500 * attempt));
-  }
-  return null;
-}
+const ESPN = 'https://site.api.espn.com/apis/site/v2/sports';
+
+// (a URL's JSON: sources' get, four tries)
+export const json = (url) => get(url);
 
 export const ymd = (date) => date.toISOString().slice(0, 10).replace(/-/g, '');
 

@@ -5,11 +5,11 @@
 // its top three scorers for its goals, season to date, which the home side gets to shelter and the road
 // side gets exposed).
 //
-// Kept in context.json: each game's xg ([home expected for, home expected against]).
+// Kept in the context's facts (.cache/model/context-<sport>.json): each game's xg ([home expected for, home expected against]).
 
+import { term } from './terms.mjs';
 import { moneypuckGames, pool } from './sources.mjs';
 
-const term = (key, group, on, label, unit) => ({ key, group, on, label, unit });
 
 export const HOCKEY_TERMS = [
   term('xgEdge', 'strength', 'm', 'Expected goals', 'per expected goal a game better (for less against) this season'),

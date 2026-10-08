@@ -15,6 +15,9 @@ export const MARKETS = ['spread', 'total', 'ml'];
 export const decimal = (american) => (american > 0 ? 1 + american / 100 : 1 + 100 / -american);
 const implied = (american) => 1 / decimal(american);
 
+// The first side's fair chance from a pair of prices (the vig taken out)
+export const fairPair = (a, b) => fair(a, b)[0];
+
 // Both sides' fair chances: the book's implied chances, the vig taken out
 function fair(a, b) {
   const x = implied(a);
@@ -86,27 +89,31 @@ export function settle(bet, game) {
   return { status, profit: round(profit, 3), final: `${game.awayAbbr} ${game.as} @ ${game.homeAbbr} ${game.hs}` };
 }
 
-// The trust in the model a market has earned: of 0 to 1.2, the one that would have made its graded bets'
-// chances closest to what happened (log-likelihood of the chosen sides' results), less a cost for trusting
-// it at all. Until a market has 40 graded, the starting trust. A bet whose premise broke in the game (a
-// starter hurt, a goalie pulled: postmortem.mjs) counts for its weight, less than 1: noise, not evidence.
-export function fitTrust(graded, start) {
-  const decided = graded.filter((b) => b.status === 'won' || b.status === 'lost');
-  if (decided.length < 40) return { trust: start, n: decided.length, fitted: false };
-  const n = decided.reduce((s, b) => s + (b.weight ?? 1), 0);
+// The trust in the model a market has earned: of 0 to 1.2, the one that would have made its bets' chances
+// closest to what happened, less a cost for trusting it at all. Two kinds of evidence, as log-likelihoods:
+// each graded bet's result (a bet whose premise broke in the game, a starter hurt or a goalie pulled, counts
+// for its weight, less than 1: noise, not evidence), and each bet's closing chance (clv.mjs: the market's
+// fair chance of its side at the close, its last word with everyone's money and news in it; a model whose
+// chances run ahead of where the market closes is worth trusting long before enough results are in to say
+// so). Until a market has 40 of the two together, the starting trust.
+export function fitTrust(bets, start) {
+  const decided = bets.filter((b) => b.status === 'won' || b.status === 'lost');
+  const closed = bets.filter((b) => b.clv && b.clv.q !== null && b.clv.q !== undefined && Number.isFinite(b.fair) && Number.isFinite(b.model));
+  if (decided.length + closed.length < 40) return { trust: start, n: decided.length, clvN: closed.length, fitted: false };
+  const n = decided.reduce((s, b) => s + (b.weight ?? 1), 0) + closed.length;
   let best = { trust: start, loss: Infinity };
   for (let t = 0; t <= 1.2001; t += 0.05) {
     let loss = 0;
-    for (const b of decided) {
-      const p = Math.min(0.995, Math.max(0.005, b.fair + t * (b.model - b.fair)));
-      loss -= (b.weight ?? 1) * Math.log(b.status === 'won' ? p : 1 - p);
-    }
+    const pOf = (b) => Math.min(0.995, Math.max(0.005, b.fair + t * (b.model - b.fair)));
+    for (const b of decided) loss -= (b.weight ?? 1) * Math.log(b.status === 'won' ? pOf(b) : 1 - pOf(b));
+    // (the closing chance as a soft result: best matched by a chance equal to it)
+    for (const b of closed) loss -= b.clv.q * Math.log(pOf(b)) + (1 - b.clv.q) * Math.log(1 - pOf(b));
     // (trusting the model has to be earned: each unit of trust costs 2 nats, so luck over a few dozen bets
     // doesn't buy it, and with no real edge the fit settles near the book)
     const penalized = loss + 2 * t * t;
     if (penalized < best.loss) best = { trust: round(t, 2), loss: penalized, raw: loss };
   }
-  return { trust: best.trust, n: decided.length, fitted: true, logLoss: round(best.raw / n, 4) };
+  return { trust: best.trust, n: decided.length, clvN: closed.length, fitted: true, logLoss: round(best.raw / n, 4) };
 }
 
 // A record: won, lost, pushed, units staked and won, the return on them

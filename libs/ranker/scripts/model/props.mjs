@@ -3,11 +3,13 @@
 // quarter or half lines, no longest-play lines, no anytime touchdown: it has no line), each priced against
 // its projection (project.mjs) and bet like the game markets, but only with an edge.
 //
-// The board gives each prop's line, and where it opened, but not its prices. A main line is the book's even
-// line, so each side is taken at -110 (the book's fair chance 50%). That only holds where the line is near
-// the player's usual: one far from it (he's gone over it in under 40% or over 60% of his games this season,
-// last season's at half weight) carries a juiced price the desk can't know, so it isn't bet. The trust in the
-// projection is the prop type's own (start 0.5, refit on its graded bets once there are 40, as the markets').
+// The board gives each prop's line and where it opened, and for the NBA, NHL and MLB each side's price (a
+// pair of items at the same line: the over first, then the under; their prices are DraftKings', vig and
+// all). The NFL's board has lines but no prices: there each side is taken at -110 (the book's fair chance
+// 50%), which only holds where the line is near the player's usual, so one far from it (he's gone over it in
+// under 40% or over 60% of his games this season, last season's at half weight) carries a juiced price the
+// desk can't know and isn't bet. The trust in the projection is the prop type's own (start 0.5, refit on its
+// graded bets once there are 40, as the markets'), against the book's fair chance where it has prices.
 //
 //   a bet: only with an expected return over 0 at the trusted chance, 0.5 to 3 units by it as a game market's;
 //   at most PER_GAME a game (the best first); cut to 0.5 when the line has moved a lot since it opened or the
@@ -16,7 +18,7 @@
 
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
-import { decimal, stakeFor } from './desk.mjs';
+import { decimal, fairPair, stakeFor } from './desk.mjs';
 import { fitStat, makeModel, nbOver, recal } from './project.mjs';
 import { CACHE, get, pool } from './sources.mjs';
 import { round } from './ratings.mjs';
@@ -178,7 +180,14 @@ const saveAthletes = () => {
   writeFileSync(athletesFile, JSON.stringify(athletes));
 };
 
-// A game's main-line player props: [{ athlete, stat, line, open }] (every page of the board)
+// (a main line's prices: its pair's American odds, the over first, then the under; null without both)
+function pricesOf(pair) {
+  const odds = (it) => Number(String(it?.odds?.american?.value ?? '').replace('+', ''));
+  const [over, under] = pair.map(odds);
+  return pair.length === 2 && Number.isFinite(over) && Number.isFinite(under) && over && under ? { over, under } : null;
+}
+
+// A game's main-line player props: [{ athlete, stat, line, open, prices }] (every page of the board)
 export async function board(sport, league, game) {
   const [kind, lg] = league.split('/');
   const items = [];
@@ -205,10 +214,11 @@ export async function board(sport, league, game) {
     const lines = [...counts.entries()].sort((a, b) => b[1] - a[1] || a[0] - b[0]);
     const top = lines.filter((l) => l[1] === lines[0][1]).map((l) => l[0]);
     const line = top[Math.floor((top.length - 1) / 2)];
-    const it = list.find((x) => x.current.target.value === line);
+    const at = list.filter((x) => x.current.target.value === line);
+    const it = at[0];
     const who = await athlete(key.split('|')[0]);
     if (!who) return;
-    out.push({ athlete: who, stat: STATS[sport].find((s) => s.key === key.split('|')[1]), line, open: it.open?.target?.value ?? null });
+    out.push({ athlete: who, stat: STATS[sport].find((s) => s.key === key.split('|')[1]), line, open: it.open?.target?.value ?? null, prices: pricesOf(at) });
   });
   saveAthletes();
   return out;
@@ -262,13 +272,14 @@ export function priceProps(sport, game, props, fitted, idx, exp, info, live, tru
     }
     const fairOver = (overs + 1) / (n + 2);
     const t = trust[`prop:${prop.stat.key}`]?.trust ?? 0.5;
+    // (the book's prices where it gave them, its fair chance their vig taken out; else -110 a side, even)
+    const book = prop.prices ? { over: prop.prices.over, under: prop.prices.under, fairOver: fairPair(prop.prices.over, prop.prices.under) } : { over: PROP_ODDS, under: PROP_ODDS, fairOver: 0.5 };
     const sides = [
-      { side: 'over', model: pOver, fair: 0.5 },
-      { side: 'under', model: 1 - pOver, fair: 0.5 },
+      { side: 'over', model: pOver, fair: book.fairOver, odds: book.over },
+      { side: 'under', model: 1 - pOver, fair: 1 - book.fairOver, odds: book.under },
     ].map((x) => {
-      const odds = PROP_ODDS;
       const p = x.fair + t * (x.model - x.fair);
-      return { ...x, odds, p, ev: p * decimal(odds) - 1 };
+      return { ...x, p, ev: p * decimal(x.odds) - 1 };
     });
     const pick = sides[0].ev >= sides[1].ev ? sides[0] : sides[1];
     const { side, model, ev, odds, fair } = pick;
@@ -279,7 +290,10 @@ export function priceProps(sport, game, props, fitted, idx, exp, info, live, tru
     const limit = Math.max(1, 0.12 * prop.line);
     let guard = null;
     if (status.skip) guard = { skip: true, why: status.why };
-    else if (fairOver < 0.4 || fairOver > 0.6) guard = { skip: true, why: `line far from his usual (over it in ${Math.round(fairOver * 100)}% of his games): a juiced price the desk can't know` };
+    // (a long shot at the book's own price: where a projection's errors are biggest and the book is most
+    // likely right)
+    else if (prop.prices && fair < 0.25) guard = { skip: true, why: `a long shot (the book's fair chance ${Math.round(fair * 100)}%)` };
+    else if (!prop.prices && (fairOver < 0.4 || fairOver > 0.6)) guard = { skip: true, why: `line far from his usual (over it in ${Math.round(fairOver * 100)}% of his games): a juiced price the desk can't know` };
     else if (Math.abs(moved) >= 2 * limit) guard = { skip: true, why: `line moved ${moved > 0 ? '+' : ''}${round(moved, 1)} since it opened` };
     else if (Math.abs(moved) >= limit) guard = { why: `line moved ${moved > 0 ? '+' : ''}${round(moved, 1)} since it opened` };
     else if (status.why) guard = { why: status.why };
@@ -290,6 +304,7 @@ export function priceProps(sport, game, props, fitted, idx, exp, info, live, tru
       model,
       fair,
       odds,
+      priced: !!prop.prices,
       p: pTrusted,
       ev,
       units: guard ? 0.5 : stakeFor(ev, evScale),

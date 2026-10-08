@@ -22,6 +22,7 @@
     <ng-container *ngTemplateOutlet="th; context: { $implicit: table, key: 'profit', label: 'Profit' }"></ng-container>
     <ng-container *ngTemplateOutlet="th; context: { $implicit: table, key: 'roi', label: 'ROI' }"></ng-container>
     <ng-container *ngTemplateOutlet="th; context: { $implicit: table, key: 'open', label: 'Open' }"></ng-container>
+    <ng-container *ngTemplateOutlet="th; context: { $implicit: table, key: 'clv', label: 'CLV' }"></ng-container>
   </tr>
 </ng-template>
 <ng-template #tallyRow let-t>
@@ -30,6 +31,7 @@
   <td [class.up]="t.profit > 0" [class.down]="t.profit < 0">{{ units(t.profit) }}</td>
   <td>{{ pct(t.roi) }}</td>
   <td>{{ t.open }}</td>
+  <td [class.up]="(t.clvBeat ?? 0) > 0.5" [class.down]="t.clvBeat !== null && t.clvBeat < 0.5">{{ clvText(t) }}</td>
 </ng-template>
 
 <section class="model-desk">
@@ -56,6 +58,10 @@
         <div class="desk-tile" [title]="help['open']">
           <small>Open</small>
           <b>{{ overall.open }}</b>
+        </div>
+        <div class="desk-tile" [title]="help['clv']">
+          <small>Beat the close</small>
+          <b [class.up]="(overall.clvBeat ?? 0) > 0.5" [class.down]="overall.clvBeat !== null && overall.clvBeat < 0.5">{{ overall.clvN ? pct(overall.clvBeat, 0) : '-' }}</b>
         </div>
       </div>
     }
@@ -88,6 +94,7 @@
                 <ng-container *ngTemplateOutlet="th; context: { $implicit: 'sport', key: 'profit', label: 'Profit' }"></ng-container>
                 <ng-container *ngTemplateOutlet="th; context: { $implicit: 'sport', key: 'roi', label: 'ROI' }"></ng-container>
                 <ng-container *ngTemplateOutlet="th; context: { $implicit: 'sport', key: 'open', label: 'Open' }"></ng-container>
+                <ng-container *ngTemplateOutlet="th; context: { $implicit: 'sport', key: 'clv', label: 'CLV' }"></ng-container>
                 <ng-container *ngTemplateOutlet="th; context: { $implicit: 'sport', key: 'test', label: 'Model test' }"></ng-container>
                 @if (overall.bets) {
                   <ng-container *ngTemplateOutlet="th; context: { $implicit: 'sport', key: 'disrupted', label: 'Disrupted' }"></ng-container>
@@ -237,6 +244,7 @@
                 <ng-container *ngTemplateOutlet="th; context: { $implicit: 'recent', key: 'p', label: 'Its chance' }"></ng-container>
                 <ng-container *ngTemplateOutlet="th; context: { $implicit: 'recent', key: 'final', label: 'Final' }"></ng-container>
                 <ng-container *ngTemplateOutlet="th; context: { $implicit: 'recent', key: 'result', label: 'Result' }"></ng-container>
+                <ng-container *ngTemplateOutlet="th; context: { $implicit: 'recent', key: 'clv', label: 'CLV', help: help['betClv'] }"></ng-container>
                 <ng-container *ngTemplateOutlet="th; context: { $implicit: 'recent', key: 'why', label: 'Why' }"></ng-container>
               </tr>
             </thead>
@@ -252,6 +260,7 @@
                   <td>{{ pct(b.p) }}</td>
                   <td>{{ b.final }}</td>
                   <td [class.up]="b.profit > 0" [class.down]="b.profit < 0">{{ b.status }} {{ units(b.profit) }}</td>
+                  <td [class.up]="b.clv?.beat === true" [class.down]="b.clv?.beat === false">{{ betClv(b) }}</td>
                   <td class="desk-why" [title]="recapText(b)">
                     @if (broke(b)) {
                       <mat-icon class="desk-broke" fontIcon="healing" aria-label="Premise broke in the game"></mat-icon>
