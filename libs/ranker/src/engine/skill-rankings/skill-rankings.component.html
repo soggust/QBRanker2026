@@ -160,9 +160,9 @@
               @for (stat of group.stats; track stat.key) {
                 @if (stat.format === 'recent') {
                   <!-- The latest results as squares (the game log's W and L), newest first; empty slots for games not
-                       played yet. The pointer on them loads the team's scores for their hovers -->
+                       played yet. The pointer resting on them loads the team's scores for their hovers -->
                   <div class="box support-box recent-box">
-                    <div class="last-five" [class.many]="manyRecent" (mouseenter)="games.primeRecent(recentTeam(player), season)">
+                    <div class="last-five" [class.many]="manyRecent" (mouseenter)="games.primeSoon(recentTeam(player), season)" (mouseleave)="games.cancelPrime()">
                       <div>
                         @for (result of reader.lastFive(player); track $index) {
                           <p

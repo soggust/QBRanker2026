@@ -92,6 +92,20 @@ export class GameViewService {
   // A Recent dot's score ("24-17", the team's way): the team's results loaded once the pointer reaches
   // its row's dots (primeRecent), then read for each dot
   private scored = new Map<string, TeamResult[]>();
+
+  // (the grid's: once the pointer stays on a row's squares a moment, so a sweep down the list doesn't ask
+  // for every team it passes; leaving them before then asks for none)
+  private primeTimer: ReturnType<typeof setTimeout> | null = null;
+  primeSoon(team: (string | undefined)[], season: number): void {
+    this.cancelPrime();
+    this.primeTimer = setTimeout(() => this.primeRecent(team, season), 150);
+  }
+
+  cancelPrime(): void {
+    if (this.primeTimer) clearTimeout(this.primeTimer);
+    this.primeTimer = null;
+  }
+
   primeRecent(team: (string | undefined)[], season: number): void {
     const league = SPORT.gameLog?.league;
     const id = league ? findEspnTeamId(league, team) : null;
