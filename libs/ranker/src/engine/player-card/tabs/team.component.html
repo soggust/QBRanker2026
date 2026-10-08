@@ -1,0 +1,221 @@
+<!-- A team's depth chart (SPORT.depthChart, player-card/depth-chart.ts): each side's formation drawn on a
+     chalk field, a chip per starter (tap one for the players behind him), then the special teams,
+     the starters who've changed since week 1, and everyone who's played, by snap share -->
+
+@let d = cards.depthChart(c);
+@if (d === 'loading') {
+  <p class="card-note">Loading…</p>
+} @else if (d === 'error') {
+  <p class="card-note">The depth chart couldn't be loaded.</p>
+} @else {
+  @for (side of d.sides; track side.id) {
+    <!-- (the first, the card's own unit, open) -->
+    <card-panel
+      class="tab-card depth-panel group-results"
+      [startOpen]="$first"
+      [label]="side.title + (side.set ? ' · ' + side.set : '')"
+      [icon]="side.icon ?? (side.id === 'offense' ? 'sports_football' : 'shield')"
+    >
+      <div
+        class="depth-field"
+        [ngClass]="'surface-' + (side.surface ?? 'field')"
+        [class.defense]="side.id === 'defense'"
+        [class.fixed]="side.height"
+        [style.height.px]="side.height"
+        [style.--los]="side.los + '%'"
+      >
+        <!-- (the surface's markings: a court's paint and arc, a rink's lines and circles, a diamond's
+             base paths; a football field's are its yard lines, in its background) -->
+        @switch (side.surface) {
+          @case ('court') {
+            <svg class="depth-marks" viewBox="0 0 200 100" preserveAspectRatio="none" aria-hidden="true">
+              <rect x="76" y="0" width="48" height="44" />
+              <ellipse cx="100" cy="44" rx="18" ry="12" />
+              <path d="M 22 0 L 22 22 A 78 62 0 0 0 178 22 L 178 0" />
+              <line x1="90" y1="5" x2="110" y2="5" />
+              <ellipse cx="100" cy="9" rx="3" ry="2.5" />
+              <path d="M 82 100 A 18 12 0 0 1 118 100" />
+            </svg>
+          }
+          @case ('rink') {
+            <svg class="depth-marks" viewBox="0 0 200 85" preserveAspectRatio="none" aria-hidden="true">
+              <rect x="1" y="1" width="198" height="83" rx="26" ry="26" />
+              <line class="red" x1="100" y1="1" x2="100" y2="84" />
+              <line class="blue" x1="75" y1="1" x2="75" y2="84" />
+              <line class="blue" x1="125" y1="1" x2="125" y2="84" />
+              <line class="red" x1="11" y1="6.6" x2="11" y2="78.4" />
+              <line class="red" x1="189" y1="6.6" x2="189" y2="78.4" />
+              <circle cx="100" cy="42.5" r="15" />
+              <circle cx="31" cy="20.5" r="15" />
+              <circle cx="31" cy="64.5" r="15" />
+              <circle cx="169" cy="20.5" r="15" />
+              <circle cx="169" cy="64.5" r="15" />
+              <path class="crease" d="M 11 38.5 A 6 4 0 0 1 11 46.5" />
+              <path class="crease" d="M 189 38.5 A 6 4 0 0 0 189 46.5" />
+            </svg>
+          }
+          @case ('diamond') {
+            <svg class="depth-marks" viewBox="0 0 200 100" preserveAspectRatio="none" aria-hidden="true">
+              <path d="M 100 97 L 6 3" />
+              <path d="M 100 97 L 194 3" />
+              <path d="M 6 3 Q 100 -18 194 3" />
+              <path class="dirt" d="M 100 97 L 142 58 Q 100 2 58 58 Z" />
+              <path d="M 100 92 L 132 58 L 100 26 L 68 58 Z" />
+              <ellipse cx="100" cy="58" rx="5" ry="4" />
+            </svg>
+          }
+        }
+        @if (side.los !== null) {
+          <span class="depth-los" aria-hidden="true"></span>
+        }
+        @for (slot of side.slots; track slot.key) {
+          @let starter = slot.depth[0];
+          @let open = cards.depthOpen === side.id + slot.key;
+          <div
+            class="depth-slot"
+            [class.sub]="slot.sub"
+            [class.dim]="slot.focus === false"
+            [class.open]="open"
+            [class.pop-up]="slot.y > 55"
+            [class.pop-left]="slot.x < 18"
+            [class.pop-right]="slot.x > 82"
+            [style.left.%]="slot.x"
+            [style.top.%]="slot.y"
+          >
+            <button type="button" class="depth-chip" [attr.aria-expanded]="open" [title]="slot.name" (click)="cards.toggleDepthSlot(side.id + slot.key)">
+              <span class="depth-pos">{{ slot.label }}</span>
+              <span class="depth-head">
+                @if (starter?.headshot) {
+                  <img [src]="starter!.headshot" alt="" loading="lazy" (error)="starter!.headshot = null" />
+                } @else {
+                  <span class="depth-initial">{{ starter?.name?.[0] ?? '?' }}</span>
+                }
+                @if (starter?.status; as status) {
+                  <span class="depth-status" [ngClass]="'s-' + status.toLowerCase()" [title]="starter!.statusText + (starter!.injury ? ' (' + starter!.injury + ')' : '')">{{ status }}</span>
+                }
+              </span>
+              <span class="depth-name">{{ starter?.short ?? 'Open' }}</span>
+              @if (starter?.snaps != null) {
+                <span class="depth-snaps">{{ starter!.snaps | percent: '1.0-0' }}</span>
+              }
+            </button>
+            <!-- (open: everyone at the spot, by depth) -->
+            @if (open && slot.depth.length) {
+              <div class="depth-pop">
+                <b>{{ slot.name }}</b>
+                @for (p of slot.depth; track $index) {
+                  <span class="depth-pop-row">
+                    <i>{{ $index + 1 }}</i>
+                    @if (p.link; as link) {<button type="button" class="depth-link" [title]="'Open ' + p.name" (click)="$event.stopPropagation(); cards.openLinked(link, c.season)">{{ p.name }}</button>} @else {<span>{{ p.name }}</span>}
+                    @if (p.status) {
+                      <em [ngClass]="'s-' + p.status.toLowerCase()">{{ p.status }}</em>
+                    }
+                    <small>{{ p.snaps != null ? (p.snaps | percent: '1.0-0') : '—' }}</small>
+                  </span>
+                }
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </card-panel>
+  }
+
+  <!-- (the team's card: an O-Line or Defense card keeps to its own unit) -->
+  @if (d.special.length) {
+    <card-panel class="tab-card depth-special group-results" [label]="d.specialTitle ?? 'Special Teams'" icon="sports">
+      <div class="group-body depth-special-row">
+        @for (s of d.special; track s.label) {
+          <span class="depth-special-item">
+            <span class="depth-pos">{{ s.label }}</span>
+            <span class="depth-head small" [class.face-link]="s.player?.link" [title]="s.player?.link ? 'Open ' + s.player!.name : ''" (click)="openLink(s.player?.link, c.season)">
+              @if (s.player?.headshot) {
+                <img [src]="s.player!.headshot" alt="" loading="lazy" (error)="s.player!.headshot = null" />
+              } @else {
+                <span class="depth-initial">{{ s.player?.name?.[0] ?? '?' }}</span>
+              }
+            </span>
+            <span class="depth-name">{{ s.player?.short ?? 'Open' }}</span>
+            <!-- (his usage: a second unit's minutes, a specialist's snaps) -->
+            @if (s.player?.snaps != null) {
+              <span class="depth-snaps">{{ s.player!.snaps | percent: '1.0-0' }}</span>
+            }
+          </span>
+        }
+      </div>
+    </card-panel>
+  }
+
+  <!-- (the staff, by unit: the head coach, the coordinators, the position coaches) -->
+  @if (d.coaches.length) {
+    <card-panel class="tab-card depth-coaches group-results" label="Coaches" icon="assignment">
+      <div class="group-body">
+        @for (g of d.coaches; track g.title) {
+          <h4 class="depth-unit">{{ g.title }}</h4>
+          @for (co of g.rows; track $index) {
+            <div class="depth-coach">
+              <span class="depth-coach-role">{{ co.role }}</span>
+              @if (co.link; as link) {<button type="button" class="depth-link" [title]="'Open ' + co.name" (click)="cards.openLinked(link, c.season)">{{ co.name }}</button>} @else {<span>{{ co.name }}</span>}
+            </div>
+          }
+        }
+      </div>
+    </card-panel>
+  }
+
+  <!-- (the season's positional changes, week by week: who went out, who came in, and why when it's known) -->
+  @if (d.timeline.length) {
+    <card-panel class="tab-card depth-changes" label="Positional Changes" icon="swap_horiz">
+      <div class="group-body">
+        @for (w of d.timeline; track w.week) {
+          <h4 class="depth-unit">Week {{ w.week }}</h4>
+          @for (ch of w.changes; track ch.label + ch.to) {
+            <div class="depth-change">
+              <span class="depth-change-pos">{{ ch.label }}</span>
+              <s>@if (ch.from.link; as link) {<button type="button" class="depth-link" [title]="'Open ' + ch.from.name" (click)="$event.stopPropagation(); cards.openLinked(link, c.season)">{{ ch.from.name }}</button>} @else {<span>{{ ch.from.name }}</span>}</s>
+              <mat-icon fontIcon="arrow_forward"></mat-icon>
+              <b>@if (ch.to.link; as link) {<button type="button" class="depth-link" [title]="'Open ' + ch.to.name" (click)="$event.stopPropagation(); cards.openLinked(link, c.season)">{{ ch.to.name }}</button>} @else {<span>{{ ch.to.name }}</span>}</b>
+              <!-- (why: a tag in its color, the detail beside it) -->
+              @if (ch.tag) {
+                <span class="depth-reason" [ngClass]="'r-' + ch.reason">{{ ch.tag }}</span>
+              }
+              @if (ch.note) {
+                <small class="depth-change-note">{{ ch.note }}</small>
+              }
+            </div>
+          }
+        }
+      </div>
+    </card-panel>
+  }
+
+  <card-panel class="tab-card depth-usage" [label]="d.usageTitle ?? 'Full Roster'" icon="groups">
+    <div class="group-body">
+      @for (g of d.usage; track g.title) {
+        <h4 class="depth-unit">{{ g.title }}</h4>
+        @for (p of g.rows; track p.name) {
+          <div class="depth-row" [class.off-chart]="!p.onChart" [class.unused]="!p.snaps">
+            <span class="depth-head tiny" [class.face-link]="p.link" [title]="p.link ? 'Open ' + p.name : ''" (click)="openLink(p.link, c.season)">
+              @if (p.headshot) {
+                <img [src]="p.headshot" alt="" loading="lazy" (error)="p.headshot = null" />
+              } @else {
+                <span class="depth-initial">{{ p.name[0] }}</span>
+              }
+            </span>
+            <span class="depth-row-name">@if (p.link; as link) {<button type="button" class="depth-link" [title]="'Open ' + p.name" (click)="$event.stopPropagation(); cards.openLinked(link, c.season)">{{ p.name }}</button>} @else {<span>{{ p.name }}</span>}<small>{{ p.pos }}</small></span>
+            <span class="depth-bar"><i [style.width.%]="(p.snaps ?? 0) * 100"></i></span>
+            <span class="depth-row-pct">{{ p.snaps != null ? (p.snaps | percent: '1.0-0') : '—' }}</span>
+            <span class="depth-row-games">{{ p.games }}G</span>
+            <span class="depth-row-status">
+              @if (p.status) {
+                <em [ngClass]="'s-' + p.status.toLowerCase()" [title]="p.statusText + (p.injury ? ' (' + p.injury + ')' : '')">{{ p.status }}</em>
+              } @else if (!p.onChart) {
+                <em class="s-gone" title="Not on the depth chart now">Off chart</em>
+              }
+            </span>
+          </div>
+        }
+      }
+    </div>
+  </card-panel>
+}

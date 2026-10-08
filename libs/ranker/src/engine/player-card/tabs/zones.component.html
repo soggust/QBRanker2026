@@ -1,0 +1,48 @@
+<!-- MLB's season by zone (SPORT.zones): the strike zone's nine boxes and the four corners outside it, each in
+     its hot or cold color, for the stat picked; a pitcher's arsenal under it -->
+
+@let zv = cards.zones(c);
+@if (zv === 'loading') {
+  <p class="card-note">Loading…</p>
+} @else if (zv === 'error' || !zv.stats.length) {
+  <p class="card-note">No zone data for this season.</p>
+} @else {
+  @let zs = zoneStat(zv);
+  <div class="game-play-filters">
+    @for (st of zv.stats; track st.key) {
+      <button type="button" class="game-filter" [class.active]="st.key === zs.key" (click)="cards.zoneStat = st.key">{{ st.label }}</button>
+    }
+  </div>
+  <div class="chart-card zone-card">
+    <div class="log-chart-head">
+      <span class="log-chart-label">{{ zs.label }}<small>by zone</small></span>
+    </div>
+    <div class="zone-grid">
+      @for (z of ['11', '12', '13', '14']; track z) {
+        <span class="zone-out" [ngClass]="'z' + z" [style.background]="zs.zones[z]?.color"><b>{{ zs.zones[z]?.value }}</b></span>
+      }
+      <span class="zone-in">
+        @for (z of ['01', '02', '03', '04', '05', '06', '07', '08', '09']; track z) {
+          <span [style.background]="zs.zones[z]?.color"><b>{{ zs.zones[z]?.value }}</b></span>
+        }
+      </span>
+    </div>
+    <!-- (home plate under it: the catcher's side of the zone) -->
+    <svg class="zone-plate" viewBox="0 0 40 14" aria-hidden="true"><path d="M2 2 L38 2 L38 7 L20 12 L2 7 Z" /></svg>
+  </div>
+  @if (zv.arsenal.length) {
+    <card-panel class="tab-card group-advanced zone-arsenal" [expandable]="false" label="Arsenal" icon="sports_baseball">
+      <div class="group-body">
+        @for (p of zv.arsenal; track p.type) {
+          <div class="arsenal-pitch">
+            <span class="arsenal-pitch-name"><i [style.background]="pitchColor(p.type)"></i>{{ p.type }}</span>
+            <span class="arsenal-pitch-bar"><i [style.width.%]="p.share * 100" [style.background]="pitchColor(p.type)"></i></span>
+            <b>{{ p.share * 100 | number: '1.1-1' }}%</b>
+            <span class="arsenal-pitch-mph">{{ p.mph !== null ? (p.mph | number: '1.1-1') + ' mph' : '' }}</span>
+            <small>{{ p.count }}</small>
+          </div>
+        }
+      </div>
+    </card-panel>
+  }
+}

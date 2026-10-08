@@ -1,0 +1,143 @@
+<!-- The AI write-up (player-card/analysis.ts): the headline and the archetype's definition, the overview, the season's
+     strengths and concerns, the coming game, the rest of the season, betting angles -->
+
+<!-- A point in the analysis: its title, the take, the numbers behind it (their real values and ranks) -->
+<ng-template #aiPoint let-p>
+  <div class="ai-point">
+    <h5>{{ p.title }}</h5>
+    <p>{{ p.body }}</p>
+    @if (p.evidence.length) {
+      <div class="ai-evidence">
+        @for (e of p.evidence; track $index) {
+          <span class="ai-chip" [style.--tone]="e.rank ? rankTone(rankPct(e.rank, e.of)) : null">
+            <small>{{ e.label }}</small><b>{{ evidenceText(e.value) }}</b>
+            @if (e.rank) {
+              <i>#{{ e.rank }}<small>/{{ e.of }}</small></i>
+            }
+          </span>
+        }
+      </div>
+    }
+  </div>
+</ng-template>
+
+@let a = cards.analysis(c);
+@if (a === 'loading') {
+  <p class="card-note">Loading…</p>
+} @else if (a === 'error') {
+  <p class="card-note">The analysis couldn't be loaded.</p>
+} @else {
+  @let r = a.report;
+  <div class="ai-hero">
+    <h2 class="ai-headline">{{ r.headline }}</h2>
+    <p class="ai-definition">{{ r.archetype.definition }}</p>
+    <p class="ai-meta">
+      <span>Updated {{ a.at | date: 'MMM d' }}</span>
+    </p>
+  </div>
+
+  <card-panel class="tab-card ai-card" label="Overview" icon="auto_awesome" [open]="cards.aiOpen.has('take')" (toggled)="cards.toggleAi('take')">
+    <div class="group-body ai-prose">
+      @for (p of paragraphs(r.take); track $index) {
+        <p>{{ p }}</p>
+      }
+    </div>
+  </card-panel>
+
+  <card-panel class="tab-card ai-card ai-season" label="Current Performance" icon="insights" [open]="cards.aiOpen.has('season')" (toggled)="cards.toggleAi('season')">
+    <div class="group-body">
+      <div class="ai-columns">
+        <div class="ai-points strengths">
+          <h4><mat-icon fontIcon="trending_up"></mat-icon>Strengths</h4>
+          @for (p of r.strengths; track $index) {
+            <ng-container *ngTemplateOutlet="aiPoint; context: { $implicit: p }"></ng-container>
+          }
+        </div>
+        <div class="ai-points concerns">
+          <h4><mat-icon fontIcon="trending_down"></mat-icon>Concerns</h4>
+          @for (p of r.concerns; track $index) {
+            <ng-container *ngTemplateOutlet="aiPoint; context: { $implicit: p }"></ng-container>
+          }
+        </div>
+      </div>
+      <p class="ai-trend" [ngClass]="r.trend.direction"><b>{{ r.trend.direction }}</b>{{ r.trend.note }}</p>
+    </div>
+  </card-panel>
+
+  @if (a.game) {
+    <card-panel class="tab-card ai-card ai-next group-box" label="Next Up: Week {{ a.game.week }} {{ a.game.at === 'home' ? 'vs' : '@' }} {{ a.game.opp }}" icon="sports_football" [open]="cards.aiOpen.has('next')" (toggled)="cards.toggleAi('next')">
+      <div class="group-body">
+        <div class="ai-next-head">
+          <span class="ai-outlook" [ngClass]="r.nextGame.outlook">{{ r.nextGame.outlook }} matchup</span>
+          @if (a.game.line; as line) {
+            <span class="ai-line" [title]="(line.book ?? 'Sportsbook') + ', via ESPN'">
+              <b>{{ line.line }}</b>
+              @if (line.overUnder) {
+                <span>O/U {{ line.overUnder }}</span>
+              }
+              @if (line.hisTeamMoneyline) {
+                <span>ML {{ line.hisTeamMoneyline }}</span>
+              }
+            </span>
+          }
+        </div>
+        <h3 class="ai-subhead">{{ r.nextGame.headline }}</h3>
+        <div class="ai-prose">
+          @for (p of paragraphs(r.nextGame.body); track $index) {
+            <p>{{ p }}</p>
+          }
+        </div>
+        <div class="ai-points matchups">
+          @for (p of r.nextGame.keyMatchups; track $index) {
+            <ng-container *ngTemplateOutlet="aiPoint; context: { $implicit: p }"></ng-container>
+          }
+        </div>
+        <p class="ai-watch"><mat-icon fontIcon="visibility"></mat-icon><span><b>Watch:</b> {{ r.nextGame.watch }}</span></p>
+      </div>
+    </card-panel>
+  }
+
+  <!-- (the week's bets, before the season's outlook) -->
+  <card-panel class="tab-card ai-card ai-bets group-results" [label]="a.game ? 'Betting Angles: Week ' + a.game.week : 'Betting Angles'" icon="paid" [open]="cards.aiOpen.has('bets')" (toggled)="cards.toggleAi('bets')">
+    <div class="group-body">
+      @if (!r.bets.length) {
+        <p class="card-note">Nothing in this matchup looks mispriced.</p>
+      }
+      @for (b of r.bets; track $index) {
+        <div class="ai-bet">
+          <span class="ai-bet-strength" [ngClass]="b.strength === 'fade' ? 'fade' : 'like'">{{ b.strength === 'fade' ? 'fade' : 'like' }}</span>
+          <div class="ai-bet-main">
+            <span class="ai-bet-pick"
+              >@if (b.strength === 'fade') {<b>{{ b.market }}</b><small>{{ insteadText(b.lean) }}</small>} @else {<b>{{ b.lean }}</b><small>{{ b.market }}</small>}</span
+            >
+            <p>{{ b.reason }}</p>
+          </div>
+        </div>
+      }
+    </div>
+  </card-panel>
+
+  <card-panel class="tab-card ai-card ai-rest group-advanced" label="Season Outlook" icon="event_upcoming" [open]="cards.aiOpen.has('rest')" (toggled)="cards.toggleAi('rest')">
+    <div class="group-body">
+      <div class="ai-projections">
+        @for (p of r.restOfSeason.projections; track $index) {
+          <div class="ai-projection">
+            <span class="ai-projection-range">{{ p.low | number: '1.0-2' }}<small>–</small>{{ p.high | number: '1.0-2' }}</span>
+            <span class="ai-projection-stat">{{ p.stat }}</span>
+          </div>
+        }
+      </div>
+      <div class="ai-prose">
+        @for (p of paragraphs(r.restOfSeason.body); track $index) {
+          <p>{{ p }}</p>
+        }
+      </div>
+      <div class="ai-swing">
+        <span class="ai-swing-label">Swing factors</span>
+        @for (f of r.restOfSeason.swingFactors; track $index) {
+          <span class="ai-chip">{{ f }}</span>
+        }
+      </div>
+    </div>
+  </card-panel>
+}

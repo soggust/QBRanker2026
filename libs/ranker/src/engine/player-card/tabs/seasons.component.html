@@ -1,0 +1,71 @@
+<!-- Every season they're in: each opens that season's card (the table stays as it is) -->
+
+@if (c.seasons) {
+  <!-- Career arc: a bar per season, as tall as where they ranked (first = full height) -->
+  <div class="chart-card career-card">
+    <div class="log-chart-head">
+      <span class="log-chart-label">Rank<small>by season</small></span>
+    </div>
+    <div class="career-chart" [style.--count]="c.seasons!.length">
+      @for (s of c.seasons; track s.season) {
+        <button
+          type="button"
+          class="arc"
+          [class.active]="s.season === c.season"
+          [class.pending]="!s.yours"
+          [style.--pct]="s.pct"
+          [style.--tone]="rankTone(s.pct)"
+          [title]="s.season + ': #' + s.rank + ' of ' + s.of"
+          (click)="s.season !== c.season && cards.openSeason(s.season, c.player.gsisId)"
+        >
+          <span class="arc-rank">#{{ s.rank }}</span>
+          <span class="arc-bar"></span>
+          <span class="arc-year">'{{ s.season % 100 | number: '2.0' }}</span>
+        </button>
+      }
+    </div>
+  </div>
+}
+<card-panel class="tab-card card-career" [expandable]="false" [label]="cards.careerTitle" icon="calendar_month">
+  <div class="group-body">
+  @if (!c.seasons) {
+    <p class="card-note">Loading…</p>
+  } @else {
+    <!-- A line per season, newest first: each opens that season's card -->
+    <div class="season-list">
+      @for (s of c.seasons.slice().reverse(); track s.season) {
+        <button
+          type="button"
+          class="season-row"
+          [class.active]="s.season === c.season"
+          [class.pending]="!s.yours"
+          [style.--tone]="rankTone(s.pct)"
+          [title]="s.season === c.season ? 'Showing this season' : 'Open the ' + s.season + ' card'"
+          (click)="s.season !== c.season && cards.openSeason(s.season, c.player.gsisId)"
+        >
+          <img [src]="s.logo" alt="" [class.white-logo]="whiteLogo(s.teamLogo)" />
+          <span class="season-year">{{ seasonName(s.season) }}</span>
+          <span class="season-games">{{ s.games }} G</span>
+          <!-- Headline stats as readouts: value, a bar against their best season, label; best lit -->
+          @for (h of s.stats; track h.label) {
+            <span
+              class="readout"
+              [class.lead]="$first"
+              [class.best]="h.best"
+              [class.tinted]="h.tint"
+              [style.--share]="h.share"
+              [style.--tint]="h.tint"
+              [title]="h.best ? 'Career best' : ''"
+            >
+              <b>{{ h.text }}</b>
+              <i></i>
+              <small>{{ h.label }}</small>
+            </span>
+          }
+          <span class="season-rank">#{{ s.rank }}<small> / {{ s.of }}</small></span>
+        </button>
+      }
+    </div>
+  }
+  </div>
+</card-panel>

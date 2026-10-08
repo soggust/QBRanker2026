@@ -3133,3 +3133,16 @@
     }
   }
 }
+
+// The card's tabs are components (engine/player-card/tabs): their elements lay out as if they weren't there,
+// so a tab's panels sit in the card's body as they always have
+card-stats,
+card-overview,
+card-analysis,
+card-team,
+card-zones,
+card-games,
+card-history,
+card-seasons {
+  display: contents;
+}

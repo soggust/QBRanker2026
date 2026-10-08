@@ -1,0 +1,51 @@
+<!-- One stat: value, rank in the list, a bar for where that sits, the list average -->
+<ng-template #statTile let-s>
+  <div class="card-stat" [ngClass]="'group-' + s.group" [title]="s.name" [style.--pct]="s.pct ?? 0" [style.--tone]="rankTone(s.pct)">
+    <span class="stat-name">{{ s.label }}</span>
+    <span class="stat-rank">
+      @if (s.rank !== null) {
+        {{ s.tied ? 'T-' : '#' }}{{ s.rank }}<small> / {{ s.of }}</small>
+      }
+    </span>
+    @if (s.dots) {
+      <!-- (the game log's W/L squares, oldest first: each opens its game, its hover the score) -->
+      <span class="stat-value stat-dots" (mouseenter)="games.primeRecent(recentTeam(c), c.season)">
+        @for (d of s.dots; track $index) {
+          @let i = s.dots.length - 1 - $index;
+          <button
+            type="button"
+            class="recent-square"
+            [ngClass]="d === 1 ? 'W' : d === 0.5 ? 'T' : 'L'"
+            [class.ot]="recentOt(c, i)"
+            [disabled]="!games.available"
+            [title]="recentTitle(c, d, i)"
+            (click)="openRecent(c, i)"
+          >
+            {{ d === 1 ? 'W' : d === 0.5 ? 'T' : 'L' }}
+          </button>
+        }
+      </span>
+    } @else {
+      <span class="stat-value" [style.color]="s.tint">{{ s.display }}</span>
+    }
+    <span class="stat-bar" [class.empty]="s.rank === null"><i></i></span>
+    <span class="stat-avg">{{ s.avg !== null ? 'Avg ' + s.avg : '' }}</span>
+  </div>
+</ng-template>
+
+<!-- Each group a panel (card-panel), open until it's folded shut -->
+@for (group of c.groups; track group.id) {
+  <card-panel
+    [ngClass]="'group-' + group.id"
+    [label]="group.title"
+    [icon]="group.icon"
+    [open]="!cards.closedGroups.has(group.id)"
+    (toggled)="cards.toggleGroup(group.id)"
+  >
+    <div class="card-stats">
+      @for (s of group.stats; track s.key) {
+        <ng-container *ngTemplateOutlet="statTile; context: { $implicit: s }"></ng-container>
+      }
+    </div>
+  </card-panel>
+}

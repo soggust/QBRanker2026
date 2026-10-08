@@ -1,0 +1,18 @@
+<!-- The sport's history (SPORT.cardHistory: a fighter's fights), newest first -->
+
+<div class="card-group card-history">
+  <h3><mat-icon [fontIcon]="sport.cardHistory?.icon ?? 'history'"></mat-icon>{{ sport.cardHistory?.title }}</h3>
+  @let rows = historyRows(c);
+  @if (!rows.length) {
+    <p class="card-note">Nothing yet.</p>
+  }
+  <div class="history-list">
+    @for (r of rows; track $index) {
+      <div class="history-row">
+        <span class="history-result" [ngClass]="r.result === 'W' ? 'win' : r.result === 'L' ? 'loss' : 'draw'">{{ r.result }}</span>
+        <span class="history-main">{{ r.main }}<small>{{ r.sub }}</small></span>
+        <span class="history-detail">{{ r.detail }}</span>
+      </div>
+    }
+  </div>
+</div>

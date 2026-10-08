@@ -1,0 +1,95 @@
+<!-- Overview: the archetype and a one-line take, context flags, a skill radar (with last
+     season's shape as a ghost), and a scouting report of skills with the stats behind them -->
+
+@let o = c.overview;
+@let flags = sortFlags(o.flags);
+<div class="ov-top">
+  <div class="ov-profile">
+    <h4 class="ov-archetype">{{ o.archetype }}</h4>
+    <p class="ov-blurb">{{ o.blurb }}</p>
+    @if (flags.length) {
+      <ul class="ov-flags">
+        @for (f of flags; track f.text) {
+          <li [ngClass]="f.tone"><mat-icon [fontIcon]="f.icon"></mat-icon><span>{{ f.text }}</span></li>
+        }
+      </ul>
+    }
+  </div>
+
+  @if (o.skills.length >= 3) {
+    <div class="ov-radar">
+      <svg viewBox="-215 -140 430 285" role="img" [attr.aria-label]="'Skill profile of ' + c.name">
+        @for (ring of o.radar.rings; track $index) {
+          <polygon class="ring" [class.avg]="$index === 1" [attr.points]="ring"></polygon>
+        }
+        @for (a of o.radar.axes; track a.label) {
+          <line class="spoke" x1="0" y1="0" [attr.x2]="a.x" [attr.y2]="a.y"></line>
+        }
+        <polygon class="shape" [attr.points]="o.radar.shape"></polygon>
+        @for (d of o.radar.dots; track $index) {
+          <circle class="dot" r="3.5" [attr.cx]="d.x" [attr.cy]="d.y" [style.fill]="rankTone(d.pct)"></circle>
+        }
+        @for (a of o.radar.axes; track a.label) {
+          <text class="axis-label" [attr.x]="a.lx" [attr.y]="a.ly" [attr.text-anchor]="a.anchor">{{ a.label }}</text>
+        }
+      </svg>
+      <div class="ov-legend">
+        <span><i class="key now"></i>{{ sport.careerOnly ? 'Career' : seasonName(c.season) }}</span>
+        <span><i class="key avg"></i>League Avg</span>
+      </div>
+    </div>
+  }
+</div>
+
+<!-- Scouting report: every skill, strengths first, then average, then weaknesses, each with
+     the stats behind it -->
+@for (side of o.report; track side.title) {
+  @if (side.list.length) {
+    <!-- (each folds; all start shut) -->
+    <card-panel class="ov-section tab-card" [ngClass]="side.tone" [label]="side.title" [icon]="side.icon">
+      <div class="group-body">
+      <div class="ov-skills">
+        @for (s of side.list; track s.id) {
+          <div class="skill-card" [style.--pct]="s.pct" [style.--tone]="rankTone(s.pct)">
+            <div class="skill-head">
+              <span class="skill-name">{{ s.name }}</span>
+              <span class="skill-standing">{{ s.standing }}</span>
+            </div>
+            <span class="stat-bar"><i></i></span>
+            <span class="skill-evidence">
+              @for (e of s.evidence; track e.label) {
+                <span><b [style.--tone]="rankTone(rankPct(e.rank, e.of))">#{{ e.rank }}</b> {{ e.label }}</span>
+              }
+            </span>
+          </div>
+        }
+      </div>
+      </div>
+    </card-panel>
+  }
+}
+
+<!-- The three closest seasons by anyone else, 2000 on (finished seasons only) -->
+@if (c.season !== currentSeason && c.comps?.length) {
+  <card-panel class="ov-section similar tab-card" [expandable]="false" label="Similar Seasons" icon="compare_arrows">
+    <div class="group-body">
+    <div class="comps-row">
+      @for (m of c.comps; track m.season + m.gsisId) {
+        <button type="button" class="comp" [style.--team-badge]="m.color" (click)="cards.openSeason(m.season, m.gsisId)">
+          <span class="comp-badge" [class.with-photo]="m.photo">
+            <span class="comp-card" [class.white-logo]="m.whiteLogo"><img class="comp-logo" [src]="m.logo" alt="" /></span>
+            @if (m.photo) {
+              <img class="comp-photo" [src]="m.photo" alt="" (error)="m.photo = cards.nextPhoto({ id: m.espnId }, 240)" />
+            }
+          </span>
+          <span class="comp-text">
+            <span class="comp-season">{{ seasonText(m.season) }}</span>
+            <span class="comp-name">{{ m.name }}</span>
+          </span>
+          <span class="comp-match" [style.--tone]="rankTone((m.match - 60) / 40)">{{ m.match }}<small>%</small></span>
+        </button>
+      }
+    </div>
+    </div>
+  </card-panel>
+}
