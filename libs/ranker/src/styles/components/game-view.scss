@@ -61,14 +61,8 @@
   gap: 6px;
   min-width: 0;
 
-  &.lost {
-    .game-logo-card {
-      filter: saturate(0.6) brightness(0.85);
-    }
-
-    .game-team-name {
-      opacity: 0.75;
-    }
+  &.lost .game-logo-card {
+    filter: saturate(0.6) brightness(0.85);
   }
 }
 
