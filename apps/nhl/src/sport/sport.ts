@@ -13,7 +13,7 @@ interface NhlGameLogs {
   playoffs?: Record<string, number>;
 }
 // (whether the earlier seasons' files are there: player logs for past seasons)
-const PAST_SEASON_LOGS = false;
+const PAST_SEASON_LOGS = true;
 const nhlGameLogFiles = new Map<number, Promise<NhlGameLogs>>();
 function nhlGameLogs(season: number): Promise<NhlGameLogs> {
   if (!nhlGameLogFiles.has(season)) {
