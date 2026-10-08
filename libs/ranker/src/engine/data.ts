@@ -30,6 +30,8 @@ export const SEASON_PARTS: SeasonPart[] = ['regular', 'post', 'all'];
 
 // (from a shared link, ?part=post, when the sport has them)
 function linkedPart(): SeasonPart {
+  // (the build scripts import this under Node, with no page address)
+  if (typeof location === 'undefined') return 'regular';
   const linked = new URLSearchParams(location.search).get('part') as SeasonPart | null;
   return SPORT.seasonParts && linked && SEASON_PARTS.includes(linked) ? linked : 'regular';
 }
