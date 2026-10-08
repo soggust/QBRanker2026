@@ -26,6 +26,7 @@ import { GameLogView, gameLogView } from './game-log-view';
 import { PlayerAnalysis, analysisIndex, loadAnalysis } from './analysis';
 import { espnTeamNames, espnUpcoming } from '@ranker/core/game-logs';
 import { heroColor } from '../game-view/team-color';
+import { GameViewService, nameKey } from '../game-view/game-view.service';
 
 // What the card needs from the table it opens from
 export interface CardHost {
@@ -69,6 +70,25 @@ export class PlayerCards {
     private readonly host: CardHost,
     private readonly data: SeasonDataService,
   ) {}
+
+  // The game view's names and teams open cards here: a team its card that season (the game closes), a
+  // player his; and a season's players by name, to know which names to link
+  connectGames(games: GameViewService): void {
+    games.openTeam = (abbreviation, season) => {
+      games.close();
+      this.openTeam(abbreviation, season);
+    };
+    games.openPlayer = (link, season) => this.openLinked(link, season);
+    games.findPlayers = async (season) => {
+      const rows = season === this.host.season ? SKILL_UNITS : await this.data.rows(season);
+      const players = new Map<string, { position: string; gsisId: string }>();
+      for (const [position, list] of Object.entries(rows)) {
+        if (SPORT.teamTabs?.includes(position)) continue;
+        for (const p of (list ?? []) as SkillPlayer[]) if (!players.has(nameKey(p.name))) players.set(nameKey(p.name), { position, gsisId: p.gsisId });
+      }
+      return players;
+    };
+  }
 
   // The card's tab: the table's, or another one's (a roster's player, or the hero's team, opened on its
   // own tab with the grid left where it is)
