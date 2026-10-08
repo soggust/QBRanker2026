@@ -34,7 +34,7 @@
 
 <section class="model-desk">
   <header class="desk-head">
-    <h2 class="desk-title"><mat-icon aria-hidden="true" fontIcon="smart_toy"></mat-icon>Algorithm</h2>
+    <h2 class="desk-title"><mat-icon aria-hidden="true" fontIcon="query_stats"></mat-icon>Algorithm</h2>
     @if (!loading) {
       <div class="desk-tiles">
         <div class="desk-tile" title="Play money: 100 units to start">
@@ -259,6 +259,50 @@
           </ul>
         } @else {
           <p class="desk-note">No changes yet: each run refits the ratings and each market's trust, and logs what moves here.</p>
+        }
+      </div>
+    </card-panel>
+
+    <card-panel class="tab-card group-results" label="Context" icon="insights">
+      <div class="group-body">
+        <!-- (what it weighs beyond the ratings, each term's size fit on the history: the held-out numbers
+             without and with them, then every term, the ones left out dimmed) -->
+        @if (contextRows.length) {
+          <ul class="desk-context-tests">
+            @for (c of contextTests; track c.label) {
+              <li [title]="help['test']">
+                <b>{{ c.label }}</b> on {{ c.games }} unseen games: winners {{ pct(c.before.winHit) }} → {{ pct(c.after.winHit) }} · margin ±{{ c.before.maeMargin }} → {{ c.after.maeMargin }} · total ±{{ c.before.maeTotal }} → {{ c.after.maeTotal }}
+              </li>
+            }
+          </ul>
+          <table class="desk-table desk-bets">
+            <thead>
+              <tr>
+                <ng-container *ngTemplateOutlet="th; context: { $implicit: 'context', key: 'sport', label: 'Sport' }"></ng-container>
+                <ng-container *ngTemplateOutlet="th; context: { $implicit: 'context', key: 'term', label: 'Term' }"></ng-container>
+                <ng-container *ngTemplateOutlet="th; context: { $implicit: 'context', key: 'on', label: 'Moves' }"></ng-container>
+                <ng-container *ngTemplateOutlet="th; context: { $implicit: 'context', key: 'size', label: 'Size' }"></ng-container>
+                <ng-container *ngTemplateOutlet="th; context: { $implicit: 'context', key: 'kept', label: 'Kept' }"></ng-container>
+                <ng-container *ngTemplateOutlet="th; context: { $implicit: 'context', key: 'games', label: 'Games' }"></ng-container>
+                <ng-container *ngTemplateOutlet="th; context: { $implicit: 'context', key: 'gain', label: 'Held-out gain' }"></ng-container>
+              </tr>
+            </thead>
+            <tbody>
+              @for (t of sorted('context', contextRows, contextValue); track t.sport + t.key) {
+                <tr [class.desk-off]="!t.kept">
+                  <th>{{ t.sport }}</th>
+                  <td class="desk-left" [title]="t.unit">{{ t.label }}</td>
+                  <td>{{ t.on }}</td>
+                  <td>{{ t.kept ? signed(t.size) + ' ' + t.unitWord : '0' }}</td>
+                  <td>{{ t.kept ? 'yes' : 'no' }}</td>
+                  <td>{{ t.games }}</td>
+                  <td [class.up]="(t.gain ?? 0) > 0 && t.kept" [class.down]="(t.gain ?? 0) < 0">{{ t.gain === null ? '-' : signed(t.gain) + '%' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        } @else {
+          <p class="desk-note">No context fit yet: each run gathers it and fits each term's size.</p>
         }
       </div>
     </card-panel>

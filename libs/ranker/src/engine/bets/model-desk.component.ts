@@ -4,7 +4,8 @@ import { Component, OnInit } from '@angular/core';
 // (libs/ranker/scripts/model/run.mjs: every market of every game, 0.5 to 3 units), read from each sport's
 // data/model/ledger.json and state.json. Its bankroll and record, broken down by sport, market and stake,
 // how well its chances match what happened, its bankroll over time, the bets still open, the latest graded,
-// and every change it's made to itself and why.
+// every change it's made to itself and why, and the context it weighs beyond the ratings (rest, travel,
+// starters, weather, parks, the ranker's own numbers) with each term's fitted size.
 
 interface ModelBet {
   id: string;
@@ -26,6 +27,20 @@ interface ModelBet {
   final?: string;
 }
 
+type TestNumbers = { maeMargin: number; maeTotal: number; winHit: number; winLogLoss: number };
+
+interface ContextTerm {
+  key: string;
+  label: string;
+  group: string;
+  on: 'margin' | 'total';
+  unit: string;
+  size: number;
+  kept: boolean;
+  games: number;
+  gain: number | null;
+}
+
 interface ModelState {
   sport: string;
   label: string;
@@ -36,7 +51,10 @@ interface ModelState {
   history: { games: number; finals: number };
   changelog: { at: string; what: string; from: number; to: number; why: string; sport?: string }[];
   teams: { abbr: string; rating: number }[];
+  context?: { lambda: number; terms: ContextTerm[]; test: { games: number; before: TestNumbers; after: TestNumbers } } | null;
 }
+
+type ContextRow = ContextTerm & { sport: string; unitWord: string };
 
 export interface Tally {
   label: string;
@@ -52,6 +70,8 @@ export interface Tally {
 
 const SPORTS = ['nfl', 'nba', 'nhl', 'mlb'];
 const MARKET_NAMES: Record<string, string> = { spread: 'Spread', total: 'Total', ml: 'Moneyline' };
+// (each sport's scoring unit, for a context term's size)
+const UNIT_WORDS: Record<string, string> = { nfl: 'pts', nba: 'pts', nhl: 'goals', mlb: 'runs' };
 
 function tally(label: string, bets: ModelBet[]): Tally {
   const t: Tally = { label, bets: 0, won: 0, lost: 0, push: 0, staked: 0, profit: 0, roi: null, open: 0 };
@@ -91,6 +111,8 @@ export class ModelDeskComponent implements OnInit {
   open: ModelBet[] = [];
   recent: ModelBet[] = [];
   changes: (ModelState['changelog'][number] & { sport: string })[] = [];
+  contextRows: ContextRow[] = [];
+  contextTests: { label: string; games: number; before: TestNumbers; after: TestNumbers }[] = [];
 
   async ngOnInit(): Promise<void> {
     const get = (url: string) =>
@@ -147,6 +169,14 @@ export class ModelDeskComponent implements OnInit {
       .flatMap((s) => s.changelog.map((c) => ({ ...c, sport: s.label })))
       .sort((a, b) => b.at.localeCompare(a.at))
       .slice(0, 30);
+
+    // (each sport's context terms, the kept ones first, and its held-out numbers with and without them)
+    this.contextRows = this.states.flatMap((s) => (s.context?.terms ?? []).map((t) => ({ ...t, sport: s.label, unitWord: UNIT_WORDS[s.sport] ?? '' })));
+    this.contextTests = this.states.filter((s) => s.context?.test).map((s) => ({ label: s.label, ...s.context!.test }));
+  }
+
+  signed(v: number): string {
+    return `${v > 0 ? '+' : ''}${v}`;
   }
 
   get balance(): number {
@@ -183,6 +213,7 @@ export class ModelDeskComponent implements OnInit {
   private sorts: Record<string, { key: string; dir: 1 | -1 }> = {
     open: { key: 'start', dir: 1 },
     recent: { key: 'graded', dir: -1 },
+    context: { key: 'gain', dir: -1 },
   };
 
   sortBy(table: string, key: string): void {
@@ -231,6 +262,10 @@ export class ModelDeskComponent implements OnInit {
   readonly stateValue = (s: ModelState, key: string): unknown =>
     key === 'label' ? s.label : key === 'history' ? s.history.finals : key === 'trust' ? (s.trust['spread']?.trust ?? null) : s.params[key];
 
+  // (a context term's value by column)
+  readonly contextValue = (t: ContextRow, key: string): unknown =>
+    key === 'sport' ? t.sport : key === 'term' ? t.label : key === 'on' ? t.on : key === 'size' ? Math.abs(t.size) : key === 'kept' ? (t.kept ? 1 : 0) : key === 'games' ? t.games : key === 'gain' ? t.gain : null;
+
   // Each column's hover: what it is
   readonly help: Record<string, string> = {
     record: 'Won-lost-pushed (sorts by the share won)',
@@ -262,8 +297,14 @@ export class ModelDeskComponent implements OnInit {
     sigmaT: 'Total spread: the same for game totals',
     trust: "How much each market counts the model against the sportsbook: 0 the book's alone, 1 the model's alone (starts at 0.5; refit on the market's graded bets once 40 are; * not yet)",
     history: 'Finished games the ratings are built on',
+    term: "What it weighs beyond the ratings (hover a name for its unit): rest, travel, starters, weather, ballparks, and last season's numbers from the ranker",
+    on: 'What it moves: the margin (toward the side it names) or the game total',
+    size: "Its fitted size, in the sport's scoring unit per unit of the term (hover the name for the unit); refit every run on every game before, pulled toward 0 unless the games bear it out",
+    kept: 'Kept if the held-out games were predicted better with it; left out (size 0) if not',
+    games: 'Games in the history where it applied',
+    gain: "How much tighter its predictions of games it hadn't seen were with this term than without, in percent (negative: it hurt, so it's left out)",
   };
 }
 
 // (the columns that sort as text, A first)
-const TEXT_KEYS = new Set(['label', 'sport', 'game', 'market', 'pick', 'start']);
+const TEXT_KEYS = new Set(['label', 'sport', 'game', 'market', 'pick', 'start', 'term', 'on']);

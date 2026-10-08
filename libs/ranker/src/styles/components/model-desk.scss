@@ -27,6 +27,7 @@
   display: flex;
   font-family: v.$font-hand;
   font-size: 20px;
+  font-weight: 400;
   gap: 8px;
 
   mat-icon {
@@ -245,4 +246,25 @@ card-panel {
     color: rgba(255, 255, 255, 0.7);
     font-size: 12px;
   }
+}
+
+// (the context: each sport's held-out numbers without and with it, then its terms, the ones left out dimmed)
+.desk-context-tests {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 12px;
+  list-style: none;
+  margin: 0 0 10px;
+  padding: 0;
+
+  li {
+    padding: 2px 0;
+  }
+
+  b {
+    color: #fff;
+  }
+}
+
+.desk-off {
+  opacity: 0.45;
 }

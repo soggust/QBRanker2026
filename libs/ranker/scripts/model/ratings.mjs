@@ -33,7 +33,8 @@ function team(state, id, season, params) {
   return { r: state.r.get(id), o: state.o.get(id), d: state.d.get(id) };
 }
 
-// A game's expectation: the home margin, each team's score and the total
+// A game's expectation: the home margin, each team's score and the total (the ratings' alone; context.mjs's
+// terms are added on by adjust)
 export function expect(state, game, params) {
   const h = team(state, game.home, game.season, params);
   const a = team(state, game.away, game.season, params);
@@ -42,6 +43,17 @@ export function expect(state, game, params) {
   const homePts = state.avg + h.o - a.d + edge / 2;
   const awayPts = state.avg + a.o - h.d - edge / 2;
   return { margin, total: homePts + awayPts, homePts, awayPts };
+}
+
+// An expectation with the context's adjustments: adjM to the home margin, adjT to the total (each side's score
+// takes half of each)
+export function adjust(exp, adjM, adjT) {
+  return {
+    margin: exp.margin + adjM,
+    total: exp.total + adjT,
+    homePts: exp.homePts + adjM / 2 + adjT / 2,
+    awayPts: exp.awayPts - adjM / 2 + adjT / 2,
+  };
 }
 
 // Learn from a final: the ratings move by k of the surprise (capped, so a blowout counts as a big win, not
@@ -61,9 +73,17 @@ function learn(state, game, exp, params) {
 }
 
 // Replay the finals in order: the state after them, and how well each was predicted before it was played
-// (after a burn-in: the first part of the history only teaches)
-export function replay(games, params, burnIn = 0.3) {
+// (after a burn-in: the first part of the history only teaches).
+//
+// With a context (ctx: each game's terms, context.mjs), the terms' sizes are learned as the replay goes, the
+// way the ratings are: before each game, the sizes that best explain every earlier game's miss from the
+// ratings' expectation (least squares), each pulled toward 0 by lambda made-up games where it did nothing
+// (ridge). So a game is only ever predicted with sizes learned from games before it, and a term that explains
+// nothing stays near 0. ctx.off: terms left out.
+export function replay(games, params, burnIn = 0.3, ctx = null) {
   const state = start(params);
+  const fitM = ctx ? online(ctx, 'm') : null;
+  const fitT = ctx ? online(ctx, 't') : null;
   const finals = games.filter((g) => g.final && g.hs !== null && g.as !== null).sort((a, b) => a.date.localeCompare(b.date));
   const from = Math.floor(finals.length * burnIn);
   let n = 0;
@@ -74,7 +94,9 @@ export function replay(games, params, burnIn = 0.3) {
   let winLoss = 0;
   let winHits = 0;
   finals.forEach((g, i) => {
-    const exp = expect(state, g, params);
+    const base = expect(state, g, params);
+    const f = ctx?.feats.get(g.id);
+    const exp = f ? adjust(base, fitM.predict(f.m), fitT.predict(f.t)) : base;
     if (i >= from) {
       const m = g.hs - g.as - exp.margin;
       const t = g.hs + g.as - exp.total;
@@ -90,7 +112,12 @@ export function replay(games, params, burnIn = 0.3) {
       n++;
     }
     learn(state, g, exp, params);
+    if (f) {
+      fitM.add(f.m, g.hs - g.as - base.margin);
+      fitT.add(f.t, g.hs + g.as - base.total);
+    }
   });
+  if (ctx) state.weights = { m: fitM.weights(), t: fitT.weights() };
   return {
     state,
     n,
@@ -101,6 +128,144 @@ export function replay(games, params, burnIn = 0.3) {
     winLogLoss: n ? winLoss / n : null,
     winHit: n ? winHits / n : null,
   };
+}
+
+// A term's gate: what's kept or left out together (a park's terms come and go as one; any other term alone)
+export const gateOf = (t) => t.gate ?? t.key;
+
+// One side's terms (m or t) learned online: the running sums of least squares, solved when asked, each term's
+// row starting with lambda made-up games of its typical size and no effect (scale: its typical square). With
+// many terms (MLB's parks) it's solved again every few games rather than every one: still only ever from
+// games already played.
+function online(ctx, on) {
+  const k = ctx.terms[on].length;
+  const off = ctx.terms[on].map((t) => ctx.off.has(gateOf(t)));
+  const lambda = ctx.terms[on].map((t) => (t.gate && ctx.lambdaSet ? ctx.lambdaSet : ctx.lambda));
+  const A = Array.from({ length: k }, (_, i) => Array.from({ length: k }, (_, j) => (i === j ? lambda[i] * (ctx.scale[on][i] || 1) + 1e-9 : 0)));
+  const b = new Array(k).fill(0);
+  const every = k > 16 ? Math.ceil(k / 10) : 1;
+  let w = new Array(k).fill(0);
+  let pending = 0;
+  const live = (x) => {
+    const nz = [];
+    for (let i = 0; i < k; i++) if (x[i] && !off[i]) nz.push(i);
+    return nz;
+  };
+  return {
+    predict(x) {
+      if (pending >= every) (w = solve(A, b)), (pending = 0);
+      let s = 0;
+      for (const i of live(x)) s += x[i] * w[i];
+      return s;
+    },
+    add(x, y) {
+      const nz = live(x);
+      if (!nz.length) return;
+      for (const i of nz) {
+        b[i] += x[i] * y;
+        for (const j of nz) A[i][j] += x[i] * x[j];
+      }
+      pending++;
+    },
+    weights() {
+      if (pending) (w = solve(A, b)), (pending = 0);
+      return w.map((v, i) => (off[i] ? 0 : v));
+    },
+  };
+}
+
+// (a small linear system, by elimination)
+function solve(A, b) {
+  const n = b.length;
+  const M = A.map((row, i) => [...row, b[i]]);
+  for (let c = 0; c < n; c++) {
+    let p = c;
+    for (let r = c + 1; r < n; r++) if (Math.abs(M[r][c]) > Math.abs(M[p][c])) p = r;
+    [M[c], M[p]] = [M[p], M[c]];
+    if (Math.abs(M[c][c]) < 1e-12) continue;
+    for (let r = 0; r < n; r++) {
+      if (r === c) continue;
+      const f = M[r][c] / M[c][c];
+      for (let j = c; j <= n; j++) M[r][j] -= f * M[c][j];
+    }
+  }
+  return M.map((row, i) => (Math.abs(row[i]) < 1e-12 ? 0 : row[n] / row[i]));
+}
+
+// The context's fit, on top of the ratings' settings: how hard to pull the terms' sizes toward 0 (lambda, the
+// one whose held-out predictions were best), then which terms earn their place (each left out in turn, and
+// kept only if the held-out games were predicted better with it by more than 1 nat in all: the cost of one
+// more setting). A set of terms that come as one (MLB's parks) gets its own lambda, fit the same way., then how much each kept term helped. Its test numbers next to the ratings' alone.
+export function fitContext(games, params, feats, terms) {
+  const finals = games.filter((g) => g.final && g.hs !== null && g.as !== null);
+  const scale = { m: terms.m.map(() => 0), t: terms.t.map(() => 0) };
+  const seen = { m: terms.m.map(() => 0), t: terms.t.map(() => 0) };
+  for (const g of finals) {
+    const f = feats.get(g.id);
+    if (!f) continue;
+    for (const on of ['m', 't'])
+      f[on].forEach((v, i) => {
+        scale[on][i] += v * v;
+        if (v) seen[on][i]++;
+      });
+  }
+  for (const on of ['m', 't']) scale[on] = scale[on].map((s, i) => (seen[on][i] ? s / seen[on][i] : 1));
+  const all = [...terms.m, ...terms.t];
+  const gates = [...new Set(all.map(gateOf))];
+  const score = (r) => Math.log(r.sigma) + Math.log(r.sigmaT);
+  let lambdaSet = null;
+  const run = (lambda, off) => {
+    const r = replay(games, params, 0.3, { feats, terms, scale, lambda, lambdaSet, off });
+    return { r, score: score(r) };
+  };
+  const before = replay(games, params);
+  const n = before.n || 1;
+  // (terms never seen at all are left out from the start)
+  const seenGate = (gate) => all.some((t) => gateOf(t) === gate && (t.on === 'm' ? seen.m[terms.m.indexOf(t)] : seen.t[terms.t.indexOf(t)]));
+  const off = new Set(gates.filter((g) => !seenGate(g)));
+  let best = null;
+  for (const lambda of [4, 16, 64, 256, 1024]) {
+    const tried = run(lambda, off);
+    if (!best || tried.score < best.score) best = { lambda, ...tried };
+  }
+  if (all.some((t) => t.gate)) {
+    let set = { lambdaSet: null, ...best };
+    for (const ls of [16, 64, 256, 1024, 4096]) {
+      lambdaSet = ls;
+      const tried = run(best.lambda, off);
+      if (tried.score < set.score) set = { ...best, ...tried, lambdaSet: ls };
+    }
+    lambdaSet = set.lambdaSet;
+    best = set;
+  }
+  // (each term must pay for itself on the held-out games, or it's left out)
+  // (again until none leaves: one leaving can make another not worth its place)
+  for (let changed = true, passes = 0; changed && passes < 4; passes++) {
+    changed = false;
+    for (const gate of gates) {
+      if (off.has(gate)) continue;
+      const without = run(best.lambda, new Set([...off, gate]));
+      // (one nat each: a park's set is already held back by its own lambda, fit on the same held-out games)
+      if ((without.score - best.score) * n <= 1) {
+        off.add(gate);
+        best = { ...best, ...without };
+        changed = true;
+      }
+    }
+  }
+  // (each term's worth: how much worse the held-out games were without it, or better with it, per game)
+  const gain = {};
+  for (const gate of gates) {
+    if (!seenGate(gate)) continue;
+    const flipped = new Set(off);
+    if (off.has(gate)) flipped.delete(gate);
+    else flipped.add(gate);
+    const other = run(best.lambda, flipped);
+    gain[gate] = off.has(gate) ? best.score - other.score : other.score - best.score;
+  }
+  const ctx = { feats, terms, scale, lambda: best.lambda, lambdaSet, off };
+  const final = replay(games, params, 0, ctx).state.weights;
+  return { ctx, before, after: best.r, gain, seen, weights: final };
 }
 
 // The grid's best settings: the ones whose margins and totals were closest to what happened (the normal

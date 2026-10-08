@@ -6,6 +6,8 @@ on:
     # and the night games, Monday's, Thursday's) and MLB's day games, with the night's results graded. Each
     # run grades what finished, refits the ratings and each market's trust on it, and bets every market of
     # every game in the next two days it hasn't bet yet (libs/ranker/scripts/model/run.mjs). Code only: free.
+    # Its context (rest, travel, starters, weather, parks: context.mjs) is kept in each sport's
+    # scripts/model/context.json, so a run only asks about the games new since the last.
     - cron: "20 14 * * *"
     - cron: "20 22 * * *"
   workflow_dispatch:
@@ -30,6 +32,15 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "22"
+
+      # (nflverse's schedule and anything else slow the context reads, kept between runs; none of it is
+      # needed: without it the run asks again)
+      - name: Restore the desk's cache
+        uses: actions/cache@v4
+        with:
+          path: .cache/model
+          key: model-desk-${{ github.run_id }}
+          restore-keys: model-desk-
 
       - name: Grade, refit and bet
         run: node libs/ranker/scripts/model/run.mjs
