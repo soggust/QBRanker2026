@@ -15,13 +15,25 @@
 //        SEASON=2025 npm run update-data  (a past season, written to src/StaticData/seasons/2025/;
 //                                          run once, since a finished season doesn't change)
 //        OUT_DIR=some/folder              (write somewhere else, e.g. for a dry run)
+//        PART=post,all                    (only those parts: see below)
+//
+// Each run writes three parts of the season (the app's Stats From setting): the regular season
+// (skill-players.json, games.json, data-grades.json), the playoffs (skill-players.post.json,
+// games.post.json, data-grades.post.json) and both together (*.all.json). The playoffs and both wait
+// for a playoff game to be played (until then the app says "None yet"). Every part is built the same
+// way from its own games: ESPN's season type 3 beside type 2, nflverse's POST play-by-play, player
+// stats and weekly files beside its REG ones, every rate worked out again from the part's own plays
+// and totals. What only exists for the regular season (Pro Football Reference's season totals, before
+// its weekly files began in 2024) is null in the other two parts rather than borrowed.
+// PART=post,all backfills a finished season's playoffs without touching its regular-season files
+// (which build-blocking.mjs has added to since). A past season's downloads are kept in .cache.
 //
 // A past season has no injury report (its injury flags are the players who finished it on injured
 // reserve, from the rosters) and no hand-set preseason grades (a full season of stats
 // outweighs them completely), and it fails outright if nflverse can't be loaded, rather than keeping
 // previous values.
 
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, rm, stat, writeFile } from 'node:fs/promises';
 import { pathToFileURL } from 'node:url';
 import { gunzipSync } from 'node:zlib';
 
@@ -37,13 +49,28 @@ const DATA_DIR = process.env.OUT_DIR
   ? pathToFileURL(process.env.OUT_DIR.replace(/[\/]?$/, '/'))
   : new URL(PAST_SEASON ? `../src/StaticData/seasons/${SEASON}/` : '../src/StaticData/', import.meta.url);
 const TEAM_GRADES_FILE = new URL('team-grades.json', DATA_DIR);
-const GAMES_FILE = new URL('games.json', DATA_DIR);
 const SUBJECTIVE_FILE = new URL('subjective.json', DATA_DIR);
-const SKILL_FILE = new URL('skill-players.json', DATA_DIR);
-const DATA_GRADES_FILE = new URL('data-grades.json', DATA_DIR);
+// (one of each per part: partFile)
+const GAMES_FILE = 'games.json';
+const SKILL_FILE = 'skill-players.json';
+const DATA_GRADES_FILE = 'data-grades.json';
 const DEFAULT_SCORE = 6;
 const NFLVERSE = 'https://github.com/nflverse/nflverse-data/releases/download';
 const SCHEDULE_URL = 'https://raw.githubusercontent.com/nflverse/nfldata/master/data/games.csv';
+
+// The parts this run builds (see the top), a file's name in a part, and which games a part counts:
+// ESPN's season types (2 the regular season, 3 the playoffs) and nflverse's REG or not
+const PARTS = (process.env.PART ?? 'regular,post,all').split(',').map((part) => part.trim());
+const PART_NAMES = { regular: 'regular season', post: 'playoffs', all: 'regular season and playoffs' };
+for (const part of PARTS) if (!PART_NAMES[part]) throw new Error(`Unknown PART "${part}" (regular, post or all)`);
+const partFile = (file, part) => new URL(part === 'regular' ? file : file.replace(/\.json$/, `.${part}.json`), DATA_DIR);
+const ESPN_TYPES = { regular: [2], post: [3], all: [2, 3] };
+// (ESPN's playoff weeks: wild card, divisional, conference, then the Pro Bowl and the Super Bowl)
+const POST_WEEKS = 5;
+// nflverse's season_type or game_type in a part (REG; POST, or WC, DIV, CON and SB)
+const inPart = (part, type) => part === 'all' || (part === 'regular') === (type === 'REG');
+// nflverse's season player stats file for a part
+const PLAYER_STATS = { regular: 'reg', post: 'post', all: 'regpost' };
 
 async function getJson(url, attempts = 3) {
   for (let i = 1; ; i++) {
@@ -105,10 +132,29 @@ function parseCsv(text) {
   return rows.map((r) => Object.fromEntries(header.map((key, i) => [key, r[i]])));
 }
 
-async function getCsvGz(url) {
+// A download, kept in .cache/nflverse (shared with build-depth.mjs) when building a past season: a file
+// of that season's own for good (a finished season's don't change), the all-seasons files (players,
+// Next Gen Stats, the schedule) for FRESH_HOURS. The season being played always downloads afresh.
+const DOWNLOAD_CACHE = new URL('../../../.cache/nflverse/', import.meta.url);
+const FRESH_HOURS = 6;
+async function download(url) {
+  const file = new URL(url.split('/').pop(), DOWNLOAD_CACHE);
+  if (PAST_SEASON) {
+    const age = await stat(file).then((s) => Date.now() - s.mtimeMs, () => null);
+    if (age !== null && (file.pathname.includes(`_${SEASON}.`) || age < FRESH_HOURS * 36e5)) return readFile(file);
+  }
   const res = await fetch(url);
   if (!res.ok) throw new Error(`${res.status} ${res.statusText} for ${url}`);
-  return parseCsv(gunzipSync(Buffer.from(await res.arrayBuffer())).toString());
+  const body = Buffer.from(await res.arrayBuffer());
+  if (PAST_SEASON) {
+    await mkdir(DOWNLOAD_CACHE, { recursive: true });
+    await writeFile(file, body);
+  }
+  return body;
+}
+
+async function getCsvGz(url) {
+  return parseCsv(gunzipSync(await download(url)).toString());
 }
 
 const mean = (values) =>
@@ -117,9 +163,7 @@ const mean = (values) =>
 const num = (v) => (v === undefined || v === '' || v === 'NA' ? null : Number(v));
 
 async function getCsv(url) {
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`${res.status} ${res.statusText} for ${url}`);
-  return parseCsv(await res.text());
+  return parseCsv((await download(url)).toString());
 }
 
 // Secondary data sets (Next Gen Stats, Pro Football Reference advanced stats, snap counts) are
@@ -175,12 +219,12 @@ async function pfrSeasonRows(type, sacksByPfr) {
     });
 }
 
+// The season's nflverse files, read once for every part the run builds (nflversePart picks a part's games)
 async function loadNflverse() {
-  let [players, pbp, playerStats, schedule, ngsPass, ngsRush, ngsRec, pfrPass, pfrRush, pfrRec, pfrDef, snaps] =
+  let [players, pbp, schedule, ngsPass, ngsRush, ngsRec, pfrPass, pfrRush, pfrRec, pfrDef, snaps, ...partStats] =
     await Promise.all([
       getCsvGz(`${NFLVERSE}/players/players.csv.gz`),
       getCsvGz(`${NFLVERSE}/pbp/play_by_play_${SEASON}.csv.gz`),
-      getCsvGz(`${NFLVERSE}/stats_player/stats_player_reg_${SEASON}.csv.gz`),
       getCsv(SCHEDULE_URL),
       ...['passing', 'rushing', 'receiving'].map((type) =>
         optionalCsvGz(`${NFLVERSE}/nextgen_stats/ngs_${type}.csv.gz`)
@@ -189,8 +233,11 @@ async function loadNflverse() {
         optionalCsvGz(`${NFLVERSE}/pfr_advstats/advstats_week_${type}_${SEASON}.csv.gz`)
       ),
       optionalCsvGz(`${NFLVERSE}/snap_counts/snap_counts_${SEASON}.csv.gz`),
+      ...PARTS.map((part) => getCsvGz(`${NFLVERSE}/stats_player/stats_player_${PLAYER_STATS[part]}_${SEASON}.csv.gz`)),
     ]);
-  if (!pfrPass.length) {
+  // (the weekly files cover any part's games; the season totals standing in for them, the regular season's alone)
+  const pfrWeekly = pfrPass.length > 0;
+  if (!pfrWeekly) {
     const pfrByGsis = new Map(players.filter((p) => p.pfr_id && p.pfr_id !== 'NA').map((p) => [p.gsis_id, p.pfr_id]));
     const sacksByPfr = new Map();
     for (const play of pbp) {
@@ -203,22 +250,76 @@ async function loadNflverse() {
     );
     console.log(`Pro Football Reference: season totals (no weekly files for ${SEASON})`);
   }
-  for (const rows of [pbp, playerStats, schedule, pfrPass, pfrRush, pfrRec, pfrDef, snaps]) sameTeamAbbrs(rows);
+  for (const rows of [pbp, schedule, pfrPass, pfrRush, pfrRec, pfrDef, snaps, ...partStats]) sameTeamAbbrs(rows);
   const espnIds = players.filter((p) => p.espn_id && p.espn_id !== 'NA');
 
-  // Next Gen Stats: week 0 rows are regular-season totals
-  const ngsSeason = (rows) =>
-    new Map(
-      rows
-        .filter((r) => r.season === String(SEASON) && r.season_type === 'REG' && r.week === '0')
-        .map((r) => [r.player_gsis_id, r])
-    );
-  const regular = (rows) => rows.filter((r) => r.game_type === 'REG');
+  return {
+    seasonPbp: pbp,
+    schedule,
+    playerStatsByPart: Object.fromEntries(PARTS.map((part, i) => [part, partStats[i]])),
+    ngsRows: { pass: ngsPass, rush: ngsRush, rec: ngsRec },
+    pfrRows: { pass: pfrPass, rush: pfrRush, rec: pfrRec, def: pfrDef, weekly: pfrWeekly },
+    snaps,
+    pfrByGsis: new Map(players.filter((p) => p.pfr_id && p.pfr_id !== 'NA').map((p) => [p.gsis_id, p.pfr_id])),
+    // Everyone who was a head coach in an earlier season (a coach not in here is in his first year)
+    pastCoaches: new Set(
+      schedule.filter((game) => Number(game.season) < SEASON).flatMap((game) => [game.home_coach, game.away_coach])
+    ),
+    gsisByEspn: new Map(espnIds.map((p) => [Number(p.espn_id), p.gsis_id])),
+    espnByGsis: new Map(espnIds.map((p) => [p.gsis_id, Number(p.espn_id)])),
+  };
+}
+
+// Next Gen Stats over a part's games, by player: the regular season is its week 0 rows (the season's
+// totals); the playoffs their weekly rows, and both the two together, each average weighted by what it
+// averages over (time to throw by attempts, separation by targets...), so it's the part's own average
+const NGS_WEIGHTS = {
+  pass: { avg_time_to_throw: 'attempts', avg_intended_air_yards: 'attempts', aggressiveness: 'attempts' },
+  rush: { rush_yards_over_expected_per_att: 'rush_attempts' },
+  rec: { avg_separation: 'targets', avg_yac_above_expectation: 'receptions', avg_intended_air_yards: 'targets' },
+};
+function ngsPart(rows, part, weights) {
+  const seasonRows = rows.filter(
+    (r) =>
+      r.season === String(SEASON) &&
+      ((part !== 'post' && r.season_type === 'REG' && r.week === '0') ||
+        (part !== 'regular' && r.season_type === 'POST' && r.week !== '0'))
+  );
+  if (part === 'regular') return new Map(seasonRows.map((r) => [r.player_gsis_id, r]));
+  const merged = new Map();
+  for (const [id, list] of Map.groupBy(seasonRows, (r) => r.player_gsis_id)) {
+    // (the latest row's team: the playoffs')
+    const row = { ...list.at(-1) };
+    for (const weight of new Set(Object.values(weights))) row[weight] = list.reduce((sum, r) => sum + (num(r[weight]) ?? 0), 0);
+    for (const [key, weight] of Object.entries(weights)) {
+      let sum = 0;
+      let total = 0;
+      for (const r of list) {
+        const v = num(r[key]);
+        const w = num(r[weight]) ?? 0;
+        if (v === null || !w) continue;
+        sum += v * w;
+        total += w;
+      }
+      row[key] = total ? sum / total : null;
+    }
+    merged.set(id, row);
+  }
+  return merged;
+}
+
+// The season's files cut down to a part's games: its plays, its player stats, its games in the
+// schedule, and Next Gen Stats, Pro Football Reference and snap counts over those games
+function nflversePart(season, part) {
+  const counts = (rows) => rows.filter((r) => inPart(part, r.game_type));
+  // (Pro Football Reference's season totals count the regular season only: nothing for the other parts)
+  const pfrRows = (rows) => (season.pfrRows.weekly || part === 'regular' ? counts(rows) : []);
+  const { pass, rush, rec, def } = season.pfrRows;
 
   // Average offensive snap share over the games a player was on the field
   const snapShare = new Map();
   for (const [id, t] of totalsBy(
-    regular(snaps).filter((r) => (num(r.offense_snaps) ?? 0) > 0),
+    counts(season.snaps).filter((r) => (num(r.offense_snaps) ?? 0) > 0),
     (r) => r.pfr_player_id,
     ['offense_pct']
   )) {
@@ -226,33 +327,28 @@ async function loadNflverse() {
   }
 
   return {
-    pbp: pbp.filter((play) => play.season_type === 'REG'),
-    playerStats,
-    pfrByGsis: new Map(players.filter((p) => p.pfr_id && p.pfr_id !== 'NA').map((p) => [p.gsis_id, p.pfr_id])),
-    ngs: { pass: ngsSeason(ngsPass), rush: ngsSeason(ngsRush), rec: ngsSeason(ngsRec) },
+    ...season,
+    pbp: season.seasonPbp.filter((play) => inPart(part, play.season_type)),
+    playerStats: season.playerStatsByPart[part],
+    ngs: Object.fromEntries(Object.entries(season.ngsRows).map(([type, rows]) => [type, ngsPart(rows, part, NGS_WEIGHTS[type])])),
     pfr: {
-      pass: totalsBy(regular(pfrPass), (r) => r.pfr_player_id, ['times_sacked', 'times_pressured', 'passing_bad_throws']),
-      rush: totalsBy(regular(pfrRush), (r) => r.pfr_player_id, ['rushing_yards_after_contact', 'rushing_broken_tackles']),
-      rec: totalsBy(regular(pfrRec), (r) => r.pfr_player_id, ['receiving_drop', 'receiving_broken_tackles']),
-      def: totalsBy(regular(pfrDef), (r) => r.team, ['def_pressures', 'def_missed_tackles', 'def_tackles_combined']),
+      pass: totalsBy(pfrRows(pass), (r) => r.pfr_player_id, ['times_sacked', 'times_pressured', 'passing_bad_throws']),
+      rush: totalsBy(pfrRows(rush), (r) => r.pfr_player_id, ['rushing_yards_after_contact', 'rushing_broken_tackles']),
+      rec: totalsBy(pfrRows(rec), (r) => r.pfr_player_id, ['receiving_drop', 'receiving_broken_tackles']),
+      def: totalsBy(pfrRows(def), (r) => r.team, ['def_pressures', 'def_missed_tackles', 'def_tackles_combined']),
       // Offense team totals, for the O-line and weapons grades
-      passTeam: totalsBy(regular(pfrPass), (r) => r.team, ['times_pressured', 'passing_drops']),
-      rushTeam: totalsBy(regular(pfrRush), (r) => r.team, ['carries', 'rushing_yards_before_contact', 'rushing_broken_tackles']),
-      recTeam: totalsBy(regular(pfrRec), (r) => r.team, ['receiving_broken_tackles']),
+      passTeam: totalsBy(pfrRows(pass), (r) => r.team, ['times_pressured', 'passing_drops']),
+      rushTeam: totalsBy(pfrRows(rush), (r) => r.team, ['carries', 'rushing_yards_before_contact', 'rushing_broken_tackles']),
+      recTeam: totalsBy(pfrRows(rec), (r) => r.team, ['receiving_broken_tackles']),
     },
     snapShare,
-    // Everyone who was a head coach in an earlier season (a coach not in here is in his first year)
-    pastCoaches: new Set(
-      schedule.filter((game) => Number(game.season) < SEASON).flatMap((game) => [game.home_coach, game.away_coach])
+    // The part's completed games, with coaches, scores and betting lines
+    games: season.schedule.filter(
+      (game) => game.season === String(SEASON) && inPart(part, game.game_type) && num(game.result) !== null
     ),
-    // Completed regular-season games, with coaches, scores and betting lines
-    games: schedule.filter(
-      (game) => game.season === String(SEASON) && game.game_type === 'REG' && num(game.result) !== null
-    ),
-    gsisByEspn: new Map(espnIds.map((p) => [Number(p.espn_id), p.gsis_id])),
-    espnByGsis: new Map(espnIds.map((p) => [p.gsis_id, Number(p.espn_id)])),
   };
 }
+
 
 // EPA/play and success rate cover the QB's dropbacks and runs; CPOE covers pass attempts.
 // Fantasy points are nflverse standard scoring; half/full PPR add 0.5/1 per reception in the app.
@@ -265,7 +361,8 @@ async function loadNflverse() {
 const QB_GAME_PLAYS = 10;
 
 function advancedStats(espnIds, { pbp, playerStats, gsisByEspn, pfrByGsis, ngs, pfr }) {
-  const plays = pbp.filter((play) => play.season_type === 'REG' && (play.pass === '1' || play.rush === '1'));
+  // (the part's plays: nflversePart)
+  const plays = pbp.filter((play) => play.pass === '1' || play.rush === '1');
   const seasonRows = new Map(playerStats.map((row) => [row.player_id, row]));
 
   const stats = new Map();
@@ -1027,13 +1124,12 @@ function specialTeamsEpa(pbp) {
     }
     return new Map([...byPlayer].map(([id, values]) => [id, mean(values)]));
   };
-  const reg = pbp.filter((play) => play.season_type === 'REG');
   return {
     kicks: perPlayer(
-      reg.filter((play) => play.field_goal_attempt === '1' || play.extra_point_attempt === '1'),
+      pbp.filter((play) => play.field_goal_attempt === '1' || play.extra_point_attempt === '1'),
       'kicker_player_id'
     ),
-    punts: perPlayer(reg.filter((play) => play.punt_attempt === '1'), 'punter_player_id'),
+    punts: perPlayer(pbp.filter((play) => play.punt_attempt === '1'), 'punter_player_id'),
   };
 }
 
@@ -1113,18 +1209,19 @@ function listedPlayers(all, { count, usage, leaders = [] }) {
 
 // Targets per receiver and per team, counted from the play-by-play (every pass that names a receiver,
 // sacks and spikes aside), and which receiving stats this season's player stats actually have
-function receivingFromPbp(playerStats, pbp) {
+// (whether the play-by-play names receivers on incompletions is the season's, playoffs and all: seasonPbp)
+function receivingFromPbp(playerStats, pbp, seasonPbp) {
   const targets = new Map();
   const teamTargets = new Map();
-  let incompletions = 0;
+  const targeted = (play) =>
+    play.pass_attempt === '1' && play.sack !== '1' && play.qb_spike !== '1' && play.receiver_player_id && play.receiver_player_id !== 'NA';
   for (const play of pbp) {
-    if (play.pass_attempt !== '1' || play.sack === '1' || play.qb_spike === '1') continue;
+    if (!targeted(play)) continue;
     const id = play.receiver_player_id;
-    if (!id || id === 'NA') continue;
-    if (play.complete_pass === '0') incompletions++;
     targets.set(id, (targets.get(id) ?? 0) + 1);
     teamTargets.set(play.posteam, (teamTargets.get(play.posteam) ?? 0) + 1);
   }
+  const incompletions = seasonPbp.filter((play) => targeted(play) && play.complete_pass === '0').length;
   // A stat is there if nearly every player with a catch has it (a stray value doesn't count)
   const catchers = playerStats.filter((row) => (num(row.receptions) ?? 0) > 0);
   const has = (key) => catchers.filter((row) => (num(row[key]) ?? 0) !== 0).length >= catchers.length * 0.8;
@@ -1140,8 +1237,8 @@ function receivingFromPbp(playerStats, pbp) {
 }
 
 function skillPlayers(nflverse) {
-  const { playerStats, pbp, espnByGsis, pfrByGsis, ngs, pfr, snapShare } = nflverse;
-  const receiving = receivingFromPbp(playerStats, pbp);
+  const { playerStats, pbp, seasonPbp, espnByGsis, pfrByGsis, ngs, pfr, snapShare } = nflverse;
+  const receiving = receivingFromPbp(playerStats, pbp, seasonPbp);
   if (!receiving.hasTargets) {
     console.log(
       receiving.pbpHasTargets
@@ -1194,17 +1291,41 @@ function skillPlayers(nflverse) {
   return result;
 }
 
-async function completedGames() {
-  const weeks = await mapBatched(
-    Array.from({ length: WEEKS }, (_, i) => i + 1),
-    6,
-    (week) => getJson(`${SITE}/scoreboard?seasontype=2&week=${week}&dates=${SEASON}`)
+// What a past season's ESPN calls gave (its weeks' games, its QBs' season stats), kept in .cache between
+// runs (a finished season doesn't change): a backfill reads each once. The season being played asks again.
+const ESPN_CACHE = new URL(`../../../.cache/nfl-espn/${SEASON}.json`, import.meta.url);
+const espnCache = PAST_SEASON
+  ? await readFile(ESPN_CACHE, 'utf8').then((text) => new Map(Object.entries(JSON.parse(text))), () => new Map())
+  : new Map();
+async function espnCached(key, fn) {
+  if (espnCache.has(key)) return espnCache.get(key);
+  const value = await fn();
+  if (PAST_SEASON) espnCache.set(key, value);
+  return value;
+}
+async function saveEspnCache() {
+  if (!PAST_SEASON) return;
+  await mkdir(new URL('.', ESPN_CACHE), { recursive: true });
+  await writeFile(ESPN_CACHE, JSON.stringify(Object.fromEntries(espnCache)));
+}
+
+// The 32 teams' logos (a Pro Bowl's AFC and NFC, or Team Irvin, aren't one)
+const NFL_LOGOS = new Set(Object.values(TEAM_ICONS).map((icon) => `assets/NFL_Icons/${icon}.png`));
+
+// A part's completed games, oldest first (playoff: a playoff game)
+async function completedGames(part) {
+  const pages = ESPN_TYPES[part].flatMap((type) =>
+    Array.from({ length: type === 2 ? WEEKS : POST_WEEKS }, (_, i) => [type, i + 1])
   );
-  return weeks
-    .flatMap((scoreboard) => scoreboard.events)
-    .filter((event) => event.status.type.completed)
-    .map((event) => ({ id: event.id, date: event.date }))
-    .sort((a, b) => a.date.localeCompare(b.date));
+  const weeks = await mapBatched(pages, 6, ([type, week]) =>
+    espnCached(`scoreboard.${type}.${week}`, async () =>
+      (await getJson(`${SITE}/scoreboard?seasontype=${type}&week=${week}&dates=${SEASON}`)).events
+        .filter((event) => event.status.type.completed)
+        .filter((event) => event.competitions[0].competitors.every((c) => NFL_LOGOS.has(teamLogo(c.team.displayName))))
+        .map((event) => ({ id: event.id, date: event.date, playoff: type === 3 }))
+    )
+  );
+  return weeks.flat().sort((a, b) => a.date.localeCompare(b.date));
 }
 
 // A QB's season box stats from ESPN (what the app used to fetch live on every page load).
@@ -1223,35 +1344,59 @@ function passerRating(completions, attempts, yards, tds, ints) {
   return round((sum / 6) * 100, 1);
 }
 
-async function qbBoxStats(id) {
-  const url = `https://sports.core.api.espn.com/v2/sports/football/leagues/nfl/seasons/${SEASON}/types/2/athletes/${id}/statistics`;
-  const res = await fetch(url);
-  if (res.status === 404) return null;
-  if (!res.ok) throw new Error(`${res.status} ${res.statusText} for ${url}`);
-  const data = await res.json();
-  const stat = (category, name) =>
-    data.splits.categories.find((c) => c.name === category)?.stats.find((s) => s.name === name)?.value ?? 0;
-  const attempts = stat('passing', 'passingAttempts');
+// A QB's season box stats in a part: ESPN's totals for each of its season types (null when ESPN has
+// none for him in any), added up, the rates worked out again from the sums where there are two
+async function qbBoxStats(id, part) {
+  const totals = (await Promise.all(ESPN_TYPES[part].map((type) => espnSeasonTotals(id, type)))).filter(Boolean);
+  if (!totals.length) return null;
+  const sum = (key) => totals.reduce((total, t) => total + t[key], 0);
+  const attempts = sum('attempts');
   return {
-    games: stat('general', 'gamesPlayed'),
+    games: sum('games'),
     // (for the catching-up check: update-data's gamesBehind; not shown)
     attempts,
-    fumLost: stat('general', 'fumblesLost'),
-    passYards: stat('passing', 'passingYards'),
-    passTd: stat('passing', 'passingTouchdowns'),
-    ints: stat('passing', 'interceptions'),
-    compPercent: round(stat('passing', 'completionPct'), 1),
-    ypa: round(stat('passing', 'yardsPerPassAttempt'), 2),
-    rating: passerRating(
-      stat('passing', 'completions'),
-      attempts,
-      stat('passing', 'passingYards'),
-      stat('passing', 'passingTouchdowns'),
-      stat('passing', 'interceptions')
-    ),
-    rushYards: stat('rushing', 'rushingYards'),
-    rushTd: stat('rushing', 'rushingTouchdowns'),
+    fumLost: sum('fumLost'),
+    passYards: sum('passYards'),
+    passTd: sum('passTd'),
+    ints: sum('ints'),
+    compPercent: totals.length === 1 ? totals[0].compPercent : attempts ? round((sum('completions') / attempts) * 100, 1) : 0,
+    ypa: totals.length === 1 ? totals[0].ypa : attempts ? round(sum('passYards') / attempts, 2) : 0,
+    rating: passerRating(sum('completions'), attempts, sum('passYards'), sum('passTd'), sum('ints')),
+    rushYards: sum('rushYards'),
+    rushTd: sum('rushTd'),
   };
+}
+
+// One season type's totals from ESPN (2 the regular season, 3 the playoffs; null: none, a 404)
+function espnSeasonTotals(id, type) {
+  return espnCached(`stats.${type}.${id}`, async () => {
+    const url = `https://sports.core.api.espn.com/v2/sports/football/leagues/nfl/seasons/${SEASON}/types/${type}/athletes/${id}/statistics`;
+    // (a failed call tried again, a few seconds apart; a 404 is an answer)
+    let res;
+    for (let i = 1; ; i++) {
+      res = await fetch(url).catch((err) => ({ ok: false, status: 0, statusText: err.message }));
+      if (res.ok || res.status === 404 || i >= 3) break;
+      await new Promise((r) => setTimeout(r, 1000 * i));
+    }
+    if (res.status === 404) return null;
+    if (!res.ok) throw new Error(`${res.status} ${res.statusText} for ${url}`);
+    const data = await res.json();
+    const stat = (category, name) =>
+      data.splits.categories.find((c) => c.name === category)?.stats.find((s) => s.name === name)?.value ?? 0;
+    return {
+      games: stat('general', 'gamesPlayed'),
+      attempts: stat('passing', 'passingAttempts'),
+      completions: stat('passing', 'completions'),
+      fumLost: stat('general', 'fumblesLost'),
+      passYards: stat('passing', 'passingYards'),
+      passTd: stat('passing', 'passingTouchdowns'),
+      ints: stat('passing', 'interceptions'),
+      compPercent: round(stat('passing', 'completionPct'), 1),
+      ypa: round(stat('passing', 'yardsPerPassAttempt'), 2),
+      rushYards: stat('rushing', 'rushingYards'),
+      rushTd: stat('rushing', 'rushingTouchdowns'),
+    };
+  });
 }
 
 // Each passer's attempts game by game, from the summaries read for the records: athlete id -> [[date,
@@ -1342,12 +1487,37 @@ async function readStarters(game) {
   return starters;
 }
 
+// Each part of the season in turn (PARTS: the regular season first). The regular season holding off for
+// ESPN's stats holds the whole run, so the parts stay in step.
 async function main() {
   await mkdir(DATA_DIR, { recursive: true });
-  const games = await completedGames();
-  console.log(`Season ${SEASON}: ${games.length} completed games`);
+  const shared = {};
+  for (const part of PARTS) {
+    const held = await updatePart(part, shared);
+    await saveEspnCache();
+    if (held && part === 'regular') return;
+  }
+}
+
+// What the parts share, worked out the first time one needs it: the season's nflverse files (a promise,
+// so a failure is the same for every part), the injury report, the head coaches
+const once = (shared, key, fn) => (shared[key] ??= fn());
+
+// One part's files (true: held off, nothing written)
+async function updatePart(part, shared) {
+  const label = part === 'regular' ? '' : ` (${PART_NAMES[part]})`;
+  const games = await completedGames(part);
+  // (none yet: and none left over from the season before, once the new one is current)
+  if (part !== 'regular' && !games.some((game) => game.playoff)) {
+    await Promise.all([GAMES_FILE, SKILL_FILE, DATA_GRADES_FILE].map((file) => rm(partFile(file, part), { force: true })));
+    console.log(`Season ${SEASON}: no playoff games yet (no ${part} files)`);
+    return false;
+  }
+  console.log(`Season ${SEASON}${label}: ${games.length} completed games`);
 
   const fresh = games.filter((g) => !summaryCache.has(String(g.id))).length;
+  // (each part counts its own games' attempts: gamesBehind)
+  summaryAttempts.clear();
   const perGame = await mapBatched(games, 8, gameStarters);
   console.log(`Game summaries: ${fresh} read, ${games.length - fresh} from the cache`);
   await mkdir(new URL('.', SUMMARY_CACHE), { recursive: true });
@@ -1390,34 +1560,34 @@ async function main() {
   // cover every game in the records, nothing is written (the site keeps the last update, records and
   // stats together) and the next scheduled run tries again. Past HOLD_HOURS after the latest game the
   // update goes ahead anyway, each QB still behind marked (statsBehind) rather than the site frozen.
-  const boxes = await mapBatched(gameData, 8, (qb) => qbBoxStats(qb.id).catch(() => undefined));
+  const boxes = await mapBatched(gameData, 8, (qb) => qbBoxStats(qb.id, part).catch(() => undefined));
   const behind = gameData.map((qb, i) => [qb, boxes[i] ? gamesBehind(qb.id, boxes[i].attempts) : 0]).filter(([, n]) => n > 0);
   const latest = games.at(-1)?.date;
   const hoursSince = latest ? (Date.now() - Date.parse(latest)) / 3600000 : Infinity;
   if (behind.length && !PAST_SEASON && hoursSince < HOLD_HOURS) {
     console.log(
-      `ESPN's season stats are behind its results for ${behind.map(([qb, n]) => `${qb.name} (${n} game${n === 1 ? '' : 's'})`).join(', ')}: ` +
+      `ESPN's season stats${label} are behind its results for ${behind.map(([qb, n]) => `${qb.name} (${n} game${n === 1 ? '' : 's'})`).join(', ')}: ` +
         `keeping the current data (the latest game ended ${Math.round(hoursSince)} hours ago; going ahead anyway after ${HOLD_HOURS})`,
     );
-    return;
+    return true;
   }
   for (const [qb, n] of behind) qb.statsBehind = n;
 
   // nflverse can lag ESPN or be briefly unavailable; keep the last known values rather than failing
-  const previous = JSON.parse(await readFile(GAMES_FILE, 'utf8').catch(() => '[]'));
+  const previous = JSON.parse(await readFile(partFile(GAMES_FILE, part), 'utf8').catch(() => '[]'));
   let advanced = new Map();
   let skill = null;
   let dataGrades = null;
   // (a past season's injury flags: who finished it on injured reserve)
   let seasonEndInjuries = new Map();
   try {
-    const nflverse = await loadNflverse();
-    if (PAST_SEASON) seasonEndInjuries = await seasonEndReserve(nflverse.espnByGsis);
+    const nflverse = nflversePart(await once(shared, 'nflverse', loadNflverse), part);
+    if (PAST_SEASON) seasonEndInjuries = await once(shared, 'seasonEnd', () => seasonEndReserve(nflverse.espnByGsis));
     // ESPN's staff pages show today's coach, so a past season names its coaches from the schedule
-    nflverse.headCoaches = PAST_SEASON ? new Map() : await espnHeadCoaches().catch((err) => {
+    nflverse.headCoaches = PAST_SEASON ? new Map() : await once(shared, 'coaches', () => espnHeadCoaches().catch((err) => {
       console.warn(`Could not load head coaches from ESPN, using nflverse names: ${err.message}`);
       return new Map();
-    });
+    }));
     advanced = advancedStats(gameData.map((qb) => qb.id), nflverse);
     // The play-by-play stats again without garbage time, for the Garbage Time Stats setting
     const competitive = advancedStats(gameData.map((qb) => qb.id), { ...nflverse, pbp: nflverse.pbp.filter(competitivePlay) });
@@ -1429,8 +1599,8 @@ async function main() {
     console.warn(`Could not load nflverse data, keeping previous values: ${err.message}`);
   }
   if (dataGrades) {
-    await writeFile(DATA_GRADES_FILE, JSON.stringify(dataGrades));
-    console.log(`Wrote data grades: ${Object.keys(dataGrades.teams).length} teams, ${Object.keys(dataGrades.qbs).length} QBs`);
+    await writeFile(partFile(DATA_GRADES_FILE, part), JSON.stringify(dataGrades));
+    console.log(`Wrote data grades${label}: ${Object.keys(dataGrades.teams).length} teams, ${Object.keys(dataGrades.qbs).length} QBs`);
   }
   for (const qb of gameData) {
     qb.advanced = advanced.get(qb.id) ?? previous.find((p) => p.id === qb.id)?.advanced ?? null;
@@ -1452,21 +1622,21 @@ async function main() {
 
   // Injury flags from ESPN's report; keep yesterday's if the report can't be loaded
   // (a past season has no report: its flags are the players who finished on injured reserve)
-  const injuries = PAST_SEASON ? seasonEndInjuries : await espnInjuries().catch((err) => {
+  const injuries = PAST_SEASON ? seasonEndInjuries : await once(shared, 'injuries', () => espnInjuries().catch((err) => {
     console.warn(`Could not load the ESPN injury report, keeping previous injury flags: ${err.message}`);
     return null;
-  });
+  }));
   for (const qb of gameData) {
     const status = injuries ? (injuries.get(qb.id) ?? 'Active') : previous.find((p) => p.id === qb.id)?.injuryStatus;
     qb.injuryStatus = status ?? 'Active';
     qb.injured = INJURED_STATUSES.includes(qb.injuryStatus);
   }
   const hurt = gameData.filter((qb) => qb.injured).map((qb) => `${qb.name} (${qb.injuryStatus})`);
-  if (hurt.length) console.log(`Injured QBs: ${hurt.join(', ')}`);
+  if (hurt.length && part === 'regular') console.log(`Injured QBs: ${hurt.join(', ')}`);
 
   // Same injury flags for RB/WR/TE/K/P (defenses and coaches have none). If nflverse couldn't be
   // loaded, yesterday's player list still gets today's injury report
-  const previousSkill = JSON.parse(await readFile(SKILL_FILE, 'utf8').catch(() => 'null'));
+  const previousSkill = JSON.parse(await readFile(partFile(SKILL_FILE, part), 'utf8').catch(() => 'null'));
   const skillOut = skill ?? previousSkill;
   if (skillOut) {
     const previousStatus = new Map(
@@ -1485,16 +1655,18 @@ async function main() {
         if (player.injured) hurtSkill.push(`${player.name} (${pos}, ${player.injuryStatus})`);
       }
     }
-    await writeFile(SKILL_FILE, JSON.stringify(skillOut));
+    await writeFile(partFile(SKILL_FILE, part), JSON.stringify(skillOut));
     console.log(
-      `Wrote skill players: ${Object.entries(skillOut).map(([pos, list]) => `${list.length} ${pos}`).join(', ')}`
+      `Wrote skill players${label}: ${Object.entries(skillOut).map(([pos, list]) => `${list.length} ${pos}`).join(', ')}`
     );
-    if (hurtSkill.length) console.log(`Injured players: ${hurtSkill.join(', ')}`);
+    if (hurtSkill.length && part === 'regular') console.log(`Injured players: ${hurtSkill.join(', ')}`);
   }
 
-  await writeFile(GAMES_FILE, JSON.stringify(gameData));
-  console.log(`Wrote ${gameData.length} QBs to games.json`);
+  await writeFile(partFile(GAMES_FILE, part), JSON.stringify(gameData));
+  console.log(`Wrote ${gameData.length} QBs to ${GAMES_FILE.replace('.json', part === 'regular' ? '.json' : `.${part}.json`)}`);
 
+  // The season's own files, the same whichever games count: the regular season's run writes them
+  if (part !== 'regular') return false;
   // Add any new QBs to subjective.json. Weapons/O-line/coaching come from team-grades.json and
   // defense from the Defenses rankings, so only the per-QB scores are needed.
   const subjective = JSON.parse(await readFile(SUBJECTIVE_FILE, 'utf8').catch(() => '{}'));
@@ -1511,6 +1683,7 @@ async function main() {
   // The app loads team-grades.json with every season; a past season has no preseason grades (every
   // team falls back to a C, which a full season of stats outweighs)
   if (PAST_SEASON) await writeFile(TEAM_GRADES_FILE, '{}' + String.fromCharCode(10));
+  return false;
 }
 
 main().catch((err) => {

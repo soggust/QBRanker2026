@@ -14,7 +14,7 @@ import {
   statLabelFor,
   unitStat,
 } from './positions';
-import { DATA } from '@ranker/engine/data';
+import { DATA, dataPart } from '@ranker/engine/data';
 import { CAST_GRADES, GARBAGE_TIME_STAT } from './skills';
 import { buildQbUnits } from './qb-rows';
 import { OLINE_LEAN, computedValue, connectTeamGrades, fromOtherTabs } from './team-grades';
@@ -46,9 +46,11 @@ function teamRows(): SkillPlayer[] {
 }
 
 // The card's first NFL takes: a small sample, and garbage-time padding
-function cardFlags({ player, position, current }: FlagContext): CardFlag[] {
+// (the playoffs are a few games for everyone: no sample flag there)
+function cardFlags({ player, position, current, tableSeason }: FlagContext): CardFlag[] {
   const flags: CardFlag[] = [];
-  if (!TEAM_TABS.includes(position) && player.games < 6) {
+  const playoffs = tableSeason && dataPart === 'post';
+  if (!TEAM_TABS.includes(position) && player.games < 6 && !playoffs) {
     flags.push({
       icon: 'hourglass_bottom',
       tone: 'info',
@@ -207,6 +209,11 @@ export const SPORT: SportConfig = {
     teamGrades: 'team-grades.json',
     dataGrades: 'data-grades.json',
   },
+  // Stats From: the playoffs, or the regular season and the playoffs, beside the regular season
+  // (update-data.mjs). The QBs (games.json) and the stats grades (data-grades.json) are built from the
+  // part's games too; the preseason grades and QB scores are the season's either way
+  seasonParts: true,
+  seasonPartFiles: ['games', 'dataGrades'],
   extraRows: () => ({ QB: buildQbUnits(), TM: teamRows() }),
   settings: [
     {

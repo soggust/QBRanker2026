@@ -51,6 +51,8 @@ jobs:
       - name: Roll over to a new season
         run: node scripts/rollover.mjs nfl --if-due
 
+      # (the regular season, and once the playoffs have begun their own files beside it, the playoffs
+      # and both together: *.post.json and *.all.json, the app's Stats From; none until then)
       - name: Pull game results from ESPN
         run: npm run update-data
 
