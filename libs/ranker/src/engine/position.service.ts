@@ -172,6 +172,11 @@ export class PositionService {
   private statHiddenSubject = new BehaviorSubject<Record<string, boolean>>({});
   public statHidden$ = this.statHiddenSubject.asObservable();
 
+  // (every eye's state at once: a new object whenever one changes)
+  get statHiddenState(): Record<string, boolean> {
+    return this.statHiddenSubject.value;
+  }
+
   isStatHidden(position: Position, key: string): boolean {
     return !!this.statHiddenSubject.value[`${position}.${key}`];
   }

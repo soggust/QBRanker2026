@@ -68,8 +68,26 @@ export class SkillRankingsComponent implements OnChanges, CardHost {
   // The table's values: this season's rows, ranked as the list shows
   readonly reader = new StatReader(this.tableSource());
 
-  // How the list is made (the filters, the sliders, the columns)
+  // How the list is made (the filters, the sliders, the columns), from the table's tab as it is now (one
+  // object, read through: the ranker asks for it for every cell)
   private readonly ranker: TabRanker;
+  private readonly tabState = ((table: SkillRankingsComponent) => ({
+    get position() {
+      return table.position;
+    },
+    get stats() {
+      return table.stats;
+    },
+    get groups() {
+      return table.groups;
+    },
+    get hidden() {
+      return table.hidden;
+    },
+    get weights() {
+      return table.weights;
+    },
+  }))(this);
 
   // The player card (a name clicked)
   readonly cards: PlayerCards;
@@ -88,7 +106,7 @@ export class SkillRankingsComponent implements OnChanges, CardHost {
     this.ranker = new TabRanker(
       positionService,
       seasonData,
-      () => ({ position: this.position, stats: this.stats, groups: this.groups, hidden: this.hidden, weights: this.weights }),
+      () => this.tabState,
       () => this.position && this.sortPlayers(),
     );
     this.cards = new PlayerCards(this, seasonData);

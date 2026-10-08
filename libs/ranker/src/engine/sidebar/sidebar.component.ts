@@ -5,6 +5,7 @@ import { SKILL_PRESETS, SkillPresetDef } from '@sport/skill-presets';
 import { PositionService } from '@ranker/engine/position.service';
 import { SPORT } from '@sport/sport';
 import { combinedFor, statIsEmpty } from '@ranker/engine/unit-scoring';
+import { statLabel } from '@ranker/engine/stat-reader';
 import { CURRENT_SEASON, dataSeason } from '@ranker/engine/data';
 import {
   POSITIONS,
@@ -118,7 +119,7 @@ export class SidebarComponent implements OnInit {
         children.forEach((child) => used.add(child.key));
         rows.push({ key: pair.stat.key, label: pair.stat.label, description: pair.stat.description, children });
       } else {
-        const label = SPORT.statLabel?.(stat, this.positionService.settings.sport, this.position) ?? stat.label;
+        const label = statLabel(stat, this.positionService.settings.sport, this.position);
         rows.push({ key: stat.key, label, description: stat.description, stat });
       }
     }

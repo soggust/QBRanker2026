@@ -4,7 +4,7 @@
 import { PACE_GAMES, PER_GAME_LABELS, STAT_NAMES, SkillPlayer, SkillPosition, SkillStat, SkillWeights } from '@sport/positions';
 import { SPORT } from '@sport/sport';
 import { extras } from '@ranker/engine/row-fields';
-import { ValueContext } from '@ranker/engine/sport';
+import { SportSettings, ValueContext } from '@ranker/engine/sport';
 import { recentCount, statValue } from '@ranker/engine/unit-scoring';
 import { CURRENT_SEASON } from '@ranker/engine/data';
 
@@ -35,6 +35,9 @@ export interface ReaderSource {
   // The tab's sliders, its switched-off stats at 0 (a combined total mixes its parts by them)
   weights?: SkillWeights;
 }
+
+// A stat's short label: the sport's wording for it under its settings (SPORT.statLabel), else its own
+export const statLabel = (stat: SkillStat, settings: SportSettings, position: string): string => SPORT.statLabel?.(stat, settings, position) ?? stat.label;
 
 // A Recent result's letter (W, T, L), and on hover how it was decided past regulation (the NHL's OT or SO:
 // "L (SO)")
@@ -91,8 +94,39 @@ export class StatReader {
     return this.basis !== 'season' && stat.kind === 'volume';
   }
 
+  // Each row's values and texts, worked out once until the list, its settings, the data or the sliders
+  // change (the grid asks for every cell's on every check; the scales reset with them)
+  private raws = new Map<SkillPlayer, Map<SkillStat, number | null>>();
+  private texts = new Map<SkillPlayer, Map<SkillStat, string>>();
+  private colors = new Map<SkillPlayer, Map<SkillStat, string | null>>();
+
+  private fresh(): void {
+    const s = this.source;
+    const known = this.scalesFor;
+    if (known && known[0] === s.list && known[1] === s.version && known[2] === s.settings && known[3] === s.weights) return;
+    this.scales.clear();
+    this.rankValues.clear();
+    this.raws.clear();
+    this.texts.clear();
+    this.colors.clear();
+    this.scalesFor = [s.list, s.version, s.settings, s.weights];
+  }
+
+  private remember<T>(cache: Map<SkillPlayer, Map<SkillStat, T>>, player: SkillPlayer, stat: SkillStat, work: () => T): T {
+    this.fresh();
+    let row = cache.get(player);
+    if (!row) cache.set(player, (row = new Map()));
+    let value = row.get(stat);
+    if (value === undefined && !row.has(stat)) row.set(stat, (value = work()));
+    return value as T;
+  }
+
   // A stat's value from the data, or worked out in the app (see statValue)
   raw(player: SkillPlayer, stat: SkillStat): number | null {
+    return this.remember(this.raws, player, stat, () => this.rawValue(player, stat));
+  }
+
+  private rawValue(player: SkillPlayer, stat: SkillStat): number | null {
     const context: ValueContext = {
       position: this.position,
       settings: this.source.settings.sport,
@@ -141,6 +175,10 @@ export class StatReader {
   }
 
   format(player: SkillPlayer, stat: SkillStat): string {
+    return this.remember(this.texts, player, stat, () => this.formatValue(player, stat));
+  }
+
+  private formatValue(player: SkillPlayer, stat: SkillStat): string {
     const value = this.value(player, stat);
     if (value === null) return '-';
     // Per game reads to a decimal; a full-season pace rounds to a whole season's worth
@@ -180,7 +218,7 @@ export class StatReader {
 
   // The column's label, switched to its per-game name (or tagged with the pace, "162G") when it shows rates
   label(stat: SkillStat): string {
-    const label = SPORT.statLabel?.(stat, this.source.settings.sport, this.position) ?? stat.label;
+    const label = statLabel(stat, this.source.settings.sport, this.position);
     if (!this.showsPerGame(stat)) return label;
     return this.basis === 'pace17' ? `${label} (${PACE_GAMES[this.position]}G)` : (PER_GAME_LABELS[stat.key] ?? `${label} / Game`);
   }
@@ -223,7 +261,7 @@ export class StatReader {
   // grades and recent results keep their own coloring; display-only columns stay plain)
   valueColor(player: SkillPlayer, stat: SkillStat): string | null {
     if (!this.source.settings.colorValues || stat.infoOnly || ['grade', 'recent'].includes(stat.format)) return null;
-    return tintFrom(this.rate(player, stat), this.scale(stat, 'rate'), !!stat.negative);
+    return this.remember(this.colors, player, stat, () => tintFrom(this.rate(player, stat), this.scale(stat, 'rate'), !!stat.negative));
   }
 
   // Show Ranks: a column shown as places in the list (not the Recent dots, a column that's a rank
@@ -262,12 +300,7 @@ export class StatReader {
   }
 
   private scale(stat: SkillStat, basis: 'rate' | 'shown'): TintScale | null {
-    const inputs = [this.source.list, this.source.version, this.source.settings];
-    if (!this.scalesFor || inputs.some((v, i) => v !== this.scalesFor![i])) {
-      this.scales.clear();
-      this.rankValues.clear();
-      this.scalesFor = inputs;
-    }
+    this.fresh();
     const key = `${basis}.${stat.key}`;
     if (!this.scales.has(key)) {
       const value = (p: SkillPlayer) => (basis === 'shown' ? this.value(p, stat) : this.rate(p, stat));

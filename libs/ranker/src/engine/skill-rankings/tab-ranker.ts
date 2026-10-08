@@ -177,10 +177,17 @@ export class TabRanker {
     return showUnused || !!weights[stat.key];
   }
 
-  // A tab's sliders as its combined totals mix their parts: a part switched off with its eye at 0
+  // A tab's sliders as its combined totals mix their parts: a part switched off with its eye at 0 (the same
+  // object until the sliders or the eyes change: every cell's value asks for it)
+  private mixes = new Map<SkillPosition, { weights: SkillWeights; hidden: Record<string, boolean>; mix: SkillWeights }>();
   mixWeights(position: SkillPosition): SkillWeights {
     const weights = this.tab(position).weights;
+    const hidden = this.positions.statHiddenState;
+    const known = this.mixes.get(position);
+    if (known?.weights === weights && known.hidden === hidden) return known.mix;
     const off = combinedFor(position).flatMap(({ parts }) => parts.filter((part) => this.statHidden(part, position)));
-    return off.length ? { ...weights, ...Object.fromEntries(off.map((part) => [part, 0])) } : weights;
+    const mix = off.length ? { ...weights, ...Object.fromEntries(off.map((part) => [part, 0])) } : weights;
+    this.mixes.set(position, { weights, hidden, mix });
+    return mix;
   }
 }
