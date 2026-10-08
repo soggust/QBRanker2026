@@ -2,9 +2,10 @@ import type { CardFlag, FlagContext, SportConfig } from '@ranker/engine/sport';
 import { espnTeamGameLog } from '@ranker/core/game-logs';
 import { loadTeamRoster } from './team-roster';
 
-// A season's game logs (the NHL's API doesn't let the site ask): this season's in game-logs.json, kept
-// nightly; an earlier one's in game-logs/<season>.json, written once. Each loaded the first time a card
-// of that season opens its Game Log tab (again after a failure)
+// A season's game logs (the NHL's API doesn't let the site ask), in game-logs/<season>/<bucket>.json: a
+// player's in bucket id % 32 (apps/nhl/scripts/game-log-files.mjs), so a card loads its player's share,
+// not the season's. This season's kept nightly, earlier ones written once. Each bucket loaded the first
+// time a card in it opens its Game Log tab (again after a failure)
 interface NhlGameLogs {
   skater: string[];
   goalie: string[];
@@ -14,7 +15,8 @@ interface NhlGameLogs {
 }
 // (whether the earlier seasons' files are there: player logs for past seasons)
 const PAST_SEASON_LOGS = true;
-const nhlGameLogFiles = new Map<number, Promise<NhlGameLogs>>();
+const LOG_BUCKETS = 32;
+const nhlGameLogFiles = new Map<string, Promise<NhlGameLogs>>();
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 function nhlDay(date: string, season: number): string | undefined {
   const [mon, d] = date.split(' ');
@@ -23,19 +25,20 @@ function nhlDay(date: string, season: number): string | undefined {
   const year = m >= 8 ? season - 1 : season;
   return `${year}-${String(m + 1).padStart(2, '0')}-${d.padStart(2, '0')}`;
 }
-function nhlGameLogs(season: number): Promise<NhlGameLogs> {
-  if (!nhlGameLogFiles.has(season)) {
-    const file = season === SPORT.currentSeason ? 'data/game-logs.json' : `data/game-logs/${season}.json`;
+function nhlGameLogs(season: number, id: number): Promise<NhlGameLogs> {
+  const file = `data/game-logs/${season}/${id % LOG_BUCKETS}.json`;
+  if (!nhlGameLogFiles.has(file)) {
     nhlGameLogFiles.set(
-      season,
-      fetch(file, { cache: 'no-cache' }).then((res) => {
+      file,
+      // (this season's change nightly; an earlier one's never)
+      fetch(file, { cache: season === SPORT.currentSeason ? 'no-cache' : 'default' }).then((res) => {
         if (!res.ok) throw new Error(String(res.status));
         return res.json() as Promise<NhlGameLogs>;
       }),
     );
   }
-  return nhlGameLogFiles.get(season)!.catch((err) => {
-    nhlGameLogFiles.delete(season);
+  return nhlGameLogFiles.get(file)!.catch((err) => {
+    nhlGameLogFiles.delete(file);
     throw err;
   });
 }
@@ -209,7 +212,7 @@ export const SPORT: SportConfig = {
       if (['TM', 'HC'].includes(position)) {
         return espnTeamGameLog('hockey/nhl', [player.teamName ?? undefined, player.name, player.teamLogo?.match(/([^/]+)\.\w+$/)?.[1]], season, 3);
       }
-      const file = await nhlGameLogs(season);
+      const file = await nhlGameLogs(season, Number(player.id));
       const rows = file.logs[String(player.id)] ?? [];
       const goalie = position === 'G';
       const columns = (goalie ? file.goalie : file.skater).map((label) => ({ label }));

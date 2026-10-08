@@ -17,6 +17,7 @@ import { CardPanelComponent } from './player-card/card-panel.component';
 import { GameViewComponent } from './game-view/game-view.component';
 import { ColumnHighlightDirective } from '@ranker/core/column-highlight.directive';
 import { COLUMN_MOVER, ColumnDragDirective } from '@ranker/core/column-drag.directive';
+import { SelectOriginDirective } from '@ranker/core/select-origin.directive';
 import { MatMenuModule } from '@angular/material/menu';
 import { AboutComponent } from '@sport/about/about.component';
 import { AboutFrameComponent } from './about/about-frame.component';
@@ -34,6 +35,7 @@ import { BetsPageComponent } from './bets/bets-page.component';
     GameViewComponent,
     ColumnHighlightDirective,
     ColumnDragDirective,
+    SelectOriginDirective,
     AboutComponent,
     AboutFrameComponent,
     BetsPageComponent,

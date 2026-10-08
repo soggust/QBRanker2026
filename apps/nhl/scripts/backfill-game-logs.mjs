@@ -1,22 +1,22 @@
 // Earlier seasons' game logs for the card's Game Log tab, written once (the NHL's API doesn't let the
 // site ask): every player in a season's lists (the archives' skaters and goalies), regular season and
-// playoffs, newest first, into src/StaticData/game-logs/<season>.json, the same shape as this season's
-// game-logs.json ({ skater, goalie, logs, playoffs: { id: playoff games, the newest of the log } }).
+// playoffs, newest first, into src/StaticData/game-logs/<season>/, split like this season's
+// (game-log-files.mjs: { skater, goalie, logs, playoffs: { id: playoff games, the newest of the log } }).
+// A season the nightly update already kept (the one rollover archives) is left as it is.
 //
 //   node apps/nhl/scripts/backfill-game-logs.mjs [season...]
 //
 // Paced like the nightly update (a few requests a second, a 429's Retry-After honored); a season already
 // written is skipped, so a run that stops picks up where it left off.
 
-import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, readdirSync } from 'node:fs';
 import path from 'node:path';
+import { seasonDir, writeLogFiles } from './game-log-files.mjs';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
 const SEASONS = path.join(ROOT, 'src/StaticData/seasons');
 const OUT = path.join(ROOT, 'src/StaticData/game-logs');
 const WEB = 'https://api-web.nhle.com/v1';
-const SKATER_LOG = ['G', 'A', 'P', '+/-', 'SOG', 'PIM', 'TOI'];
-const GOALIE_LOG = ['SA', 'GA', 'SV%', 'TOI'];
 const seasonId = (season) => `${season - 1}${season}`;
 
 let lastRequest = 0;
@@ -57,8 +57,7 @@ function playersOf(season) {
 }
 
 async function backfill(season) {
-  const file = path.join(OUT, `${season}.json`);
-  if (existsSync(file)) return console.log(`${season}: already written`);
+  if (existsSync(seasonDir(OUT, season))) return console.log(`${season}: already written`);
   const players = playersOf(season);
   const logs = {};
   const playoffs = {};
@@ -85,7 +84,7 @@ async function backfill(season) {
     }
     if (++done % 100 === 0) console.log(`${season}: ${done} of ${players.size}`);
   }
-  writeFileSync(file, JSON.stringify({ skater: SKATER_LOG, goalie: GOALIE_LOG, logs, playoffs }));
+  writeLogFiles(OUT, season, logs, playoffs);
   console.log(`${season}: ${Object.keys(logs).length} players written`);
 }
 

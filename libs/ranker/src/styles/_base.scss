@@ -248,8 +248,9 @@ body:has(.card-backdrop) .sport-bar {
   border-color: #333 !important;
 }
 
+// (a dropdown's list hangs from the dropdown itself: SelectOriginDirective; a pixel below it)
 .mdc-menu-surface {
-  transform: translate(-10px, 10px) !important;
+  transform: translateY(1px) !important;
 
   .mat-mdc-option span {
     color: var(--primary-50) !important;

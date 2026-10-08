@@ -20,6 +20,7 @@ import path from 'node:path';
 import { curve } from '../../../libs/ranker/scripts/grades.mjs';
 import { blendWithLastSeason } from '../../../libs/ranker/scripts/early-season.mjs';
 import { coachesFor } from './coaches.mjs';
+import { readLogFiles, removeOldFile, writeLogFiles } from './game-log-files.mjs';
 
 const CURRENT_SEASON = 2027;
 // MoneyPuck's season files start with 2008-09
@@ -66,17 +67,26 @@ async function get(url, as = 'json') {
 }
 
 // Every listed player's game log this season, regular season and playoffs (from April on), newest first:
-// game-logs.json, { skater: columns, goalie: columns, logs: { id: [[date, "@ TOR", result, ...the line],
-// ...] } }. One at a time at get()'s pace (the API rate-limits faster asking): a few minutes
-const SKATER_LOG = ['G', 'A', 'P', '+/-', 'SOG', 'PIM', 'TOI'];
-const GOALIE_LOG = ['SA', 'GA', 'SV%', 'TOI'];
-async function writeGameLogs(season, skaters, goalies, dir) {
-  const players = [...skaters.map((u) => [u.id, false]), ...goalies.map((u) => [u.id, true])];
+// { id: [[date, "@ TOR", result, ...the line], ...] } in game-logs/<season>/ (game-log-files.mjs: split so
+// a card loads only its share). One at a time at get()'s pace (the API rate-limits faster asking); a
+// player whose log already has every game he's played (no new ones since the last run) is kept as it was,
+// not asked again: on a game night about a third of them are asked, in the offseason none
+async function writeGameLogs(season, skaters, goalies) {
+  const root = path.join(STATIC, 'game-logs');
+  const before = readLogFiles(root, season);
+  const players = [...skaters.map((u) => [u.id, false, u.games]), ...goalies.map((u) => [u.id, true, u.games])];
   const logs = {};
   // (each player's playoff games: the newest of his log, set apart on the card)
   const playoffGames = {};
   const playoffs = new Date().getMonth() >= 3 && new Date().getMonth() <= 5;
-  const one = async ([id, goalie]) => {
+  let kept = 0;
+  const one = async ([id, goalie, played]) => {
+    const known = before.logs[id];
+    if (!playoffs && !before.playoffs[id] && played > 0 && known?.length === played) {
+      logs[id] = known;
+      kept++;
+      return;
+    }
     const games = [];
     for (const type of playoffs ? [3, 2] : [2]) {
       const body = await get(`${WEB}/player/${id}/game-log/${seasonId(season)}/${type}`).catch(() => null);
@@ -94,8 +104,9 @@ async function writeGameLogs(season, skaters, goalies, dir) {
     });
   };
   for (const player of players) await one(player);
-  await writeFile(path.join(dir, 'game-logs.json'), JSON.stringify({ skater: SKATER_LOG, goalie: GOALIE_LOG, logs, playoffs: playoffGames }));
-  console.log(`Game logs: ${Object.keys(logs).length} players`);
+  const written = writeLogFiles(root, season, logs, playoffGames);
+  removeOldFile(path.join(STATIC, 'game-logs.json'));
+  console.log(`Game logs: ${Object.keys(logs).length} players (${kept} unchanged, not asked), ${written} files written`);
 }
 
 const round = (v, d = 3) => (v === null || v === undefined || !Number.isFinite(v) ? null : Math.round(v * 10 ** d) / 10 ** d);
@@ -398,7 +409,7 @@ async function buildSeason(season) {
   // (compact: the files are served to the browser as is)
   await writeFile(path.join(dir, 'skill-players.json'), JSON.stringify(out));
   // (this season's game logs, for the card's Game Log tab: the NHL's API doesn't let the site ask it)
-  if (current) await writeGameLogs(season, skaterRows, out.G, dir);
+  if (current) await writeGameLogs(season, skaterRows, out.G);
   const champion = [...teamAwards].find(([, a]) => a.includes('cup'))?.[0] ?? '?';
   const rookieCount = [...skaterRows, ...out.G].filter((u) => u.rookie).length;
   console.log(
