@@ -86,6 +86,23 @@ section footer .mat-mdc-select.season-select {
   padding-inline: 22px !important;
 }
 
+// The selectable pills (the game view's filters) in the dropdowns' leather, with its welt and white text
+html .game-filter {
+  background:
+    radial-gradient(ellipse at 35% 20%, rgba(255, 255, 255, 0.2), transparent 60%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(0, 0, 0, 0.18)),
+    var(--tex-leather) center / 96px,
+    var(--leather) !important;
+  background-blend-mode: normal, normal, soft-light, normal !important;
+  border: 1px solid #1a120c !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    0 0 0 0.5px #1a120c,
+    1px 1px 1px rgba(0, 0, 0, 0.6) !important;
+  color: #fff !important;
+  text-shadow: $on-leather !important;
+}
+
 // The buttons, dropdowns and lists: the thick dark edge of a leather welt, with rounder corners. (1.5px
 // in all: browsers round a border to whole screen pixels, so a 1.5px border draws as 1px on a standard
 // screen; the extra half pixel is a ring outside it, which isn't rounded.)

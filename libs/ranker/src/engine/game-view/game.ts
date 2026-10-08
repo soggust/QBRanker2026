@@ -8,6 +8,8 @@
 // A game is found by ESPN's event id when the page has it (a game log's row), or by its team, season
 // and opponent (a Recent dot: the nth game against that opponent, newest first, on the team's schedule).
 
+import { espnTeamId } from '@ranker/core/game-logs';
+
 // ---- what the view shows
 
 export interface GameTeam {
@@ -71,6 +73,8 @@ export interface GameMark {
   // made, missed (or blocked), a goal; a hit, a home run, an out
   result: 'made' | 'missed' | 'goal' | 'hit' | 'hr' | 'out';
   text: string;
+  // the shooter's, or the batter's, name (the chart's player filter)
+  player: string | null;
 }
 
 export interface GamePassZone {
@@ -82,13 +86,37 @@ export interface GamePassZone {
   int: number;
 }
 
+// A pitch where it crossed the plate (the catcher's view, on Gameday's scale: the zone about 90-150
+// across, 147-199 down), by whom, its type and speed
+export interface GamePitch {
+  x: number;
+  y: number;
+  // the pitching team's side
+  side: 'away' | 'home';
+  pitcher: string;
+  type: string;
+  mph: number | null;
+  result: 'ball' | 'strike' | 'play';
+}
+
+// A pitcher's arsenal: his pitches, each type's share and average speed, most-thrown first
+export interface GameArsenal {
+  side: 'away' | 'home';
+  pitcher: string;
+  pitches: number;
+  types: { type: string; share: number; mph: number | null }[];
+}
+
 export type GameChart =
-  | { kind: 'court' | 'rink' | 'diamond'; marks: GameMark[] }
+  | { kind: 'court' | 'rink'; marks: GameMark[] }
+  | { kind: 'diamond'; marks: GameMark[]; pitches: GamePitch[]; arsenals: GameArsenal[] }
   | { kind: 'football'; drives: GameDrive[]; teams: { side: 'away' | 'home'; passers: string[]; zones: GamePassZone[] }[] };
 
 // A drive on the field: where it started and ended (0 the home team's goal line, 100 the away team's)
 export interface GameDrive {
   side: 'away' | 'home';
+  // the quarter it started in (5 on: overtime)
+  quarter: number;
   start: number;
   end: number;
   result: string;
@@ -124,6 +152,8 @@ export interface GameView {
   id: string;
   league: string;
   date: string;
+  // the season it was in (ESPN's: the site's numbering, a season named by the year it ends in)
+  seasonYear: number | null;
   // not played yet: a preview (the line, the predictor, the injuries, each team's form; no score or plays)
   preview: boolean;
   // (a preview's: ESPN's matchup predictor, each team's chance to win, 0-1)
@@ -192,6 +222,11 @@ interface EspnPlay {
   scoringPlay?: boolean;
   shootingPlay?: boolean;
   participants?: { type?: string; athlete?: { id?: string } }[];
+  atBatId?: string;
+  alternativeType?: { text?: string };
+  pitchCoordinate?: { x?: number; y?: number };
+  pitchType?: { text?: string };
+  pitchVelocity?: number;
   coordinate?: { x?: number; y?: number };
   hitCoordinate?: { x?: number; y?: number };
   team?: { id?: string };
@@ -281,7 +316,52 @@ const API = 'https://site.api.espn.com/apis/site/v2/sports';
 interface ScheduleEvent {
   id: string;
   date: string;
-  competitions: { status?: { type?: { completed?: boolean } }; competitors: { homeAway: 'home' | 'away'; team: { id: string } }[] }[];
+  competitions: {
+    status?: { type?: { completed?: boolean } };
+    competitors: { homeAway: 'home' | 'away'; team: { id: string }; score?: { value?: number; displayValue?: string } }[];
+  }[];
+}
+
+// A team's finished games that season, newest first (the regular season's and the playoffs'): each one's
+// id, its opponent and where, and the score the team's way ("24-17"); read once a visit
+export interface TeamResult {
+  event: string;
+  opponent: string;
+  home: boolean;
+  score: string;
+}
+const results = new Map<string, Promise<TeamResult[]>>();
+export function teamResults(league: string, teamId: string, season: number): Promise<TeamResult[]> {
+  const key = `${league}/${teamId}/${season}`;
+  if (!results.has(key)) {
+    results.set(
+      key,
+      Promise.all(
+        [2, 3].map((type) =>
+          fetch(`${API}/${league}/teams/${teamId}/schedule?season=${season}&seasontype=${type}`)
+            .then((r) => (r.ok ? r.json() : { events: [] }))
+            .catch(() => ({ events: [] })),
+        ),
+      ).then((pages) =>
+        pages
+          .flatMap((p) => (p.events ?? []) as ScheduleEvent[])
+          .filter((e) => e.competitions[0]?.status?.type?.completed)
+          .sort((a, b) => b.date.localeCompare(a.date))
+          .map((e) => {
+            const us = e.competitions[0].competitors.find((c) => c.team.id === teamId);
+            const them = e.competitions[0].competitors.find((c) => c.team.id !== teamId);
+            const points = (c: typeof us) => c?.score?.displayValue ?? String(c?.score?.value ?? '');
+            return { event: e.id, opponent: them?.team.id ?? '', home: us?.homeAway === 'home', score: `${points(us)}-${points(them)}` };
+          }),
+      ),
+    );
+  }
+  return results.get(key)!;
+}
+
+// The nth game against an opponent (home or away), newest first: a Recent dot's
+export function nthMeeting(list: TeamResult[], opponentId: string, home: boolean | null, nth: number): TeamResult | null {
+  return list.filter((r) => r.opponent === opponentId && (home === null || r.home === home))[nth] ?? null;
 }
 
 export async function findGame(
@@ -292,23 +372,7 @@ export async function findGame(
   season: number,
   nth: number,
 ): Promise<string | null> {
-  const pages = await Promise.all(
-    [2, 3].map((type) =>
-      fetch(`${API}/${league}/teams/${teamId}/schedule?season=${season}&seasontype=${type}`)
-        .then((r) => (r.ok ? r.json() : { events: [] }))
-        .catch(() => ({ events: [] })),
-    ),
-  );
-  const games = pages
-    .flatMap((p) => (p.events ?? []) as ScheduleEvent[])
-    .filter((e) => e.competitions[0]?.status?.type?.completed)
-    .sort((a, b) => b.date.localeCompare(a.date))
-    .filter((e) => {
-      const us = e.competitions[0].competitors.find((c) => c.team.id === teamId);
-      const them = e.competitions[0].competitors.find((c) => c.team.id !== teamId);
-      return them?.team.id === opponentId && (home === null || (us?.homeAway === 'home') === home);
-    });
-  return games[nth]?.id ?? null;
+  return nthMeeting(await teamResults(league, teamId, season), opponentId, home, nth)?.event ?? null;
 }
 
 // A game by its date and a team in it (a game log's row without ESPN's id: MLB's and the NHL's player
@@ -588,7 +652,10 @@ export async function loadGame(league: string, eventId: string): Promise<GameVie
     }
   }
 
-  const chart = gameChart(league, s, sideOf);
+  // (each player's team and name by ESPN id, for the pitches)
+  const people = new Map<string, { side: 'away' | 'home'; name: string }>();
+  for (const t of box) for (const g of t.groups) for (const r of g.rows) if (r.id) people.set(r.id, { side: t.side, name: r.name });
+  const chart = gameChart(league, s, sideOf, people);
 
   // A preview's: the predictor, the injury report, each team's last five, the broadcast
   const preview = comp.status?.type?.state === 'pre';
@@ -626,6 +693,7 @@ export async function loadGame(league: string, eventId: string): Promise<GameVie
     id: eventId,
     league,
     date: comp.date ?? '',
+    seasonYear: s.header?.season?.year ?? null,
     preview,
     predictor: awayChance !== null && homeChance !== null ? { away: awayChance, home: homeChance } : null,
     injuries,
@@ -818,10 +886,22 @@ function fantasyPoints(league: string, box: GameView['box']): { fantasy: GameFan
 
 const PASS_ZONES = ['deep left', 'deep middle', 'deep right', 'short left', 'short middle', 'short right'];
 
-function gameChart(league: string, s: EspnSummary, sideOf: (id: string | undefined) => 'away' | 'home' | null): GameChart | null {
+function gameChart(
+  league: string,
+  s: EspnSummary,
+  sideOf: (id: string | undefined) => 'away' | 'home' | null,
+  people: Map<string, { side: 'away' | 'home'; name: string }>,
+): GameChart | null {
   // (ESPN marks a play it couldn't place far off the board)
   const placed = (c: { x?: number; y?: number } | undefined): c is { x: number; y: number } =>
     !!c && typeof c.x === 'number' && typeof c.y === 'number' && Math.abs(c.x) < 1000 && Math.abs(c.y) < 1000;
+
+  // (the play's shooter or batter by the box score: ESPN's scorer, shooter or batter, else its first named)
+  const who = (p: EspnPlay): string | null => {
+    const parts = p.participants ?? [];
+    const one = parts.find((x) => x.type === 'shooter' || x.type === 'scorer' || x.type === 'batter') ?? parts[0];
+    return people.get(one?.athlete?.id ?? '')?.name ?? null;
+  };
 
   if (league.includes('basketball')) {
     const marks: GameMark[] = [];
@@ -829,7 +909,7 @@ function gameChart(league: string, s: EspnSummary, sideOf: (id: string | undefin
       const side = sideOf(p.team?.id);
       // (free throws are placed at the line: not shots from the floor)
       if (!p.shootingPlay || !side || !placed(p.coordinate) || /free throw/i.test(p.text ?? '')) continue;
-      marks.push({ x: p.coordinate.x, y: p.coordinate.y + 4, side, result: p.scoringPlay ? 'made' : 'missed', text: p.text ?? '' });
+      marks.push({ x: p.coordinate.x, y: p.coordinate.y + 4, side, result: p.scoringPlay ? 'made' : 'missed', text: p.text ?? '', player: who(p) });
     }
     return marks.length ? { kind: 'court', marks } : null;
   }
@@ -846,21 +926,66 @@ function gameChart(league: string, s: EspnSummary, sideOf: (id: string | undefin
         x = -x;
         y = -y;
       }
-      marks.push({ x: x + 100, y: 42.5 - y, side, result: kind === 'Goal' ? 'goal' : 'missed', text: p.text ?? '' });
+      marks.push({ x: x + 100, y: 42.5 - y, side, result: kind === 'Goal' ? 'goal' : 'missed', text: p.text ?? '', player: who(p) });
     }
     return marks.length ? { kind: 'rink', marks } : null;
   }
 
   if (league.includes('baseball')) {
+    // Each at-bat's result (its "play result" row: what happened, "Home Run", and how far, "(372 feet)")
+    const results = new Map<string, EspnPlay>();
+    for (const p of s.plays ?? []) if (p.type?.type === 'play-result' && p.atBatId) results.set(p.atBatId, p);
     const marks: GameMark[] = [];
+    const placedAtBats = new Set<string>();
     for (const p of s.plays ?? []) {
       const side = sideOf(p.team?.id);
       if (!side || !placed(p.hitCoordinate)) continue;
-      const kind = p.type?.text ?? '';
+      // (one mark an at-bat: ESPN repeats the spot on its rows)
+      if (p.atBatId) {
+        if (placedAtBats.has(p.atBatId)) continue;
+        placedAtBats.add(p.atBatId);
+      }
+      const res = p.atBatId ? results.get(p.atBatId) : undefined;
+      const kind = res?.alternativeType?.text ?? p.type?.text ?? '';
       const result = /home run/i.test(kind) ? 'hr' : /single|double|triple/i.test(kind) ? 'hit' : 'out';
-      marks.push({ x: p.hitCoordinate.x, y: p.hitCoordinate.y, side, result, text: kind });
+      const feet = res?.text?.match(/\((\d+) feet\)/)?.[1];
+      const player = who(res ?? p);
+      const short = player ? player.replace(/^(\S)\S*\s+/, '$1. ') : null;
+      // ("HR (398 ft) · K. Marte", "Fly Out · K. Marte")
+      const text = [`${result === 'hr' ? 'HR' : kind}${feet ? ` (${feet} ft)` : ''}`, short].filter(Boolean).join(' · ');
+      marks.push({ x: p.hitCoordinate.x, y: p.hitCoordinate.y, side, result, text, player });
     }
-    return marks.length ? { kind: 'diamond', marks } : null;
+    // Every pitch with a type and a spot: who threw it (his team by the box score), and how it came out
+    const pitches: GamePitch[] = [];
+    for (const p of s.plays ?? []) {
+      const type = p.pitchType?.text;
+      const pitcher = people.get(p.participants?.find((x) => x.type === 'pitcher')?.athlete?.id ?? '');
+      if (!type || !pitcher || !placed(p.pitchCoordinate)) continue;
+      const kind = p.type?.type ?? '';
+      const result = /^ball/.test(kind) || /pitchout|hit-by/.test(kind) ? 'ball' : /strike|foul/.test(kind) ? 'strike' : 'play';
+      pitches.push({ x: p.pitchCoordinate.x, y: p.pitchCoordinate.y, side: pitcher.side, pitcher: pitcher.name, type, mph: p.pitchVelocity ?? null, result });
+    }
+    // Each pitcher's arsenal
+    const byPitcher = new Map<string, GamePitch[]>();
+    for (const p of pitches) byPitcher.set(p.side + p.pitcher, [...(byPitcher.get(p.side + p.pitcher) ?? []), p]);
+    const arsenals: GameArsenal[] = [...byPitcher.values()]
+      .map((list) => {
+        const byType = new Map<string, GamePitch[]>();
+        for (const p of list) byType.set(p.type, [...(byType.get(p.type) ?? []), p]);
+        return {
+          side: list[0].side,
+          pitcher: list[0].pitcher,
+          pitches: list.length,
+          types: [...byType.entries()]
+            .map(([type, ps]) => {
+              const speeds = ps.map((p) => p.mph).filter((v): v is number => v !== null);
+              return { type, share: ps.length / list.length, mph: speeds.length ? Math.round((speeds.reduce((a, b) => a + b, 0) / speeds.length) * 10) / 10 : null };
+            })
+            .sort((a, b) => b.share - a.share),
+        };
+      })
+      .sort((a, b) => (a.side === b.side ? b.pitches - a.pitches : a.side === 'away' ? -1 : 1));
+    return marks.length || pitches.length ? { kind: 'diamond', marks, pitches, arsenals } : null;
   }
 
   if (league.includes('football')) {
@@ -891,6 +1016,7 @@ function gameChart(league: string, s: EspnSummary, sideOf: (id: string | undefin
     const drives: GameDrive[] = (s.drives?.previous ?? [])
       .map((d) => ({
         side: sideOf(d.team?.id),
+        quarter: d.start?.period?.number ?? 0,
         start: d.start?.yardLine,
         end: d.end?.yardLine,
         result: d.displayResult ?? d.result ?? '',
@@ -922,7 +1048,7 @@ const BLACK_TEAMS: Record<string, string> = {
 // A team's color that reads on the dark board: its own; a dark one lightened, keeping its hue (the Ravens'
 // purple, the Yankees' navy); a colorless black (the Bruins', the Giants') swapped for its alternate when
 // that has a color (their gold, their orange)
-function teamColor(main: string | undefined, alt: string | undefined): string {
+export function teamColor(main: string | undefined, alt: string | undefined): string {
   const rgb = (hex: string | undefined) => {
     const m = hex?.match(/^#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i);
     return m ? m.slice(1).map((x) => parseInt(x, 16)) : null;
@@ -942,4 +1068,31 @@ function teamColor(main: string | undefined, alt: string | undefined): string {
   if (light(m) >= 0.2) return hex(m);
   if (!colorful(m) && a && colorful(a)) return lift(a);
   return lift(m);
+}
+
+// A team's color as the game view draws it (ESPN's, made to read on the dark board), for a player card's
+// hero: the team found by the names the row knows (its team's name, its own, its logo's file), then ESPN's
+// page for it (once a visit); null when it isn't found
+const teamColors = new Map<string, Promise<string | null>>();
+export function heroColor(league: string, names: (string | undefined)[]): Promise<string | null> {
+  let id: string;
+  try {
+    id = espnTeamId(league, names);
+  } catch {
+    return Promise.resolve(null);
+  }
+  const key = league + '/' + id;
+  if (!teamColors.has(key)) {
+    teamColors.set(
+      key,
+      fetch(`${API}/${league}/teams/${id}`)
+        .then((r) => (r.ok ? r.json() : null))
+        .then((j) => {
+          const t = j?.team as { color?: string; alternateColor?: string; abbreviation?: string } | undefined;
+          return t?.color ? teamColor(t.color, t.alternateColor ?? BLACK_TEAMS[t.abbreviation ?? '']) : null;
+        })
+        .catch(() => null),
+    );
+  }
+  return teamColors.get(key)!;
 }

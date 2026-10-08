@@ -16,6 +16,7 @@ import { StatReader } from '@ranker/engine/stat-reader';
 import { SeasonDataService } from '@ranker/engine/season-data.service';
 import { NUMBER, grade, innings, ordinal, rankPct, rankTone } from '@ranker/core/format';
 import type { DepthPlayer, DepthView } from './depth-chart';
+import type { ZoneView } from './zones';
 import { CardOverview, CardSeason, CardStat, CardTab, CareerSeason, PlayerCard, SeasonContext } from './card.model';
 import { archetypeFor, overviewBlurb, profileFlags, scoutingReport, skillScores } from './overview';
 import { careerHistory } from './career-history';
@@ -23,6 +24,7 @@ import { radar, radarShape } from './radar';
 import { GameLogView, gameLogView } from './game-log-view';
 import { PlayerAnalysis, analysisIndex, loadAnalysis } from './analysis';
 import { espnTeamNames, espnUpcoming } from '@ranker/core/game-logs';
+import { heroColor } from '../game-view/game';
 
 // What the card needs from the table it opens from
 export interface CardHost {
@@ -93,6 +95,8 @@ export class PlayerCards {
     // (a team's Team tab: its depth chart, staff and roster, before its Stats)
     if (SPORT.depthChart?.has(card.player, this.position, card.season)) tabs.push({ id: 'depth', title: 'Team' });
     tabs.push(stats);
+    // (MLB's season by zone: a pitcher's, a hitter's)
+    if (SPORT.zones?.has(card.player, this.position, card.season)) tabs.push({ id: 'zones', title: SPORT.zones.title(this.position) });
     if (this.hasGameLog(card)) tabs.push({ id: 'games', title: 'Game Log' });
     if (!SPORT.careerOnly && (!card.seasons || card.seasons.length > 1)) tabs.push({ ...seasons, title: this.careerTitle });
     return SPORT.cardHistory ? [...tabs, { id: 'history', title: SPORT.cardHistory.title }] : tabs;
@@ -120,6 +124,21 @@ export class PlayerCards {
         .catch(() => this.analysisLoads.set(file, 'error'));
     }
     return this.analysisLoads.get(file)!;
+  }
+
+  // The Zones tab: the season by zone (loaded the first time the tab asks, then kept), and the stat showing
+  private zoneLoads = new Map<string, ZoneView | 'loading' | 'error'>();
+  zoneStat: string | null = null;
+  zones(card: PlayerCard): ZoneView | 'loading' | 'error' {
+    const key = `${this.position}/${card.player.gsisId}/${card.season}`;
+    if (!this.zoneLoads.has(key) && SPORT.zones) {
+      this.zoneLoads.set(key, 'loading');
+      SPORT.zones
+        .load(card.player, this.position, card.season)
+        .then((view) => this.zoneLoads.set(key, view))
+        .catch(() => this.zoneLoads.set(key, 'error'));
+    }
+    return this.zoneLoads.get(key) ?? 'error';
   }
 
   // The Analysis tab's sections open (all folded each time the tab opens, or another card does)
@@ -226,17 +245,22 @@ export class PlayerCards {
   // A game log's opponent ("@ IND"): its team's card for the card's season (the sport's team tab), found
   // by ESPN's name for the abbreviation, or the row's logo file ("LAK_2002..." for the NHL's own)
   async openOpponent(card: PlayerCard, vs: string): Promise<void> {
+    await this.openTeam(vs.split(' ').slice(1).join(' '), card.season);
+  }
+
+  // A team by its abbreviation ("IND"): its card for a season (the game view's teams too)
+  async openTeam(abbreviation: string, season: number): Promise<void> {
     const position = SPORT.teamTabs?.[0];
     if (!position) return;
-    const abbr = vs.split(' ').slice(1).join(' ').toLowerCase();
-    const rows = card.season === this.host.season ? SKILL_UNITS : await this.data.rows(card.season).catch(() => null);
+    const abbr = abbreviation.toLowerCase();
+    const rows = season === this.host.season ? SKILL_UNITS : await this.data.rows(season).catch(() => null);
     const teams = (rows?.[position as SkillPosition] ?? []) as SkillPlayer[];
     const names = espnTeamNames(SPORT.gameLog?.league ?? '', abbr).map((n) => n.toLowerCase());
     const file = (p: SkillPlayer) => p.teamLogo?.match(/([^/]+)\.\w+$/)?.[1]?.toLowerCase() ?? '';
     const team =
       teams.find((t) => names.includes(t.name.toLowerCase()) || names.includes(((t as { teamName?: string | null }).teamName ?? '').toLowerCase())) ??
       teams.find((t) => file(t).split('_')[0] === abbr || names.includes(file(t)));
-    if (team) await this.openLinked({ position, gsisId: team.gsisId }, card.season);
+    if (team) await this.openLinked({ position, gsisId: team.gsisId }, season);
   }
 
   toggleDepthSlot(key: string): void {
@@ -320,6 +344,14 @@ export class PlayerCards {
     if (!this.tabsFor(card).some((tab) => tab.id === this.tab)) this.tab = 'overview';
     this.loadSeasons(card);
     this.loadPrevSkills(card);
+    // (the hero in the team's own color, as the game view draws it, once ESPN's list is in)
+    const league = SPORT.gameLog?.league;
+    if (league && card.heroColor === undefined) {
+      const p = card.player as SkillPlayer & { teamName?: string | null };
+      heroColor(league, [p.teamName ?? undefined, p.name, p.teamLogo?.match(/([^/]+)\.\w+$/)?.[1]])
+        .then((color) => (card.heroColor = color))
+        .catch(() => (card.heroColor = null));
+    }
   }
 
   // ---------------------------------------------------------------------------
@@ -349,6 +381,7 @@ export class PlayerCards {
       context,
       name: player.name,
       positionName: POSITION_NAMES[this.position],
+      positionLabel: SPORT.teamTabs?.includes(this.position) || this.position === SPORT.coachTab ? POSITION_NAMES[this.position] : this.position,
       seasonLabel: SPORT.careerOnly ? 'Career' : isLiveSeason(season) ? 'This Season' : SPORT.seasonText(season),
       teamName: SPORT.teamName ? SPORT.teamName(player, this.position, rows) : ((player as { teamName?: string | null }).teamName ?? null),
       teamLink: this.teamLink(player, rows),

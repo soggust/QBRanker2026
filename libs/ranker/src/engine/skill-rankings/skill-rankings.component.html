@@ -82,7 +82,7 @@
             ><span class="visually-hidden">1</span>} @else {{{ i + 1 }}}</span
         >
           <!-- The team card, with the player's headshot standing in it (teams and units: just the logo) -->
-          <span class="badge-slot card-target" [class.with-photo]="headshot(player)" (click)="cards.open(player)"
+          <span class="badge-slot card-target" [class.with-photo]="headshot(player)" (click)="openCard(player)"
             ><span class="team-badge" [class.white-logo]="teamLogoWhite(player)"
               ><img [src]="seasonLogo(player.teamLogo)" class="team-logo" alt=""
             /></span
@@ -95,8 +95,8 @@
               />}</span
           >
           <!-- The badge through the name opens the player card -->
-          <p class="player-name card-target" (click)="cards.open(player)">
-            <strong class="card-link" role="button" tabindex="0" [attr.data-name]="player.name" (keydown.enter)="cards.open(player)">{{ player.name }}</strong>
+          <p class="player-name card-target" (click)="openCard(player)">
+            <strong class="card-link" role="button" tabindex="0" [attr.data-name]="player.name" (keydown.enter)="openCard(player)">{{ player.name }}</strong>
             @if (statsBehind(player); as n) {
               <!-- His stats don't cover every game in his record yet (the data source catching up) -->
               <mat-icon
@@ -159,15 +159,16 @@
             } @else {
               @for (stat of group.stats; track stat.key) {
                 @if (stat.format === 'recent') {
-                  <!-- The latest results as dots, newest first; empty slots for games not played yet -->
+                  <!-- The latest results as squares (the game log's W and L), newest first; empty slots for games not
+                       played yet. The pointer on them loads the team's scores for their hovers -->
                   <div class="box support-box recent-box">
-                    <div class="last-five" [class.many]="manyRecent">
+                    <div class="last-five" [class.many]="manyRecent" (mouseenter)="games.primeRecent(recentTeam(player), season)">
                       <div>
                         @for (result of reader.lastFive(player); track $index) {
                           <p
                             [ngClass]="result === 1 ? 'green' : result === 0.5 ? 'tie' : 'red'"
                             [class.game-link]="games.available"
-                            [title]="reader.recentTitle(player, $index)"
+                            [title]="dotTitle(player, $index)"
                             (click)="openRecent(player, $index, $event)"
                           >
                             {{ result === 1 ? 'W' : result === 0.5 ? 'T' : 'L' }}

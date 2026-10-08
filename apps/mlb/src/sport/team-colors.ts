@@ -26,7 +26,7 @@ const BADGE: Record<string, string> = {
   140: '#003278', // Rangers
   141: '#134a8e', // Blue Jays
   142: '#002b5c', // Twins
-  143: '#002d72', // Phillies
+  143: '#e81828', // Phillies (their red, the hero's: the blue badge read as another team's)
   144: '#13274f', // Braves
   145: '#27251f', // White Sox
   146: '#000000', // Marlins

@@ -84,7 +84,12 @@
 }
 
 .game-team-name {
+  // (a button: the team's card that season)
+  background: none;
+  border: none;
   color: #fff;
+  cursor: pointer;
+  padding: 0;
   @include v.hand(28px);
   line-height: 1.1;
   // (clear of the logo card above it)
@@ -182,7 +187,7 @@
     min-width: 80px;
     text-align: left;
 
-    img {
+    > img {
       height: 22px;
       object-fit: contain;
       width: 22px;
@@ -212,7 +217,7 @@
 }
 
 .wp-chart {
-  height: 170px;
+  height: 140px;
   position: relative;
 
   svg {
@@ -384,37 +389,6 @@
   font-size: 12px;
   font-weight: 700;
   margin: 0 0 6px;
-}
-
-.game-play-filters {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 12px;
-}
-
-// (a pill in the sport's own hide: _sport-kit.scss's menu buttons set its face, edge and text; the one
-// chosen ringed in the accent at full strength, the others a touch faded)
-.game-filter {
-  border-radius: 999px;
-  cursor: pointer;
-  font: inherit;
-  font-size: 12px;
-  font-weight: 800;
-  letter-spacing: 0.5px;
-  opacity: 0.72;
-  padding: 6px 16px;
-  text-transform: uppercase;
-  transition: opacity 0.12s ease;
-
-  &:hover {
-    opacity: 1;
-  }
-
-  &.active {
-    opacity: 1;
-    outline: 2px solid var(--scoreboard-led);
-    outline-offset: 2px;
-  }
 }
 
 // ---- the venue, weather, crowd and the line
@@ -711,15 +685,20 @@
 // hollow), or the NFL's drives across a field and its passes by zone
 
 .game-surface {
+  // (each sized to sit above the fold: the court and the field by their height, the rink by its own)
   svg {
     display: block;
     margin: 0 auto;
-    max-height: 560px;
+    max-height: 420px;
     width: 100%;
   }
 
   &.court svg {
-    max-width: 520px;
+    max-width: 440px;
+  }
+
+  &.rink svg {
+    max-height: 340px;
   }
 
   .marks-lines {
@@ -733,12 +712,12 @@
     }
 
     .red {
-      stroke: rgba(255, 110, 110, 0.45);
+      stroke: rgba(255, 110, 110, 0.35);
       stroke-width: 2px;
     }
 
     .blue {
-      stroke: rgba(110, 170, 255, 0.5);
+      stroke: rgba(110, 170, 255, 0.4);
       stroke-width: 3px;
     }
 
@@ -987,11 +966,8 @@
 // (a team's last five: each a row that opens its game)
 .game-form-row {
   align-items: center;
-  background: none;
-  border: none;
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   color: #fff;
-  cursor: pointer;
   display: flex;
   font: inherit;
   font-size: 13px;
@@ -1012,15 +988,6 @@
     min-width: 16px;
   }
 
-  &:hover:not(:disabled) b {
-    color: var(--scoreboard-led);
-    text-decoration: underline;
-    text-underline-offset: 3px;
-  }
-
-  &:disabled {
-    cursor: default;
-  }
 }
 
 .game-form-score {
@@ -1080,5 +1047,325 @@
 
   &.T {
     background: #9aa0a6;
+  }
+}
+
+// (a game to come: its line, under the date)
+.game-line-note {
+  color: var(--scoreboard-led);
+  margin-top: -4px;
+}
+
+// (a team's logo, small, on its badge: the grid's gem in miniature)
+.mini-gem {
+  align-items: center;
+  background: var(--team-badge);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 6px;
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.25);
+  display: inline-flex;
+  flex: none;
+  height: 22px;
+  justify-content: center;
+  overflow: hidden;
+  width: 30px;
+
+  img {
+    height: 26px;
+    object-fit: contain;
+    width: 26px;
+  }
+
+  &.white-logo img {
+    filter: brightness(0) invert(1);
+  }
+}
+
+// ---- baseball's pitches: the zone in chalk (its nine boxes faint), the plate, each pitch in its type's
+// color (a ball hollowed); each pitcher's arsenal as a split bar
+
+.game-pitches {
+  margin-top: 0;
+
+  svg {
+    display: block;
+    margin: 0 auto;
+    max-height: 440px;
+    max-width: 560px;
+    width: 100%;
+  }
+
+  .log-legend {
+    flex-wrap: wrap;
+  }
+}
+
+.pitch-zone {
+  fill: rgba(255, 255, 255, 0.03);
+  stroke: rgba(255, 255, 255, 0.55);
+  stroke-width: 1.2px;
+  vector-effect: non-scaling-stroke;
+}
+
+.pitch-zone-third {
+  stroke: rgba(255, 255, 255, 0.15);
+  stroke-width: 1px;
+  vector-effect: non-scaling-stroke;
+}
+
+.pitch-plate {
+  fill: rgba(255, 255, 255, 0.12);
+  stroke: rgba(255, 255, 255, 0.4);
+  vector-effect: non-scaling-stroke;
+}
+
+.pitch {
+  opacity: 0.85;
+  stroke: rgba(0, 0, 0, 0.5);
+  stroke-width: 0.6px;
+  vector-effect: non-scaling-stroke;
+
+  // (a ball: an empty ring in its pitch's color)
+  &.ball {
+    opacity: 0.95;
+    stroke-width: 1.6px;
+  }
+}
+
+.game-arsenal {
+  margin-top: 12px;
+}
+
+.arsenal-row {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  display: grid;
+  gap: 6px 16px;
+  grid-template-columns: 180px minmax(0, 1fr);
+  padding: 10px 0;
+}
+
+.arsenal-name {
+  display: flex;
+  flex-direction: column;
+  grid-row: span 2;
+
+  b {
+    font-size: 13.5px;
+  }
+
+  small {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 11px;
+    font-weight: 700;
+  }
+}
+
+.arsenal-bar {
+  border-radius: 4px;
+  display: flex;
+  gap: 1px;
+  height: 10px;
+  overflow: hidden;
+
+  i {
+    display: block;
+    height: 100%;
+  }
+}
+
+.arsenal-types {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+
+  span {
+    align-items: center;
+    color: rgba(255, 255, 255, 0.75);
+    display: inline-flex;
+    font-size: 11.5px;
+    font-weight: 700;
+    gap: 5px;
+  }
+
+  i {
+    border-radius: 2px;
+    display: inline-block;
+    height: 8px;
+    width: 8px;
+  }
+}
+
+// (a quarter's start on the drive chart: a dashed chalk line across the field, its name on it)
+.drive-quarter {
+  border-top: 1px dashed rgba(255, 255, 255, 0.3);
+  margin: 10px 0 6px;
+  position: relative;
+
+  span {
+    background: #2a302e;
+    border-radius: 4px;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 9.5px;
+    font-weight: 900;
+    left: 50%;
+    letter-spacing: 1px;
+    padding: 1px 8px;
+    position: absolute;
+    text-transform: uppercase;
+    top: -8px;
+    transform: translateX(-50%);
+  }
+}
+
+
+// (a scoring play with its scorer's headshot: the text centered on the picture)
+.game-play.with-head {
+  align-items: center;
+}
+
+// (a last five's opponent and score: each its own link)
+.game-form-team,
+.game-form-score {
+  align-items: center;
+  background: none;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  display: inline-flex;
+  font: inherit;
+  gap: 8px;
+  padding: 0;
+
+  &:hover:not(:disabled) {
+    color: var(--scoreboard-led);
+  }
+
+  &:disabled {
+    cursor: default;
+  }
+}
+
+.game-form-row .game-form-score {
+  color: var(--scoreboard-led);
+}
+
+// (a team's name under the pointer: lit like every link, its card a click away)
+.game-team-name {
+  transition: color 0.15s;
+
+  &:hover {
+    color: var(--scoreboard-led);
+  }
+}
+
+// (a dropdown in the pills' row: the same round hide, its caret drawn after it; its list the browser's,
+// in the board's dark)
+.game-select-wrap {
+  display: inline-flex;
+  position: relative;
+
+  &::after {
+    color: currentColor;
+    content: "▾";
+    font-size: 11px;
+    pointer-events: none;
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-52%);
+  }
+}
+
+.game-select {
+  appearance: none;
+  max-width: 240px;
+  padding-right: 32px;
+  text-overflow: ellipsis;
+
+  option {
+    background: #1d2220;
+    color: #fff;
+    text-transform: none;
+  }
+}
+
+// (a dropdown at full strength always: it's a choice, not a filter left off)
+.game-select {
+  opacity: 1;
+}
+
+// (the spray chart's park, bottom left; the legend's home run ringed in the board's light)
+.game-surface.diamond {
+  position: relative;
+}
+
+.park-name {
+  bottom: 10px;
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 11px;
+  font-weight: 800;
+  left: 14px;
+  letter-spacing: 0.5px;
+  position: absolute;
+  text-transform: uppercase;
+}
+
+.mark-key.hr {
+  background: rgba(255, 255, 255, 0.7);
+  border: 2px solid var(--scoreboard-led);
+  height: 11px;
+  width: 11px;
+}
+
+// (the pitch legend's fill key, set off from the pitch types)
+.pitch-key:first-of-type {
+  border-left: 1px solid rgba(255, 255, 255, 0.2);
+  padding-left: 12px;
+}
+
+// (the line among the game's facts: how it came out in the board's light)
+.game-facts .game-bet i {
+  color: var(--scoreboard-led);
+}
+
+// ---- the charts' hover details: anything with one under the pointer shows the help cursor and lifts (a
+// mark or pitch grows, a bar brightens), so the reader knows to rest there
+
+.game-surface .mark,
+.game-pitches .pitch {
+  cursor: help;
+  // (a hollow one hovers across its middle too, not just its ring)
+  pointer-events: all;
+  transform-box: fill-box;
+  transform-origin: center;
+  transition:
+    transform 0.12s ease,
+    filter 0.12s ease;
+
+  &:hover {
+    filter: brightness(1.3) drop-shadow(0 0 2px rgba(255, 255, 255, 0.6));
+    transform: scale(1.7);
+  }
+}
+
+.drive-row {
+  cursor: help;
+
+  &:hover .drive-bar {
+    filter: brightness(1.3);
+    opacity: 1;
+  }
+
+  &:hover .drive-result {
+    color: #fff;
+  }
+}
+
+.arsenal-bar i {
+  cursor: help;
+  transition: filter 0.12s ease;
+
+  &:hover {
+    filter: brightness(1.35);
   }
 }

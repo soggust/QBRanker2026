@@ -6,7 +6,7 @@ import { CardSkill } from '@ranker/engine/skills';
 
 export type { CardFlag, CardSkill };
 
-export type CardTab = 'overview' | 'analysis' | 'stats' | 'seasons' | 'history' | 'games' | 'depth';
+export type CardTab = 'overview' | 'analysis' | 'stats' | 'seasons' | 'history' | 'games' | 'depth' | 'zones';
 
 // A stat's value, where it ranks in the list and how that compares
 export interface CardStat {
@@ -122,12 +122,16 @@ export interface PlayerCard {
   comps: CardComp[] | null;
   name: string;
   positionName: string;
+  // the hero's: a player's position short ("QB", "SP"); a team unit's or a coach's in full
+  positionLabel: string;
   seasonLabel: string;
   teamName: string | null;
   // The team's own card that season, when the site has it (the hero's team name a link to it)
   teamLink: { position: string; gsisId: string } | null;
   logo: string;
   color: string;
+  // the hero's background: the team's color as the game view draws it (ESPN's, made to read), once it's in
+  heroColor?: string | null;
   whiteLogo: boolean;
   photo: string | null;
   rank: number;

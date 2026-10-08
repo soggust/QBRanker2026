@@ -8,8 +8,9 @@ import { PlayerCard } from './card.model';
 import { PlayerCards } from './player-cards';
 import { sortFlags } from './overview';
 import { evidenceText, insteadText, paragraphs } from './analysis';
-import { GameViewService } from '../game-view/game-view.service';
+import { GameViewService, recentRef } from '../game-view/game-view.service';
 import type { GameLogViewRow } from './game-log-view';
+import { ZoneStat, ZoneView, pitchColor } from './zones';
 
 // The player card: a scoreboard panel over the dimmed page, the hero (team card, name, awards, overall
 // rank) over the Overview, Stats, Seasons and the sport's history tab. Arrow keys flip through the
@@ -25,6 +26,42 @@ export class PlayerCardComponent {
   @Input({ required: true }) cards!: PlayerCards;
 
   constructor(readonly games: GameViewService) {}
+
+  // The Zones tab's stat showing (the first until another is picked), and a pitch type's color
+  zoneStat(view: ZoneView): ZoneStat {
+    return view.stats.find((st) => st.key === this.cards.zoneStat) ?? view.stats[0];
+  }
+
+  readonly pitchColor = pitchColor;
+
+  // The card's recent games (its Stats tab's Recent): the team, a game's hover ("W 24-17 @ Miami Dolphins"),
+  // and a game opened (the card set aside, as from the game log)
+  recentTeam(card: PlayerCard): (string | undefined)[] {
+    const p = card.player as { teamName?: string | null; name: string; teamLogo?: string };
+    return [p.teamName ?? undefined, p.name, p.teamLogo?.match(/([^/]+)\.\w+$/)?.[1]];
+  }
+
+  private recentVs(card: PlayerCard): (string | null)[] | undefined {
+    return (card.player as { lastFiveVs?: (string | null)[] }).lastFiveVs;
+  }
+
+  recentTitle(card: PlayerCard, result: number, index: number): string {
+    const word = result === 1 ? 'W' : result === 0.5 ? 'T' : 'L';
+    const vs = this.recentVs(card)?.[index];
+    const score = this.games.recentScore(this.recentTeam(card), this.recentVs(card), index, card.season);
+    return [word, score, vs ? (/^(@|vs) /.test(vs) ? vs : 'vs ' + vs) : null].filter(Boolean).join(' ');
+  }
+
+  openRecent(card: PlayerCard, index: number): void {
+    const ref = recentRef(this.recentTeam(card), this.recentVs(card), index, card.season);
+    if (ref) this.games.open(ref);
+  }
+
+  // The card closed (no game to go back to any more)
+  close(): void {
+    this.games.backTo = null;
+    this.cards.close();
+  }
 
   // A game log's row: its game (ESPN's id, or its day and the two teams)
   openGame(card: PlayerCard, row: GameLogViewRow): void {
@@ -74,7 +111,7 @@ export class PlayerCardComponent {
     if (!this.cards.card || this.games.game) return;
     // (Escape shuts an open popover first, then the card)
     if (event.key === 'Escape' && this.cards.depthOpen) this.cards.depthOpen = null;
-    else if (event.key === 'Escape') this.cards.close();
+    else if (event.key === 'Escape') this.close();
     else if (event.key === 'ArrowRight' || event.key === 'ArrowDown') this.cards.step(1);
     else if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') this.cards.step(-1);
     else return;

@@ -749,33 +749,42 @@ section ul li.player {
       justify-content: center;
       margin: 0 auto;
 
+      // (each game the game log's W/L square: small, its letter centered in it)
       p {
-        border-radius: 50%;
-        font-size: 0;
-        font-weight: bold;
-        height: 9px;
-        letter-spacing: 1px;
-        margin: 0 2px;
+        align-items: center;
+        border-radius: 2px;
+        display: flex;
+        justify-content: center;
+        color: #111;
+        font-family: v.$font-base;
+        font-size: 8.5px;
+        font-weight: 900;
+        height: 13px;
+        letter-spacing: 0;
+        // (Nunito's caps sit high: a pixel down to look centered)
+        line-height: 1;
+        margin: 0 1.5px;
+        padding-top: 1px;
+        text-align: center;
         text-shadow: none;
-        width: 9px;
+        width: 13px;
 
         &.green {
-          background: rgb(80, 207, 80);
-          box-shadow: 0 0 0.4em rgba(80, 207, 80, 0.55);
+          background: #3ecf6e;
         }
 
         &.red {
-          background: #ff3b30;
-          box-shadow: 0 0 0.4em rgba(255, 59, 48, 0.5);
+          background: #ff5a4f;
         }
 
         &.tie {
-          background: #ffd54a;
+          background: #9aa0a6;
         }
 
         &.unplayed {
           background: none;
           box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.35);
+          color: transparent;
         }
 
         // (a played game's dot under the cursor: a touch bigger and brighter, a soft ring; its title
@@ -801,11 +810,12 @@ section ul li.player {
       }
     }
 
-    // (ten games: smaller dots, closer together, so the column stays narrow)
+    // (ten games: smaller squares, no letter, closer together, so the column stays narrow)
     &.many div p {
-      height: 7px;
+      font-size: 0;
+      height: 8px;
       margin: 0 1px;
-      width: 7px;
+      width: 8px;
     }
   }
 

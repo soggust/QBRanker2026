@@ -1,6 +1,7 @@
 import type { CardFlag, FlagContext, SportConfig } from '@ranker/engine/sport';
 import { espnTeamGameLog, mlbGameLog } from '@ranker/core/game-logs';
 import { loadTeamRoster } from './team-roster';
+import { PITCHERS, loadZones } from './zones';
 import type { SkillPlayer } from './positions';
 
 // MLB: what the engine needs to know about baseball (the rest is beside this file: positions,
@@ -124,6 +125,12 @@ export const SPORT: SportConfig = {
   // MLB's headshot cutouts (square)
   headshot: (id, w) => `https://img.mlbstatic.com/mlb-photos/image/upload/w_${w},q_auto:best/v1/people/${id}/headshot/silo/current`,
   cardFlags,
+  // The card's Zones tab: a pitcher's or hitter's season by zone, a pitcher's arsenal (zones.ts; 2015 on)
+  zones: {
+    has: (player, position, season) => position !== 'TM' && Number(player.id) > 0 && season >= 2015,
+    title: (position) => (PITCHERS.includes(position) ? 'Pitch Zones' : 'Hot Zones'),
+    load: (player, position, season) => loadZones(Number(player.id), position, season),
+  },
   // The card's Team tab (teams): the lineup on a diamond, the pitching staff, the manager and coaches,
   // everyone who played (team-roster.ts)
   depthChart: {

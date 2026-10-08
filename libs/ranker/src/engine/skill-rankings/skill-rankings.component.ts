@@ -25,7 +25,7 @@ import { StatReader } from '@ranker/engine/stat-reader';
 import { hasMin, minCount, seasonLength } from '@ranker/engine/playing-time';
 import { settingGroups, settingOptions, settingText, settingsAt } from '@ranker/engine/setting-options';
 import { CardHost, PlayerCards } from '@ranker/engine/player-card/player-cards';
-import { GameViewService, recentRef } from '@ranker/engine/game-view/game-view.service';
+import { GameViewService, nameKey, recentRef } from '@ranker/engine/game-view/game-view.service';
 import { SeasonContext } from '@ranker/engine/player-card/card.model';
 import { copyRankingsToClipboard } from '@ranker/core/clipboard';
 import { RowGlide } from './row-glide';
@@ -83,6 +83,22 @@ export class SkillRankingsComponent implements OnChanges, CardHost {
     readonly games: GameViewService,
   ) {
     this.cards = new PlayerCards(this, seasonData);
+    // (a team in the game view: the game closes, its card opens)
+    games.openTeam = (abbreviation, season) => {
+      games.close();
+      this.cards.openTeam(abbreviation, season);
+    };
+    // (a player in the game view: his card that season; and the season's players by name, to link them)
+    games.openPlayer = (link, season) => this.cards.openLinked(link, season);
+    games.findPlayers = async (season) => {
+      const rows = season === this.season ? SKILL_UNITS : await seasonData.rows(season);
+      const players = new Map<string, { position: string; gsisId: string }>();
+      for (const [position, list] of Object.entries(rows)) {
+        if (SPORT.teamTabs?.includes(position)) continue;
+        for (const p of (list ?? []) as SkillPlayer[]) if (!players.has(nameKey(p.name))) players.set(nameKey(p.name), { position, gsisId: p.gsisId });
+      }
+      return players;
+    };
     const service = this.positionService;
 
     // Re-rank when the sliders, the group eyes, the settings menu or the stat eyes change
@@ -441,11 +457,29 @@ export class SkillRankingsComponent implements OnChanges, CardHost {
   openRecent(player: SkillPlayer, index: number, event: Event): void {
     if (!this.games.available) return;
     const vs = (player as { lastFiveVs?: (string | null)[] }).lastFiveVs;
-    const team = [(player as { teamName?: string | null }).teamName ?? undefined, player.name, player.teamLogo?.match(/([^/]+)\.\w+$/)?.[1]];
-    const ref = recentRef(team, vs, index, this.season);
+    const ref = recentRef(this.recentTeam(player), vs, index, this.season);
     if (!ref) return;
     event.stopPropagation();
     this.games.open(ref);
+  }
+
+  // A row's card (a click in the grid: a fresh start, no game to go back to)
+  openCard(player: SkillPlayer): void {
+    this.games.backTo = null;
+    this.cards.open(player);
+  }
+
+  // A row's team, by the names the row knows (its team's name, its own, its logo's file)
+  recentTeam(player: SkillPlayer): (string | undefined)[] {
+    return [(player as { teamName?: string | null }).teamName ?? undefined, player.name, player.teamLogo?.match(/([^/]+)\.\w+$/)?.[1]];
+  }
+
+  // A Recent square's hover: "W 24-17 @ Miami Dolphins" (the score once the team's results are in)
+  dotTitle(player: SkillPlayer, index: number): string {
+    const title = this.reader.recentTitle(player, index);
+    const vs = (player as { lastFiveVs?: (string | null)[] }).lastFiveVs;
+    const score = this.games.recentScore(this.recentTeam(player), vs, index, this.season);
+    return score ? title.replace(/^(\S+)/, `$1 ${score}`) : title;
   }
 
   // Empty Recent slots for games not played yet (up to the tab's count: SPORT.recentGames)

@@ -26,12 +26,15 @@
         @for (side of ['away', 'home']; track side) {
           @let t = side === 'away' ? g.away : g.home;
           <div class="game-team" [ngClass]="side" [class.lost]="!t.winner && (g.away.winner || g.home.winner)">
-            <span class="hero-card game-logo-card">
-              @if (t.logo) {
-                <img class="hero-logo" [src]="t.logo" alt="" />
+            <!-- (the grid's team card: the site's logo on its badge color) -->
+            @let site = siteTeam(t, g);
+            <span class="hero-card game-logo-card" [style.--team-badge]="site?.badge ?? t.color" [class.white-logo]="site?.white">
+              @if (site?.logo ?? t.logo; as logo) {
+                <img class="hero-logo" [src]="logo" alt="" />
               }
             </span>
-            <span class="game-team-name">{{ t.short }}</span>
+            <!-- (its name: the team's card that season) -->
+            <button type="button" class="game-team-name" title="Open their season" (click)="games.toTeam(t.abbr, seasonOf(g))">{{ t.short }}</button>
             @if (t.record) {
               <span class="game-team-record">{{ t.record }}</span>
             }
@@ -39,7 +42,7 @@
           @if (side === 'away') {
             <div class="game-center">
               @if (g.label) {
-                <span class="season-chip">{{ g.label }}</span>
+                <span class="season-chip">{{ g.label }}{{ g.seasonYear && g.seasonYear !== currentSeason ? ' - ' + seasonText(g.seasonYear) : '' }}</span>
               }
               <!-- (a game to come: its start on the board, in place of the score) -->
               @if (g.preview) {
@@ -66,6 +69,10 @@
               </div>
               }
               <span class="game-when">{{ when(g) }}</span>
+              <!-- (a game to come: the line under its date) -->
+              @if (g.preview && g.line; as line) {
+                <span class="game-when game-line-note">{{ g.line!.details }}{{ g.line!.overUnder !== null ? ' · O/U ' + g.line!.overUnder : '' }}</span>
+              }
             </div>
           }
         }
@@ -83,12 +90,32 @@
             role="tab"
             [class.active]="games.tab === tab.id"
             [attr.aria-selected]="games.tab === tab.id"
-            (click)="games.tab = tab.id; body.scrollTop = 0"
+            (click)="games.tab = tab.id; games.player = null; body.scrollTop = 0"
           >
             {{ tab.title }}
           </button>
         }
       </nav>
+
+      <!-- A player's name: a link to his card that season when the site has him (the game closes; his card's
+           back arrow reopens it), plain otherwise -->
+      <ng-template #who let-name let-text="text">
+        @if (games.link(name)) {
+          <button type="button" class="depth-link" [title]="'Open ' + name" (click)="games.toPlayer(name, seasonOf(g))">{{ text ?? name }}</button>
+        } @else {
+          {{ text ?? name }}
+        }
+      </ng-template>
+
+      <!-- A team's logo, small, on its badge (the grid's gem: the site's logo on its color) -->
+      <ng-template #gem let-t>
+        @let site = siteTeam(t, g);
+        <span class="mini-gem" [style.--team-badge]="site?.badge ?? t.color" [class.white-logo]="site?.white">
+          @if (site?.logo ?? t.logo; as logo) {
+            <img [src]="logo" alt="" />
+          }
+        </span>
+      </ng-template>
 
       <div class="card-body" #body>
         @switch (games.tab) {
@@ -105,18 +132,6 @@
                   <span class="predictor-side home"><b>{{ p.home | percent: '1.0-1' }}</b><small>{{ g.home.abbr }}</small></span>
                 </div>
               </div>
-            }
-            @if (g.line; as line) {
-              <card-panel class="tab-card group-results game-info" [expandable]="false" label="The Line" icon="paid">
-                <div class="group-body">
-                  <div class="game-line flush">
-                    <div><small>Spread{{ line.book ? ' · ' + line.book : '' }}</small><b>{{ line.details }}</b></div>
-                    @if (line.overUnder !== null) {
-                      <div><small>Total</small><b>O/U {{ line.overUnder }}</b></div>
-                    }
-                  </div>
-                </div>
-              </card-panel>
             }
             @if (g.leaders.length) {
               <card-panel class="tab-card group-box game-leaders" [expandable]="false" label="Season Leaders" icon="military_tech">
@@ -136,7 +151,7 @@
                           </span>
                           <span class="game-leader-main">
                             <small>{{ l.category }}</small>
-                            <b>{{ l.name }}</b>
+                            <b><ng-container *ngTemplateOutlet="who; context: { $implicit: l.name }"></ng-container></b>
                           </span>
                           <span class="game-leader-line">{{ l.line }}</span>
                         </div>
@@ -154,15 +169,18 @@
                     <div class="game-leader-col">
                       <h4 class="depth-unit">{{ team.short }}</h4>
                       @for (x of t.games; track x.event) {
-                        <button type="button" class="game-form-row" [disabled]="!x.event" (click)="games.open({ event: x.event })">
+                        <!-- (the opponent: its team's card that season; the score: the game) -->
+                        <div class="game-form-row">
                           <span class="log-outcome" [ngClass]="x.result">{{ x.result }}</span>
                           <span class="log-vs">{{ x.vs.split(' ')[0] }}</span>
-                          @if (x.logo) {
-                            <img [src]="x.logo" alt="" loading="lazy" />
-                          }
-                          <b>{{ x.vs.split(' ').slice(1).join(' ') }}</b>
-                          <span class="game-form-score">{{ x.score }}</span>
-                        </button>
+                          <button type="button" class="game-form-team" title="Open their season" (click)="openTeam(x.vs.split(' ').slice(1).join(' '), g)">
+                            @if (x.logo) {
+                              <img [src]="x.logo" alt="" loading="lazy" />
+                            }
+                            <b>{{ x.vs.split(' ').slice(1).join(' ') }}</b>
+                          </button>
+                          <button type="button" class="game-form-score" [disabled]="!x.event" title="Open the game" (click)="games.open({ event: x.event })">{{ x.score }}</button>
+                        </div>
                       }
                     </div>
                   }
@@ -188,7 +206,7 @@
                       </span>
                       <span class="game-leader-main">
                         <small>{{ i.position }}{{ i.detail ? ' · ' + i.detail : '' }}</small>
-                        <b>{{ i.name }}</b>
+                        <b><ng-container *ngTemplateOutlet="who; context: { $implicit: i.name }"></ng-container></b>
                       </span>
                       <span class="game-injury-status" [ngClass]="'s-' + i.status.toLowerCase().replace(' ', '-')">{{ i.status }}</span>
                     </div>
@@ -215,9 +233,7 @@
                   @for (t of [g.away, g.home]; track t.id) {
                     <tr [class.won]="t.winner">
                       <th>
-                        @if (t.logo) {
-                          <img [src]="t.logo" alt="" />
-                        }
+                        <ng-container *ngTemplateOutlet="gem; context: { $implicit: t }"></ng-container>
                         {{ t.abbr }}
                       </th>
                       @for (p of g.periodLabels; track $index) {
@@ -275,7 +291,7 @@
                           </span>
                           <span class="game-leader-main">
                             <small>{{ l.category }}</small>
-                            <b>{{ l.name }}</b>
+                            <b><ng-container *ngTemplateOutlet="who; context: { $implicit: l.name }"></ng-container></b>
                           </span>
                           <span class="game-leader-line">{{ l.line }}</span>
                         </div>
@@ -334,7 +350,7 @@
                           @for (r of grp.rows; track $index) {
                             <tr [class.bench-start]="$index > 0 && grp.rows[$index - 1].starter && !r.starter">
                               <td class="name">
-                                {{ r.short }}
+                                <ng-container *ngTemplateOutlet="who; context: { $implicit: r.name, text: r.short }"></ng-container>
                                 @if (r.position) {
                                   <small>{{ r.position }}</small>
                                 }
@@ -373,9 +389,20 @@
           @case ('chart') {
             @if (g.chart; as ch) {
               <div class="game-play-filters">
-                <button type="button" class="game-filter" [class.active]="games.chartSide === 'both'" (click)="games.chartSide = 'both'">Both</button>
-                <button type="button" class="game-filter" [class.active]="games.chartSide === 'away'" (click)="games.chartSide = 'away'">{{ g.away.abbr }}</button>
-                <button type="button" class="game-filter" [class.active]="games.chartSide === 'home'" (click)="games.chartSide = 'home'">{{ g.home.abbr }}</button>
+                <button type="button" class="game-filter" [class.active]="games.chartSide === 'both'" (click)="games.chartSide = 'both'; games.player = null">Both</button>
+                <button type="button" class="game-filter" [class.active]="games.chartSide === 'away'" (click)="games.chartSide = 'away'; games.player = null">{{ g.away.abbr }}</button>
+                <button type="button" class="game-filter" [class.active]="games.chartSide === 'home'" (click)="games.chartSide = 'home'; games.player = null">{{ g.home.abbr }}</button>
+                <!-- (one shooter or hitter alone, from all of them on the team pills' side) -->
+                @if (ch.kind !== 'football') {
+                  <span class="game-select-wrap">
+                    <select class="game-filter game-select" [class.active]="games.player" (change)="pickPlayer($any($event.target).value)">
+                      <option value="">{{ ch.kind === 'diamond' ? 'All hitters' : 'All shooters' }}</option>
+                      @for (name of chartPlayers(ch); track name) {
+                        <option [value]="name" [selected]="games.player === name">{{ name }}</option>
+                      }
+                    </select>
+                  </span>
+                }
               </div>
               @if (ch.kind === 'football') {
                 <card-panel class="tab-card group-results game-chart-panel" [startOpen]="true" label="Drives" icon="sports_football" [style.--away-color]="g.away.color" [style.--home-color]="g.home.color">
@@ -384,6 +411,10 @@
                       <span class="drive-endzone home">{{ g.home.abbr }}</span>
                       <span class="drive-endzone away">{{ g.away.abbr }}</span>
                       @for (d of ch.drives; track $index) {
+                        <!-- (where a quarter starts: its marker; between the 2nd and 3rd, halftime) -->
+                        @if ($index > 0 && d.quarter !== ch.drives[$index - 1].quarter) {
+                          <div class="drive-quarter"><span>{{ quarterName(d.quarter) }}</span></div>
+                        }
                         @if (games.chartSide === 'both' || games.chartSide === d.side) {
                           <div class="drive-row" [title]="d.label + ' · ' + d.result">
                             <span
@@ -428,6 +459,9 @@
                       <span><i class="wp-key home"></i>{{ g.home.abbr }}</span>
                       <span><i class="mark-key made"></i>{{ ch.kind === 'diamond' ? 'Hit' : ch.kind === 'rink' ? 'Goal' : 'Made' }}</span>
                       <span><i class="mark-key"></i>{{ ch.kind === 'diamond' ? 'Out' : 'Missed' }}</span>
+                      @if (ch.kind === 'diamond') {
+                        <span><i class="mark-key hr"></i>HR</span>
+                      }
                     </span>
                   </div>
                   @switch (ch.kind) {
@@ -454,8 +488,8 @@
                           <line class="red" x1="100" y1="0.5" x2="100" y2="84.5" />
                           <line class="blue" x1="75" y1="0.5" x2="75" y2="84.5" />
                           <line class="blue" x1="125" y1="0.5" x2="125" y2="84.5" />
-                          <line class="red" x1="11" y1="4" x2="11" y2="81" />
-                          <line class="red" x1="189" y1="4" x2="189" y2="81" />
+                          <line class="red" x1="11" y1="5.7" x2="11" y2="79.3" />
+                          <line class="red" x1="189" y1="5.7" x2="189" y2="79.3" />
                           <circle cx="100" cy="42.5" r="15" />
                           <circle cx="31" cy="20.5" r="15" />
                           <circle cx="31" cy="64.5" r="15" />
@@ -468,20 +502,92 @@
                       </svg>
                     }
                     @case ('diamond') {
-                      <svg viewBox="0 18 250 192" aria-hidden="true">
+                      <!-- (to scale: this park's own wall, its foul lines out to it, the bases 90 feet apart) -->
+                      @let field = park(g);
+                      <svg [attr.viewBox]="sprayBox(g, ch)" aria-hidden="true">
                         <g class="marks-lines">
-                          <path d="M125 200 L1.3 76.3 A175 175 0 0 1 248.7 76.3 Z" />
-                          <path class="dirt" d="M125 200 L152.8 172.2 L125 144.4 L97.2 172.2 Z" />
-                          <circle cx="125" cy="174" r="3" />
+                          <path [attr.d]="field.wall" />
+                          <path [attr.d]="field.fouls" />
+                          <path class="dirt" [attr.d]="field.infield" />
+                          <circle [attr.cx]="field.mound[0]" [attr.cy]="field.mound[1]" r="3" />
                         </g>
                         @for (m of marks(ch); track $index) {
                           <circle class="mark" [ngClass]="[m.side, m.result === 'out' ? 'missed' : 'made', m.result]" [attr.cx]="m.x" [attr.cy]="m.y" [attr.r]="m.result === 'hr' ? 4 : 2.6"><title>{{ m.text }}</title></circle>
                         }
                       </svg>
+                      <!-- (the park the wall is drawn for) -->
+                      @if (g.venue) {
+                        <span class="park-name">{{ g.venue.name }}</span>
+                      }
                     }
                   }
                 </div>
               }
+            }
+          }
+
+          <!-- Baseball's pitches: every pitch where it crossed the plate (the catcher's view, colored by type), and
+               each pitcher's arsenal -->
+          @case ('pitches') {
+            @if (g.chart; as ch) {
+              <div class="game-play-filters">
+                <button type="button" class="game-filter" [class.active]="games.chartSide === 'both'" (click)="games.chartSide = 'both'; games.player = null">Both</button>
+                <button type="button" class="game-filter" [class.active]="games.chartSide === 'away'" (click)="games.chartSide = 'away'; games.player = null">{{ g.away.abbr }}</button>
+                <button type="button" class="game-filter" [class.active]="games.chartSide === 'home'" (click)="games.chartSide = 'home'; games.player = null">{{ g.home.abbr }}</button>
+                <!-- (one pitcher alone, from all of them on the team pills' side) -->
+                <span class="game-select-wrap">
+                  <select class="game-filter game-select" [class.active]="games.player" (change)="pickPlayer($any($event.target).value)">
+                    <option value="">All pitchers</option>
+                    @for (p of pitchers(ch, g); track p.name) {
+                      <option [value]="p.name" [selected]="games.player === p.name">{{ p.name }}</option>
+                    }
+                  </select>
+                </span>
+              </div>
+              <div class="chart-card game-pitches">
+                <div class="log-chart-head">
+                  <span class="log-chart-label">Pitch Locations<small>{{ pitchScope(g) }}</small></span>
+                  <span class="log-legend">
+                    @for (t of pitchLegend(ch); track t.type) {
+                      <span><i class="mark-key made" [style.background]="pitchColor(t.type)" [style.border-color]="pitchColor(t.type)"></i>{{ t.type }} · {{ t.count }}</span>
+                    }
+                    <!-- (what a ring means: a ball hollow, a strike or a ball in play filled) -->
+                    <span class="pitch-key"><i class="mark-key made"></i>Strike</span>
+                    <span class="pitch-key"><i class="mark-key"></i>Ball</span>
+                  </span>
+                </div>
+                <!-- (ESPN's heights run squashed against its widths: stretched 1.6x down, the zone taller than wide) -->
+                <svg viewBox="40 100 180 240" aria-hidden="true">
+                  <rect class="pitch-zone" x="90" [attr.y]="py(147)" width="60" [attr.height]="py(199) - py(147)" />
+                  <line class="pitch-zone-third" x1="110" [attr.y1]="py(147)" x2="110" [attr.y2]="py(199)" />
+                  <line class="pitch-zone-third" x1="130" [attr.y1]="py(147)" x2="130" [attr.y2]="py(199)" />
+                  <line class="pitch-zone-third" x1="90" [attr.y1]="py(164.3)" x2="150" [attr.y2]="py(164.3)" />
+                  <line class="pitch-zone-third" x1="90" [attr.y1]="py(181.7)" x2="150" [attr.y2]="py(181.7)" />
+                  <path class="pitch-plate" d="M100 326 L140 326 L140 331 L120 337 L100 331 Z" />
+                  @for (p of pitches(ch); track $index) {
+                    <circle class="pitch" [class.ball]="p.result === 'ball'" [attr.cx]="p.x" [attr.cy]="py(p.y)" r="2.8" [style.fill]="p.result === 'ball' ? 'none' : pitchColor(p.type)" [style.stroke]="p.result === 'ball' ? pitchColor(p.type) : null"><title>{{ p.pitcher }}: {{ p.type }}{{ p.mph ? ', ' + p.mph + ' mph' : '' }} ({{ p.result }})</title></circle>
+                  }
+                </svg>
+              </div>
+              <card-panel class="tab-card group-advanced game-arsenal" label="Pitch Types" icon="sports_baseball">
+                <div class="group-body">
+                  @for (a of arsenals(ch); track a.side + a.pitcher) {
+                    <div class="arsenal-row">
+                      <span class="arsenal-name"><b><ng-container *ngTemplateOutlet="who; context: { $implicit: a.pitcher }"></ng-container></b><small>{{ (a.side === 'away' ? g.away : g.home).abbr }} · {{ a.pitches }} pitches</small></span>
+                      <span class="arsenal-bar">
+                        @for (t of a.types; track t.type) {
+                          <i [style.width.%]="t.share * 100" [style.background]="pitchColor(t.type)" [title]="t.type + ' ' + (t.share * 100 | number: '1.0-0') + '%' + (t.mph ? ', ' + t.mph + ' mph' : '')"></i>
+                        }
+                      </span>
+                      <span class="arsenal-types">
+                        @for (t of a.types; track t.type) {
+                          <span><i [style.background]="pitchColor(t.type)"></i>{{ t.type }} {{ t.share * 100 | number: '1.0-0' }}%{{ t.mph ? ' · ' + t.mph + ' mph' : '' }}</span>
+                        }
+                      </span>
+                    </div>
+                  }
+                </div>
+              </card-panel>
             }
           }
 
@@ -502,13 +608,11 @@
                     </span>
                     <span class="game-fantasy-main">
                       <b>
-                        {{ p.name }}
+                        <ng-container *ngTemplateOutlet="who; context: { $implicit: p.name }"></ng-container>
                         @if (p.position) {
                           <small>{{ p.position }}</small>
                         }
-                        @if (team.logo) {
-                          <img [src]="team.logo" alt="" />
-                        }
+                        <ng-container *ngTemplateOutlet="gem; context: { $implicit: team }"></ng-container>
                       </b>
                       <small>{{ p.parts.join(' · ') }}</small>
                       <span class="game-fantasy-bar"><i [style.width.%]="fantasyShare(g, p.points) * 100"></i></span>
@@ -562,13 +666,12 @@
                     @if (g.duration) {
                       <div><small>Duration</small><b>{{ g.duration }}</b></div>
                     }
-                  </div>
-                }
-                @if (g.line; as line) {
-                  <div class="game-line">
-                    <div><small>Line{{ line.book ? ' · ' + line.book : '' }}</small><b>{{ line.details }}</b>@if (line.spread) {<i>{{ line.spread }}</i>}</div>
-                    @if (line.overUnder !== null) {
-                      <div><small>Total</small><b>O/U {{ line.overUnder }}</b>@if (line.total) {<i [class.over]="line.total === 'Over'">{{ line.total }}</i>}</div>
+                    <!-- (the line and how it came out, with the rest of the facts) -->
+                    @if (g.line; as line) {
+                      <div class="game-bet"><small>Line{{ line.book ? ' · ' + line.book : '' }}</small><b>{{ line.details }}</b>@if (line.spread) {<i>{{ line.spread }}</i>}</div>
+                      @if (line.overUnder !== null) {
+                        <div class="game-bet"><small>Total</small><b>O/U {{ line.overUnder }}</b>@if (line.total) {<i>{{ line.total }}</i>}</div>
+                      }
                     }
                   </div>
                 }
@@ -606,7 +709,7 @@
                       <p class="game-drive-sub">{{ grp.sub }}</p>
                     }
                     @for (p of shownPlays(grp); track $index) {
-                      <div class="game-play" [class.scoring]="p.scoring" [ngClass]="p.side ?? ''">
+                      <div class="game-play" [class.scoring]="p.scoring" [class.with-head]="p.scoring && p.headshot" [ngClass]="p.side ?? ''">
                         @if (p.clock) {
                           <span class="game-play-clock">{{ p.clock }}</span>
                         }

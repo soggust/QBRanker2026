@@ -3,6 +3,7 @@ import type { SkillPlayer, SkillStat } from '@sport/positions';
 import type { CardSkill } from './skills';
 import type { RosterGrade } from './roster-grades';
 import type { DepthLoadContext, DepthView } from './player-card/depth-chart';
+import type { ZoneView } from './player-card/zones';
 
 // How a stat's value reads (every sport's SkillStat.format is one of these): int, dec1, dec2; avg3, a
 // batting-average style rate (".287"); ip, innings (175.1); pct, a 0-1 share as a whole percent;
@@ -347,6 +348,13 @@ export interface SportConfig {
   depthChart?: {
     has: (player: SkillPlayer, position: string, season: number) => boolean;
     load: (player: SkillPlayer, position: string, season: number, context: DepthLoadContext) => Promise<DepthView>;
+  };
+  // The card's Zones tab (MLB's: a pitcher's or hitter's season by zone, a pitcher's arsenal): whether a
+  // row has it for a season, its tab's name, and its zones (player-card/zones.ts)
+  zones?: {
+    has: (player: SkillPlayer, position: string, season: number) => boolean;
+    title: (position: string) => string;
+    load: (player: SkillPlayer, position: string, season: number) => Promise<ZoneView>;
   };
   // The card's big hero logo when the sport has a sharper one than the grid's icon (the NFL's, 256px)
   cardLogo?: (logo: string) => string;
