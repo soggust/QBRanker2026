@@ -367,6 +367,11 @@ export interface SportConfig {
   cardHistory?: { title: string; icon: string; rows: (player: SkillPlayer) => HistoryRow[] };
   // More files in each season's folder (key -> file), read into DATA beside skill-players.json
   dataFiles?: Record<string, string>;
+  // The stats can count the playoffs, or the regular season and the playoffs together (the settings
+  // menu's Stats From; data.ts SeasonPart): skill-players.json's playoff and combined files, and the
+  // dataFiles keys named here (whichever of them have their own)
+  seasonParts?: boolean;
+  seasonPartFiles?: string[];
   // Tabs built in the app from DATA rather than read from skill-players.json (the NFL's QBs)
   extraRows?: () => Record<string, SkillPlayer[]>;
   // The sport's own settings (settings menu)

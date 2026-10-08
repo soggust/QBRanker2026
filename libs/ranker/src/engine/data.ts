@@ -22,14 +22,31 @@ export const SEASONS = Array.from({ length: CURRENT_SEASON - SPORT.firstSeason +
 export const SEASON_LIVE = Date.now() < new Date(SPORT.currentSeasonEnds + 'T00:00:00').getTime();
 export const isLiveSeason = (season: number) => season === CURRENT_SEASON && SEASON_LIVE;
 
-// The season DATA holds, and a count that goes up with every load (for caches keyed on the data)
+// Which games the stats count (SPORT.seasonParts): the regular season, the playoffs, or both. A season's
+// playoffs and both sit next to its regular season, skill-players.post.json and skill-players.all.json
+// (only the files SPORT.seasonPartFiles adds have them too; the rest are the season's either way)
+export type SeasonPart = 'regular' | 'post' | 'all';
+export const SEASON_PARTS: SeasonPart[] = ['regular', 'post', 'all'];
+
+// (from a shared link, ?part=post, when the sport has them)
+function linkedPart(): SeasonPart {
+  const linked = new URLSearchParams(location.search).get('part') as SeasonPart | null;
+  return SPORT.seasonParts && linked && SEASON_PARTS.includes(linked) ? linked : 'regular';
+}
+
+// The season and part DATA holds, and a count that goes up with every load (for caches keyed on the data)
 export let dataSeason = CURRENT_SEASON;
+export let dataPart: SeasonPart = linkedPart();
 export let dataVersion = 0;
 
 const FILES: Record<string, string> = {
   skillPlayers: 'skill-players.json',
   ...SPORT.dataFiles,
 };
+const PART_KEYS = new Set(['skillPlayers', ...(SPORT.seasonPartFiles ?? [])]);
+
+// (a file's name for a part: skill-players.post.json)
+const partFile = (key: string, file: string, part: SeasonPart) => (part !== 'regular' && PART_KEYS.has(key) ? file.replace(/\.json$/, `.${part}.json`) : file);
 
 // A season from a shared link (?season=2024), if it's one we have. Refreshing the page goes back to
 // the current season (and takes ?season out of the address); opening a link still lands on its year.
@@ -50,9 +67,20 @@ export function linkedSeason(): number {
 // The current season is fetched with "no-cache" (it still uses the browser's copy, but checks with
 // the server first, so a nightly data update shows up on the next visit); a finished season never
 // changes, so the browser's copy is used as is
-export async function loadData(season = CURRENT_SEASON): Promise<void> {
-  Object.assign(DATA, await fetchSeason(season));
+// A part the season doesn't have (no playoffs yet, or none built) loads its regular season instead:
+// dataPart says which it got
+export async function loadData(season = CURRENT_SEASON, part = dataPart): Promise<void> {
+  let data: AppData;
+  try {
+    data = await fetchSeason(season, part);
+  } catch (err) {
+    if (part === 'regular') throw err;
+    data = await fetchSeason(season);
+    part = 'regular';
+  }
+  Object.assign(DATA, data);
   dataSeason = season;
+  dataPart = part;
   dataVersion++;
 }
 
@@ -74,9 +102,9 @@ export function withSeason<T>(season: number, data: AppData, fn: () => T): T {
 
 // A season's files, without loading them into DATA (the player card reads other seasons this way,
 // leaving the table on its own)
-export async function fetchSeason(season: number): Promise<AppData> {
+export async function fetchSeason(season: number, part: SeasonPart = 'regular'): Promise<AppData> {
   const entries = await Promise.all(
-    Object.entries(FILES).map(async ([key, file]) => [key, await fetchSeasonFile(season, file)] as const),
+    Object.entries(FILES).map(async ([key, file]) => [key, await fetchSeasonFile(season, partFile(key, file, part))] as const),
   );
   return Object.fromEntries(entries) as unknown as AppData;
 }

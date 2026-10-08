@@ -1,5 +1,5 @@
 import { SPORT } from '@sport/sport';
-import { CURRENT_SEASON, dataSeason, loadData } from '@ranker/engine/data';
+import { CURRENT_SEASON, SeasonPart, dataPart, dataSeason, loadData } from '@ranker/engine/data';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, EMPTY, Observable, combineLatest, distinctUntilChanged, map, merge } from 'rxjs';
 import { connectRosterGrades } from '@ranker/engine/roster-grades';
@@ -131,28 +131,54 @@ export class PositionService {
   public season$ = this.seasonSubject.asObservable();
   private seasonLoadingSubject = new BehaviorSubject<boolean>(false);
   public seasonLoading$ = this.seasonLoadingSubject.asObservable();
-  private ordersBySeason = new Map<number, Partial<Record<SkillPosition, UnitOrder>>>();
+  private ordersBySeason = new Map<string, Partial<Record<SkillPosition, UnitOrder>>>();
+
+  // Which games the stats count (data.ts SeasonPart: the regular season, the playoffs or both), the
+  // settings menu's Stats From
+  private seasonPartSubject = new BehaviorSubject<SeasonPart>(dataPart);
+  public seasonPart$ = this.seasonPartSubject.asObservable();
 
   get season(): number {
     return this.seasonSubject.value;
   }
 
+  get seasonPart(): SeasonPart {
+    return this.seasonPartSubject.value;
+  }
+
   // Load another season's data and show it: the rows are rebuilt first, then the orders swap to that
   // season's, then the pages hear the season changed
   async setSeason(season: number): Promise<void> {
-    if (season === this.season || this.seasonLoadingSubject.value) return;
+    if (season === this.season) return;
+    await this.load(season, this.seasonPart);
+  }
+
+  // The playoffs, both, or the regular season again (a season without the part stays on its regular
+  // season; false says so)
+  async setSeasonPart(part: SeasonPart): Promise<boolean> {
+    if (part === this.seasonPart) return true;
+    await this.load(this.season, part);
+    return this.seasonPart === part;
+  }
+
+  private async load(season: number, part: SeasonPart): Promise<void> {
+    if (this.seasonLoadingSubject.value) return;
     this.seasonLoadingSubject.next(true);
     try {
-      await loadData(season);
+      await loadData(season, part);
       rebuildUnits();
-      this.ordersBySeason.set(this.season, this.unitOrdersSubject.value);
-      this.unitOrdersSubject.next(this.ordersBySeason.get(season) ?? {});
+      this.ordersBySeason.set(`${this.season}.${this.seasonPart}`, this.unitOrdersSubject.value);
+      this.unitOrdersSubject.next(this.ordersBySeason.get(`${season}.${dataPart}`) ?? {});
+      this.seasonPartSubject.next(dataPart);
       this.seasonSubject.next(season);
 
-      // A past season goes in the address, so a shared link opens it (?season=2024)
+      // A past season goes in the address, so a shared link opens it (?season=2024), and the playoffs
+      // or both (?part=post)
       const url = new URL(location.href);
       if (season === CURRENT_SEASON) url.searchParams.delete('season');
       else url.searchParams.set('season', String(season));
+      if (dataPart === 'regular') url.searchParams.delete('part');
+      else url.searchParams.set('part', dataPart);
       history.replaceState(null, '', url);
     } catch (err) {
       console.error(err);
@@ -166,9 +192,9 @@ export class PositionService {
   }
 
   // A tab's order in any season this visit (the player card ranks other seasons with it when it was
-  // dragged by hand)
+  // dragged by hand; it reads other seasons' regular seasons)
   seasonUnitOrder(season: number, position: SkillPosition): UnitOrder | undefined {
-    return season === this.season ? this.unitOrder(position) : this.ordersBySeason.get(season)?.[position];
+    return season === this.season ? this.unitOrder(position) : this.ordersBySeason.get(`${season}.regular`)?.[position];
   }
 
   setUnitOrder(position: SkillPosition, ids: string[], manual: boolean): void {

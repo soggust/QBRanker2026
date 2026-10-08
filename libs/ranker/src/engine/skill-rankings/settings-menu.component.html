@@ -13,6 +13,12 @@
   <div class="menu-col">
   <!-- Format: how the stats are counted and shown -->
   <div class="menu-section section-stats" (click)="$event.stopPropagation()"><mat-icon fontIcon="tune"></mat-icon>Format</div>
+  @if (sport.seasonParts) {
+    <div mat-menu-item [title]="seasonPartTitle" (click)="$event.stopPropagation(); cycleSeasonPart()">
+      <span class="menu-slot"><span class="menu-value" aria-live="polite">{{ seasonPartNote || seasonPartLabels[seasonPart] }}</span></span>
+      <span>Stats From</span>
+    </div>
+  }
   @for (setting of settingsAt('formatTop'); track setting.key) {
     <ng-container *ngTemplateOutlet="choice; context: { $implicit: setting }"></ng-container>
   }

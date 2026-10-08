@@ -19,7 +19,7 @@ import { logoForSeason } from '@sport/logo-eras';
 import { SportSetting, SportSettings } from '@ranker/engine/sport';
 import { PositionService, RankerSettings } from '@ranker/engine/position.service';
 import { SeasonDataService } from '@ranker/engine/season-data.service';
-import { CURRENT_SEASON, SEASONS, dataSeason, dataVersion, isLiveSeason } from '@ranker/engine/data';
+import { CURRENT_SEASON, SEASONS, SeasonPart, dataPart, dataSeason, dataVersion, isLiveSeason } from '@ranker/engine/data';
 import { SKILL_UNITS, emptyIn, recentCount, statIsEmpty } from '@ranker/engine/unit-scoring';
 import { StatReader } from '@ranker/engine/stat-reader';
 import { settingGroups, settingOptions, settingText, settingsAt } from '@ranker/engine/setting-options';
@@ -54,6 +54,7 @@ export class SkillRankingsComponent implements OnChanges, CardHost {
   // The year dropdown: every season we have, newest first
   readonly seasons = SEASONS;
   season = CURRENT_SEASON;
+  seasonPart: SeasonPart = dataPart;
   seasonLoading = false;
 
   readonly sport = SPORT;
@@ -130,11 +131,12 @@ export class SkillRankingsComponent implements OnChanges, CardHost {
     service.settings$.pipe(takeUntilDestroyed()).subscribe(() => this.position && this.sortPlayers());
     service.statHidden$.pipe(takeUntilDestroyed()).subscribe(() => this.position && this.sortPlayers());
 
-    // Another season from the year dropdown: its rows from the top, in that season's order for this
-    // tab (dragged or not) if it has one, otherwise sorted by the sliders
+    // Another season from the year dropdown (or its playoffs, Stats From): its rows from the top, in
+    // that season's order for this tab (dragged or not) if it has one, otherwise sorted by the sliders
     service.season$.pipe(takeUntilDestroyed()).subscribe((season) => {
-      const changed = season !== this.season;
+      const changed = season !== this.season || service.seasonPart !== this.seasonPart;
       this.season = season;
+      this.seasonPart = service.seasonPart;
       if (changed && this.position) this.ngOnChanges();
     });
     service.seasonLoading$.pipe(takeUntilDestroyed()).subscribe((loading) => (this.seasonLoading = loading));

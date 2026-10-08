@@ -7,6 +7,7 @@ import { PositionService, RankerSettings } from '@ranker/engine/position.service
 import { SKILL_UNITS } from '@ranker/engine/unit-scoring';
 import { minCount, seasonLength, steppedMin } from '@ranker/engine/playing-time';
 import { settingText, settingsAt } from '@ranker/engine/setting-options';
+import { SEASON_PARTS, SeasonPart } from '@ranker/engine/data';
 
 // A switch in the Display section: one of ours, or the sport's (SPORT.settings)
 interface MenuSwitch {
@@ -44,6 +45,28 @@ export class SettingsMenuComponent {
   readonly rookiesTitle =
     `On: list only players in their first season (and first-year head coaches), across every tab but the team ones. ` +
     `A first season is the first one they're in our data, so ${SPORT.seasonText(SPORT.firstSeason)} lists everyone`;
+
+  // Stats From (SPORT.seasonParts): the regular season, the playoffs, or both; a season without
+  // playoffs (none yet, or none built) says so for a moment and stays on its regular season
+  readonly seasonPartLabels: Record<SeasonPart, string> = { regular: 'Season', post: 'Playoffs', all: 'Both' };
+  readonly seasonPartTitle =
+    'Click to switch which games the stats count: the regular season, the playoffs, or the two together ' +
+    '(rates and per-game stats worked out over those games; a season with no playoffs keeps its regular season)';
+  seasonPartNote = '';
+  private noteTimer?: ReturnType<typeof setTimeout>;
+
+  get seasonPart(): SeasonPart {
+    return this.positionService.seasonPart;
+  }
+
+  async cycleSeasonPart(): Promise<void> {
+    const next = SEASON_PARTS[(SEASON_PARTS.indexOf(this.seasonPart) + 1) % SEASON_PARTS.length];
+    if (await this.positionService.setSeasonPart(next)) return;
+    // (no playoffs that season: back around to the regular season, with a word why)
+    this.seasonPartNote = 'None yet';
+    clearTimeout(this.noteTimer);
+    this.noteTimer = setTimeout(() => (this.seasonPartNote = ''), 1800);
+  }
 
   get copyStatsTitle(): string {
     const what = this.settings.showRanks ? 'ranks' : 'stats';
