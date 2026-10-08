@@ -67,6 +67,23 @@ export function linkedSeason(): number {
 // The current season is fetched with "no-cache" (it still uses the browser's copy, but checks with
 // the server first, so a nightly data update shows up on the next visit); a finished season never
 // changes, so the browser's copy is used as is
+// Whether a season has its playoffs built (Stats From greys out until it does): asked for the file's
+// headers only, once a season. (A missing file is a 404, or the site's page in its place: not JSON.)
+const partsKnown = new Map<number, Promise<boolean>>();
+export function hasSeasonParts(season: number): Promise<boolean> {
+  if (!SPORT.seasonParts) return Promise.resolve(false);
+  let known = partsKnown.get(season);
+  if (!known) {
+    const current = season === CURRENT_SEASON;
+    const dir = current ? 'data' : `data/seasons/${season}`;
+    known = fetch(`${dir}/${partFile('skillPlayers', FILES['skillPlayers'], 'post')}`, { method: 'HEAD', cache: current ? 'no-cache' : 'default' })
+      .then((res) => res.ok && (res.headers.get('content-type') ?? '').includes('json'))
+      .catch(() => false);
+    partsKnown.set(season, known);
+  }
+  return known;
+}
+
 // A part the season doesn't have (no playoffs yet, or none built) loads its regular season instead:
 // dataPart says which it got
 export async function loadData(season = CURRENT_SEASON, part = dataPart): Promise<void> {

@@ -55,6 +55,13 @@ export class SettingsMenuComponent {
   seasonPartNote = '';
   private noteTimer?: ReturnType<typeof setTimeout>;
 
+  readonly noSeasonPartsTitle = "No playoff stats for this season yet: the stats are the regular season's";
+
+  // (a season without its playoffs built: greyed out, on Season)
+  get seasonPartsAvailable(): boolean {
+    return this.positionService.seasonPartsAvailable;
+  }
+
   get seasonPart(): SeasonPart {
     return this.positionService.seasonPart;
   }

@@ -1,5 +1,5 @@
 import { SPORT } from '@sport/sport';
-import { CURRENT_SEASON, SeasonPart, dataPart, dataSeason, loadData } from '@ranker/engine/data';
+import { CURRENT_SEASON, SeasonPart, dataPart, dataSeason, hasSeasonParts, loadData } from '@ranker/engine/data';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, EMPTY, Observable, combineLatest, distinctUntilChanged, map, merge } from 'rxjs';
 import { connectRosterGrades } from '@ranker/engine/roster-grades';
@@ -95,6 +95,7 @@ export class PositionService {
   // (a shared list's link opened: its sliders, eyes and settings, applied once everything's set up)
   constructor() {
     applySharedLink(this, DEFAULT_SETTINGS);
+    this.checkSeasonParts(dataSeason);
     // (a linked part the season doesn't have loaded its regular season: the address says so too)
     const url = new URL(location.href);
     if (url.searchParams.has('part') && url.searchParams.get('part') !== dataPart) {
@@ -153,6 +154,13 @@ export class PositionService {
   // settings menu's Stats From
   private seasonPartSubject = new BehaviorSubject<SeasonPart>(dataPart);
   public seasonPart$ = this.seasonPartSubject.asObservable();
+  // (whether the season on screen has its playoffs built: Stats From is greyed out until it does)
+  seasonPartsAvailable = false;
+  private checkSeasonParts(season: number): void {
+    hasSeasonParts(season).then((has) => {
+      if (season === this.season) this.seasonPartsAvailable = has;
+    });
+  }
 
   get season(): number {
     return this.seasonSubject.value;
@@ -187,6 +195,8 @@ export class PositionService {
       this.unitOrdersSubject.next(this.ordersBySeason.get(`${season}.${dataPart}`) ?? {});
       this.seasonPartSubject.next(dataPart);
       this.seasonSubject.next(season);
+      this.seasonPartsAvailable = false;
+      this.checkSeasonParts(season);
 
       // A past season goes in the address, so a shared link opens it (?season=2024), and the playoffs
       // or both (?part=post)
