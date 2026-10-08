@@ -1,6 +1,6 @@
 import { SKILL_STATS, SkillPlayer, SkillPosition, SkillStat, SkillStatGroup, SkillWeights, StatGroupId, skillGroups, statGroup } from '@sport/positions';
 import { SPORT } from '@sport/sport';
-import { PositionService } from '@ranker/engine/position.service';
+import { DEFAULT_SETTINGS, PositionService } from '@ranker/engine/position.service';
 import { SeasonDataService } from '@ranker/engine/season-data.service';
 import { byTotals, combinedFor, combinedWeights, weightedTotals } from '@ranker/engine/unit-scoring';
 import { StatReader } from '@ranker/engine/stat-reader';
@@ -65,15 +65,27 @@ export class TabRanker {
   // Best first by the sliders: switched-off groups and stats don't count, and each combined pair's
   // parts count by their parent slider (another tab's, for a card opened on it). Combined (the setting),
   // a pair counts as its column, the total its sliders mix, so the list goes by the number it shows.
-  ranked(reader: StatReader, players: SkillPlayer[], position: SkillPosition): SkillPlayer[] {
+  //
+  // The list's filters (Min Games, Injured Players, Rookies Only) only leave players out: every row of the
+  // tab is ranked, each stat measured against the same players whatever they're set to (the rows with
+  // the sport's default Min Games: the list as it first opens), and then the players asked for are kept
+  // in that order. (Measured against just the players left, a stat's average and spread moved with
+  // the filters, and players who stayed swapped places.)
+  ranked(reader: StatReader, players: SkillPlayer[], position: SkillPosition, rows: Record<string, SkillPlayer[]> = { [position]: players }): SkillPlayer[] {
     const { stats, hidden } = this.tab(position);
     const combined = this.settings.combineStats;
     const counted = (combined ? this.combine(stats, position).stats : stats).filter(
       (stat) => !hidden[statGroup(stat)] && !this.statHidden(stat.key, position) && !reader.recentOff(stat),
     );
     const weights = combinedWeights(position, this.mixWeights(position), combined);
-    const totals = weightedTotals(players, counted, weights, (player, stat) => reader.value(player, stat), undefined, this.settings.sport);
-    return byTotals(players, totals, this.settings.sport);
+    const keep = new Set(players);
+    const visible = (rows[position] ?? []).filter((player) => SPORT.rowVisible?.(player, this.settings.sport) ?? true);
+    const seen = new Set(visible);
+    const all = [...visible, ...players.filter((player) => !seen.has(player))];
+    const min = hasMin(position) ? minCount(DEFAULT_SETTINGS, seasonLength(rows, position)) : 0;
+    const pool = all.filter((player) => SPORT.playingTime.of(player) >= min);
+    const totals = weightedTotals(all, counted, weights, (player, stat) => reader.value(player, stat), undefined, this.settings.sport, pool);
+    return byTotals(all, totals, this.settings.sport).filter((player) => keep.has(player));
   }
 
   // A list in a saved order (players that have since appeared go at the end)

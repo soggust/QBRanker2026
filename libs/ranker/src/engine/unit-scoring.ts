@@ -133,8 +133,12 @@ export function weightedTotals<T>(
   value: (unit: T, stat: SkillStat) => number | null,
   reliability: ((unit: T, stat: SkillStat) => number) | null = (SPORT.reliability as ((unit: T, stat: SkillStat) => number) | undefined) ?? null,
   settings: SportSettings = DEFAULT_SPORT_SETTINGS,
+  // (the units each stat's average and spread come from, when not all of them: a list's filters then
+  // only leave units out, never move the ones left; see TabRanker.ranked)
+  pool?: T[],
 ): Map<T, number> {
   const totals = new Map<T, number>(units.map((unit) => [unit, 0]));
+  const index = new Map(units.map((unit, i) => [unit, i]));
   // (each unit's skipMissing stats: the strength he's missing, and the score and strength he has)
   const skipped = new Map<T, { missed: number; sum: number; strength: number }>();
   const skipOf = (unit: T) => skipped.get(unit) ?? skipped.set(unit, { missed: 0, sum: 0, strength: 0 }).get(unit)!;
@@ -142,12 +146,15 @@ export function weightedTotals<T>(
     const weight = weights[stat.key] ?? 0;
     if (!weight || stat.infoOnly || stat.shownWhen?.(settings) === false) continue;
 
-    const raw = units.map((unit) => {
+    const rawOf = (unit: T) => {
       const shown = value(unit, stat);
       const scored = SPORT.scoreValue?.(unit as SkillPlayer, stat, shown, settings);
       return scored === undefined ? shown : scored;
-    });
-    const known = raw.filter((v): v is number => v !== null);
+    };
+    const raw = units.map(rawOf);
+    const isNumber = (v: number | null): v is number => v !== null;
+    const pooled = pool?.map((unit) => (index.has(unit) ? raw[index.get(unit)!] : rawOf(unit))).filter(isNumber);
+    const known = pooled && pooled.length >= 2 ? pooled : raw.filter(isNumber);
     if (known.length < 2) continue;
     const mean = known.reduce((a, b) => a + b, 0) / known.length;
     const sd = Math.sqrt(known.reduce((a, b) => a + (b - mean) ** 2, 0) / known.length);

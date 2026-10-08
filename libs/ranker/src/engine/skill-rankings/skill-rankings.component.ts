@@ -184,7 +184,7 @@ export class SkillRankingsComponent implements OnChanges, CardHost {
   // Sort by the sliders (weighted totals of every stat that counts), then head-to-head among ties
   sortPlayers(): void {
     const from = this.glide.measure(this.rankingsList?.nativeElement);
-    this.playerList = this.limited(this.shown(this.ranker.ranked(this.reader, this.ranker.listed(SKILL_UNITS, this.season, this.position), this.position)));
+    this.playerList = this.limited(this.shown(this.ranker.ranked(this.reader, this.ranker.listed(SKILL_UNITS, this.season, this.position), this.position, SKILL_UNITS)));
     this.publishOrder(false);
     this.glide.play(() => this.rankingsList?.nativeElement, from);
   }
@@ -312,7 +312,7 @@ export class SkillRankingsComponent implements OnChanges, CardHost {
   }
 
   rankedIn(context: SeasonContext, players: SkillPlayer[]): SkillPlayer[] {
-    return this.ranker.ranked(this.readerFor(context), players, context.position ?? this.position);
+    return this.ranker.ranked(this.readerFor(context), players, context.position ?? this.position, context.rows);
   }
 
   // ---------------------------------------------------------------------------
