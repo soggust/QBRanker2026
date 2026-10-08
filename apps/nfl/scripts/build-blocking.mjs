@@ -93,11 +93,39 @@ const inPart = (part, seasonType) => part === 'all' || (part === 'regular') === 
 
 const round = (v, d = 3) => (v === null ? null : Math.round(v * 10 ** d) / 10 ** d);
 
-const seasons = fs
+// Both stats on every RB, WR and TE row, empty (null) where they aren't charted: the shape update-data.mjs
+// writes, so every season and part has the same fields (a tab reads only its own: Pass Pro for RBs, Run
+// Block EPA for WRs and TEs). True when it added any.
+function withBlockingFields(units) {
+  let added = false;
+  for (const pos of POSITIONS) {
+    for (const unit of units[pos] ?? []) {
+      for (const key of ['runBlockEpa', 'passProPct']) {
+        if (key in unit.stats) continue;
+        unit.stats[key] = null;
+        added = true;
+      }
+    }
+  }
+  return added;
+}
+
+const allSeasons = fs
   .readdirSync(SEASONS_DIR)
-  .filter((dir) => /^\d{4}$/.test(dir) && Number(dir) >= FIRST)
+  .filter((dir) => /^\d{4}$/.test(dir))
   .map(Number)
   .sort((a, b) => a - b);
+const seasons = allSeasons.filter((season) => season >= FIRST);
+
+// The seasons before participation data: the fields, empty
+for (const season of allSeasons.filter((season) => season < FIRST)) {
+  for (const part of PARTS) {
+    const file = path.join(SEASONS_DIR, String(season), PART_FILES[part]);
+    if (!fs.existsSync(file)) continue;
+    const units = JSON.parse(fs.readFileSync(file, 'utf8'));
+    if (withBlockingFields(units)) fs.writeFileSync(file, JSON.stringify(units));
+  }
+}
 
 for (const season of seasons) {
   let pbp, participation;
@@ -214,7 +242,6 @@ for (const season of seasons) {
       for (const unit of units[pos] ?? []) {
         const row = out[unit.gsisId];
         if (pos === 'RB') {
-          delete unit.stats.runBlockEpa;
           const value = row && row[11] >= 40 && row[9] >= 40 ? round((row[10] / row[9] - row[12] / row[11]) * 100, 1) : null;
           unit.stats.passProPct = value;
           if (value !== null) passFilled++;
@@ -225,6 +252,7 @@ for (const season of seasons) {
         }
       }
     }
+    withBlockingFields(units);
     fs.writeFileSync(file, JSON.stringify(units));
     console.log(`${season} ${part}: ${Object.keys(out).length} players, ${runFilled} with Run Block EPA, ${passFilled} RBs with Pass Pro`);
   }
@@ -234,12 +262,4 @@ for (const season of seasons) {
 // update writes them empty too)
 const currentFile = path.join(SEASONS_DIR, '..', 'skill-players.json');
 const current = JSON.parse(fs.readFileSync(currentFile, 'utf8'));
-for (const pos of POSITIONS) {
-  for (const unit of current[pos] ?? []) {
-    if (pos === 'RB') {
-      delete unit.stats.runBlockEpa;
-      unit.stats.passProPct ??= null;
-    } else unit.stats.runBlockEpa ??= null;
-  }
-}
-fs.writeFileSync(currentFile, JSON.stringify(current));
+if (withBlockingFields(current)) fs.writeFileSync(currentFile, JSON.stringify(current));

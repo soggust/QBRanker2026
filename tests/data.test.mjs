@@ -48,10 +48,6 @@ const OPTIONAL = new Set(['injured', 'injuryStatus']);
 // Recent form, which a finished season's regular-season file leaves out (the app shows Recent for the
 // season being played only) and its playoff files keep
 const RECENT = /^(team)?[lL]astFive(Vs|Ot)?$/;
-// Known gap, reported 2026-10-08: the NFL's finished regular seasons have no Pass Pro / Run Block
-// on-off stats or TOP per game, which their .post/.all files and the current season do have. Listed so
-// the check still catches anything new; take these out once the data is rebuilt.
-const KNOWN_EXTRA = { nfl: new Set(['stats.passProPct', 'stats.runBlockEpa', 'stats.topPerGame']) };
 
 for (const sport of SPORTS) {
   test(`${sport}: every JSON file under StaticData parses`, () => {
@@ -112,7 +108,7 @@ for (const sport of SPORTS) {
           const regAny = new Set(regRows.flatMap(fieldsOf));
           const finished = !isCurrent(dir);
           const extra = [...commonFields(rows[tab])].filter(
-            (f) => !regAny.has(f) && !(finished && (RECENT.test(f) || KNOWN_EXTRA[sport]?.has(f))),
+            (f) => !regAny.has(f) && !(finished && RECENT.test(f)),
           );
           assert.deepEqual(extra, [], `${where} ${part} ${tab}: has ${extra.join(', ')}, which skill-players.json doesn't`);
         }
