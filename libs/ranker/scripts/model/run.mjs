@@ -62,8 +62,14 @@ async function runSport(sport) {
     console.log(`${sport}: history started, ${games.size} games (${current - 1}-${current})`);
   }
   const upcoming = [];
-  for (let d = -4; d <= 2; d++) {
-    for (const e of await scoreboard(cfg.league, ymd(new Date(now.getTime() + d * DAY)))) {
+  // (the last few days and the next two; and the day of any bet still open from before then, should the
+  // runs ever have stopped a while)
+  const days = new Set(Array.from({ length: 7 }, (_, i) => ymd(new Date(now.getTime() + (i - 4) * DAY))));
+  for (const bet of read(path.join(ROOT, 'apps', sport, 'src/StaticData/model/ledger.json'), { bets: [] }).bets) {
+    if (bet.status === 'open' && Date.parse(bet.start) < now.getTime() - 4 * DAY) days.add(ymd(new Date(bet.start)));
+  }
+  for (const day of days) {
+    for (const e of await scoreboard(cfg.league, day)) {
       const g = gameOf(e);
       if (!g || (g.type !== 2 && g.type !== 3)) continue;
       games.set(g.id, { ...(games.get(g.id) ?? {}), ...g });
