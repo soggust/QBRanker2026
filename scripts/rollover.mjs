@@ -124,13 +124,20 @@ async function main() {
 
   if (dry) {
     console.log(
-      `  then: SEASON=${current} node apps/${sport}/scripts/update-data.mjs, node apps/${sport}/scripts/build-comps.mjs`,
+      `  then: SEASON=${current} node apps/${sport}/scripts/update-data.mjs, its season builders for ${current} (depth, coaches, game logs: the ones it has), node apps/${sport}/scripts/build-comps.mjs`,
     );
     return;
   }
 
   // 2. The finished season, archived
   run([scriptFile], { SEASON: String(current) });
+
+  // (the finished season's other files, by the sport's builders that keep one per season: the NFL's depth
+  // charts and staffs, the NBA's and MLB's staffs, the NHL's game logs)
+  for (const builder of ["build-depth.mjs", "build-coaches.mjs", "backfill-game-logs.mjs"]) {
+    const file = path.join(ROOT, "apps", sport, "scripts", builder);
+    if (existsSync(file)) run([file, String(current)]);
+  }
 
   // 3. Similar seasons and careers (esbuild: the packages)
   if (!existsSync(path.join(ROOT, "node_modules", "esbuild"))) {

@@ -23,7 +23,8 @@ const CACHE = path.join(ROOT, '.cache/nflverse');
 const DATA = path.join(ROOT, 'apps/nfl/src/StaticData');
 const NFLVERSE = 'https://github.com/nflverse/nflverse-data/releases/download';
 const SCHEDULE_URL = 'https://raw.githubusercontent.com/nflverse/nfldata/master/data/games.csv';
-const CURRENT_SEASON = 2026;
+// (the season in the data: update-data.mjs's, the one scripts/rollover.mjs bumps)
+const CURRENT_SEASON = Number(readFileSync(path.join(import.meta.dirname, 'update-data.mjs'), 'utf8').match(/^const CURRENT_SEASON = (\d+);/m)[1]);
 // (fresh enough: the nightly run downloads the season being played again; a past season's never change)
 const FRESH_HOURS = 6;
 

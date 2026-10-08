@@ -8,12 +8,13 @@
 //   node apps/nfl/scripts/build-coaches.mjs              (the season being played: nightly)
 //   node apps/nfl/scripts/build-coaches.mjs 2001-2025    (past seasons: once)
 
-import { mkdirSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 
 const ROOT = path.resolve(import.meta.dirname, '../../..');
 const DATA = path.join(ROOT, 'apps/nfl/src/StaticData');
-const CURRENT_SEASON = 2026;
+// (the season in the data: update-data.mjs's, the one scripts/rollover.mjs bumps)
+const CURRENT_SEASON = Number(readFileSync(path.join(import.meta.dirname, 'update-data.mjs'), 'utf8').match(/^const CURRENT_SEASON = (\d+);/m)[1]);
 const API = 'https://en.wikipedia.org/w/api.php';
 const AGENT = 'QBRanker/1.0 (https://github.com/soggust; data build)';
 
