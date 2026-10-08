@@ -68,11 +68,38 @@
         ]
       },
       {
-        "source": "**/*.@(html|json)",
+        "source": "**/*.html",
         "headers": [
           {
             "key": "Cache-Control",
             "value": "no-cache"
+          }
+        ]
+      },
+      {
+        "regex": "^/[a-z]+/data/[^/]+\\.json$",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache"
+          }
+        ]
+      },
+      {
+        "regex": "^/[a-z]+/data/(analysis|careers|depth)/.+\\.json$",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache"
+          }
+        ]
+      },
+      {
+        "regex": "^/[a-z]+/data/(seasons|game-logs)/.+\\.json$",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "public, max-age=86400, stale-while-revalidate=604800"
           }
         ]
       },
