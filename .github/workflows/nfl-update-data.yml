@@ -35,6 +35,17 @@ jobs:
           node-version: "22"
           cache: "npm"
 
+      # (the finished games' summaries already read, so a run reads only the new ones: update-data.mjs; and
+      # nflverse's files, fresh for six hours, so the retry runs don't download them again: build-depth.mjs)
+      - name: Restore the download caches
+        uses: actions/cache@v4
+        with:
+          path: |
+            .cache/nfl-summaries
+            .cache/nflverse
+          key: nfl-cache-${{ github.run_id }}
+          restore-keys: nfl-cache-
+
       # A new season that has begun (yesterday's games on ESPN) becomes current before the night's
       # update: the finished one is archived as a past season (scripts/rollover.mjs)
       - name: Roll over to a new season

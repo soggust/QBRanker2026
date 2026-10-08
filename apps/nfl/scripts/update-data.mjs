@@ -1258,15 +1258,29 @@ async function qbBoxStats(id) {
 // attempts]]. Only to tell whether ESPN's season totals have caught up with those games yet
 const summaryAttempts = new Map();
 function noteAttempts(summary, date) {
+  const noted = [];
   for (const team of summary.boxscore?.players ?? []) {
     const passing = team.statistics.find((c) => c.name === 'passing');
     const at = passing?.keys.indexOf('completions/passingAttempts') ?? -1;
     for (const a of passing?.athletes ?? []) {
       const attempts = Number(String(a.stats[at] ?? '0/0').split('/')[1]) || 0;
-      (summaryAttempts.get(a.athlete.id) ?? summaryAttempts.set(a.athlete.id, []).get(a.athlete.id)).push([date, attempts]);
+      noted.push([a.athlete.id, attempts]);
     }
   }
+  addAttempts(noted, date);
+  return noted;
 }
+
+function addAttempts(noted, date) {
+  for (const [id, attempts] of noted) (summaryAttempts.get(id) ?? summaryAttempts.set(id, []).get(id)).push([date, attempts]);
+}
+
+// What each finished game's summary gave (its starters, its passers' attempts), kept on disk between runs
+// (.cache, kept by the workflow): a final game doesn't change, so a night's run reads only the new games'
+const SUMMARY_CACHE = new URL(`../../../.cache/nfl-summaries/${SEASON}.json`, import.meta.url);
+const summaryCache = await readFile(SUMMARY_CACHE, 'utf8')
+  .then((text) => new Map(Object.entries(JSON.parse(text))))
+  .catch(() => new Map());
 
 // How many of a QB's latest games ESPN's season totals leave out (0: caught up): the fewest latest games
 // whose attempts make up the gap between the summaries' total and the season total
@@ -1281,8 +1295,18 @@ function gamesBehind(id, seasonAttempts) {
 
 // Returns [{ athlete, team, result }] for both teams in a game
 async function gameStarters(game) {
+  const cached = summaryCache.get(String(game.id));
+  if (cached) {
+    addAttempts(cached.attempts, game.date);
+    return cached.starters;
+  }
+  const starters = await readStarters(game);
+  return starters;
+}
+
+async function readStarters(game) {
   const summary = await getJson(`${SITE}/summary?event=${game.id}`);
-  noteAttempts(summary, game.date);
+  const attempts = noteAttempts(summary, game.date);
   const competitors = summary.header.competitions[0].competitors;
   const tie = competitors.every((c) => !c.winner);
 
@@ -1314,6 +1338,7 @@ async function gameStarters(game) {
     if (!PAST_SEASON) throw new Error(problem);
     console.warn(`${problem}; left out of the QB records`);
   }
+  summaryCache.set(String(game.id), { starters, attempts });
   return starters;
 }
 
@@ -1322,7 +1347,11 @@ async function main() {
   const games = await completedGames();
   console.log(`Season ${SEASON}: ${games.length} completed games`);
 
+  const fresh = games.filter((g) => !summaryCache.has(String(g.id))).length;
   const perGame = await mapBatched(games, 8, gameStarters);
+  console.log(`Game summaries: ${fresh} read, ${games.length - fresh} from the cache`);
+  await mkdir(new URL('.', SUMMARY_CACHE), { recursive: true });
+  await writeFile(SUMMARY_CACHE, JSON.stringify(Object.fromEntries(summaryCache)));
 
   // Games are in date order, so results accumulate chronologically
   const qbs = new Map();
