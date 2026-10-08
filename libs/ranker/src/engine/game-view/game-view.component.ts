@@ -23,7 +23,7 @@ import { GameTab, GameViewService } from './game-view.service';
 @Component({
   selector: 'game-view',
   templateUrl: './game-view.component.html',
-  styleUrls: ['../../styles/components/player-card.scss', '../../styles/components/game-view.scss'],
+  // (its look, the card's and its own, is global, kept to its element: styles/_cards.scss)
   standalone: false,
 })
 export class GameViewComponent {

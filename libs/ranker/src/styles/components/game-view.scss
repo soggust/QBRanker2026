@@ -194,8 +194,12 @@
     font-weight: 400;
   }
 
+  // (the total's column set off; its scores lit, its heading like the rest)
   .total {
     border-left: 1px solid rgba(255, 255, 255, 0.12);
+  }
+
+  td.total {
     color: var(--scoreboard-led);
   }
 

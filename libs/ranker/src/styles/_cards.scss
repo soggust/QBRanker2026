@@ -1,0 +1,14 @@
+// The player card's and the game view's look (styles/components/player-card.scss, game-view.scss), loaded
+// once for the whole page but kept to their own elements: nested under player-card and game-view, so it
+// reaches nothing else, and does reach the components inside them (the card's tabs). The game view is the
+// card's look plus its own, after it.
+@use "sass:meta";
+
+player-card,
+game-view {
+  @include meta.load-css("components/player-card");
+}
+
+game-view {
+  @include meta.load-css("components/game-view");
+}

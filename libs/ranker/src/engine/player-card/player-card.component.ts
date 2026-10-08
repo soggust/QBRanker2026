@@ -20,8 +20,7 @@ import { ZoneStat, ZoneView, pitchColor } from './zones';
 @Component({
   selector: 'player-card',
   templateUrl: './player-card.component.html',
-  // (the shared look: libs/ranker/src/styles/components, plus this sport's card partial)
-  styleUrls: ['../../styles/components/player-card.scss'],
+  // (its look is global, kept to its element: styles/_cards.scss)
   standalone: false,
 })
 export class PlayerCardComponent {
