@@ -289,7 +289,7 @@
                     <line class="wp-mid" x1="0" y1="100" x2="1000" y2="100" />
                     <path class="wp-fill home" clip-path="url(#wp-top)" [attr.d]="probabilityPath(wp, true)" />
                     <path class="wp-fill away" clip-path="url(#wp-bottom)" [attr.d]="probabilityPath(wp, true)" />
-                    <path class="wp-line" [attr.d]="probabilityPath(wp)" />
+                    <path class="wp-line" pathLength="1" [attr.d]="probabilityPath(wp)" />
                   </svg>
                   <span class="wp-edge top">{{ g.home.abbr }} 100%</span>
                   <span class="wp-edge mid">50%</span>
@@ -409,6 +409,8 @@
                               class="drive-bar"
                               [ngClass]="d.side"
                               [class.scoring]="d.scoring"
+                              [class.leftward]="d.start > d.end"
+                              [style.--i]="$index"
                               [style.left.%]="(d.start < d.end ? d.start : d.end)"
                               [style.width.%]="(d.start < d.end ? d.end - d.start : d.start - d.end) || 0.6"
                             ></span>
@@ -465,7 +467,7 @@
                           <path d="M19 47 A6 6 0 0 1 31 47" />
                         </g>
                         @for (m of marks(ch); track $index) {
-                          <circle class="mark" [ngClass]="[m.side, m.result]" [attr.cx]="m.x" [attr.cy]="m.y" r="0.8"><title>{{ m.text }}</title></circle>
+                          <circle class="mark" [ngClass]="[m.side, m.result]" [attr.cx]="m.x" [attr.cy]="m.y" r="0.8" [style.--i]="$index"><title>{{ m.text }}</title></circle>
                         }
                       </svg>
                     }
@@ -485,7 +487,7 @@
                           <circle cx="169" cy="64.5" r="15" />
                         </g>
                         @for (m of marks(ch); track $index) {
-                          <circle class="mark" [ngClass]="[m.side, m.result]" [attr.cx]="m.x" [attr.cy]="m.y" [attr.r]="m.result === 'goal' ? 2.6 : 1.6"><title>{{ m.text }}</title></circle>
+                          <circle class="mark" [ngClass]="[m.side, m.result]" [attr.cx]="m.x" [attr.cy]="m.y" [attr.r]="m.result === 'goal' ? 2.6 : 1.6" [style.--i]="$index"><title>{{ m.text }}</title></circle>
                         }
                       </svg>
                     }
@@ -500,7 +502,7 @@
                           <circle [attr.cx]="field.mound[0]" [attr.cy]="field.mound[1]" r="3" />
                         </g>
                         @for (m of marks(ch); track $index) {
-                          <circle class="mark" [ngClass]="[m.side, m.result === 'out' ? 'missed' : 'made', m.result]" [attr.cx]="m.x" [attr.cy]="m.y" [attr.r]="m.result === 'hr' ? 4 : 2.6"><title>{{ m.text }}</title></circle>
+                          <circle class="mark" [ngClass]="[m.side, m.result === 'out' ? 'missed' : 'made', m.result]" [attr.cx]="m.x" [attr.cy]="m.y" [attr.r]="m.result === 'hr' ? 4 : 2.6" [style.--i]="$index"><title>{{ m.text }}</title></circle>
                         }
                       </svg>
                       <!-- (the park the wall is drawn for) -->
@@ -541,7 +543,7 @@
                   <line class="pitch-zone-third" x1="90" [attr.y1]="py(181.7)" x2="150" [attr.y2]="py(181.7)" />
                   <path class="pitch-plate" d="M100 326 L140 326 L140 331 L120 337 L100 331 Z" />
                   @for (p of pitches(ch); track $index) {
-                    <circle class="pitch" [class.ball]="p.result === 'ball'" [attr.cx]="p.x" [attr.cy]="py(p.y)" r="2.8" [style.fill]="p.result === 'ball' ? 'none' : pitchColor(p.type)" [style.stroke]="p.result === 'ball' ? pitchColor(p.type) : null"><title>{{ p.pitcher }}: {{ p.type }}{{ p.mph ? ', ' + p.mph + ' mph' : '' }} ({{ p.result }})</title></circle>
+                    <circle class="pitch" [class.ball]="p.result === 'ball'" [style.--i]="$index" [attr.cx]="p.x" [attr.cy]="py(p.y)" r="2.8" [style.fill]="p.result === 'ball' ? 'none' : pitchColor(p.type)" [style.stroke]="p.result === 'ball' ? pitchColor(p.type) : null"><title>{{ p.pitcher }}: {{ p.type }}{{ p.mph ? ', ' + p.mph + ' mph' : '' }} ({{ p.result }})</title></circle>
                   }
                 </svg>
               </div>

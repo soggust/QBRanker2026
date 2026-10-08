@@ -36,13 +36,13 @@ import { Component, EventEmitter, Input, Output, ViewEncapsulation } from '@angu
       <ng-content select="[panel-actions]"></ng-content>
     </div>
     @if (isOpen || !expandable) {
-      <div class="panel-body"><ng-content></ng-content></div>
+      <div class="panel-body" (animationend)="unfolding = false"><ng-content></ng-content></div>
     }
   `,
   styleUrls: ['../../styles/components/card-panel.scss'],
   // (its styles reach the bar it draws; the content keeps the page's own)
   encapsulation: ViewEncapsulation.None,
-  host: { class: 'stat-group', '[class.closed]': 'expandable && !isOpen' },
+  host: { class: 'stat-group', '[class.closed]': 'expandable && !isOpen', '[class.unfolding]': 'unfolding' },
   standalone: false,
 })
 export class CardPanelComponent {
@@ -67,7 +67,11 @@ export class CardPanelComponent {
     return this.own;
   }
 
+  // (opened by a click just now: its body unfolds, card-panel.scss; a panel open from the start just shows)
+  unfolding = false;
+
   toggle(): void {
+    this.unfolding = !this.own;
     if (!this.controlled) this.own = !this.own;
     this.toggled.emit();
   }

@@ -140,3 +140,22 @@ card-panel.depth-panel {
     border-radius: 0 0 5px 5px;
   }
 }
+
+// A panel opened by a click unfolds: its content slides out from under the bar (none for anyone who's
+// asked their system for less motion)
+@media (prefers-reduced-motion: no-preference) {
+  .stat-group.unfolding > .panel-body {
+    animation: panel-unfold 0.24s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+}
+
+@keyframes panel-unfold {
+  from {
+    clip-path: inset(0 0 100% 0);
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}

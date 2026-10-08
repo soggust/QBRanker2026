@@ -3146,3 +3146,19 @@ card-history,
 card-seasons {
   display: contents;
 }
+
+// ---- motion (none for anyone who's asked their system for less): a tab's content eases in when the tab
+// opens (the card's and the game view's: their panels are made new each time)
+@media (prefers-reduced-motion: no-preference) {
+  .card-body > :not(card-stats, card-overview, card-analysis, card-team, card-zones, card-games, card-history, card-seasons),
+  .card-body > :is(card-stats, card-overview, card-analysis, card-team, card-zones, card-games, card-history, card-seasons) > * {
+    animation: tab-in 0.22s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+  }
+}
+
+@keyframes tab-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
