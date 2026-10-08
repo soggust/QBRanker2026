@@ -24,6 +24,7 @@ import { AboutComponent } from '@sport/about/about.component';
 import { AboutFrameComponent } from './about/about-frame.component';
 import { PositionService } from './position.service';
 import { BetsPageComponent } from './bets/bets-page.component';
+import { ModelDeskComponent } from './bets/model-desk.component';
 
 @NgModule({
   declarations: [
@@ -41,6 +42,7 @@ import { BetsPageComponent } from './bets/bets-page.component';
     AboutComponent,
     AboutFrameComponent,
     BetsPageComponent,
+    ModelDeskComponent,
   ],
   bootstrap: [AppComponent],
   // (the column headers' drag and drop reorders columns through the position service)

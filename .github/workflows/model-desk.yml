@@ -1,0 +1,50 @@
+name: Model Desk - Bets
+
+on:
+  schedule:
+    # Twice a day, 14:20 and 22:20 UTC (10:20 AM and 6:20 PM Eastern): before every NFL slot (Sunday's 1 PM
+    # and the night games, Monday's, Thursday's) and MLB's day games, with the night's results graded. Each
+    # run grades what finished, refits the ratings and each market's trust on it, and bets every market of
+    # every game in the next two days it hasn't bet yet (libs/ranker/scripts/model/run.mjs). Code only: free.
+    - cron: "20 14 * * *"
+    - cron: "20 22 * * *"
+  workflow_dispatch:
+
+# (with the data updates: one push at a time)
+concurrency:
+  group: update-data
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  desk:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Grade, refit and bet
+        run: node libs/ranker/scripts/model/run.mjs
+
+      # (the desk's history and its ledger and state; the admin panel is dev only, so no deploy: the site
+      # picks them up with the next data update's)
+      - name: Commit the desk
+        run: |
+          git add apps/*/scripts/model apps/*/src/StaticData/model
+          if git diff --cached --quiet; then
+            echo "Nothing new"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Model desk: graded, refit, bet"
+          git pull --rebase
+          git push

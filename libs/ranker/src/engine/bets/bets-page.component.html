@@ -1,6 +1,10 @@
 <!-- Every betting angle in the latest analyses, one row per bet, most confident first; a row opens to its
      reasoning -->
 <div class="bets-page">
+  <!-- The code-only model desk's play-money betting, its record and its changes to itself (dev only) -->
+  @if (dev) {
+    <model-desk></model-desk>
+  }
   <div class="bets-panel">
     <!-- The game dropdown on the left (when it was updated under it), the filter chips on the right -->
     <header class="bets-head">

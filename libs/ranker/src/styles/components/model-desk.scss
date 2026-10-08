@@ -1,0 +1,213 @@
+@use "../variables" as v;
+
+// ===========================================================================
+// The model desk's admin panel (the Bets page, dev only): a scoreboard header with the bankroll tiles, then
+// the breakdowns in the card's panels, the bankroll curve, the bets
+// ===========================================================================
+
+.model-desk {
+  @include v.scoreboard-panel(10px, 0 4px 14px rgba(0, 0, 0, 0.45));
+  color: #fff;
+  margin: 0 auto 18px;
+  max-width: 1200px;
+  padding: 16px 18px 18px;
+}
+
+.desk-head {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.desk-title {
+  align-items: center;
+  display: flex;
+  font-family: v.$font-hand;
+  font-size: 20px;
+  gap: 8px;
+
+  mat-icon {
+    color: var(--scoreboard-led);
+  }
+
+  small {
+    color: rgba(255, 255, 255, 0.5);
+    font-family: v.$font-base;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+}
+
+.desk-tiles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.desk-tile {
+  @include v.led-tile;
+  align-items: center;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 86px;
+  padding: 6px 12px;
+
+  small {
+    color: rgba(255, 255, 255, 0.55);
+    font-family: v.$font-base;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  b {
+    font-family: v.$font-base;
+    font-size: 17px;
+    font-weight: 900;
+  }
+}
+
+.up {
+  color: v.$good !important;
+}
+
+.down {
+  color: v.$bad !important;
+}
+
+.desk-note {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 13px;
+  margin: 6px 2px;
+}
+
+.desk-curve {
+  @include v.scoreboard-panel;
+  margin-bottom: 12px;
+  padding: 10px 14px;
+
+  .log-chart-label {
+    font-size: 13px;
+    font-weight: 800;
+
+    small {
+      color: rgba(255, 255, 255, 0.5);
+      font-weight: 600;
+      margin-left: 6px;
+    }
+  }
+
+  svg {
+    display: block;
+    height: 120px;
+    margin-top: 6px;
+    width: 100%;
+  }
+
+  path {
+    fill: none;
+    stroke: var(--scoreboard-led);
+    stroke-width: 2;
+    vector-effect: non-scaling-stroke;
+  }
+
+  .desk-start {
+    stroke: rgba(255, 255, 255, 0.25);
+    stroke-dasharray: 4 4;
+    vector-effect: non-scaling-stroke;
+  }
+}
+
+.desk-grid {
+  display: grid;
+  gap: 0 14px;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+}
+
+.desk-table {
+  border-collapse: collapse;
+  font-size: 12.5px;
+  font-variant-numeric: tabular-nums;
+  width: 100%;
+
+  th,
+  td {
+    padding: 5px 8px;
+    text-align: right;
+    white-space: nowrap;
+  }
+
+  th:first-child {
+    text-align: left;
+  }
+
+  thead th {
+    color: rgba(255, 255, 255, 0.55);
+    font-size: 10.5px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  tbody tr {
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  tbody th {
+    font-weight: 800;
+  }
+
+  small {
+    color: rgba(255, 255, 255, 0.45);
+    display: block;
+    font-size: 10.5px;
+    font-weight: 600;
+  }
+}
+
+.desk-test {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 11.5px;
+  white-space: normal !important;
+}
+
+.desk-bets td {
+  text-align: right;
+}
+
+.desk-changes {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+
+  li {
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    display: grid;
+    gap: 2px;
+    padding: 7px 0;
+
+    &:first-child {
+      border-top: none;
+    }
+  }
+
+  small {
+    color: rgba(255, 255, 255, 0.45);
+    font-size: 10.5px;
+  }
+
+  b {
+    font-size: 13px;
+  }
+
+  span {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 12px;
+  }
+}

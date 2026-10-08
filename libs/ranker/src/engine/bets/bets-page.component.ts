@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, isDevMode } from '@angular/core';
 import { SPORT_LINKS } from '@ranker/core/sports';
 import { insteadText } from '../player-card/analysis';
 
@@ -163,6 +163,9 @@ function lineOf(key: string): { line: string; side: string } | null {
   standalone: false,
 })
 export class BetsPageComponent implements OnInit {
+  // (the model desk's admin panel: on the dev server only)
+  readonly dev = isDevMode();
+
   rows: BetRow[] | null = null;
   updated: string | null = null;
   // the filter: all games (the top 50 bets), or one game (its top 15, from all of its bets), by its matchup

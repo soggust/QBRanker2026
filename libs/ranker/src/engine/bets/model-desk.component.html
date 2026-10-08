@@ -1,0 +1,243 @@
+<!-- The model desk's admin panel (dev only): its bankroll and record up top, then the breakdowns, the
+     bankroll over time, the bets open, the latest graded, and the changes it's made to itself -->
+<section class="model-desk">
+  <header class="desk-head">
+    <span class="desk-title"><mat-icon fontIcon="smart_toy"></mat-icon>Model Desk <small>dev only · play money · code, no AI</small></span>
+    @if (!loading) {
+      <div class="desk-tiles">
+        <div class="desk-tile">
+          <small>Bankroll</small>
+          <b [class.up]="overall.profit > 0" [class.down]="overall.profit < 0">{{ balance.toFixed(2) }}u</b>
+        </div>
+        <div class="desk-tile">
+          <small>Record</small>
+          <b>{{ overall.won }}-{{ overall.lost }}-{{ overall.push }}</b>
+        </div>
+        <div class="desk-tile">
+          <small>Profit</small>
+          <b [class.up]="overall.profit > 0" [class.down]="overall.profit < 0">{{ units(overall.profit) }}</b>
+        </div>
+        <div class="desk-tile">
+          <small>ROI</small>
+          <b [class.up]="(overall.roi ?? 0) > 0" [class.down]="(overall.roi ?? 0) < 0">{{ pct(overall.roi) }}</b>
+        </div>
+        <div class="desk-tile">
+          <small>Open</small>
+          <b>{{ overall.open }}</b>
+        </div>
+      </div>
+    }
+  </header>
+
+  @if (loading) {
+    <p class="desk-note">Loading the desk…</p>
+  } @else if (!states.length) {
+    <p class="desk-note">No desk yet: run <code>node libs/ranker/scripts/model/run.mjs</code>.</p>
+  } @else {
+    <!-- (the bankroll after each graded bet) -->
+    @if (overall.bets) {
+      <div class="chart-card desk-curve">
+        <span class="log-chart-label">Bankroll<small>after each graded bet · {{ curveRange.min.toFixed(1) }}u to {{ curveRange.max.toFixed(1) }}u</small></span>
+        <svg viewBox="0 0 600 120" preserveAspectRatio="none">
+          <line class="desk-start" x1="0" x2="600" [attr.y1]="110 - ((bankroll - curveRange.min) / (curveRange.max - curveRange.min || 1)) * 100" [attr.y2]="110 - ((bankroll - curveRange.min) / (curveRange.max - curveRange.min || 1)) * 100" />
+          <path [attr.d]="curve" />
+        </svg>
+      </div>
+    }
+
+    <div class="desk-grid">
+      <card-panel class="tab-card group-results" [expandable]="false" label="By Sport" icon="sports">
+        <div class="group-body">
+          <table class="desk-table">
+            <thead>
+              <tr><th></th><th>Record</th><th>Profit</th><th>ROI</th><th>Open</th><th>Model test</th></tr>
+            </thead>
+            <tbody>
+              @for (t of bySport; track t.label) {
+                <tr>
+                  <th>{{ t.label }}</th>
+                  <td>{{ t.won }}-{{ t.lost }}-{{ t.push }}</td>
+                  <td [class.up]="t.profit > 0" [class.down]="t.profit < 0">{{ units(t.profit) }}</td>
+                  <td>{{ pct(t.roi) }}</td>
+                  <td>{{ t.open }}</td>
+                  <td class="desk-test">
+                    @if (t.state?.test; as test) {
+                      winners {{ pct(test.winHit) }} · margin ±{{ test.maeMargin }} · total ±{{ test.maeTotal }}
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </card-panel>
+
+      <card-panel class="tab-card group-box" [expandable]="false" label="By Market" icon="category">
+        <div class="group-body">
+          <table class="desk-table">
+            <thead>
+              <tr><th></th><th>Record</th><th>Profit</th><th>ROI</th><th>Open</th></tr>
+            </thead>
+            <tbody>
+              @for (t of byMarket; track t.label) {
+                <tr>
+                  <th>{{ t.label }}</th>
+                  <td>{{ t.won }}-{{ t.lost }}-{{ t.push }}</td>
+                  <td [class.up]="t.profit > 0" [class.down]="t.profit < 0">{{ units(t.profit) }}</td>
+                  <td>{{ pct(t.roi) }}</td>
+                  <td>{{ t.open }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </card-panel>
+
+      <card-panel class="tab-card group-advanced" [expandable]="false" label="By Stake" icon="toll">
+        <div class="group-body">
+          <!-- (whether the bigger stakes, the bigger edges, do better: the staking working) -->
+          <table class="desk-table">
+            <thead>
+              <tr><th></th><th>Record</th><th>Profit</th><th>ROI</th><th>Open</th></tr>
+            </thead>
+            <tbody>
+              @for (t of byStake; track t.label) {
+                <tr>
+                  <th>{{ t.label }}</th>
+                  <td>{{ t.won }}-{{ t.lost }}-{{ t.push }}</td>
+                  <td [class.up]="t.profit > 0" [class.down]="t.profit < 0">{{ units(t.profit) }}</td>
+                  <td>{{ pct(t.roi) }}</td>
+                  <td>{{ t.open }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </card-panel>
+
+      <card-panel class="tab-card group-support" [expandable]="false" label="Calibration" icon="tune">
+        <div class="group-body">
+          <!-- (the chance it gave its picks against how often they won: close together is honest) -->
+          @if (calibration.length) {
+            <table class="desk-table">
+              <thead>
+                <tr><th>Its chance</th><th>Bets</th><th>Said</th><th>Won</th></tr>
+              </thead>
+              <tbody>
+                @for (c of calibration; track c.label) {
+                  <tr>
+                    <th>{{ c.label }}</th>
+                    <td>{{ c.n }}</td>
+                    <td>{{ pct(c.said) }}</td>
+                    <td [class.up]="c.was > c.said + 0.03" [class.down]="c.was < c.said - 0.03">{{ pct(c.was) }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          } @else {
+            <p class="desk-note">Nothing graded yet.</p>
+          }
+        </div>
+      </card-panel>
+    </div>
+
+    <card-panel class="tab-card group-box" label="Settings" icon="settings_suggest">
+      <div class="group-body">
+        <!-- (each sport's fitted settings and how much each market trusts the model: * not fitted yet) -->
+        <table class="desk-table">
+          <thead>
+            <tr><th></th><th>k</th><th>Home</th><th>Carryover</th><th>kO</th><th>σ margin</th><th>σ total</th><th>Trust (book 0 → model 1)</th><th>History</th></tr>
+          </thead>
+          <tbody>
+            @for (s of states; track s.sport) {
+              <tr>
+                <th>{{ s.label }}</th>
+                <td>{{ s.params['k'] }}</td>
+                <td>{{ s.params['hfa'] }}</td>
+                <td>{{ s.params['revert'] }}</td>
+                <td>{{ s.params['kO'] }}</td>
+                <td>{{ s.params['sigma'] }}</td>
+                <td>{{ s.params['sigmaT'] }}</td>
+                <td class="desk-test">{{ trustText(s) }}</td>
+                <td>{{ s.history.finals }} games</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </card-panel>
+
+    <card-panel class="tab-card group-results" label="Open Bets" icon="schedule" [startOpen]="true">
+      <div class="group-body">
+        @if (open.length) {
+          <table class="desk-table desk-bets">
+            <thead>
+              <tr><th>Game</th><th>Market</th><th>Pick</th><th>Odds</th><th>Units</th><th>Its chance</th><th>Book's</th><th>EV</th></tr>
+            </thead>
+            <tbody>
+              @for (b of open; track b.id) {
+                <tr>
+                  <th>{{ b.sport.toUpperCase() }} · {{ b.matchup }}<small>{{ b.start | date: 'EEE h:mm a' }}</small></th>
+                  <td>{{ marketName(b.market) }}</td>
+                  <td><b>{{ b.pick }}</b></td>
+                  <td>{{ odds(b.odds) }}</td>
+                  <td>{{ b.units }}</td>
+                  <td>{{ pct(b.p) }}</td>
+                  <td>{{ pct(b.fair) }}</td>
+                  <td [class.up]="b.ev > 0" [class.down]="b.ev < 0">{{ pct(b.ev) }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        } @else {
+          <p class="desk-note">No bets open.</p>
+        }
+      </div>
+    </card-panel>
+
+    <card-panel class="tab-card group-advanced" label="Latest Results" icon="history">
+      <div class="group-body">
+        @if (recent.length) {
+          <table class="desk-table desk-bets">
+            <thead>
+              <tr><th>Game</th><th>Pick</th><th>Odds</th><th>Units</th><th>Its chance</th><th>Final</th><th>Result</th></tr>
+            </thead>
+            <tbody>
+              @for (b of recent; track b.id) {
+                <tr>
+                  <th>{{ b.sport.toUpperCase() }} · {{ b.matchup }}<small>{{ b.start | date: 'MMM d' }}</small></th>
+                  <td><b>{{ b.pick }}</b><small>{{ marketName(b.market) }}</small></td>
+                  <td>{{ odds(b.odds) }}</td>
+                  <td>{{ b.units }}</td>
+                  <td>{{ pct(b.p) }}</td>
+                  <td>{{ b.final }}</td>
+                  <td [class.up]="b.profit > 0" [class.down]="b.profit < 0">{{ b.status }} {{ units(b.profit) }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        } @else {
+          <p class="desk-note">Nothing graded yet.</p>
+        }
+      </div>
+    </card-panel>
+
+    <card-panel class="tab-card group-support" label="What It's Changed" icon="auto_fix_high">
+      <div class="group-body">
+        @if (changes.length) {
+          <ul class="desk-changes">
+            @for (c of changes; track c.at + c.what + c.sport) {
+              <li>
+                <small>{{ c.at | date: 'MMM d, h:mm a' }} · {{ c.sport }}</small>
+                <b>{{ c.what }}: {{ c.from }} → {{ c.to }}</b>
+                <span>{{ c.why }}</span>
+              </li>
+            }
+          </ul>
+        } @else {
+          <p class="desk-note">No changes yet: each run refits the ratings and each market's trust, and logs what moves here.</p>
+        }
+      </div>
+    </card-panel>
+  }
+</section>
