@@ -62,6 +62,13 @@ jobs:
       - name: Build coaching staffs
         run: node apps/nfl/scripts/build-coaches.mjs || echo "coaches skipped"
 
+      # (each finished game's highlights, kept for the game view before ESPN lets them go)
+      - name: Keep game highlights
+        env:
+          # (optional: with a YouTube Data API key, every game is searched for, not only the channel's latest uploads)
+          YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
+        run: node libs/ranker/scripts/highlights.mjs nfl || echo "highlights skipped"
+
       - name: Commit updated data
         id: commit
         run: |

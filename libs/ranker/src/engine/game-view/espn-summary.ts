@@ -40,6 +40,8 @@ export interface EspnPlay {
   team?: { id?: string };
 }
 export interface EspnSummary {
+  // (the game's videos, a few days after it: the NBA's and the NHL's highlights)
+  videos?: { headline?: string; duration?: number; thumbnail?: string; links?: { source?: { href?: string } } }[];
   header?: {
     week?: number;
     season?: { year?: number; type?: number };

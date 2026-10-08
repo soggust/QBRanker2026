@@ -3,7 +3,8 @@ import { SPORT } from '@sport/sport';
 import { espnTeamId, findEspnTeamId } from '@ranker/core/game-logs';
 import { TeamResult, findGame, findGameOn, nthMeeting, teamResults } from './find-game';
 import { loadGame } from './game';
-import { GameView } from './game.model';
+import { GameVideo, GameView } from './game.model';
+import { loadHighlights } from './highlights';
 import { GameWeather, loadWeather, venuePhoto } from './venue';
 
 // Which game to open: ESPN's id (a game log's row), a date and a team in it (a row without one), or a
@@ -13,7 +14,7 @@ export type GameRef =
   | { date: string; names: string[] }
   | { team: (string | undefined)[]; opponent: string; home: boolean | null; season: number; nth: number };
 
-export type GameTab = 'summary' | 'box' | 'plays' | 'chart' | 'fantasy' | 'info' | 'preview' | 'injuries' | 'pitches';
+export type GameTab = 'summary' | 'box' | 'plays' | 'chart' | 'fantasy' | 'highlights' | 'info' | 'preview' | 'injuries' | 'pitches';
 
 // The game view's state: the game open (or finding it, or failed), its tab, its weather. One at a time,
 // in a player card's place when opened from one (the card is set aside; closing the game brings it back).
@@ -22,6 +23,9 @@ export class GameViewService {
   game: GameView | 'loading' | 'error' | null = null;
   tab: GameTab = 'summary';
   weather: GameWeather | 'loading' | null = null;
+  // the game's highlights (highlights.ts: none until they're found), and the one playing
+  videos: GameVideo[] = [];
+  video = 0;
   // (the play groups open on the Plays tab, and its filter)
   openPlays = new Set<number>();
   scoringOnly = false;
@@ -52,6 +56,8 @@ export class GameViewService {
     this.game = 'loading';
     this.tab = 'summary';
     this.weather = null;
+    this.videos = [];
+    this.video = 0;
     this.openPlays.clear();
     this.scoringOnly = false;
     this.chartSide = 'both';
@@ -79,6 +85,9 @@ export class GameViewService {
           .then((photo) => ticket === this.opened && photo && (venue.image = photo))
           .catch(() => null);
       }
+      loadHighlights(game)
+        .then((videos) => ticket === this.opened && (this.videos = videos))
+        .catch(() => null);
       this.weather = 'loading';
       loadWeather(game)
         .then((w) => ticket === this.opened && (this.weather = w))

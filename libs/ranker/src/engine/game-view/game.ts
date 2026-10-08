@@ -334,5 +334,9 @@ export async function loadGame(league: string, eventId: string): Promise<GameVie
     chart,
     fantasy,
     plays,
+    videos: (s.videos ?? [])
+      .filter((v) => v.links?.source?.href)
+      .map((v) => ({ title: v.headline ?? '', src: v.links!.source!.href!, youtube: null, thumb: v.thumbnail ?? null, duration: v.duration ?? null }))
+      .sort((a, b) => Number(/highlights/i.test(b.title)) - Number(/highlights/i.test(a.title))),
   };
 }

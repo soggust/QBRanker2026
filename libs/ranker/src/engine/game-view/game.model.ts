@@ -142,6 +142,16 @@ export interface GamePlayGroup {
   plays: GamePlay[];
 }
 
+// A video of the game: a file to play, or a YouTube video to embed (the NFL's)
+export interface GameVideo {
+  title: string;
+  src: string | null;
+  youtube: string | null;
+  thumb: string | null;
+  // (seconds)
+  duration: number | null;
+}
+
 export interface GameView {
   id: string;
   league: string;
@@ -179,4 +189,7 @@ export interface GameView {
   // each player's fantasy points from his line, best first (the component scores catches by the setting)
   fantasy: GameFantasy[];
   plays: GamePlayGroup[];
+  // its videos in ESPN's summary (the game's highlights first; most games have none: highlights.ts looks
+  // elsewhere)
+  videos: GameVideo[];
 }

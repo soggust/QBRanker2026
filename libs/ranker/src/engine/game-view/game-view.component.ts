@@ -1,4 +1,5 @@
 import { Component, HostListener } from '@angular/core';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { SPORT } from '@sport/sport';
 import { extras } from '@ranker/engine/row-fields';
 import { badgeColor, whiteLogo } from '@sport/team-colors';
@@ -30,9 +31,23 @@ export class GameViewComponent {
   constructor(
     readonly games: GameViewService,
     private positions: PositionService,
+    private sanitizer: DomSanitizer,
   ) {}
 
-  // The tabs: Fantasy when the box score scores anyone
+  // A YouTube video's player (the NFL's highlights), made safe to embed once per video
+  private embeds = new Map<string, SafeResourceUrl>();
+  youtubeUrl(id: string): SafeResourceUrl {
+    let url = this.embeds.get(id);
+    if (!url) this.embeds.set(id, (url = this.sanitizer.bypassSecurityTrustResourceUrl(`https://www.youtube-nocookie.com/embed/${encodeURIComponent(id)}?rel=0`)));
+    return url;
+  }
+
+  // "1:42"
+  duration(seconds: number): string {
+    return `${Math.floor(seconds / 60)}:${String(Math.round(seconds % 60)).padStart(2, '0')}`;
+  }
+
+  // The tabs: Fantasy when the box score scores anyone, Highlights when the game has any
   tabsFor(game: GameView): { id: GameTab; title: string }[] {
     // (a game to come: its preview, the injury report, the venue)
     if (game.preview) {
@@ -49,6 +64,7 @@ export class GameViewComponent {
       ...(game.chart ? [{ id: 'chart' as const, title: this.chartTitle(game) }] : []),
       ...(game.chart && 'pitches' in game.chart && game.chart.pitches.length ? [{ id: 'pitches' as const, title: 'Pitches' }] : []),
       ...(game.fantasy.length ? [{ id: 'fantasy' as const, title: 'Fantasy' }] : []),
+      ...(this.games.videos.length ? [{ id: 'highlights' as const, title: 'Highlights' }] : []),
       { id: 'info', title: 'Game Info' },
     ];
   }

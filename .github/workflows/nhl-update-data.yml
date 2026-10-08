@@ -40,6 +40,10 @@ jobs:
       - name: Pull NHL stats
         run: npm run nhl:update-data
 
+      # (each finished game's highlights, kept for the game view before ESPN lets them go)
+      - name: Keep game highlights
+        run: node libs/ranker/scripts/highlights.mjs nhl || echo "highlights skipped"
+
       - name: Commit updated data
         id: commit
         run: |

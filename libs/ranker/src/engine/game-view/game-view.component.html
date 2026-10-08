@@ -601,6 +601,43 @@
             </card-panel>
           }
 
+          <!-- The game's highlights: the one playing on the board, every clip under it (the game's own first) -->
+          @case ('highlights') {
+            @let videos = games.videos;
+            @if (videos.length) {
+              @let v = videos[games.video] ?? videos[0];
+              <div class="chart-card game-video-card">
+                <div class="game-video">
+                  @if (v.youtube) {
+                    <iframe [src]="youtubeUrl(v.youtube)" [title]="v.title" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe>
+                  } @else {
+                    <video [src]="v.src" [poster]="v.thumb ?? ''" controls playsinline preload="metadata"></video>
+                  }
+                </div>
+                <p class="game-video-title">{{ v.title }}</p>
+              </div>
+              @if (videos.length > 1) {
+                <card-panel class="tab-card group-box" [expandable]="false" label="Clips" icon="smart_display">
+                  <div class="group-body game-clips">
+                    @for (clip of videos; track $index) {
+                      <button type="button" class="game-clip" [class.active]="$index === games.video" [title]="clip.title" (click)="games.video = $index">
+                        <span class="game-clip-thumb">
+                          @if (clip.thumb) {
+                            <img [src]="clip.thumb" alt="" loading="lazy" />
+                          }
+                          @if (clip.duration) {
+                            <small>{{ duration(clip.duration) }}</small>
+                          }
+                        </span>
+                        <span class="game-clip-title">{{ clip.title }}</span>
+                      </button>
+                    }
+                  </div>
+                </card-panel>
+              }
+            }
+          }
+
           <!-- The venue (its photo, its weather at game time), the crowd, the line and how it came out, the officials -->
           @case ('info') {
             <card-panel class="tab-card group-advanced game-info" [expandable]="false" label="Game Info" icon="stadium">

@@ -86,7 +86,7 @@
         ]
       },
       {
-        "regex": "^/[a-z]+/data/(analysis|careers|depth)/.+\\.json$",
+        "regex": "^/[a-z]+/data/(analysis|careers|depth|highlights)/.+\\.json$",
         "headers": [
           {
             "key": "Cache-Control",

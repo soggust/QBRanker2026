@@ -44,6 +44,10 @@ jobs:
       - name: Build coaching staffs
         run: node apps/nba/scripts/build-coaches.mjs || echo "coaches skipped"
 
+      # (each finished game's highlights, kept for the game view before ESPN lets them go)
+      - name: Keep game highlights
+        run: node libs/ranker/scripts/highlights.mjs nba || echo "highlights skipped"
+
       - name: Commit updated data
         id: commit
         run: |
