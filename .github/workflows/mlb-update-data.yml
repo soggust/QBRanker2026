@@ -37,6 +37,8 @@ jobs:
       - name: Roll over to a new season
         run: node scripts/rollover.mjs mlb --if-due
 
+      # (once the postseason has begun, also the playoffs' and both parts' files, skill-players.post.json
+      # and .all.json: the app's Stats From)
       - name: Pull stats from the MLB Stats API and Baseball Savant
         run: npm run mlb:update-data
 
