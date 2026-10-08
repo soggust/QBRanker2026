@@ -8,13 +8,14 @@
 //   node apps/nfl/scripts/build-coaches.mjs              (the season being played: nightly)
 //   node apps/nfl/scripts/build-coaches.mjs 2001-2025    (past seasons: once)
 
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { mkdirSync } from 'node:fs';
 import path from 'node:path';
+import { currentSeason, writeStaff } from '../../../libs/ranker/scripts/wiki-staff.mjs';
 
 const ROOT = path.resolve(import.meta.dirname, '../../..');
 const DATA = path.join(ROOT, 'apps/nfl/src/StaticData');
 // (the season in the data: update-data.mjs's, the one scripts/rollover.mjs bumps)
-const CURRENT_SEASON = Number(readFileSync(path.join(import.meta.dirname, 'update-data.mjs'), 'utf8').match(/^const CURRENT_SEASON = (\d+);/m)[1]);
+const CURRENT_SEASON = currentSeason(path.join(import.meta.dirname, '..'));
 const API = 'https://en.wikipedia.org/w/api.php';
 const AGENT = 'QBRanker/1.0 (https://github.com/soggust; data build)';
 
@@ -116,7 +117,7 @@ async function build(season) {
   }
   const dir = current ? path.join(DATA, 'depth') : path.join(DATA, 'seasons', String(season), 'depth');
   mkdirSync(dir, { recursive: true });
-  writeFileSync(path.join(dir, 'coaches.json'), JSON.stringify({ season, at: new Date().toISOString(), teams: out }));
+  writeStaff(path.join(dir, 'coaches.json'), season, out);
   console.log(`${season}: ${Object.keys(out).length} teams${missing.length ? ` (none for ${missing.join(', ')})` : ''}`);
 }
 

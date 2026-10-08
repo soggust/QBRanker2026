@@ -15,13 +15,15 @@ import { createGunzip } from 'node:zlib';
 import { createInterface } from 'node:readline';
 import path from 'node:path';
 import { espnInjuries, espnLines, kickoffForecast, kickoffIso } from './live.mjs';
+import { currentSeason } from '../../../../libs/ranker/scripts/wiki-staff.mjs';
 
 const ROOT = path.resolve(import.meta.dirname, '../../../..');
 const DATA = path.join(ROOT, 'apps/nfl/src/StaticData');
 const CACHE = path.join(ROOT, '.cache/nflverse');
 const OUT = path.join(ROOT, '.cache/analysis/dossiers');
 const TEAM_OUT = path.join(ROOT, '.cache/analysis/teams');
-const SEASON = 2026;
+// (the season in the data: update-data.mjs's, the one scripts/rollover.mjs bumps)
+const SEASON = currentSeason(path.join(ROOT, 'apps/nfl'));
 const NFLVERSE = 'https://github.com/nflverse/nflverse-data/releases/download';
 const FILES = {
   pbp: `pbp/play_by_play_${SEASON}.csv.gz`,

@@ -33,6 +33,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "22"
+          cache: "npm"
 
       # A new season that has begun (yesterday's games on ESPN) becomes current before the night's
       # update: the finished one is archived as a past season (scripts/rollover.mjs)
@@ -62,6 +63,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git commit -m "Update game data from ESPN"
+          git pull --rebase
           git push
           echo "changed=true" >> "$GITHUB_OUTPUT"
 

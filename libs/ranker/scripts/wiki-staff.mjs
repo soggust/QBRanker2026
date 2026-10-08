@@ -1,6 +1,6 @@
 // Wikipedia for the Team tab's Coaches panel (the NBA's and MLB's scripts/build-coaches.mjs): pages'
 // wikitext, 50 a request, and a wiki line as plain text. Free.
-import { readFileSync } from 'node:fs';
+import { readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 
 const API = 'https://en.wikipedia.org/w/api.php';
@@ -67,4 +67,18 @@ export function currentSeason(appDir) {
   const season = Number(text.match(/^const CURRENT_SEASON = (\d+);/m)?.[1]);
   if (!season) throw new Error(`no CURRENT_SEASON in ${appDir}/scripts/update-data.mjs`);
   return season;
+}
+
+// A season's staff file: the teams and when they were read. A run that finds the same staffs keeps the
+// file as it was (its "at" too), so a nightly run with nothing new changes nothing to commit.
+export function writeStaff(file, season, teams) {
+  let old = null;
+  try {
+    old = JSON.parse(readFileSync(file, 'utf8'));
+  } catch {
+    // (no file yet)
+  }
+  if (old?.season === season && JSON.stringify(old.teams) === JSON.stringify(teams)) return false;
+  writeFileSync(file, JSON.stringify({ season, at: new Date().toISOString(), teams }));
+  return true;
 }

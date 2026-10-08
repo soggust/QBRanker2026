@@ -415,15 +415,26 @@ interface EspnOdds {
   overUnder?: number;
   moneyline?: { home?: { close?: { odds?: string } }; away?: { close?: { odds?: string } } };
 }
-// A day's scoreboard (by its date in New York, as ESPN files games), each game's odds by its id
-const boards = new Map<string, Promise<Map<string, EspnOdds>>>();
+// A day's scoreboard (day as YYYYMMDD), asked once a visit: its games' odds, and the game view's search for
+// a game by its date
+export interface EspnBoardEvent {
+  id: string;
+  competitions?: {
+    odds?: EspnOdds[];
+    competitors?: { team: { abbreviation?: string; displayName?: string; shortDisplayName?: string; name?: string } }[];
+  }[];
+}
+const boards = new Map<string, Promise<EspnBoardEvent[]>>();
+export function espnScoreboard(league: string, day: string): Promise<EspnBoardEvent[]> {
+  return memo(boards, `${league}/${day}`, () =>
+    fetchJson<{ events?: EspnBoardEvent[] }>(`${ESPN_API}/${league}/scoreboard?dates=${day}`, { events: [] }).then((data) => data.events ?? []),
+  );
+}
+
+// A day's games' odds by their ids (the day by its date in New York, as ESPN files games)
 function oddsOn(league: string, date: Date): Promise<Map<string, EspnOdds>> {
   const day = date.toLocaleDateString('en-CA', { timeZone: 'America/New_York' }).replace(/-/g, '');
-  return memo(boards, `${league}/${day}`, () =>
-    fetchJson<{ events?: { id: string; competitions?: { odds?: EspnOdds[] }[] }[] }>(`${ESPN_API}/${league}/scoreboard?dates=${day}`, { events: [] }).then(
-      (data) => new Map<string, EspnOdds>((data.events ?? []).map((e) => [e.id, e.competitions?.[0]?.odds?.[0] ?? {}])),
-    ),
-  );
+  return espnScoreboard(league, day).then((events) => new Map(events.map((e) => [e.id, e.competitions?.[0]?.odds?.[0] ?? {}])));
 }
 
 // The rest of a row's team's season (by the names it knows, as for its log), soonest first; the games in

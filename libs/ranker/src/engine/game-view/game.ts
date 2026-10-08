@@ -8,7 +8,7 @@
 // A game is found by ESPN's event id when the page has it (a game log's row), or by its team, season
 // and opponent (a Recent dot: the nth game against that opponent, newest first, on the team's schedule).
 
-import { ESPN_API, espnSchedule, findEspnTeamId } from '@ranker/core/game-logs';
+import { ESPN_API, espnSchedule, espnScoreboard, findEspnTeamId } from '@ranker/core/game-logs';
 import { fetchJson, memo } from '@ranker/core/http';
 
 // ---- what the view shows
@@ -358,11 +358,10 @@ export async function findGame(
 // logs): that day's scoreboard, the game with that team's abbreviation or name
 export async function findGameOn(league: string, date: string, names: string[]): Promise<string | null> {
   const day = date.slice(0, 10).replace(/-/g, '');
-  const board = await fetchJson<{ events?: { id: string; competitions: { competitors: { team: EspnTeamRef }[] }[] }[] }>(`${API}/${league}/scoreboard?dates=${day}`, {});
+  const events = await espnScoreboard(league, day);
   const wanted = names.map((n) => n.toLowerCase());
-  const events = board.events ?? [];
   const event = events.find((e) =>
-    e.competitions[0]?.competitors.some((c) =>
+    e.competitions?.[0]?.competitors?.some((c) =>
       [c.team.abbreviation, c.team.displayName, c.team.shortDisplayName, c.team.name].some((x) => x && wanted.includes(x.toLowerCase())),
     ),
   );
@@ -711,11 +710,17 @@ export interface GameWeather {
 const SKY = (code: number): string =>
   code >= 95 ? 'Thunderstorms' : code >= 85 ? 'Snow showers' : code >= 80 ? 'Rain showers' : code >= 71 ? 'Snow' : code >= 61 ? 'Rain' : code >= 51 ? 'Drizzle' : code >= 45 ? 'Fog' : code >= 3 ? 'Overcast' : code >= 1 ? 'Partly cloudy' : 'Clear';
 
+// (each city's place, looked up once a visit: a team's home games all ask for the same one)
+const places = new Map<string, Promise<{ results?: { latitude: number; longitude: number; admin1?: string; country_code?: string }[] }>>();
+
 export async function loadWeather(game: GameView): Promise<GameWeather | null> {
   if (!game.venue || game.venue.roof === 'indoors' || !game.venue.city || !game.date) return null;
-  const place = await fetchJson<{ results?: { latitude: number; longitude: number; admin1?: string; country_code?: string }[] }>(
-    `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(game.venue.city)}&count=5`,
-    {},
+  const city = game.venue.city;
+  const place = await memo(places, city, () =>
+    fetchJson<{ results?: { latitude: number; longitude: number; admin1?: string; country_code?: string }[] }>(
+      `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=5`,
+      {},
+    ),
   );
   const results = place.results ?? [];
   const state = (game.venue.state ?? '').toLowerCase();
@@ -1064,7 +1069,12 @@ export function heroColor(league: string, names: (string | undefined)[]): Promis
 
 // A venue's photo when ESPN has none (a game abroad: Tottenham Hotspur Stadium, a Munich or São Paulo
 // game): Wikipedia's lead photo for the venue, else for its city (its summary API: free, open to the page)
-export async function venuePhoto(name: string, city: string | null): Promise<string | null> {
+const photos = new Map<string, Promise<string | null>>();
+export function venuePhoto(name: string, city: string | null): Promise<string | null> {
+  return memo(photos, `${name}/${city}`, () => findVenuePhoto(name, city));
+}
+
+async function findVenuePhoto(name: string, city: string | null): Promise<string | null> {
   for (const title of [name, city].filter((t): t is string => !!t)) {
     const page = await fetchJson<{ thumbnail?: { source?: string }; originalimage?: { source?: string } } | null>(
       `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title.replace(/ /g, '_'))}`,

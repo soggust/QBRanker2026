@@ -16,9 +16,12 @@
 // that don't match are printed, so a spelling difference can be added to NAME_FIXES.
 
 import { readFile, writeFile } from 'node:fs/promises';
+import { fileURLToPath } from 'node:url';
+import { currentSeason } from '../../../libs/ranker/scripts/wiki-staff.mjs';
 
 const FIRST_SEASON = Number(process.env.FROM ?? 2000);
-const LAST_SEASON = 2025;
+// (the last finished season: the one before the season in the data, which scripts/rollover.mjs bumps)
+const LAST_SEASON = currentSeason(fileURLToPath(new URL('..', import.meta.url))) - 1;
 const SEASONS_DIR = new URL('../src/StaticData/seasons/', import.meta.url);
 const ALL_PRO_FILE = new URL('../src/sport/all-pro.json', import.meta.url);
 const PRO_BOWL_FILE = new URL('../src/sport/pro-bowl.json', import.meta.url);

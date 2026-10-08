@@ -28,7 +28,12 @@
             "assets": [
               "apps/nfl/src/favicon.ico",
               "apps/nfl/src/favicon.svg",
-              "apps/nfl/src/assets",
+              {
+                "glob": "**/*",
+                "input": "apps/nfl/src/assets",
+                "output": "assets",
+                "ignore": ["**/*.psd"]
+              },
               {
                 "glob": "**/*.json",
                 "input": "apps/nfl/src/StaticData",

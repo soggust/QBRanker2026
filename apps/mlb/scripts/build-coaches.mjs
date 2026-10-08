@@ -8,9 +8,9 @@
 //   node apps/mlb/scripts/build-coaches.mjs              (the season in the data: nightly)
 //   node apps/mlb/scripts/build-coaches.mjs 2000-2025    (past seasons: once)
 
-import { existsSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import path from 'node:path';
-import { currentSeason, param, plain, seasonRange, wikitext } from '../../../libs/ranker/scripts/wiki-staff.mjs';
+import { currentSeason, param, plain, seasonRange, wikitext, writeStaff } from '../../../libs/ranker/scripts/wiki-staff.mjs';
 
 const DATA = path.resolve(import.meta.dirname, '../src/StaticData');
 const CURRENT_SEASON = currentSeason(path.resolve(import.meta.dirname, '..'));
@@ -73,7 +73,7 @@ async function build(season) {
     out[team] = { head, staff };
   }
   const to = current ? path.join(DATA, 'coaches.json') : path.join(DATA, 'seasons', String(season), 'coaches.json');
-  writeFileSync(to, JSON.stringify({ season, at: new Date().toISOString(), teams: out }));
+  writeStaff(to, season, out);
   console.log(`${season}: ${Object.keys(out).length} teams${missing.length ? ` (none for ${missing.join(', ')})` : ''}`);
 }
 

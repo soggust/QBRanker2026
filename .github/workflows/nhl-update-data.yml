@@ -30,6 +30,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "22"
+          cache: "npm"
 
       # A new season that has begun (yesterday's games on ESPN) becomes current before the night's
       # update: the finished one is archived as a past season (scripts/rollover.mjs)
