@@ -1398,7 +1398,7 @@
       "rushYards": 100,
       "rushTd": 0
     },
-    "injuryStatus": "Questionable",
+    "injuryStatus": "Active",
     "injured": false
   },
   {
@@ -1991,8 +1991,8 @@
       "assets/NFL_Icons/Falcons.png": 2
     },
     "advanced": {
-      "pressureToSack": 0,
-      "badThrowPct": 0.044,
+      "pressureToSack": 0.333,
+      "badThrowPct": 0.089,
       "timeToThrow": 2.4,
       "adot": 6.8,
       "aggressiveness": 2.2,
@@ -2219,8 +2219,8 @@
       "assets/NFL_Icons/Saints.png": 4
     },
     "advanced": {
-      "pressureToSack": 0.345,
-      "badThrowPct": 0.1,
+      "pressureToSack": 0.279,
+      "badThrowPct": 0.15,
       "timeToThrow": 2.73,
       "adot": 8.3,
       "aggressiveness": 17.2,
@@ -2250,7 +2250,7 @@
       "rushYards": 72,
       "rushTd": 1
     },
-    "injuryStatus": "Active",
+    "injuryStatus": "Questionable",
     "injured": false
   },
   {

@@ -51,9 +51,9 @@
         "ptsAllowedPerGame": 23,
         "fantasyStd": 14,
         "receptions": 0,
-        "pressureRate": 0.193,
+        "pressureRate": 0.273,
         "qbHitRate": 0.187,
-        "missedTacklePct": 0.075,
+        "missedTacklePct": 0.065,
         "thirdDownPct": 0.368,
         "redZoneTdPct": 0.563,
         "topPerGame": 32.36
@@ -786,9 +786,9 @@
         "ptsAllowedPerGame": 32,
         "fantasyStd": 6,
         "receptions": 0,
-        "pressureRate": 0.21,
+        "pressureRate": 0.217,
         "qbHitRate": 0.145,
-        "missedTacklePct": 0.086,
+        "missedTacklePct": 0.109,
         "thirdDownPct": 0.476,
         "redZoneTdPct": 0.667,
         "topPerGame": 31.51
@@ -2637,11 +2637,11 @@
       "stats": {
         "sacksAllowed": 8,
         "qbHitRate": 0.116,
-        "pressureRate": 0.152,
+        "pressureRate": 0.161,
         "sackRate": 0.071,
         "ypc": 5.2,
         "stuffRate": 0.143,
-        "yardsBeforeContact": 2.6,
+        "yardsBeforeContact": 2.84,
         "runEpa": 0.11,
         "runSuccess": 0.519,
         "shortYardagePct": 0.556,
@@ -3309,11 +3309,11 @@
       "stats": {
         "sacksAllowed": 12,
         "qbHitRate": 0.162,
-        "pressureRate": 0.146,
+        "pressureRate": 0.217,
         "sackRate": 0.061,
         "ypc": 3.25,
         "stuffRate": 0.172,
-        "yardsBeforeContact": 2.31,
+        "yardsBeforeContact": 2.11,
         "runEpa": -0.078,
         "runSuccess": 0.387,
         "shortYardagePct": 0.857,
@@ -3691,7 +3691,7 @@
         "epaPerCarry": -0.078,
         "epaPerTarget": -0.293,
         "ryoePerAtt": -0.89,
-        "yacoPerCarry": 0.96,
+        "yacoPerCarry": 1.4,
         "brokenTackles": 2,
         "snapShare": 0.33,
         "separation": null,
@@ -3707,7 +3707,7 @@
         "epaPerCarry": -0.223,
         "epaPerTarget": -0.266
       },
-      "injuryStatus": "Active",
+      "injuryStatus": "Questionable",
       "injured": false
     },
     {
@@ -3867,7 +3867,7 @@
         "epaPerCarry": 0.132,
         "epaPerTarget": -0.334,
         "ryoePerAtt": 1.49,
-        "yacoPerCarry": 1.96,
+        "yacoPerCarry": 2.49,
         "brokenTackles": 10,
         "snapShare": 0.65,
         "separation": null,
@@ -4087,7 +4087,7 @@
         "epaPerCarry": 0.199,
         "epaPerTarget": 0.449,
         "ryoePerAtt": 0,
-        "yacoPerCarry": 1.77,
+        "yacoPerCarry": 2.57,
         "brokenTackles": 2,
         "snapShare": 0.355,
         "separation": null,
@@ -4191,7 +4191,7 @@
         "epaPerCarry": -0.207,
         "epaPerTarget": 0.247
       },
-      "injuryStatus": "Active",
+      "injuryStatus": "Questionable",
       "injured": false
     },
     {
@@ -4543,8 +4543,8 @@
         "epaPerCarry": -0.092,
         "epaPerTarget": 0.236
       },
-      "injuryStatus": "Injured Reserve",
-      "injured": true
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4240631,
@@ -4614,7 +4614,7 @@
         "catchPct": 1,
         "epaPerCarry": -0.05,
         "epaPerTarget": 0.106,
-        "ryoePerAtt": 0.18,
+        "ryoePerAtt": 0.2,
         "yacoPerCarry": 2.35,
         "brokenTackles": 5,
         "snapShare": 0.59,
@@ -4807,7 +4807,7 @@
         "epaPerCarry": -0.292,
         "epaPerTarget": 0.155
       },
-      "injuryStatus": "Active",
+      "injuryStatus": "Questionable",
       "injured": false
     },
     {
@@ -4895,7 +4895,7 @@
         "epaPerCarry": -0.193,
         "epaPerTarget": 0.451
       },
-      "injuryStatus": "Active",
+      "injuryStatus": "Questionable",
       "injured": false
     },
     {
@@ -4939,8 +4939,8 @@
         "epaPerCarry": -0.445,
         "epaPerTarget": -0.08
       },
-      "injuryStatus": "Injured Reserve",
-      "injured": true
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4429795,
@@ -5423,7 +5423,7 @@
         "epaPerCarry": -0.005,
         "epaPerTarget": -0.169
       },
-      "injuryStatus": "Active",
+      "injuryStatus": "Questionable",
       "injured": false
     },
     {
@@ -5539,7 +5539,7 @@
         "epaPerCarry": -0.401,
         "epaPerTarget": -0.399,
         "ryoePerAtt": null,
-        "yacoPerCarry": 0.84,
+        "yacoPerCarry": 1.11,
         "brokenTackles": 0,
         "snapShare": 0.247,
         "separation": null,
@@ -6479,7 +6479,7 @@
         "epaPerCarry": -0.084,
         "epaPerTarget": -1.083
       },
-      "injuryStatus": "Active",
+      "injuryStatus": "Questionable",
       "injured": false
     },
     {
@@ -6523,8 +6523,8 @@
         "epaPerCarry": 0.006,
         "epaPerTarget": -0.286
       },
-      "injuryStatus": "Injured Reserve",
-      "injured": true
+      "injuryStatus": "Active",
+      "injured": false
     },
     {
       "id": 4432710,
@@ -9869,7 +9869,7 @@
         "epaPerCarry": -0.439,
         "epaPerTarget": -0.178
       },
-      "injuryStatus": "Active",
+      "injuryStatus": "Questionable",
       "injured": false
     },
     {
@@ -10001,7 +10001,7 @@
         "epaPerCarry": 0,
         "epaPerTarget": 1.048
       },
-      "injuryStatus": "Active",
+      "injuryStatus": "Questionable",
       "injured": false
     },
     {
@@ -10927,7 +10927,7 @@
         "epaPerCarry": 0,
         "epaPerTarget": 0.46
       },
-      "injuryStatus": "Active",
+      "injuryStatus": "Questionable",
       "injured": false
     },
     {
@@ -11015,7 +11015,7 @@
         "epaPerCarry": 0,
         "epaPerTarget": -0.209
       },
-      "injuryStatus": "Active",
+      "injuryStatus": "Questionable",
       "injured": false
     },
     {
@@ -11499,7 +11499,7 @@
         "epaPerCarry": 0,
         "epaPerTarget": 0.916
       },
-      "injuryStatus": "Questionable",
+      "injuryStatus": "Active",
       "injured": false
     },
     {
@@ -11895,7 +11895,7 @@
         "epaPerCarry": 0,
         "epaPerTarget": 0.218
       },
-      "injuryStatus": "Active",
+      "injuryStatus": "Questionable",
       "injured": false
     },
     {
@@ -12188,7 +12188,7 @@
         "epaPerTarget": -0.673,
         "ryoePerAtt": null,
         "yacoPerCarry": null,
-        "brokenTackles": 0,
+        "brokenTackles": 1,
         "snapShare": 0.528,
         "separation": null,
         "yacOverExp": null,
