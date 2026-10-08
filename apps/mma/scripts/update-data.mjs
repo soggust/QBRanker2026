@@ -23,6 +23,7 @@
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import path from 'node:path';
 import { allFights } from './fights.mjs';
+import { shareRows } from '../../../libs/ranker/scripts/shared-rows.mjs';
 import { PARAMS, cautious, deviationOn, history, rate, tabOf, weightOf } from './rating.mjs';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
@@ -756,7 +757,8 @@ for (const id of active) {
 }
 for (const tab of Object.keys(out)) out[tab].sort((a, b) => a.name.localeCompare(b.name));
 await mkdir(STATIC, { recursive: true });
-await writeFile(path.join(STATIC, 'skill-players.json'), JSON.stringify(out));
+// (each fighter's fields alike in his tabs stored once: half the download)
+await writeFile(path.join(STATIC, 'skill-players.json'), JSON.stringify(shareRows(out)));
 console.log(
   `${Object.entries(out).map(([tab, rows]) => `${rows.length} ${tab}`).join(', ')} (${active.length} fighters, ${activeSet.size} active; fetched ${fetched}; champions ${Object.values(out).flat().filter((u) => u.awards.includes('champ')).length})`,
 );

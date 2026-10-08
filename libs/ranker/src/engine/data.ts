@@ -87,5 +87,16 @@ export async function fetchSeasonFile<T = unknown>(season: number, file: string)
   const dir = current ? 'data' : `data/seasons/${season}`;
   const res = await fetch(`${dir}/${file}`, { cache: current ? 'no-cache' : 'default' });
   if (!res.ok) throw new Error(`Could not load ${season} ${file}: ${res.status}`);
-  return res.json();
+  return expandRows(await res.json()) as T;
+}
+
+// A file whose rows repeated across tabs are stored once (libs/ranker/scripts/shared-rows.mjs: MMA's
+// fighters, in the pound-for-pound list and their division alike) put back together; any other as it is
+function expandRows(file: unknown): unknown {
+  const shared = (file as { $shared?: Record<string, object> } | null)?.$shared;
+  if (!shared) return file;
+  const { $shared: _, ...tabs } = file as Record<string, { $id?: string }[]>;
+  return Object.fromEntries(
+    Object.entries(tabs).map(([tab, rows]) => [tab, rows.map(({ $id, ...own }) => ($id === undefined ? own : { ...shared[$id], ...own }))]),
+  );
 }
