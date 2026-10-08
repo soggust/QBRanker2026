@@ -46,6 +46,10 @@ jobs:
       - name: Build depth charts
         run: node apps/nfl/scripts/build-depth.mjs
 
+      # (Wikipedia's staffs: a failed fetch keeps yesterday's file)
+      - name: Build coaching staffs
+        run: node apps/nfl/scripts/build-coaches.mjs || echo "coaches skipped"
+
       - name: Commit updated data
         id: commit
         run: |

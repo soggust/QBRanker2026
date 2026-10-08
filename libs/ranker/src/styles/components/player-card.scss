@@ -813,13 +813,6 @@
   --group-color: var(--team-accent);
 }
 
-.tab-card {
-  .log-chart:first-child,
-  .career-chart:first-child {
-    margin-top: 0;
-  }
-}
-
 // (a panel's spacing on the card, the same open or shut so nothing shifts; its box is the panel's,
 // card-panel.scss)
 .stat-group {
@@ -969,7 +962,7 @@
   gap: 4px;
   grid-template-columns: repeat(var(--count), minmax(0, 1fr));
   height: 150px;
-  margin: 14px auto 0;
+  margin: 4px auto 0;
   max-width: calc(var(--count) * 56px);
 }
 
@@ -1035,7 +1028,6 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
-  margin-top: 18px;
 }
 
 .season-row {
@@ -1431,11 +1423,17 @@
 // and below a center line), then the table: category headers, the opponent's logo, a result tile, each
 // value tinted against their own average (the tint is set inline), and a per-game average row
 // ---------------------------------------------------------------------------
-.log-chart {
-  background: rgba(0, 0, 0, 0.18);
-  border-radius: 8px;
-  margin: 12px 0 14px;
-  padding: 10px 14px 10px;
+// A tab's chart, above its panel: a scoreboard card like the Overview's (the Game Log's by game, the
+// Career tab's rank by season)
+.chart-card {
+  @include v.scoreboard-panel;
+  margin-top: 12px;
+  padding: 10px 14px;
+
+  // (first on its tab, like a first panel: the tab's own padding above it)
+  &:first-child {
+    margin-top: 0;
+  }
 }
 
 .log-chart-head {
@@ -2300,6 +2298,7 @@
 .depth-panel,
 .depth-special,
 .depth-changes,
+.depth-coaches,
 .depth-usage {
   user-select: none;
 }
@@ -2318,6 +2317,13 @@
   &:not(.defense) {
     aspect-ratio: 2 / 1;
     min-height: 300px;
+  }
+
+  // (a line alone: a strip)
+  &.line {
+    aspect-ratio: auto;
+    height: 150px;
+    min-height: 0;
   }
 }
 
@@ -2670,6 +2676,23 @@
   margin: 16px 0 6px;
 }
 
+// A coach: his role, muted, then his name
+.depth-coach {
+  align-items: baseline;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  display: grid;
+  font-size: 13px;
+  font-weight: 700;
+  gap: 10px;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  padding: 6px 0;
+}
+
+.depth-coach-role {
+  color: rgba(255, 255, 255, 0.55);
+  font-weight: 600;
+}
+
 .depth-row {
   align-items: center;
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
@@ -2679,8 +2702,10 @@
   grid-template-columns: 26px minmax(0, 1fr) 120px 40px 30px 62px;
   padding: 5px 0;
 
-  &.off-chart {
-    opacity: 0.7;
+  // (no snaps, or off the depth chart now: his name muted)
+  &.unused .depth-row-name,
+  &.off-chart .depth-row-name {
+    color: rgba(255, 255, 255, 0.45);
   }
 }
 
@@ -2735,7 +2760,7 @@
     min-height: 0;
 
     // (the offense's formation is shallower: square)
-    &:not(.defense) {
+    &:not(.defense):not(.line) {
       aspect-ratio: 1;
       min-height: 0;
     }
@@ -2769,21 +2794,59 @@
   }
 }
 
-// A roster's player the site has: his name a quiet link to his card (that season, on his own tab)
+// A name the site has a card for (a roster's player, the hero's team): a dotted underline in the team's
+// color and a small arrow after it, so it reads as a link before it's touched; on hover the underline
+// goes solid, the name takes the team's color and the arrow lights and nudges out
 .depth-link {
+  align-items: baseline;
   background: none;
   border: none;
   color: inherit;
   cursor: pointer;
+  display: inline-flex;
   font: inherit;
+  gap: 0.2em;
   letter-spacing: inherit;
   padding: 0;
   text-align: left;
-  text-decoration: underline;
-  text-decoration-color: rgba(255, 255, 255, 0.25);
+  text-decoration: underline dotted;
+  text-decoration-color: color-mix(in srgb, var(--team-accent, #fff) 55%, transparent);
+  text-decoration-thickness: 1px;
   text-underline-offset: 3px;
+  transition:
+    color 0.15s,
+    text-decoration-color 0.15s;
 
-  &:hover {
-    text-decoration-color: var(--team-accent);
+  // (the arrow: an up-right one, in the team's color)
+  &::after {
+    background: var(--team-accent, #fff);
+    content: '';
+    flex: none;
+    height: 0.62em;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M3 1.5h5.5V7M8.5 1.5 1.5 8.5' fill='none' stroke='%23000' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")
+      center / contain no-repeat;
+    opacity: 0.55;
+    transition:
+      opacity 0.15s,
+      transform 0.15s;
+    width: 0.62em;
   }
+
+  &:hover,
+  &:focus-visible {
+    color: color-mix(in srgb, var(--team-accent, #fff) 70%, #fff);
+    text-decoration-style: solid;
+    text-decoration-color: var(--team-accent, #fff);
+
+    &::after {
+      opacity: 1;
+      transform: translate(1px, -1px);
+    }
+  }
+}
+
+// (the hero's: white on the team's color, so its underline and arrow white too)
+.hero-team-link {
+  --team-accent: #fff;
+  text-shadow: inherit;
 }

@@ -2,7 +2,7 @@
 // showing in the grid, as ranks in the list it's ranked in (the table's, or another season's ranked the
 // same way); then the Overview (skills, archetype, flags, radar, scouting report), the seasons they're
 // in and similar seasons load in behind it.
-import { PER_GAME_LABELS, SkillPlayer, SkillPosition, SkillStat, SkillStatGroup, headlineStats, presetWeights } from '@sport/positions';
+import { PER_GAME_LABELS, SKILL_STATS, SkillPlayer, SkillPosition, SkillStat, SkillStatGroup, headlineStats, presetWeights } from '@sport/positions';
 import { awardsFor } from '@sport/awards';
 import { SPORT } from '@sport/sport';
 import { badgeColor, whiteLogo } from '@sport/team-colors';
@@ -34,16 +34,15 @@ export interface CardHost {
   readonly colorValues: boolean;
   // A reader for another season (the table's for null)
   readerFor(context: SeasonContext | null): StatReader;
-  // Another season's list: the same filters as the table, ranked with the current sliders
-  seasonContext(season: number, rows: Record<SkillPosition, SkillPlayer[]>): SeasonContext;
+  // Another season's list: the same filters as the table, ranked with the current sliders (another
+  // tab's, for a card opened on it)
+  seasonContext(season: number, rows: Record<SkillPosition, SkillPlayer[]>, position?: SkillPosition): SeasonContext;
   rankedIn(context: SeasonContext, players: SkillPlayer[]): SkillPlayer[];
   // The stat groups with columns showing, for that reader's season
-  shownGroups(reader: StatReader): SkillStatGroup[];
+  shownGroups(reader: StatReader, position?: SkillPosition): SkillStatGroup[];
   headshot(unit: { id?: number | null }, w?: number): string | null;
   // (one failed to load: the next headshot() is the next place to look)
   noHeadshot(unit: { id?: number | null }): void;
-  // The table onto another tab (a roster's player opened on his own)
-  switchPosition(position: SkillPosition): void;
 }
 
 const TABS: { id: CardTab; title: string }[] = [
@@ -68,8 +67,19 @@ export class PlayerCards {
     private readonly data: SeasonDataService,
   ) {}
 
+  // The card's tab: the table's, or another one's (a roster's player, or the hero's team, opened on its
+  // own tab with the grid left where it is)
+  private cardPosition: SkillPosition | null = null;
   private get position(): SkillPosition {
-    return this.host.position;
+    return this.cardPosition ?? this.host.position;
+  }
+  // (the card is on the table's tab: the table's own list and reader are its)
+  private get onTable(): boolean {
+    return this.position === this.host.position;
+  }
+  // (its tab's stats)
+  private get stats(): SkillStat[] {
+    return this.onTable ? this.host.stats : SKILL_STATS[this.position];
   }
 
   // Seasons only when they're in more than one (shown while loading; never for a career-only sport),
@@ -80,8 +90,8 @@ export class PlayerCards {
     const [overview, stats, seasons] = TABS;
     const tabs: { id: CardTab; title: string }[] = [overview];
     if (this.analysisFile(card)) tabs.push({ id: 'analysis', title: 'Analysis' });
-    // (a team's Roster, its depth chart, before its Stats)
-    if (SPORT.depthChart?.has(card.player, this.position, card.season)) tabs.push({ id: 'depth', title: 'Roster' });
+    // (a team's Team tab: its depth chart, staff and roster, before its Stats)
+    if (SPORT.depthChart?.has(card.player, this.position, card.season)) tabs.push({ id: 'depth', title: 'Team' });
     tabs.push(stats);
     if (this.hasGameLog(card)) tabs.push({ id: 'games', title: 'Game Log' });
     if (!SPORT.careerOnly && (!card.seasons || card.seasons.length > 1)) tabs.push({ ...seasons, title: this.careerTitle });
@@ -184,16 +194,31 @@ export class PlayerCards {
     view.special.forEach((s) => link(s.player));
     for (const g of view.usage) g.rows.forEach(link);
     for (const w of view.timeline) for (const ch of w.changes) [ch.from, ch.to].forEach(link);
+    // (a head coach by his name, on the coaches' tab)
+    const coachTab = Object.keys(rows).find((p) => SPORT.positionNames[p as SkillPosition] === 'Head Coach') as SkillPosition | undefined;
+    const coachRows = coachTab ? ((rows[coachTab] ?? []) as SkillPlayer[]) : [];
+    for (const g of view.coaches) {
+      for (const co of g.rows) {
+        const row = coachRows.find((r) => r.name === co.name);
+        co.link = row && coachTab ? { position: coachTab, gsisId: row.gsisId } : null;
+      }
+    }
   }
 
-  // A roster's player opened: his card for that season, the table switched to his tab first
+  // A roster's player (or the hero's team) opened: their card for that season, on their own tab, ranked
+  // with that tab's sliders and filters; the grid stays where it is
   async openLinked(link: { position: string; gsisId: string }, season: number): Promise<void> {
-    if (link.position !== this.position) {
-      this.host.switchPosition(link.position as SkillPosition);
-      // (the table takes its new tab on the next turn)
-      await new Promise((resolve) => setTimeout(resolve));
-    }
-    await this.openSeason(season, link.gsisId);
+    const back = this.cardPosition;
+    this.cardPosition = link.position === this.host.position ? null : (link.position as SkillPosition);
+    if (!(await this.openSeason(season, link.gsisId))) this.cardPosition = back;
+  }
+
+  // The hero's team name: that season's team row (the sport's team tab), for anyone but a team
+  private teamLink(player: SkillPlayer, rows: Record<SkillPosition, SkillPlayer[]>): { position: string; gsisId: string } | null {
+    const position = SPORT.teamTabs?.[0] as SkillPosition | undefined;
+    if (!position || this.position === position || !player.teamLogo) return null;
+    const team = rows[position]?.find((t) => t.teamLogo === player.teamLogo);
+    return team ? { position, gsisId: team.gsisId } : null;
   }
 
   toggleDepthSlot(key: string): void {
@@ -203,32 +228,35 @@ export class PlayerCards {
   // A name in the table: their card for the table's season, ranked as the table has them (always on
   // the Overview; flipping through players and seasons keeps the tab you're on)
   open(player: SkillPlayer): void {
+    this.cardPosition = null;
     this.tab = 'overview';
     this.show(this.render(player, this.host.season, this.host.playerList, null));
   }
 
   // A season link or a similar season: that season's card, without changing the table (the table's own
   // season shows as the table has it)
-  async openSeason(season: number, gsisId: string): Promise<void> {
+  async openSeason(season: number, gsisId: string): Promise<boolean> {
     const { host } = this;
-    const listed = season === host.season ? host.playerList.find((p) => p.gsisId === gsisId) : undefined;
+    const listed = season === host.season && this.onTable ? host.playerList.find((p) => p.gsisId === gsisId) : undefined;
     if (listed) {
       this.show(this.render(listed, host.season, host.playerList, null));
-      return;
+      return true;
     }
     this.loading = true;
     try {
       const rows = season === host.season ? SKILL_UNITS : await this.data.rows(season);
       const player = rows[this.position]?.find((p) => p.gsisId === gsisId);
-      if (!player) return;
-      const context = host.seasonContext(season, rows);
+      if (!player) return false;
+      const context = host.seasonContext(season, rows, this.position);
       // (someone under the Min Games setting still gets their card, ranked where they'd fall)
       if (!context.list.includes(player)) {
         context.list = context.manual ? [...context.list, player] : host.rankedIn(context, [...context.list, player]);
       }
       this.show(this.render(player, season, context.list, context));
+      return true;
     } catch (err) {
       console.error(err);
+      return false;
     } finally {
       this.loading = false;
     }
@@ -244,6 +272,7 @@ export class PlayerCards {
 
   close(): void {
     this.card = null;
+    this.cardPosition = null;
   }
 
   selectTab(tab: CardTab): void {
@@ -281,7 +310,7 @@ export class PlayerCards {
   private render(player: SkillPlayer, season: number, list: SkillPlayer[], context: SeasonContext | null): PlayerCard {
     const reader = this.host.readerFor(context);
     const groups = this.host
-      .shownGroups(reader)
+      .shownGroups(reader, this.position)
       .map((group) => ({
         id: group.id,
         title: group.title,
@@ -304,6 +333,7 @@ export class PlayerCards {
       positionName: POSITION_NAMES[this.position],
       seasonLabel: SPORT.careerOnly ? 'Career' : isLiveSeason(season) ? 'This Season' : SPORT.seasonText(season),
       teamName: SPORT.teamName ? SPORT.teamName(player, this.position, rows) : ((player as { teamName?: string | null }).teamName ?? null),
+      teamLink: this.teamLink(player, rows),
       logo: SPORT.cardLogo ? SPORT.cardLogo(logoForSeason(player.teamLogo, season)) : logoForSeason(player.teamLogo, season),
       color: badgeColor(player.teamLogo),
       whiteLogo: whiteLogo(player.teamLogo),
@@ -373,7 +403,7 @@ export class PlayerCards {
       const pcts: number[] = [];
       const evidence: CardSkill['evidence'] = [];
       for (const [key, dir] of def.parts) {
-        const stat = this.host.stats.find((s) => s.key === key);
+        const stat = this.stats.find((s) => s.key === key);
         if (!stat || reader.empty(key)) continue;
         const mine = reader.rate(player, stat);
         if (mine === null) continue;
@@ -422,7 +452,7 @@ export class PlayerCards {
       innings,
       overall,
       tableSeason,
-      stats: this.host.stats,
+      stats: this.stats,
       value: (stat) => reader.raw(player, stat),
       grade,
     };
@@ -440,14 +470,14 @@ export class PlayerCards {
       let unit: SkillPlayer | undefined;
       let list: SkillPlayer[];
       let context: SeasonContext | null = null;
-      if (prevSeason === host.season) {
+      if (prevSeason === host.season && this.onTable) {
         list = host.playerList;
         unit = SKILL_UNITS[this.position].find((p) => p.gsisId === card.player.gsisId);
       } else {
         const rows = await this.data.tabRows(prevSeason, this.position);
         unit = rows.find((p) => p.gsisId === card.player.gsisId);
         if (!unit) return;
-        context = host.seasonContext(prevSeason, { [this.position]: rows } as Record<SkillPosition, SkillPlayer[]>);
+        context = host.seasonContext(prevSeason, { [this.position]: rows } as Record<SkillPosition, SkillPlayer[]>, this.position);
         list = context.list;
       }
       if (!unit || this.card !== card) return;
@@ -574,9 +604,9 @@ export class PlayerCards {
 
   // A season's list ranked with the current sliders: the table's own, or another's (null context: the table's)
   private async rankedSeason(season: number): Promise<{ list: SkillPlayer[]; context: SeasonContext | null }> {
-    if (season === this.host.season) return { list: this.host.playerList, context: null };
+    if (season === this.host.season && this.onTable) return { list: this.host.playerList, context: null };
     const rows = season === CURRENT_SEASON ? (await this.data.rows(CURRENT_SEASON))[this.position] : await this.data.tabRows(season, this.position);
-    const context = this.host.seasonContext(season, { [this.position]: rows } as Record<SkillPosition, SkillPlayer[]>);
+    const context = this.host.seasonContext(season, { [this.position]: rows } as Record<SkillPosition, SkillPlayer[]>, this.position);
     return { list: context.list, context };
   }
 

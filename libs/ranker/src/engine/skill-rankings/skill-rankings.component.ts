@@ -131,11 +131,6 @@ export class SkillRankingsComponent implements OnChanges, CardHost {
     return this.positionService.settings;
   }
 
-  // (the card opening a roster's player on his own tab)
-  switchPosition(position: SkillPosition): void {
-    this.positionService.setPosition(position);
-  }
-
   get sportSettings(): SportSettings {
     return this.settings.sport;
   }
@@ -191,22 +186,23 @@ export class SkillRankingsComponent implements OnChanges, CardHost {
 
   // The players a season's rows list: injured players only with Injured Players on, enough playing
   // time (Min Games), only rookies with Rookies Only on, and the sport's own filter
-  private listed(rows: Record<string, SkillPlayer[]>, season: number): SkillPlayer[] {
-    const min = hasMin(this.position) ? minCount(this.settings, seasonLength(rows, this.position)) : 0;
-    return (rows[this.position] ?? []).filter(
+  private listed(rows: Record<string, SkillPlayer[]>, season: number, position = this.position): SkillPlayer[] {
+    const min = hasMin(position) ? minCount(this.settings, seasonLength(rows, position)) : 0;
+    return (rows[position] ?? []).filter(
       (player) =>
         (this.settings.showInjured || !player.injured || !!SPORT.noSwitches?.includes('showInjured')) &&
         SPORT.playingTime.of(player) >= min &&
-        this.rookieOk(player, season) &&
+        this.rookieOk(player, season, position) &&
         (SPORT.rowVisible?.(player, this.sportSettings) ?? true),
     );
   }
 
   // Best first by the sliders: switched-off groups and stats don't count, and each combined pair's
-  // parts count by their parent slider
-  private ranked(reader: StatReader, players: SkillPlayer[]): SkillPlayer[] {
-    const counted = this.stats.filter((stat) => !this.hidden[statGroup(stat)] && !this.statHidden(stat.key) && !reader.recentOff(stat));
-    const weights = combinedWeights(this.position, this.weights);
+  // parts count by their parent slider (another tab's, for a card opened on it)
+  private ranked(reader: StatReader, players: SkillPlayer[], position = this.position): SkillPlayer[] {
+    const { stats, hidden, weights: sliders } = this.tab(position);
+    const counted = stats.filter((stat) => !hidden[statGroup(stat)] && !this.statHidden(stat.key, position) && !reader.recentOff(stat));
+    const weights = combinedWeights(position, sliders);
     const totals = weightedTotals(players, counted, weights, (player, stat) => reader.value(player, stat), undefined, this.sportSettings);
     return byTotals(players, totals, this.sportSettings);
   }
@@ -217,8 +213,8 @@ export class SkillRankingsComponent implements OnChanges, CardHost {
   private firstSeasons: Map<string, number> | null = null;
   private firstSeasonsLoading = false;
 
-  private rookieOk(player: SkillPlayer, season: number): boolean {
-    if (!this.settings.rookiesOnly || SPORT.noSwitches?.includes('rookiesOnly') || SPORT.teamTabs?.includes(this.position)) return true;
+  private rookieOk(player: SkillPlayer, season: number, position = this.position): boolean {
+    if (!this.settings.rookiesOnly || SPORT.noSwitches?.includes('rookiesOnly') || SPORT.teamTabs?.includes(position)) return true;
     // (a sport whose data says who's a rookie: that decides)
     const flagged = (player as { rookie?: boolean }).rookie;
     if (flagged !== undefined) return flagged;
@@ -259,27 +255,41 @@ export class SkillRankingsComponent implements OnChanges, CardHost {
     return this.shownGroups(this.reader);
   }
 
-  shownGroups(reader: StatReader): SkillStatGroup[] {
+  shownGroups(reader: StatReader, position = this.position): SkillStatGroup[] {
+    const { groups, hidden } = this.tab(position);
     return this.positionService
-      .orderedGroups(this.position, this.groups)
-      .filter((group) => !this.hidden[group.id])
+      .orderedGroups(position, groups)
+      .filter((group) => !hidden[group.id])
       .map((group) => ({
         ...group,
         // (in their column order: dragging a header reorders them, and the order survives switching tabs)
-        stats: this.combine(this.positionService.orderedStats(this.position, group)).filter((stat) => this.isShown(stat, reader)),
+        stats: this.combine(this.positionService.orderedStats(position, group), position).filter((stat) => this.isShown(stat, reader, position)),
       }))
       .filter((group) => group.stats.length);
   }
 
+  // A tab's stats, groups, switched-off groups and sliders: the table's own, or another's (a card opened
+  // on it from a roster)
+  private tab(position: SkillPosition) {
+    if (position === this.position) return { stats: this.stats, groups: this.groups, hidden: this.hidden, weights: this.weights };
+    return {
+      stats: SKILL_STATS[position],
+      groups: skillGroups(position),
+      hidden: this.positionService.skillHiddenGroups(position),
+      weights: this.positionService.getWeights(position),
+    };
+  }
+
   // Combine setting: a pair (rushing + receiving yards) shows as one total column where the first of the
   // two sits, when the tab has both
-  private combine(stats: SkillStat[]): SkillStat[] {
+  private combine(stats: SkillStat[], position = this.position): SkillStat[] {
     if (!this.settings.combineStats) return stats;
     let out = stats;
-    for (const { stat: total, parts } of combinedFor(this.position)) {
+    for (const { stat: total, parts } of combinedFor(position)) {
       const at = out.findIndex((stat) => (parts as string[]).includes(stat.key));
       if (at === -1 || !parts.every((part) => out.some((stat) => stat.key === part))) continue;
-      this.combinedSpot[total.key] = out[at].key;
+      // (the grid's columns only)
+      if (position === this.position) this.combinedSpot[total.key] = out[at].key;
       out = out.flatMap((stat, i) => (i === at ? [total] : (parts as string[]).includes(stat.key) ? [] : [stat]));
     }
     return out;
@@ -294,21 +304,21 @@ export class SkillRankingsComponent implements OnChanges, CardHost {
 
   // Switched off with its sidebar eye (or its combined pair's parent eye): hidden and out of the
   // ranking, whatever Unweighted Stats says
-  private statHidden(key: string): boolean {
-    const parent = combinedFor(this.position).find(({ parts }) => (parts as string[]).includes(key));
-    return this.positionService.isStatHidden(this.position, key) || (!!parent && this.positionService.isStatHidden(this.position, parent.stat.key));
+  private statHidden(key: string, position = this.position): boolean {
+    const parent = combinedFor(position).find(({ parts }) => (parts as string[]).includes(key));
+    return this.positionService.isStatHidden(position, key) || (!!parent && this.positionService.isStatHidden(position, parent.stat.key));
   }
 
   // The eye decides first; then a stat the season didn't record has no column; then Unweighted Stats
   // decides whether a 0% stat shows (display-only columns like Games always do)
-  private isShown(stat: SkillStat, reader: StatReader): boolean {
-    if (this.statHidden(stat.key) || stat.shownWhen?.(this.sportSettings) === false || reader.recentOff(stat)) return false;
-    const weights = combinedWeights(this.position, this.weights);
+  private isShown(stat: SkillStat, reader: StatReader, position = this.position): boolean {
+    if (this.statHidden(stat.key, position) || stat.shownWhen?.(this.sportSettings) === false || reader.recentOff(stat)) return false;
+    const weights = combinedWeights(position, this.tab(position).weights);
     const showUnused = this.settings.showUnused;
     // A combined column shows if either of its stats would
-    const combined = combinedFor(this.position).find((c) => c.stat.key === stat.key);
+    const combined = combinedFor(position).find((c) => c.stat.key === stat.key);
     if (combined) {
-      const parts = combined.parts.filter((key) => !this.statHidden(key) && !reader.empty(key));
+      const parts = combined.parts.filter((key) => !this.statHidden(key, position) && !reader.empty(key));
       return parts.length > 0 && (showUnused || parts.some((key) => !!weights[key as keyof SkillWeights]));
     }
     if (reader.empty(stat.key)) return false;
@@ -349,7 +359,7 @@ export class SkillRankingsComponent implements OnChanges, CardHost {
   readerFor(context: SeasonContext | null): StatReader {
     if (!context) return this.reader;
     return new StatReader({
-      position: this.position,
+      position: context.position ?? this.position,
       settings: this.settings,
       rows: context.rows,
       list: context.list,
@@ -361,16 +371,17 @@ export class SkillRankingsComponent implements OnChanges, CardHost {
 
   // Another season's list: the same filters as the table, ranked with the current sliders (or as
   // dragged by hand this visit)
-  seasonContext(season: number, rows: Record<SkillPosition, SkillPlayer[]>): SeasonContext {
-    const units = rows[this.position];
+  seasonContext(season: number, rows: Record<SkillPosition, SkillPlayer[]>, position = this.position): SeasonContext {
+    const units = rows[position];
     const context: SeasonContext = {
       season,
       rows,
       list: [],
       empty: (key) => emptyIn(units, key),
+      ...(position !== this.position && { position }),
     };
-    const listed = this.listed({ [this.position]: units }, season);
-    const saved = this.positionService.seasonUnitOrder(season, this.position);
+    const listed = this.listed({ [position]: units }, season, position);
+    const saved = this.positionService.seasonUnitOrder(season, position);
     if (saved?.manual) {
       const at = new Map(saved.ids.map((id, i) => [id, i]));
       context.list = [...listed].sort((a, b) => (at.get(a.gsisId) ?? Infinity) - (at.get(b.gsisId) ?? Infinity));
@@ -382,7 +393,7 @@ export class SkillRankingsComponent implements OnChanges, CardHost {
   }
 
   rankedIn(context: SeasonContext, players: SkillPlayer[]): SkillPlayer[] {
-    return this.ranked(this.readerFor(context), players);
+    return this.ranked(this.readerFor(context), players, context.position);
   }
 
   // ---------------------------------------------------------------------------

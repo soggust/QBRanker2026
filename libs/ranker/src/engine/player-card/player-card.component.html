@@ -31,7 +31,13 @@
           <p class="hero-team">
             <span class="hero-position">{{ c.positionName }}</span>
             @if (c.teamName) {
-              <span class="hero-dot">•</span>{{ c.teamName }}
+              <span class="hero-dot">•</span>
+              <!-- (the team's own card that season, when the site has it) -->
+              @if (c.teamLink; as link) {
+                <button type="button" class="depth-link hero-team-link" [title]="'Open the ' + c.season + ' ' + c.teamName" (click)="cards.openLinked(link, c.season)">{{ c.teamName }}</button>
+              } @else {
+                {{ c.teamName }}
+              }
             }
           </p>
         } @else if (c.teamName && c.teamName !== c.name) {
@@ -385,12 +391,14 @@
             <p class="card-note">The depth chart couldn't be loaded.</p>
           } @else {
             @for (side of d.sides; track side.id) {
+              <!-- (the first, the card's own unit, open) -->
               <card-panel
                 class="tab-card depth-panel group-results"
+                [startOpen]="$first"
                 [label]="side.title + (side.set ? ' · ' + side.set : '')"
                 [icon]="side.id === 'offense' ? 'sports_football' : 'shield'"
               >
-                <div class="depth-field" [class.defense]="side.id === 'defense'" [style.--los]="side.los + '%'">
+                <div class="depth-field" [class.defense]="side.id === 'defense'" [class.line]="side.line" [style.--los]="side.los + '%'">
                   <span class="depth-los" aria-hidden="true"></span>
                   @for (slot of side.slots; track slot.key) {
                     @let starter = slot.depth[0];
@@ -445,23 +453,43 @@
               </card-panel>
             }
 
-            <card-panel class="tab-card depth-special group-results" label="Special Teams" icon="sports">
-              <div class="group-body depth-special-row">
-                @for (s of d.special; track s.label) {
-                  <span class="depth-special-item">
-                    <span class="depth-pos">{{ s.label }}</span>
-                    <span class="depth-head small">
-                      @if (s.player?.headshot) {
-                        <img [src]="s.player!.headshot" alt="" loading="lazy" (error)="s.player!.headshot = null" />
-                      } @else {
-                        <span class="depth-initial">{{ s.player?.name?.[0] ?? '?' }}</span>
-                      }
+            <!-- (the team's card: an O-Line or Defense card keeps to its own unit) -->
+            @if (d.special.length) {
+              <card-panel class="tab-card depth-special group-results" label="Special Teams" icon="sports">
+                <div class="group-body depth-special-row">
+                  @for (s of d.special; track s.label) {
+                    <span class="depth-special-item">
+                      <span class="depth-pos">{{ s.label }}</span>
+                      <span class="depth-head small">
+                        @if (s.player?.headshot) {
+                          <img [src]="s.player!.headshot" alt="" loading="lazy" (error)="s.player!.headshot = null" />
+                        } @else {
+                          <span class="depth-initial">{{ s.player?.name?.[0] ?? '?' }}</span>
+                        }
+                      </span>
+                      <span class="depth-name">{{ s.player?.short ?? 'Open' }}</span>
                     </span>
-                    <span class="depth-name">{{ s.player?.short ?? 'Open' }}</span>
-                  </span>
-                }
-              </div>
-            </card-panel>
+                  }
+                </div>
+              </card-panel>
+            }
+
+            <!-- (the staff, by unit: the head coach, the coordinators, the position coaches) -->
+            @if (d.coaches.length) {
+              <card-panel class="tab-card depth-coaches group-results" label="Coaches" icon="assignment">
+                <div class="group-body">
+                  @for (g of d.coaches; track g.title) {
+                    <h4 class="depth-unit">{{ g.title }}</h4>
+                    @for (co of g.rows; track $index) {
+                      <div class="depth-coach">
+                        <span class="depth-coach-role">{{ co.role }}</span>
+                        @if (co.link; as link) {<button type="button" class="depth-link" [title]="'Open ' + co.name" (click)="cards.openLinked(link, c.season)">{{ co.name }}</button>} @else {<span>{{ co.name }}</span>}
+                      </div>
+                    }
+                  }
+                </div>
+              </card-panel>
+            }
 
             <!-- (the season's positional changes, week by week: who went out, who came in, and why when it's known) -->
             @if (d.timeline.length) {
@@ -494,7 +522,7 @@
                 @for (g of d.usage; track g.title) {
                   <h4 class="depth-unit">{{ g.title }}</h4>
                   @for (p of g.rows; track p.name) {
-                    <div class="depth-row" [class.off-chart]="!p.onChart">
+                    <div class="depth-row" [class.off-chart]="!p.onChart" [class.unused]="!p.snaps">
                       <span class="depth-head tiny">
                         @if (p.headshot) {
                           <img [src]="p.headshot" alt="" loading="lazy" (error)="p.headshot = null" />
@@ -524,9 +552,59 @@
         <!-- This season's games (SPORT.gameLog): a bar per game of the key stat (a team's margin), oldest
              first, then the table, newest first, each value tinted against their own average -->
         @case ('games') {
+          <!-- (the chart its own scoreboard card, above the games) -->
+          @let log = cards.gameLog(c);
+          @if (log !== 'loading' && log !== 'error' ? log.chart : null; as chart) {
+            <div class="log-chart chart-card" [class.diverging]="chart.diverging" [class.dense]="chart.bars.length > 24">
+              <div class="log-chart-head">
+                <span class="log-chart-label">{{ chart.label }}<small>by game</small></span>
+                <span class="log-legend">
+                  @for (name of chart.legend; track $index) {
+                    <span><i [class]="'seg-' + $index"></i>{{ name }}</span>
+                  }
+                  @if (chart.plusLabel) {
+                    <span><i class="dot plus"></i>{{ chart.plusLabel }}</span>
+                  }
+                  @if (chart.minusLabel) {
+                    <span><i class="dot minus"></i>{{ chart.minusLabel }}</span>
+                  }
+                </span>
+              </div>
+              <div class="log-bars">
+                @for (bar of chart.bars; track $index) {
+                  <span class="log-bar" [ngClass]="bar.outcome" [class.negative]="bar.negative" [class.single]="chart.legend.length === 0" [title]="bar.title">
+                    <span class="log-pile">
+                      @if (!chart.diverging && chart.bars.length <= 24) {
+                        <span class="log-dots">
+                          @for (d of [].constructor(bar.minus > 4 ? 4 : bar.minus); track $index) {
+                            <i class="dot minus"></i>
+                          }
+                          @for (d of [].constructor(bar.plus > 4 ? 4 : bar.plus); track $index) {
+                            <i class="dot plus"></i>
+                          }
+                        </span>
+                        <b>{{ bar.text }}</b>
+                      }
+                      @if (chart.diverging && chart.bars.length <= 24 && !bar.negative) {
+                        <b>{{ bar.text }}</b>
+                      }
+                      @for (h of bar.segments; track $index) {
+                        <i [class]="'seg seg-' + $index" [style.--h]="h"></i>
+                      }
+                      @if (chart.diverging && chart.bars.length <= 24 && bar.negative) {
+                        <b>{{ bar.text }}</b>
+                      }
+                    </span>
+                    @if (!chart.diverging) {
+                      <span class="log-outcome-tick" [ngClass]="bar.outcome"></span>
+                    }
+                  </span>
+                }
+              </div>
+            </div>
+          }
           <card-panel class="tab-card card-games" [expandable]="false" label="Game Log" icon="event_note">
             <div class="group-body">
-            @let log = cards.gameLog(c);
             @if (log === 'loading') {
               <p class="card-note">Loading…</p>
             } @else if (log === 'error') {
@@ -535,55 +613,6 @@
               @if (!log.rows.length && !log.upcoming.length) {
                 <p class="card-note">No games yet this season.</p>
               } @else {
-              @if (log.chart; as chart) {
-                <div class="log-chart" [class.diverging]="chart.diverging" [class.dense]="chart.bars.length > 24">
-                  <div class="log-chart-head">
-                    <span class="log-chart-label">{{ chart.label }}<small>by game</small></span>
-                    <span class="log-legend">
-                      @for (name of chart.legend; track $index) {
-                        <span><i [class]="'seg-' + $index"></i>{{ name }}</span>
-                      }
-                      @if (chart.plusLabel) {
-                        <span><i class="dot plus"></i>{{ chart.plusLabel }}</span>
-                      }
-                      @if (chart.minusLabel) {
-                        <span><i class="dot minus"></i>{{ chart.minusLabel }}</span>
-                      }
-                    </span>
-                  </div>
-                  <div class="log-bars">
-                    @for (bar of chart.bars; track $index) {
-                      <span class="log-bar" [ngClass]="bar.outcome" [class.negative]="bar.negative" [class.single]="chart.legend.length === 0" [title]="bar.title">
-                        <span class="log-pile">
-                          @if (!chart.diverging && chart.bars.length <= 24) {
-                            <span class="log-dots">
-                              @for (d of [].constructor(bar.minus > 4 ? 4 : bar.minus); track $index) {
-                                <i class="dot minus"></i>
-                              }
-                              @for (d of [].constructor(bar.plus > 4 ? 4 : bar.plus); track $index) {
-                                <i class="dot plus"></i>
-                              }
-                            </span>
-                            <b>{{ bar.text }}</b>
-                          }
-                          @if (chart.diverging && chart.bars.length <= 24 && !bar.negative) {
-                            <b>{{ bar.text }}</b>
-                          }
-                          @for (h of bar.segments; track $index) {
-                            <i [class]="'seg seg-' + $index" [style.--h]="h"></i>
-                          }
-                          @if (chart.diverging && chart.bars.length <= 24 && bar.negative) {
-                            <b>{{ bar.text }}</b>
-                          }
-                        </span>
-                        @if (!chart.diverging) {
-                          <span class="log-outcome-tick" [ngClass]="bar.outcome"></span>
-                        }
-                      </span>
-                    }
-                  </div>
-                </div>
-              }
               <div class="game-log">
                 <table>
                   <thead>
@@ -710,13 +739,13 @@
 
         <!-- Every season they're in: each opens that season's card (the table stays as it is) -->
         @case ('seasons') {
-          <card-panel class="tab-card card-career" [expandable]="false" [label]="cards.careerTitle" icon="calendar_month">
-            <div class="group-body">
-            @if (!c.seasons) {
-              <p class="card-note">Loading…</p>
-            } @else {
-              <!-- Career arc: a bar per season, as tall as where they ranked (first = full height) -->
-              <div class="career-chart" [style.--count]="c.seasons.length">
+          @if (c.seasons) {
+            <!-- Career arc: a bar per season, as tall as where they ranked (first = full height) -->
+            <div class="chart-card career-card">
+              <div class="log-chart-head">
+                <span class="log-chart-label">Rank<small>by season</small></span>
+              </div>
+              <div class="career-chart" [style.--count]="c.seasons!.length">
                 @for (s of c.seasons; track s.season) {
                   <button
                     type="button"
@@ -734,7 +763,13 @@
                   </button>
                 }
               </div>
-
+            </div>
+          }
+          <card-panel class="tab-card card-career" [expandable]="false" [label]="cards.careerTitle" icon="calendar_month">
+            <div class="group-body">
+            @if (!c.seasons) {
+              <p class="card-note">Loading…</p>
+            } @else {
               <!-- A line per season, newest first: each opens that season's card -->
               <div class="season-list">
                 @for (s of c.seasons.slice().reverse(); track s.season) {

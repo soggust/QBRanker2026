@@ -46,6 +46,20 @@ export interface DepthSide {
   // the line of scrimmage, y in percent
   los: number;
   slots: DepthSlot[];
+  // just a line (an O-Line card's five): a short strip of field
+  line?: boolean;
+}
+
+// A coach on the staff: his role, and his card when the site has him (a head coach)
+export interface DepthCoach {
+  role: string;
+  name: string;
+  link?: { position: string; gsisId: string } | null;
+}
+
+export interface DepthCoachGroup {
+  title: string;
+  rows: DepthCoach[];
 }
 
 export interface DepthUsageGroup {
@@ -72,5 +86,7 @@ export interface DepthView {
   usage: DepthUsageGroup[];
   // the season's positional changes, week by week (the weeks with any)
   timeline: { week: number; changes: DepthChange[] }[];
+  // the coaching staff, by unit (none when the sport or the season doesn't have it)
+  coaches: DepthCoachGroup[];
   teamGames: number;
 }

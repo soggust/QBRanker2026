@@ -105,6 +105,8 @@ export interface SeasonContext {
   empty: (key: string) => boolean;
   // The list is that season's hand-dragged order
   manual?: boolean;
+  // The tab it's for, when not the table's (a card opened from a roster or the hero's team name)
+  position?: SkillPosition;
 }
 
 export interface PlayerCard {
@@ -122,6 +124,8 @@ export interface PlayerCard {
   positionName: string;
   seasonLabel: string;
   teamName: string | null;
+  // The team's own card that season, when the site has it (the hero's team name a link to it)
+  teamLink: { position: string; gsisId: string } | null;
   logo: string;
   color: string;
   whiteLogo: boolean;

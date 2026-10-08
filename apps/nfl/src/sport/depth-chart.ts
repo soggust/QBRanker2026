@@ -3,7 +3,7 @@
 // for past ones) laid out as the engine draws it (@ranker/engine/player-card/depth-chart): the offense in
 // its main personnel (two tight ends or a fullback where that's what it mostly played) and the defense in
 // its base front, each slot placed on the field, then the special teams, who's played and what changed.
-import type { DepthPlayer, DepthSide, DepthSlot, DepthUsageGroup, DepthView } from '@ranker/engine/player-card/depth-chart';
+import type { DepthCoachGroup, DepthPlayer, DepthSide, DepthSlot, DepthUsageGroup, DepthView } from '@ranker/engine/player-card/depth-chart';
 
 // A team's file
 interface DepthFile {
@@ -38,6 +38,11 @@ interface DepthFile {
   timeline: { week: number; changes: { side: string; key: string; name: string; from: string; to: string; reason: string | null; note: string | null }[] }[];
 }
 
+// A season's coaching staffs (scripts/build-coaches.mjs: Wikipedia's), every team by its logo's name
+interface CoachesFile {
+  teams: Record<string, Record<'head' | 'offense' | 'defense' | 'special', { role: string; name: string }[]>>;
+}
+
 // Where each spot sits (x across, y down, in percent of the field): the offense facing up from the line
 // of scrimmage, near the top of its wider, shorter field (the engine draws it at 2:1); the defense above
 // its line (the front on it, the linebackers behind, the corners wide, the safeties deep)
@@ -46,7 +51,7 @@ const SPOT: Record<string, [number, number]> = {
   X: [6, 26], SLOT: [18, 36], Z: [94, 26], LT: [30, 22], LG: [40, 22], C: [50, 22], RG: [60, 22], RT: [70, 22],
   TE: [81, 26], TE2: [20, 24], QB: [50, 50], FB: [50, 64], RB: [50, 78],
 };
-const DEFENSE_LOS = 80;
+const DEFENSE_LOS = 87;
 const DEFENSE_34: Record<string, [number, number]> = {
   // (the outside linebackers on the edge, just outside the ends; the nickel out over the slot, between them
   // and the corner)
@@ -84,7 +89,13 @@ function shortName(name: string): string {
 }
 
 export async function loadDepthChart(logo: string, position: string, season: number, current: boolean): Promise<DepthView> {
-  const res = await fetch(current ? `data/depth/${logo}.json` : `data/seasons/${season}/depth/${logo}.json`, { cache: current ? 'no-cache' : 'default' });
+  const dir = current ? 'data/depth' : `data/seasons/${season}/depth`;
+  const cache: RequestCache = current ? 'no-cache' : 'default';
+  // (the staffs alongside: none when the file isn't there)
+  const staffs = fetch(`${dir}/coaches.json`, { cache })
+    .then((r) => (r.ok ? (r.json() as Promise<CoachesFile>) : null))
+    .catch(() => null);
+  const res = await fetch(`${dir}/${logo}.json`, { cache });
   if (!res.ok) throw new Error(`depth chart ${logo} ${season}: ${res.status}`);
   const file = (await res.json()) as DepthFile;
 
@@ -138,6 +149,11 @@ export async function loadDepthChart(logo: string, position: string, season: num
       focus: position === 'OL' ? OLINE.has(key) : undefined,
       depth: depth.map((id) => player(id, 'offense')),
     }));
+    // (an O-Line card: its five alone)
+    if (position === 'OL') {
+      const line = slots.filter((s) => OLINE.has(s.key)).map((s) => ({ ...s, y: 50 }));
+      return { id: 'offense', title: 'Offensive Line', set: null, los: 50, slots: line, line: true };
+    }
     return {
       id: 'offense',
       title: 'Offense',
@@ -164,10 +180,12 @@ export async function loadDepthChart(logo: string, position: string, season: num
     return { id: 'defense', title: 'Defense', set: `Base ${front}`, los: DEFENSE_LOS, slots };
   };
 
-  // (the card's side first: the Defense card leads with its defense)
-  const sides = position === 'DEF' ? [defense(), offense()] : [offense(), defense()];
+  // An O-Line or Defense card keeps to its own unit: its spots, its players, its changes; a team's
+  // card (or its coach's) has the whole roster
+  const unit: 'OL' | 'DEF' | null = position === 'OL' || position === 'DEF' ? position : null;
+  const sides = unit === 'DEF' ? [defense()] : unit === 'OL' ? [offense()] : [offense(), defense()];
 
-  const special = [
+  const special = unit ? [] : [
     ['K', 'PK'], ['P', 'P'], ['LS', 'LS'], ['KR', 'KR'], ['PR', 'PR'],
   ].map(([label, key]) => {
     const id = file.slots.find((s) => s.side === 'special' && s.key === key)?.depth[0];
@@ -177,7 +195,7 @@ export async function loadDepthChart(logo: string, position: string, season: num
   // Who's played: everyone with a snap or on the chart, by unit, the most-used first (his own side's
   // snaps; a specialist's special teams')
   const usage: DepthUsageGroup[] = [];
-  const order = position === 'DEF' ? [...UNITS.filter(([u]) => DEFENSE_UNITS.has(u)), ...UNITS.filter(([u]) => !DEFENSE_UNITS.has(u))] : UNITS;
+  const order = unit === 'DEF' ? UNITS.filter(([u]) => DEFENSE_UNITS.has(u)) : unit === 'OL' ? UNITS.filter(([u]) => u === 'OL') : UNITS;
   for (const [unit, title] of order) {
     const rows = Object.entries(file.players)
       .filter(([, p]) => p.unit === unit && (p.games > 0 || p.chart))
@@ -194,9 +212,11 @@ export async function loadDepthChart(logo: string, position: string, season: num
     injury: 'Injury', ir: 'IR', released: 'Released', traded: 'Traded', retired: 'Retired', inactive: 'Inactive', coach: "Coach's Decision", moved: 'Moved',
   };
   const LABEL: Record<string, string> = { WR1: 'X', WR2: 'Z', WR8: 'SLOT', NB12: 'NICKEL' };
+  const ours = (c: { side: string; key: string }) =>
+    unit === 'DEF' ? c.side === 'defense' : unit === 'OL' ? c.side === 'offense' && OLINE.has(c.key.replace(/d+$/, '')) : true;
   const timeline = (file.timeline ?? []).map((w) => ({
     week: w.week,
-    changes: w.changes.map((c) => ({
+    changes: w.changes.filter(ours).map((c) => ({
       label: LABEL[c.key] ?? c.key.replace(/\d+$/, ''),
       from: player(c.from, c.side === 'defense' ? 'defense' : 'offense'),
       to: player(c.to, c.side === 'defense' ? 'defense' : 'offense'),
@@ -207,5 +227,20 @@ export async function loadDepthChart(logo: string, position: string, season: num
     })),
   }));
 
-  return { asOf: file.at, sides, special, usage, timeline, teamGames: file.teamGames };
+  // The coaching staff: the team's whole staff; an O-Line card its head coach, its coordinator and its
+  // line coaches; a Defense card its head coach and the defensive staff
+  const staff = (await staffs)?.teams[logo];
+  const coaches: DepthCoachGroup[] = [];
+  if (staff) {
+    const head = unit ? staff.head.filter((c) => /^head coach$/i.test(c.role)) : staff.head;
+    const groups: [string, { role: string; name: string }[]][] =
+      unit === 'OL'
+        ? [['Head Coach', head], ['Offense', staff.offense.filter((c) => /offensive coordinator|offensive line|run game/i.test(c.role))]]
+        : unit === 'DEF'
+          ? [['Head Coach', head], ['Defense', staff.defense]]
+          : [['Head Coach', head], ['Offense', staff.offense], ['Defense', staff.defense], ['Special Teams', staff.special]];
+    for (const [title, rows] of groups) if (rows.length) coaches.push({ title, rows: rows.map((c) => ({ ...c })) });
+  }
+
+  return { asOf: file.at, sides, special, usage, timeline: timeline.filter((w) => w.changes.length), coaches, teamGames: file.teamGames };
 }
