@@ -158,6 +158,8 @@ function lineOf(key: string): { line: string; side: string } | null {
 
 @Component({
   selector: 'bets-page',
+  // (the page's main content: the Bets page has no <main> of its own around it)
+  host: { role: 'main' },
   templateUrl: './bets-page.component.html',
   styleUrls: ['../../styles/components/bets-page.scss'],
   standalone: false,

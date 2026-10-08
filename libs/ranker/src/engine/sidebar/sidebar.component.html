@@ -89,6 +89,8 @@
                       <mat-slider min="0" max="100" step="5" color="accent" [style.--knob-roll]="(skillWeights[row.key] ?? 0) * 12 + 'deg'">
                         <input
                           matSliderThumb
+                          [attr.aria-label]="row.label + ' weight'"
+                          [attr.aria-valuetext]="(skillWeights[row.key] ?? 50) + '%'"
                           [(ngModel)]="skillWeights[row.key]"
                           (ngModelChange)="skillPresets[skill] = 'custom'; saveSkillWeights()"
                         />
@@ -113,6 +115,8 @@
                             <mat-slider min="0" max="100" step="5" color="accent" [style.--knob-roll]="(skillWeights[child.key] ?? 0) * 12 + 'deg'">
                               <input
                                 matSliderThumb
+                                [attr.aria-label]="child.label + ' weight'"
+                                [attr.aria-valuetext]="(skillWeights[child.key] ?? 50) + '%'"
                                 [(ngModel)]="skillWeights[child.key]"
                                 (ngModelChange)="skillPresets[skill] = 'custom'; saveSkillWeights()"
                               />
@@ -153,6 +157,8 @@
                       <mat-slider min="0" max="100" step="5" color="accent" [style.--knob-roll]="(skillWeights[row.key] ?? 0) * 12 + 'deg'">
                         <input
                           matSliderThumb
+                          [attr.aria-label]="row.label + ' weight'"
+                          [attr.aria-valuetext]="(skillWeights[row.key] ?? 50) + '%'"
                           [(ngModel)]="skillWeights[row.key]"
                           (ngModelChange)="skillPresets[skill] = 'custom'; saveSkillWeights()"
                         />

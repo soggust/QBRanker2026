@@ -14,7 +14,7 @@
   } @else {
   <div class="bets-panel">
     <!-- The game dropdown on the left (when it was updated under it), the filter chips on the right -->
-    <header class="bets-head">
+    <div class="bets-head">
       <!-- (the left: the game dropdown, and when the sheet was updated under it) -->
       <div class="bets-head-left">
         @if (rows?.length) {
@@ -55,7 +55,6 @@
               [ngClass]="k.kind"
               [class.on]="kinds.has(k.kind)"
               [attr.aria-pressed]="kinds.has(k.kind)"
-              [attr.aria-label]="k.name + ', ' + k.count"
               [title]="k.name"
               (click)="toggleKind(k.kind)"
             >
@@ -65,9 +64,9 @@
             </button>
           }
           <!-- (the key: what each chip's short label means, on hover or tap) -->
-          <span class="kinds-key" tabindex="0" aria-label="What the chips mean">
-            <mat-icon fontIcon="info_outline"></mat-icon>
-            <span class="kinds-key-pop" role="tooltip">
+          <span class="kinds-key" tabindex="0" role="button" aria-label="What the chips mean" aria-describedby="kinds-key-pop">
+            <mat-icon aria-hidden="true" fontIcon="info_outline"></mat-icon>
+            <span class="kinds-key-pop" id="kinds-key-pop" role="tooltip">
               @for (k of kindChips; track k.kind) {
                 <span><b [ngClass]="k.kind">{{ k.label }}</b> {{ k.name }}</span>
               }
@@ -75,7 +74,7 @@
           </span>
         </div>
       }
-    </header>
+    </div>
 
     @if (rows === null) {
       <p class="bets-note">Loading…</p>

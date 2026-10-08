@@ -3,7 +3,7 @@
   @let groups = visibleGroups;
   <!-- The position tabs (from the app), between the button bar and the grid -->
   <ng-content></ng-content>
-  <ul #rankingsList cdkDropList (cdkDropListDropped)="drop($event)" columnHighlight>
+  <ul #rankingsList id="rankings" tabindex="-1" aria-label="Rankings" cdkDropList (cdkDropListDropped)="drop($event)" columnHighlight>
     <!-- Column headers (stat groups switch on / off with the sidebar eyes) -->
     <li class="player header-row">
       <mat-icon fontIcon="drag_indicator" class="drag-indicator" style="visibility: hidden"></mat-icon>
@@ -19,11 +19,11 @@
             <div class="collapsed-strip">
               <!-- (the "…": there's more to open) -->
               <span class="collapsed-more" aria-hidden="true">…</span>
-              <mat-icon class="group-icon" [fontIcon]="group.icon" [title]="collapseTitle(group)" (click)="toggleCollapsed(group.id, $event)"></mat-icon>
+              <mat-icon class="group-icon" aria-hidden="false" [fontIcon]="group.icon" [title]="collapseTitle(group)" activate [attr.aria-label]="collapseTitle(group)" [attr.aria-expanded]="!isCollapsed(group.id)" (click)="toggleCollapsed(group.id, $event)"></mat-icon>
             </div>
           } @else if (group.id === 'support') {
             <div class="box support-box" [style.min-width.em]="group.stats.length * 7.5">
-              <mat-icon class="group-icon" [fontIcon]="group.icon" [title]="collapseTitle(group)" (click)="toggleCollapsed(group.id, $event)"></mat-icon>
+              <mat-icon class="group-icon" aria-hidden="false" [fontIcon]="group.icon" [title]="collapseTitle(group)" activate [attr.aria-label]="collapseTitle(group)" [attr.aria-expanded]="!isCollapsed(group.id)" (click)="toggleCollapsed(group.id, $event)"></mat-icon>
               @for (stat of group.stats; track stat.key) {
                 <div [columnDrag]="{ list: position + '.' + group.id, id: columnId(stat) }">
                   @let parts = labelParts(stat);<p class="stat-label" [title]="labelTitle(stat)">{{ parts[0] }}@if (parts[1]; as tag) {<span class="label-tag">{{ ' ' + tag }}</span>}</p>
@@ -35,7 +35,7 @@
               @if (stat.format === 'recent') {
                 <div class="box support-box recent-box" [columnDrag]="{ list: position + '.' + group.id, id: columnId(stat) }">
                   @if (first) {
-                    <mat-icon class="group-icon" [fontIcon]="group.icon" [title]="collapseTitle(group)" (click)="toggleCollapsed(group.id, $event)"></mat-icon>
+                    <mat-icon class="group-icon" aria-hidden="false" [fontIcon]="group.icon" [title]="collapseTitle(group)" activate [attr.aria-label]="collapseTitle(group)" [attr.aria-expanded]="!isCollapsed(group.id)" (click)="toggleCollapsed(group.id, $event)"></mat-icon>
                   }
                   <div class="last-five">
                     <div></div>
@@ -45,7 +45,7 @@
               } @else {
                 <div [columnDrag]="{ list: position + '.' + group.id, id: columnId(stat) }">
                   @if (first) {
-                    <mat-icon class="group-icon" [fontIcon]="group.icon" [title]="collapseTitle(group)" (click)="toggleCollapsed(group.id, $event)"></mat-icon>
+                    <mat-icon class="group-icon" aria-hidden="false" [fontIcon]="group.icon" [title]="collapseTitle(group)" activate [attr.aria-label]="collapseTitle(group)" [attr.aria-expanded]="!isCollapsed(group.id)" (click)="toggleCollapsed(group.id, $event)"></mat-icon>
                   }
                   @let parts = labelParts(stat);<p class="stat-label" [title]="labelTitle(stat)">{{ parts[0] }}@if (parts[1]; as tag) {<span class="label-tag">{{ ' ' + tag }}</span>}</p>
                 </div>
@@ -82,7 +82,7 @@
             ><span class="visually-hidden">1</span>} @else {{{ i + 1 }}}</span
         >
           <!-- The team card, with the player's headshot standing in it (teams and units: just the logo) -->
-          <span class="badge-slot card-target" [class.with-photo]="headshot(player)" (click)="openCard(player)"
+          <span class="badge-slot card-target" aria-hidden="true" [class.with-photo]="headshot(player)" (click)="openCard(player)"
             ><span class="team-badge" [class.white-logo]="teamLogoWhite(player)"
               ><img [src]="seasonLogo(player.teamLogo)" class="team-logo" alt=""
             /></span
@@ -96,7 +96,7 @@
           >
           <!-- The badge through the name opens the player card -->
           <p class="player-name card-target" (click)="openCard(player)">
-            <strong class="card-link" role="button" tabindex="0" [attr.data-name]="player.name" (keydown.enter)="openCard(player)">{{ player.name }}</strong>
+            <strong class="card-link" role="button" tabindex="0" [attr.data-name]="player.name" (keydown.enter)="openCard(player)" (keydown.space)="$event.preventDefault(); openCard(player)">{{ player.name }}</strong>
             @if (statsBehind(player); as n) {
               <!-- His stats don't cover every game in his record yet (the data source catching up) -->
               <mat-icon

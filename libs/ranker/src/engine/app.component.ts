@@ -23,6 +23,8 @@ export class AppComponent {
   // /<sport>/); this one is lit
   readonly sport = SPORT.id;
   readonly sports = SPORT_LINKS;
+  // (the page's name, for its heading: "NFL")
+  readonly sportName = SPORT_LINKS.find((s) => s.id === SPORT.id)?.label ?? SPORT.id.toUpperCase();
 
   // The Bets page (#bets) in place of the rankings, from the sport bar's Bets link
   betsOpen = location.hash === '#bets';

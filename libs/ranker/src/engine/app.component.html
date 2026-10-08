@@ -1,5 +1,11 @@
+<!-- (keyboard and screen readers: straight to the rankings; the page's name) -->
+@if (!betsOpen) {
+  <a class="skip-link" href="#rankings">Skip to the rankings</a>
+}
+
 <!-- Sport bar: a link to each sport's app on this site (the page shrinks by its height) -->
 <nav class="sport-bar" aria-label="Sport">
+  <h1 class="visually-hidden">{{ betsOpen ? 'Bets' : sportName + ' Season Ranker' }}</h1>
   @for (s of sports; track s.id) {
     <a [href]="'/' + s.id + '/'" [class.active]="s.id === sport && !betsOpen" [attr.aria-current]="s.id === sport && !betsOpen ? 'page' : null">{{ s.label }}</a>
   }
@@ -35,12 +41,13 @@
     @if (position) {
       <skill-rankings class="rankings" [position]="position">
         <!-- Position tabs: shown between the rankings' button bar and the grid, as wide as the grid -->
-        <nav class="position-bar" aria-label="Position">
+        <nav class="position-bar" role="tablist" aria-label="Position">
           @for (tab of positions; track tab) {
             <button
               type="button"
+              role="tab"
               [class.active]="tab === position"
-              [attr.aria-current]="tab === position ? 'page' : null"
+              [attr.aria-selected]="tab === position"
               (click)="selectPosition(tab)"
             >
               <span class="full">{{ positionNames[tab] }}</span>

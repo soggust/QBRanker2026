@@ -19,6 +19,7 @@ import { GameViewComponent } from './game-view/game-view.component';
 import { ColumnHighlightDirective } from '@ranker/core/column-highlight.directive';
 import { COLUMN_MOVER, ColumnDragDirective } from '@ranker/core/column-drag.directive';
 import { SelectOriginDirective } from '@ranker/core/select-origin.directive';
+import { A11Y_DIRECTIVES } from '@ranker/core/a11y.directives';
 import { MatMenuModule } from '@angular/material/menu';
 import { AboutComponent } from '@sport/about/about.component';
 import { AboutFrameComponent } from './about/about-frame.component';
@@ -39,6 +40,7 @@ import { ModelDeskComponent } from './bets/model-desk.component';
     ColumnHighlightDirective,
     ColumnDragDirective,
     SelectOriginDirective,
+    ...A11Y_DIRECTIVES,
     AboutComponent,
     AboutFrameComponent,
     BetsPageComponent,

@@ -1,6 +1,7 @@
 @if (games.game; as g) {
   <div class="card-backdrop game-backdrop" (click)="games.close()"></div>
-  <div class="player-card game-card" role="dialog" aria-modal="true" aria-label="Game">
+  <div class="player-card game-card" role="dialog" aria-modal="true" dialogFocus [attr.aria-label]="g === 'loading' || g === 'error' ? 'Game' : g.away.name + ' at ' + g.home.name">
+    <h2 class="visually-hidden">{{ g === 'loading' || g === 'error' ? 'Game' : g.away.name + ' at ' + g.home.name }}</h2>
     @if (g === 'loading' || g === 'error') {
       <header class="card-hero game-hero game-hero-empty">
         <div class="card-controls">
@@ -126,7 +127,7 @@
           <button type="button" class="game-filter" [class.active]="games.chartSide === 'home'" (click)="games.chartSide = 'home'; games.player = null">{{ g.home.abbr }}</button>
           @if (all) {
             <span class="game-select-wrap">
-              <select class="game-filter game-select" [class.active]="games.player" (change)="pickPlayer($event)">
+              <select class="game-filter game-select" aria-label="Player" [class.active]="games.player" (change)="pickPlayer($event)">
                 <option value="">{{ all }}</option>
                 @for (name of names; track name) {
                   <option [value]="name" [selected]="games.player === name">{{ name }}</option>
@@ -145,7 +146,7 @@
               @for (t of g.leaders; track t.side) {
                 @let team = t.side === 'away' ? g.away : g.home;
                 <div class="game-leader-col">
-                  <h4 class="depth-unit">{{ team.short }}</h4>
+                  <h3 class="depth-unit">{{ team.short }}</h3>
                   @for (l of t.rows; track $index) {
                     <div class="game-leader">
                       <span class="depth-head tiny" [class.face-link]="faceLinks(l.name)" [title]="faceLinks(l.name) ? 'Open ' + l.name : ''" (click)="openFace(l.name, g)">
@@ -192,7 +193,7 @@
                   @for (t of g.form; track t.side) {
                     @let team = t.side === 'away' ? g.away : g.home;
                     <div class="game-leader-col">
-                      <h4 class="depth-unit">{{ team.short }}</h4>
+                      <h3 class="depth-unit">{{ team.short }}</h3>
                       @for (x of t.games; track x.event) {
                         <!-- (the opponent: its team's card that season; the score: the game) -->
                         <div class="game-form-row">
@@ -247,7 +248,7 @@
               <table>
                 <thead>
                   <tr>
-                    <th></th>
+                    <th><span class="visually-hidden">Team</span></th>
                     @for (p of g.periodLabels; track $index) {
                       <th>{{ p }}</th>
                     }
@@ -332,7 +333,7 @@
                 <div class="group-body">
                   @for (grp of t.groups; track $index) {
                     @if (grp.title) {
-                      <h4 class="depth-unit">{{ grp.title }}</h4>
+                      <h3 class="depth-unit">{{ grp.title }}</h3>
                     }
                     <div class="game-log game-box-table">
                       <table>

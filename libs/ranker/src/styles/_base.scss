@@ -627,3 +627,32 @@ section footer .mat-mdc-select.season-select {
     color: var(--scoreboard-led) !important;
   }
 }
+
+// ---------------------------------------------------------------------------
+// Keyboard: the skip link (out of sight until Tab reaches it, then over the sport bar's corner), and a
+// ring in the sport's light on whatever has the keyboard's focus (a mouse click shows none:
+// :focus-visible)
+// ---------------------------------------------------------------------------
+.skip-link {
+  background: var(--scoreboard);
+  border: 2px solid var(--scoreboard-led);
+  border-radius: 8px;
+  color: var(--scoreboard-led);
+  font-weight: 800;
+  left: 8px;
+  padding: 8px 14px;
+  position: fixed;
+  text-decoration: none;
+  top: 8px;
+  transform: translateY(-200%);
+  z-index: 10000;
+
+  &:focus {
+    transform: none;
+  }
+}
+
+:where(button, a[href], input, select, summary, [tabindex]:not([tabindex="-1"]), [role="button"], [role="tab"]):focus-visible {
+  outline: 2px solid var(--scoreboard-led);
+  outline-offset: 2px;
+}
