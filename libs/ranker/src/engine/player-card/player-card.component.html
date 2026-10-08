@@ -335,6 +335,26 @@
               </card-panel>
             }
 
+            <!-- (the week's bets, before the season's outlook) -->
+            <card-panel class="tab-card ai-card ai-bets group-results" [label]="a.game ? 'Betting Angles: Week ' + a.game.week : 'Betting Angles'" icon="paid" [open]="cards.aiOpen.has('bets')" (toggled)="cards.toggleAi('bets')">
+              <div class="group-body">
+                @if (!r.bets.length) {
+                  <p class="card-note">Nothing in this matchup looks mispriced.</p>
+                }
+                @for (b of r.bets; track $index) {
+                  <div class="ai-bet">
+                    <span class="ai-bet-strength" [ngClass]="b.strength === 'fade' ? 'fade' : 'like'">{{ b.strength === 'fade' ? 'fade' : 'like' }}</span>
+                    <div class="ai-bet-main">
+                      <span class="ai-bet-pick"
+                        >@if (b.strength === 'fade') {<b>{{ b.market }}</b><small>{{ insteadText(b.lean) }}</small>} @else {<b>{{ b.lean }}</b><small>{{ b.market }}</small>}</span
+                      >
+                      <p>{{ b.reason }}</p>
+                    </div>
+                  </div>
+                }
+              </div>
+            </card-panel>
+
             <card-panel class="tab-card ai-card ai-rest group-advanced" label="Season Outlook" icon="event_upcoming" [open]="cards.aiOpen.has('rest')" (toggled)="cards.toggleAi('rest')">
               <div class="group-body">
                 <div class="ai-projections">
@@ -356,25 +376,6 @@
                     <span class="ai-chip">{{ f }}</span>
                   }
                 </div>
-              </div>
-            </card-panel>
-
-            <card-panel class="tab-card ai-card ai-bets group-results" label="Betting Angles" icon="paid" [open]="cards.aiOpen.has('bets')" (toggled)="cards.toggleAi('bets')">
-              <div class="group-body">
-                @if (!r.bets.length) {
-                  <p class="card-note">Nothing in this matchup looks mispriced.</p>
-                }
-                @for (b of r.bets; track $index) {
-                  <div class="ai-bet">
-                    <span class="ai-bet-strength" [ngClass]="b.strength === 'fade' ? 'fade' : 'like'">{{ b.strength === 'fade' ? 'fade' : 'like' }}</span>
-                    <div class="ai-bet-main">
-                      <span class="ai-bet-pick"
-                        >@if (b.strength === 'fade') {<b>{{ b.market }}</b><small>{{ insteadText(b.lean) }}</small>} @else {<b>{{ b.lean }}</b><small>{{ b.market }}</small>}</span
-                      >
-                      <p>{{ b.reason }}</p>
-                    </div>
-                  </div>
-                }
               </div>
             </card-panel>
           }
