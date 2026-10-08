@@ -37,6 +37,8 @@ jobs:
       - name: Roll over to a new season
         run: node scripts/rollover.mjs nba --if-due
 
+      # (the regular season, and once the playoffs have begun the playoffs and both too:
+      # skill-players.post.json and .all.json; before then any old ones are removed)
       - name: Pull stats from Basketball-Reference and ESPN
         run: npm run nba:update-data
 

@@ -1,6 +1,7 @@
 import type { CardFlag, FlagContext, SportConfig } from '@ranker/engine/sport';
 import { espnGameLog, espnTeamGameLog } from '@ranker/core/game-logs';
 import { teamRowsFromCoaches } from '@ranker/engine/team-rows';
+import { dataPart } from '@ranker/engine/data';
 import type { SkillPlayer } from './positions';
 import { seasonName } from './awards';
 import { loadTeamRoster } from './team-roster';
@@ -47,7 +48,7 @@ export function cardFlags({ player, position, current, ordinal, innings }: FlagC
 
   // Coaches: an interim stint, and how the team played against its talent
   if (position === 'HC') {
-    if (player.games < 60) {
+    if (player.games < 60 && dataPart === 'regular') {
       flags.push({ icon: 'swap_horiz', tone: 'info', text: `Part of the season: ${player.games} games coached` });
     }
     if (st.lift !== null && st.lift >= 4) {
@@ -70,22 +71,23 @@ export function cardFlags({ player, position, current, ordinal, innings }: FlagC
     }
   }
 
-  // A small sample: under 500 minutes
+  // A small sample: under 500 minutes (the playoffs, a quarter of a season at most: 150)
   const minutes = st.minutes ?? 0;
-  if (position !== 'HC' && minutes < 500) {
+  const sample = dataPart === 'post' ? 150 : 500;
+  if (position !== 'HC' && minutes < sample) {
     flags.push({
       icon: 'hourglass_bottom',
       tone: 'info',
       text: current ? `Small sample: ${minutes} minutes so far` : `Small sample: ${minutes} minutes`,
     });
   }
-  // Missed time: a finished season with 25+ games missed
-  if (position !== 'HC' && !current && player.games <= 57 && minutes >= 500) {
+  // Missed time: a finished season with 25+ games missed (the regular season's)
+  if (position !== 'HC' && !current && dataPart === 'regular' && player.games <= 57 && minutes >= 500) {
     flags.push({ icon: 'healing', tone: 'info', text: `Missed time: played ${player.games} of 82 games` });
   }
 
   // The team with him on the floor against off it
-  if (st.onOff !== null && minutes >= 500) {
+  if (st.onOff !== null && minutes >= sample) {
     if (st.onOff >= 8) {
       flags.push({ icon: 'trending_up', tone: 'good', text: `The team is ${signed(st.onOff)} per 100 possessions better with him on the floor` });
     } else if (st.onOff <= -8) {
@@ -101,7 +103,7 @@ export function cardFlags({ player, position, current, ordinal, innings }: FlagC
     }
   }
   // Defense the box score shows
-  if (st.dbpm !== null && minutes >= 500) {
+  if (st.dbpm !== null && minutes >= sample) {
     if (st.dbpm >= 2.5) {
       flags.push({ icon: 'shield', tone: 'good', text: `Stout defender: ${signed(st.dbpm)} Defensive Box Plus/Minus` });
     } else if (st.dbpm <= -2) {
@@ -119,6 +121,9 @@ export const SPORT: SportConfig = {
   firstSeason: 2001,
   // (after the Finals: 2025-26 is over; 2026-27 becomes current at the October rollover)
   currentSeasonEnds: '2026-06-30',
+  // (Stats From: the playoffs, or the regular season and the playoffs together; skill-players.post.json
+  // and .all.json, from scripts/update-data.mjs)
+  seasonParts: true,
   seasonText: seasonName,
   positionNames: {
     TM: 'Team',
