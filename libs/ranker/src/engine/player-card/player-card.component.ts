@@ -53,6 +53,11 @@ export class PlayerCardComponent {
     return [word, score, vs ? (/^(@|vs) /.test(vs) ? vs : 'vs ' + vs) : null].filter(Boolean).join(' ');
   }
 
+  // A headshot whose player the site has: his card (like his name)
+  openLink(link: { position: string; gsisId: string } | null | undefined, season: number): void {
+    if (link) this.cards.openLinked(link, season);
+  }
+
   recentOt(card: PlayerCard, index: number): boolean {
     return !!extras(card.player).lastFiveOt?.[index];
   }

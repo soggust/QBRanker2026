@@ -3117,3 +3117,21 @@
     filter: brightness(1.25);
   }
 }
+
+// A headshot that opens the player's card (his name does too): the pointer, a small lift, its ring lit
+.face-link {
+  cursor: pointer;
+  transition:
+    filter 0.15s,
+    transform 0.15s;
+
+  &:hover {
+    filter: brightness(1.12);
+    transform: scale(1.08);
+
+    > img,
+    > .depth-initial {
+      border-color: var(--scoreboard-led);
+    }
+  }
+}

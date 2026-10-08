@@ -223,6 +223,15 @@ export class GameViewComponent {
   }
 
   // (a player picked from the dropdown, or none: everyone)
+  // A headshot: his card that season, like his name, when the site has him
+  faceLinks(name: string | null): boolean {
+    return !!name && !!this.games.link(name);
+  }
+
+  openFace(name: string | null, game: GameView): void {
+    if (name && this.faceLinks(name)) this.games.toPlayer(name, this.seasonOf(game));
+  }
+
   pickPlayer(event: Event): void {
     this.games.player = (event.target as HTMLSelectElement).value || null;
   }

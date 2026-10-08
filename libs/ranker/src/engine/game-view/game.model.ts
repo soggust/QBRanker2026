@@ -125,8 +125,10 @@ export interface GamePlay {
   side: 'away' | 'home' | null;
   // the kind (a goal, a penalty, a home run...), for the filter
   kind: string | null;
-  // a scoring play's scorer's headshot (the shooter, the goal scorer, the batter; the NFL's from its text)
+  // a scoring play's scorer's headshot and name (the shooter, the goal scorer, the batter; the NFL's from its
+  // text)
   headshot: string | null;
+  scorer: string | null;
 }
 
 export interface GamePlayGroup {

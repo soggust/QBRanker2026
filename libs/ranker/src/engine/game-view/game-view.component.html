@@ -148,7 +148,7 @@
                   <h4 class="depth-unit">{{ team.short }}</h4>
                   @for (l of t.rows; track $index) {
                     <div class="game-leader">
-                      <span class="depth-head tiny">
+                      <span class="depth-head tiny" [class.face-link]="faceLinks(l.name)" [title]="faceLinks(l.name) ? 'Open ' + l.name : ''" (click)="openFace(l.name, g)">
                         @if (l.headshot) {
                           <img [src]="l.headshot" alt="" loading="lazy" (error)="l.headshot = null" />
                         } @else {
@@ -222,7 +222,7 @@
                 <div class="group-body">
                   @for (i of t.rows; track $index) {
                     <div class="game-leader">
-                      <span class="depth-head tiny">
+                      <span class="depth-head tiny" [class.face-link]="faceLinks(i.name)" [title]="faceLinks(i.name) ? 'Open ' + i.name : ''" (click)="openFace(i.name, g)">
                         @if (i.headshot) {
                           <img [src]="i.headshot" alt="" loading="lazy" (error)="i.headshot = null" />
                         } @else {
@@ -576,7 +576,7 @@
                   @let team = p.side === 'away' ? g.away : g.home;
                   <div class="game-fantasy-row">
                     <span class="game-fantasy-rank" [class.first]="i === 0" [class.top]="i > 0 && i < 10">{{ i + 1 }}</span>
-                    <span class="depth-head tiny">
+                    <span class="depth-head tiny" [class.face-link]="faceLinks(p.name)" [title]="faceLinks(p.name) ? 'Open ' + p.name : ''" (click)="openFace(p.name, g)">
                       @if (p.headshot) {
                         <img [src]="p.headshot" alt="" loading="lazy" (error)="p.headshot = null" />
                       } @else {
@@ -691,7 +691,7 @@
                         }
                         <!-- (a scoring play: the scorer, right before what he did) -->
                         @if (p.scoring && p.headshot) {
-                          <img class="game-play-head" [src]="p.headshot" alt="" loading="lazy" (error)="p.headshot = null" />
+                          <img class="game-play-head" [src]="p.headshot" alt="" loading="lazy" (error)="p.headshot = null" [class.face-link]="faceLinks(p.scorer)" [title]="faceLinks(p.scorer) ? 'Open ' + p.scorer : ''" (click)="openFace(p.scorer, g)" />
                         }
                         <span class="game-play-text">{{ p.text }}</span>
                         @if (p.scoring && p.score) {

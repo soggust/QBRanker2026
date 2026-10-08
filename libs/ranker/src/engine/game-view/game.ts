@@ -171,23 +171,25 @@ export async function loadGame(league: string, eventId: string): Promise<GameVie
 
   // The players' headshots by ESPN id, and by the play-by-play's short name ("D.Henry")
   const shortKey = (name: string) => name.toLowerCase().replace(/[\s.]/g, '');
-  const faces = new Map<string, string>();
-  const facesByName = new Map<string, string>();
+  type Face = { headshot: string; name: string };
+  const faces = new Map<string, Face>();
+  const facesByName = new Map<string, Face>();
   for (const t of box) {
     for (const g of t.groups) {
       for (const r of g.rows) {
         if (!r.headshot) continue;
-        if (r.id) faces.set(r.id, r.headshot);
-        facesByName.set(shortKey(r.short), r.headshot);
+        const face = { headshot: r.headshot, name: r.name };
+        if (r.id) faces.set(r.id, face);
+        facesByName.set(shortKey(r.short), face);
         // (and his first initial with his last name: "Derrick Henry" as the plays write him, "D.Henry")
         const [first, ...rest] = r.name.split(' ');
-        if (first && rest.length) facesByName.set(shortKey(first[0] + rest.join('')), r.headshot);
+        if (first && rest.length) facesByName.set(shortKey(first[0] + rest.join('')), face);
       }
     }
   }
   // A scoring play's scorer: ESPN's scorer or batter, else the first named (the shooter); the NFL's from its
   // text (a return's defender, a catch's receiver, else the runner or kicker who starts it)
-  const scorerFace = (p: EspnPlay): string | null => {
+  const scorerFace = (p: EspnPlay): Face | null => {
     if (!p.scoringPlay) return null;
     const parts = p.participants ?? [];
     const scorer = parts.find((x) => x.type === 'scorer' || x.type === 'batter') ?? parts[0];
@@ -209,7 +211,7 @@ export async function loadGame(league: string, eventId: string): Promise<GameVie
     scoring: !!p.scoringPlay,
     side: sideOf(p.team?.id),
     kind: p.type?.text ?? null,
-    headshot: scorerFace(p),
+    ...((face) => ({ headshot: face?.headshot ?? null, scorer: face?.name ?? null }))(scorerFace(p)),
   });
   // (a play's period by name: ESPN's, or from its number: the NFL's scoring plays carry just that)
   const ORDINAL = ['1st', '2nd', '3rd', '4th'];

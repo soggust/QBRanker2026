@@ -527,7 +527,7 @@
                   @for (s of d.special; track s.label) {
                     <span class="depth-special-item">
                       <span class="depth-pos">{{ s.label }}</span>
-                      <span class="depth-head small">
+                      <span class="depth-head small" [class.face-link]="s.player?.link" [title]="s.player?.link ? 'Open ' + s.player!.name : ''" (click)="openLink(s.player?.link, c.season)">
                         @if (s.player?.headshot) {
                           <img [src]="s.player!.headshot" alt="" loading="lazy" (error)="s.player!.headshot = null" />
                         } @else {
@@ -594,7 +594,7 @@
                   <h4 class="depth-unit">{{ g.title }}</h4>
                   @for (p of g.rows; track p.name) {
                     <div class="depth-row" [class.off-chart]="!p.onChart" [class.unused]="!p.snaps">
-                      <span class="depth-head tiny">
+                      <span class="depth-head tiny" [class.face-link]="p.link" [title]="p.link ? 'Open ' + p.name : ''" (click)="openLink(p.link, c.season)">
                         @if (p.headshot) {
                           <img [src]="p.headshot" alt="" loading="lazy" (error)="p.headshot = null" />
                         } @else {
