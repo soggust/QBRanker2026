@@ -74,6 +74,15 @@ function linkedPosition(): Position {
   return POSITIONS.find((position) => position === linked) ?? POSITIONS[0];
 }
 
+// A grid's look for a shared link (PositionService.layout): tab -> row ids in their dragged order,
+// tab -> collapsed group ids, "TAB.group" -> column keys, tab -> the sidebar's group order
+export interface GridLayout {
+  orders: Record<string, string[]>;
+  collapsed: Record<string, string[]>;
+  columns: Record<string, string[]>;
+  groups: Record<string, StatGroupId[]>;
+}
+
 export interface UnitOrder {
   ids: string[];
   manual: boolean;
@@ -376,6 +385,30 @@ export class PositionService {
 
   toggleGroupCollapsed(position: SkillPosition, id: StatGroupId): void {
     this.collapsedGroups = { ...this.collapsedGroups, [position]: { ...this.collapsedGroups[position], [id]: !this.isGroupCollapsed(position, id) } };
+  }
+
+  // How the grid looks beyond its settings, for a shared link (share.ts): each tab's hand-dragged order,
+  // its collapsed groups, the dragged columns and the sidebar's card order
+  get layout(): GridLayout {
+    const orders = Object.entries(this.unitOrdersSubject.value).filter(([, order]) => order?.manual);
+    return {
+      orders: Object.fromEntries(orders.map(([position, order]) => [position, order!.ids])),
+      collapsed: Object.fromEntries(
+        Object.entries(this.collapsedGroups).map(([position, groups]) => [position, Object.keys(groups ?? {}).filter((id) => groups?.[id as StatGroupId])]),
+      ),
+      columns: { ...this.columnOrders },
+      groups: { ...this.groupOrders } as Record<string, StatGroupId[]>,
+    };
+  }
+
+  // ...and a shared link's, put in place (before the tabs first draw)
+  applyLayout(layout: Partial<GridLayout>): void {
+    for (const [position, ids] of Object.entries(layout.orders ?? {})) this.setUnitOrder(position as SkillPosition, ids, true);
+    for (const [position, ids] of Object.entries(layout.collapsed ?? {})) {
+      this.collapsedGroups = { ...this.collapsedGroups, [position]: Object.fromEntries(ids.map((id) => [id, true])) };
+    }
+    this.columnOrders = { ...this.columnOrders, ...layout.columns };
+    this.groupOrders = { ...this.groupOrders, ...layout.groups };
   }
 
   // A sport setting set to a value (the footer's dropdown)

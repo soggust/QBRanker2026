@@ -18,6 +18,12 @@ interface Shared {
   // the settings menu's settings that differ, and the sport's own
   s?: Partial<Omit<RankerSettings, 'sport'>>;
   sp?: Record<string, string | boolean>;
+  // the grid as it looks (PositionService.layout): each tab's hand-dragged order, collapsed groups,
+  // dragged columns ("QB.box") and the sidebar's card order
+  o?: Record<string, string[]>;
+  c?: Record<string, string[]>;
+  k?: Record<string, string[]>;
+  go?: Record<string, string[]>;
 }
 
 const PARAM = 'list';
@@ -51,6 +57,16 @@ export function shareLink(service: PositionService, defaults: RankerSettings): s
   if (own.length) shared.s = Object.fromEntries(own);
   const sport = Object.entries(settings.sport).filter(([key, value]) => DEFAULT_SPORT_SETTINGS[key] !== value);
   if (sport.length) shared.sp = Object.fromEntries(sport);
+  const layout = service.layout;
+  const some = (record: Record<string, string[]>) => {
+    const kept = Object.entries(record).filter(([, list]) => list?.length);
+    return kept.length ? Object.fromEntries(kept) : undefined;
+  };
+  shared.o = some(layout.orders);
+  shared.c = some(layout.collapsed);
+  shared.k = some(layout.columns);
+  shared.go = some(layout.groups);
+  for (const key of ['o', 'c', 'k', 'go'] as const) if (!shared[key]) delete shared[key];
 
   const url = new URL(location.href);
   url.hash = '';
@@ -100,4 +116,16 @@ export function applySharedLink(service: PositionService, defaults: RankerSettin
   const settings = known(shared.s, defaults);
   const sport = known(shared.sp, DEFAULT_SPORT_SETTINGS);
   service.updateSettings({ ...settings, sport: { ...service.settings.sport, ...sport } as RankerSettings['sport'] });
+
+  // (the grid's look: only tabs the site has, and lists of names)
+  const lists = (record: Record<string, unknown> | undefined, tab = (key: string) => key) =>
+    Object.fromEntries(
+      Object.entries(record ?? {}).filter(([key, list]) => tabs.has(tab(key)) && Array.isArray(list) && list.every((x) => typeof x === 'string')),
+    ) as Record<string, string[]>;
+  service.applyLayout({
+    orders: lists(shared.o),
+    collapsed: lists(shared.c),
+    columns: lists(shared.k, (key) => key.split('.')[0]),
+    groups: lists(shared.go) as Record<string, StatGroupId[]>,
+  });
 }
