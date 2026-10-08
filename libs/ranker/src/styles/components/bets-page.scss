@@ -651,7 +651,8 @@ $arm-length: 175px;
     perspective: 420px;
     perspective-origin: 33px 154px;
     position: absolute;
-    top: calc(50% - 20px);
+    // (the mount and hub halfway down the panel: the hub is 154px into the handle)
+    top: calc(50% - 154px);
     width: 64px;
 
     &:focus-visible {
