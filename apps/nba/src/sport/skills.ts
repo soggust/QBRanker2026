@@ -12,7 +12,9 @@ const NBA_SKILLS: SkillDef[] = [
   { id: 'shooting', name: 'Shooting', short: 'Shooting', parts: [['threes', 1], ['fg3Pct', 1], ['ftPct', 1, 0.5]] },
   { id: 'playmaking', name: 'Playmaking', short: 'Playmaking', parts: [['assists', 1, 2], ['astPct', 1, 2], ['tovPct', -1]] },
   { id: 'rebounding', name: 'Rebounding', short: 'Rebounding', parts: [['rebounds', 1], ['trbPct', 1]] },
-  { id: 'defense', name: 'Defense', short: 'Defense', parts: [['dbpm', 1], ['stlPct', 1], ['blkPct', 1]] },
+  // (Defensive Win Shares a game beside DBPM, so a rim protector's stops count, not just his steals and
+  // blocks)
+  { id: 'defense', name: 'Defense', short: 'Defense', parts: [['dbpm', 1, 2], ['dwsGame', 1], ['stlPct', 1], ['blkPct', 1]] },
   { id: 'impact', name: 'Impact', short: 'Impact', parts: [['bpm', 1, 2], ['onOff', 1], ['ws48', 1, 2]] },
   { id: 'value', name: 'Overall Value', short: 'Value', parts: [['ws', 1], ['vorp', 1]] },
 ];
@@ -79,8 +81,10 @@ export const SKILL_MINIMUMS: Partial<Record<SkillPosition, SkillMinimums>> = {
   C: SHOOTING_MINIMUMS,
 };
 
-// (every stat a skill reads is a column)
-export const SKILL_DERIVED: SkillDerivedStats = {};
+// (a skill's stats that aren't columns: Defensive Win Shares, a season's, read a game)
+export const SKILL_DERIVED: SkillDerivedStats = {
+  dwsGame: { key: 'dwsGame', label: 'DWS', kind: 'volume', value: (p) => stat(p, 'dws') },
+};
 
 // The counting and rate skills whose split reads as "empty stats" or "earning more minutes"
 export const VOLUME_VS_EFFICIENCY: Partial<Record<SkillPosition, [volume: string, efficiency: string]>> = {

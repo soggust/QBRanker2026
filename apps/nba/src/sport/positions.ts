@@ -42,6 +42,7 @@ export type SkillStatKey =
   | 'stlPct'
   | 'blkPct'
   | 'ws'
+  | 'dws'
   | 'ws48'
   | 'bpm'
   | 'dbpm'
@@ -128,6 +129,7 @@ export const STAT_NAMES: Partial<Record<SkillColumnKey, string>> = {
   stlPct: 'Steal Percentage',
   blkPct: 'Block Percentage',
   ws: 'Win Shares',
+  dws: 'Defensive Win Shares',
   ws48: 'Win Shares per 48 Minutes',
   bpm: 'Box Plus/Minus',
   dbpm: 'Defensive Box Plus/Minus',
@@ -206,6 +208,8 @@ const NBA_STATS: SkillStat[] = [
   { key: 'per', label: 'PER', description: 'Per-minute production in one number (15 = league average)', kind: 'efficiency', format: 'dec1' },
   { key: 'usgPct', label: 'USG %', description: 'Share of his team\'s possessions he used while on the floor (shots, free throws, turnovers)', kind: 'efficiency', format: 'pctPoints' },
   { key: 'bpm', label: 'BPM', description: 'Points per 100 possessions he added over an average player, from the box score', kind: 'efficiency', format: 'dec1' },
+  // (a season total like Win Shares, which already count it: for context)
+  { key: 'dws', label: 'DWS', description: 'Defensive Win Shares: the wins his defense produced, the defensive half of Win Shares (for context; not part of the ranking)', kind: 'efficiency', format: 'dec1', infoOnly: true },
   { key: 'dbpm', label: 'DBPM', description: 'The defensive half of Box Plus/Minus', kind: 'efficiency', format: 'dec1' },
   { key: 'ws48', label: 'WS / 48', description: 'Win Shares per 48 minutes (.100 is about average)', kind: 'efficiency', format: 'avg3' },
   { key: 'onOff', label: 'On-Off', description: "His team's net rating per 100 possessions with him on the floor, minus with him off", kind: 'efficiency', format: 'dec1' },
@@ -291,6 +295,7 @@ const ADVANCED_STATS = new Set<SkillColumnKey>([
   'usgPct',
   'bpm',
   'dbpm',
+  'dws',
   'ws48',
   'onOff',
   'astPct',

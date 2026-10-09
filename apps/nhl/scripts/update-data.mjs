@@ -431,6 +431,8 @@ async function buildSeason(season, part = 'regular') {
         giveaways: rt.giveaways ?? null,
         // (a winger's handful of draws says little: 50+ faceoffs)
         faceoffPct: (draws.get(row.playerId)?.totalFaceoffs ?? 0) >= 50 ? round(draws.get(row.playerId).faceoffWinPct) : null,
+        // (the draws he took, won or lost: the sample behind it, for the card's faceoff minimum; not a column)
+        faceoffs: draws.get(row.playerId)?.totalFaceoffs ?? 0,
         gameScore: round(num(all?.gameScore), 1),
         ixg: round(ixg, 1),
         goalsAboveX: ixg === null ? null : round(row.goals - ixg, 1),

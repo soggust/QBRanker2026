@@ -289,7 +289,8 @@ async function partTables(season, part, keep) {
 //   each part's is recovered, summed, and the count total divided by it (a part with none of the count
 //   has no share to recover it from: its minutes at the other part's rate)
 // - PER, Box Plus/Minus and its defensive half are per-minute production: production (rate x minutes)
-//   summed, over the minutes; Win Shares and VORP add up, and WS/48 is them over the minutes
+//   summed, over the minutes; Win Shares (and their defensive half) and VORP add up, and WS/48 is
+//   them over the minutes
 // - on/off: the team's point margin with him on the floor (per 100 x his minutes) and off it (x the
 //   minutes of his games he sat), each summed over its minutes
 
@@ -328,6 +329,7 @@ function sumAdvanced(rows, totalsOf) {
   out.bpm = perMinute('bpm');
   out.dbpm = perMinute('dbpm');
   out.ws = round(sum(rows, (r) => num(r.ws)), 1);
+  out.dws = round(sum(rows, (r) => num(r.dws)), 1);
   out.vorp = round(sum(rows, (r) => num(r.vorp)), 1);
   out.ws_per_48 = round(ratio(48 * out.ws, mp), 3);
   const pts = sum(totals, (t) => num(t?.pts));
@@ -680,6 +682,10 @@ async function buildPart(season, part, src, { champion, runnerUp, coachRows, coy
         fgPct: pct(row.fg_pct),
         fg3Pct: num(row.fg3a) >= attempts.fg3a ? pct(row.fg3_pct) : null,
         ftPct: num(row.fta) >= attempts.fta ? pct(row.ft_pct) : null,
+        // (the attempts behind them: the card's Shooting counts a percentage only with enough a game,
+        // apps/nba/src/sport/skills.ts SKILL_MINIMUMS; not columns of their own)
+        fg3a: num(row.fg3a),
+        fta: num(row.fta),
         per: num(a.per),
         tsPct: pct(a.ts_pct),
         usgPct: num(a.usg_pct),
@@ -689,6 +695,8 @@ async function buildPart(season, part, src, { champion, runnerUp, coachRows, coy
         stlPct: num(a.stl_pct),
         blkPct: num(a.blk_pct),
         ws: num(a.ws),
+        // (Defensive Win Shares: the defensive half of Win Shares, a season total)
+        dws: num(a.dws),
         ws48: num(a.ws_per_48),
         bpm: num(a.bpm),
         dbpm: num(a.dbpm),

@@ -35,6 +35,8 @@ export type SkillStatKey =
   | 'takeaways'
   | 'giveaways'
   | 'faceoffPct'
+  // (faceoffs taken, won or lost: Faceoff %'s sample, for the card's minimum; not a column)
+  | 'faceoffs'
   // Skaters: advanced (MoneyPuck; on-ice shares at 5-on-5)
   | 'gameScore'
   | 'ixg'

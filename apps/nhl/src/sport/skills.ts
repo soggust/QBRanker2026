@@ -54,9 +54,13 @@ export const SKILLS: Record<SkillPosition, SkillDef[]> = {
 };
 
 // Shooting % counts toward Finishing only with the shots a game behind it (skills.ts SkillMinimum): a
-// forward's 1 a game, a defenseman's half that (he shoots less, from farther out)
+// forward's 1 a game, a defenseman's half that (he shoots less, from farther out); a center's Faceoff %
+// toward Faceoffs only with 5 draws a game (a fourth-liner's handful can't make him a specialist)
 const shots = (perGame: number): SkillMinimums => ({ shootingPct: { perGame, noun: 'shots', attempts: (p: SkillPlayer) => p.stats.shots ?? null } });
-export const SKILL_MINIMUMS: Partial<Record<SkillPosition, SkillMinimums>> = { C: shots(1), LW: shots(1), RW: shots(1), D: shots(0.5) };
+const faceoffs: SkillMinimums = {
+  faceoffPct: { perGame: 5, noun: 'faceoffs', attempts: (p: SkillPlayer) => (p.stats as { faceoffs?: number | null }).faceoffs ?? null },
+};
+export const SKILL_MINIMUMS: Partial<Record<SkillPosition, SkillMinimums>> = { C: { ...shots(1), ...faceoffs }, LW: shots(1), RW: shots(1), D: shots(0.5) };
 
 // (every stat a skill reads is a column: a goalie's Starts is his season's)
 export const SKILL_DERIVED: SkillDerivedStats = {};
