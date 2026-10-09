@@ -1075,8 +1075,10 @@
 }
 
 // (a game to come: its line, under the date)
+// (a preview's line under its date: light, in the board's gold)
 .game-line-note {
   color: var(--scoreboard-led);
+  font-weight: 400;
   margin-top: -4px;
 }
 
