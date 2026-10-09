@@ -156,6 +156,8 @@ const readSport = (): string | null => {
 const MARKET_NAMES: Record<string, string> = { spread: 'Spread', total: 'Total', ml: 'Moneyline', prop: 'Props' };
 // (each sport's scoring unit, for a context term's size)
 const UNIT_WORDS: Record<string, string> = { nfl: 'pts', nba: 'pts', nhl: 'goals', mlb: 'runs' };
+// (the props a bar measures whatever their line: yards, a goalie's saves, a pitcher's outs; a short count is pips)
+const BAR_STATS = new Set(['passYds', 'rushYds', 'recYds', 'rushRecYds', 'saves', 'outs']);
 
 function tally(label: string, bets: ModelBet[]): Tally {
   const t: Tally = { label, bets: 0, won: 0, lost: 0, push: 0, staked: 0, profit: 0, roi: null, open: 0, clvN: 0, clvBeat: null, clvEv: null };
@@ -455,8 +457,8 @@ export class ModelDeskComponent implements OnInit, OnDestroy {
   // (a prop in play: how it stands, the count so far against the line: an over is home once it's past the
   // line; an under is alive while it's under, lost once it's past)
   propState(b: ModelBet): 'won' | 'alive' | 'lost' | null {
-    const now = this.propNow.get(b.id);
-    if (now === null || now === undefined || b.line === undefined) return null;
+    const now = this.countNow(b);
+    if (now === null || b.line === undefined) return null;
     if (b.side === 'over') return now > b.line ? 'won' : 'alive';
     return now > b.line ? 'lost' : 'alive';
   }
@@ -498,13 +500,27 @@ export class ModelDeskComponent implements OnInit, OnDestroy {
     return { count, profit };
   }
 
+  // (what an in-play bet's meter counts: a prop's stat so far, a total's points so far; null for the rest,
+  // whose result is the score)
+  countNow(b: ModelBet): number | null {
+    if (b.market === 'prop') return this.propNow.get(b.id) ?? null;
+    if (b.market !== 'total' || !b.event) return null;
+    const game = this.boards.get(b.event);
+    return game ? game.hs + game.as : null;
+  }
+
+  // (a total's unit: the game's points, goals or runs)
+  totalWord(b: ModelBet): string {
+    return UNIT_WORDS[b.sport] ?? 'pts';
+  }
+
   // A prop in play as a meter to cheer along with: a short count (carries, catches, TDs, shots, strikeouts)
   // as a row of pips, one a unit up to the one past the line, lit as they come (the last one: the line
   // crossed); a big one (yards, saves) as a bar with a notch at the line, filling as it goes
   meter(b: ModelBet): { pips: { on: boolean; past: boolean }[] | null; fill: number; mark: number; extra: number } | null {
-    const now = this.propNow.get(b.id);
-    if (now === null || now === undefined || b.line === undefined) return null;
-    if (b.line <= 12.5) {
+    const now = this.countNow(b);
+    if (now === null || b.line === undefined) return null;
+    if (b.market === 'prop' && !BAR_STATS.has(b.propType ?? '') && b.line <= 12.5) {
       const count = Math.ceil(b.line);
       return {
         pips: Array.from({ length: count + 1 }, (_, i) => ({ on: i < now, past: i === count })),

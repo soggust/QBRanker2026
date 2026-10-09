@@ -282,12 +282,15 @@
                   } @else {
                     <td class="up">{{ units(toWin(b)) }}</td>
                   }
-                  <!-- (a prop: its meter (pips for a short count, a bar with the line notched for a big one), lit by how
-                       it stands, its count against the line, the game's score under it) -->
-                  @if (b.market === 'prop' && propNow.get(b.id) !== undefined && propNow.get(b.id) !== null) {
+                  <!-- (a prop or a total: its meter (pips for a short count, a bar with the line notched for yards, saves,
+                       outs and a game's total), lit by how it stands, its count against the line, the game's score under
+                       it; a side's result is the score) -->
+                  @let count = countNow(b);
+                  @if (count !== null) {
                     @let state = propState(b);
                     @let m = meter(b);
-                    <td class="desk-score" [class.up]="state === 'won'" [class.down]="state === 'lost'" [title]="b.player + ': ' + propNow.get(b.id) + ' ' + b.statLabel + ' so far, ' + b.side + ' ' + b.line">
+                    @let unit = b.market === 'prop' ? b.statLabel : totalWord(b);
+                    <td class="desk-score" [class.up]="state === 'won'" [class.down]="state === 'lost'" [title]="(b.market === 'prop' ? b.player + ': ' : 'The game: ') + count + ' ' + unit + ' so far, ' + b.side + ' ' + b.line">
                       @if (m) {
                         <span class="desk-meter" [class.won]="state === 'won'" [class.lost]="state === 'lost'" [class.under]="b.side === 'under'" aria-hidden="true">
                           @if (m.pips) {
@@ -302,7 +305,7 @@
                           }
                         </span>
                       }
-                      <b>{{ propNow.get(b.id) }} / {{ b.line }} {{ b.statLabel }}</b><small>{{ score?.text ?? 'Under way' }}</small>
+                      <b>{{ count }} / {{ b.line }} {{ unit }}</b><small>{{ score?.text ?? 'Under way' }}</small>
                     </td>
                   } @else {
                     <td class="desk-score" [class.desk-final]="score?.final">{{ score?.text ?? 'Under way' }}</td>
