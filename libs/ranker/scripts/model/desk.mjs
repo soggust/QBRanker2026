@@ -31,12 +31,15 @@ export function stakeFor(ev, evScale) {
   return Math.min(3, Math.max(0.5, Math.round(raw * 2) / 2));
 }
 
-// Each market's two sides, priced: the line, the price, the model's chance, the book's fair chance
+// Each market's two sides, priced: the line, the price, the model's chance, the book's fair chance (the lines'
+// own fair chance of the first side where they bring one: Pinnacle's, from The Odds API; else the two prices
+// with the vig taken out)
 export function price(game, exp, lines, params) {
   const out = [];
   const sides = (market, a, b) => {
     if (!a.odds || !b.odds) return;
-    const [fa, fb] = fair(a.odds, b.odds);
+    const given = lines.fair?.[market];
+    const [fa, fb] = Number.isFinite(given) ? [given, 1 - given] : fair(a.odds, b.odds);
     out.push({ market, sides: [{ ...a, fair: fa }, { ...b, fair: fb }] });
   };
   const { spread, total, ml } = lines;

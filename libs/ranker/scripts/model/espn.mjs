@@ -2,6 +2,10 @@
 // (its games, their scores and DraftKings' current lines). Free; asked politely, again after a refusal.
 
 import { get } from './sources.mjs';
+import { BOOK } from './leagues.mjs';
+
+// (ESPN's id for each book it carries lines from, on its core API)
+export const ESPN_PROVIDER = { draftkings: 100 };
 
 const ESPN = 'https://site.api.espn.com/apis/site/v2/sports';
 
@@ -65,7 +69,8 @@ export function gameOf(e) {
 // total (its line, the over's and the under's prices); null when the book hasn't posted. And how far each has
 // moved since it opened (move: the home spread's points, the total's points, the home side's fair chance)
 export function linesOf(e) {
-  const o = e.competitions?.[0]?.odds?.find((x) => x.moneyline || x.pointSpread || x.total);
+  // (the desk's book's lines only: BOOK, leagues.mjs)
+  const o = e.competitions?.[0]?.odds?.find((x) => (x.moneyline || x.pointSpread || x.total) && String(x.provider?.name ?? '').toLowerCase().replace(/\s/g, '') === BOOK);
   if (!o) return null;
   const price = (v) => {
     const n = Number(String(v ?? '').replace('+', ''));

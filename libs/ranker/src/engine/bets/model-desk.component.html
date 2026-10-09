@@ -214,7 +214,7 @@
                   <td>{{ b.start | date: 'EEE h:mm a' }}</td>
                   <td>{{ marketName(b.market) }}</td>
                   <td><b>{{ b.pick }}</b></td>
-                  <td>{{ odds(b.odds) }}</td>
+                  <td [title]="help['betBook']">{{ odds(b.odds) }}<small>{{ b.book }}{{ b.fairFrom === 'pinnacle' ? ' · Pinnacle fair' : '' }}</small></td>
                   <td>{{ b.units }}</td>
                   <td>{{ pct(b.p) }}</td>
                   <td>{{ pct(b.fair) }}</td>
@@ -255,7 +255,7 @@
                   <td class="desk-left">{{ b.matchup }}</td>
                   <td>{{ b.start | date: 'MMM d' }}</td>
                   <td><b>{{ b.pick }}</b><small>{{ marketName(b.market) }}</small></td>
-                  <td>{{ odds(b.odds) }}</td>
+                  <td [title]="help['betBook']">{{ odds(b.odds) }}<small>{{ b.book }}{{ b.fairFrom === 'pinnacle' ? ' · Pinnacle fair' : '' }}</small></td>
                   <td>{{ b.units }}</td>
                   <td>{{ pct(b.p) }}</td>
                   <td>{{ b.final }}</td>
@@ -373,6 +373,55 @@
       </div>
     </card-panel>
 
+    <card-panel class="tab-card group-advanced" label="Backtest" icon="history_edu">
+      <div class="group-body">
+        <!-- (the model against the real lines of games it had already seen: each market's trust fitted on the
+             closing bets, and how the early bets did against the close) -->
+        @if (backtestRows.length) {
+          <table class="desk-table desk-bets">
+            <thead>
+              <tr>
+                <ng-container *ngTemplateOutlet="th; context: { $implicit: 'backtest', key: 'sport', label: 'Sport' }"></ng-container>
+                <ng-container *ngTemplateOutlet="th; context: { $implicit: 'backtest', key: 'market', label: 'Market' }"></ng-container>
+                <ng-container *ngTemplateOutlet="th; context: { $implicit: 'backtest', key: 'btBets', label: 'Games' }"></ng-container>
+                <ng-container *ngTemplateOutlet="th; context: { $implicit: 'backtest', key: 'btTrust', label: 'Trust' }"></ng-container>
+                <ng-container *ngTemplateOutlet="th; context: { $implicit: 'backtest', key: 'btClose', label: 'ROI at close' }"></ng-container>
+                <ng-container *ngTemplateOutlet="th; context: { $implicit: 'backtest', key: 'btEarly', label: 'ROI early' }"></ng-container>
+                <ng-container *ngTemplateOutlet="th; context: { $implicit: 'backtest', key: 'btBeat', label: 'Beat the close' }"></ng-container>
+                <ng-container *ngTemplateOutlet="th; context: { $implicit: 'backtest', key: 'btLoss', label: 'Model vs market' }"></ng-container>
+                <ng-container *ngTemplateOutlet="th; context: { $implicit: 'backtest', key: 'btAnchor', label: 'Pinnacle edge' }"></ng-container>
+              </tr>
+            </thead>
+            <tbody>
+              @for (t of sorted('backtest', backtestRows, backtestValue); track t.sport + t.market) {
+                <tr>
+                  <th>{{ t.sport }}</th>
+                  <td class="desk-left">{{ marketName(t.market) }}</td>
+                  <td>{{ t.bets }}</td>
+                  <td>{{ t.trust.trust }}</td>
+                  <td [class.up]="(t.close.every.roi ?? 0) > 0" [class.down]="(t.close.every.roi ?? 0) < 0">{{ pct(t.close.every.roi) }}</td>
+                  <td [class.up]="(t.early.every.roi ?? 0) > 0" [class.down]="(t.early.every.roi ?? 0) < 0">{{ pct(t.early.every.roi) }}</td>
+                  <td>{{ pct(t.early.clv.beat, 0) }}</td>
+                  <td>{{ num(t.close.logLoss.model !== null && t.close.logLoss.market !== null ? t.close.logLoss.model - t.close.logLoss.market : null) }}</td>
+                  <td>{{ num(t.anchors.pinnacle !== null && t.anchors.own !== null ? t.anchors.own - t.anchors.pinnacle : null, 4) }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        } @else {
+          <p class="desk-note">No backtest yet: run.mjs --backtest buys its historical lines (within its 6,000 credits).</p>
+        }
+        @if (credits; as c) {
+          <!-- (The Odds API's credits this cycle) -->
+          <ul class="desk-context-tests desk-sub" [title]="help['credits']">
+            <li><b>Odds API credits</b> {{ creditsUsed(c) }} used of {{ c.monthly }} · {{ c.remaining }} left · cycle ends {{ c.cycleEnd | date: 'MMM d' }} ({{ c.daysLeft }} days)</li>
+            <li>this cycle: lines {{ c.spent['lines'] ?? 0 }} · props {{ c.spent['props'] ?? 0 }} · backtest {{ c.spent['history'] ?? 0 }} of {{ c.historyBudget }} · reserve {{ c.reserve }}</li>
+            <li>today's allowance: lines {{ c.today['lines'] ?? 0 }} of {{ c.allowance['lines'] }} · props {{ c.today['props'] ?? 0 }} of {{ c.allowance['props'] }}</li>
+          </ul>
+        }
+      </div>
+    </card-panel>
+
     <card-panel class="tab-card group-box" label="Settings" icon="settings_suggest">
       <div class="group-body">
         <!-- (each sport's fitted settings and how much each market trusts the model; hover a header for what
@@ -389,6 +438,7 @@
               <ng-container *ngTemplateOutlet="th; context: { $implicit: 'settings', key: 'sigmaT', label: 'Total spread' }"></ng-container>
               <ng-container *ngTemplateOutlet="th; context: { $implicit: 'settings', key: 'trust', label: 'Trust in the model' }"></ng-container>
               <ng-container *ngTemplateOutlet="th; context: { $implicit: 'settings', key: 'history', label: 'Games' }"></ng-container>
+              <ng-container *ngTemplateOutlet="th; context: { $implicit: 'settings', key: 'book', label: 'Book' }"></ng-container>
             </tr>
           </thead>
           <tbody>
@@ -403,6 +453,7 @@
                 <td>{{ s.params['sigmaT'] }}</td>
                 <td class="desk-test">{{ trustText(s) }}</td>
                 <td>{{ s.history.finals }}</td>
+                <td [title]="help['book']">{{ s.book ?? '-' }}</td>
               </tr>
             }
           </tbody>

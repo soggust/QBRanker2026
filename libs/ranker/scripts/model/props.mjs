@@ -21,7 +21,10 @@ import path from 'node:path';
 import { decimal, fairPair, stakeFor } from './desk.mjs';
 import { fitStat, makeModel, nbOver, recal } from './project.mjs';
 import { CACHE, get, pool } from './sources.mjs';
+import { PROP_BOOKS, SPORT_KEYS, american, call, canSpend, hasKey } from './oddsapi.mjs';
 import { round } from './ratings.mjs';
+import { ESPN_PROVIDER } from './espn.mjs';
+import { BOOK } from './leagues.mjs';
 
 const CORE = 'https://sports.core.api.espn.com/v2/sports';
 export const PER_GAME = 8;
@@ -187,12 +190,56 @@ function pricesOf(pair) {
   return pair.length === 2 && Number.isFinite(over) && Number.isFinite(under) && over && under ? { over, under } : null;
 }
 
+// The Odds API's market for each prop the desk models
+export const API_MARKETS = {
+  nfl: { player_pass_yds: 'passYds', player_pass_attempts: 'passAtt', player_pass_completions: 'passCmp', player_pass_tds: 'passTd', player_pass_interceptions: 'passInt', player_rush_yds: 'rushYds', player_rush_attempts: 'rushAtt', player_reception_yds: 'recYds', player_receptions: 'rec', player_rush_reception_yds: 'rushRecYds' },
+  nba: { player_points: 'pts', player_rebounds: 'reb', player_assists: 'ast', player_threes: 'fg3', player_points_rebounds_assists: 'pra' },
+  nhl: { player_shots_on_goal: 'sog', player_points: 'pts', player_total_saves: 'saves' },
+  mlb: { pitcher_strikeouts: 'k', pitcher_outs: 'outs', batter_hits: 'hits', batter_total_bases: 'tb' },
+};
+
+// A game's props from The Odds API, the desk's book only (cost: the markets it returns): by player and stat,
+// the line and each side's price; null when it can't be had
+export async function apiProps(sport, oddsEvent) {
+  const markets = Object.keys(API_MARKETS[sport]);
+  if (!oddsEvent || !hasKey() || !canSpend('props', markets.length)) return null;
+  const body = await call('props', `/sports/${SPORT_KEYS[sport]}/events/${oddsEvent}/odds`, { markets: markets.join(','), bookmakers: PROP_BOOKS.join(',') });
+  const book = body?.bookmakers?.find((b) => b.key === BOOK);
+  if (!book) return body ? new Map() : null;
+  const out = new Map();
+  for (const m of book.markets ?? []) {
+    const stat = API_MARKETS[sport][m.key];
+    if (!stat) continue;
+    for (const o of m.outcomes ?? []) {
+      const key = `${o.description}|${stat}|${o.point}`;
+      const x = out.get(key) ?? { name: o.description, stat, line: o.point };
+      x[String(o.name).toLowerCase()] = american(o.price);
+      out.set(key, x);
+    }
+  }
+  // (a player's main line: the one with both sides; the first such)
+  const main = new Map();
+  for (const x of out.values()) if (x.over && x.under && !main.has(`${x.name}|${x.stat}`)) main.set(`${x.name}|${x.stat}`, x);
+  return main;
+}
+
+// ESPN's board with The Odds API's lines and prices on it, where the API has the player: its line and both
+// prices replace the board's (the same book's, fresher, and the NFL's with prices at all)
+export function withApiPrices(board_, api) {
+  if (!api) return board_;
+  return board_.map((p) => {
+    const x = api.get(`${p.athlete.name}|${p.stat.key}`);
+    return x ? { ...p, line: x.line, prices: { over: x.over, under: x.under }, source: 'the odds api' } : p;
+  });
+}
+
 // A game's main-line player props: [{ athlete, stat, line, open, prices }] (every page of the board)
 export async function board(sport, league, game) {
+  if (!ESPN_PROVIDER[BOOK]) return [];
   const [kind, lg] = league.split('/');
   const items = [];
   for (let page = 1; page <= 5; page++) {
-    const body = await get(`${CORE}/${kind}/leagues/${lg}/events/${game.id}/competitions/${game.id}/odds/100/propBets?lang=en&region=us&limit=1000&page=${page}`);
+    const body = await get(`${CORE}/${kind}/leagues/${lg}/events/${game.id}/competitions/${game.id}/odds/${ESPN_PROVIDER[BOOK]}/propBets?lang=en&region=us&limit=1000&page=${page}`);
     if (!body?.items) break;
     items.push(...body.items);
     if (page >= (body.pageCount ?? 1)) break;

@@ -36,6 +36,9 @@ interface ModelBet {
   recap?: { headline: string | null; lede: string | null; link: string | null };
   disrupted?: { severe: boolean; kind: string; text: string }[];
   weight?: number;
+  // (the book it's priced and placed at, and where its fair chance came from: Pinnacle's or the book's own)
+  book?: string;
+  fairFrom?: string;
   // (its closing-line value once its game has started: clv.mjs)
   clv?: { pts: number | null; prob: number | null; ev: number | null; beat: boolean | null } | null;
 }
@@ -67,7 +70,38 @@ interface ModelState {
   context?: { lambda: number; terms: ContextTerm[]; test: { games: number; before: TestNumbers; after: TestNumbers } } | null;
   postmortem?: { graded: number; disrupted: number; weight: number; fitted: boolean };
   props?: { types: PropType[]; lastRun?: { games: number; priced: number; bet: number } } | null;
+  // (the book it bets, set in leagues.mjs; where this run's lines came from; The Odds API's credits)
+  book?: string;
+  lines?: string;
+  odds?: OddsUsage | null;
+  backtest?: { at: string; snapshots: number; planned: number; markets: Record<string, BacktestMarket> } | null;
 }
+
+interface OddsUsage {
+  monthly: number;
+  reserve: number;
+  historyBudget: number;
+  cycleStart: string | null;
+  cycleEnd: string | null;
+  daysLeft: number;
+  remaining: number;
+  used: number | null;
+  spent: Record<string, number>;
+  today: Record<string, number>;
+  allowance: Record<string, number>;
+  historyLeft: number;
+}
+
+type Returns = { n: number; staked: number; profit: number; roi: number | null };
+interface BacktestMarket {
+  trust: { trust: number; n: number; fitted: boolean };
+  bets: number;
+  close: { every: Returns; edge: Returns; logLoss: { model: number | null; market: number | null; trusted: number | null } };
+  early: { every: Returns; clv: { n: number; beat: number | null; ev: number | null } };
+  sharpShare: number;
+  anchors: { pinnacle: number | null; own: number | null };
+}
+type BacktestRow = BacktestMarket & { sport: string; market: string };
 
 interface PropType {
   key: string;
@@ -151,6 +185,8 @@ export class ModelDeskComponent implements OnInit {
   contextRows: ContextRow[] = [];
   contextTests: { label: string; games: number; before: TestNumbers; after: TestNumbers }[] = [];
   propRows: PropRow[] = [];
+  backtestRows: BacktestRow[] = [];
+  credits: OddsUsage | null = null;
   byProp: Tally[] = [];
 
   async ngOnInit(): Promise<void> {
@@ -213,6 +249,10 @@ export class ModelDeskComponent implements OnInit {
     // (each sport's context terms, the kept ones first, and its held-out numbers with and without them)
     this.contextRows = this.states.flatMap((s) => (s.context?.terms ?? []).map((t) => ({ ...t, sport: s.label, unitWord: UNIT_WORDS[s.sport] ?? '' })));
     this.contextTests = this.states.filter((s) => s.context?.test).map((s) => ({ label: s.label, ...s.context!.test }));
+
+    // (the backtest: each sport's markets; The Odds API's credits, the latest state's)
+    this.backtestRows = this.states.flatMap((s) => Object.entries(s.backtest?.markets ?? {}).map(([market, m]) => ({ ...m, sport: s.label, market })));
+    this.credits = [...this.states].sort((a, b) => b.updated.localeCompare(a.updated)).find((s) => s.odds)?.odds ?? null;
 
     // (the props: each sport's prop types and their projections' fit and check; the bets by type)
     this.propRows = this.states.flatMap((s) => (s.props?.types ?? []).map((t) => ({ ...t, sport: s.label })));
@@ -335,7 +375,29 @@ export class ModelDeskComponent implements OnInit {
   readonly calibrationValue = (c: { label: string; n: number; said: number; was: number }, key: string): unknown => (key === 'label' ? c.said : (c as unknown as Record<string, unknown>)[key]);
 
   readonly stateValue = (s: ModelState, key: string): unknown =>
-    key === 'label' ? s.label : key === 'history' ? s.history.finals : key === 'trust' ? (s.trust['spread']?.trust ?? null) : s.params[key];
+    key === 'label' ? s.label : key === 'history' ? s.history.finals : key === 'trust' ? (s.trust['spread']?.trust ?? null) : key === 'book' ? (s.book ?? null) : s.params[key];
+
+  // (a backtest row's value by column)
+  readonly backtestValue = (t: BacktestRow, key: string): unknown =>
+    key === 'sport' ? t.sport
+    : key === 'market' ? t.market
+    : key === 'btBets' ? t.bets
+    : key === 'btTrust' ? t.trust.trust
+    : key === 'btClose' ? t.close.every.roi
+    : key === 'btEarly' ? t.early.every.roi
+    : key === 'btBeat' ? t.early.clv.beat
+    : key === 'btLoss' ? (t.close.logLoss.model !== null && t.close.logLoss.market !== null ? t.close.logLoss.model - t.close.logLoss.market : null)
+    : key === 'btAnchor' ? (t.anchors.pinnacle !== null && t.anchors.own !== null ? t.anchors.own - t.anchors.pinnacle : null)
+    : null;
+
+  // (credits as a share of the month's)
+  creditsUsed(c: OddsUsage): number {
+    return c.monthly - c.remaining;
+  }
+
+  num(v: number | null | undefined, digits = 3): string {
+    return v === null || v === undefined ? '-' : v.toFixed(digits);
+  }
 
   // (a prop type's value by column)
   readonly propValue = (t: PropRow, key: string): unknown =>
@@ -394,6 +456,16 @@ export class ModelDeskComponent implements OnInit {
     propTrust: "How much the prop type counts its projection against the player's own record (starts 0.5; refit on its graded props once 40 are; * not yet)",
     clv: "Closing-line value: how its bets' lines and prices compare with where the market closed, the market's last word before the game. The share that beat the close (a better line, or the same line at a better chance), and the mean expected return at the closing chance. The early skill signal: a few dozen results are mostly luck, but beating the close shows an edge from the first bets on; the trust in the model leans on it until results pile up",
     betClv: "Its closing-line value: the points its line beat the close by (a spread, a total or a prop), else the chance its side gained on it; green when it beat the close",
+    book: "The sportsbook every bet is priced and placed at, its lines and prices (BOOK in libs/ranker/scripts/model/leagues.mjs). The fair chance each side is weighed against is Pinnacle's, its vig taken out, where Pinnacle has the line; else the book's own",
+    betBook: "The book it's priced and placed at, and where its fair chance came from (Pinnacle's line, or the book's own prices)",
+    credits: "The Odds API's credits this cycle (20,000 a month; the cycle assumed to run a month from the first call): spent by feature, what's left, and what each live feature may spend today. 2,000 are held back; history (the backtest) has its own 6,000. As credits run low the backtest stops first, then props, then lines; without them the desk prices from ESPN's free board, the same book's",
+    btBets: 'Games in the backtest: real lines from The Odds API, each game bet at its last snapshot before it started (the close)',
+    btTrust: "The trust fitted on those closing bets: how much the model adds to the market's own number (0: nothing; the live runs start from it)",
+    btClose: "Return on the closing bets at the desk's stakes, every market bet, at that trust",
+    btEarly: 'Return on the same games bet at an early line (a mid-week or morning snapshot), at that trust. Flattered: the model knows things the early line didn\'t yet (who actually started)',
+    btBeat: "Of the early bets, the share that beat the close (the line moved toward the side it took)",
+    btLoss: "The model's log loss on the results less the market's, at the close: below 0, the model's chances were sharper than the market's",
+    btAnchor: "The market's log loss with the book's own prices less with Pinnacle's: above 0, Pinnacle's is the better fair chance",
     term: "What it weighs beyond the ratings (hover a name for its unit): rest and the schedule's grind, travel, starters and bullpens, weather and air, ballparks, the officials, expected goals and neutral-script EPA, and last season's numbers from the ranker",
     on: 'What it moves: the margin (toward the side it names) or the game total',
     size: "Its fitted size, in the sport's scoring unit per unit of the term (hover the name for the unit); refit every run on every game before, pulled toward 0 unless the games bear it out",
@@ -404,4 +476,4 @@ export class ModelDeskComponent implements OnInit {
 }
 
 // (the columns that sort as text, A first)
-const TEXT_KEYS = new Set(['prop', 'label', 'sport', 'game', 'market', 'pick', 'start', 'term', 'on']);
+const TEXT_KEYS = new Set(['prop', 'book', 'label', 'sport', 'game', 'market', 'pick', 'start', 'term', 'on']);

@@ -28,16 +28,18 @@
 import '../env.mjs';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
-import { LEAGUES, PROP_CAPS } from './leagues.mjs';
+import { BOOK, LEAGUES, PROP_CAPS } from './leagues.mjs';
 import { gameOf, json, linesOf, scoreboard, teamIds, teamSchedule, ymd } from './espn.mjs';
 import { adjust, expect, fit, fitContext, gateOf, replay, round } from './ratings.mjs';
 import { OPTIONAL, enrich, featurize, gather } from './context.mjs';
 import { finalSummary, postmortems, propPostmortem, usualRoles } from './postmortem.mjs';
 import { closeOf, closingLines, clvOf, clvSummary, propCloseOf } from './clv.mjs';
+import { LINE_BOOKS, SPORT_KEYS, call, canSpend, hasKey, linesFromEvent, usageSummary } from './oddsapi.mjs';
+import { backtestBets, evaluate, snapshots, trustBets } from './backtest.mjs';
 import { playerRows } from './playerlogs.mjs';
-import { PER_GAME, STATS, board, fitProps, priceProps, rowsIndex, settleProp, statInFinal } from './props.mjs';
+import { PER_GAME, STATS, apiProps, board, fitProps, priceProps, rowsIndex, settleProp, statInFinal, withApiPrices } from './props.mjs';
 import { CACHE, readJson, writeJson } from './sources.mjs';
-import { BANKROLL, MARKETS, choose, fitTrust, pickText, price, record, settle } from './desk.mjs';
+import { BANKROLL, MARKETS, choose, fairPair, fitTrust, pickText, price, record, settle } from './desk.mjs';
 
 const ROOT = path.resolve(import.meta.dirname, '../../../..');
 // (the return a side has to show to get the 3-unit top stake; a smaller one scales down to 0.5)
@@ -48,6 +50,7 @@ const START_TRUST = 0.5;
 // hand, not fit: there aren't graded bets enough yet to fit it on)
 const DISRUPTED_WEIGHT = 0.3;
 const DAY = 864e5;
+const PROPS_ASKED = path.join(CACHE, 'odds-props.json');
 
 const read = readJson;
 const write = writeJson;
@@ -73,11 +76,14 @@ async function runSport(sport) {
     state: path.join(ROOT, 'apps', sport, 'src/StaticData/model/state.json'),
     ledger: path.join(ROOT, 'apps', sport, 'src/StaticData/model/ledger.json'),
     context: path.join(CACHE, `context-${sport}.json`),
+    backtest: path.join(ROOT, 'apps', sport, 'scripts/model/backtest.json'),
   };
   await loadHistory(r);
+  await liveLines(r);
   fitRatings(r);
   await fitTheContext(r);
   await fitTheProps(r);
+  await runBacktest(r);
   logContext(r);
   r.ledger = read(r.files.ledger, { sport, bankroll: BANKROLL, bets: [] });
   await captureClose(r);
@@ -132,6 +138,48 @@ async function loadHistory(r) {
   writeIfChanged(r.files.games, r.history.sort((a, b) => a.date.localeCompare(b.date)), { lines: true });
 }
 
+// 1b. the coming games' lines from The Odds API (oddsapi.mjs): the desk's book's prices, Pinnacle's fair
+// chance; one call for the sport (its three markets: 3 credits), only with games to bet and today's lines
+// allowance left. Without it (no key, no credits, the API down), ESPN's board, which is the same book's
+async function liveLines(r) {
+  r.linesSource = 'espn';
+  if (!r.upcoming.length || !hasKey() || !canSpend('lines', 3)) return;
+  const from = r.now.toISOString().slice(0, 19) + 'Z';
+  const to = new Date(r.now.getTime() + 3 * DAY).toISOString().slice(0, 19) + "Z";
+  const events = await call('lines', `/sports/${SPORT_KEYS[r.sport]}/odds`, { markets: 'h2h,spreads,totals', bookmakers: LINE_BOOKS.join(','), commenceTimeFrom: from, commenceTimeTo: to });
+  if (!Array.isArray(events)) return;
+  let matched = 0;
+  for (const u of r.upcoming) {
+    const ev = events.find((x) => sameGame(x, u));
+    const l = ev && linesFromEvent(ev);
+    if (!l) continue;
+    const odds = { spread: l.spreads, total: l.totals, ml: l.h2h };
+    u.lines = {
+      book: 'DraftKings',
+      source: 'the odds api',
+      oddsEvent: ev.id,
+      move: u.lines.move,
+      ml: { home: l.h2h?.prices.home ?? null, away: l.h2h?.prices.away ?? null },
+      spread: { home: { line: l.spreads?.line ?? null, odds: l.spreads?.prices.home ?? null }, away: { line: l.spreads ? -l.spreads.line : null, odds: l.spreads?.prices.away ?? null } },
+      total: { line: l.totals?.line ?? null, over: l.totals?.prices.over ?? null, under: l.totals?.prices.under ?? null },
+      fair: Object.fromEntries(Object.entries(odds).filter(([, v]) => v).map(([k, v]) => [k, v.fair])),
+      fairSource: Object.fromEntries(Object.entries(odds).filter(([, v]) => v).map(([k, v]) => [k, v.sharp !== null ? 'pinnacle' : BOOK])),
+    };
+    matched++;
+  }
+  r.linesSource = `the odds api (${matched} of ${r.upcoming.length} games)`;
+  r.oddsEvents = events;
+  console.log(`${r.sport}: lines from The Odds API for ${matched} of ${r.upcoming.length} coming games`);
+}
+
+// (an Odds API event is a coming ESPN game: the same two teams, by nickname, within six hours)
+function sameGame(ev, u) {
+  const sides = u.event?.competitions?.[0]?.competitors ?? [];
+  const nick = (where) => sides.find((c) => c.homeAway === where)?.team?.name ?? null;
+  const is = (full, n) => !!n && (full === n || full.endsWith(` ${n}`));
+  return is(ev.home_team, nick('home')) && is(ev.away_team, nick('away')) && Math.abs(Date.parse(ev.commence_time) - Date.parse(u.game.date)) < 6 * 36e5;
+}
+
 // 2. the ratings, refit (each setting that moves logged with why)
 function fitRatings(r) {
   const { cfg, at } = r;
@@ -171,7 +219,11 @@ async function fitTheContext(r) {
   // (with the context, the spreads around its expectations are the ones it priced with)
   if (r.ctxFit) Object.assign(params, { sigma: round(r.ctxFit.after.sigma, 3), sigmaT: round(r.ctxFit.after.sigmaT, 3) });
   r.expPts = new Map();
-  r.teams = replay(history, params, 0, r.ctxFit?.ctx ?? null, (g, e) => r.expPts.set(g.id, [e.homePts, e.awayPts])).state;
+  r.expAll = new Map();
+  r.teams = replay(history, params, 0, r.ctxFit?.ctx ?? null, (g, e) => {
+    r.expPts.set(g.id, [e.homePts, e.awayPts]);
+    r.expAll.set(g.id, e);
+  }).state;
   r.weights = r.teams.weights ?? null;
 }
 
@@ -223,6 +275,23 @@ async function fitTheProps(r) {
   }
 }
 
+// 2d. the backtest (backtest.mjs): with --backtest, the plan's historical snapshots bought (within history's
+// budget) and the bets drawn from them saved (backtest.json, committed); every run, the saved bets read back,
+// each market's numbers worked out for the state, and the bets kept for the trust fit
+async function runBacktest(r) {
+  const { sport, history, params } = r;
+  if (BACKTEST && hasKey()) {
+    const t0 = Date.now();
+    const { snaps, bought, planned } = await snapshots(sport);
+    const bets = backtestBets(sport, snaps, history, r.expAll, params, r.facts.teams ?? []);
+    writeIfChanged(r.files.backtest, { at: r.at, planned, snapshots: snaps.length, bets });
+    console.log(`${sport}: backtest on ${snaps.length} of ${planned} snapshots (${bought} bought), ${bets.length / 2} bets a side, in ${Math.round((Date.now() - t0) / 1000)}s`);
+  }
+  const saved = read(r.files.backtest, null);
+  r.backtestBets = trustBets(saved?.bets ?? []);
+  r.backtest = saved ? { at: saved.at, snapshots: saved.snapshots, planned: saved.planned, markets: evaluate(saved.bets) } : null;
+}
+
 // The context as the state shows it; logged: a term joining or leaving, or its size moving a tenth or more
 // (the first fit logs each it keeps)
 function logContext(r) {
@@ -247,9 +316,13 @@ function refitTrust(r) {
     if (trust[key] && trust[key].trust !== t.trust) state.changelog.push({ at, what: words.what, from: trust[key].trust, to: t.trust, why: `best fit to ${t.n} graded ${words.bets} and ${t.clvN} closing lines (log loss ${t.logLoss})` });
     trust[key] = t;
   };
-  // (each one's bets with a result or a close: clv.mjs)
+  // (each one's bets with a result or a close: clv.mjs; and a market's backtest bets, the history's real lines
+  // and results, so its trust is fitted from the start, the live bets adding to them as they come)
   const evidence = (b) => b.status !== 'open' || b.clv;
-  for (const market of MARKETS) refit(market, r.ledger.bets.filter((b) => b.market === market && evidence(b)), { what: `${market} trust in the model`, bets: `${market} bets` });
+  for (const market of MARKETS) {
+    refit(market, [...(r.backtestBets ?? []).filter((b) => b.market === market), ...r.ledger.bets.filter((b) => b.market === market && evidence(b))], { what: `${market} trust in the model`, bets: `${market} bets (backtest and live)` });
+    trust[market].backtest = (r.backtestBets ?? []).filter((b) => b.market === market).length;
+  }
   // (start 0.5, refit once 40 of its bets are graded)
   for (const st of STATS[r.sport]) {
     refit(
@@ -277,6 +350,8 @@ async function captureClose(r) {
       for (const bet of mine) {
         let close = bet.market === 'prop' ? propCloseOf(bet, props) : closeOf(bet, lines);
         if (close) close.source = 'close';
+        // (a prop whose board kept no price (the NFL's): the line and price The Odds API gave near the start)
+        if (bet.market === 'prop' && close && close.odds === null && bet.seen && Date.parse(bet.start) - Date.parse(bet.seen.at) < 3 * 36e5) close = { ...bet.seen, source: 'odds api near the start' };
         else if (bet.seen && r.now.getTime() - Date.parse(bet.start) > 3 * DAY) close = { ...bet.seen, source: 'last seen' };
         if (!close) continue;
         bet.close = close;
@@ -344,6 +419,7 @@ function betGames(r) {
   const { sport, cfg, params, trust, at } = r;
   for (const { game, lines } of r.upcoming) {
     const { exp, f, adjM, adjT } = expectFor(r, game);
+    const fairFrom = lines.fairSource ?? {};
     r.snapshot.exp[game.id] = [round(exp.margin, 4), round(exp.total, 4)];
     const seen = f ? { ...f.info, adj: { margin: round(adjM, 2), total: round(adjT, 2) }, move: lines.move ?? null } : { move: lines.move ?? null };
     for (const market of price(game, exp, lines, params)) {
@@ -383,6 +459,7 @@ function betGames(r) {
         expMargin: round(exp.margin, 2),
         expTotal: round(exp.total, 2),
         book: lines.book,
+        fairFrom: fairFrom[market.market] ?? 'its own prices',
         context: { ...seen, ...(guard ? { guard: guard.why } : {}) },
         status: 'open',
         profit: 0,
@@ -413,10 +490,35 @@ async function betProps(r) {
     state.changelog.push({ at, what: 'Prop caps', from: state.propCaps ? 'before' : 'none', to: `${PROP_CAPS.untested.maxUnits}u, ${PROP_CAPS.untested.perGame} a game, ${PROP_CAPS.untested.perDay}u a day`, why: 'Props are untested and priced at an assumed -110: until a type has 40 graded (its trust fit), at most 1 unit a prop, 3 props a game, 10 units a day in the sport; then 3 units and 8 a game' });
     state.propCaps = PROP_CAPS;
   }
-  for (const { game } of r.upcoming) {
+  // (The Odds API's props for a game, the desk's book's: asked twice at most, once to bet (within 30 hours of
+  // the start) and once near it (within 2.5 hours, if it has prop bets open: their last line and price before
+  // the close, the NFL's CLV); the count kept in .cache/model/odds-props.json)
+  const asked = read(PROPS_ASKED, {});
+  for (const u of r.upcoming) {
+    const game = u.game;
     try {
-      const board_ = await board(sport, cfg.league, game);
+      let board_ = await board(sport, cfg.league, game);
       if (!board_.length) continue;
+      const until = Date.parse(game.date) - r.now.getTime();
+      const times = asked[game.id] ?? 0;
+      const open = ledger.bets.filter((b) => b.event === game.id && b.market === 'prop' && b.status === 'open');
+      const wanted = u.lines.oddsEvent && !DRY && until < 30 * 36e5 && (times === 0 || (times === 1 && until < 2.5 * 36e5 && open.length));
+      if (wanted) {
+        const api = await apiProps(sport, u.lines.oddsEvent);
+        if (api) {
+          asked[game.id] = times + 1;
+          write(PROPS_ASKED, asked);
+          board_ = withApiPrices(board_, api);
+          run.api = (run.api ?? 0) + 1;
+          // (near the start: each open prop's line and price as the stand-in for its close)
+          if (times === 1) {
+            for (const b of open) {
+              const p = board_.find((x) => String(x.athlete.id) === String(b.athlete) && x.stat.key === b.propType && x.prices);
+              if (p) b.seen = { at: r.at, line: p.line, odds: b.side === 'over' ? p.prices.over : p.prices.under, fair: b.side === 'over' ? fairPair(p.prices.over, p.prices.under) : fairPair(p.prices.under, p.prices.over) };
+            }
+          }
+        }
+      }
       run.games++;
       const { exp, f } = expectFor(r, game);
       const { priced, bets } = priceProps(sport, game, board_, r.props, idx, exp, f?.info ?? null, r.live.get(game.id), trust, EV_SCALE);
@@ -426,7 +528,9 @@ async function betProps(r) {
       const even = priced.filter((x) => !x.guard?.skip);
       run.even += even.length;
       run.evenUnder += even.filter((x) => x.side === 'under').length;
-      for (const x of bets) candidates.push({ game, x, exp });
+      // (with The Odds API to hand, a prop waits for its real price (asked within 30 hours of the start)
+      // rather than going at the assumed -110: that's only the fallback when the API can't be had)
+      for (const x of bets) if (x.priced || !hasKey()) candidates.push({ game, x, exp });
       for (const x of priced) r.snapshot.projections[`${game.id}:${x.prop.stat.key}:${x.prop.athlete.id}`] = [x.projection.mean, x.prop.line, x.projection.pOver];
     } catch (err) {
       console.warn(`${sport}: props for ${game.id} skipped (${err.message})`);
@@ -466,6 +570,7 @@ async function betProps(r) {
       expMargin: round(exp.margin, 2),
       expTotal: round(exp.total, 2),
       book: 'DraftKings',
+      pricesFrom: x.prop.source ?? (x.priced ? 'espn' : 'assumed -110'),
       projection: x.projection,
       tested,
       context: { move: x.move, ...(x.guard ? { guard: x.guard.why } : {}) },
@@ -523,6 +628,11 @@ function saveState(r) {
       .map(([id, rating]) => ({ id, abbr: abbr.get(id) ?? id, rating: round(rating, 2), off: round(r.teams.o.get(id), 2), def: round(r.teams.d.get(id), 2) }))
       .sort((a, b) => b.rating - a.rating),
     record: record(ledger.bets),
+    // (the lines' source this run, and The Odds API's credits)
+    lines: r.linesSource,
+    backtest: r.backtest,
+    book: BOOK,
+    odds: hasKey() ? usageSummary() : null,
     clv: { all: clvSummary(ledger.bets), ...Object.fromEntries([...MARKETS, 'prop'].map((m) => [m, clvSummary(ledger.bets.filter((b) => b.market === m))])) },
   });
   state.changelog = state.changelog.slice(-200);
@@ -619,6 +729,8 @@ const DRY = process.argv.includes('--dry');
 const REPLACE = process.argv.includes('--replace');
 // (--all-sources: every optional source asked this run, kept terms or not: a re-test by hand)
 const ALL_SOURCES = process.argv.includes('--all-sources');
+// (--backtest: the backtest's historical snapshots bought, within history's budget: backtest.mjs)
+const BACKTEST = process.argv.includes('--backtest');
 const args = process.argv.slice(2).filter((a) => !a.startsWith('--'));
 const sports = args.length ? args : Object.keys(LEAGUES);
 for (const sport of sports) {

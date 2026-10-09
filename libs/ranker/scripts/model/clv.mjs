@@ -18,14 +18,17 @@
 import { get } from './sources.mjs';
 import { decimal, fairPair } from './desk.mjs';
 import { round } from './ratings.mjs';
+import { ESPN_PROVIDER } from './espn.mjs';
+import { BOOK } from './leagues.mjs';
 
 const CORE = 'https://sports.core.api.espn.com/v2/sports';
 
 // An event's closing lines (null when the API has none): each side's spread and its price, the total and its
 // over and under prices, each side's moneyline
 export async function closingLines(league, id) {
+  if (!ESPN_PROVIDER[BOOK]) return null;
   const [kind, lg] = league.split('/');
-  const body = await get(`${CORE}/${kind}/leagues/${lg}/events/${id}/competitions/${id}/odds/100?lang=en&region=us`);
+  const body = await get(`${CORE}/${kind}/leagues/${lg}/events/${id}/competitions/${id}/odds/${ESPN_PROVIDER[BOOK]}?lang=en&region=us`);
   if (!body) return null;
   const num = (v) => {
     const n = Number(String(v ?? '').replace(/^[ou+]/, ''));

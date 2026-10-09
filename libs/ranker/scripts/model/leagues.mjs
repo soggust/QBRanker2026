@@ -20,6 +20,10 @@
 // PROP_CAPS (props.mjs, run.mjs): how much the props may stake. untested: a prop type whose trust isn't fit
 // yet (fewer than 40 graded): at most maxUnits a prop, perGame of them a game, perDay units of them a day in
 // the sport. tested: once its trust is fit (perDay null: no daily cap)
+// BOOK: the one sportsbook the desk bets, for every market and prop: its lines and prices are the ones
+// priced and placed (The Odds API's key for it; ESPN's free board, the fallback, is DraftKings' too)
+export const BOOK = 'draftkings';
+
 export const PROP_CAPS = {
   untested: { maxUnits: 1, perGame: 3, perDay: 10 },
   tested: { maxUnits: 3, perGame: 8, perDay: null },
