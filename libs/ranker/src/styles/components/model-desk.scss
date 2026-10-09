@@ -655,3 +655,21 @@ card-panel {
   color: var(--scoreboard-led);
   font-weight: 900;
 }
+
+// The tables' values in the hand (DynaPuff, its lightest: the font comes in 400 to 700, so not the 200 asked
+// for), their bold bits at 600 rather than its heavy 700; a bet's game (its teams, and its time or score under them)
+// in Outfit bold
+.desk-table td {
+  font-family: v.$font-hand;
+  font-weight: 400;
+
+  b {
+    font-weight: 600;
+  }
+}
+
+.desk-table .desk-game,
+.desk-table .desk-when {
+  font-family: v.$font-heading;
+  font-weight: 700;
+}
