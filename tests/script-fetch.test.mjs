@@ -58,7 +58,11 @@ test('fetchRetry: gives up after its attempts, throwing the last error with the 
   assert.equal(dropped.calls.length, 2);
 });
 
-test('fetchRetry: a try that hangs is cut off at the timeout, then tried again', async () => {
+test('fetchRetry: a try that hangs is cut off at the timeout, then tried again', async (t) => {
+  // (AbortSignal.timeout's timer doesn't hold the process open, and a stub that hangs has no socket that
+  // would: kept open here, or Node can finish before the timeout fires and cancel the file's tests)
+  const awake = setInterval(() => {}, 1000);
+  t.after(() => clearInterval(awake));
   const { fetch, calls } = stub('hang', ok('second'));
   const started = Date.now();
   assert.equal(await fetchRetry(URL, { fetch, timeout: 50, backoff: 0 }), 'second');
