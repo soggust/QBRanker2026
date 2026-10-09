@@ -1391,7 +1391,7 @@
 
 .season-row {
   align-items: center;
-  @include v.scoreboard-panel(0, null);
+  @include v.scoreboard-panel(6px, null);
   color: #fff;
   column-gap: 14px;
   cursor: pointer;
@@ -2706,9 +2706,8 @@
 
 .depth-field {
   aspect-ratio: 16 / 9;
-  background:
-    repeating-linear-gradient(180deg, transparent 0 calc(10% - 1px), rgba(255, 255, 255, 0.04) calc(10% - 1px) 10%),
-    v.$chalk-dust;
+  // (its yard lines on the panel's scoreboard, no lighter ground of its own)
+  background: repeating-linear-gradient(180deg, transparent 0 calc(10% - 1px), rgba(255, 255, 255, 0.04) calc(10% - 1px) 10%);
   border-radius: 6px;
   margin: 12px 22px;
   min-height: 340px;
