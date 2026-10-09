@@ -4,7 +4,7 @@ import { insteadText } from '../player-card/analysis';
 
 // The Bets page (the sport bar's Bets link, #bets): the algorithm's top picks for every sport (each one's
 // data/model/picks.json, written by every run of the model desk: libs/ranker/scripts/model/picks.mjs), ranked
-// together by edge (its score: the expected return at its trusted chance), each showing its chance to win. The
+// together by their chance to win (the likeliest first; a bet without an edge on its price shows as low). The
 // NFL's AI bet desk's sheet for the week (data/analysis/bet-sheet.json) only marks the picks it agrees with
 // (the same game, market and side: "Algorithm + Analyst", ranked a little higher); its other picks aren't
 // shown. A row opens to its reasoning.
@@ -177,9 +177,9 @@ export class BetsPageComponent implements OnInit {
 
   rows: BetRow[] | null = null;
   updated: string | null = null;
-  // the filter: all games (the top 50 bets), or one game (its top 15, from all of its bets), by its matchup
+  // the filter: all games (the top 40 bets), or one game (its top 15, from all of its bets), by its matchup
   game = '';
-  readonly limit = 50;
+  readonly limit = 40;
   readonly gameLimit = 15;
   open = new Set<number>();
   readonly insteadText = insteadText;
@@ -320,7 +320,7 @@ export class BetsPageComponent implements OnInit {
       a.reason = `${a.reason} Analyst: ${s.reason}`;
       a.risk = s.risk;
     }
-    // (all sports' picks together, by edge)
+    // (all sports' picks together, the likeliest first)
     this.rows = algoRows.sort((a, b) => b.sureness - a.sureness || (a.game?.kickoff ?? '').localeCompare(b.game?.kickoff ?? ''));
   }
 
@@ -334,7 +334,7 @@ export class BetsPageComponent implements OnInit {
     return /^https?:/.test(logo) ? logo : `/${r.sport}/${logo}`;
   }
 
-  // All games: the top 50 bets; a game: its top 15 (from all of its bets, not just those in the top 50)
+  // All games: the top 40 bets; a game: its top 15 (from all of its bets, not just those in the top 40)
   get shown(): BetRow[] {
     const rows = this.inGame.filter((r) => !this.kinds.size || this.kinds.has(r.betType));
     return rows.slice(0, this.game ? this.gameLimit : this.limit);

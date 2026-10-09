@@ -1,8 +1,9 @@
 // The public picks: the algorithm's best bets on the games not started yet, for the site's Bets page
 // (apps/<sport>/src/StaticData/model/picks.json, written by every run when they change).
 //
-//   which    its edge bets only (intent 'edge': a positive expected return at the trusted chance, not guarded),
-//            a game market's or a prop's
+//   which    every bet it's placed on a game not started, a game market's or a prop's (not a guarded one): the
+//            user wants the bot's bets shown, the most likely first, while it's still learning (rein it in to the
+//            edge bets alone once it's sharper). Only a showcase: nothing here feeds the bettor's learning
 //   score    its expected return per unit at the trusted chance (EV: the trust already in it, so a market whose
 //            trust is fitted at 0, the NFL's spreads and moneylines, never has an edge and never shows), times
 //            how far the trust can be leaned on: 1 once the market's is fitted (the backtest's closing lines and
@@ -13,7 +14,9 @@
 //            60% or more, medium at 53%, low under (the edge bets' chances run from about 45% to 70%, a quarter
 //            under 52%, half under 57%, a quarter over 64%: the bands cut them into near thirds). A heavy
 //            favorite shows a high chance with little edge; the order is the score's, not the chance's
-//   N        the 10 best a sport (TOP), in score order; the page ranks all the sports' together
+//   N        the 40 likeliest a sport (TOP), by their chance to win (the score is the chance: the page orders by
+//            it), the page's 40 across all the sports. An edge bet's band is its chance's; one without an edge is
+//            low, whatever its chance (a favorite at a short price isn't a strong bet)
 //   reason   written from the bet's own numbers: the model's chance against the book's, the price and book,
 //            the projection (a prop's) or the expected score, what the context saw (a backup quarterback, the
 //            weather, a back-to-back, players out, the goalie or pitcher), and a line that's moved its way
@@ -23,7 +26,7 @@
 import { round } from './ratings.mjs';
 import { record } from './desk.mjs';
 
-export const TOP = 10;
+export const TOP = 40;
 const BANDS = { high: 0.6, medium: 0.53 };
 const KIND = { spread: 'spread', total: 'total', ml: 'moneyline', prop: 'player' };
 const LABEL = { spread: 'Spread', total: 'Game total', ml: 'Moneyline' };
@@ -92,20 +95,24 @@ function whereOf(bet, game) {
   return { city, stadium, weather: roof || tempF !== null ? { roof: roof ?? 'outdoors', tempF, windMph } : null };
 }
 
-// The sport's picks: its edge bets on games not started, scored and ranked, the top TOP; each one marked
+// The sport's picks: its bets on games not started, the likeliest first, the top TOP; each one marked
 // published on the ledger (its level then), and the published ones' record
 export function buildPicks(sport, ledger, trust, games, now) {
-  const open = ledger.bets.filter((b) => b.status === 'open' && Date.parse(b.start) > now.getTime() && (b.intent ?? (b.ev > 0 ? 'edge' : 'action')) === 'edge' && !b.context?.guard);
+  const open = ledger.bets.filter((b) => b.status === 'open' && Date.parse(b.start) > now.getTime() && !b.context?.guard);
+  const edgeOf = (b) => (b.intent ?? (b.ev > 0 ? 'edge' : 'action')) === 'edge';
+  // (a bet's band: its chance's if it has an edge, else low)
+  const levelOf = (b, p) => (edgeOf(b) ? level(p) : 'low');
   // (one a bet: a --dry run prices placed bets again in memory)
   const once = [...new Map(open.map((b) => [b.id, b])).values()];
-  const scored = once.map((b) => ({ b, score: scoreOf(b, trust) })).filter((x) => x.score > 0);
-  scored.sort((x, y) => y.score - x.score || x.b.start.localeCompare(y.b.start));
+  // (the order: its chance to win; its edge score kept beside it)
+  const scored = once.map((b) => ({ b, score: round(b.p, 4), edgeScore: scoreOf(b, trust) }));
+  scored.sort((x, y) => y.score - x.score || y.edgeScore - x.edgeScore || x.b.start.localeCompare(y.b.start));
   const top = scored.slice(0, TOP);
   for (const { b, score } of top) {
     if (!b.published) Object.assign(b, { published: true, publishedAt: now.toISOString() });
     // (its chance when shown, and its band: fixed from then on)
     if (!Number.isFinite(b.publishedP)) b.publishedP = b.p;
-    b.publishedLevel = level(b.publishedP);
+    b.publishedLevel = levelOf(b, b.publishedP);
     void score;
   }
   const picks = top.map(({ b, score }, i) => {
@@ -117,7 +124,8 @@ export function buildPicks(sport, ledger, trust, games, now) {
       sport,
       score,
       chance: Math.round(b.p * 100),
-      level: level(b.p),
+      level: levelOf(b, b.p),
+      edge: edgeOf(b),
       kind: KIND[b.market] ?? 'player',
       market: b.market === 'prop' ? b.statLabel : LABEL[b.market],
       pick: b.pick,

@@ -70,7 +70,7 @@
               @for (k of kindChips; track k.kind) {
                 <span><b [ngClass]="k.kind">{{ k.label }}</b> {{ k.name }}</span>
               }
-              <span><b>%</b> Its chance to win; the list is ordered by edge (the expected return at that chance)</span>
+              <span><b>%</b> Its chance to win: the list runs likeliest first. Gray: no edge on the price (a bet the bot made, not one it likes)</span>
             </span>
           </span>
         </div>
@@ -139,7 +139,7 @@
                   <p class="bet-risk"><b>Devil&#39;s Advocate:</b> {{ r.risk }}</p>
                 }
                 <!-- (the confidence shown is the bet's own; the report's overall confidence stays on its card) -->
-                <p class="bet-meta bet-confidence" title="Its chance to win; the list is ordered by edge (the expected return at that chance)">{{ r.chance ?? '–' }}% to win</p>
+                <p class="bet-meta bet-confidence" title="Its chance to win: the list runs likeliest first. Gray: no edge on the price (a bet the bot made, not one it likes)">{{ r.chance ?? '–' }}% to win</p>
               </div>
             }
           </li>
