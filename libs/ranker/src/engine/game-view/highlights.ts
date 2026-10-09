@@ -1,6 +1,6 @@
 // A finished game's highlights: ESPN's videos in its summary when it has them (the NBA's and the NHL's, for
 // a few days), else the ones kept for the season (StaticData/highlights/<season>.json, written nightly by
-// libs/ranker/scripts/highlights.mjs: ESPN's before they go, the NFL's from its YouTube channel), else, for
+// libs/ranker/scripts/highlights.mjs: ESPN's before they go, else the league's YouTube channel's), else, for
 // MLB, MLB's own (every game's, any season: its stats API, free and open to the page).
 import { fetchJson, memo } from '@ranker/core/http';
 import { GameVideo, GameView } from './game.model';
@@ -11,12 +11,15 @@ function seasonFile(season: number): Promise<SeasonHighlights> {
   return memo(seasons, season, () => fetchJson<SeasonHighlights>(`data/highlights/${season}.json`, {}, { cache: 'no-cache' }).catch(() => ({})));
 }
 
+// (none means none: the game view shows its Highlights tab only once this has found the game some, so a game
+// without any never gets an empty tab; a clip with nothing to play is left out)
 export async function loadHighlights(game: GameView): Promise<GameVideo[]> {
   if (game.preview) return [];
-  if (game.videos.length) return game.videos;
+  const playable = (videos: GameVideo[] | undefined) => (videos ?? []).filter((v) => v.youtube || v.src);
+  if (playable(game.videos).length) return playable(game.videos);
   const season = game.seasonYear ?? new Date(game.date).getFullYear();
-  const kept = (await seasonFile(season))[game.id];
-  if (kept?.length) return kept;
+  const kept = playable((await seasonFile(season))[game.id]);
+  if (kept.length) return kept;
   if (game.league.includes('baseball')) return mlbHighlights(game);
   return [];
 }

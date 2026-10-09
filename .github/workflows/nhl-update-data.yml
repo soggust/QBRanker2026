@@ -42,8 +42,20 @@ jobs:
       - name: Pull NHL stats
         run: npm run nhl:update-data
 
+      # (the highlights' YouTube upload pages and the day's search count, kept between runs: the daily search
+      # cap holds across runs, and a run only pages back to what it's seen)
+      - name: Restore the highlights cache
+        uses: actions/cache@v6
+        with:
+          path: .cache/highlights
+          key: nhl-highlights-${{ github.run_id }}
+          restore-keys: nhl-highlights-
+
       # (each finished game's highlights, kept for the game view before ESPN lets them go)
       - name: Keep game highlights
+        env:
+          # (optional: with a YouTube Data API key, a game ESPN has no videos for is found on the league's YouTube channel)
+          YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
         run: node libs/ranker/scripts/highlights.mjs nhl || echo "highlights skipped"
 
       # (the data checked before it's committed: a broken file stays out of master and off the site; npm test)

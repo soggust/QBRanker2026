@@ -160,3 +160,27 @@ for (const sport of SPORTS) {
     }
   });
 }
+
+// The game view's kept highlights (libs/ranker/scripts/highlights.mjs writes StaticData/highlights/<season>.json):
+// each game's a list of clips, and every clip has something to play (a YouTube id or a video file) and a title
+for (const sport of SPORTS) {
+  const dir = path.join(staticDir(sport), 'highlights');
+  if (!fs.existsSync(dir)) continue;
+  test(`${sport}: kept highlights are whole`, () => {
+    for (const name of fs.readdirSync(dir)) {
+      assert.match(name, /^\d{4}\.json$/, `${sport} highlights: ${name} isn't a season's file`);
+      const kept = readJson(path.join(dir, name));
+      assert.ok(kept && typeof kept === 'object' && !Array.isArray(kept), `${sport} highlights/${name}: not an object`);
+      for (const [id, clips] of Object.entries(kept)) {
+        const at = `${sport} highlights/${name} game ${id}`;
+        assert.match(id, /^\d+$/, `${at}: not an ESPN event id`);
+        assert.ok(Array.isArray(clips) && clips.length, `${at}: no clips`);
+        for (const c of clips) {
+          assert.equal(typeof c.title, 'string', `${at}: a clip without a title`);
+          assert.ok((typeof c.youtube === 'string' && c.youtube) || (typeof c.src === 'string' && c.src), `${at}: "${c.title}" has no YouTube id or video file`);
+          assert.ok(c.duration === null || Number.isFinite(c.duration), `${at}: "${c.title}" duration ${c.duration}`);
+        }
+      }
+    }
+  });
+}

@@ -43,6 +43,7 @@ jobs:
           path: |
             .cache/nfl-summaries
             .cache/nflverse
+            .cache/highlights
           key: nfl-cache-${{ github.run_id }}
           restore-keys: nfl-cache-
 
