@@ -72,20 +72,34 @@ export class TabRanker {
   // in that order. (Measured against just the players left, a stat's average and spread moved with
   // the filters, and players who stayed swapped places.)
   ranked(reader: StatReader, players: SkillPlayer[], position: SkillPosition, rows: Record<string, SkillPlayer[]> = { [position]: players }): SkillPlayer[] {
+    const keep = new Set(players);
+    return this.scores(reader, players, position, rows).ranked.filter((player) => keep.has(player));
+  }
+
+  // The scores behind ranked: every row's weighted total, the stats that counted, the tab's rows in their
+  // order (before the list's filters), and with parts each stat's share of every total (the rank tile's
+  // breakdown: the same math, so it sums to the total the list went by)
+  scores(
+    reader: StatReader,
+    players: SkillPlayer[],
+    position: SkillPosition,
+    rows: Record<string, SkillPlayer[]> = { [position]: players },
+    parts?: Map<SkillPlayer, Map<string, number>>,
+    strengths?: Map<string, number>,
+  ): { totals: Map<SkillPlayer, number>; counted: SkillStat[]; weights: SkillWeights; ranked: SkillPlayer[] } {
     const { stats, hidden } = this.tab(position);
     const combined = this.settings.combineStats;
     const counted = (combined ? this.combine(stats, position).stats : stats).filter(
       (stat) => !hidden[statGroup(stat)] && !this.statHidden(stat.key, position) && !reader.recentOff(stat),
     );
     const weights = combinedWeights(position, this.mixWeights(position), combined);
-    const keep = new Set(players);
     const visible = (rows[position] ?? []).filter((player) => SPORT.rowVisible?.(player, this.settings.sport) ?? true);
     const seen = new Set(visible);
     const all = [...visible, ...players.filter((player) => !seen.has(player))];
     const min = hasMin(position) ? minCount(DEFAULT_SETTINGS, seasonLength(rows, position)) : 0;
     const pool = all.filter((player) => SPORT.playingTime.of(player) >= min);
-    const totals = weightedTotals(all, counted, weights, (player, stat) => reader.value(player, stat), undefined, this.settings.sport, pool);
-    return byTotals(all, totals, this.settings.sport).filter((player) => keep.has(player));
+    const totals = weightedTotals(all, counted, weights, (player, stat) => reader.value(player, stat), undefined, this.settings.sport, pool, parts, strengths);
+    return { totals, counted, weights, ranked: byTotals(all, totals, this.settings.sport) };
   }
 
   // A list in a saved order (players that have since appeared go at the end)

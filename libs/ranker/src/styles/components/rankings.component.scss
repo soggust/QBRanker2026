@@ -1544,3 +1544,301 @@ section ul li.player > div.player-info .player-name {
     margin-right: 1.2em;
   }
 }
+
+// ---------------------------------------------------------------------------
+// Why a row ranks where it does: the rank tile clicked opens its breakdown on a scoreboard panel, hung
+// from the tile (phones: a sheet along the bottom of the screen)
+// ---------------------------------------------------------------------------
+// (lit like the name and its team card on hover: the badge's 2px border in the board's light; at rest the
+// border is there but clear, so the tile doesn't change size)
+section ul li.player:not(.header-row) .count.rank-tile {
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+
+  &:hover,
+  &:focus-visible,
+  &.open {
+    border-color: var(--scoreboard-led);
+    outline: none;
+  }
+}
+
+.rank-why {
+  --why-good: var(--tint-good, #3ee07a);
+  --why-bad: #ff7468;
+  @include v.scoreboard-panel(8px, 0 8px 24px rgba(0, 0, 0, 0.6));
+  box-sizing: border-box;
+  color: #ddd;
+  // (a column: the score on top and the rows beside it below stay put, the stats between them scroll)
+  display: flex;
+  flex-direction: column;
+  font-size: 12px;
+  line-height: 1.35;
+  padding: 10px 12px 9px;
+  position: fixed;
+  width: 340px;
+  z-index: 1001;
+  @include v.scrollbars(false);
+
+  &:focus {
+    outline: none;
+  }
+
+  // (only the list of stats gives up room; the score, the name and the rows beside it keep theirs)
+  > * {
+    flex-shrink: 0;
+  }
+
+  > .why-parts {
+    flex-shrink: 1;
+  }
+
+  p {
+    margin: 0;
+  }
+
+  .hurts {
+    color: var(--why-bad);
+  }
+}
+
+.why-head {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+}
+
+.why-title {
+  align-items: baseline;
+  display: flex;
+  gap: 10px;
+}
+
+.why-score {
+  color: #bbb;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+
+  b {
+    // (white, not the board's light: a red one (MMA's) would read as a bad score)
+    color: #fff;
+    font-size: 17px;
+    font-variant-numeric: tabular-nums;
+    font-weight: 800;
+    letter-spacing: 0;
+    margin-left: 4px;
+    text-shadow: 0 0 6px rgba(255, 255, 255, 0.35);
+  }
+}
+
+.why-place {
+  color: #fff;
+  font-weight: 700;
+}
+
+.why-close {
+  background: none;
+  border: none;
+  color: #999;
+  cursor: pointer;
+  display: flex;
+  padding: 2px;
+
+  mat-icon {
+    @include v.icon-size(18px);
+  }
+
+  &:hover,
+  &:focus-visible {
+    color: #fff;
+  }
+}
+
+.why-name {
+  color: #fff;
+  font-weight: 700;
+  margin-top: 2px !important;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.why-note {
+  background: rgba(255, 255, 255, 0.06);
+  border-left: 2px solid var(--scoreboard-led);
+  color: #ccc;
+  margin-top: 6px !important;
+  padding: 3px 7px;
+}
+
+// One stat a line: its bar (green helping, red hurting; the largest the full width), name and value, share
+.why-parts {
+  display: flex;
+  flex: 0 1 auto;
+  flex-direction: column;
+  gap: 3px;
+  margin: 8px -6px 0 0;
+  max-height: min(60vh, 420px);
+  min-height: 3em;
+  overflow-y: auto;
+  // (room for the scrollbar, clear of the shares)
+  padding-right: 6px;
+
+  .why-part {
+    align-items: center;
+    display: grid;
+    gap: 8px;
+    grid-template-columns: 48px 1fr auto;
+  }
+
+  em {
+    color: #fff;
+    font-style: normal;
+    font-weight: 700;
+    margin-left: 3px;
+  }
+}
+
+.why-bar {
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 2px;
+  height: 7px;
+  overflow: hidden;
+
+  i {
+    background: var(--why-good);
+    border-radius: 2px;
+    box-shadow: 0 0 5px color-mix(in srgb, var(--why-good) 50%, transparent);
+    display: block;
+    height: 100%;
+    transform-origin: left;
+  }
+
+  .hurts & i {
+    background: var(--why-bad);
+    box-shadow: 0 0 5px color-mix(in srgb, var(--why-bad) 50%, transparent);
+  }
+}
+
+.why-stat {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  .hurts & {
+    color: #ddd;
+  }
+}
+
+.why-amount {
+  color: var(--why-good);
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.why-part.hurts .why-amount,
+.why-amount.hurts {
+  color: var(--why-bad);
+}
+
+.why-empty {
+  color: #999;
+
+  .why-amount {
+    color: #aaa;
+  }
+}
+
+// The rows beside it: the gap, and the three stats making most of it
+.why-vs {
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 9px;
+  padding-top: 8px;
+
+  b {
+    color: #fff;
+  }
+}
+
+.why-drivers {
+  color: #bbb;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 10px;
+  margin-top: 1px;
+}
+
+.why-h2h {
+  color: #eee;
+  display: block;
+  font-style: italic;
+  margin-top: 1px;
+}
+
+.why-foot {
+  color: #777;
+  font-size: 10.5px;
+  margin-top: 8px !important;
+}
+
+// (phones: along the bottom, the screen's width)
+@media (max-width: 575px) {
+  .rank-why {
+    border-radius: 12px 12px 0 0;
+    bottom: 0 !important;
+    left: 0 !important;
+    max-height: 80dvh !important;
+    padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+    top: auto !important;
+    width: 100%;
+  }
+
+  .why-parts {
+    max-height: 45dvh;
+  }
+}
+
+// (a quick rise in, the bars filling from the left; none for anyone who's asked for less)
+@media (prefers-reduced-motion: no-preference) {
+  .rank-why {
+    animation: why-rise 0.14s ease-out;
+  }
+
+  .why-bar i {
+    animation: why-fill 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+  }
+
+  @media (max-width: 575px) {
+    .rank-why {
+      animation: why-sheet 0.2s ease-out;
+    }
+  }
+}
+
+@keyframes why-rise {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+
+@keyframes why-sheet {
+  from {
+    transform: translateY(30%);
+    opacity: 0;
+  }
+}
+
+@keyframes why-fill {
+  from {
+    transform: scaleX(0);
+  }
+}

@@ -3,7 +3,7 @@
   @let groups = visibleGroups;
   <!-- The position tabs (from the app), between the button bar and the grid -->
   <ng-content></ng-content>
-  <ul #rankingsList id="rankings" tabindex="-1" aria-label="Rankings" cdkDropList (cdkDropListDropped)="drop($event)" columnHighlight scrolledSideways>
+  <ul #rankingsList id="rankings" tabindex="-1" aria-label="Rankings" (scroll)="listMoved()" cdkDropList (cdkDropListDropped)="drop($event)" columnHighlight scrolledSideways>
     <!-- Column headers (stat groups switch on / off with the sidebar eyes) -->
     <li class="player header-row">
       <mat-icon fontIcon="drag_indicator" class="drag-indicator" style="visibility: hidden"></mat-icon>
@@ -87,7 +87,20 @@
           class="player-info"
           [style.--team-badge]="teamBadge(player)"
         >
-          <span [ngClass]="rankClasses(i)"
+          <!-- The rank tile: a click (or Enter / Space) opens why it ranks here -->
+          <span
+            [ngClass]="rankClasses(i)"
+            class="rank-tile"
+            [class.open]="why?.id === player.gsisId"
+            role="button"
+            tabindex="0"
+            aria-haspopup="dialog"
+            [attr.aria-expanded]="why?.id === player.gsisId"
+            [attr.aria-label]="'#' + (i + 1) + ': why ' + player.name + ' ranks here'"
+            title="Why this rank"
+            (click)="toggleWhy(player, i, $event)"
+            (keydown.enter)="toggleWhy(player, i, $event)"
+            (keydown.space)="toggleWhy(player, i, $event)"
           >@if (i === 0) {<span class="lombardi" aria-hidden="true"></span
             ><span class="visually-hidden">1</span>} @else {{{ i + 1 }}}</span
         >
@@ -232,6 +245,69 @@
       </li>
     }
   </ul>
+
+  <!-- Why a row ranks where it does (its rank tile clicked): its score split by stat, each stat's standard
+       score times its slider, adding up to the score the list went by; then the rows beside it -->
+  @if (why; as w) {
+    <div
+      #whyPop
+      class="rank-why"
+      role="dialog"
+      tabindex="-1"
+      [attr.aria-label]="'Why ' + w.name + ' ranks #' + w.rank"
+      [style.top.px]="w.at.top"
+      [style.bottom.px]="w.at.bottom"
+      [style.left.px]="w.at.left"
+      [style.max-height.px]="w.at.room"
+    >
+      <div class="why-head">
+        <p class="why-title">
+          <span class="why-score">Score <b>{{ scoreText(w.score) }}</b></span>
+          <span class="why-place">#{{ w.rank }} of {{ w.of }}</span>
+        </p>
+        <button type="button" class="why-close" aria-label="Close" (click)="closeWhy(true)"><mat-icon aria-hidden="true" fontIcon="close"></mat-icon></button>
+      </div>
+      <p class="why-name">{{ w.name }}</p>
+      @if (w.manual) {
+        <p class="why-note">Order set by hand (a dragged row): #{{ w.scoreRank }} on score</p>
+      } @else if (w.movedByHeadToHead) {
+        <p class="why-note">Moved by head to head: #{{ w.scoreRank }} on score alone</p>
+      }
+      <div class="why-parts" role="list">
+        @for (part of w.parts; track part.key) {
+          <div role="listitem" class="why-part" [class.hurts]="part.amount < 0" [title]="part.title">
+            <span class="why-bar" aria-hidden="true"><i [style.width.%]="part.width"></i></span>
+            <span class="why-stat">{{ part.label }} @if (part.value) {<em>{{ part.value }}</em>}</span>
+            <span class="why-amount">{{ signedScore(part.amount) }}</span>
+          </div>
+        } @empty {
+          <div role="listitem" class="why-part why-empty">No stat counts: every slider is at 0</div>
+        }
+      </div>
+      @if (w.vs.length) {
+        <div class="why-vs">
+          @for (vs of w.vs; track vs.rank) {
+            <p>
+              <span class="why-vs-head" [title]="vs.title"
+                >vs <b>{{ vs.name }}</b> (#{{ vs.rank }}): <span class="why-amount" [class.hurts]="vs.diff < 0">{{ signedScore(vs.diff) }}</span></span
+              >
+              @if (vs.drivers.length) {
+                <span class="why-drivers">
+                  @for (d of vs.drivers; track $index) {
+                    <span [title]="d.title">{{ d.label }} <span [class.hurts]="d.amount < 0" class="why-amount">{{ signedScore(d.amount) }}</span></span>
+                  }
+                </span>
+              }
+              @if (vs.headToHead; as h2h) {
+                <span class="why-h2h">{{ h2h }}</span>
+              }
+            </p>
+          }
+        </div>
+      }
+      <p class="why-foot">Each stat: how far from the list's average it is (in standard deviations), times its slider</p>
+    </div>
+  }
 
   <!-- The button bar (above the grid: the order is in the styles): filters, copy, the year, About, settings
        (on phones: filters, the year, compare, and More for the rest) -->

@@ -31,6 +31,7 @@ import { SeasonContext } from '@ranker/engine/player-card/card.model';
 import { copyRankingsToClipboard } from '@ranker/core/clipboard';
 import { RowGlide } from './row-glide';
 import { TabRanker } from './tab-ranker';
+import { RankWhy, rankWhy, signedScore } from './rank-why';
 
 // A tab's rankings: the button bar, then the grid (a row per player, best first by the sliders, or as
 // dragged by hand), and the player card for a name clicked
@@ -160,8 +161,9 @@ export class SkillRankingsComponent implements OnChanges, CardHost {
   }
 
   ngOnChanges(): void {
-    // (picks are a tab's own)
+    // (picks are a tab's own, and so is an open breakdown)
     this.picked = [];
+    this.closeWhy();
     // A new tab starts scrolled to the top-left of its list
     this.rankingsList?.nativeElement.scrollTo({ top: 0, left: 0 });
     this.stats = SKILL_STATS[this.position];
@@ -202,6 +204,7 @@ export class SkillRankingsComponent implements OnChanges, CardHost {
   // Sort by the sliders (weighted totals of every stat that counts), then head-to-head among ties
   sortPlayers(): void {
     const from = this.glide.measure(this.rankingsList?.nativeElement);
+    this.closeWhy();
     this.playerList = this.limited(this.shown(this.ranker.ranked(this.reader, this.ranker.listed(SKILL_UNITS, this.season, this.position), this.position, SKILL_UNITS)));
     this.publishOrder(false);
     this.glide.play(() => this.rankingsList?.nativeElement, from);
@@ -209,6 +212,7 @@ export class SkillRankingsComponent implements OnChanges, CardHost {
 
   // A row dragged to another place: the order is kept, by hand, until the tab re-sorts
   drop(event: CdkDragDrop<string[]>): void {
+    this.closeWhy();
     moveItemInArray(this.playerList, event.previousIndex, event.currentIndex);
     this.publishOrder(true);
   }
@@ -389,13 +393,73 @@ export class SkillRankingsComponent implements OnChanges, CardHost {
   }
 
   // ---------------------------------------------------------------------------
+  // Why a row ranks where it does: its rank tile clicked (or Enter / Space on it) opens its breakdown
+  // ---------------------------------------------------------------------------
+  why: (RankWhy & { at: { top: number | null; bottom: number | null; left: number; room: number } }) | null = null;
+  @ViewChild('whyPop') whyPop?: ElementRef<HTMLElement>;
+  private whyTile: HTMLElement | null = null;
+  readonly signedScore = signedScore;
+
+  toggleWhy(player: SkillPlayer, index: number, event: Event): void {
+    event.preventDefault();
+    event.stopPropagation();
+    if (this.why?.id === player.gsisId) {
+      this.closeWhy(true);
+      return;
+    }
+    const tile = event.currentTarget as HTMLElement;
+    // (the list's own scoring, each stat's share kept: the same rows, sliders and filters as sortPlayers)
+    const parts = new Map<SkillPlayer, Map<string, number>>();
+    const listed = this.ranker.listed(SKILL_UNITS, this.season, this.position);
+    const strengths = new Map<string, number>();
+    const { totals, counted, weights } = this.ranker.scores(this.reader, listed, this.position, SKILL_UNITS, parts, strengths);
+    const manual = !!this.positionService.unitOrder(this.position)?.manual;
+    const why = rankWhy(this.playerList, index, { totals, counted, parts, weights, strengths }, this.reader, { manual, settings: this.sportSettings });
+    // (hung under the tile, or over it when there's more room above; inside the screen's edges, no taller
+    // than the room it has: its list of stats scrolls)
+    const rect = tile.getBoundingClientRect();
+    const below = innerHeight - rect.bottom;
+    const left = Math.max(8, Math.min(rect.left, innerWidth - 348));
+    const at =
+      below >= 560 || below >= rect.top
+        ? { top: rect.bottom + 6, bottom: null, left, room: below - 14 }
+        : { top: null, bottom: innerHeight - rect.top + 6, left, room: rect.top - 14 };
+    this.why = { ...why, at };
+    this.whyTile = tile;
+    setTimeout(() => this.whyPop?.nativeElement.focus({ preventScroll: true }));
+  }
+
+  closeWhy(refocus = false): void {
+    if (!this.why) return;
+    this.why = null;
+    if (refocus) this.whyTile?.focus({ preventScroll: true });
+    this.whyTile = null;
+  }
+
+  // (a click anywhere off it and its tile shuts it; so does the list scrolling out from under it)
+  @HostListener('document:click', ['$event'])
+  clickOff(event: MouseEvent): void {
+    if (this.why && !(event.target as Element | null)?.closest('.rank-why, .rank-tile')) this.closeWhy();
+  }
+
+  @HostListener('window:resize')
+  listMoved(): void {
+    this.closeWhy();
+  }
+
+  // The score as the list went by: "1.23"
+  scoreText(score: number): string {
+    return (Number(score.toFixed(2)) + 0).toFixed(2).replace('-', '−');
+  }
+
+  // ---------------------------------------------------------------------------
   // Compare: rows picked in the grid, then the button
   // ---------------------------------------------------------------------------
   // A click on a row, anywhere but its name, its badge and its links (a drag just let go isn't one, nor a
   // click that ends a text selection): picked, or unpicked
   pickRow(player: SkillPlayer, event: MouseEvent): void {
     const target = event.target as Element | null;
-    if (target?.closest('.card-target, .last-five, .drag-indicator, .group-icon, button, a')) return;
+    if (target?.closest('.card-target, .rank-tile, .last-five, .drag-indicator, .group-icon, button, a')) return;
     if (Date.now() - this.dragEnded < 300 || getSelection()?.toString()) return;
     this.togglePick(player, event.currentTarget as HTMLElement);
   }
@@ -423,6 +487,11 @@ export class SkillRankingsComponent implements OnChanges, CardHost {
   // Escape with nothing open over the grid lets go of the picks
   @HostListener('document:keydown.escape', ['$event'])
   clearPicks(event: Event): void {
+    // (an open breakdown shuts first, focus back on its tile)
+    if (this.why) {
+      this.closeWhy(true);
+      return;
+    }
     if (!this.picked.length || event.defaultPrevented || document.querySelector('[aria-modal="true"], .cdk-overlay-pane')) return;
     this.picked = [];
   }

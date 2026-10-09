@@ -136,12 +136,23 @@ export function weightedTotals<T>(
   // (the units each stat's average and spread come from, when not all of them: a list's filters then
   // only leave units out, never move the ones left; see TabRanker.ranked)
   pool?: T[],
+  // (filled, when given, with each unit's total split by stat: what each one added, in the total's own
+  // units, summing to it; the rank tile's breakdown. The totals are the same either way.)
+  parts?: Map<T, Map<string, number>>,
+  // (and each counted stat's strength: its slider over 50, its boost, a support grade's fifth; a share
+  // over it is the unit's score on that stat)
+  strengths?: Map<string, number>,
 ): Map<T, number> {
   const totals = new Map<T, number>(units.map((unit) => [unit, 0]));
+  const note = (unit: T, key: string, amount: number) => {
+    if (!parts) return;
+    const own = parts.get(unit) ?? parts.set(unit, new Map()).get(unit)!;
+    own.set(key, (own.get(key) ?? 0) + amount);
+  };
   const index = new Map(units.map((unit, i) => [unit, i]));
   // (each unit's skipMissing stats: the strength he's missing, and the score and strength he has)
-  const skipped = new Map<T, { missed: number; sum: number; strength: number }>();
-  const skipOf = (unit: T) => skipped.get(unit) ?? skipped.set(unit, { missed: 0, sum: 0, strength: 0 }).get(unit)!;
+  const skipped = new Map<T, { missed: number; sum: number; strength: number; keys: [string, number][] }>();
+  const skipOf = (unit: T) => skipped.get(unit) ?? skipped.set(unit, { missed: 0, sum: 0, strength: 0, keys: [] }).get(unit)!;
   for (const stat of stats) {
     const weight = weights[stat.key] ?? 0;
     if (!weight || stat.infoOnly || stat.shownWhen?.(settings) === false) continue;
@@ -174,17 +185,20 @@ export function weightedTotals<T>(
     // the boost can depend on the sport's settings)
     const boost = typeof stat.boost === 'function' ? stat.boost(settings) : (stat.boost ?? 1);
     const strength = (weight / 50) * boost * (stat.support ? 0.2 : 1);
+    strengths?.set(stat.key, strength);
 
     units.forEach((unit, i) => {
       const v = raw[i];
       if (v === null && stat.skipMissing) {
         skipOf(unit).missed += strength;
+        if (parts) skipOf(unit).keys.push([stat.key, strength]);
         return;
       }
       const scored = v !== null ? score(v) : stat.missingIsAverage || stat.support ? 0 : worst;
       // (a rate that isn't his own sample's, like the UFC's rank, isn't scaled: stat.settled)
       const trust = reliability && stat.kind === 'efficiency' && !stat.settled ? reliability(unit, stat) : 1;
       totals.set(unit, (totals.get(unit) ?? 0) + scored * strength * trust);
+      note(unit, stat.key, scored * strength * trust);
       if (stat.skipMissing) {
         skipOf(unit).sum += scored * strength * trust;
         skipOf(unit).strength += strength;
@@ -192,8 +206,10 @@ export function weightedTotals<T>(
     });
   }
   // (the skipMissing stats a unit is missing: his average over the ones he has)
-  for (const [unit, { missed, sum, strength }] of skipped) {
+  for (const [unit, { missed, sum, strength, keys }] of skipped) {
     if (missed && strength) totals.set(unit, (totals.get(unit) ?? 0) + (sum / strength) * missed);
+    // (each one he's missing noted at that average, by its own strength)
+    if (missed && strength) for (const [key, part] of keys) note(unit, key, (sum / strength) * part);
   }
   return totals;
 }
