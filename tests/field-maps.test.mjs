@@ -36,8 +36,8 @@ test('zones, lanes and bands land in the fixed orders', () => {
 const play = (fields) => ({ season_type: 'REG', two_point_attempt: '0', sack: '0', qb_kneel: '0', qb_scramble: '0', posteam: 'KC', defteam: 'OAK', ...fields });
 const PLAYS = [
   // two throws short left (one caught for 8, a touchdown), one deep right intercepted, a sack, a spike
-  play({ play_type: 'pass', pass_attempt: '1', pass_location: 'left', air_yards: '5', complete_pass: '1', passing_yards: '8', pass_touchdown: '1', epa: '1.5', passer_player_id: 'QB1', receiver_player_id: 'WR1' }),
-  play({ play_type: 'pass', pass_attempt: '1', pass_location: 'left', air_yards: '3', complete_pass: '0', passing_yards: 'NA', epa: '-0.5', passer_player_id: 'QB1', receiver_player_id: 'WR2' }),
+  play({ play_type: 'pass', pass_attempt: '1', pass_location: 'left', air_yards: '5', complete_pass: '1', passing_yards: '8', receiving_yards: '8', pass_touchdown: '1', epa: '1.5', passer_player_id: 'QB1', receiver_player_id: 'WR1' }),
+  play({ play_type: 'pass', pass_attempt: '1', pass_location: 'left', air_yards: '3', complete_pass: '0', passing_yards: 'NA', receiving_yards: 'NA', epa: '-0.5', passer_player_id: 'QB1', receiver_player_id: 'WR2' }),
   play({ play_type: 'pass', pass_attempt: '1', pass_location: 'right', air_yards: '30', complete_pass: '0', interception: '1', epa: '-3', passer_player_id: 'QB1', receiver_player_id: 'WR1' }),
   play({ play_type: 'pass', pass_attempt: '1', sack: '1', pass_location: 'NA', air_yards: 'NA', epa: '-2', passer_player_id: 'QB1' }),
   play({ play_type: 'pass', pass_attempt: '1', pass_location: 'NA', air_yards: 'NA', epa: '-0.1', passer_player_id: 'QB1' }),
