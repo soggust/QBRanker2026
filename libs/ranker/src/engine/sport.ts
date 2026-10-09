@@ -98,7 +98,6 @@ export interface CardBreakdown {
   icon: string;
   // The panel's hover help
   help: string;
-  take: string;
   // A line of context under the table (none: nothing)
   note?: string | null;
   // Its takes, shown with the Overview's others under the archetype
@@ -111,7 +110,12 @@ export interface CardBreakdown {
     cells: { text: string; title?: string; tone?: number | null }[];
     rank: number | null;
     of: number;
+    // Its group's color (the split's part it belongs to: the NFL's WR, TE, RB), if any
+    group?: number;
   }[];
+  // The headline: which way offenses lean against it (the NFL: a pass, run or neutral funnel), their pass
+  // rate here and their usual one
+  lean?: { label: string; tone: 'pass' | 'run' | null; text: string; pass: number; usual: number | null; help: string } | null;
   // A whole split into parts (where the targets go): each part's share and the league's
   split?: { title: string; help: string; parts: { label: string; share: number; league: number; title: string; note: string }[] } | null;
 }

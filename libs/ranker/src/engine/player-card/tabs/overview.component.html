@@ -41,67 +41,79 @@
   }
 </div>
 
-<!-- The sport's breakdown (the NFL defense's vs Position): a take, a row per role with what it allowed
-     and its rank on an LED tile, where the targets go against the league's split, and the funnel -->
+<!-- The sport's breakdown (the NFL defense's vs Position): a row per role, its rank on an LED tile first,
+     then what it allowed; where the targets go as a pie, the league's split in its key; on top, which way offenses lean -->
 @if (c.breakdown; as b) {
   <!-- (folds like the scouting report's sections; starts shut) -->
   <card-panel class="ov-section tab-card breakdown" [label]="b.title" [icon]="b.icon">
     <div class="group-body">
-      <p class="bd-take" [title]="b.help">{{ b.take }}</p>
-      <div class="bd-table" role="table" [attr.aria-label]="b.title">
-        <div class="bd-row bd-head" role="row">
-          <span role="columnheader"></span>
-          @for (col of b.columns; track col.label) {
-            <span role="columnheader" [title]="col.title">{{ col.label }}</span>
-          }
-          <span role="columnheader" title="Where the defense ranks, by what it allowed against the players' own averages (#1 the stingiest)">Rank</span>
-        </div>
-        @for (r of b.rows; track r.label) {
-          <div class="bd-row" role="row">
-            <span class="bd-label" role="rowheader" [title]="r.title">{{ r.label }}</span>
-            @for (cell of r.cells; track $index) {
-              <span
-                class="bd-cell"
-                role="cell"
-                [class.toned]="cell.tone !== undefined && cell.tone !== null"
-                [style.--tone]="cell.tone !== undefined && cell.tone !== null ? rankTone(cell.tone) : null"
-                [title]="cell.title ?? ''"
-                >{{ cell.text }}</span
-              >
-            }
-            <span role="cell">
-              @if (r.rank !== null) {
-                <span class="bd-rank" [style.--tone]="rankTone(rankPct(r.rank, r.of))" [title]="'#' + r.rank + ' of ' + r.of">{{ r.rank }}</span>
-              } @else {
-                <span class="bd-rank bd-none" title="Not enough games to rank">-</span>
-              }
-            </span>
+      @if (b.lean; as l) {
+        <!-- (which way offenses lean against it: its pass and run shares as a bar, the tick their usual) -->
+        <div class="bd-lean" [title]="l.help">
+          <div class="bd-lean-head">
+            <b class="bd-lean-label" [class.pass]="l.tone === 'pass'" [class.run]="l.tone === 'run'">{{ l.label }}</b>
+            <span>{{ l.text }}</span>
           </div>
-        }
-      </div>
-      @if (b.split; as sp) {
-        <div class="bd-split">
-          <span class="bd-split-title" [title]="sp.help">{{ sp.title }}</span>
-          <!-- (each part's share of the targets; the ticks are the league's split) -->
-          <div class="bd-bar">
-            @for (p of sp.parts; track p.label) {
-              <i [style.flex-grow]="p.share" [title]="p.title"><b>{{ p.label }}</b></i>
-            }
-            @for (p of sp.parts; track p.label; let last = $last; let i = $index) {
-              @if (!last) {
-                <s class="bd-tick" [style.left.%]="splitAt(sp.parts, i) * 100" [title]="'League: ' + p.label + ' ' + (p.league * 100).toFixed(0) + '%'"></s>
-              }
-            }
-          </div>
-          <div class="bd-parts">
-            @for (p of sp.parts; track p.label) {
-              <span class="bd-part" [title]="p.title"
-                ><b>{{ p.label }}</b> <em>{{ (p.share * 100).toFixed(0) }}%</em> <small>{{ p.note }}</small></span
-              >
+          <div class="bd-lean-bar">
+            <i class="pass" [style.flex-grow]="l.pass"><b>Pass {{ (l.pass * 100).toFixed(0) }}%</b></i>
+            <i class="run" [style.flex-grow]="1 - l.pass"><b>Run {{ ((1 - l.pass) * 100).toFixed(0) }}%</b></i>
+            @if (l.usual !== null) {
+              <s class="bd-lean-tick" [style.left.%]="l.usual * 100" [title]="'Usually ' + (l.usual * 100).toFixed(0) + '% pass'"></s>
             }
           </div>
         </div>
       }
+      <!-- (the table, and the pie at its right when there's room, under it when not) -->
+      <div class="bd-main">
+        <div class="bd-table" role="table" [attr.aria-label]="b.title" [title]="b.help" [style.--bd-cols]="b.columns.length">
+          <div class="bd-row bd-head" role="row">
+            <span role="columnheader" title="Where the defense ranks, by what it allowed against the players' own averages (#1 the stingiest)">Rank</span>
+            <span role="columnheader"></span>
+            @for (col of b.columns; track col.label) {
+              <span role="columnheader" [title]="col.title">{{ col.label }}</span>
+            }
+          </div>
+          @for (r of b.rows; track r.label) {
+            <div class="bd-row" role="row">
+              <span role="cell">
+                @if (r.rank !== null) {
+                  <span class="bd-rank" [style.--tone]="rankTone(rankPct(r.rank, r.of))" [title]="'#' + r.rank + ' of ' + r.of">{{ r.rank }}</span>
+                } @else {
+                  <span class="bd-rank bd-none" title="Not enough games to rank">-</span>
+                }
+              </span>
+              <span class="bd-label" role="rowheader" [title]="r.title" [style.color]="r.group !== undefined && r.group >= 0 ? pieColor(r.group) : null">{{ r.label }}</span>
+              @for (cell of r.cells; track $index) {
+                <span
+                  class="bd-cell"
+                  role="cell"
+                  [class.toned]="cell.tone !== undefined && cell.tone !== null"
+                  [style.--tone]="cell.tone !== undefined && cell.tone !== null ? rankTone(cell.tone) : null"
+                  [title]="cell.title ?? ''"
+                  >{{ cell.text }}</span
+                >
+              }
+            </div>
+          }
+        </div>
+        @if (b.split; as sp) {
+          <div class="bd-split">
+            <span class="bd-split-title" [title]="sp.help">{{ sp.title }}</span>
+            <!-- (each part's share of the targets, a slice of the pie; its key under it, the league's share in
+                 each part's note) -->
+            <div class="bd-pie-row">
+              <div class="bd-pie" [style.background]="pie(sp.parts)" role="img" [attr.aria-label]="sp.title"></div>
+              <div class="bd-parts">
+                @for (p of sp.parts; track p.label; let i = $index) {
+                  <span class="bd-part" [title]="p.title"
+                    ><i class="bd-swatch" [style.background]="pieColor(i)"></i><b>{{ p.label }}</b> <em>{{ (p.share * 100).toFixed(0) }}%</em> <small>{{ p.note }}</small></span
+                  >
+                }
+              </div>
+            </div>
+          </div>
+        }
+      </div>
       @if (b.note) {
         <p class="bd-note">{{ b.note }}</p>
       }

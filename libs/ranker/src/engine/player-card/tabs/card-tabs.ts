@@ -48,8 +48,20 @@ export class CardOverviewTab extends CardTab {
   readonly sortFlags = sortFlags;
 
   // A breakdown split's league tick after part i: the league's shares up to and including it
-  splitAt(parts: { league: number }[], i: number): number {
-    return parts.slice(0, i + 1).reduce((a, p) => a + p.league, 0);
+  // (a split's pie: each part a slice in its own soft color: the NFL's WRs a blue, TEs a sea green, backs a gold)
+  pieColor(i: number): string {
+    return ['#8ab4e0', '#7fc8bb', '#e3cb8f'][i] ?? '#9aa0a6';
+  }
+
+  pie(parts: { share: number }[]): string {
+    const total = parts.reduce((a, p) => a + p.share, 0) || 1;
+    let at = 0;
+    const stops = parts.map((p, i) => {
+      const from = at;
+      at += (p.share / total) * 360;
+      return `${this.pieColor(i)} ${from}deg ${at}deg`;
+    });
+    return `conic-gradient(${stops.join(', ')})`;
   }
 }
 

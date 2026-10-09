@@ -52,17 +52,6 @@ export function nhlVsPositionBreakdown(player: SkillPlayer, position: string, ro
     };
   });
 
-  // The take: how it does against each, then the defensemen's share of the points when it's notable
-  const cut = Math.max(3, Math.round(of * 0.25));
-  const word = (role: Role) => {
-    const r = vs[role].rank;
-    if (r === null) return null;
-    if (r <= cut) return `holds ${ROLE_INFO[role].plural} under their averages (#${r})`;
-    if (r > of - cut) return `${ROLE_INFO[role].plural} score more than usual on it (#${r})`;
-    return `about average against ${ROLE_INFO[role].plural} (#${r})`;
-  };
-  const clauses = roles.map(word).filter((c): c is string => !!c);
-  const take = clauses.length ? clauses.join('; ').replace(/^./, (c) => c.toUpperCase()) + '.' : 'Not enough games to say.';
 
   const flags: CardFlag[] = [];
   const { D: share, lg } = vs.share;
@@ -77,7 +66,6 @@ export function nhlVsPositionBreakdown(player: SkillPlayer, position: string, ro
     title: 'vs Position',
     icon: 'person_search',
     help: "What this team allowed to opposing forwards and defensemen, a game, and against what those same skaters averaged in their other games: holding a top line under its usual output reads as good defense. Skaters the site doesn't list (a few games' call-ups) aren't counted.",
-    take,
     note: share !== null && lg !== null ? `Defensemen's share of the points against it: ${pct(share)} (league ${pct(lg)})` : null,
     flags,
     columns: [

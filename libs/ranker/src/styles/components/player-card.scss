@@ -720,18 +720,96 @@
   gap: 12px;
 }
 
-.bd-take {
-  color: #eee;
-  cursor: help;
-  font-size: 14px;
-  line-height: 1.5;
-  margin: 0;
+// (the table and the pie side by side when there's room, the pie dropping under the table when not)
+.bd-main {
+  align-items: flex-start;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px 40px;
 }
 
-// (the table and the split kept to a readable width, not spread across a wide card)
-.bd-table,
-.bd-split {
+.bd-table {
+  flex: 0 1 auto;
   max-width: 560px;
+  min-width: 0;
+}
+
+// (the headline: which way offenses lean against it, its pass and run shares as a bar, the tick their usual;
+// pass in the WRs' blue, run in the backs' gold)
+.bd-lean {
+  cursor: help;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 560px;
+}
+
+.bd-lean-head {
+  color: #ddd;
+  font-size: 13px;
+  line-height: 1.45;
+
+  span {
+    margin-left: 8px;
+  }
+}
+
+.bd-lean-label {
+  color: #fff;
+  @include v.hand(17px);
+  font-weight: 400;
+
+  &.pass {
+    color: #8ab4e0;
+  }
+
+  &.run {
+    color: #e3cb8f;
+  }
+}
+
+.bd-lean-bar {
+  border-radius: 4px;
+  display: flex;
+  gap: 2px;
+  height: 20px;
+  overflow: hidden;
+  position: relative;
+
+  i {
+    align-items: center;
+    display: flex;
+    flex: 1 1 0;
+    min-width: 0;
+    padding: 0 8px;
+
+    &.pass {
+      background: color-mix(in srgb, #8ab4e0 55%, #222);
+    }
+
+    &.run {
+      background: color-mix(in srgb, #e3cb8f 50%, #222);
+      justify-content: flex-end;
+    }
+  }
+
+  b {
+    color: #fff;
+    font-size: 11px;
+    font-weight: 800;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.7);
+    white-space: nowrap;
+  }
+
+  .bd-lean-tick {
+    background: #fff;
+    bottom: 0;
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.8);
+    position: absolute;
+    top: 0;
+    transform: translateX(-1px);
+    width: 2px;
+  }
 }
 
 .bd-table {
@@ -744,7 +822,8 @@
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   display: grid;
   gap: 10px;
-  grid-template-columns: 56px repeat(3, minmax(0, 1fr)) 40px;
+  // (the rank first, the role, then each column, kept close)
+  grid-template-columns: 34px 44px repeat(var(--bd-cols, 3), minmax(0, 72px));
   padding: 6px 0;
 
   &:last-child {
@@ -759,9 +838,9 @@
     text-align: left;
   }
 
-  > span:last-child {
+  > span:first-child {
     display: flex;
-    justify-content: flex-end;
+    justify-content: flex-start;
   }
 }
 
@@ -781,6 +860,7 @@
 .bd-label {
   color: #fff;
   cursor: help;
+  margin-left: 6px;
   @include v.hand(15px);
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
 }
@@ -820,55 +900,33 @@
   text-transform: uppercase;
 }
 
-.bd-bar {
-  border-radius: 4px;
+.bd-pie-row {
+  align-items: flex-start;
   display: flex;
-  gap: 2px;
-  height: 18px;
-  overflow: hidden;
-  position: relative;
+  flex-direction: column;
+  gap: 12px;
+}
 
-  i {
-    align-items: center;
-    background: color-mix(in srgb, var(--group-color) 70%, #222);
-    display: flex;
-    flex: 1 1 0;
-    justify-content: center;
-    min-width: 0;
+.bd-pie {
+  border-radius: 50%;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.5);
+  flex: none;
+  height: 96px;
+  width: 96px;
+}
 
-    &:nth-child(2) {
-      background: color-mix(in srgb, var(--group-color) 45%, #222);
-    }
-
-    &:nth-child(3) {
-      background: color-mix(in srgb, var(--group-color) 25%, #222);
-    }
-
-    b {
-      color: #fff;
-      font-size: 10px;
-      font-weight: 800;
-      letter-spacing: 0.5px;
-      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.7);
-    }
-  }
-
-  // (the league's split: a thin white mark where its parts would meet)
-  .bd-tick {
-    background: #fff;
-    bottom: 0;
-    box-shadow: 0 0 4px rgba(0, 0, 0, 0.8);
-    position: absolute;
-    top: 0;
-    transform: translateX(-1px);
-    width: 2px;
-  }
+.bd-swatch {
+  align-self: center;
+  border-radius: 2px;
+  display: inline-block;
+  height: 10px;
+  width: 10px;
 }
 
 .bd-parts {
   display: flex;
-  flex-wrap: wrap;
-  gap: 4px 18px;
+  flex-direction: column;
+  gap: 6px;
 
   .bd-part {
     align-items: baseline;

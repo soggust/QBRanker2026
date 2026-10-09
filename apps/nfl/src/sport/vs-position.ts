@@ -45,7 +45,6 @@ const GROUP_WORDS = { WR: 'wide receivers', TE: 'tight ends', RB: 'backs' };
 
 const signed = (v: number, digits = 1) => `${v > 0 ? '+' : v < 0 ? '−' : ''}${Math.abs(v).toFixed(digits)}`;
 const pct = (v: number) => `${Math.round(v * 100)}%`;
-const list = (items: string[]) => (items.length < 3 ? items.join(' and ') : `${items.slice(0, -1).join(', ')} and ${items.at(-1)}`);
 const capital = (text: string) => text.charAt(0).toUpperCase() + text.slice(1);
 
 export function vsPositionBreakdown(player: SkillPlayer, position: string, rows: SkillPlayer[]): CardBreakdown | null {
@@ -61,6 +60,7 @@ export function vsPositionBreakdown(player: SkillPlayer, position: string, rows:
     const ok = has(line);
     return {
       label: role,
+      group: GROUPS.indexOf(role.slice(0, 2) as (typeof GROUPS)[number]),
       title: ROLE_INFO[role].title,
       cells: [
         {
@@ -76,37 +76,23 @@ export function vsPositionBreakdown(player: SkillPlayer, position: string, rows:
           tone: ok && line.rank !== null ? rankPct(line.rank, of) : null,
           title: ok && line.exp !== null ? `${line.ppr} PPR points a game, against the ${line.exp} these ${ROLE_INFO[role].plural} averaged in their other games` : '',
         },
+        {
+          text: ok && line.ppr !== null ? Math.round(line.ppr * line.g).toString() : '-',
+          title: ok ? `${line.g} games` : '',
+        },
       ],
       rank: ok ? line.rank : null,
       of,
     };
   });
 
-  // The take: the roles it stops and the ones it gives up, then a funnel or a lopsided target split
-  const ranked = lines.filter((l) => has(l.line) && l.line.rank !== null).sort((a, b) => a.line.rank! - b.line.rank!);
-  const cut = Math.max(3, Math.round(of * 0.25));
-  const strong = ranked.filter((l) => l.line.rank! <= cut).slice(0, 2);
-  const weak = ranked.filter((l) => l.line.rank! > of - cut).reverse().slice(0, 2);
-  const say = (l: (typeof lines)[0]) => `${ROLE_INFO[l.role].plural} (#${l.line.rank})`;
-  const clauses: string[] = [];
-  if (strong.length) clauses.push(`shuts down ${list(strong.map(say))}`);
-  if (weak.length) clauses.push(`soft on ${list(weak.map(say))}`);
-  if (!clauses.length) clauses.push(ranked.length ? 'middle of the pack against every role' : 'not enough games to say');
-  const extra: string[] = [];
   const { score, rank: funnelRank } = vs.funnel;
-  if (score !== null && funnelRank !== null && Math.abs(score) >= 3) {
-    extra.push(score > 0 ? `a pass funnel (#${funnelRank})` : `a run funnel (#${of + 1 - funnelRank})`);
-  }
   // (the groups whose share of the targets against it is 4 points or more off the league's, most first)
   const lopsided = vs.targets
     ? GROUPS.map((g) => ({ g, t: vs.targets![g] }))
         .filter((x) => x.t.share !== null && x.t.lg !== null && Math.abs(x.t.share - x.t.lg) >= 0.04)
         .sort((a, b) => Math.abs(b.t.share! - b.t.lg!) - Math.abs(a.t.share! - a.t.lg!))
     : [];
-  if (lopsided.length) extra.push(`${GROUP_WORDS[lopsided[0].g]} see ${pct(lopsided[0].t.share!)} of the targets (league ${pct(lopsided[0].t.lg!)})`);
-  let take = clauses.join(', ');
-  if (extra.length) take += `; ${list(extra)}`;
-  take = capital(take) + '.';
 
   // The Overview's takes, under the archetype: the funnel (run, pass or neutral), and where the targets
   // go when that's notable
@@ -126,15 +112,26 @@ export function vsPositionBreakdown(player: SkillPlayer, position: string, rows:
     flags.push({ icon: 'track_changes', tone: 'info', text: `Targets against it: ${says.join('; ')}` });
   }
 
-  // The context under the table: the pass and run defense, and the pace
-  const pace = vs.pace.diff;
-  const note = [
-    vs.pass.ypg !== null ? `Pass D: ${Math.round(vs.pass.ypg)} receiving yards a game (#${vs.pass.rank})` : null,
-    vs.run.ypg !== null ? `Run D: ${Math.round(vs.run.ypg)} rushing yards (#${vs.run.rank})` : null,
-    pace !== null && Math.abs(pace) >= 2 ? `opponents run ${Math.abs(pace).toFixed(1)} ${pace > 0 ? 'more' : 'fewer'} plays a game than usual` : null,
-  ]
-    .filter(Boolean)
-    .join(' · ');
+  // The headline: which way offenses lean against it, their pass rate here against their usual
+  const lean =
+    score !== null && vs.funnel.rate !== null
+      ? (() => {
+          const way: 'pass' | 'run' | null = score >= 2 ? 'pass' : score <= -2 ? 'run' : null;
+          const rank = funnelRank === null ? '' : way === 'pass' ? ` (#${funnelRank} of ${of})` : way === 'run' ? ` (#${of + 1 - funnelRank} of ${of})` : '';
+          const usual = vs.funnel.exp !== null ? `, against ${pct(vs.funnel.exp)} usually` : '';
+          return {
+            label: way === 'pass' ? 'Pass funnel' : way === 'run' ? 'Run funnel' : 'Neutral funnel',
+            tone: way,
+            text:
+              (way ? `Teams lean ${way} here${rank}` : 'Teams play it straight here') +
+              `: opponents pass on ${pct(vs.funnel.rate)} of plays${usual}` +
+              (way ? `, ${Math.abs(score).toFixed(1)} points ${way === 'pass' ? 'more' : 'less'} than they usually do` : ''),
+            pass: vs.funnel.rate,
+            usual: vs.funnel.exp,
+            help: "Opponents' pass rate against this defense in neutral situations (win probability 20-80%, outside each half's last two minutes), against those same offenses' own rates in their other games. The tick is their usual rate.",
+          };
+        })()
+      : null;
 
   const split = vs.targets
     ? {
@@ -160,15 +157,15 @@ export function vsPositionBreakdown(player: SkillPlayer, position: string, rows:
     icon: 'person_search',
     help:
       "What this defense allowed to each offense's WR1, WR2, WR3, top tight end and lead back (each set by his share of the team's targets or carries in the games before), per game, and against what those same players averaged in their other games: holding an elite WR1 to his average reads as good defense. Every play counts, garbage time too.",
-    take,
-    note: note || null,
     flags,
     columns: [
       { label: 'PPR / G', title: 'PPR fantasy points the role scored a game against this defense' },
       { label: 'Yds / G', title: "Receiving yards a game (a back's from scrimmage)" },
       { label: 'vs Avg', title: 'PPR points a game against what those same players averaged in their other games (below zero: held under their norm)' },
+      { label: 'FPTS', title: 'Fantasy points (PPR) the role scored against this defense, all its games' },
     ],
     rows: tableRows,
+    lean,
     split,
   };
 }
