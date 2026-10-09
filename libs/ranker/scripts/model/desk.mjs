@@ -104,16 +104,37 @@ export function settle(bet, game) {
   return { ...outcomeOf(bet, edge), final: `${game.awayAbbr} ${game.as} @ ${game.homeAbbr} ${game.hs}` };
 }
 
+// (DraftKings' rule for a game called off, the desk's book: a bet on one canceled, or forfeit, is void as soon
+// as a run sees it; one postponed or suspended stands only if the game's played to its final within 48 hours
+// of the start it was bet on, else it's void too. A game moved more than 48 hours with no word of it is a
+// postponement; one seen called off whose final no run saw inside the 48 hours counts as finished after them)
+export const VOID_AFTER = 48 * 36e5;
+
+// A bet's void, if its game was called off (a void prop's own: a push, its stake back, no action, out of the
+// record, the ROI and the trust fit); null for one still open or to be graded on its final
+export function voidOf(bet, game, now) {
+  if (!game) return null;
+  const start = Date.parse(bet.start);
+  const late = now - start > VOID_AFTER;
+  const moved = Date.parse(game.date) - start > VOID_AFTER;
+  let why = null;
+  if (game.off === 'canceled' || game.off === 'forfeit') why = game.off;
+  else if (game.final) why = moved || (bet.off && late) ? 'not played within 48 hours' : null;
+  else if (late && (game.off || bet.off || moved)) why = `${game.off ?? bet.off ?? 'postponed'}, not played within 48 hours`;
+  if (!why) return null;
+  return { status: 'push', profit: 0, void: true, ...(bet.market === 'prop' ? { actual: null } : {}), final: why, why: `Void: game ${why}` };
+}
+
 // The trust in the model a market has earned: of 0 to 1.2, the one that would have made its bets' chances
 // closest to what happened, less a cost for trusting it at all. Two kinds of evidence, as log-likelihoods:
 // each graded bet's result (a bet whose premise broke in the game, a starter hurt or a goalie pulled, counts
 // for its weight, less than 1: noise, not evidence), and each bet's closing chance (clv.mjs: the market's
 // fair chance of its side at the close, its last word with everyone's money and news in it; a model whose
 // chances run ahead of where the market closes is worth trusting long before enough results are in to say
-// so). Until a market has 40 of the two together, the starting trust.
+// so; a void bet, no action, is neither). Until a market has 40 of the two together, the starting trust.
 export function fitTrust(bets, start) {
   const decided = bets.filter((b) => b.status === 'won' || b.status === 'lost');
-  const closed = bets.filter((b) => b.clv && b.clv.q !== null && b.clv.q !== undefined && Number.isFinite(b.fair) && Number.isFinite(b.model));
+  const closed = bets.filter((b) => !b.void && b.clv && b.clv.q !== null && b.clv.q !== undefined && Number.isFinite(b.fair) && Number.isFinite(b.model));
   if (decided.length + closed.length < 40) return { trust: start, n: decided.length, clvN: closed.length, fitted: false };
   const n = decided.reduce((s, b) => s + (b.weight ?? 1), 0) + closed.length;
   let best = { trust: start, loss: Infinity };
@@ -131,7 +152,7 @@ export function fitTrust(bets, start) {
   return { trust: best.trust, n: decided.length, clvN: closed.length, fitted: true, logLoss: round(best.raw / n, 4) };
 }
 
-// A record: won, lost, pushed, units staked and won, the return on them (a void prop, no action, isn't in it)
+// A record: won, lost, pushed, units staked and won, the return on them (a void bet, no action, isn't in it)
 export function record(bets) {
   const r = { bets: 0, won: 0, lost: 0, push: 0, staked: 0, profit: 0 };
   for (const b of bets) {

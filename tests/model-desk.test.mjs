@@ -340,9 +340,9 @@ test('tally: the record, the units, the return on them, the open bets and the cl
   assert.ok(Math.abs(t.clvEv - 0.01) < 1e-12);
   const none = desk.tally('None', []);
   assert.deepEqual([none.roi, none.clvBeat, none.clvEv], [null, null, null]);
-  // (a void prop, no action: out of the record and its stake, as desk.mjs record)
-  const voided = desk.tally('Void', [...bets, bet({ market: 'prop', status: 'push', profit: 0, units: 1, void: true })]);
-  assert.deepEqual([voided.bets, voided.push, voided.staked], [3, 1, 4.5]);
+  // (a void prop, or a spread on a game called off, no action: out of the record and its stake, as desk.mjs record)
+  const voided = desk.tally('Void', [...bets, bet({ market: 'prop', status: 'push', profit: 0, units: 1, void: true }), bet({ status: 'push', profit: 0, units: 2, void: true, final: 'canceled' })]);
+  assert.deepEqual([voided.bets, voided.push, voided.staked, voided.roi], [3, 1, 4.5, t.roi]);
 });
 
 test('rebuysFor: 1,000 more each time the open stakes would take the balance under 0', () => {

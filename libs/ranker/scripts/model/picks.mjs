@@ -165,7 +165,7 @@ export function buildPicks(sport, ledger, trust, games, now) {
   return { sport, at: now.toISOString(), bands: BANDS, top: TOP, record: { graded: published.filter((b) => b.status !== 'open').length, overall: tally(published), byLevel }, picks };
 }
 
-// (a record as the page's: wins, losses, pushes, the win share; a void prop isn't counted)
+// (a record as the page's: wins, losses, pushes, the win share; a void bet, no action, isn't counted)
 function tally(bets) {
   const r = record(bets);
   return { wins: r.won, losses: r.lost, pushes: r.push, winPct: r.won + r.lost ? round(r.won / (r.won + r.lost), 4) : null, profit: r.profit };

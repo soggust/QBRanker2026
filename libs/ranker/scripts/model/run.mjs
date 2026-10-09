@@ -28,8 +28,9 @@
 import '../env.mjs';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { BOOK, LEAGUES, PROP_CAPS } from './leagues.mjs';
-import { gameOf, json, linesOf, scoreboard, teamIds, teamSchedule, ymd } from './espn.mjs';
+import { eventOf, gameOf, json, linesOf, scoreboard, teamIds, teamSchedule, ymd } from './espn.mjs';
 import { adjust, expect, fit, fitContext, gateOf, replay, round } from './ratings.mjs';
 import { OPTIONAL, enrich, featurize, gather } from './context.mjs';
 import { finalSummary, postmortems, propPostmortem, usualRoles } from './postmortem.mjs';
@@ -40,7 +41,7 @@ import { buildPicks } from './picks.mjs';
 import { playerRows } from './playerlogs.mjs';
 import { PER_GAME, STATS, apiProps, board, fitProps, priceProps, rowsIndex, settleProp, statInFinal, withApiPrices } from './props.mjs';
 import { CACHE, DAY, isoSecond, readJson, writeJson } from './sources.mjs';
-import { BANKROLL, MARKETS, choose, fairPair, fitTrust, pickText, price, record, settle } from './desk.mjs';
+import { BANKROLL, MARKETS, choose, fairPair, fitTrust, pickText, price, record, settle, voidOf } from './desk.mjs';
 
 const ROOT = path.resolve(import.meta.dirname, '../../../..');
 // (the return a side has to show to get the 3-unit top stake; a smaller one scales down to 0.5)
@@ -169,16 +170,35 @@ async function loadHistory(r) {
   // (the last few days and the next two; and the day of any bet still open from before then, should the
   // runs ever have stopped a while)
   const days = new Set(Array.from({ length: 7 }, (_, i) => ymd(new Date(now.getTime() + (i - 4) * DAY))));
-  for (const bet of readKept(r.files.ledger, { bets: [] }).bets) {
-    if (bet.status === 'open' && Date.parse(bet.start) < now.getTime() - 4 * DAY) days.add(ymd(new Date(bet.start)));
+  const open = readKept(r.files.ledger, { bets: [] }).bets.filter((b) => b.status === 'open');
+  for (const bet of open) {
+    if (Date.parse(bet.start) < now.getTime() - 4 * DAY) days.add(ymd(new Date(bet.start)));
   }
+  const seen = new Set();
+  // (a game's word on it as it is now: one called off and since played loses its off)
+  const keep = (g) => {
+    const { off: _off, ...was } = games.get(g.id) ?? {};
+    games.set(g.id, { ...was, ...g });
+    seen.add(g.id);
+  };
   for (const day of days) {
     for (const e of await scoreboard(cfg.league, day)) {
       const g = gameOf(e);
       if (!g || (g.type !== 2 && g.type !== 3)) continue;
-      games.set(g.id, { ...(games.get(g.id) ?? {}), ...g });
+      keep(g);
       const lines = linesOf(e);
       if (!g.final && lines && Date.parse(g.date) > now.getTime() + 5 * 60e3) upcoming.push({ game: g, lines, event: e });
+    }
+  }
+  // (a game bet on, past its start, that none of those days showed: moved off its day, postponed; asked by its
+  // id, so its bets are graded or void (desk.mjs voidOf) and never left open)
+  for (const id of new Set(open.filter((b) => Date.parse(b.start) < now.getTime() && !seen.has(b.event)).map((b) => b.event))) {
+    try {
+      const e = await eventOf(cfg.league, id);
+      const g = e && gameOf(e);
+      if (g) keep({ ...g, season: g.season ?? games.get(id)?.season ?? null, type: g.type ?? games.get(id)?.type ?? null });
+    } catch (err) {
+      console.warn(`${sport}: game ${id} not read (${err.message})`);
     }
   }
   await enrich(sport, cfg, games).catch((err) => console.warn(`${sport}: history's gaps left (${err.message})`));
@@ -376,9 +396,10 @@ function refitTrust(r) {
     if (trust[key] && trust[key].trust !== t.trust) state.changelog.push({ at, what: words.what, from: trust[key].trust, to: t.trust, why: `best fit to ${t.n} graded ${words.bets} and ${t.clvN} closing lines (log loss ${t.logLoss})` });
     trust[key] = t;
   };
-  // (each one's bets with a result or a close: clv.mjs; and a market's backtest bets, the history's real lines
-  // and results, so its trust is fitted from the start, the live bets adding to them as they come)
-  const evidence = (b) => b.status !== 'open' || b.clv;
+  // (each one's bets with a result or a close, a void one's neither: clv.mjs; and a market's backtest bets, the
+  // history's real lines and results, so its trust is fitted from the start, the live bets adding to them as
+  // they come)
+  const evidence = (b) => !b.void && (b.status !== 'open' || b.clv);
   for (const market of MARKETS) {
     refit(market, [...(r.backtestBets ?? []).filter((b) => b.market === market), ...r.ledger.bets.filter((b) => b.market === market && evidence(b))], { what: `${market} trust in the model`, bets: `${market} bets (backtest and live)` });
     trust[market].backtest = (r.backtestBets ?? []).filter((b) => b.market === market).length;
@@ -387,7 +408,7 @@ function refitTrust(r) {
   for (const st of STATS[r.sport]) {
     refit(
       `prop:${st.key}`,
-      r.ledger.bets.filter((b) => b.market === 'prop' && b.propType === st.key && evidence(b) && !b.void),
+      r.ledger.bets.filter((b) => b.market === 'prop' && b.propType === st.key && evidence(b)),
       { what: `${st.label} props' trust in the projection`, bets: `${st.label} props` },
     );
   }
@@ -398,7 +419,8 @@ function refitTrust(r) {
 // (clv.mjs); a close the API never gives (it's failed for 3 days) is taken as the last line a run saw
 async function captureClose(r) {
   const { sport, cfg, games, params } = r;
-  const started = r.ledger.bets.filter((b) => !b.clv && Date.parse(b.start) <= r.now.getTime());
+  // (not a void bet's, nor one on a game called off: no action, so no close)
+  const started = r.ledger.bets.filter((b) => !b.clv && !b.void && !games.get(b.event)?.off && Date.parse(b.start) <= r.now.getTime());
   const events = [...new Set(started.map((b) => b.event))];
   let got = 0;
   for (const id of events) {
@@ -427,9 +449,19 @@ async function captureClose(r) {
 }
 
 // 4. the open bets graded against their finals (a prop from its box score: a player who didn't play is no
-// action), and each graded bet's post-mortem
+// action), and each graded bet's post-mortem; first, the bets on games called off: void, or noted as put off
+// till they're played or 48 hours have gone by (desk.mjs voidOf)
 async function gradeBets(r) {
   const { sport, cfg, games, at } = r;
+  for (const bet of r.ledger.bets) {
+    if (bet.status !== 'open') continue;
+    const g = games.get(bet.event);
+    if (g?.off && g.off !== 'canceled' && g.off !== 'forfeit') bet.off ??= g.off;
+    const voided = voidOf(bet, g, r.now.getTime());
+    if (!voided) continue;
+    Object.assign(bet, voided, { gradedAt: at });
+    r.graded++;
+  }
   for (const bet of r.ledger.bets) {
     if (bet.status !== 'open' || bet.market === 'prop') continue;
     const g = games.get(bet.event);
@@ -686,7 +718,7 @@ function saveState(r) {
         }
       : (state.props ?? null),
     postmortem: (() => {
-      const done = ledger.bets.filter((b) => b.status !== 'open' && b.why);
+      const done = ledger.bets.filter((b) => b.status !== 'open' && !b.void && b.why);
       return { graded: done.length, disrupted: done.filter((b) => (b.weight ?? 1) < 1).length, weight: DISRUPTED_WEIGHT, fitted: false };
     })(),
     history: { games: history.length, finals: history.filter((g) => g.final).length, from: history[0]?.date ?? null },
@@ -800,13 +832,16 @@ const ALL_SOURCES = process.argv.includes('--all-sources');
 const BACKTEST = process.argv.includes('--backtest');
 // (--picks-only: only the picks, from the ledger as it is: no fetching, fitting or betting)
 const PICKS_ONLY = process.argv.includes('--picks-only');
-const args = process.argv.slice(2).filter((a) => !a.startsWith('--'));
-const sports = args.length ? args : Object.keys(LEAGUES);
-for (const sport of sports) {
-  try {
-    await runSport(sport);
-  } catch (err) {
-    console.error(`${sport}: ${err.stack ?? err}`);
-    process.exitCode = 1;
+// (only when run as the script itself: imported (a check, a test), it bets nothing and asks nothing)
+if (process.argv[1] && path.relative(process.argv[1], fileURLToPath(import.meta.url)) === '') {
+  const args = process.argv.slice(2).filter((a) => !a.startsWith('--'));
+  const sports = args.length ? args : Object.keys(LEAGUES);
+  for (const sport of sports) {
+    try {
+      await runSport(sport);
+    } catch (err) {
+      console.error(`${sport}: ${err.stack ?? err}`);
+      process.exitCode = 1;
+    }
   }
 }

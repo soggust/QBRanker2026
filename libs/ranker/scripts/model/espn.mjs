@@ -46,8 +46,11 @@ export function gameOf(e) {
     const v = t.score?.value ?? Number(t.score?.displayValue ?? t.score);
     return Number.isFinite(v) ? v : null;
   };
-  // (a game called off is never final, whatever ESPN's flag: its 0-0 would grade its bets)
-  const final = !!c.status?.type?.completed && !/postponed|cancel|suspended|forfeit/i.test(c.status?.type?.name ?? '');
+  // (a game called off is never final, whatever ESPN's flag: its 0-0 would grade its bets; it's kept as off,
+  // postponed, suspended, canceled or forfeit, for its bets' void: desk.mjs voidOf)
+  const called = (c.status?.type?.name ?? '').match(/postponed|cancel|suspended|forfeit/i)?.[0].toLowerCase();
+  const off = called === 'cancel' ? 'canceled' : (called ?? null);
+  const final = !!c.status?.type?.completed && !off;
   return {
     id: e.id,
     date: e.date,
@@ -61,6 +64,7 @@ export function gameOf(e) {
     ...(c.venue?.address?.city ? { venue: [c.venue.address.city, c.venue.address.state ?? '', c.venue.address.country ?? ''].join('|') } : {}),
     ...(typeof c.venue?.indoor === 'boolean' ? { indoor: c.venue.indoor } : {}),
     final,
+    ...(off ? { off } : {}),
     hs: final ? score(home) : null,
     as: final ? score(away) : null,
   };
@@ -122,6 +126,14 @@ export function linesOf(e) {
 // A game's summary (its box score: who played, and how much)
 export async function summary(league, id) {
   return json(`${ESPN}/${league}/summary?event=${id}`);
+}
+
+// One game by its id as a scoreboard event (its summary's header): a game bet on that a run's scoreboards no
+// longer show, moved off its day; null when ESPN doesn't say
+export async function eventOf(league, id) {
+  const h = (await summary(league, id))?.header;
+  const c = h?.competitions?.[0];
+  return c ? { ...h, date: c.date, status: c.status } : null;
 }
 
 // The league's injury report: each team's listed players (ESPN's athlete id, name, position, status)

@@ -289,7 +289,8 @@ export class ModelDeskComponent implements OnInit, OnDestroy {
     const away = teams.find((t) => t.homeAway === 'away');
     const home = teams.find((t) => t.homeAway === 'home');
     if (!away || !home) return;
-    const final = !!event.status?.type?.completed;
+    // (a game called off is never final: its 0-0 isn't a result, as the bettor's espn.mjs gameOf)
+    const final = !!event.status?.type?.completed && !/postponed|cancel|suspended|forfeit/i.test(event.status?.type?.name ?? '');
     this.boards.set(String(event.id), { hs: Number(home.score) || 0, as: Number(away.score) || 0, final, state: event.status?.type?.state });
     const score = `${away.team?.abbreviation} ${away.score ?? 0} - ${home.team?.abbreviation} ${home.score ?? 0}`;
     const detail = event.status?.type?.shortDetail ?? '';
@@ -373,9 +374,10 @@ export class ModelDeskComponent implements OnInit, OnDestroy {
     return provisional(b, this.boardOf(b), this.propNow.get(b.id));
   }
 
-  // (a bet's result in Latest Results: the run's grade, or for one not graded yet, the scores')
+  // (a bet's result in Latest Results: the run's grade (a void one, no action, said so), or for one not graded
+  // yet, the scores')
   result(b: ModelBet): { status: string; profit: number } | null {
-    return b.status !== 'open' ? { status: b.status, profit: b.profit } : this.provisional(b);
+    return b.status !== 'open' ? { status: b.void ? 'void' : b.status, profit: b.profit } : this.provisional(b);
   }
 
   // (a bet's final score: the run's, or the scoreboard's before it's graded)
@@ -607,6 +609,6 @@ export class ModelDeskComponent implements OnInit, OnDestroy {
 // (an event on ESPN's scoreboard, as much as the desk reads)
 interface ScoreboardEvent {
   id: string | number;
-  status?: { type?: { completed?: boolean; state?: 'pre' | 'in' | 'post'; shortDetail?: string } };
+  status?: { type?: { completed?: boolean; name?: string; state?: 'pre' | 'in' | 'post'; shortDetail?: string } };
   competitions?: { competitors?: { homeAway: string; score?: string; team?: { abbreviation?: string } }[] }[];
 }
