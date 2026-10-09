@@ -104,22 +104,10 @@
               <!-- (the result: the game itself, the game view) -->
               <td class="log-result">
                 <button type="button" class="log-game" [disabled]="!games.available" [title]="games.available ? 'Open the game' : ''" (click)="openGame(c, g)">
-                  <!-- (a mini scoreboard: his team's score first, the winner's lit green, the loser's red, as
-                       on the game view's board; anything after the score (OT) beside it) -->
-                  @let sb = board(g.score);
-                  @if (sb) {
-                    <span class="log-board" [ngClass]="g.outcome"
-                      ><b class="us">{{ sb.us }}</b><i>-</i><b class="them">{{ sb.them }}</b></span
-                    >
-                    @if (sb.extra) {
-                      <small class="log-extra">{{ sb.extra }}</small>
-                    }
-                  } @else {
-                    @if (g.outcome) {
-                      <span class="log-outcome" [ngClass]="g.outcome">{{ g.outcome }}</span>
-                    }
-                    {{ g.score }}
+                  @if (g.outcome) {
+                    <span class="log-outcome" [ngClass]="g.outcome">{{ g.outcome }}</span>
                   }
+                  {{ g.score }}
                 </button>
               </td>
               @for (cell of g.cells; track $index) {
@@ -128,7 +116,14 @@
                   [class.wide]="log.columns[$index].wide"
                   [class.group-start]="log.groups && ($index === 0 || log.columns[$index].group !== log.columns[$index - 1].group)"
                 >
-                  {{ cell }}
+                  <!-- (a team's points for and against, each on its own little LED tile: the winner's lit green,
+                       the loser's red, as on the game view's board) -->
+                  @let led = scoreSide(log.columns, $index);
+                  @if (led && g.outcome) {
+                    <span class="log-led" [class.won]="(led === 'PF') === (g.outcome === 'W')" [class.lost]="(led === 'PF') === (g.outcome === 'L')">{{ cell }}</span>
+                  } @else {
+                    {{ cell }}
+                  }
                 </td>
               }
             </tr>
