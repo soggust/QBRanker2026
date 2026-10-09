@@ -656,12 +656,11 @@
   grid-template-columns: 118px minmax(0, 1fr);
 }
 
+// (the hand lettering, thin, as the card writes its skills)
 .cmp-skill-name {
   color: #ddd;
-  font-size: 12px;
-  font-weight: 800;
-  letter-spacing: 0.4px;
-  text-transform: uppercase;
+  @include v.hand(14px);
+  line-height: 1.15;
 }
 
 .cmp-bars {
