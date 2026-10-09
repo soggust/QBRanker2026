@@ -570,8 +570,11 @@
 // (a skill's position, among different positions)
 .cmp-skill-tab {
   color: #ffa74d;
+  // (the body font, not the name's hand lettering: never bold DynaPuff)
+  font-family: v.$font-base;
   font-size: 10px;
   font-weight: 800;
+  letter-spacing: 0.4px;
   margin-left: 6px;
 }
 
