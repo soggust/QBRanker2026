@@ -20,7 +20,7 @@
         @if (rows?.length) {
           <!-- (the chip's rim: its spots drawn as dashes along an outline, so they follow the round ends) -->
           <span class="bets-chip">
-            <select class="bets-game" aria-label="Game" [(ngModel)]="game">
+            <select class="bets-game" aria-label="Game" [(ngModel)]="game" (ngModelChange)="closeWhy()">
               <option value="">All Games</option>
               @for (d of gameDays; track d.day) {
                 <optgroup [label]="d.day">
@@ -82,77 +82,86 @@
     } @else if (!rows.length) {
       <p class="bets-note">No picks right now: the algorithm posts its best bets as the coming games' lines come in.</p>
     } @else {
-      <ol class="bets-list" [class.spinning]="spinning">
+      <ol class="bets-list" [class.spinning]="spinning" (scroll)="closeWhy()">
         @for (r of shown; track r.id; let i = $index, n = $count) {
           <li class="bet" [ngClass]="level(r)" [class.open]="open.has(r.id)" [style.--i]="i">
-            <button type="button" class="bet-row" (click)="toggle(r.id)" [attr.aria-expanded]="open.has(r.id)">
-              <mat-icon class="bet-chevron" [fontIcon]="open.has(r.id) ? 'expand_more' : 'chevron_right'"></mat-icon>
-              <!-- (the #1 bet is the lock) -->
-              <!-- (its hover: where it ranks, its confidence (the row's color) and its chance) -->
-              <span
+            <!-- (the row, and its rank tile over the row's rank column: a button of its own, not one inside the row's) -->
+            <div class="bet-line">
+              <button type="button" class="bet-row" (click)="toggle(r.id)" [attr.aria-expanded]="open.has(r.id)">
+                <mat-icon class="bet-chevron" [fontIcon]="open.has(r.id) ? 'expand_more' : 'chevron_right'"></mat-icon>
+                <span class="bet-rank-slot" aria-hidden="true"></span>
+                <!-- (a like reads "Bet": it's the bet to make, as a fade is the side to go against) -->
+                <span class="bet-grade" [ngClass]="side(r)">{{ side(r) === 'like' ? 'bet' : 'fade' }}</span>
+                <span class="bet-main" [class.has-circle]="r.strength !== 'fade'">
+                  <!-- (a fade says what it fades, and the bet to make instead) -->
+                  @if (r.strength === 'fade') {
+                    <b>{{ r.market }}</b>
+                    <small>{{ insteadText(r.pick) }}</small>
+                  } @else {
+                    <!-- (led by a circle: a prop's player, a total's arrow, a side's team; its one word that says what
+                         the bet is in its team's color; its price under it) -->
+                    @let parts = pickParts(r);
+                    @if (r.betType === 'player' && r.athleteId) {
+                      <img class="bet-circle bet-face" [src]="headshot(r)" alt="" (error)="hide($event)" />
+                    } @else if (r.betType === 'total') {
+                      <span class="bet-circle" [class.over]="r.side === 'over'" aria-hidden="true"><mat-icon [fontIcon]="r.side === 'under' ? 'arrow_downward' : 'arrow_upward'"></mat-icon></span>
+                    } @else {
+                      <span class="bet-circle" aria-hidden="true">
+                        @if (pickLogo(r); as logo) {
+                          <img [src]="logo" alt="" (error)="hide($event)" />
+                        }
+                      </span>
+                    }
+                    <b>@if (r.betType === 'player' && r.player) {{{ r.player }}{{ ' ' }}}{{ parts[0] }}<span class="bet-key" [style.color]="pickColor(r)">{{ parts[1] }}</span>{{ parts[2] }}</b>
+                    <small>{{ r.odds ?? '' }}</small>
+                  }
+                </span>
+                <span class="bet-game">
+                  @if (r.game) {
+                    <!-- (each team with its little logo, when the data has them) -->
+                    @if (r.game.teams?.length === 2) {
+                      <b class="bet-matchup">
+                        @for (t of r.game.teams; track t.abbr; let last = $last) {
+                          @if (t.logo) {
+                            <img [src]="logoSrc(r, t.logo)" alt="" />
+                          }
+                          {{ t.abbr }}
+                          @if (!last) {
+                            <span class="bet-at">&#64;</span>
+                          }
+                        }
+                      </b>
+                    } @else {
+                      <b>{{ r.game.matchup }}</b>
+                    }
+                    <!-- (when it's played, under the teams; where and its weather are in the open section) -->
+                    @if (r.game.kickoff) {
+                      <small class="bet-when">{{ r.game.kickoff | date: 'EEE MMM d · h:mm a' }}</small>
+                    }
+                  }
+                </span>
+              </button>
+              <!-- The rank tile (the #1 bet is the lock): a click (or Enter / Space) opens how its score is built; its
+                   hover, its place, its score and its confidence (the row's color) -->
+              <button
+                type="button"
                 class="bet-rank"
                 [class.top]="i < 10"
                 [class.lock]="i === 0"
-                [attr.aria-label]="i === 0 ? 'Lock, number 1' : null"
-                [title]="'#' + (i + 1) + ' of ' + n + ' · ' + level(r) + ' confidence' + (r.chance != null ? ' · ' + r.chance + '% to win' : '')"
+                [class.open]="why?.id === r.id"
+                aria-haspopup="dialog"
+                [attr.aria-expanded]="why?.id === r.id"
+                [attr.aria-label]="(i === 0 ? 'Lock, number 1' : '#' + (i + 1)) + ': how its score is built'"
+                [title]="rankTitle(r, i, n)"
+                (click)="toggleWhy(i, $event)"
               >
                 @if (i === 0) {
                   <mat-icon fontIcon="lock"></mat-icon>
                 } @else {
                   {{ i + 1 }}
                 }
-              </span>
-              <!-- (a like reads "Bet": it's the bet to make, as a fade is the side to go against) -->
-              <span class="bet-grade" [ngClass]="side(r)">{{ side(r) === 'like' ? 'bet' : 'fade' }}</span>
-              <span class="bet-main" [class.has-circle]="r.strength !== 'fade'">
-                <!-- (a fade says what it fades, and the bet to make instead) -->
-                @if (r.strength === 'fade') {
-                  <b>{{ r.market }}</b>
-                  <small>{{ insteadText(r.pick) }}</small>
-                } @else {
-                  <!-- (led by a circle: a prop's player, a total's arrow, a side's team; its one word that says what
-                       the bet is in its team's color; its price under it) -->
-                  @let parts = pickParts(r);
-                  @if (r.betType === 'player' && r.athleteId) {
-                    <img class="bet-circle bet-face" [src]="headshot(r)" alt="" (error)="hide($event)" />
-                  } @else if (r.betType === 'total') {
-                    <span class="bet-circle" [class.over]="r.side === 'over'" aria-hidden="true"><mat-icon [fontIcon]="r.side === 'under' ? 'arrow_downward' : 'arrow_upward'"></mat-icon></span>
-                  } @else {
-                    <span class="bet-circle" aria-hidden="true">
-                      @if (pickLogo(r); as logo) {
-                        <img [src]="logo" alt="" (error)="hide($event)" />
-                      }
-                    </span>
-                  }
-                  <b>@if (r.betType === 'player' && r.player) {{{ r.player }}{{ ' ' }}}{{ parts[0] }}<span class="bet-key" [style.color]="pickColor(r)">{{ parts[1] }}</span>{{ parts[2] }}</b>
-                  <small>{{ r.odds ?? '' }}</small>
-                }
-              </span>
-              <span class="bet-game">
-                @if (r.game) {
-                  <!-- (each team with its little logo, when the data has them) -->
-                  @if (r.game.teams?.length === 2) {
-                    <b class="bet-matchup">
-                      @for (t of r.game.teams; track t.abbr; let last = $last) {
-                        @if (t.logo) {
-                          <img [src]="logoSrc(r, t.logo)" alt="" />
-                        }
-                        {{ t.abbr }}
-                        @if (!last) {
-                          <span class="bet-at">&#64;</span>
-                        }
-                      }
-                    </b>
-                  } @else {
-                    <b>{{ r.game.matchup }}</b>
-                  }
-                  <!-- (when it's played, under the teams; where and its weather are in the open section) -->
-                  @if (r.game.kickoff) {
-                    <small class="bet-when">{{ r.game.kickoff | date: 'EEE MMM d · h:mm a' }}</small>
-                  }
-                }
-              </span>
-            </button>
+              </button>
+            </div>
             @if (open.has(r.id)) {
               <div class="bet-reasons">
                 <p>{{ r.reason }}</p>
@@ -185,6 +194,73 @@
         <span class="slot-knob"></span>
       </span>
     </button>
+
+    <!-- How a bet's score is built (its rank tile clicked): the book's fair chance and the model's lean on it,
+         adding up to the score the list went by (and the analyst's quarter where it agrees); its confidence and
+         its price; then the bets beside it -->
+    @if (why; as w) {
+      <div
+        #whyPop
+        class="bet-why"
+        [class.above]="w.at.top === null"
+        [class.sheet]="w.sheet"
+        role="dialog"
+        tabindex="-1"
+        [attr.aria-label]="'How ' + w.name + '’s score is built: #' + w.rank"
+        [style.top.px]="w.at.top"
+        [style.bottom.px]="w.at.bottom"
+        [style.left.px]="w.at.left"
+        [style.max-height.px]="w.at.room"
+      >
+        <div class="why-head">
+          <p class="why-title">
+            <span class="why-score">Score <b>{{ betScoreText(w.score) }}</b></span>
+            <span class="why-place">#{{ w.rank }} of {{ w.of }}</span>
+          </p>
+          <button type="button" class="why-close" aria-label="Close" (click)="closeWhy(true)"><mat-icon aria-hidden="true" fontIcon="close"></mat-icon></button>
+        </div>
+        <p class="why-name">{{ w.name }}</p>
+        <div class="why-parts" role="list">
+          @for (part of w.parts; track part.key) {
+            <div role="listitem" class="why-part" [class.hurts]="part.amount < 0" [title]="part.title">
+              <span class="why-bar" aria-hidden="true"><i [style.width.%]="part.width"></i></span>
+              <span class="why-stat">{{ part.label }} @if (part.value) {<em>{{ part.value }}</em>}</span>
+              <span class="why-amount">{{ signedPoints(part.amount) }}</span>
+            </div>
+          }
+        </div>
+        <!-- (its confidence, and its price's expected return and stake) -->
+        <div class="why-facts">
+          <p [title]="w.levelTitle"><span>Confidence</span> <b [ngClass]="w.level">{{ w.levelText }}</b></p>
+          @if (w.edgeText) {
+            <p [title]="w.edgeTitle"><span>Expected return</span> <b>{{ w.edgeText }}</b></p>
+          }
+        </div>
+        @if (w.vs.length) {
+          <div class="why-vs">
+            @for (vs of w.vs; track vs.rank) {
+              <p>
+                <span class="why-vs-head" [title]="vs.title"
+                  >vs <b>{{ vs.name }}</b> (#{{ vs.rank }}): <span class="why-amount" [class.hurts]="vs.diff < 0">{{ signedPoints(vs.diff) }}</span></span
+                >
+                @if (vs.drivers.length) {
+                  <span class="why-drivers">
+                    @for (d of vs.drivers; track $index) {
+                      <span [title]="d.title">{{ d.label }} <span [class.hurts]="d.amount < 0" class="why-amount">{{ signedPoints(d.amount) }}</span></span>
+                    }
+                  </span>
+                }
+              </p>
+            }
+          </div>
+        }
+        @if (w.partial) {
+          <p class="why-foot">The score is its chance to win, in points (this pick's file is from before the book's and the model's chances were kept)</p>
+        } @else {
+          <p class="why-foot">The score is its chance to win, in points: the book's fair chance (the vig out), moved toward the model's by the trust the model has earned in that market (lean = trust × (model − book)); an analyst agreeing counts a quarter more</p>
+        }
+      </div>
+    }
   </div>
   }
 </div>

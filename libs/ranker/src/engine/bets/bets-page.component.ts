@@ -1,7 +1,8 @@
-import { Component, OnInit, isDevMode } from '@angular/core';
+import { Component, ElementRef, HostListener, OnInit, ViewChild, isDevMode } from '@angular/core';
 import { SPORT_LINKS } from '@ranker/core/sports';
 import { insteadText } from '../player-card/analysis';
 import { americanOdds, headshot } from './bet-format';
+import { BetWhy, PickWhy, betScoreText, betWhy, signedPoints } from './bet-why';
 import { TeamColors, loadTeamColors, pickTeamColor, splitPick } from './pick-style';
 
 // The Bets page (the sport bar's Bets link, #bets): the algorithm's top picks for every sport (each one's
@@ -52,6 +53,18 @@ export interface BetRow {
   sureness: number;
   // its type, for the filter chips
   betType: BetKind;
+  // (its score's makings, for the rank tile's breakdown (bet-why.ts): whether it has an edge, the model's and
+  // the book's chances, the trusted one, its expected return and stake, its price, and the parts picks.mjs
+  // split the score into; older picks files carry only some)
+  edge?: boolean;
+  model?: number;
+  fair?: number;
+  p?: number;
+  ev?: number;
+  units?: number;
+  price?: number;
+  book?: string;
+  why?: PickWhy | null;
 }
 
 // (an analyst's pick, as far as the page uses it: the call, its side, its case and its risk)
@@ -155,6 +168,14 @@ interface Pick {
   teams: { abbr: string; logo: string | null }[];
   where: GameInfo | null;
   reason: string;
+  // (its score's makings: older files carry the chances without the parts)
+  edge?: boolean;
+  model?: number;
+  fair?: number;
+  p?: number;
+  ev?: number;
+  units?: number;
+  why?: PickWhy;
 }
 interface Picks {
   at: string;
@@ -316,6 +337,15 @@ export class BetsPageComponent implements OnInit {
             player: p.player ?? null,
             athleteId: p.athlete ?? null,
             playerTeam: p.team ?? null,
+            edge: p.edge,
+            model: p.model,
+            fair: p.fair,
+            p: p.p,
+            ev: p.ev,
+            units: p.units,
+            price: p.odds,
+            book: p.book,
+            why: p.why ?? null,
           });
         }
       }
@@ -385,6 +415,7 @@ export class BetsPageComponent implements OnInit {
   }
 
   toggleKind(kind: BetKind): void {
+    this.closeWhy();
     if (!this.kinds.delete(kind)) this.kinds.add(kind);
   }
 
@@ -441,11 +472,78 @@ export class BetsPageComponent implements OnInit {
     if (!this.open.delete(id)) this.open.add(id);
   }
 
+  // ---------------------------------------------------------------------------
+  // Why a bet ranks where it does: its rank tile clicked (or Enter / Space on it) opens how its score is
+  // built (bet-why.ts), as the grid's rank tile does
+  // ---------------------------------------------------------------------------
+  why: (BetWhy & { at: { top: number | null; bottom: number | null; left: number; room: number }; sheet: boolean }) | null = null;
+  @ViewChild('whyPop') whyPop?: ElementRef<HTMLElement>;
+  private whyTile: HTMLElement | null = null;
+  readonly signedPoints = signedPoints;
+  readonly betScoreText = betScoreText;
+
+  // The rank tile's hover: its place, its score and its confidence ("#3 of 40 · Score 70.34 · High confidence")
+  rankTitle(r: BetRow, i: number, n: number): string {
+    const level = this.level(r);
+    return `#${i + 1} of ${n} · Score ${betScoreText(r.sureness * 100)} · ${level[0].toUpperCase()}${level.slice(1)} confidence`;
+  }
+
+  toggleWhy(index: number, event: Event): void {
+    event.preventDefault();
+    event.stopPropagation();
+    const rows = this.shown;
+    const row = rows[index];
+    if (!row) return;
+    if (this.why?.id === row.id) {
+      this.closeWhy(true);
+      return;
+    }
+    const tile = event.currentTarget as HTMLElement;
+    // (hung under the tile, or over it when there's more room above; inside the screen's edges, no taller
+    // than the room it has; phones: a sheet along the bottom)
+    const rect = tile.getBoundingClientRect();
+    const below = innerHeight - rect.bottom;
+    const left = Math.max(8, Math.min(rect.left, innerWidth - 348));
+    const at =
+      below >= 420 || below >= rect.top
+        ? { top: rect.bottom + 6, bottom: null, left, room: below - 14 }
+        : { top: null, bottom: innerHeight - rect.top + 6, left, room: rect.top - 14 };
+    this.why = { ...betWhy(rows, index), at, sheet: matchMedia('(max-width: 575px)').matches };
+    this.whyTile = tile;
+    setTimeout(() => this.whyPop?.nativeElement.focus({ preventScroll: true }));
+  }
+
+  closeWhy(refocus = false): void {
+    if (!this.why) return;
+    this.why = null;
+    if (refocus) this.whyTile?.focus({ preventScroll: true });
+    this.whyTile = null;
+  }
+
+  // (a click anywhere off it and its tile shuts it; so does the list scrolling out from under it, or the
+  // screen changing size)
+  @HostListener('document:click', ['$event'])
+  clickOff(event: MouseEvent): void {
+    if (this.why && !(event.target as Element | null)?.closest('.bet-why, .bet-rank')) this.closeWhy();
+  }
+
+  @HostListener('window:resize')
+  listMoved(): void {
+    this.closeWhy();
+  }
+
+  // (Escape shuts it, focus back on its tile)
+  @HostListener('document:keydown.escape')
+  escape(): void {
+    this.closeWhy(true);
+  }
+
   // The slot handle: pulled, it swings down and springs back, and as it lands the rows spin in like reels
   pulling = false;
   spinning = false;
   pull(): void {
     if (this.pulling) return;
+    this.closeWhy();
     this.pulling = true;
     setTimeout(() => (this.spinning = true), 280);
     setTimeout(() => (this.pulling = false), 700);

@@ -46,6 +46,25 @@ export function scoreOf(bet, trust) {
   return round(bet.ev * (trust?.[key]?.fitted ? 1 : 0.5), 4);
 }
 
+// A bet's score (the order: its chance to win) split as the page's rank tile shows it: the book's fair chance
+// of its side, and the model's lean on it (the trust times the model's chance less the book's), adding up to
+// the score; the trust read back off the bet's own numbers (the one it was priced at), fitted or the untested
+// start, and where the fair chance came from
+export function scoreParts(bet, trust) {
+  const score = round(bet.p, 4);
+  const fair = round(bet.fair, 4);
+  const key = bet.market === 'prop' ? `prop:${bet.propType}` : bet.market;
+  const gap = bet.model - bet.fair;
+  return {
+    score,
+    fair,
+    lean: round(score - fair, 4),
+    trust: Math.abs(gap) > 1e-6 ? round((bet.p - bet.fair) / gap, 2) + 0 : null,
+    fitted: !!trust?.[key]?.fitted,
+    from: bet.oddsAssumed ? 'even' : bet.fairFrom === 'pinnacle' ? 'pinnacle' : 'book',
+  };
+}
+
 // A bet's reasons, in a few short sentences from its own numbers
 export function reasonOf(bet, game) {
   const [away, home] = bet.matchup.split(' @ ');
@@ -117,7 +136,10 @@ export function buildPicks(sport, ledger, trust, games, now) {
   // (one a bet: a --dry run prices placed bets again in memory)
   const once = [...new Map(open.map((b) => [b.id, b])).values()];
   // (the order: its chance to win; its edge score kept beside it)
-  const scored = once.map((b) => ({ b, score: round(b.p, 4), edgeScore: scoreOf(b, trust) }));
+  const scored = once.map((b) => {
+    const { score, ...why } = scoreParts(b, trust);
+    return { b, score, why, edgeScore: scoreOf(b, trust) };
+  });
   scored.sort((x, y) => y.score - x.score || y.edgeScore - x.edgeScore || x.b.start.localeCompare(y.b.start));
   const top = scored.slice(0, TOP);
   for (const { b } of top) {
@@ -126,7 +148,7 @@ export function buildPicks(sport, ledger, trust, games, now) {
     if (!Number.isFinite(b.publishedP)) b.publishedP = b.p;
     b.publishedLevel = levelOf(b, b.publishedP);
   }
-  const picks = top.map(({ b, score }, i) => {
+  const picks = top.map(({ b, score, why }, i) => {
     const g = games.get(b.event);
     const [away, home] = b.matchup.split(' @ ');
     return {
@@ -153,6 +175,8 @@ export function buildPicks(sport, ledger, trust, games, now) {
       p: b.p,
       ev: b.ev,
       units: b.units,
+      // (its score's parts, for the rank tile's breakdown: fair + lean is the score)
+      why,
       start: b.start,
       matchup: b.matchup,
       teams: [away, home].map((abbr) => ({ abbr, logo: logo(sport, abbr) })),
