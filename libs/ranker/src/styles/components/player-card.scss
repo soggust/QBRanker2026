@@ -2165,27 +2165,7 @@
   // (a team's points for and against, each on a little LED tile: the winner's lit green, the loser's red,
   // the game view's board's; a tie in the board's own light)
   .log-led {
-    @include v.led-tile;
-    --tone: var(--scoreboard-led);
-    border-radius: 4px;
-    color: var(--tone);
-    display: inline-flex;
-    font-size: 11px;
-    font-weight: 400;
-    height: 20px;
-    min-width: 30px;
-    padding: 1px 5px 0;
-    text-shadow: 0 0 6px color-mix(in srgb, var(--tone) 60%, transparent);
-    transition: text-shadow 0.15s;
-    vertical-align: middle;
-
-    &.won {
-      --tone: rgb(80, 207, 80);
-    }
-
-    &.lost {
-      --tone: #ff3b30;
-    }
+    @include v.score-led;
   }
 
   .log-outcome {

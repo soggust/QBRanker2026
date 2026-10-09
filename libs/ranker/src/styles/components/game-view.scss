@@ -1014,11 +1014,43 @@
 
 }
 
+// (a last-five game's score: two LED tiles at the row's end, the team's first)
 .game-form-score {
-  color: rgba(255, 255, 255, 0.7);
-  font-variant-numeric: tabular-nums;
-  font-weight: 700;
+  display: inline-flex;
+  gap: 4px;
   margin-left: auto;
+}
+
+.game-form-led {
+  @include v.score-led;
+  justify-content: center;
+}
+
+// (its week or day: small bold caps, the game a click away)
+.game-form-when {
+  background: none;
+  border: none;
+  color: var(--scoreboard-led);
+  cursor: pointer;
+  flex: none;
+  font-family: v.$font-base;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.4px;
+  min-width: 76px;
+  padding: 0;
+  text-align: left;
+  text-transform: uppercase;
+  transition: color 0.15s;
+
+  &:hover:not(:disabled) {
+    color: #fff;
+  }
+
+  &:disabled {
+    color: rgba(255, 255, 255, 0.55);
+    cursor: default;
+  }
 }
 
 // (an injured player's status: out red, doubtful orange, questionable gold, the rest grey)
@@ -1247,8 +1279,7 @@
 }
 
 // (a last five's opponent and score: each its own link)
-.game-form-team,
-.game-form-score {
+.game-form-team {
   align-items: center;
   background: none;
   border: none;
@@ -1266,10 +1297,6 @@
   &:disabled {
     cursor: default;
   }
-}
-
-.game-form-row .game-form-score {
-  color: var(--scoreboard-led);
 }
 
 // (a team's name under the pointer: lit like every link, its card a click away)
@@ -1459,16 +1486,11 @@
 
 // (the game view's links: the same hover as every link, the glow included)
 .game-form-team,
-.game-form-score,
+.game-form-when,
 .game-team-name {
   &:hover:not(:disabled) {
     @include v.link-lit;
   }
-}
-
-// (a last five's score in bold: the button's inherited font would undo it)
-.game-form-row .game-form-score {
-  font-weight: 800;
 }
 
 // ---- highlights: the video on the board, its title under it, the clips in a grid of thumbnails
@@ -1613,16 +1635,21 @@
 }
 
 // ---- motion (none for anyone who's asked their system for less): the LED board powers on, the win
-// probability draws itself, a chart's marks and drives come in a quick sweep, the fantasy bars fill
+// probability charts the game play by play, a chart's marks and drives come in a quick sweep, the fantasy bars fill
 @media (prefers-reduced-motion: no-preference) {
   .game-scores .rank-number,
   .game-board .rank-number {
     animation: led-on 0.55s steps(1, end) backwards;
   }
 
+  // (the win probability charts the game: the line and its fills drawn play by play, over 8s)
   .wp-line {
-    animation: wp-draw 1.1s cubic-bezier(0.3, 0.6, 0.3, 1) backwards;
+    animation: wp-draw 8s linear backwards;
     stroke-dasharray: 1;
+  }
+
+  .wp-reveal {
+    animation: wp-reveal 8s linear backwards;
   }
 
   .mark,
@@ -1668,6 +1695,12 @@
   }
   72% {
     opacity: 1;
+  }
+}
+
+@keyframes wp-reveal {
+  from {
+    width: 0;
   }
 }
 

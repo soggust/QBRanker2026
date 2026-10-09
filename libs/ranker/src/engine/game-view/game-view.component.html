@@ -200,8 +200,10 @@
                     <div class="game-leader-col">
                       <h3 class="depth-unit">{{ team.short }}</h3>
                       @for (x of t.games; track x.event) {
-                        <!-- (the opponent: its team's card that season; the score: the game) -->
+                        <!-- (the week or day: the game; the opponent: its team's card that season; the score on the
+                             LED tiles, the team's first) -->
                         <div class="game-form-row">
+                          <button type="button" class="game-form-when" [disabled]="!x.event" title="Open the game" (click)="games.open({ event: x.event })">{{ x.when }}</button>
                           <span class="log-outcome" [ngClass]="x.result">{{ x.result }}</span>
                           <span class="log-vs">{{ x.at }}</span>
                           <button type="button" class="game-form-team" title="Open their season" (click)="openTeam(x.opponent, g)">
@@ -210,7 +212,12 @@
                             }
                             <b>{{ x.opponent }}</b>
                           </button>
-                          <button type="button" class="game-form-score" [disabled]="!x.event" title="Open the game" (click)="games.open({ event: x.event })">{{ x.score }}</button>
+                          @if (x.us !== '' && x.them !== '') {
+                            <span class="game-form-score" [title]="x.result + ' ' + x.us + '-' + x.them"
+                              ><span class="game-form-led" [class.won]="x.result === 'W'" [class.lost]="x.result === 'L'">{{ x.us }}</span
+                              ><span class="game-form-led" [class.won]="x.result === 'L'" [class.lost]="x.result === 'W'">{{ x.them }}</span></span
+                            >
+                          }
                         </div>
                       }
                     </div>
@@ -284,8 +291,9 @@
                 <div class="wp-chart">
                   <svg viewBox="0 0 1000 200" preserveAspectRatio="none" aria-hidden="true">
                     <defs>
-                      <clipPath id="wp-top"><rect x="0" y="0" width="1000" height="100" /></clipPath>
-                      <clipPath id="wp-bottom"><rect x="0" y="100" width="1000" height="100" /></clipPath>
+                      <!-- (each team's half; their rects sweep open with the line, wp-reveal) -->
+                      <clipPath id="wp-top"><rect class="wp-reveal" x="0" y="0" width="1000" height="100" /></clipPath>
+                      <clipPath id="wp-bottom"><rect class="wp-reveal" x="0" y="100" width="1000" height="100" /></clipPath>
                     </defs>
                     <line class="wp-mid" x1="0" y1="100" x2="1000" y2="100" />
                     <path class="wp-fill home" clip-path="url(#wp-top)" [attr.d]="probabilityPath(wp, true)" />

@@ -286,8 +286,11 @@ export async function loadGame(league: string, eventId: string): Promise<GameVie
       side: sideOf(t.team?.id),
       games: (t.events ?? []).map((e) => ({
         event: e.id ?? '',
+        when: formWhen(league, e.week, e.gameDate),
         result: e.gameResult ?? '',
-        score: e.score ?? '',
+        // (the team's own score first: at home it's the home team's)
+        us: (e.atVs === '@' ? e.awayTeamScore : e.homeTeamScore) ?? '',
+        them: (e.atVs === '@' ? e.homeTeamScore : e.awayTeamScore) ?? '',
         at: (e.atVs === '@' ? '@' : 'vs') as '@' | 'vs',
         opponent: e.opponent?.abbreviation ?? '',
         logo: e.opponentLogo ?? e.opponent?.logo ?? null,
@@ -328,6 +331,21 @@ export async function loadGame(league: string, eventId: string): Promise<GameVie
       .map((v) => ({ title: v.headline ?? '', src: v.links!.source!.href!, youtube: null, thumb: v.thumbnail ?? null, duration: v.duration ?? null }))
       .sort((a, b) => Number(/highlights/i.test(b.title)) - Number(/highlights/i.test(a.title))),
   };
+}
+
+// A last-five game's when: the NFL's by its week ("Week 4"; the preseason's "Pre Wk 2" in August, the
+// playoffs' by their round in January and February, ESPN numbering them 1 to 5), anyone else's by its day
+// ("05/21/2025", the Eastern day it was played)
+const PLAYOFF_ROUNDS = ['Wild Card', 'Divisional', 'Conference', 'Pro Bowl', 'Super Bowl'];
+export function formWhen(league: string, week: number | undefined, date: string | undefined): string {
+  const day = date ? new Date(date) : null;
+  if (league.includes('football') && week) {
+    const month = day ? day.getUTCMonth() : -1;
+    if (month === 7) return `Pre Wk ${week}`;
+    if ((month === 0 || month === 1) && week <= PLAYOFF_ROUNDS.length) return PLAYOFF_ROUNDS[week - 1];
+    return `Week ${week}`;
+  }
+  return day ? day.toLocaleDateString('en-US', { timeZone: 'America/New_York', month: '2-digit', day: '2-digit', year: 'numeric' }) : '';
 }
 
 // A game to come's injury report, each team's: only the ones still in doubt for it (a player ESPN expects

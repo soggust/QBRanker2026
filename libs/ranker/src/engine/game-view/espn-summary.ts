@@ -83,7 +83,17 @@ export interface EspnSummary {
   }[];
   lastFiveGames?: {
     team?: { id?: string };
-    events?: { id?: string; gameResult?: string; score?: string; atVs?: string; opponent?: { abbreviation?: string; logo?: string }; opponentLogo?: string }[];
+    events?: {
+      id?: string;
+      gameResult?: string;
+      week?: number;
+      gameDate?: string;
+      homeTeamScore?: string;
+      awayTeamScore?: string;
+      atVs?: string;
+      opponent?: { abbreviation?: string; logo?: string };
+      opponentLogo?: string;
+    }[];
   }[];
   leaders?: { team?: { id?: string }; leaders?: { displayName?: string; leaders?: { displayValue?: string; athlete?: EspnAthlete }[] }[] }[];
   boxscore?: {
