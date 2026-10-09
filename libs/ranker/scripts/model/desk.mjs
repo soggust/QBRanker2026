@@ -1,6 +1,6 @@
 // The desk's betting: every market of every game (the spread, the total, the moneyline) priced with the
 // model's chance for each side, the better side bet at 0.5 to 3 units by how good the price is, and each bet
-// graded when its game is final. Play money: a 100-unit bankroll.
+// graded when its game is final. Play money: a 1,000-unit bankroll, rebought when it runs out.
 //
 // A side's chance: the model's (its expected margin or total and the history's spread around it), pulled
 // toward the book's fair price (its two prices with the vig taken out) by how much the model has earned
@@ -8,7 +8,9 @@
 
 import { phi, round } from './ratings.mjs';
 
-export const BANKROLL = 100;
+// (1,000 to start, so a full slate of bets leaves most of it on hand; the desk rebuys 1,000 whenever its
+// balance would go under 0: the money's play money and every bet is data)
+export const BANKROLL = 1000;
 export const MARKETS = ['spread', 'total', 'ml'];
 
 // American odds as the decimal payout (stake back included) and as the chance they imply

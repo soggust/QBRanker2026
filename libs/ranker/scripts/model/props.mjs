@@ -27,7 +27,9 @@ import { ESPN_PROVIDER } from './espn.mjs';
 import { BOOK } from './leagues.mjs';
 
 const CORE = 'https://sports.core.api.espn.com/v2/sports';
-export const PER_GAME = 8;
+// (no cap a game: every main-line prop that isn't skipped gets a bet, 0.5u at no edge, like the game markets:
+// the user wants every bet the data can give; null keeps the name for the state)
+export const PER_GAME = null;
 export const PROP_ODDS = -110;
 
 const stat = (key, label, match, extra = {}) => ({ key, label, match, ...extra });
@@ -360,10 +362,7 @@ export function priceProps(sport, game, props, fitted, idx, exp, info, live, tru
       move: prop.open !== null ? { open: prop.open, now: prop.line } : null,
     });
   }
-  const bets = priced
-    .filter((x) => x.ev > 0 && !x.guard?.skip)
-    .sort((a, b) => b.ev - a.ev)
-    .slice(0, PER_GAME);
+  const bets = priced.filter((x) => !x.guard?.skip).sort((a, b) => b.ev - a.ev);
   return { priced, bets };
 }
 

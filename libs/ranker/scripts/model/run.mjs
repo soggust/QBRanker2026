@@ -86,6 +86,7 @@ async function runSport(sport) {
   await runBacktest(r);
   logContext(r);
   r.ledger = read(r.files.ledger, { sport, bankroll: BANKROLL, bets: [] });
+  r.ledger.bankroll = BANKROLL;
   await captureClose(r);
   refitTrust(r);
   await gradeBets(r);
@@ -455,6 +456,8 @@ function betGames(r) {
         fair: round(pick.fair, 4),
         p: round(pick.p, 4),
         ev: round(pick.ev, 4),
+        // (edge: it sees value; action: no edge, bet for the data; the desk keeps their records apart)
+        intent: pick.ev > 0 && !guard ? 'edge' : 'action',
         units: pick.units,
         expMargin: round(exp.margin, 2),
         expTotal: round(exp.total, 2),
@@ -487,7 +490,7 @@ async function betProps(r) {
   const capsOf = (key) => (trust[`prop:${key}`]?.fitted ? PROP_CAPS.tested : PROP_CAPS.untested);
   const untestedUnits = (day) => ledger.bets.filter((b) => b.market === 'prop' && !b.tested && dayOf(b.start) === day).reduce((t, b) => t + b.units, 0);
   if (JSON.stringify(state.propCaps ?? null) !== JSON.stringify(PROP_CAPS)) {
-    state.changelog.push({ at, what: 'Prop caps', from: state.propCaps ? 'before' : 'none', to: `${PROP_CAPS.untested.maxUnits}u, ${PROP_CAPS.untested.perGame} a game, ${PROP_CAPS.untested.perDay}u a day`, why: 'Props are untested and priced at an assumed -110: until a type has 40 graded (its trust fit), at most 1 unit a prop, 3 props a game, 10 units a day in the sport; then 3 units and 8 a game' });
+    state.changelog.push({ at, what: 'Prop caps', from: state.propCaps ? 'before' : 'none', to: `${PROP_CAPS.untested.maxUnits}u a prop untested, ${PROP_CAPS.tested.maxUnits}u tested, ${PROP_CAPS.untested.perGame ?? 'every'} a game`, why: 'Every main-line prop with a real price is bet (0.5u at no edge), as the game markets are: as much data as the props can give, the money being play money; an untested type stakes at most 1 unit' });
     state.propCaps = PROP_CAPS;
   }
   // (The Odds API's props for a game, the desk's book's: asked twice at most, once to bet (within 30 hours of
@@ -543,9 +546,9 @@ async function betProps(r) {
     const caps = capsOf(x.prop.stat.key);
     const tested = caps === PROP_CAPS.tested;
     const inGame = mine.filter((b) => (tested ? true : !b.tested)).length;
-    if (inGame >= caps.perGame || mine.length >= PER_GAME) continue;
+    if ((caps.perGame !== null && inGame >= caps.perGame) || (PER_GAME !== null && mine.length >= PER_GAME)) continue;
     x.units = Math.min(x.units, caps.maxUnits);
-    if (!tested && untestedUnits(dayOf(game.date)) + x.units > caps.perDay) continue;
+    if (!tested && caps.perDay !== null && untestedUnits(dayOf(game.date)) + x.units > caps.perDay) continue;
     const bet = {
       id,
       event: game.id,
@@ -566,6 +569,7 @@ async function betProps(r) {
       fair: round(x.fair, 4),
       p: round(x.p, 4),
       ev: round(x.ev, 4),
+      intent: x.ev > 0 && !x.guard ? 'edge' : 'action',
       units: x.units,
       expMargin: round(exp.margin, 2),
       expTotal: round(exp.total, 2),

@@ -27,6 +27,11 @@ const HURT = /injur|left the game|exited|did not return|didn't return|helped off
 const EXIT = /left the game|left in the|exited|did not return|didn't return|helped off|carted off|(was|were) ejected|tossed/i;
 const NOT_PLAYER = /manager|coach|bench boss|rested|was out with|missed the game|sat out|did not play|didn't play/i;
 
+// (a bet with no edge, placed for the data, says so: its result is no verdict on the model's judgement;
+// bets from before the intent was kept go by their EV)
+export const intentOf = (bet) => bet.intent ?? (bet.ev > 0 ? 'edge' : 'action');
+const actionTag = (bet) => (intentOf(bet) === 'action' ? ' (action bet: no edge, placed for the data)' : '');
+
 // A final's summary, kept (only the parts the post-mortem reads)
 export async function finalSummary(sport, league, id) {
   const file = path.join(CACHE, 'summaries', `${sport}-${id}.json`);
@@ -148,7 +153,7 @@ export function postmortem(sport, bet, game, body, usual) {
     recap: { headline: recap.headline, lede: recap.lede, link: recap.link },
     disrupted: events,
     miss,
-    why: `${status}: ${[...said, call].join('; ')}`,
+    why: `${status}${actionTag(bet)}: ${[...said, call].join('; ')}`,
     broken: severe.length > 0,
   };
 }
@@ -256,5 +261,5 @@ export function propPostmortem(sport, bet, game, body, rows, weight, usual = nul
   const notes = events.filter((e) => ['overtime', 'blowout'].includes(e.kind)).map((e) => e.text);
   const status = bet.status === 'won' ? 'Won' : bet.status === 'lost' ? 'Lost' : 'Push';
   const said = [`${bet.player} ${bet.actual} ${bet.statLabel} vs ${bet.line} (projected ${bet.projection?.mean ?? '?'})`, ...mine.map((e) => e.text), ...notes];
-  return { ...base, disrupted: [...mine, ...events.filter((e) => !e.severe)], why: `${status}: ${said.slice(0, 3).join('; ')}`, weight: mine.length ? weight : 1 };
+  return { ...base, disrupted: [...mine, ...events.filter((e) => !e.severe)], why: `${status}${actionTag(bet)}: ${said.slice(0, 3).join('; ')}`, weight: mine.length ? weight : 1 };
 }

@@ -29,6 +29,8 @@ interface ModelBet {
   p: number;
   ev: number;
   units: number;
+  // (edge: it saw value; action: no edge, bet for the data. Older bets go by their EV)
+  intent?: 'edge' | 'action';
   status: 'open' | 'won' | 'lost' | 'push';
   profit: number;
   final?: string;
@@ -173,12 +175,15 @@ export class ModelDeskComponent implements OnInit, OnDestroy {
   loading = true;
   states: ModelState[] = [];
   bets: ModelBet[] = [];
-  readonly bankroll = 100;
+  // (play money: 1,000 to start, and 1,000 more whenever the balance would go under 0)
+  readonly bankroll = 1000;
 
   overall!: Tally;
   bySport: (Tally & { state: ModelState | null })[] = [];
   byMarket: Tally[] = [];
   byStake: Tally[] = [];
+  // (the bets it saw value in, apart from the ones placed for the data: the real record is the edge's)
+  byIntent: Tally[] = [];
   calibration: { label: string; n: number; said: number; was: number }[] = [];
   curve = '';
   curveRange = { min: 0, max: 0 };
@@ -249,6 +254,7 @@ export class ModelDeskComponent implements OnInit, OnDestroy {
       (t) => t.state || t.bets || t.open,
     );
     this.byMarket = Object.keys(MARKET_NAMES).map((m) => tally(MARKET_NAMES[m], bets.filter((b) => b.market === m)));
+    this.byIntent = [tally('Edge', bets.filter((b) => this.intentOf(b) === 'edge')), tally('Action', bets.filter((b) => this.intentOf(b) === 'action'))];
     this.byStake = [0.5, 1, 1.5, 2, 2.5, 3].map((u) => tally(`${u}u`, bets.filter((b) => b.units === u))).filter((t) => t.bets || t.open);
 
     // (how often the sides it gave each chance actually won: by its chance, five points wide; a bet whose
@@ -324,7 +330,17 @@ export class ModelDeskComponent implements OnInit, OnDestroy {
   // The account, as at a sportsbook: a bet's stake leaves the balance when it's placed and comes back with
   // its winnings (or doesn't) when it's graded. Bankroll: the starting 100 plus what's been won or lost.
   get balance(): number {
-    return this.bankroll + this.overall.profit;
+    return this.bankroll + this.overall.profit + this.rebuys * this.bankroll;
+  }
+
+  // (how many times it's rebought: 1,000 each time the balance would go under 0)
+  get rebuys(): number {
+    const short = this.atRisk - (this.bankroll + this.overall.profit);
+    return short > 0 ? Math.ceil(short / this.bankroll) : 0;
+  }
+
+  intentOf(b: ModelBet): 'edge' | 'action' {
+    return b.intent ?? (b.ev > 0 ? 'edge' : 'action');
   }
 
   // (the stakes on open bets, started or not)
@@ -483,7 +499,8 @@ export class ModelDeskComponent implements OnInit, OnDestroy {
     profit: 'Units won or lost, stakes included',
     roi: 'Return on the units staked: profit ÷ staked',
     open: 'Bets placed on games not played yet',
-    available: "What's left to bet with: the bankroll (100 to start, plus what's been won or lost) less the stakes on open bets, as at a sportsbook",
+    available: "What's left to bet with: the bankroll (1,000 to start, plus what's been won or lost, plus 1,000 for each rebuy) less the stakes on open bets, as at a sportsbook",
+    intent: 'Edge: bets where it saw value. Action: no edge, placed only for the data (every market gets a bet). The model is judged on the edge record',
     atRisk: "The stakes on every open bet, started or not: out of the balance until they're graded",
     live: 'Bets on games under way right now, with the score (ESPN, every minute); graded on the next run after the game ends',
     test: "How the ratings did on games they hadn't seen yet: winners picked right, and how far off the margins and totals were on average",

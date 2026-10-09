@@ -24,9 +24,11 @@
 // priced and placed (The Odds API's key for it; ESPN's free board, the fallback, is DraftKings' too)
 export const BOOK = 'draftkings';
 
+// (no count caps: the user wants all the exposure the data can give, the money's play money; an untested type
+// still stakes at most 1 unit a prop)
 export const PROP_CAPS = {
-  untested: { maxUnits: 1, perGame: 3, perDay: 10 },
-  tested: { maxUnits: 3, perGame: 8, perDay: null },
+  untested: { maxUnits: 1, perGame: null, perDay: null },
+  tested: { maxUnits: 3, perGame: null, perDay: null },
 };
 
 export const LEAGUES = {

@@ -39,7 +39,7 @@
     <h2 class="desk-title"><mat-icon aria-hidden="true" fontIcon="query_stats"></mat-icon>Algorithm</h2>
     @if (!loading) {
       <div class="desk-tiles">
-        <div class="desk-tile" [title]="help['available'] + ' (bankroll ' + balance.toFixed(2) + 'u)'">
+        <div class="desk-tile" [title]="help['available'] + ' (bankroll ' + balance.toFixed(2) + 'u' + (rebuys ? ', ' + rebuys + ' rebuy' + (rebuys > 1 ? 's' : '') : '') + ')'">
           <small>Balance</small>
           <b [class.up]="overall.profit > 0" [class.down]="overall.profit < 0">{{ available.toFixed(2) }}u</b>
         </div>
@@ -155,6 +155,15 @@
               }
             </tbody>
           </table>
+          <!-- (the bets it saw value in apart from the ones placed only for the data: the edge's is the real record) -->
+          <table class="desk-table desk-subtable" [title]="help['intent']">
+            <thead><ng-container *ngTemplateOutlet="tallyHead; context: { $implicit: 'intent' }"></ng-container></thead>
+            <tbody>
+              @for (t of sorted('intent', byIntent, tallyValue); track t.label) {
+                <tr><ng-container *ngTemplateOutlet="tallyRow; context: { $implicit: t }"></ng-container></tr>
+              }
+            </tbody>
+          </table>
         </div>
       </card-panel>
 
@@ -211,7 +220,7 @@
                   <th>{{ b.sport.toUpperCase() }}</th>
                   <td class="desk-left">{{ b.matchup }}</td>
                   <td class="desk-left" [class.desk-final]="score?.final">{{ score?.text ?? 'Under way' }}</td>
-                  <td><b>{{ b.pick }}</b><small>{{ marketName(b.market) }}</small></td>
+                  <td><b>{{ b.pick }}</b><small>{{ marketName(b.market) }}{{ intentOf(b) === 'action' ? ' · action' : '' }}</small></td>
                   <td>{{ odds(b.odds) }}</td>
                   <td>{{ b.units }}</td>
                   <td class="up">{{ units(toWin(b)) }}</td>
@@ -248,7 +257,7 @@
                   <td class="desk-left">{{ b.matchup }}</td>
                   <td>{{ b.start | date: 'EEE h:mm a' }}</td>
                   <td>{{ marketName(b.market) }}</td>
-                  <td><b>{{ b.pick }}</b></td>
+                  <td [title]="help['intent']"><b>{{ b.pick }}</b>@if (intentOf(b) === 'action') {<small>action</small>}</td>
                   <td [title]="help['betBook']">{{ odds(b.odds) }}<small>{{ b.book }}{{ b.fairFrom === 'pinnacle' ? ' · Pinnacle fair' : '' }}</small></td>
                   <td>{{ b.units }}</td>
                   <td>{{ pct(b.p) }}</td>
@@ -289,7 +298,7 @@
                   <th>{{ b.sport.toUpperCase() }}</th>
                   <td class="desk-left">{{ b.matchup }}</td>
                   <td>{{ b.start | date: 'MMM d' }}</td>
-                  <td><b>{{ b.pick }}</b><small>{{ marketName(b.market) }}</small></td>
+                  <td><b>{{ b.pick }}</b><small>{{ marketName(b.market) }}{{ intentOf(b) === 'action' ? ' · action' : '' }}</small></td>
                   <td [title]="help['betBook']">{{ odds(b.odds) }}<small>{{ b.book }}{{ b.fairFrom === 'pinnacle' ? ' · Pinnacle fair' : '' }}</small></td>
                   <td>{{ b.units }}</td>
                   <td>{{ pct(b.p) }}</td>
