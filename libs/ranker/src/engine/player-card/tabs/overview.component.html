@@ -68,7 +68,7 @@
         <div class="bd-table" role="table" [attr.aria-label]="b.title" [title]="b.help" [style.--bd-cols]="b.columns.length">
           <div class="bd-row bd-head" role="row">
             <span role="columnheader" title="Where the defense ranks, by what it allowed against the players' own averages (#1 the stingiest)">Rank</span>
-            <span class="bd-pos" role="columnheader" title="Each offense's player in that role">vs Pos</span>
+            <span class="bd-pos" role="columnheader" title="Each offense's player in that role (by his share of its targets, or a back's of its carries)">Target</span>
             @for (col of b.columns; track col.label) {
               <span role="columnheader" [title]="col.title">{{ col.label }}</span>
             }
@@ -106,7 +106,7 @@
               <div class="bd-pie">
                 <svg viewBox="0 0 100 100" role="img" [attr.aria-label]="sp.title">
                   @for (s of slices; track $index) {
-                    <path [attr.d]="s.d" [attr.fill]="s.color" [class.on]="pieHover === $index" (mouseenter)="pieHover = $index" (mouseleave)="pieHover = null" />
+                    <path [attr.d]="s.d" [attr.fill]="s.color" [class.on]="pieHover === $index" (mouseenter)="pieHover = $index" (mouseleave)="pieHover = null" (click)="pieHover = pieHover === $index ? null : $index" />
                   }
                 </svg>
                 @for (s of slices; track $index) {

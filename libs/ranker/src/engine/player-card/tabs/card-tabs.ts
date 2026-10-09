@@ -66,7 +66,8 @@ export class CardOverviewTab extends CardTab {
       at += (p.share / total) * 2 * Math.PI;
       const [x0, y0] = point(from, 50);
       const [x1, y1] = point(at, 50);
-      const [x, y] = point((from + at) / 2, 31);
+      // (a big slice's share nearer the middle, clear of its edges)
+      const [x, y] = point((from + at) / 2, at - from > 2.2 ? 24 : 31);
       const d = at - from >= 2 * Math.PI - 1e-6 ? 'M50,0 A50,50 0 1 1 49.99,0 Z' : `M50,50 L${x0},${y0} A50,50 0 ${at - from > Math.PI ? 1 : 0} 1 ${x1},${y1} Z`;
       return { d, color: this.pieColor(i), x, y, pct: `${Math.round(p.share * 100)}%` };
     });

@@ -824,7 +824,7 @@
   display: grid;
   gap: 10px;
   // (the rank first, the role, then each column, kept close)
-  grid-template-columns: 34px 52px repeat(var(--bd-cols, 3), minmax(0, 1fr));
+  grid-template-columns: 34px 64px repeat(var(--bd-cols, 3), minmax(0, 1fr));
   padding: 6px 0;
 
   &:last-child {
@@ -841,7 +841,7 @@
   }
 
   > .bd-pos {
-    margin-left: 6px;
+    margin-left: 14px;
   }
 
   > span:first-child {
@@ -866,7 +866,7 @@
 .bd-label {
   color: #fff;
   cursor: help;
-  margin-left: 6px;
+  margin-left: 14px;
   @include v.hand(15px);
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
 }
