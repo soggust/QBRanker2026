@@ -1,4 +1,5 @@
 @use "../variables" as v;
+@use "../casino-chip" as chip;
 
 // ===========================================================================
 // The model desk's admin panel (the Bets page, dev only): a scoreboard header with the bankroll tiles, then
@@ -345,44 +346,59 @@ card-panel {
 .desk-sports {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 14px;
+  gap: 10px;
+  margin: 4px 0 16px;
 }
 
 .desk-sport {
-  align-items: center;
-  background: rgba(0, 0, 0, 0.35);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 999px;
-  color: rgba(255, 255, 255, 0.75);
-  cursor: pointer;
-  display: inline-flex;
-  font: inherit;
-  font-size: 12px;
-  font-weight: 800;
-  gap: 6px;
-  letter-spacing: 0.5px;
-  padding: 5px 14px;
-  text-transform: uppercase;
-  transition:
-    color 0.15s,
-    background 0.15s;
+  @include chip.chip(58px);
 
+  // (a league chip: its logo, the open bets under it; All its word)
   img {
-    height: 18px;
+    height: 26px;
     object-fit: contain;
-    width: 18px;
+    width: 26px;
   }
 
-  &:hover {
-    color: #fff;
+  .sport-label {
+    font-size: 10px;
+    font-weight: 900;
+    letter-spacing: 0.4px;
+    line-height: 1;
+    margin-top: 1px;
   }
 
-  &.active {
-    background: rgba(0, 0, 0, 0.6);
-    color: var(--scoreboard-led);
-    outline: 2px solid var(--scoreboard-led);
-    outline-offset: 2px;
+  .sport-count {
+    font-size: 10px;
+    font-weight: 800;
+    line-height: 1;
+    margin-top: 2px;
+    opacity: 0.75;
+  }
+
+  // (each league its own chip color; All the house's gold)
+  &.all {
+    --clay: #9a7b22;
+
+    .sport-label {
+      font-size: 12px;
+    }
+  }
+
+  &.nfl {
+    --clay: #1f3f7a;
+  }
+
+  &.nba {
+    --clay: #b8322a;
+  }
+
+  &.nhl {
+    --clay: #262626;
+  }
+
+  &.mlb {
+    --clay: #1d8a4e;
   }
 }
 
@@ -392,4 +408,9 @@ card-panel {
   height: 22px;
   object-fit: contain;
   width: 22px;
+}
+
+// (In Play's last column: the game's score, or a prop's count so far over the line with the score under it)
+.desk-score b {
+  display: block;
 }

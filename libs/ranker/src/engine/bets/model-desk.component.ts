@@ -1,4 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
+import { SummaryBox, liveStat } from './live-props';
 
 // The algorithm's admin panel (the Bets page, dev only): the code-only desk's play-money betting
 // (libs/ranker/scripts/model/run.mjs: every market of every game, 0.5 to 3 units), read from each sport's
@@ -21,6 +22,10 @@ interface ModelBet {
   propType?: string;
   statLabel?: string;
   player?: string;
+  // (a prop's: the player's ESPN id, its line and side, for the count in play)
+  athlete?: string | number;
+  line?: number;
+  side?: string;
   projection?: { mean: number; pOver: number; fairOver: number };
   pick: string;
   odds: number;
@@ -212,6 +217,11 @@ export class ModelDeskComponent implements OnInit, OnDestroy {
     this.states = this.sport ? this.allStates.filter((s) => s.sport === this.sport) : this.allStates;
   }
 
+  // (a sport's open bets, or every sport's: the chips' counts)
+  openCount(sport: string | null): number {
+    return this.allBets.filter((b) => b.status === 'open' && (!sport || b.sport === sport)).length;
+  }
+
   // (a league's logo, ESPN's: in the chips and each bet's row)
   leagueLogo(sport: string): string {
     return `https://a.espncdn.com/i/teamlogos/leagues/500/${sport}.png`;
@@ -232,6 +242,11 @@ export class ModelDeskComponent implements OnInit, OnDestroy {
   recent: ModelBet[] = [];
   // (each in-play game's score and clock, by its ESPN id, from ESPN's scoreboard every minute)
   scores = new Map<string, { text: string; final: boolean }>();
+  // (each in-play prop's stat so far, by the bet's id, from its game's box score every minute)
+  propNow = new Map<string, number | null>();
+  // (each in-play game's score as numbers and whether it's over: the bets settled here as soon as they're
+  // decided, pending the next run's official grading)
+  private boards = new Map<string, { hs: number; as: number; final: boolean }>();
   private scoreTimer?: ReturnType<typeof setInterval>;
   changes: (ModelState['changelog'][number] & { sport: string })[] = [];
   contextRows: ContextRow[] = [];
@@ -277,11 +292,21 @@ export class ModelDeskComponent implements OnInit, OnDestroy {
         const away = side('away');
         const home = side('home');
         if (!away || !home) continue;
+        this.boards.set(String(event.id), { hs: Number(home.score) || 0, as: Number(away.score) || 0, final: !!event.status?.type?.completed });
         this.scores.set(String(event.id), {
           text: `${away.team?.abbreviation} ${away.score ?? 0} - ${home.team?.abbreviation} ${home.score ?? 0} · ${event.status?.type?.shortDetail ?? ''}`,
           final: !!event.status?.type?.completed,
         });
       }
+    }
+    // (the props in play: each game's summary once, its box score read for every prop on it)
+    const props = live.filter((b) => b.market === 'prop' && b.event && b.athlete !== undefined && b.propType);
+    for (const event of new Set(props.map((b) => b.event!))) {
+      const sport = props.find((b) => b.event === event)!.sport;
+      const body = (await fetch(`https://site.api.espn.com/apis/site/v2/sports/${ESPN_LEAGUES[sport]}/summary?event=${event}`)
+        .then((res) => (res.ok ? res.json() : null))
+        .catch(() => null)) as SummaryBox | null;
+      for (const b of props.filter((x) => x.event === event)) this.propNow.set(b.id, liveStat(sport, b.propType!, String(b.athlete), body));
     }
     this.live = live.sort((a, b) => a.start.localeCompare(b.start));
     this.open = this.bets.filter((b) => b.status === 'open' && Date.parse(b.start) > now).sort((a, b) => a.start.localeCompare(b.start));
@@ -391,6 +416,52 @@ export class ModelDeskComponent implements OnInit, OnDestroy {
   // (what's left to bet with)
   get available(): number {
     return this.balance - this.atRisk;
+  }
+
+  // (a prop in play: how it stands, the count so far against the line: an over is home once it's past the
+  // line; an under is alive while it's under, lost once it's past)
+  propState(b: ModelBet): 'won' | 'alive' | 'lost' | null {
+    const now = this.propNow.get(b.id);
+    if (now === null || now === undefined || b.line === undefined) return null;
+    if (b.side === 'over') return now > b.line ? 'won' : 'alive';
+    return now > b.line ? 'lost' : 'alive';
+  }
+
+  // An in-play bet's result as soon as it's decided, by the same rules the run grades with (desk.mjs settle,
+  // props.mjs settleProp): a game bet once its game is final; a prop once it's past its line (an over won, an
+  // under lost) or its game's over. Null until then (and for a prop whose player's count isn't in the box
+  // score). The run's grading is the official one: this is what it will say.
+  provisional(b: ModelBet): { status: 'won' | 'lost' | 'push'; profit: number } | null {
+    if (b.status !== 'open' || b.line === undefined) return null;
+    const game = b.event ? this.boards.get(b.event) : undefined;
+    let edge: number;
+    if (b.market === 'prop') {
+      const now = this.propNow.get(b.id);
+      if (now === null || now === undefined) return null;
+      if (!game?.final && now <= b.line) return null;
+      edge = (b.side === 'over' ? 1 : -1) * (now - b.line);
+    } else {
+      if (!game?.final) return null;
+      const margin = game.hs - game.as;
+      if (b.market === 'spread') edge = (b.side === 'home' ? margin : -margin) + b.line;
+      else if (b.market === 'total') edge = (b.side === 'over' ? 1 : -1) * (game.hs + game.as - b.line);
+      else edge = b.side === 'home' ? margin : -margin;
+    }
+    const status = edge > 0 ? 'won' : edge < 0 ? 'lost' : 'push';
+    return { status, profit: status === 'won' ? this.toWin(b) : status === 'lost' ? -b.units : 0 };
+  }
+
+  // (the in-play bets decided so far, and what they come to)
+  get pending(): { count: number; profit: number } {
+    let count = 0;
+    let profit = 0;
+    for (const b of this.live) {
+      const p = this.provisional(b);
+      if (!p) continue;
+      count++;
+      profit += p.profit;
+    }
+    return { count, profit };
   }
 
   // (what a bet pays on top of its stake if it wins, at its American odds)

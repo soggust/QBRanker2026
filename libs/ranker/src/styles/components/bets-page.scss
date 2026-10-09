@@ -1,4 +1,5 @@
 @use "../variables" as v;
+@use "../casino-chip" as chip;
 
 // The Bets page: one scoreboard panel down the middle of the page, a row per call, most
 // confident first; like green, lean yellow, fade red (as on the card's Analysis tab).
@@ -90,48 +91,7 @@
 }
 
 .kind-chip {
-  --clay: #555;
-  align-items: center;
-  background:
-    radial-gradient(circle at 35% 25%, rgba(255, 255, 255, 0.22), transparent 60%),
-    linear-gradient(180deg, transparent 45%, rgba(0, 0, 0, 0.22)),
-    var(--clay);
-  border: 6px solid var(--clay);
-  border-radius: 50%;
-  box-shadow:
-    inset 0 0 0 2px var(--clay),
-    inset 0 0 0 3px rgba(255, 236, 196, 0.45),
-    0 2px 4px rgba(0, 0, 0, 0.45);
-  color: #fff;
-  cursor: pointer;
-  display: inline-flex;
-  flex-direction: column;
-  font-family: v.$font-base;
-  height: 58px;
-  justify-content: center;
-  opacity: 0.5;
-  padding: 0;
-  position: relative;
-  text-shadow: 0 1px 1.5px rgba(0, 0, 0, 0.6);
-  transition:
-    opacity 0.15s ease,
-    transform 0.15s ease,
-    box-shadow 0.15s ease;
-  width: 58px;
-
-  &:hover {
-    opacity: 0.85;
-  }
-
-  // on: full color, lifted
-  &.on {
-    box-shadow:
-      inset 0 0 0 2px var(--clay),
-      inset 0 0 0 3px rgba(255, 236, 196, 0.7),
-      0 4px 10px rgba(0, 0, 0, 0.55);
-    opacity: 1;
-    transform: translateY(-2px);
-  }
+  @include chip.chip;
 
   .kind-label {
     font-size: 12px;
@@ -146,29 +106,6 @@
     line-height: 1;
     margin-top: 2px;
     opacity: 0.75;
-  }
-
-  // (its rim: the dropdown's spots, around the circle)
-  .chip-rim {
-    height: calc(100% + 12px);
-    left: -6px;
-    overflow: visible;
-    pointer-events: none;
-    position: absolute;
-    top: -6px;
-    width: calc(100% + 12px);
-  }
-
-  rect {
-    fill: none;
-    height: calc(100% - 6px);
-    rx: 999px;
-    stroke: #f4efe3;
-    stroke-dasharray: 5 5;
-    stroke-width: 6px;
-    width: calc(100% - 6px);
-    x: 3px;
-    y: 3px;
   }
 
   // (each type its denomination's color)
