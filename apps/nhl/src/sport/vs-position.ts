@@ -1,5 +1,5 @@
 import type { CardBreakdown, CardFlag } from '@ranker/engine/sport';
-import { rankPct } from '@ranker/core/format';
+import { tintFrom, tintScale } from '@ranker/core/value-tint';
 import type { SkillPlayer } from './positions';
 
 // A team's card: vs Position (SportConfig.cardBreakdown). What it allowed to opposing forwards and
@@ -33,17 +33,21 @@ export function nhlVsPositionBreakdown(player: SkillPlayer, position: string, ro
   if (!vs || !vs.games) return null;
   const of = Math.max(rows.filter((r) => nhlVsPosOf(r)).length, vs.F.rank ?? 0, vs.D.rank ?? 0);
   const roles: Role[] = ['F', 'D'];
+  // (each value tinted as the grid tints its columns: green the further under the other teams' average, red
+  // the further over; less allowed is better)
+  const tint = (role: Role, key: 'pts' | 'shots' | 'vs', value: number | null) =>
+    value === null ? null : tintFrom(value, tintScale(rows.map((r) => (nhlVsPosOf(r)?.[role]?.[key] as number | null | undefined) ?? null)), true);
   const tableRows = roles.map((role) => {
     const line = vs[role];
     return {
       label: ROLE_INFO[role].label,
       title: ROLE_INFO[role].title,
       cells: [
-        { text: line.pts !== null ? line.pts.toFixed(2) : '-', title: line.goals !== null ? `${line.goals} goals and ${line.pts} points a game` : '' },
-        { text: line.shots !== null ? line.shots.toFixed(1) : '-', title: 'Shots on goal a game' },
+        { text: line.pts !== null ? line.pts.toFixed(2) : '-', color: tint(role, 'pts', line.pts), title: line.goals !== null ? `${line.goals} goals and ${line.pts} points a game` : '' },
+        { text: line.shots !== null ? line.shots.toFixed(1) : '-', color: tint(role, 'shots', line.shots), title: 'Shots on goal a game' },
         {
           text: line.vs !== null ? signed(line.vs) : '-',
-          tone: line.rank !== null ? rankPct(line.rank, of) : null,
+          color: tint(role, 'vs', line.vs),
           title: line.exp !== null ? `${line.pts} points a game, against the ${line.exp} these ${ROLE_INFO[role].plural} averaged in their other games` : '',
         },
       ],

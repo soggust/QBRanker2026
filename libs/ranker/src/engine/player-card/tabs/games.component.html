@@ -76,9 +76,9 @@
           <tr>
             <th class="log-date">Date</th>
             <th class="log-opp">Opp</th>
-            <th class="log-result">Result</th>
+            <th class="log-result log-center">Result</th>
             @for (col of log.columns; track $index) {
-              <th [class.key]="log.chart?.keys?.includes($index)" [class.wide]="col.wide" [class.group-start]="log.groups && ($index === 0 || col.group !== log.columns[$index - 1].group)">{{ col.label }}</th>
+              <th [class.key]="log.chart?.keys?.includes($index)" [class.wide]="col.wide" [class.log-center]="centered(log.columns, $index)" [class.group-start]="log.groups && ($index === 0 || col.group !== log.columns[$index - 1].group)">{{ col.label }}</th>
             }
           </tr>
         </thead>
@@ -90,7 +90,10 @@
               <tr class="log-section"><th [attr.colspan]="log.columns.length + 3">Playoffs</th></tr>
             }
             <tr [class.log-playoff]="g.playoff">
-              <td class="log-date">{{ g.date }}</td>
+              <!-- (the date: the game itself, the game view) -->
+              <td class="log-date">
+                <button type="button" class="log-game" [disabled]="!games.available" [title]="games.available ? 'Open the game' : ''" (click)="openGame(c, g)">{{ g.date }}</button>
+              </td>
               <!-- (the opponent: its team's card that season) -->
               <td class="log-opp">
                 <button type="button" class="log-team" title="Open their season" (click)="cards.openOpponent(c, g.vs)">
@@ -101,20 +104,21 @@
                   {{ g.vs.split(' ').slice(1).join(' ') }}
                 </button>
               </td>
-              <!-- (the result: the game itself, the game view) -->
-              <td class="log-result">
-                <button type="button" class="log-game" [disabled]="!games.available" [title]="games.available ? 'Open the game' : ''" (click)="openGame(c, g)">
-                  @if (g.outcome) {
-                    <span class="log-outcome" [ngClass]="g.outcome">{{ g.outcome }}</span>
-                  }
+              <!-- (the result: a team's just its W or L, its scores on their tiles; a player's the score too) -->
+              <td class="log-result log-center">
+                @if (g.outcome) {
+                  <span class="log-outcome" [ngClass]="g.outcome">{{ g.outcome }}</span>
+                }
+                @if (!scoreSide(log.columns, 0) || !g.outcome) {
                   {{ g.score }}
-                </button>
+                }
               </td>
               @for (cell of g.cells; track $index) {
                 <td
                   [class.key]="log.chart?.keys?.includes($index)"
                   [class.wide]="log.columns[$index].wide"
                   [class.group-start]="log.groups && ($index === 0 || log.columns[$index].group !== log.columns[$index - 1].group)"
+                  [class.log-center]="centered(log.columns, $index)"
                 >
                   <!-- (a team's points for and against, each on its own little LED tile: the winner's lit green,
                        the loser's red, as on the game view's board) -->
@@ -133,7 +137,7 @@
             <tr class="log-avg">
               <td colspan="3">Per game</td>
               @for (a of log.average; track $index) {
-                <td [class.key]="log.chart?.keys?.includes($index)" [class.group-start]="log.groups && ($index === 0 || log.columns[$index].group !== log.columns[$index - 1].group)">{{ a }}</td>
+                <td [class.key]="log.chart?.keys?.includes($index)" [class.log-center]="centered(log.columns, $index)" [class.group-start]="log.groups && ($index === 0 || log.columns[$index].group !== log.columns[$index - 1].group)">{{ a }}</td>
               }
             </tr>
           }

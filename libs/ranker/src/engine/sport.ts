@@ -107,7 +107,8 @@ export interface CardBreakdown {
     label: string;
     title: string;
     // tone: 0 (worst) to 1 (best), a value colored by how it reads (none: plain)
-    cells: { text: string; title?: string; tone?: number | null }[];
+    // (color: the grid's tint against the other defenses, value-tint.ts; tone: a rank color, glowing)
+    cells: { text: string; title?: string; tone?: number | null; color?: string | null }[];
     rank: number | null;
     of: number;
     // Its group's color (the split's part it belongs to: the NFL's WR, TE, RB), if any

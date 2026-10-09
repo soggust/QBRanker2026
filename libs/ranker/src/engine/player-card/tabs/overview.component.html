@@ -89,6 +89,7 @@
                   role="cell"
                   [class.toned]="cell.tone !== undefined && cell.tone !== null"
                   [style.--tone]="cell.tone !== undefined && cell.tone !== null ? rankTone(cell.tone) : null"
+                  [style.color]="cell.color ?? null"
                   [title]="cell.title ?? ''"
                   >{{ cell.text }}</span
                 >

@@ -107,6 +107,11 @@ export class CardZonesTab extends CardTab {
 export class CardGamesTab extends CardTab {
   // A team log's points-for or points-against column (each shown on an LED tile); null for any other (a
   // player's PA, MLB's plate appearances, isn't one: only a log with PF has them)
+  // (a team log's PF, PA and Record: centered under their headers)
+  centered(columns: { label: string }[], i: number): boolean {
+    return !!this.scoreSide(columns, i) || (columns[i]?.label === 'Record' && columns.some((c) => c.label === 'PF'));
+  }
+
   scoreSide(columns: { label: string }[], i: number): 'PF' | 'PA' | null {
     const label = columns[i]?.label;
     return (label === 'PF' || label === 'PA') && columns.some((c) => c.label === 'PF') ? label : null;

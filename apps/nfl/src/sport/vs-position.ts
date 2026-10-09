@@ -1,5 +1,5 @@
 import type { CardBreakdown, CardFlag } from '@ranker/engine/sport';
-import { rankPct } from '@ranker/core/format';
+import { tintFrom, tintScale } from '@ranker/core/value-tint';
 import type { SkillPlayer } from './positions';
 
 // A defense's card: vs Position (SportConfig.cardBreakdown). What it allowed to each offense's WR1, WR2,
@@ -67,6 +67,11 @@ export function vsPositionBreakdown(player: SkillPlayer, position: string, rows:
   // (ranked among the defenses the season's part has: 32, or the playoff teams)
   const of = Math.max(rows.filter((r) => vsPosOf(r)).length, ...ROLES.map((r) => vs[r]?.rank ?? 0));
 
+  // (each value tinted as the grid tints its columns: green the further under the other defenses' average,
+  // red the further over; less allowed is better)
+  const tint = (role: Role, key: 'epa' | 'ppr' | 'yds' | 'vs', value: number | null | undefined) =>
+    value == null ? null : tintFrom(value, tintScale(rows.map((r) => (vsPosOf(r)?.[role]?.[key] as number | null | undefined) ?? null)), true);
+
   // Every role, a dash where the season had no game for it
   const lines = ROLES.map((role) => ({ role, line: vs[role] }));
   const has = (line: RoleLine | undefined): line is RoleLine => !!line && line.g > 0;
@@ -79,20 +84,22 @@ export function vsPositionBreakdown(player: SkillPlayer, position: string, rows:
       cells: [
         {
           text: ok && line.epa != null ? signed(line.epa, 2) : '-',
-          tone: ok && line.epaRank != null ? rankPct(line.epaRank, of) : null,
+          color: ok ? tint(role, 'epa', line.epa) : null,
           title: ok && line.epa != null ? `${signed(line.epa, 2)} EPA a ${role === 'RB1' ? 'target or carry' : 'target'} to these ${ROLE_INFO[role].plural} (#${line.epaRank} of ${of})` : '',
         },
         {
           text: ok && line.ppr !== null ? line.ppr.toFixed(1) : '-',
+          color: ok ? tint(role, 'ppr', line.ppr) : null,
           title: ok ? `${line.rec ?? 0} catches${line.tgt !== null ? ` on ${line.tgt} targets` : ''}, ${line.yds ?? 0} yards and ${line.td ?? 0} TDs a game` : '',
         },
         {
           text: ok && line.yds !== null ? line.yds.toFixed(1) : '-',
+          color: ok ? tint(role, 'yds', line.yds) : null,
           title: ok && line.ydsVs !== null ? `${signed(line.ydsVs)} yards a game against their own averages` : '',
         },
         {
           text: ok && line.vs !== null ? signed(line.vs) : '-',
-          tone: ok && line.rank !== null ? rankPct(line.rank, of) : null,
+          color: ok ? tint(role, 'vs', line.vs) : null,
           title: ok && line.exp !== null ? `${line.ppr} PPR points a game, against the ${line.exp} these ${ROLE_INFO[role].plural} averaged in their other games` : '',
         },
       ],
