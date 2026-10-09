@@ -153,8 +153,10 @@
           }
           @for (u of log.upcoming; track $index) {
             <tr class="log-next" [class.first]="$first">
-              <td class="log-date">{{ u.date }}</td>
-              <!-- (the opponent: its team's card; the time: the game's preview) -->
+              <!-- (the date: the game's preview, as a played game's date opens it; the opponent: its team's card) -->
+              <td class="log-date">
+                <button type="button" class="log-game" [disabled]="!games.available || !u.event" [title]="u.event ? 'Preview the game' : ''" (click)="u.event && games.open({ event: u.event })">{{ u.date }}</button>
+              </td>
               <td class="log-opp">
                 <button type="button" class="log-team" title="Open their season" (click)="cards.openOpponent(c, u.vs)">
                   <span class="log-vs">{{ u.vs.split(' ')[0] }}</span>
@@ -164,9 +166,7 @@
                   {{ u.vs.split(' ').slice(1).join(' ') }}
                 </button>
               </td>
-              <td class="log-result">
-                <button type="button" class="log-game" [disabled]="!games.available || !u.event" [title]="u.event ? 'Preview the game' : ''" (click)="u.event && games.open({ event: u.event })">{{ u.time }}</button>
-              </td>
+              <td class="log-result">{{ u.time }}</td>
               <td class="log-next-detail" [attr.colspan]="log.columns.length">
                 @if (u.tv) {
                   <span>{{ u.tv }}</span>
