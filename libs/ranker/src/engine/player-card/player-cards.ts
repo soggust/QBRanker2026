@@ -21,7 +21,8 @@ import { CardOverview, CardSeason, CardStat, CardTab, CareerSeason, PlayerCard, 
 import { archetypeFor, overviewBlurb, profileFlags, scoutingReport, skillScores, skillsOf } from './overview';
 import { careerHistory } from './career-history';
 import { radar, radarShape } from './radar';
-import { GameLogView, gameLogView } from './game-log-view';
+import { GameLogView, gameLogView, splitVs } from './game-log-view';
+import { percentile } from './hover-text';
 import { PlayerAnalysis, analysisIndex, loadAnalysis } from './analysis';
 import { espnTeamNames, espnUpcoming } from '@ranker/core/game-logs';
 import { heroColor } from '../game-view/team-color';
@@ -152,15 +153,21 @@ export class PlayerCards {
   private zoneLoads = new Map<string, ZoneView | 'loading' | 'error'>();
   zoneStat: string | null = null;
   zones(card: PlayerCard): ZoneView | 'loading' | 'error' {
+    const zones = SPORT.zones;
+    return this.loadOnce(this.zoneLoads, card, zones && (() => zones.load(card.player, this.position, card.season)));
+  }
+
+  // A tab's view of a card (its season by zone, its game log, its depth chart), loaded the first time the tab
+  // asks, then kept: the view, or still loading, or failed (and failed for a sport without one: no load)
+  private loadOnce<T>(cache: Map<string, T | 'loading' | 'error'>, card: PlayerCard, load: (() => Promise<T>) | undefined): T | 'loading' | 'error' {
     const key = `${this.position}/${card.player.gsisId}/${card.season}`;
-    if (!this.zoneLoads.has(key) && SPORT.zones) {
-      this.zoneLoads.set(key, 'loading');
-      SPORT.zones
-        .load(card.player, this.position, card.season)
-        .then((view) => this.zoneLoads.set(key, view))
-        .catch(() => this.zoneLoads.set(key, 'error'));
+    if (!cache.has(key) && load) {
+      cache.set(key, 'loading');
+      load()
+        .then((view) => cache.set(key, view))
+        .catch(() => cache.set(key, 'error'));
     }
-    return this.zoneLoads.get(key) ?? 'error';
+    return cache.get(key) ?? 'error';
   }
 
   // The Analysis tab's sections open (all folded each time the tab opens, or another card does)
@@ -180,45 +187,32 @@ export class PlayerCards {
     return !!SPORT.gameLog?.has(card.player, this.position, card.season);
   }
 
-  // A card's game log for its season, loaded the first time its tab asks (then kept, as the tab shows it),
-  // with the team's games still to play when it's the season being played and the sport names its league
-  // (those failing just leave them out): the log, or still loading, or failed
+  // A card's game log for its season (loadOnce), with the team's games still to play when it's the season
+  // being played and the sport names its league (those failing just leave them out)
   private gameLogs = new Map<string, GameLogView | 'loading' | 'error'>();
   gameLog(card: PlayerCard): GameLogView | 'loading' | 'error' {
-    const key = `${this.position}/${card.player.gsisId}/${card.season}`;
-    if (!this.gameLogs.has(key) && SPORT.gameLog) {
-      this.gameLogs.set(key, 'loading');
-      const { load, league } = SPORT.gameLog;
-      const player = card.player;
-      const next = league && card.season === CURRENT_SEASON
-        ? espnUpcoming(league, rowTeamNames(player), SPORT.currentSeason).catch(() => [])
-        : Promise.resolve([]);
-      Promise.all([load(player, this.position, card.season), next])
-        .then(([log, upcoming]) => this.gameLogs.set(key, gameLogView(log, upcoming)))
-        .catch(() => this.gameLogs.set(key, 'error'));
-    }
-    return this.gameLogs.get(key) ?? 'error';
+    const sportLog = SPORT.gameLog;
+    return this.loadOnce(this.gameLogs, card, sportLog && (async () => {
+      const { load, league } = sportLog;
+      const next = league && card.season === CURRENT_SEASON ? espnUpcoming(league, rowTeamNames(card.player), SPORT.currentSeason).catch(() => []) : Promise.resolve([]);
+      const [log, upcoming] = await Promise.all([load(card.player, this.position, card.season), next]);
+      return gameLogView(log, upcoming);
+    }));
   }
 
-  // A team card's depth chart for its season, loaded the first time its tab asks (then kept): the chart,
-  // or still loading, or failed. depthOpen: the slot whose backups are showing (one at a time)
+  // A team card's depth chart for its season (loadOnce), its players linked to their cards. depthOpen: the
+  // slot whose backups are showing (one at a time)
   private depthCharts = new Map<string, DepthView | 'loading' | 'error'>();
   depthOpen: string | null = null;
   depthChart(card: PlayerCard): DepthView | 'loading' | 'error' {
-    const key = `${this.position}/${card.player.gsisId}/${card.season}`;
-    if (!this.depthCharts.has(key) && SPORT.depthChart) {
-      this.depthCharts.set(key, 'loading');
+    const depth = SPORT.depthChart;
+    return this.loadOnce(this.depthCharts, card, depth && (async () => {
       // (the sport builds it from that season's rows: every tab's, the table's own for its season)
-      const rows = card.season === this.host.season ? Promise.resolve(SKILL_UNITS) : this.data.rows(card.season);
-      rows
-        .then((rows) => SPORT.depthChart!.load(card.player, this.position, card.season, { rows, headshot: (p) => this.host.headshot(p, 96) }))
-        .then(async (view) => {
-          await this.linkRoster(view, card.season);
-          this.depthCharts.set(key, view);
-        })
-        .catch(() => this.depthCharts.set(key, 'error'));
-    }
-    return this.depthCharts.get(key) ?? 'error';
+      const rows = card.season === this.host.season ? SKILL_UNITS : await this.data.rows(card.season);
+      const view = await depth.load(card.player, this.position, card.season, { rows, headshot: (p) => this.host.headshot(p, 96) });
+      await this.linkRoster(view, card.season);
+      return view;
+    }));
   }
 
   // A roster's players the site has: each one's card (his tab and row id), found among that season's rows
@@ -267,7 +261,7 @@ export class PlayerCards {
   // A game log's opponent ("@ IND"): its team's card for the card's season (the sport's team tab), found
   // by ESPN's name for the abbreviation, or the row's logo file ("LAK_2002..." for the NHL's own)
   async openOpponent(card: PlayerCard, vs: string): Promise<void> {
-    await this.openTeam(vs.split(' ').slice(1).join(' '), card.season);
+    await this.openTeam(splitVs(vs)[1], card.season);
   }
 
   // A team by its abbreviation ("IND"): its card for a season (the game view's teams too)
@@ -541,9 +535,9 @@ export class PlayerCards {
       const moves = overview.skills.filter((s) => byId.has(s.id)).map((s) => ({ skill: s, delta: s.pct - byId.get(s.id)! }));
       const up = moves.reduce((best, m) => (m.delta > (best?.delta ?? 0.2) ? m : best), null as (typeof moves)[0] | null);
       const down = moves.reduce((worst, m) => (m.delta < (worst?.delta ?? -0.2) ? m : worst), null as (typeof moves)[0] | null);
-      const pctText = (p: number) => `${Math.round(p * 100)}th`;
+      // (a skill's percentiles: "58th → 92nd percentile")
       const move = (m: (typeof moves)[0], way: string) =>
-        `${m.skill.name} ${way} from ${prevSeason} (${pctText(m.skill.pct - m.delta)} → ${pctText(m.skill.pct)} percentile)`;
+        `${m.skill.name} ${way} from ${prevSeason} (${percentile(m.skill.pct - m.delta)} → ${percentile(m.skill.pct)} percentile)`;
       if (up) overview.flags.push({ icon: 'trending_up', tone: 'good', text: move(up, 'up') });
       if (down) overview.flags.push({ icon: 'trending_down', tone: 'bad', text: move(down, 'down') });
     } catch (err) {

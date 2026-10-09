@@ -43,7 +43,8 @@
 </div>
 
 <!-- The sport's breakdown (the NFL defense's vs Position): a row per role, its rank on an LED tile first,
-     then what it allowed; where the targets go as a pie, the league's split in its key; on top, which way offenses lean -->
+     then what it allowed; where the targets go as a pie (the league's split in each slice's popover); on top,
+     which way offenses lean -->
 @if (c.breakdown; as b) {
   <!-- (folds like the scouting report's sections; starts shut) -->
   <card-panel class="ov-section tab-card breakdown" [label]="b.title" [icon]="b.icon">
@@ -55,11 +56,12 @@
             <b class="bd-lean-label" [class.pass]="l.tone === 'pass'" [class.run]="l.tone === 'run'">{{ l.label }}</b>
             <span>{{ l.text }}</span>
           </div>
-          <div class="bd-lean-bar" [title]="'Pass ' + (l.pass * 100).toFixed(0) + '% · Run ' + ((1 - l.pass) * 100).toFixed(0) + '%' + (l.usual !== null ? ' (offenses usually pass ' + (l.usual * 100).toFixed(0) + '%)' : '')">
-            <i class="pass" [style.flex-grow]="l.pass"><b>Pass {{ (l.pass * 100).toFixed(0) }}%</b></i>
-            <i class="run" [style.flex-grow]="1 - l.pass"><b>Run {{ ((1 - l.pass) * 100).toFixed(0) }}%</b></i>
+          @let shares = leanShares(l.pass);
+          <div class="bd-lean-bar" [title]="leanTitle(l.pass, l.usual)">
+            <i class="pass" [style.flex-grow]="l.pass"><b>Pass {{ shares.pass }}%</b></i>
+            <i class="run" [style.flex-grow]="1 - l.pass"><b>Run {{ shares.run }}%</b></i>
             @if (l.usual !== null) {
-              <s class="bd-lean-tick" [style.left.%]="l.usual * 100" [title]="'Usually ' + (l.usual * 100).toFixed(0) + '% pass'"></s>
+              <s class="bd-lean-tick" [style.left.%]="l.usual * 100" [title]="'Usually ' + leanShares(l.usual).pass + '% pass'"></s>
             }
           </div>
         </div>
@@ -78,7 +80,7 @@
             <div class="bd-row" role="row">
               <span role="cell">
                 @if (r.rank !== null) {
-                  <span class="bd-rank" [style.--tone]="rankTone(rankPct(r.rank, r.of))" [title]="'#' + r.rank + ' of ' + r.of">{{ r.rank }}</span>
+                  <span class="bd-rank" [style.--tone]="rankTone(rankPct(r.rank, r.of))" [title]="rankText(r.rank, r.of)">{{ r.rank }}</span>
                 } @else {
                   <span class="bd-rank bd-none" title="Not enough games to rank">-</span>
                 }
@@ -107,9 +109,18 @@
             <div class="bd-pie-row">
               <div class="bd-pie">
                 <svg viewBox="0 0 100 100" role="img" [attr.aria-label]="sp.title">
-                  @for (s of slices; track $index) {
-                    <path [attr.d]="s.d" [attr.fill]="s.color" [class.on]="pieHover === $index" (mouseenter)="pieHover = $index" (mouseleave)="pieHover = null" (click)="pieHover = pieHover === $index ? null : $index" />
-                  }
+                  <!-- (the slices drawn through a ring that sweeps round from the top as the pie comes in: its
+                       stroke covers the pie and a slice grown on hover; still, it shows all of it) -->
+                  <defs>
+                    <mask id="bd-pie-sweep" maskUnits="userSpaceOnUse" x="-10" y="-10" width="120" height="120">
+                      <circle class="bd-sweep" cx="50" cy="50" r="30" fill="none" stroke="#fff" stroke-width="60" pathLength="1" transform="rotate(-90 50 50)" />
+                    </mask>
+                  </defs>
+                  <g mask="url(#bd-pie-sweep)">
+                    @for (s of slices; track $index) {
+                      <path [attr.d]="s.d" [attr.fill]="s.color" [class.on]="pieHover === $index" (mouseenter)="pieHover = $index" (mouseleave)="pieHover = null" (click)="pieHover = pieHover === $index ? null : $index" />
+                    }
+                  </g>
                 </svg>
                 @for (s of slices; track $index) {
                   <span class="bd-pie-pct" [style.left.%]="s.x" [style.top.%]="s.y">{{ s.pct }}</span>
@@ -154,7 +165,7 @@
             <span class="stat-bar" [title]="skillTitle(s)"><i></i></span>
             <span class="skill-evidence">
               @for (e of s.evidence; track e.label) {
-                <span [title]="e.label + ': #' + e.rank + ' of ' + e.of"><b [style.--tone]="rankTone(rankPct(e.rank, e.of))">#{{ e.rank }}</b> {{ e.label }}</span>
+                <span [title]="e.label + ': ' + rankText(e.rank, e.of)"><b [style.--tone]="rankTone(rankPct(e.rank, e.of))">#{{ e.rank }}</b> {{ e.label }}</span>
               }
             </span>
           </div>

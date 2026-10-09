@@ -2,6 +2,7 @@ import { Component, HostListener, Input } from '@angular/core';
 import { AWARD_INFO } from '@sport/awards';
 import { whiteLogo } from '@sport/team-colors';
 import { rankPct, rankTone } from '@ranker/core/format';
+import { possessive } from './hover-text';
 import { PlayerCards } from './player-cards';
 import { GameViewService } from '../game-view/game-view.service';
 
@@ -24,16 +25,15 @@ export class PlayerCardComponent {
   readonly awardInfo = AWARD_INFO;
   readonly rankTone = rankTone;
   readonly rankPct = rankPct;
+  // (logos drawn in white on the board: the Giants')
+  readonly whiteLogo = whiteLogo;
+  // ("Purdy's", "49ers'": the compare button's hover)
+  readonly possessive = possessive;
 
   // The card closed (no game to go back to any more)
   close(): void {
     this.games.backTo = null;
     this.cards.close();
-  }
-
-  // Logos drawn in white on the board (e.g. the Giants')
-  whiteLogo(teamLogo: string): boolean {
-    return whiteLogo(teamLogo);
   }
 
   // A spot's popover (everyone at a depth chart spot) shuts on a click anywhere outside its spot

@@ -108,7 +108,12 @@ export function vsPositionBreakdown(player: SkillPlayer, position: string, rows:
     };
   });
 
-  const { score, rank: funnelRank } = vs.funnel;
+  const { score, rank: funnelRank, rate, exp } = vs.funnel;
+  // (which way offenses lean against it: 2 points or more off their usual pass rate, else neither; its rank
+  // that way, #1 the most pass-heavy or run-heavy)
+  const way: 'pass' | 'run' | null = score === null ? null : score >= 2 ? 'pass' : score <= -2 ? 'run' : null;
+  const wayRank = funnelRank !== null && way ? ` (#${way === 'pass' ? funnelRank : of + 1 - funnelRank} of ${of})` : '';
+  const funnelName = `${way ? capital(way) : 'Neutral'} funnel`;
   // (the groups whose share of the targets against it is 4 points or more off the league's, most first)
   const lopsided = vs.targets
     ? GROUPS.map((g) => ({ g, t: vs.targets![g] }))
@@ -120,16 +125,10 @@ export function vsPositionBreakdown(player: SkillPlayer, position: string, rows:
   // go when that's notable
   const flags: CardFlag[] = [];
   if (score !== null && funnelRank !== null) {
-    const amount = `${Math.abs(score).toFixed(1)}%`;
     // (over expected: against what the down, distance, field position, time and score call for)
     const usual = vs.funnel.method === 'proe' ? 'usual for the situation' : 'usual';
-    if (score >= 2) {
-      flags.push({ icon: 'call_split', tone: 'info', text: `Pass funnel: opponents pass ${amount} more often than ${usual} (#${funnelRank} of ${of})` });
-    } else if (score <= -2) {
-      flags.push({ icon: 'call_split', tone: 'info', text: `Run funnel: opponents pass ${amount} less often than ${usual} (#${of + 1 - funnelRank} of ${of})` });
-    } else {
-      flags.push({ icon: 'call_split', tone: 'info', text: `Neutral funnel: opponents pass about as often as ${usual} (${signed(score)}%)` });
-    }
+    const how = way ? `${Math.abs(score).toFixed(1)}% ${way === 'pass' ? 'more' : 'less'} often than ${usual}${wayRank}` : `about as often as ${usual} (${signed(score)}%)`;
+    flags.push({ icon: 'call_split', tone: 'info', text: `${funnelName}: opponents pass ${how}` });
   }
   if (lopsided.length) {
     const says = lopsided.map((x) => `${GROUP_WORDS[x.g]} ${x.t.share! > x.t.lg! ? 'get' : 'get only'} ${pct(x.t.share!)} (league ${pct(x.t.lg!)})`);
@@ -138,29 +137,24 @@ export function vsPositionBreakdown(player: SkillPlayer, position: string, rows:
 
   // The headline: which way offenses lean against it, their pass rate here against their usual
   const lean =
-    score !== null && vs.funnel.rate !== null
-      ? (() => {
-          const way: 'pass' | 'run' | null = score >= 2 ? 'pass' : score <= -2 ? 'run' : null;
-          const rank = funnelRank === null ? '' : way === 'pass' ? ` (#${funnelRank} of ${of})` : way === 'run' ? ` (#${of + 1 - funnelRank} of ${of})` : '';
-          const usual = vs.funnel.exp !== null ? `, against ${pct(vs.funnel.exp)} usually` : '';
-          return {
-            label: way === 'pass' ? 'Pass funnel' : way === 'run' ? 'Run funnel' : 'Neutral funnel',
-            tone: way,
-            text:
-              (way ? `Teams lean ${way} here${rank}` : 'Teams play it straight here') +
-              `: opponents pass on ${pct(vs.funnel.rate)} of plays${usual}` +
-              (way ? `, ${Math.abs(score).toFixed(1)} points ${way === 'pass' ? 'more' : 'less'} than they usually do` : ''),
-            pass: vs.funnel.rate,
-            usual: vs.funnel.exp,
-            help: funnelHelp(vs.funnel),
-          };
-        })()
+    score !== null && rate !== null
+      ? {
+          label: funnelName,
+          tone: way,
+          text:
+            (way ? `Teams lean ${way} here${wayRank}` : 'Teams play it straight here') +
+            `: opponents pass on ${pct(rate)} of plays${exp !== null ? `, against ${pct(exp)} usually` : ''}` +
+            (way ? `, ${Math.abs(score).toFixed(1)} points ${way === 'pass' ? 'more' : 'less'} than they usually do` : ''),
+          pass: rate,
+          usual: exp,
+          help: funnelHelp(vs.funnel),
+        }
       : null;
 
   const split = vs.targets
     ? {
         title: 'Where the targets go',
-        help: "The share of the targets against this defense that went to wide receivers, tight ends and backs; the white ticks are the league's split",
+        help: "The share of the targets against this defense that went to wide receivers, tight ends and backs; each slice's hover has the league's share",
         parts: GROUPS.map((g) => {
           const t = vs.targets![g];
           const share = t.share ?? 0;

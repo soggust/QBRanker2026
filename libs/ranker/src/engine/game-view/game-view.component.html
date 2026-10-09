@@ -72,7 +72,7 @@
               <span class="game-when">{{ when(g) }}</span>
               <!-- (a game to come: the line under its date) -->
               @if (g.preview && g.line; as line) {
-                <span class="game-when game-line-note">{{ g.line!.details }}{{ g.line!.overUnder !== null ? ' · O/U ' + g.line!.overUnder : '' }}</span>
+                <span class="game-when game-line-note">{{ line.details }}{{ line.overUnder !== null ? ' · O/U ' + line.overUnder : '' }}</span>
               }
             </div>
           }
@@ -106,6 +106,17 @@
         } @else {
           {{ text ?? name }}
         }
+      </ng-template>
+
+      <!-- A player's face: his headshot (or his initial), opening his card like his name when the site has him -->
+      <ng-template #face let-p>
+        <span class="depth-head tiny" [class.face-link]="faceLinks(p.name)" [title]="faceLinks(p.name) ? 'Open ' + p.name : ''" (click)="openFace(p.name, g)">
+          @if (p.headshot) {
+            <img [src]="p.headshot" alt="" loading="lazy" (error)="p.headshot = null" />
+          } @else {
+            <span class="depth-initial">{{ p.name[0] }}</span>
+          }
+        </span>
       </ng-template>
 
       <!-- A team's logo, small, on its badge (the grid's gem: the site's logo on its color) -->
@@ -149,13 +160,7 @@
                   <h3 class="depth-unit">{{ team.short }}</h3>
                   @for (l of t.rows; track $index) {
                     <div class="game-leader">
-                      <span class="depth-head tiny" [class.face-link]="faceLinks(l.name)" [title]="faceLinks(l.name) ? 'Open ' + l.name : ''" (click)="openFace(l.name, g)">
-                        @if (l.headshot) {
-                          <img [src]="l.headshot" alt="" loading="lazy" (error)="l.headshot = null" />
-                        } @else {
-                          <span class="depth-initial">{{ l.name[0] }}</span>
-                        }
-                      </span>
+                      <ng-container *ngTemplateOutlet="face; context: { $implicit: l }"></ng-container>
                       <span class="game-leader-main">
                         <small>{{ l.category }}</small>
                         <b><ng-container *ngTemplateOutlet="who; context: { $implicit: l.name }"></ng-container></b>
@@ -198,12 +203,12 @@
                         <!-- (the opponent: its team's card that season; the score: the game) -->
                         <div class="game-form-row">
                           <span class="log-outcome" [ngClass]="x.result">{{ x.result }}</span>
-                          <span class="log-vs">{{ x.vs.split(' ')[0] }}</span>
-                          <button type="button" class="game-form-team" title="Open their season" (click)="openTeam(x.vs.split(' ').slice(1).join(' '), g)">
+                          <span class="log-vs">{{ x.at }}</span>
+                          <button type="button" class="game-form-team" title="Open their season" (click)="openTeam(x.opponent, g)">
                             @if (x.logo) {
                               <img [src]="x.logo" alt="" loading="lazy" />
                             }
-                            <b>{{ x.vs.split(' ').slice(1).join(' ') }}</b>
+                            <b>{{ x.opponent }}</b>
                           </button>
                           <button type="button" class="game-form-score" [disabled]="!x.event" title="Open the game" (click)="games.open({ event: x.event })">{{ x.score }}</button>
                         </div>
@@ -223,13 +228,7 @@
                 <div class="group-body">
                   @for (i of t.rows; track $index) {
                     <div class="game-leader">
-                      <span class="depth-head tiny" [class.face-link]="faceLinks(i.name)" [title]="faceLinks(i.name) ? 'Open ' + i.name : ''" (click)="openFace(i.name, g)">
-                        @if (i.headshot) {
-                          <img [src]="i.headshot" alt="" loading="lazy" (error)="i.headshot = null" />
-                        } @else {
-                          <span class="depth-initial">{{ i.name[0] }}</span>
-                        }
-                      </span>
+                      <ng-container *ngTemplateOutlet="face; context: { $implicit: i }"></ng-container>
                       <span class="game-leader-main">
                         <small>{{ i.position }}{{ i.detail ? ' · ' + i.detail : '' }}</small>
                         <b><ng-container *ngTemplateOutlet="who; context: { $implicit: i.name }"></ng-container></b>
@@ -263,7 +262,8 @@
                         {{ t.abbr }}
                       </th>
                       @for (p of g.periodLabels; track $index) {
-                        <td [title]="t.periods[$index] != null ? t.abbr + ', ' + periodName(g, p) + ': ' + t.periods[$index] : ''">{{ t.periods[$index] ?? '' }}</td>
+                        @let score = t.periods.at($index);
+                        <td [title]="score != null ? t.abbr + ', ' + periodName(g, p) + ': ' + score : ''">{{ score ?? '' }}</td>
                       }
                       <td class="total" [title]="t.abbr + ' final: ' + t.score">{{ t.score }}</td>
                     </tr>
@@ -587,13 +587,7 @@
                   @let team = p.side === 'away' ? g.away : g.home;
                   <div class="game-fantasy-row">
                     <span class="game-fantasy-rank" [class.first]="i === 0" [class.top]="i > 0 && i < 10">{{ i + 1 }}</span>
-                    <span class="depth-head tiny" [class.face-link]="faceLinks(p.name)" [title]="faceLinks(p.name) ? 'Open ' + p.name : ''" (click)="openFace(p.name, g)">
-                      @if (p.headshot) {
-                        <img [src]="p.headshot" alt="" loading="lazy" (error)="p.headshot = null" />
-                      } @else {
-                        <span class="depth-initial">{{ p.name[0] }}</span>
-                      }
-                    </span>
+                    <ng-container *ngTemplateOutlet="face; context: { $implicit: p }"></ng-container>
                     <span class="game-fantasy-main">
                       <b>
                         <ng-container *ngTemplateOutlet="who; context: { $implicit: p.name }"></ng-container>
@@ -616,20 +610,24 @@
           @case ('highlights') {
             @let videos = games.videos;
             @if (videos.length) {
-              @let v = videos[games.video] ?? videos[0];
+              @let v = videos.at(games.video) ?? videos[0];
               <div class="chart-card game-video-card">
                 <div class="game-video">
-                  <!-- (the NFL's videos won't play off YouTube: the NFL blocks them on other sites, so its show their
-                       picture and open on YouTube) -->
-                  @if (v.youtube && g.league.includes('football')) {
-                    <a class="game-video-out" [href]="'https://www.youtube.com/watch?v=' + v.youtube" target="_blank" rel="noopener" [title]="'Watch ' + v.title + ' on YouTube'">
-                      <img [src]="'https://i.ytimg.com/vi/' + v.youtube + '/hqdefault.jpg'" alt="" />
-                      <span class="game-video-play"><mat-icon fontIcon="play_arrow" aria-hidden="true"></mat-icon>Watch on YouTube</span>
-                    </a>
-                  } @else if (v.youtube) {
-                    <iframe [src]="youtubeUrl(v.youtube)" [title]="v.title" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe>
-                  } @else {
-                    <video [src]="v.src" [poster]="v.thumb ?? ''" controls playsinline preload="metadata"></video>
+                  <!-- (the NFL's videos won't play off YouTube: the NFL blocks them on other sites, so they show their
+                       picture and open on YouTube: videoPlay) -->
+                  @switch (videoPlay(v, g.league)) {
+                    @case ('link') {
+                      <a class="game-video-out" [href]="youtubeWatch(v.youtube!)" target="_blank" rel="noopener" [title]="'Watch ' + v.title + ' on YouTube'">
+                        <img [src]="youtubeThumb(v.youtube!)" alt="" />
+                        <span class="game-video-play"><mat-icon fontIcon="play_arrow" aria-hidden="true"></mat-icon>Watch on YouTube</span>
+                      </a>
+                    }
+                    @case ('embed') {
+                      <iframe [src]="youtubeUrl(v.youtube!)" [title]="v.title" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe>
+                    }
+                    @default {
+                      <video [src]="v.src" [poster]="v.thumb ?? ''" controls playsinline preload="metadata"></video>
+                    }
                   }
                 </div>
                 <p class="game-video-title">{{ v.title }}</p>

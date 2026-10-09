@@ -2157,6 +2157,11 @@
     text-align: left;
   }
 
+  // (a game's row under the pointer: its tiles' lamps a touch brighter)
+  tr:hover > td > .log-led {
+    text-shadow: 0 0 9px color-mix(in srgb, var(--tone) 90%, transparent);
+  }
+
   // (a team's points for and against, each on a little LED tile: the winner's lit green, the loser's red,
   // the game view's board's; a tie in the board's own light)
   .log-led {
@@ -2171,6 +2176,7 @@
     min-width: 30px;
     padding: 1px 5px 0;
     text-shadow: 0 0 6px color-mix(in srgb, var(--tone) 60%, transparent);
+    transition: text-shadow 0.15s;
     vertical-align: middle;
 
     &.won {
@@ -3568,5 +3574,74 @@ card-seasons {
   from {
     opacity: 0;
     transform: translateY(6px);
+  }
+}
+
+// ---- motion, the Overview's vs Position and the Game Log's tiles (none for anyone who's asked for less):
+// the pie sweeps round from the top (its mask's ring drawn in), its shares showing once it's round; the
+// lean bar fills from the left, its tick after; a slice's popover rises in; the rank and score tiles'
+// digits warm up like the board's lamps, the ranks a row after another
+@media (prefers-reduced-motion: no-preference) {
+  .bd-sweep {
+    animation: pie-sweep 0.4s cubic-bezier(0.3, 0.7, 0.3, 1) backwards;
+    stroke-dasharray: 1 1;
+  }
+
+  .bd-pie-pct,
+  .bd-lean-tick {
+    animation: card-fade 0.2s ease 0.3s backwards;
+  }
+
+  .bd-lean-bar {
+    animation: lean-fill 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+  }
+
+  .bd-pop {
+    animation: pop-rise 0.15s ease-out;
+  }
+
+  .bd-rank,
+  .log-led {
+    animation: led-warm 0.35s ease-out backwards;
+  }
+
+  @for $i from 2 through 8 {
+    .bd-row:nth-child(#{$i}) .bd-rank {
+      animation-delay: ($i - 2) * 40ms;
+    }
+  }
+}
+
+@keyframes pie-sweep {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes lean-fill {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+// (the popover sits centered over its pie: translateX(-50%))
+@keyframes pop-rise {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 4px);
+  }
+}
+
+// (a digit dark on its tile, then lit in its own color)
+@keyframes led-warm {
+  from {
+    color: color-mix(in srgb, var(--tone, #fff) 20%, #2a2a2a);
+    text-shadow: none;
   }
 }

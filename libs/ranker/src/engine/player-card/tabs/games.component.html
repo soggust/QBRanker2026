@@ -78,7 +78,7 @@
             <th class="log-opp">Opp</th>
             <th class="log-result">Result</th>
             @for (col of log.columns; track $index) {
-              <th [class.key]="log.chart?.keys?.includes($index)" [class.wide]="col.wide" [class.log-center]="centered(log.columns, $index)" [class.log-left]="scoreSide(log.columns, $index)" [class.group-start]="log.groups && ($index === 0 || col.group !== log.columns[$index - 1].group)">{{ col.label }}</th>
+              <ng-container *ngTemplateOutlet="logCell; context: { $implicit: log.looks[$index], th: true, text: col.label }"></ng-container>
             }
           </tr>
         </thead>
@@ -96,39 +96,19 @@
               </td>
               <!-- (the opponent: its team's card that season) -->
               <td class="log-opp">
-                <button type="button" class="log-team" title="Open their season" (click)="cards.openOpponent(c, g.vs)">
-                  <span class="log-vs">{{ g.vs.split(' ')[0] }}</span>
-                  @if (g.logo) {
-                    <img [src]="g.logo" alt="" loading="lazy" />
-                  }
-                  {{ g.vs.split(' ').slice(1).join(' ') }}
-                </button>
+                <ng-container *ngTemplateOutlet="opponent; context: { $implicit: g }"></ng-container>
               </td>
               <!-- (the result: a team's just its W or L, its scores on their tiles; a player's the score too) -->
               <td class="log-result">
                 @if (g.outcome) {
                   <span class="log-outcome" [ngClass]="g.outcome">{{ g.outcome }}</span>
                 }
-                @if (!scoreSide(log.columns, 0) || !g.outcome) {
+                @if (!log.scoreboard || !g.outcome) {
                   {{ g.score }}
                 }
               </td>
               @for (cell of g.cells; track $index) {
-                <td
-                  [class.key]="log.chart?.keys?.includes($index)"
-                  [class.wide]="log.columns[$index].wide"
-                  [class.group-start]="log.groups && ($index === 0 || log.columns[$index].group !== log.columns[$index - 1].group)"
-                  [class.log-center]="centered(log.columns, $index)" [class.log-left]="scoreSide(log.columns, $index)"
-                >
-                  <!-- (a team's points for and against, each on its own little LED tile: the winner's lit green,
-                       the loser's red, as on the game view's board) -->
-                  @let led = scoreSide(log.columns, $index);
-                  @if (led && g.outcome) {
-                    <span class="log-led" [class.won]="(led === 'PF') === (g.outcome === 'W')" [class.lost]="(led === 'PF') === (g.outcome === 'L')">{{ cell }}</span>
-                  } @else {
-                    {{ cell }}
-                  }
-                </td>
+                <ng-container *ngTemplateOutlet="logCell; context: { $implicit: log.looks[$index], text: cell, outcome: g.outcome }"></ng-container>
               }
             </tr>
           }
@@ -137,7 +117,7 @@
             <tr class="log-avg">
               <td colspan="3">Per game</td>
               @for (a of log.average; track $index) {
-                <td [class.key]="log.chart?.keys?.includes($index)" [class.log-center]="centered(log.columns, $index)" [class.log-left]="scoreSide(log.columns, $index)" [class.group-start]="log.groups && ($index === 0 || log.columns[$index].group !== log.columns[$index - 1].group)">{{ a }}</td>
+                <ng-container *ngTemplateOutlet="logCell; context: { $implicit: log.looks[$index], text: a }"></ng-container>
               }
             </tr>
           }
@@ -162,13 +142,7 @@
                 <button type="button" class="log-game" [disabled]="!games.available || !u.event" [title]="u.event ? 'Preview the game' : ''" (click)="u.event && games.open({ event: u.event })">{{ u.date }}</button>
               </td>
               <td class="log-opp">
-                <button type="button" class="log-team" title="Open their season" (click)="cards.openOpponent(c, u.vs)">
-                  <span class="log-vs">{{ u.vs.split(' ')[0] }}</span>
-                  @if (u.logo) {
-                    <img [src]="u.logo" alt="" loading="lazy" />
-                  }
-                  {{ u.vs.split(' ').slice(1).join(' ') }}
-                </button>
+                <ng-container *ngTemplateOutlet="opponent; context: { $implicit: u }"></ng-container>
               </td>
               <td class="log-result">{{ u.time }}</td>
               <td class="log-next-detail" [attr.colspan]="tvSpan(log.columns.length)">
@@ -193,6 +167,34 @@
   }
   </div>
 </card-panel>
+
+<!-- A column's header or cell in its look (log.looks): a team's points for and against each on a little LED
+     tile, the winner's lit green, the loser's red, as on the game view's board -->
+<ng-template #logCell let-look let-th="th" let-text="text" let-outcome="outcome">
+  @if (th) {
+    <th [class.key]="look.key" [class.wide]="look.wide" [class.group-start]="look.groupStart" [class.log-center]="look.center" [class.log-left]="look.score">{{ text }}</th>
+  } @else {
+    <td [class.key]="look.key" [class.wide]="look.wide" [class.group-start]="look.groupStart" [class.log-center]="look.center" [class.log-left]="look.score">
+      @if (look.score && outcome) {
+        <span class="log-led" [class.won]="(look.score === 'PF') === (outcome === 'W')" [class.lost]="(look.score === 'PF') === (outcome === 'L')">{{ text }}</span>
+      } @else {
+        {{ text }}
+      }
+    </td>
+  }
+</ng-template>
+
+<!-- (the opponent, a played game's or one to come's: its team's card that season) -->
+<ng-template #opponent let-g>
+  @let vs = splitVs(g.vs);
+  <button type="button" class="log-team" title="Open their season" (click)="cards.openOpponent(c, g.vs)">
+    <span class="log-vs">{{ vs[0] }}</span>
+    @if (g.logo) {
+      <img [src]="g.logo" alt="" loading="lazy" />
+    }
+    {{ vs[1] }}
+  </button>
+</ng-template>
 
 <!-- (an upcoming game's line: DraftKings', via ESPN) -->
 <ng-template #lineOf let-u>

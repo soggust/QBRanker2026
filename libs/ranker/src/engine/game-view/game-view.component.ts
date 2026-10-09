@@ -10,6 +10,7 @@ import { pitchColor } from '../player-card/zones';
 import { HOME, TracedPark, fieldSpot, loadTracedParks, tracedPark, wallPath } from './parks';
 import { GameArsenal, GameChart, GameFantasy, GameMark, GamePitch, GameTeam, GameView } from './game.model';
 import { GameWeather } from './venue';
+import { videoPlay, youtubeThumb, youtubeWatch } from './highlights';
 import { PositionService } from '../position.service';
 
 import { GameTab, GameViewService } from './game-view.service';
@@ -35,7 +36,12 @@ export class GameViewComponent {
     private sanitizer: DomSanitizer,
   ) {}
 
-  // A YouTube video's player (the NFL's highlights), made safe to embed once per video
+  // How a clip plays (the NFL's open on YouTube), its page and its picture
+  readonly videoPlay = videoPlay;
+  readonly youtubeWatch = youtubeWatch;
+  readonly youtubeThumb = youtubeThumb;
+
+  // A YouTube video's player, made safe to embed once per video
   private embeds = new Map<string, SafeResourceUrl>();
   youtubeUrl(id: string): SafeResourceUrl {
     let url = this.embeds.get(id);
@@ -266,7 +272,6 @@ export class GameViewComponent {
     return side === 'both' ? 'Both teams' : (side === 'away' ? game.away : game.home).name;
   }
 
-  // (a player picked from the dropdown, or none: everyone)
   // A headshot: his card that season, like his name, when the site has him
   faceLinks(name: string | null): boolean {
     return !!name && !!this.games.link(name);
@@ -276,6 +281,7 @@ export class GameViewComponent {
     if (name && this.faceLinks(name)) this.games.toPlayer(name, this.seasonOf(game));
   }
 
+  // (a player picked from the dropdown, or none: everyone)
   pickPlayer(event: Event): void {
     this.games.player = (event.target as HTMLSelectElement).value || null;
   }
@@ -310,7 +316,6 @@ export class GameViewComponent {
     return 'marks' in chart ? chart.marks.filter((m) => (side === 'both' || m.side === side) && (!one || m.player === one)) : [];
   }
 
-  // A pass zone's shade: its share of the team's attempts
   // A zone's share of all the attempts, for its hover: "34%"
   attShare(zones: { att: number }[], att: number): string {
     const all = zones.reduce((a, z) => a + z.att, 0);
@@ -325,6 +330,7 @@ export class GameViewComponent {
     return `${ordinal(n)} ${unit}`;
   }
 
+  // A pass zone's shade: its attempts against the busiest zone's
   zoneShare(zones: { att: number }[], att: number): number {
     const most = Math.max(...zones.map((z) => z.att), 1);
     return att / most;
@@ -342,7 +348,6 @@ export class GameViewComponent {
     return /intercept|fumble|downs/i.test(result);
   }
 
-  // A fantasy line's bar: its points against the game's best
   // The fantasy board in the Fantasy Scoring setting (the NFL's: a catch worth 1, a half or nothing), best first
   fantasyRows(game: GameView): (GameFantasy & { total: number })[] {
     const scoring = this.positions.settings.sport['fantasyScoring'];

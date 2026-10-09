@@ -35,11 +35,26 @@ export interface GameLogChartView {
   keys: number[];
   bars: GameLogBar[];
 }
+// How a column shows (its header, cells and average alike)
+export interface GameLogColumnLook {
+  // charted (highlighted), text (wide), the first of its group (a rule before it)
+  key: boolean;
+  wide: boolean;
+  groupStart: boolean;
+  // (a team log's Record: centered under its header)
+  center: boolean;
+  // a team log's points for or against, each on an LED tile (left, over the games to come's TV and line);
+  // null for any other column (a player's PA, MLB's plate appearances, isn't one: only a log with PF has them)
+  score: 'PF' | 'PA' | null;
+}
 export interface GameLogView {
   // the team's games still to play (rows after the played ones)
   upcoming: UpcomingGame[];
   groups: { label: string; span: number }[] | null;
   columns: GameLogColumn[];
+  looks: GameLogColumnLook[];
+  // (a team's log: its scores on their tiles, so its Result is just the W or L)
+  scoreboard: boolean;
   rows: GameLogViewRow[];
   average: string[] | null;
   chart: GameLogChartView | null;
@@ -64,13 +79,32 @@ function averageText(values: string[], avg: number): string {
   return values.some((v) => v.trim().startsWith('.')) ? text.replace(/^(-?)0\./, '$1.') : text;
 }
 
+// "@ IND" as ["@", "IND"], "vs New York Giants" as ["vs", "New York Giants"]
+export function splitVs(vs: string): [string, string] {
+  const [at, ...team] = vs.split(' ');
+  return [at, team.join(' ')];
+}
+
+// Each column's look: the chart's columns (keys) highlighted
+export function columnLooks(columns: GameLogColumn[], keys: number[]): GameLogColumnLook[] {
+  const grouped = columns.some((c) => c.group);
+  const team = columns.some((c) => c.label === 'PF');
+  return columns.map((c, i) => ({
+    key: keys.includes(i),
+    wide: !!c.wide,
+    groupStart: grouped && (i === 0 || c.group !== columns[i - 1].group),
+    center: team && c.label === 'Record',
+    score: team && (c.label === 'PF' || c.label === 'PA') ? c.label : null,
+  }));
+}
+
 const OUTCOME = (result: string): GameLogViewRow['outcome'] => (/^[WLT]\b/.test(result) ? (result[0] as 'W' | 'L' | 'T') : '');
 
 // A column's index by "Group LABEL" or LABEL (-1 when the log hasn't got it)
-const columnIndex = (columns: GameLogColumn[], name: string) =>
-  columns.findIndex((c) => `${c.group ?? ''} ${c.label}`.trim() === name) >= 0
-    ? columns.findIndex((c) => `${c.group ?? ''} ${c.label}`.trim() === name)
-    : columns.findIndex((c) => c.label === name);
+function columnIndex(columns: GameLogColumn[], name: string): number {
+  const full = columns.findIndex((c) => `${c.group ?? ''} ${c.label}`.trim() === name);
+  return full >= 0 ? full : columns.findIndex((c) => c.label === name);
+}
 
 // "Passing YDS" -> "Passing"; a lone label stays itself
 const legendName = (c: GameLogColumn) => c.group || c.label;
@@ -111,7 +145,9 @@ export function gameLogView(log: GameLog, upcoming: UpcomingGame[] = []): GameLo
         })
       : null;
 
-  return { upcoming, groups, columns: log.columns, rows, average, chart: chartView(log) };
+  const chart = chartView(log);
+  const looks = columnLooks(log.columns, chart?.keys ?? []);
+  return { upcoming, groups, columns: log.columns, looks, scoreboard: looks[0]?.score != null, rows, average, chart };
 }
 
 function chartView(log: GameLog): GameLogChartView | null {

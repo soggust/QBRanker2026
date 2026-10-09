@@ -1692,3 +1692,19 @@
     transform: scaleX(0);
   }
 }
+
+// ---- (motion too) the team stats' and the predictor's bars: each side fills in from its own end, the two
+// meeting where they split
+@media (prefers-reduced-motion: no-preference) {
+  .game-stat-bar i {
+    animation: bar-fill 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+
+    &.away {
+      transform-origin: left center;
+    }
+
+    &.home {
+      transform-origin: right center;
+    }
+  }
+}

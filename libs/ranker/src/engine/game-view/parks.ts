@@ -55,13 +55,13 @@ const STANDARD: [number, number, number, number, number] = [330, 375, 400, 375, 
 const ROUND = /shea|veterans stadium|cinergy|riverfront|three rivers|olympic stadium|stade olympique|dodger stadium|kauffman|qualcomm|jack murphy|rfk|robert f. kennedy|tropicana|rogers centre|skydome|coliseum|network associates|mcafee|overstock|ringcentral|angel stadium|edison|metrodome|humphrey/i;
 
 // The park's wall: its five distances (left line to right line)
-export function parkWall(venue: string | null | undefined): [number, number, number, number, number] {
+function parkWall(venue: string | null | undefined): [number, number, number, number, number] {
   return PARKS.find(([name]) => name.test(venue ?? ''))?.[1] ?? STANDARD;
 }
 
 // The spray chart's scale: ESPN's units (Gameday's) are about 2.39 feet, home plate at (125.2, 204.5), up
 // the field
-export const FEET_PER_UNIT = 2.39;
+const FEET_PER_UNIT = 2.39;
 export const HOME: [number, number] = [125.2, 204.5];
 
 // A spot on the field by its distance (feet) and its angle from the left-field line (0) to the right (90)

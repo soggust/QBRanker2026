@@ -5,9 +5,9 @@ import { extras, rowTeamNames } from '@ranker/engine/row-fields';
 import { recentWord } from '@ranker/engine/stat-reader';
 import { recentRef } from '../../game-view/game-view.service';
 import { evidenceText, insteadText, paragraphs } from '../analysis';
-import type { CardSkill } from '@ranker/engine/skills';
-import { CardStat, PlayerCard } from '../card.model';
-import type { GameLogViewRow } from '../game-log-view';
+import { PlayerCard } from '../card.model';
+import { GameLogViewRow, splitVs } from '../game-log-view';
+import { leanShares, leanTitle, statTitle, zoneTitle } from '../hover-text';
 import { sortFlags } from '../overview';
 import { ZoneStat, ZoneView, pitchColor } from '../zones';
 import { CardTab } from './card-tab';
@@ -37,11 +37,8 @@ export class CardStatsTab extends CardTab {
     return !!extras(card.player).lastFiveOt?.[index];
   }
 
-  // A tile's bar on hover: "Passing Yds: 4,183 (#3 of 32) · Avg 3,610"
-  statTitle(s: CardStat): string {
-    const rank = s.rank !== null ? ` (${s.tied ? 'T-' : '#'}${s.rank} of ${s.of})` : '';
-    return `${s.name}${s.display ? ': ' + s.display : ''}${rank}${s.avg !== null ? ' · Avg ' + s.avg : ''}`;
-  }
+  // (a tile's bar on hover: "Passing Yds: 4,183 (#3 of 32) · Avg 3,610")
+  readonly statTitle = statTitle;
 
   openRecent(card: PlayerCard, index: number): void {
     const ref = recentRef(this.recentTeam(card), this.recentVs(card), index, card.season);
@@ -53,16 +50,9 @@ export class CardStatsTab extends CardTab {
 @Component({ selector: 'card-overview', templateUrl: './overview.component.html', standalone: false })
 export class CardOverviewTab extends CardTab {
   readonly sortFlags = sortFlags;
-
-  // "Lamar Jackson's", "San Francisco 49ers'" (the radar's hover)
-  possessive(name: string): string {
-    return name + (name.endsWith('s') ? "'" : "'s");
-  }
-
-  // A skill's hover (its radar point, name and bar): "Accuracy: Top 8% · 92nd percentile"
-  skillTitle(skill: CardSkill | undefined): string {
-    return skill ? `${skill.name}: ${skill.standing} · ${this.pctText(skill.pct)}` : '';
-  }
+  // (the lean bar's shares, adding up to 100, and its hover)
+  readonly leanShares = leanShares;
+  readonly leanTitle = leanTitle;
 
   // (a split's pie: each part a slice in its own soft color: the NFL's WRs a blue, TEs a sea green, backs a gold)
   pieColor(i: number): string {
@@ -118,44 +108,25 @@ export class CardZonesTab extends CardTab {
     return view.stats.find((st) => st.key === this.cards.zoneStat) ?? view.stats[0];
   }
 
-  // A box's hover: "Slugging, low left: .512 (catcher's view)"
-  zoneTitle(stat: ZoneStat, zone: string): string {
-    const n = Number(zone);
-    const where =
-      n > 10
-        ? `outside the zone, ${['high left', 'high right', 'low left', 'low right'][n - 11]}`
-        : n === 5
-          ? 'middle of the zone'
-          : `${['high', 'middle', 'low'][Math.floor((n - 1) / 3)]} ${['left', 'middle', 'right'][(n - 1) % 3]}`;
-    const value = stat.zones[zone]?.value;
-    return `${stat.label}, ${where}${value ? ': ' + value : ': none'} (catcher's view)`;
-  }
+  // (a box's hover: "Slugging, low left: .512 (catcher's view)")
+  readonly zoneTitle = zoneTitle;
 }
 
 // Game Log: the season's games (a result opens its game) and the games to come
 @Component({ selector: 'card-games', templateUrl: './games.component.html', standalone: false })
 export class CardGamesTab extends CardTab {
-  // A team log's points-for or points-against column (each shown on an LED tile); null for any other (a
-  // player's PA, MLB's plate appearances, isn't one: only a log with PF has them)
-  // (a team log's Record: centered under its header)
-  centered(columns: { label: string }[], i: number): boolean {
-    return columns[i]?.label === 'Record' && columns.some((c) => c.label === 'PF');
-  }
+  // ("@ IND" as its "@" and its "IND")
+  readonly splitVs = splitVs;
 
   // (an upcoming game's TV: under the first stat column, the line taking the rest)
   tvSpan(columns: number): number {
     return Math.min(1, columns);
   }
 
-  scoreSide(columns: { label: string }[], i: number): 'PF' | 'PA' | null {
-    const label = columns[i]?.label;
-    return (label === 'PF' || label === 'PA') && columns.some((c) => c.label === 'PF') ? label : null;
-  }
-
   // A row's game: ESPN's id, or its day and the two teams
   openGame(card: PlayerCard, row: GameLogViewRow): void {
     if (row.event) this.games.open({ event: row.event });
-    else if (row.when) this.games.open({ date: row.when, names: [row.vs.split(' ').slice(1).join(' '), extras(card.player).teamName ?? ''].filter(Boolean) });
+    else if (row.when) this.games.open({ date: row.when, names: [splitVs(row.vs)[1], extras(card.player).teamName ?? ''].filter(Boolean) });
   }
 }
 

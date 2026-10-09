@@ -267,8 +267,9 @@
       [title]="picked.length ? 'Compare the ' + picked.length + ' picked' : 'Compare: click rows to pick them, or open and search anyone, any season'"
     >
       <mat-icon aria-hidden="true" fontIcon="compare_arrows"></mat-icon>
-      @if (picked.length) {
-        <span class="compare-count" aria-hidden="true">{{ picked.length }}</span>
+      <!-- (made new each time the count changes, so it pops: rankings.component.scss) -->
+      @for (count of picked.length ? [picked.length] : []; track count) {
+        <span class="compare-count" aria-hidden="true">{{ count }}</span>
       }
     </button>
 

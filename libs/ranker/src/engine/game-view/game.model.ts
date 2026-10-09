@@ -163,8 +163,8 @@ export interface GameView {
   // (a preview's: ESPN's matchup predictor, each team's chance to win, 0-1)
   predictor: { away: number; home: number } | null;
   injuries: { side: 'away' | 'home'; rows: { name: string; position: string | null; status: string; detail: string | null; headshot: string | null }[] }[];
-  // each team's last five games, newest first (ESPN's: each opens its game)
-  form: { side: 'away' | 'home'; games: { event: string; result: string; score: string; vs: string; logo: string | null }[] }[];
+  // each team's last five games, newest first (ESPN's: each opens its game), the opponent by its abbreviation
+  form: { side: 'away' | 'home'; games: { event: string; result: string; score: string; at: '@' | 'vs'; opponent: string; logo: string | null }[] }[];
   broadcast: string | null;
   // "Final", "Final/OT"
   status: string;

@@ -280,23 +280,7 @@ export async function loadGame(league: string, eventId: string): Promise<GameVie
   const projection = (x: { gameProjection?: string } | undefined) => (x?.gameProjection ? Number(x.gameProjection) / 100 : null);
   const awayChance = projection(s.predictor?.awayTeam?.id === home.id ? s.predictor?.homeTeam : s.predictor?.awayTeam);
   const homeChance = projection(s.predictor?.awayTeam?.id === home.id ? s.predictor?.awayTeam : s.predictor?.homeTeam);
-  // (only the ones still in doubt for it: a player ESPN expects back before the game's day is left off;
-  // its return date on the game's day itself is a questionable one, kept)
-  const gameDay = comp.date ? new Date(comp.date).toLocaleDateString('en-CA', { timeZone: 'America/New_York' }) : null;
-  const backInTime = (returnDate?: string) => !!returnDate && !!gameDay && returnDate.slice(0, 10) < gameDay;
-  const injuries = (s.injuries ?? [])
-    .map((t) => ({
-      side: sideOf(t.team?.id),
-      rows: (t.injuries ?? []).filter((i) => !backInTime(i.details?.returnDate)).map((i) => ({
-        name: i.athlete?.displayName ?? '',
-        position: i.athlete?.position?.abbreviation ?? null,
-        status: i.status ?? '',
-        detail: [i.details?.type, i.details?.returnDate ? `back ${new Date(i.details.returnDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}` : null].filter(Boolean).join(' · ') || null,
-        headshot: headshotOf(i.athlete),
-      })),
-    }))
-    .filter((t): t is GameView['injuries'][number] => !!t.side && t.rows.length > 0)
-    .sort(awayFirst);
+  const injuries = injuryReport(s.injuries, comp.date, sideOf);
   const form = (s.lastFiveGames ?? [])
     .map((t) => ({
       side: sideOf(t.team?.id),
@@ -304,7 +288,8 @@ export async function loadGame(league: string, eventId: string): Promise<GameVie
         event: e.id ?? '',
         result: e.gameResult ?? '',
         score: e.score ?? '',
-        vs: `${e.atVs === '@' ? '@' : 'vs'} ${e.opponent?.abbreviation ?? ''}`,
+        at: (e.atVs === '@' ? '@' : 'vs') as '@' | 'vs',
+        opponent: e.opponent?.abbreviation ?? '',
         logo: e.opponentLogo ?? e.opponent?.logo ?? null,
       })),
     }))
@@ -343,4 +328,37 @@ export async function loadGame(league: string, eventId: string): Promise<GameVie
       .map((v) => ({ title: v.headline ?? '', src: v.links!.source!.href!, youtube: null, thumb: v.thumbnail ?? null, duration: v.duration ?? null }))
       .sort((a, b) => Number(/highlights/i.test(b.title)) - Number(/highlights/i.test(a.title))),
   };
+}
+
+// A game to come's injury report, each team's: only the ones still in doubt for it (a player ESPN expects
+// back before the game's day is left off; back on the game's day itself is a questionable one, kept). The
+// game's day is New York's; a return date is a plain day ("2026-10-11")
+export function injuryReport(
+  teams: EspnSummary['injuries'],
+  date: string | undefined,
+  sideOf: (id: string | undefined) => 'away' | 'home' | null,
+): GameView['injuries'] {
+  const gameDay = date ? new Date(date).toLocaleDateString('en-CA', { timeZone: 'America/New_York' }) : null;
+  const backInTime = (returnDate?: string) => !!returnDate && !!gameDay && returnDate.slice(0, 10) < gameDay;
+  return (teams ?? [])
+    .map((t) => ({
+      side: sideOf(t.team?.id),
+      rows: (t.injuries ?? [])
+        .filter((i) => !backInTime(i.details?.returnDate))
+        .map((i) => ({
+          name: i.athlete?.displayName ?? '',
+          position: i.athlete?.position?.abbreviation ?? null,
+          status: i.status ?? '',
+          detail: [i.details?.type, i.details?.returnDate ? `back ${returnDay(i.details.returnDate)}` : null].filter(Boolean).join(' · ') || null,
+          headshot: headshotOf(i.athlete),
+        })),
+    }))
+    .filter((t): t is GameView['injuries'][number] => !!t.side && t.rows.length > 0)
+    .sort(awayFirst);
+}
+
+// "Oct 11": a return date's own day (read in UTC: the plain day "2026-10-11" is its midnight there, so in
+// the Americas' time it would show the day before)
+export function returnDay(date: string): string {
+  return new Date(date.slice(0, 10)).toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' });
 }

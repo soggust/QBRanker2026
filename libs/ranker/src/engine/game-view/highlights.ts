@@ -55,3 +55,15 @@ async function mlbHighlights(game: GameView): Promise<GameVideo[]> {
     .filter((v) => v.src);
   return videos.sort((a, b) => Number(/highlights|recap/i.test(b.title)) - Number(/highlights|recap/i.test(a.title)));
 }
+
+// How a clip plays on the board: the NFL's YouTube videos as their picture, opening on YouTube (the NFL
+// blocks its videos from playing on other sites), any other YouTube video embedded, a file in the page's
+// own player
+export function videoPlay(video: GameVideo, league: string): 'link' | 'embed' | 'file' {
+  if (!video.youtube) return 'file';
+  return league.includes('football') ? 'link' : 'embed';
+}
+
+// A YouTube video's page and its picture
+export const youtubeWatch = (id: string) => `https://www.youtube.com/watch?v=${encodeURIComponent(id)}`;
+export const youtubeThumb = (id: string) => `https://i.ytimg.com/vi/${encodeURIComponent(id)}/hqdefault.jpg`;

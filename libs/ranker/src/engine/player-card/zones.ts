@@ -18,7 +18,7 @@ export interface ZoneView {
 }
 
 // Each pitch type's color (the game view's pitch chart and the card's arsenal; the rest grey)
-export const PITCH_COLORS: Record<string, string> = {
+const PITCH_COLORS: Record<string, string> = {
   'Four-seam FB': '#ff5a4f',
   'Four-Seam Fastball': '#ff5a4f',
   Fastball: '#ff5a4f',

@@ -2,9 +2,10 @@ import { Directive, Input, inject } from '@angular/core';
 import { SPORT } from '@sport/sport';
 import { whiteLogo } from '@sport/team-colors';
 import { CURRENT_SEASON, isLiveSeason } from '@ranker/engine/data';
-import { ordinal, rankPct, rankTone } from '@ranker/core/format';
+import { rankPct, rankTone } from '@ranker/core/format';
 import { GameViewService } from '../../game-view/game-view.service';
 import { PlayerCard } from '../card.model';
+import { percentileText, possessive, rankText, skillTitle } from '../hover-text';
 import { PlayerCards } from '../player-cards';
 
 // What every tab of the player card has: the card it's showing (c, as the card's own template calls it),
@@ -22,6 +23,14 @@ export abstract class CardTab {
   readonly currentSeason = CURRENT_SEASON;
   readonly rankTone = rankTone;
   readonly rankPct = rankPct;
+  // (logos drawn in white on the board: the Giants')
+  readonly whiteLogo = whiteLogo;
+
+  // The hover words (hover-text.ts): "88th percentile", "#3 of 32", "Purdy's", a skill's
+  readonly pctText = percentileText;
+  readonly rankText = rankText;
+  readonly possessive = possessive;
+  readonly skillTitle = skillTitle;
 
   // "2025", "2024-25", or "Current" while it's being played
   seasonName(season: number): string {
@@ -30,15 +39,5 @@ export abstract class CardTab {
 
   seasonText(season: number): string {
     return SPORT.seasonText(season);
-  }
-
-  // A 0-1 standing as a hover's words: "88th percentile"
-  pctText(pct: number): string {
-    return `${ordinal(Math.max(1, Math.min(99, Math.round(pct * 100))))} percentile`;
-  }
-
-  // Logos drawn in white on the board (e.g. the Giants')
-  whiteLogo(teamLogo: string): boolean {
-    return whiteLogo(teamLogo);
   }
 }

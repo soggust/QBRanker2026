@@ -15,7 +15,7 @@
           [class.pending]="!s.yours"
           [style.--pct]="s.pct"
           [style.--tone]="rankTone(s.pct)"
-          [title]="seasonText(s.season) + ' · #' + s.rank + ' of ' + s.of"
+          [title]="seasonText(s.season) + ' · ' + rankText(s.rank, s.of)"
           (click)="s.season !== c.season && cards.openSeason(s.season, c.player.gsisId)"
         >
           <span class="arc-rank">#{{ s.rank }}</span>

@@ -165,7 +165,7 @@
                     @for (shape of r.shapes; track shape.color; let si = $index) {
                       @for (d of shape.dots; track $index; let j = $index) {
                         <circle class="cmp-dot" r="3.2" [attr.cx]="d.x" [attr.cy]="d.y" [style.--side]="shape.color">
-                          <title>{{ sides[si].label }} · {{ r.base.axes[j].label }}: {{ pct(d.pct) }}th percentile</title>
+                          <title>{{ sides[si].label }} · {{ r.base.axes[j].label }}: {{ percentileText(d.pct) }}</title>
                         </circle>
                       }
                     }
@@ -188,7 +188,7 @@
                     <span class="cmp-skill-name">{{ sk.name }}</span>
                     <div class="cmp-bars">
                       @for (p of sk.pcts; track $index) {
-                        <div class="cmp-bar" [class.lead]="sk.leaders.includes($index)" [style.--side]="sides[$index].color" [title]="sides[$index].label + ': ' + pct(p) + (p === null ? '' : 'th percentile')">
+                        <div class="cmp-bar" [class.lead]="sk.leaders.includes($index)" [style.--side]="sides[$index].color" [title]="sides[$index].label + ': ' + (p === null ? '-' : percentileText(p))">
                           <span class="cmp-track"><i [style.width.%]="p === null ? 0 : 4 + p * 96"></i></span>
                           @if (p === null) {
                             <b>-</b>

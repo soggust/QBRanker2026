@@ -36,7 +36,7 @@ import { Component, EventEmitter, Input, Output, ViewEncapsulation } from '@angu
       <ng-content select="[panel-actions]"></ng-content>
     </div>
     @if (isOpen || !expandable) {
-      <div class="panel-body" (animationend)="unfolding = false"><ng-content></ng-content></div>
+      <div class="panel-body" (animationend)="unfolded($event)"><ng-content></ng-content></div>
     }
   `,
   styleUrls: ['../../styles/components/card-panel.scss'],
@@ -69,6 +69,11 @@ export class CardPanelComponent {
 
   // (opened by a click just now: its body unfolds, card-panel.scss; a panel open from the start just shows)
   unfolding = false;
+
+  // (its own unfolding over: not a chart's or a tile's inside it, which would cut it short)
+  unfolded(event: AnimationEvent): void {
+    if (event.target === event.currentTarget) this.unfolding = false;
+  }
 
   toggle(): void {
     this.unfolding = !this.own;
