@@ -44,6 +44,13 @@
     }
   }
 
+  // The account (Sign in, or the avatar and its menu: account-menu.scss), pushed right, just left of the
+  // brand
+  account-menu {
+    margin-left: auto;
+    order: 2;
+  }
+
   // The site's name: a podium, then "Season Ranker" in the menu logo's lettering, both in the sport's
   // color, its right edge in line with the page's (the position tabs and the grid). A click reloads the
   // sport's page.
@@ -52,10 +59,10 @@
     @include v.headline(11px);
     gap: 8px;
     letter-spacing: 1px;
-    margin-left: auto;
+    margin-left: 6px;
     // (the bar's own padding plus this: the page's side margin, 26px)
     margin-right: 12px;
-    order: 2;
+    order: 3;
     padding: 0;
     white-space: nowrap;
 
@@ -89,6 +96,7 @@
     }
 
     a.brand {
+      margin-left: 2px;
       margin-right: 6px;
 
       .brand-name {

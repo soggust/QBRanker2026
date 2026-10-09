@@ -50,3 +50,8 @@ apps/*/scripts/model/context.json
 
 # Local keys (copy .env.example)
 .env
+
+# (the Firebase emulators' logs: npm run test:rules, emulators:start)
+firebase-debug.log
+firestore-debug.log
+ui-debug.log

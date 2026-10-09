@@ -1,18 +1,20 @@
 <!-- (keyboard and screen readers: straight to the rankings; the page's name) -->
-@if (!betsOpen) {
+@if (view === 'rankings' && gate === 'open') {
   <a class="skip-link" href="#rankings">Skip to the rankings</a>
 }
 
 <!-- Sport bar: a link to each sport's app on this site (the page shrinks by its height) -->
 <nav class="sport-bar" aria-label="Sport">
-  <h1 class="visually-hidden">{{ betsOpen ? 'Bets' : sportName + ' Season Ranker' }}</h1>
+  <h1 class="visually-hidden">{{ viewTitle }}</h1>
   @for (s of sports; track s.id) {
-    <a [href]="'/' + s.id + '/'" [class.active]="s.id === sport && !betsOpen" [attr.aria-current]="s.id === sport && !betsOpen ? 'page' : null">{{ s.label }}</a>
+    <a [href]="'/' + s.id + '/'" [class.active]="s.id === sport && view === 'rankings'" [attr.aria-current]="s.id === sport && view === 'rankings' ? 'page' : null">{{ s.label }}</a>
   }
-  <!-- Every sport's betting angles on one page (#bets): linked in development only -->
-  @if (dev) {
-    <a href="#bets" [class.active]="betsOpen" [attr.aria-current]="betsOpen ? 'page' : null">Bets</a>
+  <!-- Every sport's betting angles on one page (#bets): linked in development, and for an admin -->
+  @if (canUse('bets')) {
+    <a href="#bets" [class.active]="view === 'bets'" [attr.aria-current]="view === 'bets' ? 'page' : null">Bets</a>
   }
+  <!-- The account: Sign in, or the user's avatar and its menu (just left of the brand) -->
+  <account-menu></account-menu>
   <!-- The site's name on the far right, after a little podium (#1 on the middle step) in the sport's color;
        a click reloads this sport's page fresh, from the top -->
   <a class="brand" [href]="'/' + sport + '/'" title="Season Ranker: reload">
@@ -26,9 +28,17 @@
   </a>
 </nav>
 
-@if (betsOpen) {
+@if (view === 'bets') {
   <bets-page></bets-page>
-} @else {
+} @else if (view === 'account') {
+  <account-page></account-page>
+} @else if (view !== 'rankings') {
+  <!-- (the pages later phases fill in) -->
+  <coming-soon [heading]="viewTitle" [detail]="view === 'user' ? '@' + viewUser : ''"></coming-soon>
+} @else if (gate === 'soon') {
+  <!-- (a sport not ready for everyone, on the live site) -->
+  <coming-soon [heading]="sportName" detail="This sport is on its way. Check back soon." [backHref]="'/' + sports[0].id + '/'" [backLabel]="'Go to ' + sports[0].label"></coming-soon>
+} @else if (gate === 'open') {
 <main [class.menu-open]="menuOpen" [class.sidebar-collapsed]="sidebarCollapsed">
   <!-- Filters menu: opened by the filter button, closed by it or a click anywhere else -->
   <div class="sidebar-shell">
@@ -72,6 +82,11 @@
     }
   </div>
 </main>
+}
+
+<!-- Signing in (the sport bar's Sign in, or a page that needs an account) -->
+@if (account.loginOpen()) {
+  <login-dialog></login-dialog>
 }
 
 <!-- About / FAQ, opened from the info button in the footer -->

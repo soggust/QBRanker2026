@@ -1,0 +1,171 @@
+rules_version = '2';
+
+// Season Ranker's database rules (the accounts spec's data model). Browsers may only create and edit
+// what these allow; anything that must be trusted (grading, balances, tallies) is written by the Admin
+// SDK in GitHub Actions, which these rules don't apply to. Tests: tests/rules (npm run test:rules).
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // -------------------------------------------------------------------------
+    // Who's asking
+    // -------------------------------------------------------------------------
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(uid) {
+      return signedIn() && request.auth.uid == uid;
+    }
+
+    // (a custom claim on the sign-in token, set only with the Admin SDK: set-admin.mjs)
+    function isAdmin() {
+      return signedIn() && request.auth.token.admin == true;
+    }
+
+    // Friends: both users' friend docs say so (users/{uid}/friends/{otherUid}: { status })
+    function friendStatus(uid, other) {
+      return get(/databases/$(database)/documents/users/$(uid)/friends/$(other)).data.status;
+    }
+
+    function isFriend(owner) {
+      return signedIn()
+        && exists(/databases/$(database)/documents/users/$(owner)/friends/$(request.auth.uid))
+        && exists(/databases/$(database)/documents/users/$(request.auth.uid)/friends/$(owner))
+        && friendStatus(owner, request.auth.uid) == 'friends'
+        && friendStatus(request.auth.uid, owner) == 'friends';
+    }
+
+    // Can the reader see the owner's kind of thing ('lists', 'presets', 'openBets', 'betHistory',
+    // 'tracker'): the owner always; anyone when it's public; a friend when it's friends
+    function canSee(owner, kind) {
+      let setting = get(/databases/$(database)/documents/users/$(owner)).data.visibility[kind];
+      return isOwner(owner) || setting == 'public' || (setting == 'friends' && isFriend(owner));
+    }
+
+    // -------------------------------------------------------------------------
+    // The profile's fields
+    // -------------------------------------------------------------------------
+    function isVisibility(value) {
+      return value in ['public', 'friends', 'private'];
+    }
+
+    function validVisibility(v) {
+      return v is map
+        && v.keys().hasOnly(['lists', 'presets', 'openBets', 'betHistory', 'tracker'])
+        && v.keys().hasAll(['lists', 'presets', 'openBets', 'betHistory', 'tracker'])
+        && isVisibility(v.lists) && isVisibility(v.presets) && isVisibility(v.openBets)
+        && isVisibility(v.betHistory) && isVisibility(v.tracker);
+    }
+
+    // (a provider's photo or a team logo by its address, or an upload as a small image data URL; 60 KB at most)
+    function validPhoto(p) {
+      return p == null || (
+        p is map
+        && p.keys().hasOnly(['kind', 'url'])
+        && p.kind in ['provider', 'upload', 'logo']
+        && p.url is string
+        && p.url.size() > 0
+        && p.url.size() <= 61440
+        && p.url.matches('^(https://|/[a-z]+/assets/|data:image/(webp|jpeg|png);base64,)[^\\s]*$')
+      );
+    }
+
+    function validTeam(t) {
+      return t == null || (
+        t is map
+        && t.keys().hasOnly(['sport', 'logo'])
+        && t.sport is string && t.sport.size() <= 10
+        && t.logo is string && t.logo.size() <= 300
+      );
+    }
+
+    function validProfile(d) {
+      return d.keys().hasAll(['username', 'usernameLower', 'displayName', 'visibility', 'createdAt', 'updatedAt'])
+        && d.keys().hasOnly(['username', 'usernameLower', 'displayName', 'photo', 'favoriteTeam', 'bio', 'visibility', 'createdAt', 'updatedAt'])
+        && d.username is string
+        && d.username.matches('^[A-Za-z0-9_]{3,20}$')
+        && d.usernameLower == d.username.lower()
+        && d.displayName is string
+        && d.displayName.size() > 0
+        && d.displayName.size() <= 40
+        && (!('photo' in d) || validPhoto(d.photo))
+        && (!('bio' in d) || (d.bio is string && d.bio.size() <= 200))
+        && (!('favoriteTeam' in d) || validTeam(d.favoriteTeam))
+        && validVisibility(d.visibility)
+        && d.updatedAt == request.time;
+    }
+
+    // (the username's claim points at this user once the write is done)
+    function claimsName(uid, lower) {
+      return getAfter(/databases/$(database)/documents/usernames/$(lower)).data.uid == uid;
+    }
+
+    // -------------------------------------------------------------------------
+    // users/{uid}: the public profile
+    // -------------------------------------------------------------------------
+    match /users/{uid} {
+      allow read: if true;
+
+      // (made with its username's claim, in the same transaction)
+      allow create: if isOwner(uid)
+        && validProfile(request.resource.data)
+        && request.resource.data.createdAt == request.time
+        && claimsName(uid, request.resource.data.usernameLower);
+
+      // (a new username: claimed in the same transaction, the old claim let go)
+      allow update: if isOwner(uid)
+        && validProfile(request.resource.data)
+        && request.resource.data.createdAt == resource.data.createdAt
+        && (
+          request.resource.data.usernameLower == resource.data.usernameLower
+          || (
+            claimsName(uid, request.resource.data.usernameLower)
+            && !existsAfter(/databases/$(database)/documents/usernames/$(resource.data.usernameLower))
+          )
+        );
+
+      allow delete: if isOwner(uid);
+
+      // users/{uid}/private/{doc}: the owner's own settings (their email; later, defaults), no one else's
+      match /private/{doc} {
+        allow read, delete: if isOwner(uid);
+        allow create, update: if isOwner(uid)
+          && request.resource.data.keys().hasOnly(['email', 'defaults'])
+          && (!('email' in request.resource.data) || request.resource.data.email == null
+              || (request.resource.data.email is string && request.resource.data.email.size() <= 320))
+          && (!('defaults' in request.resource.data) || request.resource.data.defaults is map);
+      }
+    }
+
+    // -------------------------------------------------------------------------
+    // usernames/{lower}: one claim per name ({ uid }), made with the profile that uses it; let go only by
+    // its owner, once their profile no longer uses it (renamed or deleted)
+    // -------------------------------------------------------------------------
+    match /usernames/{name} {
+      allow read: if true;
+
+      allow create: if signedIn()
+        && name.matches('^[a-z0-9_]{3,20}$')
+        && request.resource.data.keys().hasOnly(['uid'])
+        && request.resource.data.uid == request.auth.uid
+        && getAfter(/databases/$(database)/documents/users/$(request.auth.uid)).data.usernameLower == name;
+
+      allow update: if false;
+
+      allow delete: if signedIn()
+        && resource.data.uid == request.auth.uid
+        && (
+          !existsAfter(/databases/$(database)/documents/users/$(request.auth.uid))
+          || getAfter(/databases/$(database)/documents/users/$(request.auth.uid)).data.usernameLower != name
+        );
+    }
+
+    // -------------------------------------------------------------------------
+    // config/{doc}: site-wide settings anyone can read and only an admin (the token's claim) can change
+    // -------------------------------------------------------------------------
+    match /config/{doc} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+  }
+}

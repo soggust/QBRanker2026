@@ -1,0 +1,44 @@
+@if (account.user(); as user) {
+  <button
+    type="button"
+    class="account-toggle"
+    [class.open]="trigger.menuOpen"
+    [matMenuTriggerFor]="menu"
+    #trigger="matMenuTrigger"
+    [attr.aria-label]="'Account: ' + (name || 'your profile')"
+    [title]="name || 'Your account'"
+  >
+    <account-avatar [photo]="user.profile?.photo" [name]="name" [size]="26"></account-avatar>
+    <span class="account-name">{{ first }}</span>
+  </button>
+
+  <mat-menu #menu="matMenu" class="account-menu" xPosition="before">
+    <!-- (who's signed in: the avatar, the name and the username; Admin when the token says so) -->
+    <div class="account-who" (click)="$event.stopPropagation()">
+      <account-avatar [photo]="user.profile?.photo" [name]="name" [size]="40"></account-avatar>
+      <div class="account-who-text">
+        <span class="account-who-name">{{ name || 'Your account' }}</span>
+        @if (user.profile?.username; as username) {
+          <span class="account-who-user">&#64;{{ username }}</span>
+        }
+      </div>
+      @if (user.admin) {
+        <span class="admin-badge" title="Admin: MMA, Bets and experimental features">Admin</span>
+      }
+    </div>
+    @for (item of items; track item.hash) {
+      <a mat-menu-item [href]="item.hash" [class.current]="isOpen(item.hash)">
+        <mat-icon aria-hidden="true" [fontIcon]="item.icon"></mat-icon><span>{{ item.label }}</span>
+      </a>
+    }
+    <div class="account-divider" role="separator"></div>
+    <button mat-menu-item type="button" (click)="signOut()">
+      <mat-icon aria-hidden="true" fontIcon="logout"></mat-icon><span>Sign out</span>
+    </button>
+  </mat-menu>
+} @else if (account.ready()) {
+  <button type="button" class="sign-in" (click)="account.openLogin()">Sign in</button>
+} @else {
+  <!-- (a returning user's sign-in being restored: a faint circle where the avatar will be) -->
+  <span class="account-pending" aria-hidden="true"></span>
+}

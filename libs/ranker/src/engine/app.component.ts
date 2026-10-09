@@ -1,10 +1,43 @@
-import { Component, HostListener, isDevMode } from '@angular/core';
+import { Component, HostListener } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { PositionService } from '@ranker/engine/position.service';
 import { POSITIONS, Position } from '@sport/positions';
 import { SPORT } from '@sport/sport';
-import { SPORT_LINKS } from '@ranker/core/sports';
+import { SITE_SPORTS } from '@ranker/core/sports';
 import { SportSettings } from '@ranker/engine/sport';
+import { AccountService } from '@ranker/engine/account/account.service';
+import { canUse } from '@ranker/engine/account/features';
+
+// The page showing, from the address's hash: the rankings (no hash), the Bets page (#bets), or an account
+// page (#account, #lists, #community, #tracker, #wallet, #friends, #u/<username>: a public profile)
+export type View = 'rankings' | 'bets' | 'account' | 'lists' | 'community' | 'tracker' | 'wallet' | 'friends' | 'user';
+const HASH_VIEWS: Record<string, View> = {
+  bets: 'bets',
+  account: 'account',
+  lists: 'lists',
+  community: 'community',
+  tracker: 'tracker',
+  wallet: 'wallet',
+  friends: 'friends',
+};
+
+export function viewOf(hash: string): View {
+  const key = hash.replace(/^#/, '');
+  if (key.startsWith('u/') && key.length > 2) return 'user';
+  return Object.hasOwn(HASH_VIEWS, key) ? HASH_VIEWS[key] : 'rankings';
+}
+
+// (each page's name, for the page heading and the tab)
+const VIEW_TITLES: Record<Exclude<View, 'rankings'>, string> = {
+  bets: 'Bets',
+  account: 'Profile & settings',
+  lists: 'My lists',
+  community: 'Community',
+  tracker: 'Tracker',
+  wallet: 'Wallet',
+  friends: 'Friends',
+  user: 'Profile',
+};
 
 // The tabs the sport's settings show (SPORT.tabVisible: MMA's divisions, men's or women's)
 function visibleTabs(settings: SportSettings): Position[] {
@@ -22,18 +55,40 @@ export class AppComponent {
   // The sport bar across the top: each sport is its own app on the same site (apps/<sport>, served at
   // /<sport>/); this one is lit
   readonly sport = SPORT.id;
-  readonly sports = SPORT_LINKS;
+  readonly siteSports = SITE_SPORTS;
   // (the page's name, for its heading: "NFL")
-  readonly sportName = SPORT_LINKS.find((s) => s.id === SPORT.id)?.label ?? SPORT.id.toUpperCase();
+  readonly sportName = SITE_SPORTS.find((s) => s.id === SPORT.id)?.label ?? SPORT.id.toUpperCase();
 
-  // The Bets page (#bets) in place of the rankings, from the sport bar's Bets link
-  betsOpen = location.hash === '#bets';
-  // (the Bets page in the sport bar only in development: on the live site it isn't linked)
-  readonly dev = isDevMode();
+  // The page in place of the rankings, from the hash: the Bets page (#bets, from the sport bar's Bets
+  // link) or an account page (the account menu's)
+  view: View = viewOf(location.hash);
+  readonly canUse = canUse;
 
   @HostListener('window:hashchange')
   onHashChange(): void {
-    this.betsOpen = location.hash === '#bets';
+    this.view = viewOf(location.hash);
+  }
+
+  get viewTitle(): string {
+    return this.view === 'rankings' ? this.sportName + ' Season Ranker' : VIEW_TITLES[this.view];
+  }
+
+  // (#u/<username>: whose profile)
+  get viewUser(): string {
+    return decodeURIComponent(location.hash.slice('#u/'.length));
+  }
+
+  // The sport bar's sports: a sport not ready for everyone (MMA) only in development or for an admin
+  get sports(): { id: string; label: string }[] {
+    return this.siteSports.filter((s) => !s.devOnly || canUse('mma'));
+  }
+
+  // This sport not ready for everyone (MMA on the live site): Coming soon, unless an admin's signed in
+  // (nothing while a sign-in is still being restored)
+  readonly sportGated = SITE_SPORTS.find((s) => s.id === SPORT.id)?.devOnly ?? false;
+  get gate(): 'open' | 'wait' | 'soon' {
+    if (!this.sportGated || canUse('mma')) return 'open';
+    return this.account.settled() ? 'soon' : 'wait';
   }
 
   position$ = this.positionService.position$;
@@ -48,7 +103,10 @@ export class AppComponent {
   // follow the one open / closed state (the footer's filter button and the menu's X).
   private readonly smallScreen = window.matchMedia('(max-width: 1199px)');
 
-  constructor(private positionService: PositionService) {
+  constructor(
+    private positionService: PositionService,
+    readonly account: AccountService,
+  ) {
     // A setting that shows new tabs (MMA's women's divisions) opens the first of them; one that
     // hides the open tab goes back to the first tab
     let shown = this.positions;

@@ -1,0 +1,159 @@
+@use "../variables" as v;
+
+// ===========================================================================
+// The sport bar's account entry (just left of the brand, app.component.scss places it): Sign in in the
+// bar's own lettering, or the avatar and first name; the menu it opens is a scoreboard panel like the
+// app's other menus (_base.scss), its rows an icon in the sport's light and a label
+// ===========================================================================
+:host {
+  align-items: center;
+  display: flex;
+}
+
+.sign-in,
+.account-toggle {
+  align-items: center;
+  background: none;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  font-family: v.$font-base;
+  font-size: 12px;
+  font-weight: 400;
+  gap: 8px;
+  height: 100%;
+  letter-spacing: 1.5px;
+  padding: 0 12px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+  text-transform: uppercase;
+
+  &:hover,
+  &.open {
+    background: rgba(0, 0, 0, 0.15);
+    color: var(--scoreboard-led);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--scoreboard-led);
+    outline-offset: -4px;
+  }
+}
+
+.account-toggle {
+  padding: 0 10px;
+
+  .account-name {
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.account-pending {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 50%;
+  height: 26px;
+  margin: 0 10px;
+  width: 26px;
+}
+
+// Phones: the avatar alone, Sign in a size down
+@media (max-width: 575px) {
+  .account-toggle {
+    padding: 0 6px;
+
+    .account-name {
+      display: none;
+    }
+  }
+
+  .sign-in {
+    font-size: 11px;
+    letter-spacing: 1px;
+    padding: 0 8px;
+    white-space: nowrap;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// The menu (in Material's overlay, outside this component)
+// ---------------------------------------------------------------------------
+::ng-deep .mat-mdc-menu-panel.account-menu {
+  min-width: 230px;
+
+  .account-who {
+    align-items: center;
+    border-bottom: 1px solid color-mix(in srgb, var(--scoreboard-led) 40%, transparent);
+    cursor: default;
+    display: flex;
+    gap: 12px;
+    margin: 4px 14px 6px;
+    padding: 8px 0 12px;
+  }
+
+  .account-who-text {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-width: 0;
+
+    span {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+
+  .account-who-name {
+    color: #fff !important;
+    @include v.headline(15px);
+  }
+
+  .account-who-user {
+    color: rgba(255, 255, 255, 0.6) !important;
+    font-family: v.$font-base;
+    font-size: 12px;
+  }
+
+  .mat-mdc-menu-item {
+    min-height: 42px;
+
+    .mat-icon {
+      color: var(--scoreboard-led);
+      margin-right: 14px;
+      @include v.icon-size(20px);
+    }
+
+    span {
+      font-weight: 700;
+    }
+
+    &:hover span,
+    &.cdk-keyboard-focused span,
+    &.current span {
+      color: var(--scoreboard-led) !important;
+    }
+  }
+
+  .account-divider {
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+    margin: 6px 14px;
+  }
+}
+
+// (the Admin badge: a small lit tag, here and on the settings page)
+::ng-deep .admin-badge {
+  border: 1px solid var(--scoreboard-led);
+  border-radius: 999px;
+  color: var(--scoreboard-led) !important;
+  flex: 0 0 auto;
+  font-family: v.$font-base;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  padding: 2px 8px;
+  text-shadow: var(--scoreboard-glow) !important;
+  text-transform: uppercase;
+}
