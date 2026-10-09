@@ -177,8 +177,8 @@ card-panel.depth-panel {
   }
 }
 
-// (a panel that opens: its body on the scoreboard, as its bar is; under the panel, so the sport's own edges,
-// the NFL's hashes and end zone, MLB's chalk, the court and rink lines, stay drawn over it)
-card-panel:has(> .group-bar > .panel-toggle) {
+// (a panel's body on the scoreboard, as its bar is (the FAQ's plain ones aside); under the panel, so the sport's
+// own edges, the NFL's hashes and end zone, MLB's chalk, the court and rink lines, stay drawn over it)
+card-panel:not(.panel-plain) {
   background: var(--scoreboard-dots), var(--scoreboard);
 }

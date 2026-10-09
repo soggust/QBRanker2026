@@ -1,7 +1,8 @@
 <!-- The sport's history (SPORT.cardHistory: a fighter's fights), newest first -->
 
-<div class="card-group card-history">
-  <h3><mat-icon [fontIcon]="sport.cardHistory?.icon ?? 'history'"></mat-icon>{{ sport.cardHistory?.title }}</h3>
+<!-- (a panel like the rest, open to begin with: it's the tab's whole content) -->
+<card-panel class="tab-card card-history" [label]="sport.cardHistory?.title ?? 'History'" [icon]="sport.cardHistory?.icon ?? 'history'" [startOpen]="true">
+  <div class="group-body">
   @let rows = historyRows(c);
   @if (!rows.length) {
     <p class="card-note">Nothing yet.</p>
@@ -15,4 +16,5 @@
       </div>
     }
   </div>
-</div>
+  </div>
+</card-panel>
