@@ -10,6 +10,9 @@
       @if (ariaSort(table, key); as dir) {
         <mat-icon aria-hidden="true" [fontIcon]="dir === 'ascending' ? 'arrow_upward' : 'arrow_downward'"></mat-icon>
       }
+          @if (key === 'odds') {
+        <span class="desk-crown" title="DraftKings: every price here is theirs"></span>
+      }
     </button>
   </th>
 </ng-template>
@@ -361,7 +364,7 @@
                     <th><img class="desk-league" [src]="leagueLogo(b.sport)" [alt]="b.sport.toUpperCase()" [title]="b.sport.toUpperCase()" /></th>
                     <td class="desk-left"><ng-container *ngTemplateOutlet="gameCell; context: { $implicit: b, when: 'EEE h:mm a' }"></ng-container></td>
                     <td class="desk-left" [title]="help['intent']"><ng-container *ngTemplateOutlet="pickCell; context: { $implicit: b }"></ng-container></td>
-                    <td [title]="help['betBook']"><span class="desk-book" [title]="(b.book ?? 'DraftKings') + (b.fairFrom === 'pinnacle' ? ' · its fair chance Pinnacle’s' : '')">DK</span>{{ odds(b.odds) }}</td>
+                    <td [title]="help['betBook']">{{ odds(b.odds) }}</td>
                     <td>{{ b.units }}</td>
                     <td>{{ pct(b.p) }}</td>
                     <td>{{ pct(b.fair) }}</td>
@@ -400,7 +403,7 @@
                     <th><img class="desk-league" [src]="leagueLogo(b.sport)" [alt]="b.sport.toUpperCase()" [title]="b.sport.toUpperCase()" /></th>
                     <td class="desk-left"><ng-container *ngTemplateOutlet="gameCell; context: { $implicit: b, when: 'MMM d' }"></ng-container></td>
                     <td class="desk-left"><ng-container *ngTemplateOutlet="pickCell; context: { $implicit: b }"></ng-container></td>
-                    <td [title]="help['betBook']"><span class="desk-book" [title]="(b.book ?? 'DraftKings') + (b.fairFrom === 'pinnacle' ? ' · its fair chance Pinnacle’s' : '')">DK</span>{{ odds(b.odds) }}</td>
+                    <td [title]="help['betBook']">{{ odds(b.odds) }}</td>
                     <td>{{ b.units }}</td>
                     <td>{{ pct(b.p) }}</td>
                     <td>{{ b.final }}</td>

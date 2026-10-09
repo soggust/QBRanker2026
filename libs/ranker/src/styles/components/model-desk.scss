@@ -692,10 +692,11 @@ card-panel {
   color: inherit;
 }
 
-// (the book a bet's priced at, a tiny DK before its odds; and the small notes under values thin, as the
-// numbers are)
-.desk-book {
-  @include v.book-badge;
+// (the book the bets are priced at: DraftKings' crown by the Odds header, once; and the small notes under
+// values thin, as the numbers are)
+.desk-crown {
+  @include v.book-crown(13px);
+  margin-left: 4px;
 }
 
 .desk-table td small {

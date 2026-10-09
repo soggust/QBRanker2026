@@ -35,7 +35,7 @@
         }
         @if (updated) {
           <span class="bets-updated">
-            Updated {{ updated | date: 'EEE MMM d, h:mm a' }}
+            Updated {{ updated | date: 'EEE MMM d, h:mm a' }} · <span class="bet-crown" title="DraftKings"></span> odds
             <!-- (the algorithm's record on the picks it has shown: overall, then by its chance to win when shown) -->
             @if (record?.graded) {
               <span class="bets-record">
@@ -104,7 +104,7 @@
                   <small>{{ insteadText(r.pick) }}</small>
                 } @else {
                   <b>{{ r.pick }}</b>
-                  <small>{{ sportLabel(r) }} · {{ r.marketLabel }}@if (r.odds) { · <span class="bet-book" title="DraftKings">DK</span>{{ r.odds }}}@if (r.source !== 'Algorithm') { · {{ r.source }}}</small>
+                  <small>{{ sportLabel(r) }} · {{ r.marketLabel }}@if (r.odds) { {{ r.odds }}}@if (r.source !== 'Algorithm') { · {{ r.source }}}</small>
                 }
               </span>
               <span class="bet-game">

@@ -797,7 +797,7 @@ $arm-length: 175px;
   }
 }
 
-// (the book a pick's priced at, a tiny DK before its odds)
-.bet-book {
-  @include v.book-badge;
+// (the book the picks are priced at: DraftKings' crown, once, in the updated line)
+.bet-crown {
+  @include v.book-crown(13px);
 }
