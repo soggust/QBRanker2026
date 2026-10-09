@@ -449,7 +449,11 @@ $chip-clay: #b0202b;
 .bet-foot .bet-where,
 .bet-game .bet-where {
   align-items: center;
+  // (the gray of a low chance's "% to win", so it reads on the dark; amber when windy)
+  color: color-mix(in srgb, #{v.$neutral} 75%, #fff);
   display: flex;
+  font-size: 12px;
+  font-weight: 600;
   gap: 4px;
 
   .mat-icon {
@@ -800,4 +804,55 @@ $arm-length: 175px;
 // (the book the picks are priced at: DraftKings' crown, once, in the updated line)
 .bet-crown {
   @include v.book-crown(13px);
+}
+
+// A pick led by a circle (a prop's player's headshot, a total's arrow, a side's team's logo) beside its two lines:
+// the pick, its one word that says what the bet is in its team's color (the board's light without one), and its
+// price under it
+.bet-main.has-circle {
+  align-items: center;
+  column-gap: 12px;
+  display: grid;
+  grid-template-columns: auto 1fr;
+
+  .bet-circle {
+    grid-row: span 2;
+  }
+}
+
+.bet-circle {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 50%;
+  display: inline-flex;
+  height: 34px;
+  justify-content: center;
+  width: 34px;
+
+  img {
+    height: 22px;
+    object-fit: contain;
+    width: 22px;
+  }
+
+  .mat-icon {
+    @include v.icon-size(18px);
+    color: #fff;
+  }
+
+  &.over {
+    background: color-mix(in srgb, var(--scoreboard-led) 22%, transparent);
+    border-color: color-mix(in srgb, var(--scoreboard-led) 55%, transparent);
+  }
+}
+
+img.bet-face {
+  object-fit: cover;
+  object-position: 50% 15%;
+}
+
+.bet-key {
+  color: var(--scoreboard-led);
+  font-weight: 900;
 }

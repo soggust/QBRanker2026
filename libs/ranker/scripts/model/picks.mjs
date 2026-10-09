@@ -129,6 +129,10 @@ export function buildPicks(sport, ledger, trust, games, now) {
       kind: KIND[b.market] ?? 'player',
       market: b.market === 'prop' ? b.statLabel : LABEL[b.market],
       pick: b.pick,
+      // (which side it took, and a prop's player and his team, ESPN's ids: the page's circle and its color)
+      side: b.side ?? null,
+      athlete: b.athlete ?? null,
+      team: b.team ?? null,
       player: b.player ?? null,
       line: b.line,
       odds: b.odds,

@@ -1,6 +1,7 @@
 import { Component, OnInit, isDevMode } from '@angular/core';
 import { SPORT_LINKS } from '@ranker/core/sports';
 import { insteadText } from '../player-card/analysis';
+import { TeamColors, loadTeamColors, pickTeamColor, splitPick } from './pick-style';
 
 // The Bets page (the sport bar's Bets link, #bets): the algorithm's top picks for every sport (each one's
 // data/model/picks.json, written by every run of the model desk: libs/ranker/scripts/model/picks.mjs), ranked
@@ -34,6 +35,11 @@ interface BetEntry {
 // other reports make the same call
 export interface BetRow extends BetEntry {
   id: number;
+  // (an algorithm pick's side, and a prop's player, his ESPN id and his team's: its circle and its color)
+  side?: string | null;
+  player?: string | null;
+  athleteId?: string | number | null;
+  playerTeam?: string | null;
   // (an algorithm pick's chance to win, a whole percent)
   chance?: number;
   pick: string;
@@ -127,6 +133,11 @@ interface Sheet {
 interface Pick {
   id: string;
   sport: string;
+  // (its side, and a prop's player, his ESPN id and his team's: picks written before carry none)
+  side?: string | null;
+  player?: string | null;
+  athlete?: string | number | null;
+  team?: string | null;
   score: number;
   // its chance to win, a whole percent (the band its level)
   chance: number;
@@ -172,6 +183,43 @@ function pickKey(sport: string, matchup: string, kind: BetKind, pick: string): s
   standalone: false,
 })
 export class BetsPageComponent implements OnInit {
+  // Each sport's teams' colors, once a visit (pick-style.ts)
+  private teamColors: TeamColors = new Map();
+  private pickColors = new Map<number, string | null>();
+
+  // (a pick's own color: a prop its player's team's, a side the team it took's; a total, none: the board's)
+  pickColor(r: BetRow): string | null {
+    const kept = this.pickColors.get(r.id);
+    if (kept !== undefined) return kept;
+    const teams = r.game?.teams ?? [];
+    const abbr = r.betType === 'player' ? null : (r.side === 'home' ? teams[1] : teams[0])?.abbr ?? null;
+    const color = pickTeamColor(this.teamColors, r.sport ?? '', { total: r.betType === 'total', teamId: r.betType === 'player' ? r.playerTeam : null, abbr });
+    if (this.teamColors.size) this.pickColors.set(r.id, color);
+    return color;
+  }
+
+  // (a pick split round its one word: a prop's after the player's name, a total's over or under, a side's line)
+  pickParts(r: BetRow): [string, string, string] {
+    const text = r.betType === 'player' && r.player && r.pick.startsWith(r.player) ? r.pick.slice(r.player.length).trimStart() : r.pick;
+    return splitPick(text, r.betType === 'player' || r.betType === 'total');
+  }
+
+  // (a side's team's logo, for its circle)
+  pickLogo(r: BetRow): string | null {
+    const teams = r.game?.teams ?? [];
+    const logo = (r.side === 'home' ? teams[1] : teams[0])?.logo;
+    return logo ? this.logoSrc(r, logo) : null;
+  }
+
+  // (a prop's player's ESPN headshot, for its circle)
+  headshot(r: BetRow): string {
+    return `https://a.espncdn.com/combiner/i?img=/i/headshots/${r.sport}/players/full/${r.athleteId}.png&w=96&h=70`;
+  }
+
+  hide(event: Event): void {
+    (event.target as HTMLElement).style.visibility = 'hidden';
+  }
+
   // (the model desk's admin panel: on the dev server only)
   readonly dev = isDevMode();
   // (development opens on the Algorithm, the live site has only the bets)
@@ -218,6 +266,11 @@ export class BetsPageComponent implements OnInit {
   }
 
   async ngOnInit(): Promise<void> {
+    // (the teams' colors for the picks' words, alongside the picks)
+    loadTeamColors(SPORT_LINKS.map((s) => s.id)).then((colors) => {
+      this.teamColors = colors;
+      this.pickColors.clear();
+    });
     const get = (url: string) =>
       fetch(url, { cache: 'no-cache' })
         .then((res) => (res.ok ? res.json() : null))
@@ -268,6 +321,10 @@ export class BetsPageComponent implements OnInit {
             chance: p.chance,
             estimated: false,
             betType: p.kind,
+            side: p.side ?? null,
+            player: p.player ?? null,
+            athleteId: p.athlete ?? null,
+            playerTeam: p.team ?? null,
           });
         }
       }

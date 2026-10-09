@@ -97,14 +97,28 @@
               </span>
               <!-- (a like reads "Bet": it's the bet to make, as a fade is the side to go against) -->
               <span class="bet-grade" [ngClass]="side(r)">{{ side(r) === 'like' ? 'bet' : 'fade' }}</span>
-              <span class="bet-main">
+              <span class="bet-main" [class.has-circle]="r.strength !== 'fade'">
                 <!-- (a fade says what it fades, and the bet to make instead) -->
                 @if (r.strength === 'fade') {
                   <b>{{ r.market }}</b>
                   <small>{{ insteadText(r.pick) }}</small>
                 } @else {
-                  <b>{{ r.pick }}</b>
-                  <small>{{ sportLabel(r) }} · {{ r.marketLabel }}@if (r.odds) { {{ r.odds }}}@if (r.source !== 'Algorithm') { · {{ r.source }}}</small>
+                  <!-- (led by a circle: a prop's player, a total's arrow, a side's team; its one word that says what
+                       the bet is in its team's color; its price under it) -->
+                  @let parts = pickParts(r);
+                  @if (r.betType === 'player' && r.athleteId) {
+                    <img class="bet-circle bet-face" [src]="headshot(r)" alt="" (error)="hide($event)" />
+                  } @else if (r.betType === 'total') {
+                    <span class="bet-circle" [class.over]="r.side === 'over'" aria-hidden="true"><mat-icon [fontIcon]="r.side === 'under' ? 'arrow_downward' : 'arrow_upward'"></mat-icon></span>
+                  } @else {
+                    <span class="bet-circle" aria-hidden="true">
+                      @if (pickLogo(r); as logo) {
+                        <img [src]="logo" alt="" (error)="hide($event)" />
+                      }
+                    </span>
+                  }
+                  <b>@if (r.betType === 'player' && r.player) {{{ r.player }}{{ ' ' }}}{{ parts[0] }}<span class="bet-key" [style.color]="pickColor(r)">{{ parts[1] }}</span>{{ parts[2] }}</b>
+                  <small>{{ r.odds ?? '' }}</small>
                 }
               </span>
               <span class="bet-game">

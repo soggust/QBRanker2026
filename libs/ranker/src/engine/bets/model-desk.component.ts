@@ -1,5 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { SummaryBox, athleteColors, liveStat, meterColor } from './live-props';
+import { TeamColors, loadTeamColors, pickTeamColor, splitPick } from './pick-style';
 
 // The algorithm's admin panel (the Bets page, dev only): the code-only desk's play-money betting
 // (libs/ranker/scripts/model/run.mjs: every market of every game, 0.5 to 3 units), read from each sport's
@@ -556,21 +557,11 @@ export class ModelDeskComponent implements OnInit, OnDestroy {
     return { count, profit };
   }
 
-  // Each sport's teams' colors (data/model/teams.json, ESPN's team list as the bettor keeps it: a browser
-  // can't ask ESPN's itself), once a visit: by abbreviation and by ESPN id
-  private teamColors = new Map<string, { color?: string; alternateColor?: string }>();
+  // Each sport's teams' colors, once a visit (pick-style.ts)
+  private teamColors: TeamColors = new Map();
 
   private async loadTeams(): Promise<void> {
-    for (const sport of new Set(this.allBets.map((b) => b.sport))) {
-      const file = (await fetch(`/${sport}/data/model/teams.json`)
-        .then((res) => (res.ok ? res.json() : null))
-        .catch(() => null)) as { teams?: Record<string, { id: string; color: string | null; alt: string | null }> } | null;
-      for (const [abbr, t] of Object.entries(file?.teams ?? {})) {
-        const colors = { color: t.color ?? undefined, alternateColor: t.alt ?? undefined };
-        this.teamColors.set(`${sport}:${abbr}`, colors);
-        this.teamColors.set(`${sport}#${t.id}`, colors);
-      }
-    }
+    this.teamColors = await loadTeamColors(this.allBets.map((b) => b.sport));
     this.pickColors.clear();
   }
 
@@ -584,25 +575,18 @@ export class ModelDeskComponent implements OnInit, OnDestroy {
     const kept = this.pickColors.get(b.id);
     if (kept !== undefined) return kept;
     const [away, home] = this.teamsOf(b);
-    const colors =
-      b.market === 'prop'
-        ? (b.team ? this.teamColors.get(`${b.sport}#${b.team}`) : undefined) ?? this.livePropColors.get(b.id)
-        : this.teamColors.get(`${b.sport}:${b.side === 'home' ? home : away}`);
-    const color = colors ? meterColor(colors) : null;
-    if (colors) this.pickColors.set(b.id, color);
+    // (an older prop, placed without its player's team: the box score's, once he's playing)
+    const live = b.market === 'prop' && !b.team ? this.livePropColors.get(b.id) : undefined;
+    if (b.market === 'prop' && !b.team && !live) return null;
+    const color = live ? meterColor(live) : pickTeamColor(this.teamColors, b.sport, { total: false, teamId: b.team, abbr: b.market === 'prop' ? null : b.side === 'home' ? home : away });
+    this.pickColors.set(b.id, color);
     return color;
   }
 
   // A pick split round its one word in its color: what the bet is (the over or under, a moneyline's ML, a
   // spread's line); [before, the word, after]
   pickParts(b: ModelBet): [string, string, string] {
-    const text = b.market === 'prop' ? this.pickRest(b).trimStart() : b.pick;
-    if (b.market === 'prop' || b.market === 'total') {
-      const at = text.indexOf(' ');
-      return at < 0 ? ['', text, ''] : ['', text.slice(0, at), text.slice(at)];
-    }
-    const at = text.lastIndexOf(' ');
-    return at < 0 ? ['', text, ''] : [text.slice(0, at + 1), text.slice(at + 1), ''];
+    return splitPick(b.market === 'prop' ? this.pickRest(b).trimStart() : b.pick, b.market === 'prop' || b.market === 'total');
   }
 
   // (what an in-play bet's meter counts: a prop's stat so far, a total's points so far; null for the rest,
