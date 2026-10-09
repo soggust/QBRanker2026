@@ -634,3 +634,18 @@ card-panel {
   color: var(--scoreboard-led);
   font-weight: 700;
 }
+
+// (a lost bet's pick: muted, in italics, struck through; its circle dimmed with it)
+.desk-pick.desk-lost {
+  b {
+    color: rgba(255, 255, 255, 0.45);
+    font-style: italic;
+    text-decoration: line-through;
+    text-decoration-color: rgba(255, 255, 255, 0.55);
+  }
+
+  .desk-badge,
+  .desk-face {
+    opacity: 0.5;
+  }
+}

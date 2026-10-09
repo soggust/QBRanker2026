@@ -29,28 +29,26 @@
 </ng-template>
 
 <!-- (a bet's pick, led by a circle: a prop's player (his headshot and name linking to his ESPN page in a new
-     tab), a total's arrow (up for the over, down for the under), a side's team; whether it's an action bet
-     under it, if it is one) -->
+     tab), a total's arrow (up for the over, down for the under), a side's team; a lost one muted, in italics,
+     struck through, once it's graded or decided in play) -->
 <ng-template #pickCell let-b>
+  @let lost = b.status === 'lost' || provisional(b)?.status === 'lost';
   @if (b.market === 'prop' && b.athlete !== undefined && b.player) {
-    <span class="desk-pick">
+    <span class="desk-pick" [class.desk-lost]="lost">
       <a class="desk-player" [href]="playerLink(b)" target="_blank" rel="noopener" [title]="b.player + ' on ESPN'" tabindex="-1" aria-hidden="true"><img class="desk-face" [src]="headshot(b)" alt="" (error)="hide($event)" /></a>
       <b><a class="desk-player" [href]="playerLink(b)" target="_blank" rel="noopener">{{ b.player }}</a>{{ pickRest(b) }}</b>
     </span>
   } @else if (b.market === 'total') {
-    <span class="desk-pick">
+    <span class="desk-pick" [class.desk-lost]="lost">
       <span class="desk-badge" [class.over]="b.side === 'over'" [class.under]="b.side === 'under'" aria-hidden="true"><mat-icon [fontIcon]="b.side === 'over' ? 'arrow_upward' : 'arrow_downward'"></mat-icon></span>
       <b>{{ b.pick }}</b>
     </span>
   } @else {
     @let team = teamsOf(b)[b.side === 'home' ? 1 : 0];
-    <span class="desk-pick">
+    <span class="desk-pick" [class.desk-lost]="lost">
       <span class="desk-badge" aria-hidden="true"><img [src]="teamLogo(b.sport, team)" alt="" (error)="hide($event)" /></span>
       <b>{{ b.pick }}</b>
     </span>
-  }
-  @if (intentOf(b) === 'action') {
-    <small [title]="help['intent']">action</small>
   }
 </ng-template>
 

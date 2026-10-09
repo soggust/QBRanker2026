@@ -519,7 +519,10 @@ export class ModelDeskComponent implements OnInit, OnDestroy {
       if (!game?.final && now <= b.line) return null;
       edge = (b.side === 'over' ? 1 : -1) * (now - b.line);
     } else {
-      if (!game?.final) return null;
+      // (a game bet once it's final; a total sooner, once the scoring's past its line: the over won, the under
+      // lost, whatever comes after)
+      if (!game) return null;
+      if (!game.final && (b.market !== 'total' || game.hs + game.as <= b.line)) return null;
       const margin = game.hs - game.as;
       if (b.market === 'spread') edge = (b.side === 'home' ? margin : -margin) + b.line;
       else if (b.market === 'total') edge = (b.side === 'over' ? 1 : -1) * (game.hs + game.as - b.line);
