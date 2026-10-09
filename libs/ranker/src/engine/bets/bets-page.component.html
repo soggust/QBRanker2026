@@ -125,9 +125,9 @@
                   } @else {
                     <b>{{ r.game.matchup }}</b>
                   }
-                  <!-- (the kickoff weather and where it's played; the wind in amber when it could matter) -->
-                  @if (where(r); as w) {
-                    <small class="bet-where" [class.windy]="w.windy"><mat-icon [fontIcon]="w.icon"></mat-icon>{{ w.text }}</small>
+                  <!-- (when it's played, under the teams; where and its weather are in the open section) -->
+                  @if (r.game.kickoff) {
+                    <small class="bet-when">{{ r.game.kickoff | date: 'EEE MMM d · h:mm a' }}</small>
                   }
                 }
               </span>
@@ -138,8 +138,14 @@
                 @if (r.risk) {
                   <p class="bet-risk"><b>Devil&#39;s Advocate:</b> {{ r.risk }}</p>
                 }
-                <!-- (the confidence shown is the bet's own; the report's overall confidence stays on its card) -->
-                <p class="bet-meta bet-confidence" title="Its chance to win: the list runs likeliest first. Gray: no edge on the price (a bet the bot made, not one it likes)">{{ r.chance ?? '–' }}% to win</p>
+                <!-- (its chance to win on the left; where it's played and the weather then on the right, the wind in
+                     amber when it could matter) -->
+                <div class="bet-foot">
+                  <p class="bet-meta bet-confidence" title="Its chance to win: the list runs likeliest first. Gray: no edge on the price (a bet the bot made, not one it likes)">{{ r.chance ?? '–' }}% to win</p>
+                  @if (where(r); as w) {
+                    <small class="bet-where" [class.windy]="w.windy"><mat-icon [fontIcon]="w.icon"></mat-icon>{{ w.text }}</small>
+                  }
+                </div>
               </div>
             }
           </li>

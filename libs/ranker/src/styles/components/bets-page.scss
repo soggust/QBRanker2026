@@ -425,6 +425,28 @@ $chip-clay: #b0202b;
 }
 
 // under it: the kickoff weather and where it's played, the wind in amber when it could matter
+// (when a game's played, under its teams)
+.bet-game .bet-when {
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+// (the open section's foot: its chance to win on the left, where and the weather on the right)
+.bet-reasons .bet-foot {
+  align-items: baseline;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  justify-content: space-between;
+  margin-top: 8px;
+
+  .bet-meta {
+    margin-top: 0;
+  }
+}
+
+.bet-foot .bet-where,
 .bet-game .bet-where {
   align-items: center;
   display: flex;
