@@ -26,7 +26,9 @@ import {
   botObservations,
   coreObservations,
   creditOf,
+  gradedPick,
   observationsOf,
+  paysInto,
   periodsAt,
   leaderboard,
   round2,
@@ -120,7 +122,13 @@ export async function snapshotLines(db, { fetchJson = get, now = Date.now(), dry
 // ---------------------------------------------------------------------------
 export async function settleOpen(db, { fetchJson = get, now = Date.now(), ledgers = readLedgers(), dry = false, log = console.log } = {}) {
   const snap = await db.collectionGroup('bets').where('status', '==', 'open').get();
-  const due = snap.docs.filter((d) => d.ref.parent.parent?.parent?.id === 'users' && iso(d.get('start')) <= new Date(now).toISOString());
+  const users = snap.docs.filter((d) => d.ref.parent.parent?.parent?.id === 'users');
+  // (a deleted account's open bets: the browser can't delete an open bet (firestore.rules), so they go here,
+  // with its tally, never settled)
+  const gone = await goneUsers(db, users);
+  if (gone.size) await removeGone(db, users.filter((d) => gone.has(d.ref.parent.parent.id)), gone, { dry, log });
+  // (due by the start the bet says; it's checked against the game's own below)
+  const due = users.filter((d) => !gone.has(d.ref.parent.parent.id) && iso(d.get('start')) <= new Date(now).toISOString());
   const byGame = new Map();
   for (const d of due) {
     const key = `${d.get('sport')}|${d.get('event')}`;
@@ -145,7 +153,7 @@ export async function settleOpen(db, { fetchJson = get, now = Date.now(), ledger
       let propValue;
       if (bet.market === 'prop' && game?.final) {
         // (the bettor's graded value for the same pick, else the box score's count)
-        const graded = mine.find((b) => b.id === bet.ref && b.status !== 'open' && b.actual !== undefined);
+        const graded = gradedPick(bet, mine);
         propValue = graded ? graded.actual : await statInFinal(sport, bet, body, null);
         if (propValue === null && !graded && bet.propType === 'tb') propValue = undefined;
       }
@@ -157,23 +165,46 @@ export async function settleOpen(db, { fetchJson = get, now = Date.now(), ledger
       counts[result.status === 'void' ? 'void' : 'settled']++;
       log(`${sport} ${bet.matchup} ${bet.pick} ${bet.odds} x${bet.stake}: ${result.status}${result.note ? ` (${result.note})` : ''}`);
       if (dry) continue;
-      await settleOne(db, d.ref, result);
+      // (filed under the game's own start, not the one the browser wrote)
+      await settleOne(db, d.ref, result, { start: game?.date });
     }
   }
   log(`bets: ${counts.settled} settled, ${counts.void} void, ${counts.waiting} waiting${dry ? ' (dry)' : ''}`);
   return counts;
 }
 
+// (the owners of these bets whose profile is gone: their accounts deleted)
+async function goneUsers(db, docs) {
+  const uids = [...new Set(docs.map((d) => d.ref.parent.parent.id))];
+  if (!uids.length) return new Set();
+  const profiles = await db.getAll(...uids.map((uid) => db.doc(`users/${uid}`)));
+  return new Set(uids.filter((_, i) => !profiles[i].exists));
+}
+
+// A deleted account's open bets and its tally, removed
+async function removeGone(db, docs, gone, { dry = false, log = console.log } = {}) {
+  log(`removed: ${docs.length} open bet${docs.length === 1 ? '' : 's'} of ${gone.size} deleted account${gone.size === 1 ? '' : 's'}${dry ? ' (dry)' : ''}`);
+  if (dry) return;
+  const refs = [...docs.map((d) => d.ref), ...[...gone].map((uid) => db.doc(`tallies/${uid}`))];
+  for (let i = 0; i < refs.length; i += 400) {
+    const batch = db.batch();
+    for (const ref of refs.slice(i, i + 400)) batch.delete(ref);
+    await batch.commit();
+  }
+}
+
 // One bet settled, its wallet paid and its owner's tally added to, together (a bet no longer open is left
-// alone: settled already). A bet placed before a reload counts in the record; its payout stays with its run.
-export async function settleOne(db, ref, result) {
+// alone: settled already). A bet placed before a reload counts in the record; its payout stays with its run,
+// and a bet placed before the wallet was made (deleted and made again) is paid nothing (paysInto). The tally's
+// day is the game's own start when it's known (`start`), not the one the browser wrote on the bet.
+export async function settleOne(db, ref, result, { start = null } = {}) {
   const uid = ref.parent.parent.id;
   const walletRef = db.doc(`users/${uid}/wallet/main`);
   const tallyRef = db.doc(`tallies/${uid}`);
   return db.runTransaction(async (tx) => {
     const [bet, wallet, tally] = await tx.getAll(ref, walletRef, tallyRef);
     if (!bet.exists || bet.get('status') !== 'open') return false;
-    const data = { ...bet.data(), start: iso(bet.get('start')) };
+    const data = { ...bet.data(), start: start ?? iso(bet.get('start')) };
     tx.update(ref, {
       status: result.status,
       profit: result.profit,
@@ -182,7 +213,7 @@ export async function settleOne(db, ref, result) {
       settledAt: FieldValue.serverTimestamp(),
     });
     const credit = creditOf(data.stake, result);
-    if (credit > 0 && wallet.exists && (wallet.get('resets') ?? 0) === (data.run ?? 0)) {
+    if (credit > 0 && wallet.exists && paysInto(bet.data(), wallet.data())) {
       tx.update(walletRef, { balance: round2((wallet.get('balance') ?? 0) + credit) });
     }
     tx.set(tallyRef, { ...addToTally(tally.exists ? tally.data() : null, data, result), updatedAt: FieldValue.serverTimestamp() });

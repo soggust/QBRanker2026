@@ -2,6 +2,7 @@ import { Component, OnDestroy, effect } from '@angular/core';
 import { SPORT } from '@sport/sport';
 import { DATA } from '@ranker/engine/data';
 import { logoFile } from '@ranker/engine/row-fields';
+import { canUse } from './features';
 import { AccountService, SocialProvider } from './account.service';
 import {
   AVATAR_QUALITIES,
@@ -10,7 +11,6 @@ import {
   DISPLAY_NAME_MAX,
   Photo,
   USERNAME_MAX,
-  VISIBILITY_CHOICES,
   VISIBILITY_KINDS,
   Visibility,
   VisibilityKind,
@@ -66,8 +66,10 @@ export async function resizeAvatar(file: Blob): Promise<string> {
   standalone: false,
 })
 export class AccountPageComponent implements OnDestroy {
-  readonly visibilityKinds = VISIBILITY_KINDS;
-  readonly visibilityChoices = VISIBILITY_CHOICES;
+  // (the bets' rows only where play betting is open: development, or an admin)
+  get visibilityKinds() {
+    return canUse('bets') ? VISIBILITY_KINDS : VISIBILITY_KINDS.filter((k) => k.kind !== 'openBets' && k.kind !== 'betHistory');
+  }
   readonly displayNameMax = DISPLAY_NAME_MAX;
   readonly usernameMax = USERNAME_MAX;
   readonly bioMax = BIO_MAX;

@@ -24,7 +24,9 @@ export class CommunityStore {
     const me = this.account.user()?.uid ?? null;
     return Promise.all(
       entries.docs.map(async (d) => {
-        const votes = await f.getDocs(f.collection(d.ref, 'votes'));
+        // (only the votes for this submission count: a vote's `at` is the entry's submittedAt; firestore.rules)
+        const submitted = d.data()['submittedAt'] as { isEqual?: (o: unknown) => boolean } | undefined;
+        const votes = (await f.getDocs(f.collection(d.ref, 'votes'))).docs.filter((v) => !!submitted?.isEqual?.(v.data()['at']));
         const entry = { ...(d.data() as Omit<CommunityEntry, 'owner'>), owner: d.id } as CommunityEntry;
         entry.ids ??= [];
         entry.names ??= [];
@@ -32,7 +34,7 @@ export class CommunityStore {
         return {
           entry,
           tally: tally(
-            votes.docs.map((v) => ({ voter: v.id, value: v.data()['value'] as number })),
+            votes.map((v) => ({ voter: v.id, value: v.data()['value'] as number })),
             me,
           ),
         };
@@ -46,9 +48,15 @@ export class CommunityStore {
     const uid = this.account.user()?.uid;
     if (!uid) throw Object.assign(new Error('signed out'), { code: 'permission-denied' });
     const [firestore, f] = await Promise.all([db(), import('firebase/firestore')]);
-    const ref = f.doc(firestore, 'community', key, 'entries', owner, 'votes', uid);
-    if (value === 0) await f.deleteDoc(ref);
-    else await f.setDoc(ref, { value, voter: uid });
+    const entryRef = f.doc(firestore, 'community', key, 'entries', owner);
+    const ref = f.doc(entryRef, 'votes', uid);
+    if (value === 0) {
+      await f.deleteDoc(ref);
+      return;
+    }
+    // (for the entry as submitted now: its submittedAt, which the rules check)
+    const at = (await f.getDoc(entryRef)).data()?.['submittedAt'];
+    await f.setDoc(ref, { value, voter: uid, at: at ?? null });
   }
 
   // The list makers' public profiles (their pictures and usernames), read once each

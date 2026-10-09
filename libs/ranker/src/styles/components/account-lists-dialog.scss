@@ -160,12 +160,6 @@ list-modal {
     gap: 8px;
   }
 
-  .vis-pills {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-
   // A list's first rows as they'll be saved: the rank, the logo, the name
   .save-preview {
     background: rgba(0, 0, 0, 0.28);

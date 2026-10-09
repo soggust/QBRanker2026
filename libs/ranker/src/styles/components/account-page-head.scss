@@ -1,0 +1,101 @@
+@use "../variables" as v;
+
+// An account page's title strip (page-head.component.ts): the icon on a lit disc (the Tracker's), the name in
+// the headline face, the line under it, the actions on the right; on its own scoreboard panel unless bare
+:host {
+  align-items: center;
+  @include v.scoreboard-panel(12px, 0 6px 18px rgba(0, 0, 0, 0.45));
+  box-sizing: border-box;
+  color: #eee;
+  display: flex;
+  font-family: v.$font-base;
+  gap: 14px;
+  padding: 16px 20px;
+}
+
+:host(.bare) {
+  background: none;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+}
+
+.page-badge {
+  align-items: center;
+  background: radial-gradient(circle at 35% 30%, color-mix(in srgb, var(--scoreboard-led) 40%, #222), #151515 70%);
+  border: 1px solid color-mix(in srgb, var(--scoreboard-led) 60%, transparent);
+  border-radius: 50%;
+  box-shadow: 0 0 12px color-mix(in srgb, var(--scoreboard-led) 35%, transparent);
+  color: var(--scoreboard-led);
+  display: flex;
+  flex: none;
+  height: 42px;
+  justify-content: center;
+  width: 42px;
+
+  .mat-icon {
+    @include v.icon-size(22px);
+  }
+}
+
+.page-heading {
+  flex: 1 1 0;
+  min-width: 0;
+
+  h2 {
+    color: #fff;
+    @include v.headline(22px);
+    letter-spacing: 0.75px;
+    margin: 0;
+    text-transform: uppercase;
+  }
+
+  p {
+    color: rgba(255, 255, 255, 0.65);
+    font-size: 13px;
+    line-height: 1.45;
+    margin: 2px 0 0;
+  }
+}
+
+.page-actions {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 8px;
+
+  &:empty {
+    display: none;
+  }
+}
+
+// (phones: the actions under the title)
+@media (max-width: 640px) {
+  :host {
+    flex-wrap: wrap;
+    gap: 10px 12px;
+    padding: 14px 16px;
+  }
+
+  :host(.bare) {
+    padding: 0;
+  }
+
+  .page-badge {
+    height: 36px;
+    width: 36px;
+
+    .mat-icon {
+      @include v.icon-size(19px);
+    }
+  }
+
+  .page-heading h2 {
+    font-size: 19px;
+  }
+
+  // (the actions on a line of their own, under the words)
+  .page-actions {
+    flex-basis: 100%;
+    padding-left: 48px;
+  }
+}

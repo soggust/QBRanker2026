@@ -21,19 +21,25 @@ const HASH_VIEWS: Record<string, View> = {
   friends: 'friends',
 };
 
+// (#u/<username>: a profile; #lists/<uid>/<id>: one saved list; #community/<tab>/<season>: a board;
+// #tracker/<uid>: someone's tracker, read only)
 export function viewOf(hash: string): View {
   const key = hash.replace(/^#/, '');
   if (key.startsWith('u/') && key.length > 2) return 'user';
-  // ---- lists (phase 2) ----
-  // (#lists/<uid>/<id>: one saved list; #community/<tab>/<season>: a board)
   if (key.startsWith('lists/')) return 'lists';
   if (key.startsWith('community/')) return 'community';
-  // ---- end lists ----
-  // ---- tracker (phase 2) ----
-  // (#tracker/<uid>: someone's tracker, read only)
   if (key.startsWith('tracker/') && key.length > 8) return 'tracker';
-  // ---- end tracker ----
   return Object.hasOwn(HASH_VIEWS, key) ? HASH_VIEWS[key] : 'rankings';
+}
+
+// (#u/<username>: the name; '' on any other page)
+function userOf(hash: string): string {
+  if (viewOf(hash) !== 'user') return '';
+  try {
+    return decodeURIComponent(hash.slice('#u/'.length));
+  } catch {
+    return hash.slice('#u/'.length);
+  }
 }
 
 // (each page's name, for the page heading and the tab)
@@ -76,16 +82,16 @@ export class AppComponent {
   @HostListener('window:hashchange')
   onHashChange(): void {
     this.view = viewOf(location.hash);
+    this.viewUser = userOf(location.hash);
   }
 
   get viewTitle(): string {
     return this.view === 'rankings' ? this.sportName + ' Season Ranker' : VIEW_TITLES[this.view];
   }
 
-  // (#u/<username>: whose profile)
-  get viewUser(): string {
-    return decodeURIComponent(location.hash.slice('#u/'.length));
-  }
+  // (#u/<username>: whose profile; set with the view, so a change of page never hands the profile another
+  // page's hash for a name)
+  viewUser = userOf(location.hash);
 
   // The sport bar's sports: a sport not ready for everyone (MMA) only in development or for an admin
   get sports(): { id: string; label: string }[] {

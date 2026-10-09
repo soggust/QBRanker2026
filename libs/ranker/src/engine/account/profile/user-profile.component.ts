@@ -1,9 +1,12 @@
 import { Component, Input, WritableSignal, effect, signal, untracked } from '@angular/core';
 import { SITE_SPORTS } from '@ranker/core/sports';
+import { SPORT } from '@sport/sport';
 import { AccountService } from '../account.service';
 import { Profile, VisibilityKind, errorMessage } from '../account-helpers';
+import { canUse } from '../features';
 import { FriendsService } from '../friends/friends.service';
 import { Access, BetRecord, accessAll, betRecord, hiddenNote, money, oddsText, recordText, relationOf } from '../friends/friends-helpers';
+import { listPath } from '../lists/lists-helpers';
 import { BetSummary, ListSummary, PinSummary, PresetSummary, loadBalance, loadBets, loadLists, loadPins, loadPresets } from './profile-data';
 
 type Load<T> = { state: 'loading' } | { state: 'ready'; value: T } | { state: 'error'; message: string };
@@ -20,6 +23,7 @@ type Load<T> = { state: 'loading' } | { state: 'ready'; value: T } | { state: 'e
   standalone: false,
 })
 export class UserProfileComponent {
+  readonly canUse = canUse;
   readonly money = money;
   readonly oddsText = oddsText;
   readonly recordText = recordText;
@@ -63,7 +67,7 @@ export class UserProfileComponent {
       const person = this.person();
       if (person.state !== 'found') return;
       const access = this.access;
-      const key = person.uid + '|' + this.relation + '|' + JSON.stringify(access);
+      const key = person.uid + '|' + this.relation + '|' + JSON.stringify(access) + '|' + canUse('bets');
       untracked(() => {
         if (key === this.loadedKey) return;
         this.loadedKey = key;
@@ -106,8 +110,14 @@ export class UserProfileComponent {
     return this.relation === 'self';
   }
 
+  // (lists: each list says who sees it, the profile's setting only the default for a new one, so the section
+  // always asks, for the ones this viewer may see)
   get access(): Record<VisibilityKind, Access> {
-    return accessAll(this.found?.profile.visibility, this.relation);
+    return { ...accessAll(this.found?.profile.visibility, this.relation), lists: 'shown' };
+  }
+
+  listHref(uid: string, list: ListSummary): string {
+    return listPath(list.sport || SPORT.id, uid, list.id);
   }
 
   hidden(kind: VisibilityKind): string {
@@ -118,7 +128,9 @@ export class UserProfileComponent {
     const owner = this.isSelf;
     const friend = this.relation === 'friends';
     const run = async <T>(target: WritableSignal<Load<T> | null>, kind: VisibilityKind, load: () => Promise<T>) => {
-      if (access[kind] !== 'shown') {
+      // (bets only where play betting is open)
+      const bets = kind === 'openBets' || kind === 'betHistory';
+      if (access[kind] !== 'shown' || (bets && !canUse('bets'))) {
         target.set(null);
         return;
       }
@@ -138,7 +150,7 @@ export class UserProfileComponent {
       run(this.pins, 'tracker', () => loadPins(uid, owner, friend)),
       run(this.openBets, 'openBets', () => loadBets(uid, 'open')),
       run(this.settledBets, 'betHistory', () => loadBets(uid, 'settled')),
-      access.betHistory === 'shown'
+      access.betHistory === 'shown' && canUse('bets')
         ? loadBalance(uid)
             .then((b) => this.found?.uid === uid && this.balance.set(b))
             .catch(() => undefined)

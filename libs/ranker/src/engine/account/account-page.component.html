@@ -1,6 +1,6 @@
 <div class="account-page">
   @if (!account.ready()) {
-    <div class="account-loading" role="status"><span class="spinner" aria-hidden="true"></span>Loading your account…</div>
+    <div class="page-loading" role="status"><span class="spinner" aria-hidden="true"></span>Loading your account…</div>
   } @else if (!user) {
     <!-- Signed out: what an account is for, and the way in -->
     <div class="soon-panel signed-out">
@@ -10,7 +10,7 @@
       <button type="button" class="primary" (click)="account.openLogin()">Sign in</button>
     </div>
   } @else if (!profile) {
-    <div class="account-loading" role="status"><span class="spinner" aria-hidden="true"></span>Setting up your profile…</div>
+    <div class="page-loading" role="status"><span class="spinner" aria-hidden="true"></span>Setting up your profile…</div>
   } @else {
     <!-- Who's signed in -->
     <header class="account-hero">
@@ -24,6 +24,8 @@
         </h2>
         <span class="hero-user">&#64;{{ profile.username }}</span>
       </div>
+      <!-- (the profile as others see it, by the Privacy settings below) -->
+      <a class="secondary small-btn hero-link" [href]="'#u/' + profile.username" title="Your profile, as others see it"><mat-icon aria-hidden="true" fontIcon="badge"></mat-icon><span class="hero-link-text">View profile</span></a>
     </header>
 
     <!-- The profile: the picture, the names and the bio -->
@@ -126,20 +128,8 @@
                 <span class="privacy-label" [id]="'vis-' + item.kind">{{ item.label }}</span>
                 <span class="privacy-hint">{{ item.hint }}</span>
               </div>
-              <div class="privacy-choices" role="radiogroup" [attr.aria-labelledby]="'vis-' + item.kind">
-                @for (choice of visibilityChoices; track choice.value) {
-                  <button
-                    type="button"
-                    role="radio"
-                    class="game-filter small"
-                    [class.active]="visibility(item.kind) === choice.value"
-                    [attr.aria-checked]="visibility(item.kind) === choice.value"
-                    [disabled]="visibilitySaving === item.kind"
-                    (click)="setVisibility(item.kind, choice.value)"
-                  >
-                    {{ choice.label }}
-                  </button>
-                }
+              <div class="privacy-choices">
+                <visibility-pills [labelledby]="'vis-' + item.kind" [value]="visibility(item.kind)" [disabled]="visibilitySaving === item.kind" (picked)="setVisibility(item.kind, $event)"></visibility-pills>
                 <span class="privacy-status" aria-live="polite">
                   @if (visibilitySaving === item.kind) {
                     <span class="spinner tiny" aria-hidden="true"></span>

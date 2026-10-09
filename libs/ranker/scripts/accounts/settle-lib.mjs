@@ -160,6 +160,31 @@ export function settlePlayBet(bet, game, { observations = [], propValue, now = D
   return { status: r.status, profit: r.status === 'won' ? toWin(bet.stake, bet.odds) : r.status === 'lost' ? -bet.stake : 0, final: r.final };
 }
 
+// (the bettor's graded pick a prop is settled by: the one its ref names, and only if it's the same stat of the
+// same player; a ref to another pick, one whose player had a big night, would otherwise settle it by that count)
+export function gradedPick(bet, ledgerBets) {
+  return (ledgerBets ?? []).find(
+    (b) =>
+      b.id === bet.ref &&
+      b.market === 'prop' &&
+      b.propType === bet.propType &&
+      String(b.athlete) === String(bet.athlete) &&
+      b.status !== 'open' &&
+      b.actual !== undefined,
+  );
+}
+
+// (whether a settled bet pays into the wallet as it is now: the same run (a reload starts another) and placed
+// after the wallet was made; a wallet deleted and made again is back at run 0, and must not collect the old
+// one's bets. Timestamps or anything with toMillis, or ISO strings)
+const millisOf = (v) => (typeof v?.toMillis === 'function' ? v.toMillis() : v == null ? null : Date.parse(v));
+export function paysInto(bet, wallet) {
+  if (!wallet || (wallet.resets ?? 0) !== (bet.run ?? 0)) return false;
+  const made = millisOf(wallet.createdAt);
+  const placed = millisOf(bet.placedAt);
+  return made == null || (Number.isFinite(placed) && placed >= made);
+}
+
 // (what goes back in the wallet: the stake and the winnings on a win, the stake on a push or a void)
 export const creditOf = (stake, result) => (result.status === 'won' ? round2(stake + result.profit) : result.status === 'lost' ? 0 : stake);
 

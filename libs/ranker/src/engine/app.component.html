@@ -32,29 +32,18 @@
   <bets-page></bets-page>
 } @else if (view === 'account') {
   <account-page></account-page>
-<!-- friends (phase 2) -->
-} @else if (view === 'friends') {
-  <friends-page></friends-page>
-} @else if (view === 'user') {
-  <user-profile [username]="viewUser"></user-profile>
-<!-- end friends -->
-<!-- wallet (phase 2) -->
-} @else if (view === 'wallet') {
-  <wallet-page></wallet-page>
-<!-- end wallet -->
-<!-- tracker (phase 2) -->
-} @else if (view === 'tracker') {
-  <tracker-page></tracker-page>
-<!-- end tracker -->
-<!-- lists (phase 2) -->
 } @else if (view === 'lists') {
   <lists-page></lists-page>
 } @else if (view === 'community') {
   <community-page></community-page>
-<!-- end lists -->
-} @else if (view !== 'rankings') {
-  <!-- (the pages later phases fill in) -->
-  <coming-soon [heading]="viewTitle"></coming-soon>
+} @else if (view === 'tracker') {
+  <tracker-page></tracker-page>
+} @else if (view === 'wallet') {
+  <wallet-page></wallet-page>
+} @else if (view === 'friends') {
+  <friends-page></friends-page>
+} @else if (view === 'user') {
+  <user-profile [username]="viewUser"></user-profile>
 } @else if (gate === 'soon') {
   <!-- (a sport not ready for everyone, on the live site) -->
   <coming-soon [heading]="sportName" detail="This sport is on its way. Check back soon." [backHref]="'/' + sports[0].id + '/'" [backLabel]="'Go to ' + sports[0].label"></coming-soon>

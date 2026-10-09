@@ -1,13 +1,9 @@
 <div class="lists-page community-page">
-  <header class="lists-head">
-    <div class="lists-head-text">
-      <h2>Community</h2>
-      <p>Everyone’s submitted lists for a tab and season, the consensus they add up to, and the votes.</p>
-    </div>
+  <page-head heading="Community" icon="groups" sub="Everyone’s submitted lists for a tab and season, the consensus they add up to, and the votes.">
     @if (account.user()) {
       <a class="secondary small-btn" href="#lists"><mat-icon aria-hidden="true" fontIcon="format_list_numbered"></mat-icon>My lists</a>
     }
-  </header>
+  </page-head>
 
   <!-- Which board: the sport (each its own page), the tab, the season -->
   <div class="board-picker">
@@ -38,7 +34,7 @@
   </div>
 
   @if (state === 'loading') {
-    <div class="lists-loading" role="status"><span class="spinner" aria-hidden="true"></span>Loading the {{ boardName }} board…</div>
+    <div class="page-loading" role="status"><span class="spinner" aria-hidden="true"></span>Loading the {{ boardName }} board…</div>
   } @else if (state === 'error') {
     <p class="form-error" role="alert">{{ error }}</p>
   } @else if (!cards.length) {

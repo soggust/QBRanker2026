@@ -45,23 +45,15 @@ export interface BetSummary extends BetLike {
 const text = (value: unknown, fallback = ''): string => (typeof value === 'string' ? value : value == null ? fallback : String(value));
 const num = (value: unknown): number | null => (typeof value === 'number' && Number.isFinite(value) ? value : null);
 
-// (a subcollection's docs, the owner's or shared with this viewer: by the rules, someone else sees only
-// those not marked private on the doc itself when the doc carries its own visibility)
-async function read(uid: string, name: string, owner: boolean, friend: boolean) {
+// (a subcollection's docs, the owner's or shared with this viewer: presets and pins by the owner's setting
+// for the kind (the page asks only when it lets this viewer see them); lists each by their own visibility,
+// so someone else asks only for the ones they may see, as the rules require)
+async function read(uid: string, name: 'lists' | 'presets' | 'pins', owner: boolean, friend: boolean) {
   const [firestore, f] = await Promise.all([db(), import('firebase/firestore')]);
   const ref = f.collection(firestore, 'users', uid, name);
-  if (owner) return (await f.getDocs(ref)).docs;
-  try {
-    return (await f.getDocs(ref)).docs.filter((d) => {
-      const v = d.data()['visibility'];
-      return v === undefined || v === 'public' || (v === 'friends' && friend);
-    });
-  } catch (error) {
-    // (rules that check each doc's own visibility: ask only for the ones this viewer may see)
-    if ((error as { code?: string }).code !== 'permission-denied') throw error;
-    const shown = friend ? ['public', 'friends'] : ['public'];
-    return (await f.getDocs(f.query(ref, f.where('visibility', 'in', shown)))).docs;
-  }
+  if (owner || name !== 'lists') return (await f.getDocs(ref)).docs;
+  const shown = friend ? ['public', 'friends'] : ['public'];
+  return (await f.getDocs(f.query(ref, f.where('visibility', 'in', shown)))).docs;
 }
 
 export async function loadLists(uid: string, owner: boolean, friend: boolean): Promise<ListSummary[]> {
@@ -113,7 +105,7 @@ function bet(d: { id: string; data: () => Record<string, unknown> }): BetSummary
     profit: num(x['profit']),
     start: millis(x['start']),
     placed: millis(x['placedAt']),
-    settled: millis(x['gradedAt'] ?? x['settledAt']),
+    settled: millis(x['settledAt']),
     botPick: x['botPick'] === true,
   };
 }

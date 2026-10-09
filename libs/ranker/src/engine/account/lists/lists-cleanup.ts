@@ -1,4 +1,5 @@
 import { db } from '@ranker/core/firebase';
+import { deleteRefs } from '../account-cleanup';
 
 // A deleted account's presets, lists and community entries (their votes with them), and the votes it
 // cast on others' entries: AccountService.deleteAccount runs this (onDelete) after signing in again,
@@ -23,13 +24,10 @@ export async function deleteListsData(uid: string): Promise<void> {
   for (const key of boards) {
     const entry = f.doc(firestore, 'community', key, 'entries', uid);
     const votes = await f.getDocs(f.collection(entry, 'votes'));
-    refs.push(...votes.docs.map((d) => d.ref), entry);
+    // (the entry ahead of its votes: they're the owner's to clear only once it's gone; firestore.rules)
+    refs.push(entry, ...votes.docs.map((d) => d.ref));
   }
   refs.push(...cast.docs.map((d) => d.ref), ...presets.docs.map((d) => d.ref), ...lists.docs.map((d) => d.ref));
 
-  for (let i = 0; i < refs.length; i += 400) {
-    const batch = f.writeBatch(firestore);
-    refs.slice(i, i + 400).forEach((ref) => batch.delete(ref));
-    await batch.commit();
-  }
+  await deleteRefs(refs);
 }

@@ -17,6 +17,7 @@
 @include kit.pills;
 @include kit.fields;
 @include kit.buttons;
+@include kit.states;
 
 .account-page {
   box-sizing: border-box;
@@ -28,16 +29,6 @@
   margin: 0 auto;
   max-width: 780px;
   padding: 26px 16px 48px;
-}
-
-.account-loading {
-  align-items: center;
-  @include v.scoreboard-panel(12px);
-  color: rgba(255, 255, 255, 0.8);
-  display: flex;
-  gap: 12px;
-  justify-content: center;
-  padding: 28px;
 }
 
 // ---------------------------------------------------------------------------
@@ -74,6 +65,11 @@
     font-weight: 700;
     text-shadow: var(--scoreboard-glow);
   }
+}
+
+.hero-link {
+  flex: none;
+  margin-left: auto;
 }
 
 // ---------------------------------------------------------------------------
@@ -115,12 +111,6 @@ card-panel.account-panel {
   justify-content: flex-end;
 }
 
-.small-btn {
-  font-size: 11.5px !important;
-  min-height: 32px !important;
-  padding: 0 12px !important;
-}
-
 label.secondary {
   position: relative;
 
@@ -138,13 +128,6 @@ label.secondary {
 .secondary.open {
   border-color: var(--scoreboard-led);
   color: var(--scoreboard-led);
-}
-
-.spinner.tiny {
-  border-width: 1.5px;
-  height: 12px;
-  vertical-align: -2px;
-  width: 12px;
 }
 
 // ---------------------------------------------------------------------------
@@ -400,82 +383,25 @@ label.secondary {
 }
 
 // ---------------------------------------------------------------------------
-// Coming soon (and signed out): one scoreboard panel, centered
-// ---------------------------------------------------------------------------
-.soon-panel {
-  align-items: center;
-  @include v.scoreboard-panel(12px, 0 12px 32px rgba(0, 0, 0, 0.5));
-  box-sizing: border-box;
-  color: #eee;
-  display: flex;
-  flex-direction: column;
-  font-family: v.$font-base;
-  gap: 10px;
-  margin: 12vh auto 0;
-  max-width: 440px;
-  padding: 32px 28px 28px;
-  text-align: center;
-  width: calc(100% - 32px);
-
-  &.signed-out {
-    margin-top: 8vh;
-  }
-
-  h2 {
-    color: #fff;
-    @include v.headline(22px);
-    letter-spacing: 0.75px;
-    margin: 0;
-    text-transform: uppercase;
-  }
-
-  .primary {
-    margin-top: 8px;
-  }
-}
-
-.soon-icon {
-  color: var(--scoreboard-led);
-  @include v.icon-size(40px);
-  text-shadow: var(--scoreboard-glow);
-}
-
-.soon-lit {
-  color: var(--scoreboard-led);
-  font-size: 13px;
-  font-weight: 800;
-  letter-spacing: 2px;
-  margin: 0;
-  text-shadow: var(--scoreboard-glow);
-  text-transform: uppercase;
-}
-
-.soon-detail {
-  color: rgba(255, 255, 255, 0.7);
-  font-size: 14px;
-  line-height: 1.5;
-  margin: 0;
-}
-
-.soon-back {
-  color: #fff;
-  font-size: 13px;
-  font-weight: 700;
-  margin-top: 8px;
-  text-decoration: underline;
-  text-decoration-color: color-mix(in srgb, var(--scoreboard-led) 60%, transparent);
-  text-underline-offset: 3px;
-
-  &:hover,
-  &:focus-visible {
-    color: var(--scoreboard-led);
-  }
-}
-
-// ---------------------------------------------------------------------------
 // Phones
 // ---------------------------------------------------------------------------
 @media (max-width: 640px) {
+  // (the hero's View profile: its icon alone)
+  .hero-link {
+    gap: 0;
+    padding: 0 9px !important;
+  }
+
+  .hero-link-text {
+    border: 0;
+    clip: rect(0 0 0 0);
+    height: 1px;
+    overflow: hidden;
+    position: absolute;
+    white-space: nowrap;
+    width: 1px;
+  }
+
   .account-page {
     gap: 14px;
     padding: 16px 12px 40px;

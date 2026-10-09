@@ -14,9 +14,6 @@ import {
   usernameFrom,
   usernameKey,
 } from './account-helpers';
-// ---- wallet (phase 2) ----
-import { deleteWallet } from './wallet/wallet-cleanup';
-// ---- end wallet ----
 
 // The signed-in user: their uid, their profile (null for the moment between signing up and the profile
 // landing), and what the sign-in itself knows (email, the providers linked, the provider's photo, admin)
@@ -85,23 +82,13 @@ export class AccountService {
   constructor() {
     // (a returning visitor: restore their sign-in now)
     if (hinted()) void this.start();
-    // ---- wallet (phase 2) ----
-    // (the play-money wallet and its bets go with the account)
-    this.onDelete(deleteWallet);
-    // ---- end wallet ----
-    // ---- friends (phase 2) ----
-    // (every friend and request, both halves: loaded only when an account is deleted)
+    // Each feature's documents, deleted with the account (each loaded only then): the play-money wallet and
+    // its settled bets; every friend and request, both halves; the pinned comparisons; presets, saved lists,
+    // their community entries with the votes on them, and the votes cast
+    this.onDelete((uid) => import('./wallet/wallet-cleanup').then((m) => m.deleteWallet(uid)));
     this.onDelete((uid) => import('./friends/friends-cleanup').then((m) => m.removeFriends(uid)));
-    // ---- end friends ----
-    // ---- tracker (phase 2) ----
-    // (the pinned comparisons: loaded only when an account is deleted)
-    this.onDelete((uid) => import('./tracker/tracker.store').then((m) => m.deletePins(uid)));
-    // ---- end tracker ----
-    // ---- lists (phase 2) ----
-    // (presets, saved lists, community entries and the votes on them, and the votes cast: loaded only
-    // when an account is deleted)
+    this.onDelete((uid) => import('./tracker/tracker-cleanup').then((m) => m.deletePins(uid)));
     this.onDelete((uid) => import('./lists/lists-cleanup').then((m) => m.deleteListsData(uid)));
-    // ---- end lists ----
   }
 
   // Loads the SDK and follows the sign-in (once)

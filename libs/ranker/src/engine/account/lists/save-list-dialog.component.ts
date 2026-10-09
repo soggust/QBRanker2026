@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, OnInit, Output, inject } from '@angular/core';
 import { SPORT } from '@sport/sport';
 import { AccountService } from '../account.service';
-import { VISIBILITY_CHOICES, Visibility, errorMessage } from '../account-helpers';
+import { Visibility, errorMessage } from '../account-helpers';
 import { ListDraft, ListsStore } from './lists.store';
 import { NOTE_MAX, TITLE_MAX, listPath, logoUrl, noteProblem, titleProblem } from './lists-helpers';
 
@@ -61,11 +61,7 @@ export const VISIBILITY_HINTS: Record<Visibility, string> = {
           </label>
           <div class="vis-row">
             <span class="field-label" id="save-vis">Who can see it</span>
-            <div class="vis-pills" role="radiogroup" aria-labelledby="save-vis">
-              @for (choice of choices; track choice.value) {
-                <button type="button" role="radio" class="game-filter small" [class.active]="visibility === choice.value" [attr.aria-checked]="visibility === choice.value" (click)="visibility = choice.value">{{ choice.label }}</button>
-              }
-            </div>
+            <visibility-pills labelledby="save-vis" [value]="visibility" (picked)="visibility = $event"></visibility-pills>
             <span class="field-hint">{{ hints[visibility] }}</span>
           </div>
           @if (error) {
@@ -96,7 +92,6 @@ export class SaveListDialogComponent implements OnInit {
 
   readonly titleMax = TITLE_MAX;
   readonly noteMax = NOTE_MAX;
-  readonly choices = VISIBILITY_CHOICES;
   readonly hints = VISIBILITY_HINTS;
 
   title = '';

@@ -141,7 +141,6 @@ export class ListsStore {
     const before = await f.getDoc(entryRef);
     const previous = before.exists() ? (before.data()['listId'] as string) : null;
     if (previous && previous !== list.id) {
-      await this.clearVotes(key, uid);
       // (the list it replaces isn't on the board any more)
       await f.updateDoc(f.doc(firestore, 'users', uid, 'lists', previous), { community: null, updatedAt: f.serverTimestamp() }).catch(() => undefined);
     }
@@ -159,6 +158,8 @@ export class ListsStore {
     });
     batch.update(f.doc(firestore, 'users', uid, 'lists', list.id), { community: { submitted: true, key }, updatedAt: f.serverTimestamp() });
     await batch.commit();
+    // (the earlier submission's votes, stale now: the rules let the owner clear only stale ones)
+    if (before.exists()) await this.clearVotes(key, uid).catch(() => undefined);
   }
 
   // Taken off the board (its votes with it)
@@ -169,13 +170,15 @@ export class ListsStore {
     const entryRef = f.doc(firestore, 'community', key, 'entries', uid);
     const snap = await f.getDoc(entryRef);
     if (snap.exists() && snap.data()['listId'] === list.id) {
-      await this.clearVotes(key, uid);
+      // (the entry first: its votes are stale once it's gone, and only then the owner's to clear)
       await f.deleteDoc(entryRef);
+      await this.clearVotes(key, uid).catch(() => undefined);
     }
     await f.updateDoc(f.doc(firestore, 'users', uid, 'lists', list.id), { community: null, updatedAt: f.serverTimestamp() }).catch(() => undefined);
   }
 
-  // (the votes on the user's entry: its owner may clear them)
+  // (the votes on the user's entry: its owner may clear them once they're stale, the entry gone or submitted
+  // again; firestore.rules)
   private async clearVotes(key: string, uid: string): Promise<void> {
     const [firestore, f] = await Promise.all([db(), import('firebase/firestore')]);
     const votes = await f.getDocs(f.collection(firestore, 'community', key, 'entries', uid, 'votes'));

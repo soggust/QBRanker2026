@@ -2,7 +2,7 @@ import { Injectable, computed, effect, signal, untracked } from '@angular/core';
 import type { DocumentReference, FieldValue, WriteBatch } from 'firebase/firestore';
 import { db } from '@ranker/core/firebase';
 import { AccountService } from '../account.service';
-import { Profile } from '../account-helpers';
+import { Profile, USERNAME_PATTERN } from '../account-helpers';
 import { FriendStatus, SEARCH_LIMIT, millis, prefixRange, sortFriends } from './friends-helpers';
 
 // (someone else's profile, with whose it is)
@@ -132,8 +132,11 @@ export class FriendsService {
 
   // (a profile by its username, any capitals: null when no one has it)
   async byUsername(username: string): Promise<PublicProfile | null> {
+    // (not a username at all, e.g. #u/a/b: no one, without asking)
+    const name = username.trim().replace(/^@+/, '');
+    if (!USERNAME_PATTERN.test(name)) return null;
     const [firestore, { doc, getDoc }] = await Promise.all([db(), import('firebase/firestore')]);
-    const claim = await getDoc(doc(firestore, 'usernames', username.trim().replace(/^@+/, '').toLowerCase()));
+    const claim = await getDoc(doc(firestore, 'usernames', name.toLowerCase()));
     if (!claim.exists()) return null;
     const uid = claim.data()['uid'] as string;
     const snap = await getDoc(doc(firestore, 'users', uid));

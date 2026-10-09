@@ -18,18 +18,6 @@ const millis = (value: unknown): number | null => {
   return t?.toMillis ? t.toMillis() : null;
 };
 
-// Every pin a user has, deleted (their account going: AccountService.onDelete)
-export async function deletePins(uid: string): Promise<void> {
-  const [firestore, f] = await Promise.all([db(), import('firebase/firestore')]);
-  const snap = await f.getDocs(f.collection(firestore, 'users', uid, 'pins'));
-  // (a batch holds 500 writes)
-  for (let i = 0; i < snap.docs.length; i += 400) {
-    const batch = f.writeBatch(firestore);
-    for (const d of snap.docs.slice(i, i + 400)) batch.delete(d.ref);
-    await batch.commit();
-  }
-}
-
 @Injectable({ providedIn: 'root' })
 export class TrackerStore {
   private readonly account = inject(AccountService);

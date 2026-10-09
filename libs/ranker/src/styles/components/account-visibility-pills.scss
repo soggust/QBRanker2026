@@ -1,0 +1,17 @@
+@use "account-kit" as kit;
+
+// Public / Friends / Only me (visibility-pills.component.ts): the sport's small pills in a row
+:host {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+@include kit.pills;
+
+// (a change saving: dimmed, not acting)
+.game-filter.busy {
+  cursor: progress;
+  opacity: 0.5;
+}

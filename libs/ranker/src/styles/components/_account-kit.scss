@@ -1,7 +1,8 @@
 @use "../variables" as v;
 
-// The account pieces' shared controls (the login dialog, the settings page): text fields on the
-// scoreboard, the sport's pills, the lit main button, a plain button, a spinner
+// The account pieces' shared controls and states (the login dialog, the settings page, every account page):
+// text fields on the scoreboard, the sport's pills, the lit main button, a plain button, a spinner; a page
+// loading, and a page with nothing to show yet (signed out, empty, not found)
 
 // The sport's pills (.game-filter: its face, edge and text are the sport theme's, global; their shape is
 // player-card.scss's, which doesn't reach here)
@@ -210,6 +211,8 @@
     letter-spacing: 1px;
     min-height: 40px;
     padding: 0 18px;
+    // (a link that's a button: no underline)
+    text-decoration: none;
     text-transform: uppercase;
     transition:
       filter 0.12s ease,
@@ -302,6 +305,20 @@
     width: 16px;
   }
 
+  // (a smaller button, in a row of actions; a spinner sized for one)
+  .small-btn {
+    font-size: 11.5px !important;
+    min-height: 32px !important;
+    padding: 0 12px !important;
+  }
+
+  .spinner.tiny {
+    border-width: 1.5px;
+    height: 12px;
+    vertical-align: -2px;
+    width: 12px;
+  }
+
   @keyframes account-spin {
     to {
       transform: rotate(360deg);
@@ -311,6 +328,96 @@
   @media (prefers-reduced-motion: reduce) {
     .spinner {
       animation-duration: 2.4s;
+    }
+  }
+}
+
+// A page loading: a scoreboard strip with a spinner. Signed out, nothing yet, not found: one scoreboard panel,
+// centered, its icon lit, its name, a line on why, and the way on (a button, or a link back)
+@mixin states {
+  .page-loading {
+    align-items: center;
+    @include v.scoreboard-panel(12px);
+    color: rgba(255, 255, 255, 0.8);
+    display: flex;
+    font-family: v.$font-base;
+    gap: 12px;
+    justify-content: center;
+    padding: 28px;
+  }
+
+  .soon-panel {
+    align-items: center;
+    @include v.scoreboard-panel(12px, 0 12px 32px rgba(0, 0, 0, 0.5));
+    box-sizing: border-box;
+    color: #eee;
+    display: flex;
+    flex-direction: column;
+    font-family: v.$font-base;
+    gap: 10px;
+    margin: 8vh auto 0;
+    max-width: 460px;
+    padding: 30px 26px 26px;
+    text-align: center;
+    width: 100%;
+
+    // (in a page that has its own header above: closer under it)
+    &.empty {
+      margin-top: 2vh;
+    }
+
+    h2 {
+      color: #fff;
+      @include v.headline(22px);
+      letter-spacing: 0.75px;
+      margin: 0;
+      text-transform: uppercase;
+    }
+
+    .primary {
+      margin-top: 6px;
+    }
+  }
+
+  .soon-icon {
+    color: var(--scoreboard-led);
+    @include v.icon-size(40px);
+    text-shadow: var(--scoreboard-glow);
+  }
+
+  .soon-lit {
+    color: var(--scoreboard-led);
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    margin: 0;
+    text-shadow: var(--scoreboard-glow);
+    text-transform: uppercase;
+  }
+
+  .soon-detail {
+    color: rgba(255, 255, 255, 0.72);
+    font-size: 14px;
+    line-height: 1.5;
+    margin: 0;
+
+    strong {
+      color: #fff;
+    }
+  }
+
+  .soon-back {
+    color: #fff;
+    font-size: 13px;
+    font-weight: 700;
+    margin-top: 6px;
+    text-decoration: underline;
+    text-decoration-color: color-mix(in srgb, var(--scoreboard-led) 60%, transparent);
+    text-underline-offset: 3px;
+
+    &:hover,
+    &:focus-visible {
+      color: var(--scoreboard-led);
     }
   }
 }

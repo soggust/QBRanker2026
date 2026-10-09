@@ -1,7 +1,7 @@
 <div class="account-page profile-page">
   @switch (person().state) {
     @case ('loading') {
-      <div class="account-loading" role="status"><span class="spinner" aria-hidden="true"></span>Loading &#64;{{ username }}…</div>
+      <div class="page-loading" role="status"><span class="spinner" aria-hidden="true"></span>Loading &#64;{{ username }}…</div>
     }
     @case ('missing') {
       <div class="soon-panel">
@@ -69,7 +69,7 @@
                   <ul class="item-list">
                     @for (list of items; track list.id) {
                       <li>
-                        <a class="item-link" [href]="'#lists/' + f.uid + '/' + list.id">
+                        <a class="item-link" [href]="listHref(f.uid, list)">
                           <span class="item-title">{{ list.title }}</span>
                           <span class="item-meta">
                             <span class="sport-tag">{{ sportLabel(list.sport) }}</span>
@@ -80,7 +80,7 @@
                     }
                   </ul>
                 } @else {
-                  <p class="empty-note">{{ isSelf ? 'You haven’t saved a list yet.' : 'No lists yet.' }}</p>
+                  <p class="empty-note">{{ isSelf ? 'You haven’t saved a list yet.' : relation === 'friends' ? 'No lists shared with friends yet.' : 'No public lists yet.' }}</p>
                 }
               }
               @case ('error') { <p class="form-error">{{ $any(lists()).message }}</p> }
@@ -90,79 +90,82 @@
         </div>
       </card-panel>
 
-      <!-- Bets: the record and bankroll (history), what's still in play (open bets) -->
-      <card-panel class="account-panel bets-panel" label="Bets" icon="casino" [expandable]="false">
-        <div class="panel-pad bets-body">
-          @if (betsHidden) {
-            <ng-container *ngTemplateOutlet="hiddenTpl; context: { kind: betsKind }"></ng-container>
-          } @else {
-            <!-- (the record) -->
-            @if (access.betHistory === 'shown') {
-              @if (record; as r) {
-                <div class="record-strip" role="group" aria-label="Betting record">
-                  <div class="stat"><span class="stat-value">{{ recordText(r) }}</span><span class="stat-label">Record</span></div>
-                  <div class="stat"><span class="stat-value" [class.up]="r.profit > 0" [class.down]="r.profit < 0">{{ money(r.profit, true) }}</span><span class="stat-label">Profit</span></div>
-                  <div class="stat"><span class="stat-value" [class.up]="(r.roi ?? 0) > 0" [class.down]="(r.roi ?? 0) < 0">{{ r.roi === null ? '–' : (r.roi > 0 ? '+' : '') + r.roi + '%' }}</span><span class="stat-label">ROI</span></div>
-                  @if (balance() !== null) {
-                    <div class="stat"><span class="stat-value">{{ money(balance()!) }}</span><span class="stat-label">Bankroll</span></div>
-                  }
-                </div>
-              } @else if (settledBets()?.state === 'error') {
-                <p class="form-error">{{ $any(settledBets()).message }}</p>
-              } @else {
-                <ng-container *ngTemplateOutlet="loadingTpl"></ng-container>
-              }
-            }
-
-            <!-- (still in play) -->
-            <section class="bets-group" aria-labelledby="open-bets-h">
-              <h3 id="open-bets-h">Open bets</h3>
-              @if (access.openBets !== 'shown') {
-                <ng-container *ngTemplateOutlet="hiddenTpl; context: { kind: 'openBets', small: true }"></ng-container>
-              } @else {
-                @switch (openBets()?.state) {
-                  @case ('ready') {
-                    @let open = $any(openBets()).value;
-                    @if (open.length) {
-                      <ul class="bet-list">
-                        @for (bet of recent(open); track bet.id) {
-                          <ng-container *ngTemplateOutlet="betTpl; context: { $implicit: bet }"></ng-container>
-                        }
-                      </ul>
-                      @if (open.length > 6) { <p class="more-note">+ {{ open.length - 6 }} more</p> }
-                    } @else {
-                      <p class="empty-note">Nothing in play.</p>
+      <!-- (play betting: where it's open, development or an admin, like the Bets page) -->
+      @if (canUse('bets')) {
+        <!-- Bets: the record and bankroll (history), what's still in play (open bets) -->
+        <card-panel class="account-panel bets-panel" label="Bets" icon="casino" [expandable]="false">
+          <div class="panel-pad bets-body">
+            @if (betsHidden) {
+              <ng-container *ngTemplateOutlet="hiddenTpl; context: { kind: betsKind }"></ng-container>
+            } @else {
+              <!-- (the record) -->
+              @if (access.betHistory === 'shown') {
+                @if (record; as r) {
+                  <div class="record-strip" role="group" aria-label="Betting record">
+                    <div class="stat"><span class="stat-value">{{ recordText(r) }}</span><span class="stat-label">Record</span></div>
+                    <div class="stat"><span class="stat-value" [class.up]="r.profit > 0" [class.down]="r.profit < 0">{{ money(r.profit, true) }}</span><span class="stat-label">Profit</span></div>
+                    <div class="stat"><span class="stat-value" [class.up]="(r.roi ?? 0) > 0" [class.down]="(r.roi ?? 0) < 0">{{ r.roi === null ? '–' : (r.roi > 0 ? '+' : '') + r.roi + '%' }}</span><span class="stat-label">ROI</span></div>
+                    @if (balance() !== null) {
+                      <div class="stat"><span class="stat-value">{{ money(balance()!) }}</span><span class="stat-label">Bankroll</span></div>
                     }
-                  }
-                  @case ('error') { <p class="form-error">{{ $any(openBets()).message }}</p> }
-                  @default { <ng-container *ngTemplateOutlet="loadingTpl"></ng-container> }
-                }
-              }
-            </section>
-
-            <!-- (settled lately) -->
-            <section class="bets-group" aria-labelledby="settled-bets-h">
-              <h3 id="settled-bets-h">Recent results</h3>
-              @if (access.betHistory !== 'shown') {
-                <ng-container *ngTemplateOutlet="hiddenTpl; context: { kind: 'betHistory', small: true }"></ng-container>
-              } @else if (settledBets()?.state === 'ready') {
-                @let settled = $any(settledBets()).value;
-                @if (settled.length) {
-                  <ul class="bet-list">
-                    @for (bet of recent(settled); track bet.id) {
-                      <ng-container *ngTemplateOutlet="betTpl; context: { $implicit: bet }"></ng-container>
-                    }
-                  </ul>
+                  </div>
+                } @else if (settledBets()?.state === 'error') {
+                  <p class="form-error">{{ $any(settledBets()).message }}</p>
                 } @else {
-                  <p class="empty-note">No settled bets yet.</p>
+                  <ng-container *ngTemplateOutlet="loadingTpl"></ng-container>
                 }
-              } @else if (settledBets()?.state !== 'error') {
-                <ng-container *ngTemplateOutlet="loadingTpl"></ng-container>
               }
-            </section>
-          }
-        </div>
-      </card-panel>
+  
+              <!-- (still in play) -->
+              <section class="bets-group" aria-labelledby="open-bets-h">
+                <h3 id="open-bets-h">Open bets</h3>
+                @if (access.openBets !== 'shown') {
+                  <ng-container *ngTemplateOutlet="hiddenTpl; context: { kind: 'openBets', small: true }"></ng-container>
+                } @else {
+                  @switch (openBets()?.state) {
+                    @case ('ready') {
+                      @let open = $any(openBets()).value;
+                      @if (open.length) {
+                        <ul class="bet-list">
+                          @for (bet of recent(open); track bet.id) {
+                            <ng-container *ngTemplateOutlet="betTpl; context: { $implicit: bet }"></ng-container>
+                          }
+                        </ul>
+                        @if (open.length > 6) { <p class="more-note">+ {{ open.length - 6 }} more</p> }
+                      } @else {
+                        <p class="empty-note">Nothing in play.</p>
+                      }
+                    }
+                    @case ('error') { <p class="form-error">{{ $any(openBets()).message }}</p> }
+                    @default { <ng-container *ngTemplateOutlet="loadingTpl"></ng-container> }
+                  }
+                }
+              </section>
+  
+              <!-- (settled lately) -->
+              <section class="bets-group" aria-labelledby="settled-bets-h">
+                <h3 id="settled-bets-h">Recent results</h3>
+                @if (access.betHistory !== 'shown') {
+                  <ng-container *ngTemplateOutlet="hiddenTpl; context: { kind: 'betHistory', small: true }"></ng-container>
+                } @else if (settledBets()?.state === 'ready') {
+                  @let settled = $any(settledBets()).value;
+                  @if (settled.length) {
+                    <ul class="bet-list">
+                      @for (bet of recent(settled); track bet.id) {
+                        <ng-container *ngTemplateOutlet="betTpl; context: { $implicit: bet }"></ng-container>
+                      }
+                    </ul>
+                  } @else {
+                    <p class="empty-note">No settled bets yet.</p>
+                  }
+                } @else if (settledBets()?.state !== 'error') {
+                  <ng-container *ngTemplateOutlet="loadingTpl"></ng-container>
+                }
+              </section>
+            }
+          </div>
+        </card-panel>
+      }
 
       <!-- Presets -->
       <card-panel class="account-panel presets-panel" label="Presets" icon="tune" [expandable]="false">

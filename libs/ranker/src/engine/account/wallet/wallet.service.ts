@@ -102,6 +102,13 @@ export class WalletService {
     this.uid = uid;
     for (const s of this.stop) s();
     this.stop = [];
+    // (the last placing's note is the last person's; signed out, their slip goes too, while a slip filled
+    // before signing in stays for the account)
+    this.placed.set(null);
+    if (!uid) {
+      this.slip.set([]);
+      this.slipOpen.set(false);
+    }
     this.wallet.set(null);
     this.bets.set([]);
     this.tally.set(null);

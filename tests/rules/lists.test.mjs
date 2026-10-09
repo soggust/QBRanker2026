@@ -235,9 +235,11 @@ describe('community rules', { skip }, () => {
     await assertSucceeds(deleteDoc(doc(alice, 'community', KEY, 'entries', 'alice')));
   });
 
-  test('votes: one per person per entry, +1 or -1, never on your own; the voter or the entry\'s owner removes it', async () => {
+  test('votes: one per person per entry, +1 or -1, never on your own; the voter removes it, the entry\'s owner a stale one', async () => {
     await submitted();
-    const vote = (uid, value, extra = {}) => setDoc(doc(as(uid), 'community', KEY, 'entries', 'alice', 'votes', uid), { value, voter: uid, ...extra });
+    // (a vote names the submission it's for: the entry's submittedAt)
+    const at = (await getDoc(doc(anon(), 'community', KEY, 'entries', 'alice'))).data().submittedAt;
+    const vote = (uid, value, extra = {}) => setDoc(doc(as(uid), 'community', KEY, 'entries', 'alice', 'votes', uid), { value, voter: uid, at, ...extra });
     await assertSucceeds(vote('bob', 1));
     await assertSucceeds(vote('bob', -1));
     await assertFails(vote('bob', 2));
@@ -245,20 +247,22 @@ describe('community rules', { skip }, () => {
     await assertFails(vote('bob', '1'));
     await assertFails(vote('bob', 1, { weight: 10 }));
     // (on their own doc only, as themselves)
-    await assertFails(setDoc(doc(as('bob'), 'community', KEY, 'entries', 'alice', 'votes', 'carol'), { value: 1, voter: 'carol' }));
-    await assertFails(setDoc(doc(as('bob'), 'community', KEY, 'entries', 'alice', 'votes', 'bob'), { value: 1, voter: 'carol' }));
+    await assertFails(setDoc(doc(as('bob'), 'community', KEY, 'entries', 'alice', 'votes', 'carol'), { value: 1, voter: 'carol', at }));
+    await assertFails(setDoc(doc(as('bob'), 'community', KEY, 'entries', 'alice', 'votes', 'bob'), { value: 1, voter: 'carol', at }));
     // (not on your own entry, not on an entry that isn't there, not signed out)
     await assertFails(vote('alice', 1));
-    await assertFails(setDoc(doc(as('bob'), 'community', KEY, 'entries', 'nobody', 'votes', 'bob'), { value: 1, voter: 'bob' }));
-    await assertFails(setDoc(doc(anon(), 'community', KEY, 'entries', 'alice', 'votes', 'x'), { value: 1, voter: 'x' }));
+    await assertFails(setDoc(doc(as('bob'), 'community', KEY, 'entries', 'nobody', 'votes', 'bob'), { value: 1, voter: 'bob', at }));
+    await assertFails(setDoc(doc(anon(), 'community', KEY, 'entries', 'alice', 'votes', 'x'), { value: 1, voter: 'x', at }));
     await assertSucceeds(vote('carol', 1));
     // (anyone counts them; a voter finds their own anywhere)
     await assertSucceeds(getDocs(collection(anon(), 'community', KEY, 'entries', 'alice', 'votes')));
     await assertSucceeds(getDocs(query(collectionGroup(as('bob'), 'votes'), where('voter', '==', 'bob'))));
     await assertFails(getDocs(query(collectionGroup(as('bob'), 'votes'), where('voter', '==', 'carol'))));
-    // (taken back by the voter, cleared by the entry's owner, not by anyone else)
+    // (taken back by the voter, not by anyone else; the entry's owner clears only stale ones: tests/rules/security)
     await assertFails(deleteDoc(doc(as('dave'), 'community', KEY, 'entries', 'alice', 'votes', 'bob')));
     await assertSucceeds(deleteDoc(doc(as('bob'), 'community', KEY, 'entries', 'alice', 'votes', 'bob')));
+    await assertFails(deleteDoc(doc(as('alice'), 'community', KEY, 'entries', 'alice', 'votes', 'carol')));
+    await assertSucceeds(deleteDoc(doc(as('alice'), 'community', KEY, 'entries', 'alice')));
     await assertSucceeds(deleteDoc(doc(as('alice'), 'community', KEY, 'entries', 'alice', 'votes', 'carol')));
   });
 });

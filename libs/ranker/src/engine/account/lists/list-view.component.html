@@ -1,5 +1,5 @@
 @if (state === 'loading') {
-  <div class="lists-loading" role="status"><span class="spinner" aria-hidden="true"></span>Loading the list…</div>
+  <div class="page-loading" role="status"><span class="spinner" aria-hidden="true"></span>Loading the list…</div>
 } @else if (state === 'missing' || !list) {
   <div class="soon-panel">
     <mat-icon class="soon-icon" aria-hidden="true" fontIcon="lock"></mat-icon>
@@ -73,11 +73,7 @@
   @if (mine) {
     <div class="owner-line">
       <span class="owner-label" id="list-vis">Who can see it</span>
-      <div class="vis-pills" role="radiogroup" aria-labelledby="list-vis">
-        @for (choice of choices; track choice.value) {
-          <button type="button" role="radio" class="game-filter small" [class.active]="list.visibility === choice.value" [attr.aria-checked]="list.visibility === choice.value" [disabled]="busy" (click)="setVisibility(choice.value)">{{ choice.label }}</button>
-        }
-      </div>
+      <visibility-pills labelledby="list-vis" [value]="list.visibility" [disabled]="busy" (picked)="setVisibility($event)"></visibility-pills>
       <span class="owner-hint">Drag the rows to reorder.</span>
     </div>
   }
@@ -181,11 +177,7 @@
         </label>
         <div class="vis-row">
           <span class="field-label" id="edit-vis">Who can see it</span>
-          <div class="vis-pills" role="radiogroup" aria-labelledby="edit-vis">
-            @for (choice of choices; track choice.value) {
-              <button type="button" role="radio" class="game-filter small" [class.active]="editVisibility === choice.value" [attr.aria-checked]="editVisibility === choice.value" (click)="editVisibility = choice.value">{{ choice.label }}</button>
-            }
-          </div>
+          <visibility-pills labelledby="edit-vis" [value]="editVisibility" (picked)="editVisibility = $event"></visibility-pills>
           <span class="field-hint">{{ hints[editVisibility] }}</span>
         </div>
         @if (error) { <p class="form-error" role="alert">{{ error }}</p> }

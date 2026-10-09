@@ -8,7 +8,7 @@ import { scoreText } from '@ranker/engine/skill-rankings/rank-why';
 import { gameLogView } from '@ranker/engine/player-card/game-log-view';
 import { COMPARE_COLORS, CompareSide } from '@ranker/engine/compare/player-compare';
 import { AccountService } from '../account.service';
-import { VISIBILITY_CHOICES, Visibility } from '../account-helpers';
+import { Visibility } from '../account-helpers';
 import { TrackerStore } from './tracker.store';
 import {
   Pin,
@@ -117,7 +117,6 @@ export class TrackerPageComponent implements OnDestroy {
 
   readonly sport = SPORT.id;
   readonly sportLabel = SITE_SPORTS.find((s) => s.id === SPORT.id)?.label ?? SPORT.id.toUpperCase();
-  readonly choices = VISIBILITY_CHOICES;
   readonly rankTone = rankTone;
   readonly scoreText = scoreText;
   readonly signed = signed;

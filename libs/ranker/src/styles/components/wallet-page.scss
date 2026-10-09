@@ -35,6 +35,11 @@ $gold: #ffcf4a;
   @include casino.panel;
 }
 
+// (the page's title strip, on the desk's scoreboard top above the tiles)
+.desk-top page-head {
+  margin-bottom: 16px;
+}
+
 .wallet-page {
   margin: 0 auto;
   max-width: 1100px;

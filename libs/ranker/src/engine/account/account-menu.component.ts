@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { AccountService } from './account.service';
 import { errorMessage, firstName } from './account-helpers';
+import { canUse } from './features';
 
 // The sport bar's account entry, just left of the brand: signed out, a small Sign in; signed in, the
 // user's avatar and first name (phones: the avatar alone) opening their menu: the account pages (hash
@@ -14,13 +15,18 @@ import { errorMessage, firstName } from './account-helpers';
 export class AccountMenuComponent {
   constructor(readonly account: AccountService) {}
 
-  readonly items = [
+  private readonly all = [
     { hash: '#account', icon: 'manage_accounts', label: 'Profile & settings' },
     { hash: '#lists', icon: 'format_list_numbered', label: 'My lists' },
     { hash: '#tracker', icon: 'push_pin', label: 'Tracker' },
     { hash: '#wallet', icon: 'account_balance_wallet', label: 'Wallet' },
     { hash: '#friends', icon: 'group', label: 'Friends' },
   ];
+
+  // (the Wallet only where play betting is open: development, or an admin, like the Bets link)
+  get items() {
+    return canUse('bets') ? this.all : this.all.filter((item) => item.hash !== '#wallet');
+  }
 
   get name(): string {
     return this.account.profile()?.displayName ?? '';

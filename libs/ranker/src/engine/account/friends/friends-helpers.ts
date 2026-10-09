@@ -131,10 +131,10 @@ export function recordText(r: BetRecord): string {
   return r.push ? `${r.won}-${r.lost}-${r.push}` : `${r.won}-${r.lost}`;
 }
 
-// (play money, signed: +$120, -$45.50)
+// (play money, in the wallet's units, signed: +120u, -45.50u)
 export function money(value: number, signed = false): string {
   const abs = Math.abs(value);
-  const text = '$' + (Number.isInteger(abs) ? abs.toLocaleString('en-US') : abs.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+  const text = (Number.isInteger(abs) ? abs.toLocaleString('en-US') : abs.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })) + 'u';
   if (value < 0) return '-' + text;
   return signed && value > 0 ? '+' + text : text;
 }

@@ -175,7 +175,8 @@ describe('wallet rules', { skip }, () => {
     // (Clear history and the account going: the owner deletes; no one else)
     await assertFails(deleteDoc(doc(bob, 'users', 'ann', 'bets', 'old')));
     await assertSucceeds(deleteDoc(doc(db, 'users', 'ann', 'bets', 'old')));
-    await assertSucceeds(deleteDoc(doc(db, 'users', 'ann', 'bets', 'b1')));
+    // (an open bet stays until it's settled: tests/rules/security)
+    await assertFails(deleteDoc(doc(db, 'users', 'ann', 'bets', 'b1')));
     await assertSucceeds(deleteDoc(doc(db, 'users', 'ann', 'wallet', 'main')));
   });
 

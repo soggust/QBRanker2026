@@ -1,7 +1,7 @@
 rules_version = '2';
 
 // Season Ranker's database rules (the accounts spec's data model). Browsers may only create and edit
-// what these allow; anything that must be trusted (grading, balances, tallies) is written by the Admin
+// what these allow; anything that must be trusted (settling bets, balances, tallies) is written by the Admin
 // SDK in GitHub Actions, which these rules don't apply to. Tests: tests/rules (npm run test:rules).
 service cloud.firestore {
   match /databases/{database}/documents {
@@ -129,7 +129,9 @@ service cloud.firestore {
           )
         );
 
-      allow delete: if isOwner(uid);
+      // (with its username's claim in the same write: a profile dropped alone would hold its name forever)
+      allow delete: if isOwner(uid)
+        && (resource == null || !existsAfter(/databases/$(database)/documents/usernames/$(resource.data.usernameLower)));
 
       // users/{uid}/private/{doc}: the owner's own settings (their email; later, defaults), no one else's
       match /private/{doc} {
@@ -380,9 +382,11 @@ service cloud.firestore {
         && getAfter(walletPath(uid)).data.get('lastBet', '') == bet
         && getAfter(walletPath(uid)).data.balance == get(walletPath(uid)).data.balance - request.resource.data.stake;
 
-      // (settled only by the Admin SDK; deleted by its owner: Clear history, or the account going)
+      // (settled only by the Admin SDK; a settled one deleted by its owner: Clear history, or the account going.
+      // An open bet stays until it's settled, so a losing one can't be dropped before the settler counts it; a
+      // deleted account's open bets are removed by the settler)
       allow update: if false;
-      allow delete: if isOwner(uid);
+      allow delete: if isOwner(uid) && resource.data.status != 'open';
     }
 
     // tallies/{uid}: the settler's record of a user's settled bets, lifetime and by day (kept through a cleared
@@ -409,7 +413,7 @@ service cloud.firestore {
     // keeps the same limits). Seen by whoever the owner's presets setting lets see them; written by the owner.
     function validPreset(d) {
       return d.keys().hasAll(['sport', 'tab', 'name', 'settings', 'createdAt', 'updatedAt'])
-        && d.keys().hasOnly(['sport', 'tab', 'name', 'settings', 'visibility', 'createdAt', 'updatedAt'])
+        && d.keys().hasOnly(['sport', 'tab', 'name', 'settings', 'createdAt', 'updatedAt'])
         && d.sport is string && d.sport.matches('^[a-z]{2,8}$')
         && d.tab is string && d.tab.matches('^[A-Za-z0-9]{1,12}$')
         && d.name is string && d.name.size() > 0 && d.name.size() <= 40
@@ -418,10 +422,10 @@ service cloud.firestore {
         && d.settings.weights is map && d.settings.weights.size() <= 120
         && d.settings.hidden is list && d.settings.hidden.size() <= 120
         && d.settings.groups is list && d.settings.groups.size() <= 12
-        && (!('visibility' in d) || isVisibility(d.visibility))
         && d.updatedAt == request.time;
     }
 
+    // (no visibility of its own: the owner's presets setting is the only one the rules read)
     match /users/{uid}/presets/{preset} {
       allow read: if canSee(uid, 'presets');
       allow create: if isOwner(uid) && validPreset(request.resource.data) && request.resource.data.createdAt == request.time;
@@ -489,18 +493,28 @@ service cloud.firestore {
           && existsAfter(/databases/$(database)/documents/users/$(owner)/lists/$(request.resource.data.listId));
         allow delete: if isOwner(owner);
 
-        // .../votes/{voter}: { value: 1 or -1, voter }: one per person per entry, written by the voter on their
-        // own doc, never on their own entry; the voter takes it back, or the entry's owner clears them
+        // .../votes/{voter}: { value: 1 or -1, voter, at }: one per person per entry, written by the voter on
+        // their own doc, never on their own entry. `at` is the submission's time (the entry's submittedAt) and
+        // only a vote for the current submission counts, so a submission made again starts its votes over. The
+        // voter takes theirs back; the entry's owner may clear only stale ones (the entry gone or submitted again
+        // in the same write or before), never pick off the down votes on the entry as it stands
+        function entryPath() {
+          return /databases/$(database)/documents/community/$(key)/entries/$(owner);
+        }
+
         match /votes/{voter} {
           allow read: if true;
           allow create, update: if isOwner(voter)
             && voter != owner
-            && exists(/databases/$(database)/documents/community/$(key)/entries/$(owner))
-            && request.resource.data.keys().hasOnly(['value', 'voter'])
-            && request.resource.data.keys().hasAll(['value', 'voter'])
+            && exists(entryPath())
+            && request.resource.data.keys().hasOnly(['value', 'voter', 'at'])
+            && request.resource.data.keys().hasAll(['value', 'voter', 'at'])
             && request.resource.data.voter == voter
-            && request.resource.data.value in [1, -1];
-          allow delete: if isOwner(voter) || isOwner(owner);
+            && request.resource.data.value in [1, -1]
+            && request.resource.data.at == get(entryPath()).data.submittedAt;
+          allow delete: if isOwner(voter)
+            || (isOwner(owner)
+              && (!existsAfter(entryPath()) || getAfter(entryPath()).data.submittedAt != resource.data.get('at', null)));
         }
       }
     }

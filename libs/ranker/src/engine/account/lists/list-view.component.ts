@@ -35,7 +35,8 @@ export const sportLabel = (id: string): string => SITE_SPORTS.find((s) => s.id =
 
 // (a list's tab, season and part, as words: "Quarterbacks · 2026", "Teams · 2024 Playoffs")
 export function listWhere(list: Pick<SavedList, 'sport' | 'tab' | 'season' | 'part'>): string {
-  const tab = list.sport === SPORT.id ? ((SPORT.tabNames as Record<string, string>)[list.tab] ?? list.tab) : list.tab;
+  // (another sport's tab names aren't loaded here: its abbreviation, but Teams for every sport's TM)
+  const tab = list.sport === SPORT.id ? ((SPORT.tabNames as Record<string, string>)[list.tab] ?? list.tab) : list.tab === 'TM' ? 'Teams' : list.tab;
   const season = list.sport === SPORT.id ? SPORT.seasonText(list.season) : String(list.season);
   const part = list.part === 'post' ? ' Playoffs' : list.part === 'all' ? ' Full Season' : '';
   return `${tab} · ${season}${part}`;
@@ -66,7 +67,6 @@ export class ListViewComponent implements OnChanges, OnDestroy {
   @Input({ required: true }) listId!: string;
 
   readonly sportId = SPORT.id;
-  readonly choices = VISIBILITY_CHOICES;
   readonly hints = VISIBILITY_HINTS;
   readonly titleMax = TITLE_MAX;
   readonly noteMax = NOTE_MAX;

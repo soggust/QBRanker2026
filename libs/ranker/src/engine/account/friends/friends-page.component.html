@@ -1,6 +1,6 @@
 <div class="account-page friends-page">
   @if (!account.ready()) {
-    <div class="account-loading" role="status"><span class="spinner" aria-hidden="true"></span>Loading your account…</div>
+    <div class="page-loading" role="status"><span class="spinner" aria-hidden="true"></span>Loading your account…</div>
   } @else if (!account.user()) {
     <!-- Signed out: what friends are for, and the way in -->
     <div class="soon-panel signed-out">
@@ -10,6 +10,10 @@
       <button type="button" class="primary" (click)="account.openLogin()">Sign in</button>
     </div>
   } @else {
+    <page-head heading="Friends" icon="group" sub="Friends see what you share with friends (Privacy, on Profile &amp; settings), and you see theirs.">
+      <a class="secondary small-btn" href="#account"><mat-icon aria-hidden="true" fontIcon="visibility"></mat-icon>Privacy</a>
+    </page-head>
+
     <!-- Finding people by username -->
     <card-panel class="account-panel" label="Find people" icon="person_search" [expandable]="false">
       <div class="panel-pad">
@@ -47,7 +51,7 @@
           } @else if (results && !results.length) {
             <span class="field-hint">No one’s username starts with “{{ query.trim().replace('@', '') }}”.</span>
           } @else if (!results) {
-            <span class="field-hint">Friends see what you share with friends (Profile &amp; settings, Privacy), and you see theirs.</span>
+            <span class="field-hint">Type the start of a username.</span>
           }
         </div>
         @if (results?.length) {
@@ -70,7 +74,7 @@
     </card-panel>
 
     @if (!friends.loaded()) {
-      <div class="account-loading" role="status"><span class="spinner" aria-hidden="true"></span>Loading your friends…</div>
+      <div class="page-loading" role="status"><span class="spinner" aria-hidden="true"></span>Loading your friends…</div>
     } @else {
       @if (friends.error()) {
         <p class="form-error" role="alert">{{ friends.error() }}</p>
@@ -88,7 +92,7 @@
       }
 
       <!-- Your friends -->
-      <card-panel class="account-panel" [label]="groups.friends.length ? 'Friends · ' + groups.friends.length : 'Friends'" icon="group" [expandable]="false">
+      <card-panel class="account-panel" [label]="groups.friends.length ? 'Your friends · ' + groups.friends.length : 'Your friends'" icon="group" [expandable]="false">
         @if (groups.friends.length) {
           <ul class="people panel-pad" aria-label="Your friends">
             @for (entry of groups.friends; track entry.uid) {

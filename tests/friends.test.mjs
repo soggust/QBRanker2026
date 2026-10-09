@@ -80,10 +80,10 @@ test('a settled record: tallies, profit and ROI; open and void bets left out', (
   assert.equal(h.recordText(r), '1-1-1');
   assert.equal(h.recordText({ ...r, push: 0 }), '1-1');
   assert.equal(h.betRecord([]).roi, null);
-  assert.equal(h.money(1250), '$1,250');
-  assert.equal(h.money(40.5, true), '+$40.50');
-  assert.equal(h.money(-45), '-$45');
-  assert.equal(h.money(0, true), '$0');
+  assert.equal(h.money(1250), '1,250u');
+  assert.equal(h.money(40.5, true), '+40.50u');
+  assert.equal(h.money(-45), '-45u');
+  assert.equal(h.money(0, true), '0u');
   assert.equal(h.oddsText(150), '+150');
   assert.equal(h.oddsText(-110), '-110');
   assert.equal(h.oddsText(null), '');

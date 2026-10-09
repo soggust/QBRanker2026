@@ -22,7 +22,7 @@ import { dateText, listWhere, sportLabel } from './list-view.component';
         </nav>
         <list-view [owner]="t.owner" [listId]="t.id"></list-view>
       } @else if (!account.ready()) {
-        <div class="lists-loading" role="status"><span class="spinner" aria-hidden="true"></span>Loading your lists…</div>
+        <div class="page-loading" role="status"><span class="spinner" aria-hidden="true"></span>Loading your lists…</div>
       } @else if (!account.user()) {
         <div class="soon-panel">
           <mat-icon class="soon-icon" aria-hidden="true" fontIcon="format_list_numbered"></mat-icon>
@@ -32,16 +32,12 @@ import { dateText, listWhere, sportLabel } from './list-view.component';
           <a class="soon-back" href="#community">See the Community’s lists</a>
         </div>
       } @else {
-        <header class="lists-head">
-          <div class="lists-head-text">
-            <h2>My lists</h2>
-            <p>Rankings you’ve saved, frozen as they were. Open one to see how its players are doing today.</p>
-          </div>
+        <page-head heading="My lists" icon="format_list_numbered" sub="Rankings you’ve saved, frozen as they were. Open one to see how its players are doing today.">
           <a class="secondary small-btn" href="#community"><mat-icon aria-hidden="true" fontIcon="groups"></mat-icon>Community</a>
-        </header>
+        </page-head>
 
         @if (lists === null) {
-          <div class="lists-loading" role="status"><span class="spinner" aria-hidden="true"></span>Loading your lists…</div>
+          <div class="page-loading" role="status"><span class="spinner" aria-hidden="true"></span>Loading your lists…</div>
         } @else if (store.error()) {
           <p class="form-error" role="alert">{{ store.error() }}</p>
         } @else if (!lists.length) {

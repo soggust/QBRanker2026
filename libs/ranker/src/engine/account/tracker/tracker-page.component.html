@@ -43,13 +43,9 @@
             </nav>
           }
           @if (mine) {
-            <div class="tracker-share" role="group" aria-label="Who sees your tracker">
-              <span class="tracker-share-label">Who sees it</span>
-              @for (c of choices; track c.value) {
-                <button type="button" class="game-filter small" [class.active]="visibility === c.value" [attr.aria-pressed]="visibility === c.value" (click)="setVisibility(c.value)">
-                  {{ c.label }}
-                </button>
-              }
+            <div class="tracker-share">
+              <span class="tracker-share-label" id="tracker-vis">Who sees it</span>
+              <visibility-pills labelledby="tracker-vis" [value]="visibility" (picked)="setVisibility($event)"></visibility-pills>
               @if (visibility !== 'private') {
                 <button type="button" class="tracker-icon" title="Copy the link to your tracker" aria-label="Copy the link to your tracker" (click)="copyLink()">
                   <mat-icon fontIcon="link"></mat-icon>

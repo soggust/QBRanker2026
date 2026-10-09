@@ -29,6 +29,7 @@
 @include kit.pills;
 @include kit.fields;
 @include kit.buttons;
+@include kit.states;
 
 $board: var(--tex-chalk-plays) -1150px -420px / 2800px 1440px, v.$chalk-dust;
 
@@ -49,16 +50,6 @@ $board: var(--tex-chalk-plays) -1150px -420px / 2800px 1440px, v.$chalk-dust;
   }
 }
 
-.lists-loading {
-  align-items: center;
-  @include v.scoreboard-panel(12px);
-  color: rgba(255, 255, 255, 0.8);
-  display: flex;
-  gap: 12px;
-  justify-content: center;
-  padding: 28px;
-}
-
 .form-error {
   color: #ffb4ae;
   font-size: 13px;
@@ -68,19 +59,6 @@ $board: var(--tex-chalk-plays) -1150px -420px / 2800px 1440px, v.$chalk-dust;
 a.primary,
 a.secondary {
   text-decoration: none;
-}
-
-.small-btn {
-  font-size: 11.5px !important;
-  min-height: 32px !important;
-  padding: 0 12px !important;
-}
-
-.spinner.tiny {
-  border-width: 1.5px;
-  height: 12px;
-  vertical-align: -2px;
-  width: 12px;
 }
 
 .dot {
@@ -116,98 +94,6 @@ a.secondary {
 // ---------------------------------------------------------------------------
 // A page's head: its name and what it is, a button on the right
 // ---------------------------------------------------------------------------
-.lists-head {
-  align-items: center;
-  @include v.scoreboard-panel(12px, 0 6px 18px rgba(0, 0, 0, 0.45));
-  display: flex;
-  gap: 16px;
-  justify-content: space-between;
-  padding: 16px 20px;
-
-  h2 {
-    color: #fff;
-    @include v.headline(22px);
-    letter-spacing: 0.75px;
-    margin: 0 0 4px;
-    text-transform: uppercase;
-  }
-
-  p {
-    color: rgba(255, 255, 255, 0.68);
-    font-size: 13px;
-    line-height: 1.45;
-    margin: 0;
-  }
-
-  .secondary {
-    flex: 0 0 auto;
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Signed out, nothing yet, not available: one scoreboard panel, centered
-// ---------------------------------------------------------------------------
-.soon-panel {
-  align-items: center;
-  @include v.scoreboard-panel(12px, 0 12px 32px rgba(0, 0, 0, 0.5));
-  box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin: 8vh auto 0;
-  max-width: 460px;
-  padding: 30px 26px 26px;
-  text-align: center;
-  width: 100%;
-
-  &.empty {
-    margin-top: 2vh;
-  }
-
-  h2 {
-    color: #fff;
-    @include v.headline(21px);
-    letter-spacing: 0.75px;
-    margin: 0;
-    text-transform: uppercase;
-  }
-
-  .primary {
-    margin-top: 6px;
-  }
-}
-
-.soon-icon {
-  color: var(--scoreboard-led);
-  @include v.icon-size(40px);
-}
-
-.soon-detail {
-  color: rgba(255, 255, 255, 0.72);
-  font-size: 14px;
-  line-height: 1.5;
-  margin: 0;
-
-  strong {
-    color: #fff;
-  }
-}
-
-.soon-back {
-  color: #fff;
-  font-size: 13px;
-  font-weight: 700;
-  margin-top: 6px;
-  text-decoration: underline;
-  text-decoration-color: color-mix(in srgb, var(--scoreboard-led) 60%, transparent);
-  text-underline-offset: 3px;
-
-  &:hover,
-  &:focus-visible {
-    color: var(--scoreboard-led);
-  }
-}
-
 // ---------------------------------------------------------------------------
 // The little chips: the sport's LED name, who sees a list, on the Community board
 // ---------------------------------------------------------------------------
@@ -506,12 +392,6 @@ a.secondary {
 }
 
 .mode-pills,
-.vis-pills {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
 .list-actions {
   align-items: center;
   display: flex;
@@ -1393,17 +1273,6 @@ a.secondary {
     padding: 14px 12px 40px;
   }
 
-  .lists-head {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 10px;
-    padding: 14px 16px;
-
-    h2 {
-      font-size: 19px;
-    }
-  }
-
   .list-hero {
     padding: 14px 14px 16px;
 
@@ -1478,6 +1347,11 @@ a.secondary {
     align-items: flex-start;
     flex-direction: column;
     gap: 6px;
+  }
+
+  // (stacked: the label its own height, not the 60px it takes across)
+  .picker-label {
+    flex: none;
   }
 
   .entry-cards,
