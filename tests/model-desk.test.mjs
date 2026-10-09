@@ -580,3 +580,13 @@ test("leagues: DraftKings is the book everywhere, each league's setup whole, the
   }
   assert.ok(PROP_CAPS.untested.maxUnits <= PROP_CAPS.tested.maxUnits && PROP_CAPS.tested.maxUnits <= 3);
 });
+
+test('byGame: each game once, its bets under it, in the order the sort put its first; one sport\'s game never another\'s', () => {
+  const bet = (id, sport, event, matchup = 'A @ B') => ({ id, sport, event, matchup, start: '2026-10-11T17:00:00Z' });
+  const groups = desk.byGame([bet('1', 'nfl', 'e1'), bet('2', 'nfl', 'e2'), bet('3', 'nfl', 'e1'), bet('4', 'nhl', 'e1'), bet('5', 'nfl', undefined, 'C @ D'), bet('6', 'nfl', undefined, 'C @ D')]);
+  assert.deepEqual(
+    groups.map((g) => g.bets.map((b) => b.id)),
+    [['1', '3'], ['2'], ['4'], ['5', '6']],
+  );
+  assert.deepEqual(desk.byGame([]), []);
+});

@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { americanOdds, headshot, hideImage, leagueLogo, num, pct, signed, teamLogo, units } from './bet-format';
-import { TableSorts, backtestValue, betValue, calibrationValue, contextValue, modelVsMarket, pinnacleEdge, propValue, sportValue, stateValue, tallyValue } from './desk-columns';
+import { BetGroup, TableSorts, backtestValue, betValue, byGame, calibrationValue, contextValue, modelVsMarket, pinnacleEdge, propValue, sportValue, stateValue, tallyValue } from './desk-columns';
 import { DESK_HELP } from './desk-help';
 import {
   BANKROLL,
@@ -582,6 +582,38 @@ export class ModelDeskComponent implements OnInit, OnDestroy {
         return `${names[k] ?? k} ${on ? (k === 'roleK' ? `k ${v}` : v) : 'left out'} (${gain})`;
       })
       .join(' · ');
+  }
+
+  // ---------------------------------------------------------------------------
+  // The bet lists by game (desk-columns.ts byGame): a game with more than one bet a row of its own, its bets
+  // under it, folded until it's opened (the games in play open: their meters are the point)
+  // ---------------------------------------------------------------------------
+
+  readonly byGame = byGame;
+  private groupsOpen = new Map<string, boolean>();
+
+  groupOpen(table: string, g: BetGroup): boolean {
+    return g.bets.length === 1 || (this.groupsOpen.get(`${table}|${g.key}`) ?? table === 'live');
+  }
+
+  toggleGroup(table: string, g: BetGroup): void {
+    this.groupsOpen.set(`${table}|${g.key}`, !this.groupOpen(table, g));
+  }
+
+  // (a game's stakes, and what its bets came to so far: null with none decided)
+  groupUnits(g: BetGroup): number {
+    return Math.round(g.bets.reduce((sum, b) => sum + b.units, 0) * 100) / 100;
+  }
+
+  // (its game's final: a side's or a total's (a prop's says the player's count), else the scoreboard's)
+  groupFinal(g: BetGroup): string {
+    const game = g.bets.find((b) => b.market !== 'prop');
+    return (game && this.finalScore(game)) || (g.bets[0].event ? (this.scores.get(g.bets[0].event)?.score ?? '') : '');
+  }
+
+  groupProfit(g: BetGroup): number | null {
+    const decided = g.bets.map((b) => this.result(b)).filter((r) => r !== null);
+    return decided.length ? decided.reduce((sum, r) => sum + r.profit, 0) : null;
   }
 
   // ---------------------------------------------------------------------------

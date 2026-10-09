@@ -243,12 +243,21 @@ card-panel {
 
 // (two panels a row on a wide screen, one on a narrower: By Sport's eight columns need about 460px)
 .desk-grid {
+  align-items: start;
   display: grid;
   gap: 0 12px;
   grid-template-columns: repeat(auto-fit, minmax(min(460px, 100%), 1fr));
 
-  // (a shorter panel in a row stretches to the tallest, its body with it: the sport's edges, the NFL's
-  // end zone, run all the way down)
+  // (By Sport across the top, centered, a panel's width; By Market and By Stake side by side under it;
+  // Calibration centered under them)
+  .desk-wide {
+    grid-column: 1 / -1;
+    justify-self: center;
+    width: min(100%, 760px);
+  }
+
+  // (each panel its own height: one folded beside an open one stays a bar; a panel's body fills it, the
+  // sport's edges, the NFL's end zone, all the way down)
   card-panel {
     display: flex;
     flex-direction: column;
@@ -946,4 +955,82 @@ card-panel {
   .desk-table td.desk-flash {
     animation: none;
   }
+}
+
+// (a breakdown's tables in step: the same fixed columns, so a panel's two (the markets over the props by type,
+// the stakes over the edge's) line up, label for label)
+.desk-table:has(> .desk-tally-head) {
+  table-layout: fixed;
+
+  th:first-child {
+    width: 30%;
+  }
+}
+
+// (a game with more than one bet: its row once, a chevron to fold its picks away, their count and stakes)
+.desk-group {
+  cursor: pointer;
+
+  td,
+  th {
+    background: rgba(255, 255, 255, 0.025);
+  }
+
+  &:hover td,
+  &:hover th {
+    background: rgba(255, 255, 255, 0.05);
+  }
+
+}
+
+// (its game: the chevron, the teams and when, on one line)
+.desk-group-game {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 6px;
+}
+
+.desk-group-toggle {
+  background: none;
+  border: 0;
+  color: rgba(255, 255, 255, 0.55);
+  cursor: pointer;
+  display: inline-flex;
+  flex: none;
+  padding: 0;
+  transition: color 0.15s;
+
+  mat-icon {
+    font-size: 18px;
+    height: 18px;
+    transform: rotate(90deg);
+    width: 18px;
+  }
+
+  .desk-group:hover &,
+  &:focus-visible {
+    color: #fff;
+  }
+
+  .shut & mat-icon {
+    transform: none;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    mat-icon {
+      transition: transform 0.2s ease;
+    }
+  }
+}
+
+.desk-table td.desk-group-count {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 11.5px;
+}
+
+// (a game's picks under it: a fainter line between them and their game)
+.desk-grouped + .desk-grouped,
+.desk-group + .desk-grouped {
+  border-top-color: rgba(255, 255, 255, 0.03);
 }

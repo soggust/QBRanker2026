@@ -135,3 +135,20 @@ export const contextValue = reader<ContextRow>({
   games: (t) => t.games,
   gain: (t) => t.gain,
 });
+
+// A bet list by game: each game once, its bets under it, in the order the table's sort put them (a game where
+// its first bet falls)
+export interface BetGroup {
+  key: string;
+  bets: ModelBet[];
+}
+export function byGame(bets: ModelBet[]): BetGroup[] {
+  const groups = new Map<string, BetGroup>();
+  for (const b of bets) {
+    const key = `${b.sport}|${b.event ?? `${b.matchup}|${b.start}`}`;
+    const group = groups.get(key) ?? { key, bets: [] };
+    if (!groups.has(key)) groups.set(key, group);
+    group.bets.push(b);
+  }
+  return [...groups.values()];
+}
