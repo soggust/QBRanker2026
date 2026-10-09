@@ -4,7 +4,9 @@
 // in its own season (across tabs, the bigger number, less where less is better), sides on different tabs
 // share only the same skills and columns, the career arcs run by career year or by season with the
 // compared season ringed, the search ranks names starting with what's typed first and the table's own tab
-// next, a pair gets a verdict, and every sport builds a view.
+// next (a headshot on each player's hit), every comparison gets a summary (what each one leads, group
+// by group, and where he's clearly the best), a shared link's sides come back in its order on its tab, only the careers files names.json names
+// are asked for, and every sport builds a view.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -69,12 +71,14 @@ function harness(engine, sport, position) {
   host.reader = readerOf(table);
   const careersDir = path.join(staticDir(sport), 'careers');
   const orEmpty = (file) => (fs.existsSync(path.join(careersDir, file)) ? readJson(path.join(careersDir, file)) : {});
+  // (every file asked for, by name: no asking for one that isn't there)
+  const asked = [];
   const data = {
     rows: async (season) => (season === CURRENT_SEASON ? SKILL_UNITS : unitsForSeason(seasonData(seasonDir(sport, season, CURRENT_SEASON), SPORT.dataFiles), season)),
-    careers: async (p) => orEmpty(`${p}.json`),
-    careerNames: async () => orEmpty('names.json'),
+    careers: async (p) => (asked.push(`${p}.json`), orEmpty(`${p}.json`)),
+    careerNames: async () => (asked.push('names.json'), orEmpty('names.json')),
   };
-  return { host, data, compare: new engine.PlayerCompare(host, data) };
+  return { host, data, asked, compare: new engine.PlayerCompare(host, data) };
 }
 
 // Every side's career in (they load after the side, on their own)
@@ -101,6 +105,27 @@ function checkColumns(engine, view, sides) {
   const led = view.wins.reduce((a, w) => a + w, 0);
   assert.equal(view.wins.length, sides.length);
   assert.ok(led <= view.contested, `the sides lead ${led} columns of ${view.contested}`);
+}
+
+// A line per side, naming the groups it leads the most columns of (columns it does lead, counted as the
+// Stats tab counts them) and its edges
+function checkSummary(view, sides) {
+  assert.equal(view.summary.length, sides.length, 'a line per side');
+  const rows = view.groups.flatMap((g) => g.rows);
+  view.summary.forEach((line, i) => {
+    assert.match(line, /^leads /, line);
+    assert.equal(line.startsWith('leads no column outright'), view.wins[i] === 0, `${line} (${view.wins[i]} led)`);
+    for (const [, title, won, of, named] of line.matchAll(/(?:leads |and )([A-Z][w ]*?) (d+) of (d+) (([^)]*))/g)) {
+      const group = view.groups.find((g) => g.title === title);
+      assert.ok(group, `${title}: a group`);
+      assert.ok(+won <= +of && +of <= group.rows.length, line);
+      for (const label of named.replace(/ and d+ more$/, '').split(', ')) {
+        assert.ok(group.rows.some((r) => r.label === label && r.leaders.length === 1 && r.leaders[0] === i), `${label}: led by side ${i} in ${title}`);
+      }
+    }
+    for (const e of view.edges[i].slice(0, 2)) assert.ok(line.includes(e.skill), `${line}: ${e.skill}`);
+  });
+  assert.ok(rows.length);
 }
 
 // Someone in a tab's careers file with a season besides the given one
@@ -144,7 +169,8 @@ test('nfl: two picked backs, then a quarterback from another season, compared', 
   const rows = compare.view.groups.flatMap((g) => g.rows);
   assert.ok(rows.some((r) => r.cells[2].text !== '-' && r.cells[0].text === '-' && r.cells[1].text === '-'), 'a column only the QB has');
   assert.ok(rows.some((r) => r.cells[2].text === '-' && r.cells[0].text !== '-'), 'a column only the backs have');
-  assert.equal(compare.view.verdict, null, 'no verdict for three');
+  // (three: who leads the most columns, named, the only one at the top its side)
+  checkSummary(compare.view, compare.sides);
 
   // (the same season again is turned away; a fourth fills it, a fifth is turned away)
   await compare.add('QB', qb.season, qb.gsisId);
@@ -335,8 +361,8 @@ test('nfl: removing and switching sides keeps the colors, and a freed color goes
   checkColumns(engine, compare.view, compare.sides);
 });
 
-test("the compare helpers: leaders, surnames, names for matching, a pair's verdict", async () => {
-  const { leadersOf, surname, normalize, verdictOf } = await engineFor('nfl');
+test('the compare helpers: leaders, surnames, names for matching, the summary', async () => {
+  const { leadersOf, surname, normalize, summaryOf } = await engineFor('nfl');
   assert.deepEqual(leadersOf([0.5, 0.9, 0.9]), [1, 2], 'a tie at the top: both lead');
   assert.deepEqual(leadersOf([0.5, 0.5]), [], 'all level: nobody leads');
   assert.deepEqual(leadersOf([null, 0.4]), [], 'one alone: nobody leads');
@@ -348,26 +374,28 @@ test("the compare helpers: leaders, surnames, names for matching, a pair's verdi
   assert.equal(normalize('Luka Dončić'), 'luka doncic');
   assert.equal(normalize("  Ja'Marr   CHASE "), 'jamarr chase');
 
-  const pair = [{ tag: 'Charles ’13' }, { tag: 'Walker ’22' }];
-  const skills = (...leaders) => leaders.map((l) => ({ leaders: l }));
-  assert.deepEqual(verdictOf(pair, [11, 4], 17, skills([0], [0], [1], [0, 1], [])), { side: 0, text: 'Charles ’13 leads 11 of 17 columns and 2 of 4 skills' });
-  assert.deepEqual(verdictOf(pair, [3, 9], 14, skills([0], [0])), { side: 1, text: 'Walker ’22 leads 9 of 14 columns; Charles ’13 leads 2 of 2 skills' });
-  assert.deepEqual(verdictOf(pair, [6, 6], 14, skills([0], [1])), { side: null, text: 'Level at 6 of 14 columns each; the skills split 1-1' });
-  assert.deepEqual(verdictOf(pair, [2, 1], 3, []), { side: 0, text: 'Charles ’13 leads 2 of 3 columns' });
-  assert.equal(verdictOf(pair, [0, 0], 0, skills([0])), null, 'nothing contested: no verdict');
-  assert.equal(verdictOf([...pair, { tag: 'X' }], [1, 1, 1], 3, []), null, 'three: no verdict');
+  // (each side: its two biggest groups, three columns named, then its two biggest edges)
+  const groups = [
+    { title: 'Box Score', contested: 6, led: [['Yds', 'TD', 'Att', 'Cmp'], ['Rating', 'Comp %'], []] },
+    { title: 'Advanced', contested: 8, led: [['EPA/Play'], ['Success', 'CPOE', 'Y/A', 'aDOT', 'TTT'], []] },
+    { title: 'Results', contested: 2, led: [['Wins'], [], []] },
+  ];
+  const edges = [[{ skill: 'Volume', by: 30 }], [{ skill: 'Accuracy', by: 18 }, { skill: 'Pocket', by: 12 }, { skill: 'Deep', by: 10 }], []];
+  assert.deepEqual(summaryOf(groups, edges), [
+    'leads Box Score 4 of 6 (Yds, TD, Att and 1 more) and Advanced 1 of 8 (EPA/Play); clearly the best at Volume',
+    'leads Advanced 5 of 8 (Success, CPOE, Y/A and 2 more) and Box Score 2 of 6 (Rating, Comp %); clearly the best at Accuracy and Pocket',
+    'leads no column outright',
+  ]);
+  assert.deepEqual(summaryOf([], [[], [{ skill: 'Speed', by: 11 }]]), ['leads no column outright', 'leads no column outright; clearly the best at Speed']);
 });
 
-test('nfl: a pair from the grid gets a verdict that matches the columns', async () => {
+test('nfl: a pair from the grid gets a summary that matches the columns', async () => {
   const engine = await engineFor('nfl');
   const { host, compare } = harness(engine, 'nfl', 'QB');
-  await compare.start(host.playerList.slice(0, 2));
-  const { verdict, wins, contested } = compare.view;
-  assert.ok(verdict, 'a verdict for two');
-  const lead = wins[0] === wins[1] ? null : wins[0] > wins[1] ? 0 : 1;
-  assert.equal(verdict.side, lead);
-  assert.ok(verdict.text.includes(`of ${contested} columns`), verdict.text);
-  if (lead !== null) assert.ok(verdict.text.startsWith(`${compare.sides[lead].tag} leads ${wins[lead]} of`), verdict.text);
+  await compare.start(host.playerList.slice(0, 1));
+  assert.equal(compare.view.summary, null, 'one alone: no summary');
+  await compare.add('QB', host.season, host.playerList[1].gsisId);
+  checkSummary(compare.view, compare.sides);
 });
 
 test('nfl: the same player picked again adds his next season down, until none are left', async () => {
@@ -399,7 +427,7 @@ for (const sport of ['mlb', 'nba', 'nhl', 'mma']) {
     checkColumns(engine, compare.view, compare.sides);
     assert.ok(compare.view.skills.length > 0 && compare.view.groups.length > 0, 'skills and columns');
     assert.ok(compare.view.skills.every((s) => s.pcts.every((p) => p === null || (p >= 0 && p <= 1))));
-    assert.ok(compare.view.verdict === null || compare.view.verdict.text.length > 0);
+    checkSummary(compare.view, compare.sides);
 
     const name = host.playerList[2].name;
     await compare.search(engine.surname(name));
@@ -418,3 +446,61 @@ for (const sport of ['mlb', 'nba', 'nhl', 'mma']) {
     }
   });
 }
+
+test("nfl: a shared link's sides open in its order, on its tab, anyone not found left out", async () => {
+  const engine = await engineFor('nfl');
+  const { host, data, compare } = harness(engine, 'nfl', 'QB');
+  const vet = await withAnotherSeason(data, 'QB', host.playerList, host.season);
+  const past = (await data.careers('QB'))[vet.gsisId].find(([s]) => s !== host.season)[0];
+  const wr = engine.defaultRanking('WR', engine.presetWeights('WR', 'default'))[0];
+  const sides = [
+    { position: 'QB', season: past, gsisId: vet.gsisId },
+    { position: 'QB', season: host.season, gsisId: 'nobody-here' },
+    { position: 'WR', season: host.season, gsisId: wr.gsisId },
+    { position: 'QB', season: host.season, gsisId: host.playerList[0].gsisId },
+  ];
+  await compare.openLinked({ sides, tab: 'stats' });
+  assert.equal(compare.open, true);
+  assert.equal(compare.tab, 'stats');
+  assert.deepEqual(
+    compare.sides.map((s) => [s.position, s.season, s.gsisId]),
+    [sides[0], sides[2], sides[3]].map((s) => [s.position, s.season, s.gsisId]),
+    "the link's order (a season from another year loads last, still first), the unknown id skipped",
+  );
+  assert.equal(compare.note, '', 'nothing said about the one left out');
+  // (an unknown tab: Overview; more than four: the first four)
+  const five = host.playerList.slice(0, 5).map((p) => ({ position: 'QB', season: host.season, gsisId: p.gsisId }));
+  await compare.openLinked({ sides: five, tab: 'nope' });
+  assert.equal(compare.tab, 'overview');
+  assert.deepEqual(compare.sides.map((s) => s.gsisId), five.slice(0, engine.COMPARE_MAX).map((s) => s.gsisId));
+});
+
+test('nfl: a player hit carries his headshot, a team hit none', async () => {
+  const engine = await engineFor('nfl');
+  const { host, compare } = harness(engine, 'nfl', 'QB');
+  host.headshot = (unit, w) => (unit.id ? `shot/${unit.id}/${w}` : null);
+  await compare.start([]);
+  await compare.search('peyton manning');
+  const manning = compare.hits.find((h) => h.name === 'Peyton Manning');
+  assert.match(manning.photo, /^shot\/\d+\/96$/);
+  await compare.search('new york jets');
+  const jets = compare.hits.find((h) => h.position === 'TM');
+  assert.ok(jets, 'the Jets found');
+  assert.equal(jets.photo, null);
+  assert.ok(!('headshotId' in jets), 'only the hit, not the index entry');
+});
+
+test('the search asks only for the careers files names.json names (a career-only sport: none)', async () => {
+  for (const sport of ['nfl', 'mma']) {
+    const engine = await engineFor(sport);
+    const position = Object.keys(engine.SKILL_STATS)[0];
+    const { compare, asked, data, host } = harness(engine, sport, position);
+    await compare.start([]);
+    await compare.search(engine.surname(host.playerList[0].name));
+    assert.ok(compare.hits.length, `${sport}: found`);
+    const names = engine.SPORT.careerOnly ? {} : await data.careerNames();
+    const files = asked.filter((f) => f !== 'names.json');
+    assert.deepEqual(files.sort(), Object.keys(names).map((p) => `${p}.json`).sort(), `${sport}: ${files}`);
+    if (engine.SPORT.careerOnly) assert.deepEqual(asked, [], 'mma: no careers files at all');
+  }
+});

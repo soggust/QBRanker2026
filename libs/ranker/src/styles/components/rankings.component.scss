@@ -1257,7 +1257,8 @@ section.category-colors ul li.player:not(.header-row):not(.cdk-drag-preview) > .
   transition: opacity 0.35s ease-in-out;
   visibility: hidden;
   white-space: nowrap;
-  z-index: 999;
+  // (over the compare view too: its share button's)
+  z-index: 1002;
 
   &.show {
     opacity: 1;

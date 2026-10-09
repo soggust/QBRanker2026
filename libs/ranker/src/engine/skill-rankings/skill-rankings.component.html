@@ -65,7 +65,7 @@
       <li class="empty-list">{{ sport.copy.noneFound ?? 'No Players Found' }}</li>
     }
     @for (player of playerList; track player.gsisId; let i = $index) {
-      <!-- (a click on a row, off its name and links, picks it for Compare) -->
+      <!-- (a click on a row, off its name and links, picks it for Compare; so does C on its name) -->
       <li
         cdkDrag
         cdkDragPreviewContainer="parent"
@@ -74,6 +74,7 @@
         [attr.data-id]="player.gsisId"
         (cdkDragEnded)="rowDropped()"
         (click)="pickRow(player, $event)"
+        (keydown)="pickKey(player, $event)"
       >
         <mat-icon
           cdkDragHandle
@@ -105,7 +106,7 @@
           >
           <!-- The badge through the name opens the player card -->
           <p class="player-name card-target" (click)="openCard(player)">
-            <strong class="card-link" role="button" tabindex="0" [attr.data-name]="player.name" (keydown.enter)="openCard(player)" (keydown.space)="$event.preventDefault(); openCard(player)">{{ player.name }}</strong>
+            <strong class="card-link" role="button" tabindex="0" aria-keyshortcuts="C" [attr.aria-label]="picked.includes(player.gsisId) ? player.name + ', picked for Compare' : null" [attr.data-name]="player.name" (keydown.enter)="openCard(player)" (keydown.space)="$event.preventDefault(); openCard(player)">{{ player.name }}</strong>
             @if (statsBehind(player); as n) {
               <!-- His stats don't cover every game in his record yet (the data source catching up) -->
               <mat-icon
@@ -348,7 +349,7 @@
 
 <!-- The settings menu (the gear opens it), the compare view, and the player card (a name clicked) -->
 <settings-menu #settings [position]="position"></settings-menu>
-<player-compare [compare]="compare"></player-compare>
+<player-compare [compare]="compare" [share]="shareCompare"></player-compare>
 <player-card [cards]="cards" [compare]="compareFromCard"></player-card>
 <!-- (a game: from a Recent dot, or a game log's row) -->
 <game-view></game-view>

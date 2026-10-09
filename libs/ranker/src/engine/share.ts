@@ -129,3 +129,49 @@ export function applySharedLink(service: PositionService, defaults: RankerSettin
     groups: lists(shared.go) as Record<string, StatGroupId[]>,
   });
 }
+
+// A comparison shared by its link (?cmp=, on top of the list's own link: the sides ranked with the same
+// sliders): each side as tab.season.id, "_" between them (an address leaves it as it is), the compare tab
+// first when it isn't Overview ("stats_QB.2007.QB-1428_RB.2013.00-0011869"). The id is last, so it can
+// hold anything ("_" and "%" kept out of it by escaping them).
+export const COMPARE_PARAM = 'cmp';
+
+export interface SharedSide {
+  position: SkillPosition;
+  season: number;
+  gsisId: string;
+}
+
+export interface SharedCompare {
+  sides: SharedSide[];
+  tab: string;
+}
+
+export function compareCode({ sides, tab }: SharedCompare): string {
+  const items = sides.map((s) => `${s.position}.${s.season}.${s.gsisId.replace(/%/g, '%25').replace(/_/g, '%5F')}`);
+  return (tab === 'overview' ? items : [tab, ...items]).join('_');
+}
+
+// ...and read back: only the tabs and seasons the site has, each side once (the compare view takes the
+// first four, and the tab when it has it); junk reads as nobody
+export function readCompareCode(code: string, seasons: number[]): SharedCompare {
+  const shared: SharedCompare = { sides: [], tab: 'overview' };
+  const positions = new Set<string>(POSITIONS);
+  code.split('_').forEach((item, i) => {
+    const [, position, season, id] = item.match(/^([^.]+)\.(\d+)\.(.+)$/) ?? [];
+    if (!id) {
+      if (i === 0) shared.tab = item;
+      return;
+    }
+    let gsisId: string;
+    try {
+      gsisId = decodeURIComponent(id);
+    } catch {
+      return;
+    }
+    const side = { position: position as SkillPosition, season: Number(season), gsisId };
+    const twice = shared.sides.some((s) => s.position === side.position && s.season === side.season && s.gsisId === gsisId);
+    if (positions.has(position) && seasons.includes(side.season) && !twice) shared.sides.push(side);
+  });
+  return shared;
+}

@@ -5,8 +5,8 @@
 //
 // What it builds, once per change of sides: the skills (on one radar where they share three or more, and
 // as bars), the edges (where each one is clearly the best of them), how alike they are, the grid's columns
-// side by side (each side's tab's; the leader marked, the columns each one leads counted), a verdict for a
-// pair and the career arcs (every season's standing, the compared one ringed). Sides on different tabs
+// side by side (each side's tab's; the leader marked, the columns each one leads counted), a summary (what
+// each one leads, and where he's clearly the best) and the career arcs (every season's standing, the compared one ringed). Sides on different tabs
 // share only what's the same skill or column by name, and a column they share goes to the bigger number: a
 // percentile among backs and one among receivers don't say who did more.
 import { SKILL_STATS, SkillPlayer, SkillPosition, SkillStat, presetWeights } from '@sport/positions';
@@ -21,9 +21,10 @@ import { CardSkill } from '@ranker/engine/skills';
 import { SeasonDataService } from '@ranker/engine/season-data.service';
 import { rankPct } from '@ranker/core/format';
 import { CardHost, careerLines } from '@ranker/engine/player-card/player-cards';
-import { CardRadar, CardSeason, SeasonContext } from '@ranker/engine/player-card/card.model';
+import { CardRadar, CardSeason, CareersFile, SeasonContext } from '@ranker/engine/player-card/card.model';
 import { archetypeFor, skillsOf } from '@ranker/engine/player-card/overview';
 import { radar } from '@ranker/engine/player-card/radar';
+import type { SharedCompare } from '@ranker/engine/share';
 
 export const COMPARE_MAX = 4;
 
@@ -92,6 +93,8 @@ export interface CompareHit {
   logo: string;
   badge: string;
   whiteLogo: boolean;
+  // Their headshot, small (none: the team card stands in)
+  photo: string | null;
   // "2008-2016", the season a click adds (their best by the default sliders), and every season they have
   span: string;
   best: { season: number; rank: number; of: number };
@@ -141,8 +144,8 @@ export interface CompareView {
   // The columns each side leads outright, and how many had a leader
   wins: number[];
   contested: number;
-  // Two sides: who leads more of it, in a line (the side: none when they're level)
-  verdict: { side: number | null; text: string } | null;
+  // What each one has over the rest, in a line each (one side alone: none)
+  summary: string[] | null;
   // More than one tab among them (the skills are each one's among his own tab's; a column two tabs share
   // goes to the bigger number)
   mixed: boolean;
@@ -164,7 +167,8 @@ export interface CompareArcs {
 
 const ARC = { width: 640, height: 210, left: 40, right: 14, top: 14, bottom: 28 };
 
-type SearchEntry = CompareHit & { key: string };
+type SearchEntry = Omit<CompareHit, 'photo'> & { key: string; headshotId: number | null };
+type CareerNames = Awaited<ReturnType<SeasonDataService['careerNames']>>;
 
 export class PlayerCompare {
   open = false;
@@ -204,6 +208,18 @@ export class PlayerCompare {
     await Promise.all(picks.slice(0, COMPARE_MAX).map((p) => this.add(this.host.position, this.host.season, p.gsisId)));
   }
 
+  // From a link (share.ts): its sides in the link's order (the first four; anyone not found left out), on
+  // its tab
+  async openLinked({ sides, tab }: SharedCompare): Promise<void> {
+    this.reset();
+    if (tab === 'stats' || (tab === 'career' && !SPORT.careerOnly)) this.tab = tab;
+    const keys = sides.slice(0, COMPARE_MAX).map((s) => keyOf(s.position, s.season, s.gsisId));
+    await Promise.all(sides.slice(0, COMPARE_MAX).map((s) => this.add(s.position, s.season, s.gsisId)));
+    // (they load together, in whatever order they come back)
+    this.sides.sort((a, b) => keys.indexOf(a.key) - keys.indexOf(b.key));
+    this.build();
+  }
+
   // From a card: its season into the view (added when it's open, a fresh one otherwise)
   async startWith(position: SkillPosition, season: number, gsisId: string): Promise<void> {
     if (!this.open) this.reset();
@@ -236,7 +252,12 @@ export class PlayerCompare {
       else this.sides.push(side);
       if (old?.position === position && old.gsisId === gsisId && old.career) side.career = old.career;
       this.build();
+      // (a career-only sport: no seasons to pick or chart)
       if (side.career) return;
+      if (SPORT.careerOnly) {
+        side.career = [];
+        return;
+      }
       careerLines(this.data, this.host.season, position, gsisId)
         .catch(() => [])
         .then((career) => {
@@ -386,7 +407,11 @@ export class PlayerCompare {
     // (the columns: each side's tab's as the grid shows them, merged group by group)
     const wins = sides.map(() => 0);
     let contested = 0;
+    // (and group by group, the columns each one leads, for the summary)
+    const tallies: GroupTally[] = [];
     const groups = this.columns().flatMap(({ stats, ...group }) => {
+      const tally: GroupTally = { title: group.title, contested: 0, led: sides.map(() => []) };
+      tallies.push(tally);
       const rows = stats
         .map(({ key, of }): CompareRow => {
           const i = of.findIndex((s) => !!s);
@@ -397,12 +422,17 @@ export class PlayerCompare {
           const tabs = new Set(sides.filter((_, j) => cells[j].value !== null).map((s) => s.position));
           const leaders = leadersOf(tabs.size > 1 ? cells.map((c) => (c.value === null ? null : c.lowerBetter ? -c.value : c.value)) : cells.map((c) => c.pct));
           // (counted toward the columns each side leads: not display-only stats or the team around them)
+          const { reader } = sides[i];
+          const label = reader.label(shared);
           if (!shared.infoOnly && (!shared.support || shared.supportHelps) && leaders.length) {
             contested++;
-            if (leaders.length === 1) wins[leaders[0]]++;
+            tally.contested++;
+            if (leaders.length === 1) {
+              wins[leaders[0]]++;
+              tally.led[leaders[0]].push(label);
+            }
           }
-          const { reader } = sides[i];
-          return { key, label: reader.label(shared), name: reader.name(shared), cells, leaders };
+          return { key, label, name: reader.name(shared), cells, leaders };
         })
         .filter((row) => row.cells.some((c) => c.text !== '-'));
       return rows.length ? [{ ...group, rows }] : [];
@@ -416,7 +446,7 @@ export class PlayerCompare {
       groups,
       wins,
       contested,
-      verdict: verdictOf(sides, wins, contested, skills),
+      summary: sides.length > 1 ? summaryOf(tallies, edges) : null,
       mixed: new Set(sides.map((s) => s.position)).size > 1,
     };
   }
@@ -497,7 +527,7 @@ export class PlayerCompare {
       .map((e) => ({ e, score: score(e) }))
       .sort((a, b) => b.score - a.score)
       .slice(0, 8)
-      .map(({ e }) => e);
+      .map(({ e: { headshotId, ...hit } }) => ({ ...hit, photo: headshotId ? this.host.headshot({ id: headshotId }, 96) : null }));
     this.active = 0;
     this.searched = true;
   }
@@ -520,30 +550,33 @@ export class PlayerCompare {
     this.searched = false;
   }
 
-  // Everyone on every tab: the careers files' finished seasons (named by careers/names.json) and the
-  // season being played, ranked with the default sliders like them
+  // Everyone on every tab: the careers files' finished seasons (named by careers/names.json: only the tabs
+  // it names have a file; a career-only sport has none) and the season being played, ranked with the
+  // default sliders like them
   private async entries(): Promise<SearchEntry[]> {
-    const [names, careers, current] = await Promise.all([
-      this.data.careerNames(),
-      Promise.all(TABS.map((tab) => this.data.careers(tab).catch(() => ({})))),
+    const [names, current] = await Promise.all([
+      SPORT.careerOnly ? ({} as CareerNames) : this.data.careerNames(),
       this.host.season === CURRENT_SEASON ? SKILL_UNITS : this.data.rows(CURRENT_SEASON),
     ]);
+    const careers = await Promise.all(TABS.map((tab): Promise<CareersFile> | CareersFile => (names[tab] ? this.data.careers(tab).catch(() => ({})) : {})));
     type Line = { season: number; logo: string; rank: number; of: number };
     return TABS.flatMap((position, t) => {
-      const byId = new Map<string, { name: string; seasons: Line[] }>();
+      // (a team's or a coach's: no headshot)
+      const photos = !isTeamTab(position) && position !== SPORT.coachTab;
+      const byId = new Map<string, { name: string; headshotId: number | null; seasons: Line[] }>();
       for (const [id, lines] of Object.entries(careers[t])) {
-        const name = names[position]?.[id]?.[0];
-        if (name) byId.set(id, { name, seasons: lines.map(([season, logo, , rank, of]) => ({ season, logo: SPORT.teamLogo(logo), rank, of })) });
+        const [name, headshotId] = names[position]?.[id] ?? [];
+        if (name) byId.set(id, { name, headshotId: headshotId ?? null, seasons: lines.map(([season, logo, , rank, of]) => ({ season, logo: SPORT.teamLogo(logo), rank, of })) });
       }
       const rows = current[position] ?? [];
       const ranked = rows.length ? defaultRanking(position, presetWeights(position, 'default'), current) : [];
       for (const row of rows) {
         const line = { season: CURRENT_SEASON, logo: row.teamLogo, rank: ranked.indexOf(row) + 1, of: ranked.length };
         const known = byId.get(row.gsisId);
-        if (!known) byId.set(row.gsisId, { name: row.name, seasons: [line] });
+        if (!known) byId.set(row.gsisId, { name: row.name, headshotId: row.id ?? null, seasons: [line] });
         else if (!known.seasons.some((s) => s.season === CURRENT_SEASON)) known.seasons.push(line);
       }
-      return [...byId].map(([id, { name, seasons }]): SearchEntry => {
+      return [...byId].map(([id, { name, headshotId, seasons }]): SearchEntry => {
         seasons.sort((a, b) => a.season - b.season);
         // (their best ranked season; none ranked, the latest)
         const best = seasons.reduce<Line | null>((b, s) => (s.rank > 0 && (!b || rankPct(s.rank, s.of) > rankPct(b.rank, b.of)) ? s : b), null) ?? seasons.at(-1)!;
@@ -554,6 +587,7 @@ export class PlayerCompare {
           id,
           key: normalize(name),
           name,
+          headshotId: photos ? headshotId : null,
           ...teamLook(best.logo, best.season),
           span: SPORT.careerOnly ? '' : first === last ? SPORT.seasonText(first) : `${first}-${last}`,
           best: { season: best.season, rank: best.rank, of: best.of },
@@ -585,22 +619,35 @@ function cell(side: CompareSide, stat: SkillStat | null): CompareCell {
   return { text, value, lowerBetter, pct: rankPct(rank, values.length), rank, of: values.length, tint: reader.valueColor(player, stat) };
 }
 
-// Two sides, in a line: who leads more of the columns, then of the skills ("Charles ’13 leads 11 of 17
-// columns and 5 of 8 skills"; "Level at 8 columns each; Walker ’22 leads 5 of 8 skills")
-export function verdictOf(sides: { tag: string }[], wins: number[], contested: number, skills: { leaders: number[] }[]): CompareView['verdict'] {
-  if (sides.length !== 2 || !contested) return null;
-  const led = skills.filter((s) => s.leaders.length);
-  const skillWins = [0, 1].map((i) => led.filter((s) => s.leaders.length === 1 && s.leaders[0] === i).length);
-  const ahead = (w: number[]) => (w[0] === w[1] ? null : w[0] > w[1] ? 0 : 1);
-  const side = ahead(wins);
-  let text = side === null ? `Level at ${wins[0]} of ${contested} columns each` : `${sides[side].tag} leads ${wins[side]} of ${contested} columns`;
-  if (led.length) {
-    const top = ahead(skillWins);
-    if (top === null) text += `; the skills split ${skillWins[0]}-${skillWins[1]}`;
-    else if (top === side) text += ` and ${skillWins[top]} of ${led.length} skills`;
-    else text += `; ${sides[top].tag} leads ${skillWins[top]} of ${led.length} skills`;
-  }
-  return { side, text };
+// A stat group's columns each side leads outright, of those with a leader
+export interface GroupTally {
+  title: string;
+  contested: number;
+  led: string[][];
+}
+
+// What each side has over the rest, in plain words: the groups it leads the most columns of (its two
+// biggest, three of the columns named), then the skills it's clearly the best at (its edges: two)
+// ("leads Advanced 5 of 8 (EPA/Play, Success, CPOE and 2 more) and Box Score 3 of 6 (Rating, Comp %, Y/A);
+// clearly the best at Accuracy and Pocket Presence")
+export function summaryOf(groups: GroupTally[], edges: { skill: string }[][]): string[] {
+  return edges.map((own, i) => {
+    const led = groups
+      .filter((g) => g.led[i].length)
+      .sort((a, b) => b.led[i].length - a.led[i].length)
+      .slice(0, 2)
+      .map((g) => {
+        const columns = g.led[i];
+        const more = columns.length > 3 ? ` and ${columns.length - 3} more` : '';
+        return `${g.title} ${columns.length} of ${g.contested} (${columns.slice(0, 3).join(', ')}${more})`;
+      });
+    const best = own.slice(0, 2).map((e) => e.skill);
+    const parts = [
+      led.length ? `leads ${led.join(' and ')}` : 'leads no column outright',
+      ...(best.length ? [`clearly the best at ${best.join(' and ')}`] : []),
+    ];
+    return parts.join('; ');
+  });
 }
 
 // The best of a few percentiles: every side at the top (ties), none when fewer than two have one or

@@ -1,5 +1,4 @@
-<!-- Compare: a tape per side across the top (the add slot after them, a pair's verdict under them), then
-     Overview, Stats and Career -->
+<!-- Compare: a tape per side across the top (the add slot after them), then Overview, Stats and Career -->
 @if (compare.open) {
   @let v = compare.view;
   @let sides = compare.sides;
@@ -7,6 +6,12 @@
   <div class="player-card compare-card" [class.suspended]="games.game" role="dialog" aria-modal="true" dialogFocus aria-label="Compare">
     <header class="compare-hero">
       <div class="card-controls">
+        <!-- (a link that opens this comparison, the sides and the tab: share.ts) -->
+        @if (share && sides.length) {
+          <button type="button" #shareButton aria-label="Share a link to this comparison" title="Share a link to this comparison" (click)="share(shareButton)" animate.enter="share-in">
+            <mat-icon fontIcon="share"></mat-icon>
+          </button>
+        }
         <button type="button" aria-label="Close" title="Close (Esc)" (click)="compare.close()">
           <mat-icon fontIcon="close"></mat-icon>
         </button>
@@ -93,7 +98,12 @@
                         (mouseenter)="compare.active = h"
                         (click)="compare.pick(hit)"
                       >
-                        <span class="hit-badge" [class.white-logo]="hit.whiteLogo"><img [src]="hit.logo" alt="" /></span>
+                        <!-- (their headshot in the team's color; none, or it won't load: the team card) -->
+                        @if (hit.photo) {
+                          <span class="hit-photo"><img [src]="hit.photo" alt="" loading="lazy" (error)="hit.photo = null" /></span>
+                        } @else {
+                          <span class="hit-badge" [class.white-logo]="hit.whiteLogo"><img [src]="hit.logo" alt="" /></span>
+                        }
                         <span class="hit-text">
                           <b>{{ hit.name }}</b>
                           <small>{{ hit.tabLabel }}@if (hit.span) { · {{ hit.span }}}</small>
@@ -114,12 +124,6 @@
           </div>
         }
       </div>
-      <!-- (a pair: who leads more of the columns and the skills, in a line) -->
-      @if (v?.verdict; as verdict) {
-        <p class="compare-verdict" [class.level]="verdict.side === null" [style.--side]="verdict.side === null ? null : sides[verdict.side].color">
-          <i aria-hidden="true"></i>{{ verdict.text }}
-        </p>
-      }
       @if (compare.note) {
         <p class="compare-note" role="status">{{ compare.note }}</p>
       }
@@ -142,6 +146,14 @@
       } @else {
         @switch (compare.tab) {
           @case ('overview') {
+            <!-- The summary: what each one has over the rest, a line each in his color -->
+            @if (v.summary; as lines) {
+              <ul class="cmp-summary">
+                @for (s of sides; track s.key; let i = $index) {
+                  <li [style.--side]="s.color"><i aria-hidden="true"></i><span><b>{{ s.tag }}</b> {{ lines[i] }}</span></li>
+                }
+              </ul>
+            }
             <!-- Skills: every side's shape on one radar (the skills they share), and each skill's bars -->
             @if (v.mixed) {
               <p class="cmp-mixed"><mat-icon fontIcon="info"></mat-icon>Different positions: each skill is where he stood among his own position, and only the same skill lines up</p>

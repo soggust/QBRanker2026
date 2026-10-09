@@ -6,10 +6,10 @@ import { COMPARE_MAX, CompareTab, PlayerCompare } from './player-compare';
 import { GameViewService } from '../game-view/game-view.service';
 
 // The compare view: the player card's board with a tape per side across the top (team card, season, rank,
-// archetype; the season switchable, the side removable), a slot to add one by name and, for a pair, the
-// verdict; then its tabs: Overview (the skills on one radar and as bars, the edges, how alike), Stats (the
-// grid's columns side by side) and Career (the arcs). In the search, the arrows move through the hits and
-// Enter picks one; Escape clears the search, then closes the view.
+// archetype; the season switchable, the side removable) and a slot to add one by name; then its tabs:
+// Overview (what each one has over the rest, the skills on one radar and as bars, the edges, how alike),
+// Stats (the grid's columns side by side) and Career (the arcs). In the search, the arrows move through
+// the hits and Enter picks one; Escape clears the search, then closes the view.
 @Component({
   selector: 'player-compare',
   templateUrl: './player-compare.component.html',
@@ -18,6 +18,8 @@ import { GameViewService } from '../game-view/game-view.service';
 })
 export class PlayerCompareComponent implements DoCheck {
   @Input({ required: true }) compare!: PlayerCompare;
+  // (the share button: the grid shares the link, its toast under the button)
+  @Input() share?: (button: HTMLElement) => void;
 
   @ViewChild('search') searchBox?: ElementRef<HTMLInputElement>;
 

@@ -1,4 +1,4 @@
-import { Component, ElementRef, Input, OnChanges, ViewChild } from '@angular/core';
+import { Component, ElementRef, HostListener, Input, OnChanges, ViewChild } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import {
@@ -174,6 +174,9 @@ export class SkillRankingsComponent implements OnChanges, CardHost {
     // (a card a link asked for: open on its tab, once)
     const card = this.positionService.takePendingCard(this.position);
     if (card) this.cards.openLinked(card, this.season);
+    // (a comparison a link asked for: open over whichever tab, once)
+    const shared = this.positionService.takePendingCompare();
+    if (shared) this.compare.openLinked(shared);
   }
 
   get settings(): RankerSettings {
@@ -393,10 +396,34 @@ export class SkillRankingsComponent implements OnChanges, CardHost {
     const target = event.target as Element | null;
     if (target?.closest('.card-target, .last-five, .drag-indicator, .group-icon, button, a')) return;
     if (Date.now() - this.dragEnded < 300 || getSelection()?.toString()) return;
+    this.togglePick(player, event.currentTarget as HTMLElement);
+  }
+
+  // ...or C with the row's name in focus (Enter and Space still open the card), said under the name
+  pickKey(player: SkillPlayer, event: KeyboardEvent): void {
+    if (event.key.toLowerCase() !== 'c' || event.ctrlKey || event.metaKey || event.altKey) return;
+    event.preventDefault();
+    const name = event.target as HTMLElement;
+    const picked = this.togglePick(player, name);
+    if (picked !== null) this.toast(name, picked ? `Picked for Compare (${this.picked.length} of ${COMPARE_MAX})` : 'Unpicked');
+  }
+
+  // (picked: true, unpicked: false, a fifth turned away: null)
+  private togglePick(player: SkillPlayer, anchor: HTMLElement): boolean | null {
     const at = this.picked.indexOf(player.gsisId);
     if (at >= 0) this.picked.splice(at, 1);
-    else if (this.picked.length >= COMPARE_MAX) this.toast(event.currentTarget as HTMLElement, `Compare up to ${COMPARE_MAX} at a time`);
-    else this.picked.push(player.gsisId);
+    else if (this.picked.length >= COMPARE_MAX) {
+      this.toast(anchor, `Compare up to ${COMPARE_MAX} at a time`);
+      return null;
+    } else this.picked.push(player.gsisId);
+    return at < 0;
+  }
+
+  // Escape with nothing open over the grid lets go of the picks
+  @HostListener('document:keydown.escape', ['$event'])
+  clearPicks(event: Event): void {
+    if (!this.picked.length || event.defaultPrevented || document.querySelector('[aria-modal="true"], .cdk-overlay-pane')) return;
+    this.picked = [];
   }
 
   rowDropped(): void {
@@ -562,10 +589,19 @@ export class SkillRankingsComponent implements OnChanges, CardHost {
       .catch((err) => console.error('Failed to copy: ', err));
   }
 
-  // The list's link (its tab, season, sliders, eyes and settings: share.ts): a phone's share sheet, else
-  // copied, "Link copied" under the button
+  // The list's link (its tab, season, sliders, eyes and settings: share.ts)
   shareList(button: HTMLElement): void {
-    const url = this.positionService.shareLink();
+    this.shareLink(button, this.positionService.shareLink(), 'Link copied: anyone who opens it sees this list');
+  }
+
+  // The compare view's: the list's, with its sides and its tab on top
+  readonly shareCompare = (button: HTMLElement) => {
+    const { sides, tab } = this.compare;
+    this.shareLink(button, this.positionService.compareLink(sides, tab), 'Link copied: anyone who opens it sees this comparison');
+  };
+
+  // (a phone's share sheet, else copied, "Link copied" under the button)
+  private shareLink(button: HTMLElement, url: string, copied: string): void {
     const phone = matchMedia('(pointer: coarse)').matches && typeof navigator.share === 'function';
     if (phone) {
       navigator.share({ title: document.title, url }).catch(() => null);
@@ -573,7 +609,7 @@ export class SkillRankingsComponent implements OnChanges, CardHost {
     }
     navigator.clipboard
       .writeText(url)
-      .then(() => this.toast(button, 'Link copied: anyone who opens it sees this list'))
+      .then(() => this.toast(button, copied))
       .catch((err) => console.error('Failed to copy: ', err));
   }
 

@@ -1,10 +1,10 @@
 import { SPORT } from '@sport/sport';
-import { CURRENT_SEASON, SeasonPart, dataPart, dataSeason, hasSeasonParts, loadData } from '@ranker/engine/data';
+import { CURRENT_SEASON, SEASONS, SeasonPart, dataPart, dataSeason, hasSeasonParts, loadData } from '@ranker/engine/data';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, EMPTY, Observable, combineLatest, distinctUntilChanged, map, merge } from 'rxjs';
 import { connectRosterGrades } from '@ranker/engine/roster-grades';
 import { DEFAULT_SPORT_SETTINGS, SKILL_UNITS, defaultRanking, rebuildUnits } from '@ranker/engine/unit-scoring';
-import { applySharedLink, shareLink } from '@ranker/engine/share';
+import { COMPARE_PARAM, SharedCompare, SharedSide, applySharedLink, compareCode, readCompareCode, shareLink } from '@ranker/engine/share';
 import type { EngineHost, SportSettings } from '@ranker/engine/sport';
 import {
   POSITIONS,
@@ -96,6 +96,16 @@ function linkedCard(): { position: SkillPosition; gsisId: string } | null {
   return null;
 }
 
+// A comparison from a link (?cmp=: share.ts), taken out of the address; null when there's none
+function linkedCompare(): SharedCompare | null {
+  const url = new URL(location.href);
+  const code = url.searchParams.get(COMPARE_PARAM);
+  if (code === null) return null;
+  url.searchParams.delete(COMPARE_PARAM);
+  history.replaceState(null, '', url);
+  return readCompareCode(code, SEASONS);
+}
+
 // A grid's look for a shared link (PositionService.layout): tab -> row ids in their dragged order,
 // tab -> collapsed group ids, "TAB.group" -> column keys, tab -> the sidebar's group order
 export interface GridLayout {
@@ -120,6 +130,8 @@ export class PositionService {
     // (a card's link: its tab open from the start, the card when the grid draws it)
     this.pendingCard = linkedCard();
     if (this.pendingCard) this.positionSubject.next(this.pendingCard.position);
+    // (a comparison's link: the compare view open once the grid draws)
+    this.pendingCompare = linkedCompare();
     this.checkSeasonParts(dataSeason);
     // (a linked part the season doesn't have loaded its regular season: the address says so too)
     const url = new URL(location.href);
@@ -133,6 +145,13 @@ export class PositionService {
   // The link to this list as it is now (the tab, the season, and what's changed from the defaults)
   shareLink(): string {
     return shareLink(this, DEFAULT_SETTINGS);
+  }
+
+  // ...and with a comparison on top (its sides ranked with the same sliders)
+  compareLink(sides: SharedSide[], tab: string): string {
+    const url = new URL(this.shareLink());
+    url.searchParams.set(COMPARE_PARAM, compareCode({ sides, tab }));
+    return url.toString();
   }
 
   private settingsSubject = new BehaviorSubject<RankerSettings>({ ...DEFAULT_SETTINGS });
@@ -175,6 +194,15 @@ export class PositionService {
     if (!card || card.position !== position) return null;
     this.pendingCard = null;
     return card;
+  }
+
+  // A comparison a link asked for (linkedCompare), until the grid opens it
+  private pendingCompare: SharedCompare | null = null;
+
+  takePendingCompare(): SharedCompare | null {
+    const shared = this.pendingCompare;
+    this.pendingCompare = null;
+    return shared;
   }
 
   // The season on screen (the year selector). Sliders, eyes and column orders carry over to another

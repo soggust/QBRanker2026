@@ -16,6 +16,8 @@ export class AboutComponent {
     { id: 'about', title: 'Guide' },
     { id: 'ranking', title: 'Rankings' },
     { id: 'grades', title: 'Grades' },
+    { id: 'card', title: 'Player Card' },
+    { id: 'compare', title: 'Compare' },
     { id: 'tips', title: 'Tips' },
     { id: 'glossary', title: 'Stats' },
     { id: 'faq', title: 'FAQ' },

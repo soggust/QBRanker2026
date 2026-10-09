@@ -8,9 +8,9 @@
         This site lets you settle it yourself: move the sliders and the list re-ranks instantly.
       </p>
       <p>
-        It covers every position (catchers, first, second and third base, shortstops, outfielders and
-        designated hitters) plus starting and relief pitchers, with this season's stats, updated every
-        night, and every season back to 2000.
+        It covers teams, every position (catchers, first, second and third base, shortstops, outfielders
+        and designated hitters) and starting and relief pitchers, with this season's stats, updated every
+        night, and every season back to 2000, the postseason included.
       </p>
       <div class="callout">
         <strong>New here?</strong> Pick a tab up top, then try a preset from the dropdown at the top of the
@@ -30,10 +30,12 @@
         </li>
         <li><b>Drag rows</b> to rank by hand. Your order sticks until that tab's sliders change.</li>
         <li><b>Hover</b> any column label for the full stat name and the league average.</li>
-        <li><b>Click a name</b> (or its card) for the player card: an overview with a skill radar, archetype and scouting report, every stat as a rank, and his seasons.</li>
+        <li><b>Click a name</b> (or its card) for the player card: an overview with a skill radar, archetype and scouting report, every stat as a rank, his games, zones and seasons.</li>
+        <li><b>Click a row</b> anywhere but the name to pick it, then <b>compare</b> to put up to four side by side (see Compare).</li>
         <li>
           In the bar above the list: <b>filter</b> opens the filter menu, <b>copy</b> copies your list,
-          <b>info</b> opens this panel and the <b>gear</b> has the settings.
+          <b>share</b> makes a link to it, <b>compare</b> opens Compare, <b>info</b> opens this panel and
+          the <b>gear</b> has the settings.
         </li>
         <li>
           <b>Badges</b> under a name mark that season's honors: the World Series, the pennant, MVP, Cy Young,
@@ -100,6 +102,24 @@
         Rate stats aren't adjusted for how much playing time they come from. Raise <b>Min PA</b> in the
         settings to leave out players with too little.
       </p>
+      <h4>The Teams tab</h4>
+      <p>
+        The first tab ranks the 30 teams: record, recent results, playoff wins, run differential, offense
+        and defense ranks, OPS, ERA, fielding runs, wins against the run differential and the park. Then
+        <b>Hitters</b>, <b>Rotation</b> and <b>Bullpen</b>: each group graded from your own rankings on the
+        player tabs, weighted by plate appearances or innings. Re-rank the relievers and every team's
+        Bullpen grade follows.
+      </p>
+      <h4>The postseason</h4>
+      <p>
+        <b>Length</b> in the settings switches the stats between the regular <b>Season</b>, the
+        <b>Playoffs</b> or <b>Both</b> together (rates worked out over those games), for any season from
+        2000 on. It's greyed out until a season's postseason starts. WAR,
+        baserunning and fielding runs, xFIP, xERA, sprint speed and Outs Above Average have no postseason
+        source, so those columns are empty there; postseason Statcast starts in 2015. A playoffs or both
+        card leaves out its career takes and similar seasons, which would weigh a few games against whole
+        regular seasons.
+      </p>
       <h4>Ranking by hand</h4>
       <p>
         Drag a row by its handle to move it. A hand-dragged order stays put when you switch tabs, and
@@ -110,7 +130,7 @@
     @case ('grades') {
       <h3>The player card</h3>
       <p>
-        Click any name for his card. It has three tabs:
+        Click any name for his card (a team's works the same way). Its tabs:
       </p>
       <ul>
         <li>
@@ -119,9 +139,30 @@
           percentile in the list. They make up the radar, pick his <b>archetype</b> (a Slugger, a Table
           Setter, an Ace, a Lockdown Closer...) and fill the scouting report, strengths first.
         </li>
-        <li><b>Stats:</b> every column as a rank in the list, with the list average.</li>
-        <li><b>Seasons:</b> his career year by year, each season ranked with your sliders. Click one for that season's card.</li>
+        <li>
+          <b>Team</b> (teams): the lineup on a diamond, the batting order, the pitching staff, the manager
+          and coaches, and everyone who played. Names open their own cards.
+        </li>
+        <li><b>Stats:</b> every column as a rank in the list, with the list average. The Recent squares open their games.</li>
+        <li>
+          <b>Hot Zones</b> (<b>Pitch Zones</b> for pitchers, 2015 on): a hitter's average, slugging, OPS
+          and exit velocity in each part of the strike zone; a pitcher's pitches and the damage against
+          him there, with his arsenal (each pitch's share, speed and count).
+        </li>
+        <li>
+          <b>Game Log:</b> that season's games, a chart of the key stat by game, then a row each (the
+          postseason set apart). A team's runs for and against (PF and PA) sit on little scoreboard tiles, the
+          winner's lit green and the loser's red. The date opens the game, the opponent its team's card.
+          This season's card also lists the games still to come, with the first pitch, the TV and the
+          betting line.
+        </li>
+        <li><b>Career</b> (<b>History</b> for teams): every season he's had, each ranked with your sliders. Click one for that season's card.</li>
       </ul>
+      <p>
+        The <b>compare</b> button at the top of the card takes that season into Compare. Hover any chart (the
+        radar, a skill's bar, a stat tile, a zone, the game log's bars) for whose it is, what it is and the
+        number.
+      </p>
       <h4>The takes</h4>
       <p>
         The points under the archetype read the season in context: luck (a hitter's wOBA against his
@@ -132,8 +173,69 @@
       </p>
       <h4>Similar seasons</h4>
       <p>
-        Finished seasons show the three closest seasons by anyone else since 2000: every stat is compared
-        by how far it stood out from its own year's league, so a 2004 season and a 2024 one line up fairly.
+        Finished seasons show the three closest seasons by anyone else since 2000 (click the panel to open
+        it, and one for its card): every stat is compared by how far it stood out from its own year's
+        league, so a 2004 season and a 2024 one line up fairly.
+      </p>
+      <h4>The game view</h4>
+      <p>
+        A game opened from the card has the scoreboard, then the summary, box score, plays, spray chart,
+        every pitch and fantasy points. A finished game has <b>Highlights</b> from MLB itself, any season,
+        playing right on the board; one still to come has a preview with the injury report.
+      </p>
+    }
+
+    @case ('compare') {
+      <h3>Compare</h3>
+      <p>
+        Put up to four seasons side by side: any players, any years, any tabs. Three ways in:
+      </p>
+      <ul>
+        <li>
+          <b>Pick rows</b> in the list: click a row anywhere but the name (the name opens the card), and
+          again to let it go (from the keyboard: <b>C</b> on a name; Escape lets go of them all). The
+          <b>compare</b> button in the bar counts the picks; click it to compare them.
+        </li>
+        <li>The <b>compare</b> button at the top of a player card takes that season in.</li>
+        <li>
+          Open <b>compare</b> with nothing picked and <b>search</b> anyone the site has had, any season. A
+          name adds his best season; the season under each name switches it to another of his years.
+        </li>
+      </ul>
+      <p>
+        Each season is read against its own league: that year's list on his tab, ranked with your sliders,
+        just as his card reads it. So a 2004 season and a 2024 one meet on even ground: where each stood
+        among his own peers.
+      </p>
+      <p>
+        <b>Share</b>, at the top of Compare, copies a link that opens the same comparison, ranked with the
+        same sliders.
+      </p>
+      <h4>Overview</h4>
+      <p>
+        Everyone's skills on one radar and as bars (percentiles, 100 the top). <b>Edges</b> lists where one
+        is clearly the best of them (10 percentile points or more over the next best); <b>How Alike</b>
+        gives each pair a score, 100% being the same skill profile.
+      </p>
+      <h4>Stats</h4>
+      <p>
+        The grid's columns side by side, each value tinted as the grid tints it, with a bar for where it
+        stood that season. Each column's leader is lit, and over each player is how many columns he leads.
+        A line under the names sums it up: who leads the most columns, and the most skills (with three or
+        four, each one's count of columns led under it).
+      </p>
+      <h4>Career</h4>
+      <p>
+        Each one's career arc: every season's rank in its league (with the default sliders), the compared
+        season ringed. The dropdown lines them up by <b>Career Year</b> (first season, second...) or by
+        <b>Season</b>.
+      </p>
+      <h4>Different positions</h4>
+      <p>
+        A shortstop and a DH can go side by side, each read among his own position (a hitter and a pitcher
+        too, though they share little). Only what's the same by name lines up: a skill only when both have
+        it, and a column both tabs have goes to the bigger number, since percentiles among different
+        positions don't say who did more.
       </p>
     }
 
@@ -145,6 +247,9 @@
         <li><mat-icon fontIcon="palette"></mat-icon><span><b>Color-coded values</b> are green above the league average and red below it. Counting stats compare per game, so missed time doesn't turn a good player red. Hover a column label for the average of what the column shows.</span></li>
         <li><mat-icon fontIcon="emoji_events"></mat-icon><span><b>Rank tiles:</b> a trophy for #1, green through 10, white in the middle and red for the bottom 10.</span></li>
         <li><mat-icon fontIcon="content_copy"></mat-icon><span><b>Copy</b> puts your whole ranked list on the clipboard, ready to paste into a group chat.</span></li>
+        <li><mat-icon fontIcon="share"></mat-icon><span><b>Share</b> copies a link that opens your list exactly as it looks: the tab, the season, your sliders, eyes, settings, dragged rows and columns. On a phone it opens the share sheet.</span></li>
+        <li><mat-icon fontIcon="swipe"></mat-icon><span><b>Scroll sideways</b> through the columns and the rank and team card stay pinned at the left, so every stat keeps its owner beside it.</span></li>
+        <li><mat-icon fontIcon="ads_click"></mat-icon><span><b>Hover a chart</b> (the radar, a bar, a career dot, a zone, a game's win probability) for whose it is, what it is and the number.</span></li>
         <li><mat-icon fontIcon="healing"></mat-icon><span>The <b>bandage</b> marks players on the injured list. Hide them with <b>Injured Players</b> in the settings.</span></li>
         <li><mat-icon fontIcon="filter_list"></mat-icon><span><b>Min PA</b> in the settings leaves out players with less than a share of the season's playing time (plate appearances; pitchers: batters faced), in steps of 10%. Try 50%+ for everyday players only, or 1 to see everyone.</span></li>
         <li><mat-icon fontIcon="military_tech"></mat-icon><span>Hover any <b>badge</b> under a name for the award written out.</span></li>
@@ -195,6 +300,19 @@
           5 an All-Star, 8+ an MVP-type season. It's one slider like any other.
         </p>
       </card-panel>
+      <card-panel class="faq-panel panel-plain" label="How do I compare two players?">
+        <p>
+          Click their rows (anywhere but the name) and then the compare button in the bar, or open a card and
+          use its compare button. Compare with nothing picked to search anyone, any season. Up to four fit,
+          each read against his own season's league with your sliders (see Compare).
+        </p>
+      </card-panel>
+      <card-panel class="faq-panel panel-plain" label="Can I rank just the postseason?">
+        <p>
+          Yes: <b>Length</b> in the settings switches between the regular Season, the Playoffs and Both, for
+          every season from 2000 on (see Rankings).
+        </p>
+      </card-panel>
       <card-panel class="faq-panel panel-plain" label="What does &quot;-&quot; mean?">
         <p>
           The stat isn't available for that player, usually a Statcast stat with too few batted balls or
@@ -209,8 +327,9 @@
       </card-panel>
       <card-panel class="faq-panel panel-plain" label="Is my ranking saved?">
         <p>
-          No. Everything resets when you reload the page: sliders, drags, column changes, the settings menu
-          and the season (back to the current one). Copy your list if you want to keep it.
+          Not on the site: everything resets when you reload the page (sliders, drags, column changes, the
+          settings menu and the season). To keep it, <b>Share</b> makes a link that opens it exactly as you
+          left it; bookmark it or send it. No account needed.
         </p>
       </card-panel>
       <card-panel class="faq-panel panel-plain" label="A player I'm looking for isn't listed.">
@@ -229,7 +348,11 @@
         <li>
           <a href="https://statsapi.mlb.com" target="_blank" rel="noopener">MLB Stats API</a>: season stats,
           WAR, wRC+, wOBA, FIP and xFIP, fielding and baserunning runs, the injured list, awards and All-Star
-          teams, and player headshots.
+          teams, player headshots, game logs, zones and pitch arsenals, and game highlights.
+        </li>
+        <li>
+          <a href="https://www.espn.com/mlb/" target="_blank" rel="noopener">ESPN</a>: teams' game logs,
+          box scores, plays and betting lines.
         </li>
         <li>
           <a href="https://baseballsavant.mlb.com" target="_blank" rel="noopener">Baseball Savant</a>:

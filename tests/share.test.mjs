@@ -76,7 +76,6 @@ for (const sport of SPORTS) {
     for (const setting of SPORT.settings ?? []) a.stepSportSetting(setting.key);
     a.setUnitOrder(first, ['row-b', 'row-a'], true);
     a.toggleGroupCollapsed(first, group);
-    // (unicode, and runs of ? and ~ whose base64 has / and +: the link must carry them URL-safe)
     // (unicode, and runs of ? and ~, whose base64 has / and +: the link must carry them URL-safe)
     a.setColumnOrder(`${first}.box`, COLUMNS);
     a.setGroupOrder(second, ['support', 'advanced', 'box', 'results']);
@@ -124,3 +123,78 @@ for (const sport of SPORTS) {
     assert.deepEqual(d.settings, fresh.settings);
   });
 }
+
+// Compare links (?cmp=): each side as tab.season.id, "_" between, the compare tab first unless it's Overview;
+// read back, only the tabs and seasons the site has, each side once, and junk reads as nobody
+test('nfl: a compare code round-trips its sides and tab, and junk reads as nobody', async () => {
+  setAddress('https://ranker.test/nfl/');
+  const { compareCode, readCompareCode, SEASONS } = await loadEngine('nfl');
+  const [now, then] = [SEASONS[0], SEASONS.at(-1)];
+  // (ids with dashes, dots, spaces and the very marks the code uses)
+  const sides = [
+    { position: 'QB', season: then, gsisId: 'QB-1428' },
+    { position: 'RB', season: now, gsisId: '00-0011869' },
+    { position: 'HC', season: now, gsisId: 'HC-A.J. Smith' },
+    { position: 'WR', season: then, gsisId: 'odd_id%2F~here' },
+  ];
+  for (const tab of ['overview', 'stats', 'career']) {
+    const code = compareCode({ sides, tab });
+    assert.equal(code.startsWith('QB.'), tab === 'overview', `${tab}: the tab first unless it's Overview`);
+    assert.deepEqual(readCompareCode(code, SEASONS), { sides, tab });
+    // (and through an address, as a link carries it)
+    const url = new URL('https://ranker.test/nfl/');
+    url.searchParams.set('cmp', code);
+    assert.deepEqual(readCompareCode(new URL(url.href).searchParams.get('cmp'), SEASONS), { sides, tab });
+  }
+  assert.equal(compareCode({ sides: sides.slice(0, 2), tab: 'stats' }), `stats_QB.${then}.QB-1428_RB.${now}.00-0011869`);
+
+  // (junk: nobody, on Overview)
+  for (const junk of ['', '_', '___', 'QB', 'QB.', 'QB.abc.x', 'QB..x', '.2020.x', '%%%', 'QB.2020']) {
+    assert.deepEqual(readCompareCode(junk, SEASONS).sides, [], `"${junk}"`);
+  }
+  // (a tab or season the site hasn't, an id that won't decode, a side twice: left out, the rest kept)
+  const kept = `QB.${now}.QB-1`;
+  const code = [`stats`, `NOPE.${now}.x`, `QB.${SEASONS.at(-1) - 1}.QB-2`, `QB.${now + 1}.QB-3`, `QB.${now}.bad%E0%A4`, kept, kept, `QB.${now}.x`].join('_');
+  assert.deepEqual(readCompareCode(code, SEASONS), {
+    sides: [
+      { position: 'QB', season: now, gsisId: 'QB-1' },
+      { position: 'QB', season: now, gsisId: 'x' },
+    ],
+    tab: 'stats',
+  });
+  // (only the first item can be the tab)
+  assert.equal(readCompareCode(`${kept}_stats`, SEASONS).tab, 'overview');
+});
+
+test('nfl: a compare link carries the list too, and opening it hands the grid the comparison once', async () => {
+  const page = 'https://ranker.test/nfl/?pos=RB';
+  setAddress(page);
+  const { PositionService, SEASONS, presetWeights } = await loadEngine('nfl');
+  const a = new PositionService();
+  const base = presetWeights('RB', 'default');
+  const key = Object.keys(base)[0];
+  a.saveWeights('RB', { ...base, [key]: base[key] === 73 ? 12 : 73 });
+  const sides = [
+    { position: 'RB', season: SEASONS[1], gsisId: '00-0011869' },
+    { position: 'QB', season: SEASONS[0], gsisId: 'QB-1428' },
+  ];
+  const link = new URL(a.compareLink(sides, 'career'));
+  assert.ok(link.searchParams.get('list'), 'the sliders with it');
+  assert.equal(link.searchParams.get('pos'), 'RB');
+  assert.match(link.search, /[?&]cmp=career_RB\.\d+\.00-0011869_QB\.\d+\.QB-1428(&|$)/, 'the address carries it as it is');
+  assert.equal(link.searchParams.get('cmp'), `career_RB.${SEASONS[1]}.00-0011869_QB.${SEASONS[0]}.QB-1428`);
+  assert.equal(new URL(location.href).searchParams.has('cmp'), false, 'making the link leaves the address alone');
+
+  setAddress(link.href);
+  const b = new PositionService();
+  assert.deepEqual(b.getWeights('RB'), a.getWeights('RB'));
+  assert.equal(new URL(location.href).searchParams.has('cmp'), false, '?cmp= left in the address');
+  assert.deepEqual(b.takePendingCompare(), { sides, tab: 'career' });
+  assert.equal(b.takePendingCompare(), null, 'once');
+
+  // (none in the address: nothing pending; junk: nobody, still opened)
+  setAddress(page);
+  assert.equal(new PositionService().takePendingCompare(), null);
+  setAddress(`${page}&cmp=%%junk`);
+  assert.deepEqual(new PositionService().takePendingCompare(), { sides: [], tab: '%%junk' });
+});

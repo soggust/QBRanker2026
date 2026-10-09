@@ -14,12 +14,12 @@
 // ---------------------------------------------------------------------------
 // Hero: the tapes, side by side, and the add slot after them
 // ---------------------------------------------------------------------------
-// (on the scoreboard, like the tabs under it; clear of the close button on the right)
+// (on the scoreboard, like the tabs under it; its controls in a strip along the top)
 .compare-hero {
   background: var(--scoreboard-dots), var(--scoreboard);
   border-bottom: 1px solid #2c2c2c;
   flex: 0 0 auto;
-  padding: 16px 52px 16px 22px;
+  padding: 46px 22px 16px;
   position: relative;
   z-index: 2;
 }
@@ -348,6 +348,24 @@
   }
 }
 
+// (a hit's headshot, round, in their team's color)
+.hit-photo {
+  background: color-mix(in srgb, var(--team-badge) 70%, #000);
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.16);
+  height: 34px;
+  justify-self: center;
+  overflow: hidden;
+  width: 34px;
+
+  img {
+    height: 100%;
+    object-fit: cover;
+    object-position: top;
+    width: 100%;
+  }
+}
+
 // (a hit's team, on a little team card)
 .hit-badge {
   align-items: center;
@@ -405,27 +423,6 @@
   }
 }
 
-// (a pair's verdict under the tapes: the leader's dot, then the line; level, a dot in chalk)
-.compare-verdict {
-  align-items: center;
-  color: rgba(255, 255, 255, 0.82);
-  display: flex;
-  font-size: 12.5px;
-  font-weight: 700;
-  gap: 8px;
-  letter-spacing: 0.2px;
-  margin: 12px 0 0;
-
-  i {
-    background: var(--side, #b9c2bf);
-    border-radius: 50%;
-    box-shadow: 0 0 7px var(--side, transparent);
-    flex: none;
-    height: 8px;
-    width: 8px;
-  }
-}
-
 .compare-note {
   color: var(--scoreboard-led);
   font-size: 12px;
@@ -455,6 +452,42 @@
   &.small {
     font-size: 13px;
     padding: 20px 0 4px;
+  }
+}
+
+// (the summary over Overview: a line per side, its dot and its name in its color, what it has over the
+// rest after them)
+.cmp-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  list-style: none;
+  margin: 0 0 14px;
+  padding: 0;
+
+  li {
+    align-items: baseline;
+    color: rgba(255, 255, 255, 0.8);
+    display: flex;
+    font-size: 13px;
+    font-weight: 600;
+    gap: 8px;
+    line-height: 1.4;
+  }
+
+  i {
+    background: var(--side);
+    border-radius: 50%;
+    box-shadow: 0 0 7px var(--side);
+    flex: none;
+    height: 8px;
+    transform: translateY(-1px);
+    width: 8px;
+  }
+
+  b {
+    color: var(--side);
+    font-weight: 800;
   }
 }
 
@@ -966,7 +999,7 @@
 // ---------------------------------------------------------------------------
 // Motion, quick and quiet (none for anyone who's asked their system for less): a tape eases in when added
 // and out when removed, the shapes grow, the bars fill and their numbers tick up, a leader's dot pops, the
-// career lines draw in and their seasons land after them, the hits drop in
+// career lines draw in and their seasons land after them, the hits and the summary's lines drop in
 // ---------------------------------------------------------------------------
 @media (prefers-reduced-motion: no-preference) {
   .tape-in {
@@ -982,8 +1015,22 @@
     animation: hits-in 0.14s ease-out;
   }
 
+  .share-in {
+    animation: cmp-pop 0.2s cubic-bezier(0.3, 1.6, 0.5, 1);
+  }
+
+  .cmp-summary li {
+    animation: hits-in 0.2s ease-out backwards;
+
+    @for $i from 2 through 4 {
+      &:nth-child(#{$i}) {
+        animation-delay: #{($i - 1) * 0.04}s;
+      }
+    }
+  }
+
   .cmp-radar .cmp-shape {
-    animation: radar-grow 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+    animation: radar-grow 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
   }
 
   .cmp-track i,
@@ -1070,7 +1117,7 @@
 // ---------------------------------------------------------------------------
 @media (max-width: 760px) {
   .compare-hero {
-    padding: 14px 46px 14px 14px;
+    padding: 44px 14px 14px;
   }
 
   .tapes {
@@ -1101,6 +1148,17 @@
 
   .cmp-col-head small {
     display: none;
+  }
+
+  // (the columns led over the name, not cut off beside it)
+  .cmp-col-head {
+    align-items: flex-end;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .cmp-wins {
+    margin-right: 0;
   }
 
   .cmp-top {

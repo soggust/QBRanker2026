@@ -29,9 +29,11 @@
         <li><b>Drag rows</b> to rank by hand. Your order sticks until that division's sliders change.</li>
         <li><b>Hover</b> any column label for the full stat name and the division average.</li>
         <li><b>Click a name</b> for the fighter card: an overview with a skill radar, archetype and scouting report, every stat as a rank, and his fights.</li>
+        <li><b>Click a row</b> anywhere but the name to pick it, then <b>compare</b> to put up to four side by side (see Compare).</li>
         <li>
           In the bar above the list: <b>filter</b> opens the filter menu, <b>copy</b> copies your list,
-          <b>info</b> opens this panel and the <b>gear</b> has the settings.
+          <b>share</b> makes a link to it, <b>compare</b> opens Compare, <b>info</b> opens this panel and
+          the <b>gear</b> has the settings.
         </li>
         <li>
           <b>Badges</b> under a name: the <b>belt</b> for each division's champion, and a plaque for the
@@ -141,6 +143,48 @@
         (a finisher, or one who goes to the cards), whether he's ever been finished or has chin questions,
         whether he wins the striking battle, and his quality wins.
       </p>
+      <p>
+        The <b>compare</b> button at the top of the card takes him into Compare. Hover any chart (the radar,
+        a skill's bar, a stat tile) for whose it is, what it is and the number.
+      </p>
+    }
+
+    @case ('compare') {
+      <h3>Compare</h3>
+      <p>
+        Put up to four fighters side by side, from any divisions. Three ways in:
+      </p>
+      <ul>
+        <li>
+          <b>Pick rows</b> in the list: click a row anywhere but the name (the name opens the card), and
+          again to let it go (from the keyboard: <b>C</b> on a name; Escape lets go of them all). The
+          <b>compare</b> button in the bar counts the picks; click it to compare them.
+        </li>
+        <li>The <b>compare</b> button at the top of a fighter card takes him in.</li>
+        <li>Open <b>compare</b> with nothing picked and <b>search</b> for anyone by name.</li>
+      </ul>
+      <p>
+        Each fighter is read against his own division, ranked with your sliders, just as his card reads
+        him: where each stands among his own peers.
+      </p>
+      <p>
+        <b>Share</b>, at the top of Compare, copies a link that opens the same comparison, ranked with the
+        same sliders.
+      </p>
+      <h4>Overview</h4>
+      <p>
+        Everyone's skills on one radar and as bars (percentiles, 100 the top). <b>Edges</b> lists where one
+        is clearly the best of them (10 percentile points or more over the next best); <b>How Alike</b>
+        gives each pair a score, 100% being the same skill profile.
+      </p>
+      <h4>Stats</h4>
+      <p>
+        The grid's columns side by side, each value tinted as the grid tints it, with a bar for where it
+        stands in his division. Each column's leader is lit, and over each fighter is how many columns he
+        leads. A line under the names sums it up: who leads the most columns, and the most skills (with
+        three or four, each one's count of columns led under it). Across divisions, a column they share
+        goes to the bigger number.
+      </p>
     }
 
     @case ('tips') {
@@ -153,6 +197,8 @@
         <li><mat-icon fontIcon="female"></mat-icon><span><b>WMMA</b> in the dropdown switches the tabs to the women's: pound-for-pound, bantamweight, flyweight and strawweight.</span></li>
         <li><mat-icon fontIcon="sports_mma"></mat-icon><span><b>UFC Fighters Only</b> in the settings lists just the UFC's roster (all-time: anyone who's fought there). Everyone is still rated on every promotion.</span></li>
         <li><mat-icon fontIcon="content_copy"></mat-icon><span><b>Copy</b> puts your whole ranked list on the clipboard, ready to paste into a group chat.</span></li>
+        <li><mat-icon fontIcon="share"></mat-icon><span><b>Share</b> copies a link that opens your list exactly as it looks: the division, your sliders, eyes, settings, dragged rows and columns. On a phone it opens the share sheet.</span></li>
+        <li><mat-icon fontIcon="swipe"></mat-icon><span><b>Scroll sideways</b> through the columns and the rank and picture stay pinned at the left, so every stat keeps its owner beside it.</span></li>
         <li><mat-icon fontIcon="military_tech"></mat-icon><span>Hover any <b>badge</b> under a name for the title written out.</span></li>
       </ul>
     }
@@ -208,8 +254,9 @@
       </card-panel>
       <card-panel class="faq-panel panel-plain" label="Is my ranking saved?">
         <p>
-          No. Everything resets when you reload the page: sliders, drags, column changes and the settings
-          menu. Copy your list if you want to keep it.
+          Not on the site: everything resets when you reload the page (sliders, drags, column changes and
+          the settings menu). To keep it, <b>Share</b> makes a link that opens it exactly as you left it;
+          bookmark it or send it. No account needed.
         </p>
       </card-panel>
     }

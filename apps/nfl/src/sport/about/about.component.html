@@ -8,9 +8,9 @@
         yourself: move the sliders and the list re-ranks instantly.
       </p>
       <p>
-        It covers quarterbacks, running backs, wide receivers, tight ends, offensive lines, kickers,
+        It covers teams, quarterbacks, running backs, wide receivers, tight ends, offensive lines, kickers,
         punters, defenses and head coaches, all with this season's stats, updated every night, plus every
-        season back to 2000.
+        season back to 2000, playoffs included.
       </p>
       <div class="callout">
         <strong>New here?</strong> Pick a tab up top, then try a preset from the dropdown at the top of the
@@ -30,9 +30,12 @@
         </li>
         <li><b>Drag rows</b> to rank by hand. Your order sticks until that tab's sliders change.</li>
         <li><b>Hover</b> any column label for the full stat name and the league average.</li>
+        <li><b>Click a name</b> (or its card) for the player card: an overview with a skill radar, archetype and scouting report, every stat as a rank, his games and his seasons.</li>
+        <li><b>Click a row</b> anywhere but the name to pick it, then <b>compare</b> to put up to four side by side (see Compare).</li>
         <li>
           In the bar above the list: <b>filter</b> opens the filter menu, <b>copy</b> copies your list,
-          <b>info</b> opens this panel and the <b>gear</b> has the settings.
+          <b>share</b> makes a link to it, <b>compare</b> opens Compare, <b>info</b> opens this panel and
+          the <b>gear</b> has the settings.
         </li>
         <li>
           <b>Badges</b> under a name mark that season's honors: the Super Bowl, conference titles, MVP and the
@@ -79,6 +82,22 @@
         a full modern season. Per game and 17-game pace rank the same; they just read differently. A QB's games
         are his starts plus any relief appearance with real snaps (10+ dropbacks and runs), so a brief
         cameo doesn't halve his per-game numbers.
+      </p>
+      <h4>The Teams tab</h4>
+      <p>
+        The first tab ranks the 32 teams: record, recent results, point and turnover differential, EPA on
+        offense, defense and special teams, offense and defense ranks and the close-game record, plus the
+        team grades from the other tabs (QB Play, RB Play, Weapons, O-Line, Defense, Coaching). Here the
+        grades count <em>for</em> a team, like any other stat: a good roster is the point.
+      </p>
+      <h4>Playoffs</h4>
+      <p>
+        <b>Length</b> in the settings switches the stats between the regular <b>Season</b>, the
+        <b>Playoffs</b> or <b>Both</b> together (rates worked out over those games), for any season from
+        2000 on. It's greyed out until a season's playoffs start. Pro Football Reference's charting
+        (pressures, drops, bad throws, broken tackles) has no playoff split before 2024, so those columns
+        are empty there. A playoffs or both card leaves out its career takes and similar seasons, which
+        would weigh a few games against whole regular seasons.
       </p>
       <h4>Ranking by hand</h4>
       <p>
@@ -156,6 +175,135 @@
       </p>
     }
 
+    @case ('card') {
+      <h3>The player card</h3>
+      <p>
+        Click any name for his card (a team's, a defense's or a coach's works the same way). Its tabs:
+      </p>
+      <ul>
+        <li>
+          <b>Overview:</b> related stats rolled up into skills (a QB's accuracy, efficiency, pushing the
+          ball, ball security, avoiding sacks, running threat...; each tab its own), each as a percentile in
+          the list. They make up the radar, pick his <b>archetype</b> and fill the scouting report:
+          strengths, average and weaknesses, each skill with the stats behind it.
+        </li>
+        <li>
+          <b>Analysis</b> (this season's quarterbacks and teams): an AI write-up refreshed every week: how
+          the season's going, the next game and the rest of the season, each point with the numbers behind it.
+        </li>
+        <li>
+          <b>Team</b> (teams, defenses, O-lines and coaches, 2001 on): the depth chart drawn on a field, the
+          coaching staff, the week-by-week lineup changes and the full roster. Names open their own cards.
+        </li>
+        <li><b>Stats:</b> every column as a rank in the list, with the list average. The Recent squares open their games.</li>
+        <li>
+          <b>Game Log:</b> that season's games, a chart of the key stat by game, then a row each (the playoffs
+          set apart). A team's points for and against (PF and PA) sit on little scoreboard tiles, the
+          winner's lit green and the loser's red. The date opens the game, the opponent its team's card.
+          This season's card also lists the games still to come, with the kickoff, the TV and the betting
+          line.
+        </li>
+        <li><b>Career</b> (<b>History</b> for teams): every season he's had, each ranked with your sliders. Click one for that season's card.</li>
+      </ul>
+      <p>
+        The <b>compare</b> button at the top of the card takes that season into Compare. Hover any chart (the
+        radar, a skill's bar, a stat tile, the game log's bars) for whose it is, what it is and the number.
+      </p>
+      <h4>The takes</h4>
+      <p>
+        The points under the archetype read the season in context: a small sample, stats padded in
+        garbage time, a supporting cast that's helping or holding him back (from the support grades), and
+        his career so far: where he is (a promising rookie, an established star, a veteran), whether this
+        is a breakout or a down year against his recent norm, streaks, and the skills that have defined
+        his career. A card only looks at that season and the ones before it.
+      </p>
+      <h4>Similar seasons</h4>
+      <p>
+        Finished seasons show the three closest seasons by anyone else since 2000 (click the panel to open
+        it, and one for its card): every stat is compared by how far it stood out from its own year's
+        league, so a 2004 season and a 2024 one line up fairly.
+      </p>
+      <h4>A defense's vs Position</h4>
+      <p>
+        A defense's Overview has a <b>vs Position</b> panel: what it allowed to each offense's
+        <b>WR1</b>, <b>WR2</b>, <b>WR3</b>, top tight end (<b>TE1</b>) and lead back (<b>RB1</b>), each
+        set by his share of his team's targets (a back's carries) in the games before. For each: <b>EPA a
+        play</b> (from 2006), PPR points and yards a game, and <b>vs Avg</b>, the PPR points against what
+        those same players averaged in their other games. The rank comes from that: holding an elite WR1
+        to his usual reads as good defense, and #1 is the stingiest.
+      </p>
+      <p>
+        On top, the <b>funnel</b>: whether offenses lean <b>pass</b> or <b>run</b> against it, or play it
+        straight (<b>neutral</b>). From 2006 it's the pass rate over expected in neutral situations (win
+        probability 20-80%, outside each half's last two minutes), using nflverse's model of how often teams
+        pass on each down, distance, field position, time and score, against those same offenses' own lean
+        in their other games; before 2006, the plain pass rate. Beside the table, a pie of where the targets
+        go (receivers, tight ends, backs), with the league's split on hover. It's there to read, not to rank:
+        nothing in it moves the list.
+      </p>
+      <h4>The game view</h4>
+      <p>
+        A game opened from the card has the scoreboard, then the summary (with the win probability), box
+        score, plays, drive chart and fantasy points. A finished game with video has <b>Highlights</b>
+        (the NFL's open on YouTube, which won't let other sites play them); one still to come has a
+        preview with the injury report.
+      </p>
+    }
+
+    @case ('compare') {
+      <h3>Compare</h3>
+      <p>
+        Put up to four seasons side by side: any players, any years, any tabs. Three ways in:
+      </p>
+      <ul>
+        <li>
+          <b>Pick rows</b> in the list: click a row anywhere but the name (the name opens the card), and
+          again to let it go (from the keyboard: <b>C</b> on a name; Escape lets go of them all). The
+          <b>compare</b> button in the bar counts the picks; click it to compare them.
+        </li>
+        <li>The <b>compare</b> button at the top of a player card takes that season in.</li>
+        <li>
+          Open <b>compare</b> with nothing picked and <b>search</b> anyone the site has had, any season. A
+          name adds his best season; the season under each name switches it to another of his years.
+        </li>
+      </ul>
+      <p>
+        Each season is read against its own league: that year's list on his tab, ranked with your sliders,
+        just as his card reads it. So a 2007 season and a 2025 one meet on even ground: where each stood
+        among his own peers.
+      </p>
+      <p>
+        <b>Share</b>, at the top of Compare, copies a link that opens the same comparison, ranked with the
+        same sliders.
+      </p>
+      <h4>Overview</h4>
+      <p>
+        Everyone's skills on one radar and as bars (percentiles, 100 the top). <b>Edges</b> lists where one
+        is clearly the best of them (10 percentile points or more over the next best); <b>How Alike</b>
+        gives each pair a score, 100% being the same skill profile.
+      </p>
+      <h4>Stats</h4>
+      <p>
+        The grid's columns side by side, each value tinted as the grid tints it, with a bar for where it
+        stood that season. Each column's leader is lit, and over each player is how many columns he leads.
+        A line under the names sums it up: who leads the most columns, and the most skills (with three or
+        four, each one's count of columns led under it).
+      </p>
+      <h4>Career</h4>
+      <p>
+        Each one's career arc: every season's rank in its league (with the default sliders), the compared
+        season ringed. The dropdown lines them up by <b>Career Year</b> (first season, second...) or by
+        <b>Season</b>.
+      </p>
+      <h4>Different positions</h4>
+      <p>
+        A back and a receiver can go side by side, each read among his own position. Only what's the same
+        by name lines up: a skill only when both have it (a back's rushing efficiency isn't a receiver's
+        efficiency), and a column both tabs have goes to the bigger number, since percentiles among
+        different positions don't say who did more.
+      </p>
+    }
+
     @case ('tips') {
       <h3>Tips &amp; tricks</h3>
       <ul class="tips">
@@ -164,6 +312,9 @@
         <li><mat-icon fontIcon="palette"></mat-icon><span><b>Color-coded values</b> are green above the league average and red below it. Counting stats compare per game, so missed games don't turn a good player red. Hover a column label for the average of what the column shows.</span></li>
         <li><mat-icon fontIcon="emoji_events"></mat-icon><span><b>Rank tiles:</b> a trophy for #1, green through 10, white in the middle and red for the bottom 10.</span></li>
         <li><mat-icon fontIcon="content_copy"></mat-icon><span><b>Copy</b> puts your whole ranked list on the clipboard, ready to paste into a group chat.</span></li>
+        <li><mat-icon fontIcon="share"></mat-icon><span><b>Share</b> copies a link that opens your list exactly as it looks: the tab, the season, your sliders, eyes, settings, dragged rows and columns. On a phone it opens the share sheet.</span></li>
+        <li><mat-icon fontIcon="swipe"></mat-icon><span><b>Scroll sideways</b> through the columns and the rank and team card stay pinned at the left, so every stat keeps its owner beside it.</span></li>
+        <li><mat-icon fontIcon="ads_click"></mat-icon><span><b>Hover a chart</b> (the radar, a bar, a career dot, a slice of the pie) for whose it is, what it is and the number.</span></li>
         <li><mat-icon fontIcon="healing"></mat-icon><span>The <b>bandage</b> marks players ESPN lists as Out, Doubtful or on IR (in a past season, those who finished it on IR). Hide them with <b>Injured Players</b> in the settings.</span></li>
         <li><mat-icon fontIcon="hourglass_bottom"></mat-icon><span>Turn off <b>Garbage Time Stats</b> to leave out plays run once the game was decided (win probability under 10% or over 90%). Stats padded in blowouts shrink.</span></li>
         <li><mat-icon fontIcon="leaderboard"></mat-icon><span><b>Rank Base</b> in the settings sets what the head coaches' Off and Def Rank columns rank on: points or yards per game.</span></li>
@@ -259,6 +410,28 @@
           too little, turn its slider up or down.
         </p>
       </card-panel>
+      <card-panel class="faq-panel panel-plain" label="How do I compare two players?">
+        <p>
+          Click their rows (anywhere but the name) and then the compare button in the bar, or open a card and
+          use its compare button. Compare with nothing picked to search anyone, any season. Up to four fit,
+          each read against his own season's league with your sliders (see Compare).
+        </p>
+      </card-panel>
+      <card-panel class="faq-panel panel-plain" label="What's a pass funnel or a run funnel?">
+        <p>
+          A defense offenses would rather throw on (or run on) than they usually do. On a defense's card,
+          vs Position takes how much more often its opponents passed than the situation called for (the
+          down, distance, field position, time and score, by nflverse's model), in neutral game states, and
+          sets it against how those same offenses do in their other games. Before 2006 it's the plain pass
+          rate. Two points or more either way makes it a funnel.
+        </p>
+      </card-panel>
+      <card-panel class="faq-panel panel-plain" label="Can I rank just the playoffs?">
+        <p>
+          Yes: <b>Length</b> in the settings switches between the regular Season, the Playoffs and Both, for
+          every season from 2000 on (see Rankings).
+        </p>
+      </card-panel>
       <card-panel class="faq-panel panel-plain" label="What does &quot;-&quot; mean?">
         <p>
           The stat isn't available for that player yet, usually because a data source doesn't cover him or
@@ -275,8 +448,9 @@
       </card-panel>
       <card-panel class="faq-panel panel-plain" label="Is my ranking saved?">
         <p>
-          No. Everything resets when you reload the page: sliders, drags, column changes, the settings menu
-          and the season (back to the current one). Copy your list if you want to keep it.
+          Not on the site: everything resets when you reload the page (sliders, drags, column changes, the
+          settings menu and the season). To keep it, <b>Share</b> makes a link that opens it exactly as you
+          left it; bookmark it or send it. No account needed.
         </p>
       </card-panel>
       <card-panel class="faq-panel panel-plain" label="Why don't some stats change with Garbage Time Stats off?">
@@ -306,11 +480,16 @@
       <ul>
         <li>
           <a href="https://www.espn.com/nfl/" target="_blank" rel="noopener">ESPN</a>: game results, QB box
-          score stats (passer rating is worked out from them), the injury report and head coaches.
+          score stats (passer rating is worked out from them), the injury report, head coaches, game logs,
+          box scores, plays and betting lines.
+        </li>
+        <li>
+          <a href="https://www.youtube.com/@NFL" target="_blank" rel="noopener">The NFL's YouTube channel</a>:
+          game highlights.
         </li>
         <li>
           <a href="https://github.com/nflverse" target="_blank" rel="noopener">nflverse</a>: play-by-play
-          (EPA, success rate, CPOE, win probability), season stats and fantasy points, snap counts, Next Gen
+          (EPA, success rate, CPOE, win probability, expected pass rate), season stats and fantasy points, snap counts, Next Gen
           Stats tracking data and Pro Football Reference's charting (pressures, broken tackles, drops, bad
           throws), plus schedules, coaches and Super Bowl results for past seasons.
         </li>

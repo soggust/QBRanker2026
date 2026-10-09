@@ -3,7 +3,7 @@
 // globalThis.__DATA first, since unit-scoring builds the rows as soon as it loads.
 import '../../libs/ranker/scripts/comps/prefill';
 
-export { DATA, CURRENT_SEASON, withSeason } from '@ranker/engine/data';
+export { DATA, CURRENT_SEASON, SEASONS, withSeason } from '@ranker/engine/data';
 export {
   SKILL_UNITS,
   rebuildUnits,
@@ -20,6 +20,6 @@ export { TabRanker } from '@ranker/engine/skill-rankings/tab-ranker';
 export { StatReader } from '@ranker/engine/stat-reader';
 export { DEFAULT_SETTINGS, PositionService } from '@ranker/engine/position.service';
 export { hasMin, minCount, seasonLength } from '@ranker/engine/playing-time';
-export { shareLink, applySharedLink } from '@ranker/engine/share';
+export { shareLink, applySharedLink, compareCode, readCompareCode } from '@ranker/engine/share';
 export { SPORT } from '@sport/sport';
 export { POSITIONS, SKILL_STATS, presetWeights, skillGroups, statGroup } from '@sport/positions';
