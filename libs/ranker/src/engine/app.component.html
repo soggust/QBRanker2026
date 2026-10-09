@@ -9,8 +9,10 @@
   @for (s of sports; track s.id) {
     <a [href]="'/' + s.id + '/'" [class.active]="s.id === sport && !betsOpen" [attr.aria-current]="s.id === sport && !betsOpen ? 'page' : null">{{ s.label }}</a>
   }
-  <!-- Every sport's betting angles on one page (#bets) -->
-  <a href="#bets" [class.active]="betsOpen" [attr.aria-current]="betsOpen ? 'page' : null">Bets</a>
+  <!-- Every sport's betting angles on one page (#bets): linked in development only -->
+  @if (dev) {
+    <a href="#bets" [class.active]="betsOpen" [attr.aria-current]="betsOpen ? 'page' : null">Bets</a>
+  }
   <!-- The site's name on the far right, after a little podium (#1 on the middle step) in the sport's color;
        a click reloads this sport's page fresh, from the top -->
   <a class="brand" [href]="'/' + sport + '/'" title="Season Ranker: reload">

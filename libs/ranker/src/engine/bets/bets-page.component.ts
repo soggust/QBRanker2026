@@ -167,7 +167,8 @@ function lineOf(key: string): { line: string; side: string } | null {
 export class BetsPageComponent implements OnInit {
   // (the model desk's admin panel: on the dev server only)
   readonly dev = isDevMode();
-  view: 'bets' | 'desk' = 'bets';
+  // (development opens on the Algorithm, the live site has only the bets)
+  view: 'bets' | 'desk' = isDevMode() ? 'desk' : 'bets';
 
   rows: BetRow[] | null = null;
   updated: string | null = null;

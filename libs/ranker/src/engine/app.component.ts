@@ -1,4 +1,4 @@
-import { Component, HostListener } from '@angular/core';
+import { Component, HostListener, isDevMode } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { PositionService } from '@ranker/engine/position.service';
 import { POSITIONS, Position } from '@sport/positions';
@@ -28,6 +28,8 @@ export class AppComponent {
 
   // The Bets page (#bets) in place of the rankings, from the sport bar's Bets link
   betsOpen = location.hash === '#bets';
+  // (the Bets page in the sport bar only in development: on the live site it isn't linked)
+  readonly dev = isDevMode();
 
   @HostListener('window:hashchange')
   onHashChange(): void {
