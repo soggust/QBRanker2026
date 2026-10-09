@@ -9,7 +9,8 @@
 // - ESPN's fighters (cached in scripts/cache.json, refetched only after a new fight or after a week):
 //   each fighter's bio (division, gender, country flag, headshot, gym, reach, age, pro record) and his
 //   stats fight by fight (strikes, knockdowns, takedowns, submission attempts, ground advances: the UFC's
-//   and the PFL's fights). Opponents' stats are fetched too, so what a fighter absorbs is counted.
+//   and the PFL's fights; where ESPN's athlete stats leave a bout out, its core API's for that bout).
+//   Opponents' stats are fetched too, so what a fighter absorbs is counted.
 // - UFC.com's rankings page: each division's champion and top 15, and the pound-for-pound lists
 // - UFC.com's fighter pages, for UFC fighters without a fight in six months: their status there
 //   ("Retired" or "Not Fighting" moves them to the retired fighters; checked monthly, cached)
@@ -166,8 +167,18 @@ const num = (v) => {
 };
 
 // A fighter's stats by bout: [sig landed, sig attempted, knockdowns, takedowns landed, takedowns
-// attempted, submission attempts, ground advances, reversals]
-async function fightStats(id) {
+// attempted, submission attempts, ground advances, reversals]. From ESPN's athlete stats, every bout at
+// once; that comes back empty ({}) for some fighters (Francis Ngannou, Lyoto Machida, Nate Diaz: a
+// fifth of those with UFC fights), so any of his bouts (UFC and PFL ones, the leagues ESPN keeps stats
+// for) it leaves out are asked of the core API one by one (coreFightStats)
+async function fightStats(id, bouts = []) {
+  const byBout = await athleteFightStats(id);
+  const missing = bouts.filter((b) => !byBout[b.id]);
+  if (missing.length) Object.assign(byBout, await coreFightStats(id, missing));
+  return byBout;
+}
+
+async function athleteFightStats(id) {
   const data = await get(`${COMMON}/${id}/stats`);
   const byBout = {};
   for (const category of data?.categories ?? []) {
@@ -190,6 +201,35 @@ async function fightStats(id) {
         s[6] = at(row, 'AD');
       }
     }
+  }
+  return byBout;
+}
+
+// The same stats from ESPN's core API, a bout at a time: his event log (each bout's competitor link),
+// then each missing bout's statistics. A bout it has nothing for (no categories, or not a strike,
+// takedown or submission attempt in them: no data kept) stays missing.
+const CORE_ATHLETES = 'https://sports.core.api.espn.com/v2/sports/mma/athletes';
+const CORE_STATS = { SSL: 0, SSA: 1, KD: 2, TDL: 3, TDA: 4, SM: 5, AD: 6, RV: 7 };
+async function coreFightStats(id, bouts) {
+  const log = await get(`${CORE_ATHLETES}/${id}/eventlog?limit=500`);
+  const competitor = new Map();
+  for (const item of log?.events?.items ?? []) {
+    const bout = item.competition?.$ref?.match(/\/competitions\/(\d+)/)?.[1];
+    if (bout && item.competitor?.$ref) competitor.set(bout, item.competitor.$ref.replace(/^http:/, 'https:').replace('?', '/statistics?'));
+  }
+  const byBout = {};
+  for (const b of bouts) {
+    if (!competitor.has(b.id)) continue;
+    const data = await get(competitor.get(b.id)).catch(() => null);
+    const stats = (data?.splits?.categories ?? []).flatMap((c) => c.stats ?? []);
+    const s = [0, 0, 0, 0, 0, 0, 0, 0];
+    let tried = 0;
+    for (const stat of stats) {
+      const abbr = String(stat.abbreviation ?? '').trim();
+      if (abbr in CORE_STATS) s[CORE_STATS[abbr]] = num(stat.value);
+      if (['TSA', 'TDA', 'SM'].includes(abbr)) tried += num(stat.value);
+    }
+    if (tried > 0) byBout[b.id] = s;
   }
   return byBout;
 }
@@ -400,6 +440,7 @@ function career(id, fights, stats, cache) {
   let draws = 0;
   let finishes = 0;
   let finished = 0;
+  let koWins = 0;
   for (const b of fights) {
     const me = b.fighters.find((f) => f.id === id);
     const opp = b.fighters.find((f) => f.id !== id);
@@ -407,6 +448,7 @@ function career(id, fights, stats, cache) {
     else if (opp.winner) losses++;
     else draws++;
     if (me.winner && !b.decision) finishes++;
+    if (me.winner && !b.decision && b.method === 'KO') koWins++;
     if (opp.winner && !b.decision) finished++;
     const mine = stats[b.id];
     if (mine) {
@@ -438,6 +480,8 @@ function career(id, fights, stats, cache) {
     ties: draws,
     winPct: fights.length ? round((wins + draws / 2) / fights.length) : null,
     finishRate: wins ? round(finishes / wins) : null,
+    // (his wins by KO/TKO, of all his wins)
+    koShare: wins ? round(koWins / wins) : null,
     finishes,
     finished,
     fightTime: fights.length ? round(fights.reduce((s, b) => s + b.seconds, 0) / fights.length / 60, 1) : null,
@@ -534,8 +578,18 @@ let fetched = 0;
 for (const id of needed) {
   const entry = (cache[id] ??= {});
   const last = byFighter.get(id)[0].date;
-  if (!entry.stats || entry.last !== last) {
-    entry.stats = await fightStats(id).catch(() => entry.stats ?? {});
+  // (his UFC and PFL bouts: the ones ESPN keeps stats for; asked again after a new fight, or once more
+  // when bouts of his are missing that the core API hasn't been asked for yet: core, the fight it was
+  // asked through)
+  const statBouts = byFighter.get(id).filter((b) => STATS_LEAGUES.has(b.league));
+  const gaps = entry.stats && entry.core !== last && statBouts.some((b) => !entry.stats[b.id]);
+  if (!entry.stats || entry.last !== last || gaps) {
+    try {
+      entry.stats = await fightStats(id, statBouts);
+      entry.core = last;
+    } catch {
+      entry.stats ??= {};
+    }
     entry.last = last;
     fetched++;
   }

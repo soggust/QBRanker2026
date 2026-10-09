@@ -7,7 +7,7 @@ const MMA_SKILLS: SkillDef[] = [
   { id: 'volume', name: 'Striking Output', short: 'Output', parts: [['slpm', 1], ['strDiff', 1]] },
   { id: 'accuracy', name: 'Striking Accuracy', short: 'Accuracy', parts: [['strAcc', 1]] },
   { id: 'striking-defense', name: 'Striking Defense', short: 'Str. Defense', parts: [['strDef', 1], ['sapm', -1]] },
-  { id: 'power', name: 'Knockout Power', short: 'Power', parts: [['kd15', 1], ['finishRate', 1]] },
+  { id: 'power', name: 'Knockout Power', short: 'Power', parts: [['kd15', 1], ['koShare', 1]] },
   { id: 'wrestling', name: 'Wrestling', short: 'Wrestling', parts: [['td15', 1, 2], ['tdAcc', 1]] },
   { id: 'takedown-defense', name: 'Takedown Defense', short: 'TD Defense', parts: [['tdDef', 1]] },
   { id: 'grappling', name: 'Grappling', short: 'Grappling', parts: [['sub15', 1], ['adv15', 1]] },

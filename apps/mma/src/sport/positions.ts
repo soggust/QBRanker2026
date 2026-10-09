@@ -28,6 +28,7 @@ export type SkillStatKey =
   | 'winPct'
   | 'streak'
   | 'finishRate'
+  | 'koShare'
   | 'finishes'
   | 'finished'
   | 'fightTime'
@@ -147,6 +148,7 @@ export const STAT_NAMES: Partial<Record<SkillColumnKey, string>> = {
   recent: 'Last Five Fights',
   streak: 'Current Streak (wins +, losses -)',
   finishRate: 'Finish Rate (wins inside the distance)',
+  koShare: 'KO/TKO Share (wins by knockout)',
   fightTime: 'Average Fight Time (minutes)',
   slpm: 'Significant Strikes Landed per Minute',
   sapm: 'Significant Strikes Absorbed per Minute',
@@ -226,6 +228,7 @@ const MMA_STATS: SkillStat[] = [
   { key: 'kdAgainst', label: 'KD Against', description: 'Times knocked down per 15 minutes: his chin (lower is better)', kind: 'efficiency', format: 'dec2', negative: true, skipMissing: true, boost: boxBoost },
   { key: 'adv15', label: 'Adv / 15', description: 'Ground position advances (to the back, mount, side or half guard) per 15 minutes: control on the mat', kind: 'efficiency', format: 'dec2', skipMissing: true, boost: boxBoost },
   { key: 'oppRating', label: 'Opp Rating', description: "His opponents' average rating going into their fights: who he's beaten and lost to", kind: 'efficiency', format: 'int', missingIsAverage: true, settled: true },
+  { key: 'koShare', label: 'KO %', description: 'Share of his wins by KO or TKO (Finish % counts submissions too; for context, not part of the ranking: Knockout Power reads it)', kind: 'efficiency', format: 'pct', infoOnly: true },
   { key: 'fightTime', label: 'Avg Time', description: 'Average fight time, in minutes (for context; not part of the ranking)', kind: 'efficiency', format: 'dec1', infoOnly: true },
   { key: 'age', label: 'Age', description: 'Age (for context; not part of the ranking)', kind: 'efficiency', format: 'int', infoOnly: true },
   { key: 'reach', label: 'Reach', description: 'Reach, in inches (for context; not part of the ranking)', kind: 'efficiency', format: 'int', infoOnly: true },
