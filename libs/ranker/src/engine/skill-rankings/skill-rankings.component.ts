@@ -31,7 +31,7 @@ import { SeasonContext } from '@ranker/engine/player-card/card.model';
 import { copyRankingsToClipboard } from '@ranker/core/clipboard';
 import { RowGlide } from './row-glide';
 import { TabRanker } from './tab-ranker';
-import { RankWhy, rankWhy, signedScore } from './rank-why';
+import { RankWhy, rankWhy, scoreText, signedScore } from './rank-why';
 
 // A tab's rankings: the button bar, then the grid (a row per player, best first by the sliders, or as
 // dragged by hand), and the player card for a name clicked
@@ -205,7 +205,9 @@ export class SkillRankingsComponent implements OnChanges, CardHost {
   sortPlayers(): void {
     const from = this.glide.measure(this.rankingsList?.nativeElement);
     this.closeWhy();
-    this.playerList = this.limited(this.shown(this.ranker.ranked(this.reader, this.ranker.listed(SKILL_UNITS, this.season, this.position), this.position, SKILL_UNITS)));
+    const { ranked, totals } = this.ranker.rankedTotals(this.reader, this.ranker.listed(SKILL_UNITS, this.season, this.position), this.position, SKILL_UNITS);
+    this.playerList = this.limited(this.shown(ranked));
+    this.totals = totals;
     this.publishOrder(false);
     this.glide.play(() => this.rankingsList?.nativeElement, from);
   }
@@ -219,7 +221,9 @@ export class SkillRankingsComponent implements OnChanges, CardHost {
 
   // Put the list back in a saved order (players that have since appeared go at the end)
   private restoreOrder(ids: string[]): void {
-    this.playerList = this.limited(this.ranker.inOrder(this.shown(this.ranker.listed(SKILL_UNITS, this.season, this.position)), ids));
+    const listed = this.ranker.listed(SKILL_UNITS, this.season, this.position);
+    this.playerList = this.limited(this.ranker.inOrder(this.shown(listed), ids));
+    this.totals = this.ranker.scores(this.reader, listed, this.position, SKILL_UNITS).totals;
   }
 
   // Remember this tab's order for when you come back
@@ -399,6 +403,14 @@ export class SkillRankingsComponent implements OnChanges, CardHost {
   @ViewChild('whyPop') whyPop?: ElementRef<HTMLElement>;
   private whyTile: HTMLElement | null = null;
   readonly signedScore = signedScore;
+  // (every row's score, as the list last scored it: the rank tile's hover)
+  private totals = new Map<SkillPlayer, number>();
+
+  // The rank tile's hover: its place and its score ("Rank 1 · Score 21.04")
+  rankTitle(player: SkillPlayer, index: number): string {
+    const total = this.totals.get(player);
+    return `Rank ${index + 1}${total === undefined ? '' : ` · Score ${scoreText(total)}`} (click for why)`;
+  }
 
   toggleWhy(player: SkillPlayer, index: number, event: Event): void {
     event.preventDefault();

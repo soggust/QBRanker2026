@@ -129,7 +129,7 @@ export function rankWhy(
     const against = !options.manual && (above ? diff < 0 : diff > 0);
     const [winner, loser] = above ? [player, other] : [other, player];
     const headToHead = against && beat ? (beat(winner, loser, options.settings) ? `${winner.name} won head to head` : 'Moved by head to head') : null;
-    const title = `Score ${plain(score)} vs ${plain(total(other))}: ${signedScore(diff)}\nThe three stats that differ most (+ in favor of ${player.name})`;
+    const title = `Score ${scoreText(score)} vs ${scoreText(total(other))}: ${signedScore(diff)}\nThe three stats that differ most (+ in favor of ${player.name})`;
     vs.push({ name: other.name, rank: at + 1, above, diff, drivers, headToHead, title });
   }
 
@@ -162,7 +162,7 @@ function valueText(player: SkillPlayer, stat: SkillStat, reader: WhyReader): str
 }
 
 // A score as is ("21.04", "−0.50")
-function plain(score: number): string {
+export function scoreText(score: number): string {
   return (Number(score.toFixed(2)) + 0).toFixed(2).replace('-', '−');
 }
 

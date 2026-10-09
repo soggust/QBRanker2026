@@ -72,8 +72,19 @@ export class TabRanker {
   // in that order. (Measured against just the players left, a stat's average and spread moved with
   // the filters, and players who stayed swapped places.)
   ranked(reader: StatReader, players: SkillPlayer[], position: SkillPosition, rows: Record<string, SkillPlayer[]> = { [position]: players }): SkillPlayer[] {
+    return this.rankedTotals(reader, players, position, rows).ranked;
+  }
+
+  // ranked, with every row's score (the rank tile's hover)
+  rankedTotals(
+    reader: StatReader,
+    players: SkillPlayer[],
+    position: SkillPosition,
+    rows: Record<string, SkillPlayer[]> = { [position]: players },
+  ): { ranked: SkillPlayer[]; totals: Map<SkillPlayer, number> } {
     const keep = new Set(players);
-    return this.scores(reader, players, position, rows).ranked.filter((player) => keep.has(player));
+    const { ranked, totals } = this.scores(reader, players, position, rows);
+    return { ranked: ranked.filter((player) => keep.has(player)), totals };
   }
 
   // The scores behind ranked: every row's weighted total, the stats that counted, the tab's rows in their

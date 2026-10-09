@@ -97,7 +97,7 @@
             aria-haspopup="dialog"
             [attr.aria-expanded]="why?.id === player.gsisId"
             [attr.aria-label]="'#' + (i + 1) + ': why ' + player.name + ' ranks here'"
-            title="Why this rank"
+            [title]="rankTitle(player, i)"
             (click)="toggleWhy(player, i, $event)"
             (keydown.enter)="toggleWhy(player, i, $event)"
             (keydown.space)="toggleWhy(player, i, $event)"
