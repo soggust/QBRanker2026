@@ -503,19 +503,64 @@
 }
 
 // (sides on different tabs: what lines up, said once over the tab)
+// (different positions: a word in orange, how they line up in a popover on hover or focus)
 .cmp-mixed {
   align-items: center;
-  color: #9a9a9a;
-  display: flex;
+  color: #ffa74d;
+  cursor: help;
+  display: inline-flex;
   font-size: 12px;
-  font-weight: 700;
-  gap: 6px;
+  font-weight: 800;
+  gap: 5px;
+  letter-spacing: 0.4px;
   margin: 0 0 12px;
+  outline: none;
+  position: relative;
+  text-transform: uppercase;
 
   .mat-icon {
-    @include v.icon-size(15px);
+    @include v.icon-size(16px);
     flex: none;
   }
+
+  &:hover .cmp-mixed-pop,
+  &:focus-visible .cmp-mixed-pop {
+    opacity: 1;
+    transform: translateY(0);
+    visibility: visible;
+  }
+}
+
+.cmp-mixed-pop {
+  background: #151a18;
+  border: 1px solid #ffa74d;
+  border-radius: 8px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.6);
+  color: #ddd;
+  font-size: 12px;
+  font-weight: 600;
+  left: 0;
+  letter-spacing: 0;
+  line-height: 1.45;
+  opacity: 0;
+  padding: 8px 11px;
+  pointer-events: none;
+  position: absolute;
+  text-transform: none;
+  top: calc(100% + 6px);
+  transform: translateY(-3px);
+  transition: opacity 0.15s, transform 0.15s;
+  visibility: hidden;
+  width: 300px;
+  z-index: 5;
+}
+
+// (a skill's position, among different positions)
+.cmp-skill-tab {
+  color: #ffa74d;
+  font-size: 10px;
+  font-weight: 800;
+  margin-left: 6px;
 }
 
 // (a line of each side's color: the legends' keys)

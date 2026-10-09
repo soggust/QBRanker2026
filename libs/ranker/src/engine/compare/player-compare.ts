@@ -125,6 +125,8 @@ export interface CompareRow {
 export interface CompareSkill {
   id: string;
   name: string;
+  // Its position's label when they're of different positions ("RB"), else none
+  tab: string | null;
   // Each side's percentile (null: not one of its tab's), and the sides that lead it
   pcts: (number | null)[];
   leaders: number[];
@@ -366,13 +368,15 @@ export class PlayerCompare {
   }
 
   private compareView(sides: CompareSide[]): CompareView {
-    // (every skill any of them has, the first side's order first: one skill when its id and its name are
-    // the same, so a back's Rushing Efficiency and a receiver's Efficiency stay two)
-    const skillKey = (k: CardSkill) => `${k.id}|${k.name}`;
-    const defs = new Map(sides.flatMap((s) => s.skills.map((k) => [skillKey(k), k] as const)));
-    const skills = [...defs].map(([id, def]): CompareSkill & { short: string } => {
-      const pcts = sides.map((s) => s.skills.find((k) => skillKey(k) === id)?.pct ?? null);
-      return { id, name: def.name, short: def.short, pcts, leaders: leadersOf(pcts) };
+    // (every skill any of them has, the first side's order first. A skill is a percentile among his own
+    // position, so it's one skill only within a position: a back's Receiving and a receiver's are two, each
+    // tagged with its position, and a back can only lead the backs at it)
+    const mixed = new Set(sides.map((s) => s.position)).size > 1;
+    const skillKey = (side: CompareSide, k: CardSkill) => `${side.position}|${k.id}`;
+    const defs = new Map(sides.flatMap((s) => s.skills.map((k) => [skillKey(s, k), { def: k, side: s }] as const)));
+    const skills = [...defs].map(([id, { def, side }]): CompareSkill & { short: string } => {
+      const pcts = sides.map((s) => s.skills.find((k) => skillKey(s, k) === id)?.pct ?? null);
+      return { id, name: def.name, tab: mixed ? side.tabLabel : null, short: def.short, pcts, leaders: leadersOf(pcts) };
     });
 
     // (the radar: the skills all of them have)
@@ -395,7 +399,7 @@ export class PlayerCompare {
           const mine = s.pcts[i];
           const others = s.pcts.filter((p, j): p is number => j !== i && p !== null);
           const by = mine === null || !others.length ? 0 : Math.round((mine - Math.max(...others)) * 100);
-          return by >= EDGE ? [{ skill: s.name, by }] : [];
+          return by >= EDGE ? [{ skill: s.tab ? `${s.name} (${s.tab})` : s.name, by }] : [];
         })
         .sort((a, b) => b.by - a.by)
         .slice(0, 3),
@@ -453,7 +457,7 @@ export class PlayerCompare {
       wins,
       contested,
       summary: sides.length > 1 ? summaryOf(tallies, edges) : null,
-      mixed: new Set(sides.map((s) => s.position)).size > 1,
+      mixed,
     };
   }
 

@@ -214,15 +214,18 @@ test('nfl: a back and a receiver share only the same skills and columns, a share
   const { view } = compare;
   assert.equal(view.mixed, true);
 
-  // (a skill lines up when its id and its name are the same, and only then)
-  const has = (side, id) => side.skills.some((k) => `${k.id}|${k.name}` === id);
+  // (a skill is a percentile among his own position: each position's skills are their own rows, tagged with
+  // the position, so neither leads a skill of the other's; no radar, since they share none)
   for (const sk of view.skills) {
-    assert.equal(sk.pcts[0] !== null, has(rb, sk.id), `${sk.id}: the back's`);
-    assert.equal(sk.pcts[1] !== null, has(receiver, sk.id), `${sk.id}: the receiver's`);
+    const [rbHas, wrHas] = [sk.pcts[0] !== null, sk.pcts[1] !== null];
+    assert.ok(rbHas !== wrHas, `${sk.id}: one position's only`);
+    assert.equal(sk.tab, rbHas ? 'RB' : 'WR', `${sk.id}: tagged with its position`);
+    assert.equal(sk.id, `${rbHas ? 'RB' : 'WR'}|${sk.id.split('|')[1]}`);
+    assert.deepEqual(sk.leaders, [], `${sk.id}: nobody leads a skill only one has`);
   }
-  const common = view.skills.filter((s) => s.pcts.every((p) => p !== null));
-  assert.equal(view.radar === null, common.length < 3, 'a radar when they share three skills');
-  assert.equal(view.skills.length, new Set([...rb.skills, ...receiver.skills].map((k) => `${k.id}|${k.name}`)).size, 'every skill either has, once');
+  assert.equal(view.radar, null, 'no shared skills, no radar');
+  assert.equal(view.skills.length, rb.skills.length + receiver.skills.length, 'every skill either has, once');
+  assert.deepEqual(view.edges, [[], []], 'no edges across positions');
 
   // (a column lines up when its key and its label are the same: each value is its own tab's column's)
   const columns = (side) => new Set(host.shownGroups(side.reader, side.position).flatMap((g) => g.stats.map((s) => `${s.key}|${s.label}`)));
@@ -507,5 +510,21 @@ test('the search asks only for the careers files names.json names (a career-only
     const files = asked.filter((f) => f !== 'names.json');
     assert.deepEqual(files.sort(), Object.keys(names).map((p) => `${p}.json`).sort(), `${sport}: ${files}`);
     if (engine.SPORT.careerOnly) assert.deepEqual(asked, [], 'mma: no careers files at all');
+  }
+});
+
+test('nfl: two backs and a receiver: the backs share their skills, the receiver keeps his own', async () => {
+  const engine = await engineFor('nfl');
+  const { host, compare } = harness(engine, 'nfl', 'RB');
+  const wr = engine.defaultRanking('WR', engine.presetWeights('WR', 'default'))[0];
+  await compare.start(host.playerList.slice(0, 2));
+  await compare.add('WR', host.season, wr.gsisId);
+  const { skills } = compare.view;
+  const rbReceiving = skills.find((s) => s.tab === 'RB' && /receiv/i.test(s.name));
+  assert.ok(rbReceiving, 'the backs have a receiving skill');
+  assert.equal(rbReceiving.pcts[2], null, "the receiver isn't on the backs' receiving row");
+  for (const i of rbReceiving.leaders) assert.ok(i < 2, 'only a back can lead the backs at it');
+  for (const s of skills.filter((k) => k.tab === 'WR')) {
+    assert.deepEqual([s.pcts[0], s.pcts[1]], [null, null], `${s.name}: the receiver's alone`);
   }
 });

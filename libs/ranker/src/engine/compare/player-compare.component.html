@@ -148,7 +148,10 @@
           @case ('overview') {
             <!-- Skills: every side's shape on one radar (the skills they share), and each skill's bars -->
             @if (v.mixed) {
-              <p class="cmp-mixed"><mat-icon fontIcon="info"></mat-icon>Different positions: each skill is where he stood among his own position, and only the same skill lines up</p>
+              <!-- (different positions: said in a word, how they line up in a popover on hover or focus) -->
+              <p class="cmp-mixed" tabindex="0" [attr.aria-describedby]="'cmp-mixed-pop'"
+                ><mat-icon fontIcon="swap_horiz" aria-hidden="true"></mat-icon>Different positions<span class="cmp-mixed-pop" id="cmp-mixed-pop" role="tooltip">Each skill is where he stood among his own position, so each position's skills are its own rows (tagged with the position) and a player only leads the others at his position.</span></p
+              >
             }
             <div class="cmp-top">
               @if (v.radar; as r) {
@@ -189,7 +192,7 @@
               <div class="cmp-skills">
                 @for (sk of v.skills; track sk.id) {
                   <div class="cmp-skill">
-                    <span class="cmp-skill-name">{{ sk.name }}</span>
+                    <span class="cmp-skill-name">{{ sk.name }}@if (sk.tab) {<small class="cmp-skill-tab">{{ sk.tab }}</small>}</span>
                     <div class="cmp-bars">
                       @for (p of sk.pcts; track $index) {
                         <div class="cmp-bar" [class.lead]="sk.leaders.includes($index)" [style.--side]="sides[$index].color" [title]="sides[$index].label + ': ' + (p === null ? '-' : percentileText(p))">
@@ -270,7 +273,10 @@
               </ul>
             }
             @if (v.mixed) {
-              <p class="cmp-mixed"><mat-icon fontIcon="info"></mat-icon>Different positions: a column they share goes to the bigger number; the bars, where each stood among his own position</p>
+              <!-- (different positions: said in a word, how they line up in a popover on hover or focus) -->
+              <p class="cmp-mixed" tabindex="0" [attr.aria-describedby]="'cmp-mixed-pop'"
+                ><mat-icon fontIcon="swap_horiz" aria-hidden="true"></mat-icon>Different positions<span class="cmp-mixed-pop" id="cmp-mixed-pop" role="tooltip">A column they share goes to the bigger number; the bar under each value is where he stood among his own position.</span></p
+              >
             }
             <div class="cmp-stats" [style.--sides]="sides.length">
               <div class="cmp-row cmp-head">
