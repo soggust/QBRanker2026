@@ -1291,8 +1291,14 @@ section ul li.empty-list {
 // edge on a strip of board, the name faded (the stats pass under where it was), so every stat keeps its
 // owner beside it. Nothing changes width, so the list never jumps under a finger or the pointer.
 section ul.scrolled-x li.player > div.player-info {
-  // (in from the edge, as the drag grip leaves it unscrolled; the strip reaches back to the edge)
-  left: 1.5em;
+  // (in from the edge: on a phone 1.5em, the drag grip left behind; on a bigger screen where it sits
+  // unscrolled, the grip pinned beside it as it is (below); the strip reaches back to the edge)
+  --pin-left: 1.5em;
+  left: var(--pin-left);
+
+  @media (min-width: 576px) {
+    --pin-left: 4.25em;
+  }
   pointer-events: none;
   position: sticky;
   z-index: 3;
@@ -1309,10 +1315,10 @@ section ul.scrolled-x li.player > div.player-info {
     bottom: -0.25em;
     box-shadow: 4px 0 8px rgba(0, 0, 0, 0.4);
     content: "";
-    left: -2em;
+    left: calc(-0.5em - var(--pin-left));
     position: absolute;
     top: -0.25em;
-    width: 13.5em;
+    width: calc(12em + var(--pin-left));
     z-index: -1;
   }
 
@@ -1324,6 +1330,15 @@ section ul.scrolled-x li.player > div.player-info {
   .player-name,
   .header-name {
     opacity: 0;
+  }
+}
+
+// (a bigger screen's drag grip pinned where it sits, over the strip: rows can still be dragged scrolled)
+@media (min-width: 576px) {
+  section ul.scrolled-x li.player > .drag-indicator {
+    left: 0.5em;
+    position: sticky;
+    z-index: 4;
   }
 }
 
