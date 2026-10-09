@@ -1,59 +1,88 @@
-// The Bets page's rank tile breakdown (bet-why.ts) and the parts picks.mjs writes for it (scoreParts): the
-// book's fair chance and the model's lean add up to the score the picks are ordered by, the analyst's quarter
-// on top where it agrees; a picks file from before the parts still splits its score off the chances it kept,
-// and one with neither shows the chance alone. Made-up bets, no network.
+// The Bets page's order and its rank tile breakdown (bet-why.ts), and the parts picks.mjs writes for it
+// (scoreParts): the Kelly score, (b·p − (1 − p)) / b, split into the price (the book's fair chance against the
+// price's break-even) and the model's lean, adding up to it; a heavy favorite with no edge on its price scores 0
+// or under and sorts below a longer price with a real edge; the analyst's quarter never lowers a score; a picks
+// file from before the Kelly score is worked out from its chances and price, and one with no price shows the
+// chance alone. Made-up bets, no network.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import path from 'node:path';
 import { loadEngine } from './support/engine.mjs';
 import { buildPicks, scoreParts } from '../libs/ranker/scripts/model/picks.mjs';
+import { decimal } from '../libs/ranker/scripts/model/desk.mjs';
 
 const desk = await loadEngine('nfl', { entry: path.join(import.meta.dirname, 'support', 'bets-entry.ts'), data: {} });
 
 const close = (a, b, what, eps = 1e-9) => assert.ok(Math.abs(a - b) <= eps, `${what}: ${a} vs ${b}`);
 const bet = (over = {}) => ({ id: 'x', sport: 'nfl', start: '2026-10-10T17:00:00Z', matchup: 'TB @ DAL', market: 'spread', side: 'home', line: -3, pick: 'DAL -3', odds: -110, model: 0.6, fair: 0.5, p: 0.535, ev: 0.0214, units: 1, status: 'open', profit: 0, ...over });
+// (the Kelly fraction as written: (b·p − (1 − p)) / b)
+const kelly = (p, odds) => {
+  const b = decimal(odds) - 1;
+  return (b * p - (1 - p)) / b;
+};
+const now = new Date('2026-10-09T12:00:00Z');
+// (a -250 favorite the model agrees with the book on: no edge; a +150 dog the model likes: a real one)
+const FAV = { id: 'fav', market: 'ml', side: 'home', pick: 'DAL ML', odds: -250, model: 0.7, fair: 0.7, p: 0.7, ev: -0.02, intent: 'action' };
+const DOG = { id: 'dog', market: 'ml', side: 'away', pick: 'TB ML', odds: 150, model: 0.48, fair: 0.38, p: 0.415, ev: 0.0375, intent: 'edge' };
 
-test('scoreParts: fair + lean is the score, the trust read back off the bet, fitted or not, where the fair chance came from', () => {
-  const b = bet({ model: 0.7894, fair: 0.6571, p: 0.6571 + 0.35 * (0.7894 - 0.6571), fairFrom: 'pinnacle' });
+test('scoreParts: the Kelly score, price + lean adding up to it, the trust read back off the bet, where the fair chance came from', () => {
+  const b = bet({ odds: -217, model: 0.7894, fair: 0.6571, p: 0.6571 + 0.35 * (0.7894 - 0.6571), fairFrom: 'pinnacle' });
   const parts = scoreParts(b, { spread: { fitted: true } });
-  close(parts.fair + parts.lean, parts.score, 'fair + lean');
-  assert.equal(parts.score, 0.7034);
-  assert.equal(parts.trust, 0.35);
-  assert.equal(parts.fitted, true);
-  assert.equal(parts.from, 'pinnacle');
-  // (a model no different from the book: no trust to read; a prop with no price: an even line)
+  close(parts.price + parts.lean, parts.score, 'price + lean');
+  close(parts.score, kelly(b.p, b.odds), 'the Kelly fraction', 1e-4);
+  close(parts.p0, 217 / 317, 'break-even', 1e-4);
+  assert.ok(parts.price < 0, 'the vig on this side');
+  assert.ok(parts.lean > 0);
+  assert.deepEqual([parts.trust, parts.fitted, parts.from], [0.35, true, 'pinnacle']);
+  // (a model no different from the book: no trust to read, no lean; a prop with no price: an even line)
   const flat = scoreParts(bet({ market: 'prop', propType: 'k', model: 0.5, fair: 0.5, p: 0.5, oddsAssumed: true }), {});
   assert.deepEqual([flat.lean, flat.trust, flat.fitted, flat.from], [0, null, false, 'even']);
+  assert.ok(flat.score < 0, 'an even chance at -110: the vig alone');
   // (a lean against the bet: the model under the book)
   const under = scoreParts(bet({ model: 0.45, fair: 0.6, p: 0.6 - 0.5 * 0.15 }), {});
   assert.ok(under.lean < 0);
-  close(under.fair + under.lean, under.score, 'fair + lean (negative lean)');
+  close(under.price + under.lean, under.score, 'price + lean (negative lean)');
 });
 
-test('buildPicks: each pick carries its parts, and they add up to its score', () => {
-  const now = new Date('2026-10-09T12:00:00Z');
+test('buildPicks: by Kelly, a -250 favorite with no edge below a +150 bet with a real one; each pick its parts, adding up to its score', () => {
   const ledger = {
     bets: [
-      bet({ id: 'a', model: 0.66, fair: 0.6, p: 0.627, ev: 0.03, intent: 'edge' }),
-      bet({ id: 'b', market: 'total', side: 'over', pick: 'Over 47.5', model: 0.58, fair: 0.5123, p: 0.5427, ev: 0.012, intent: 'edge' }),
-      bet({ id: 'c', market: 'ml', side: 'away', pick: 'TB ML', model: 0.3, fair: 0.36, p: 0.333, ev: -0.02, intent: 'action' }),
+      bet(FAV),
+      bet(DOG),
+      bet({ id: 'a', model: 0.66, fair: 0.6, p: 0.627, ev: 0.197, intent: 'edge' }),
+      bet({ id: 'b', market: 'total', side: 'over', pick: 'Over 47.5', model: 0.58, fair: 0.5123, p: 0.5427, ev: 0.036, intent: 'edge' }),
     ],
   };
   const out = buildPicks('nfl', ledger, { spread: { fitted: true } }, new Map(), now);
-  assert.equal(out.picks.length, 3);
+  assert.deepEqual(out.picks.map((p) => p.id), ['a', 'b', 'dog', 'fav']);
+  const fav = out.picks.find((p) => p.id === 'fav');
+  const dog = out.picks.find((p) => p.id === 'dog');
+  assert.ok(fav.score <= 0, `the favorite's ${fav.score}`);
+  assert.ok(dog.score > 0, `the dog's ${dog.score}`);
+  assert.ok(fav.chance > dog.chance, 'the likelier bet ranked lower');
+  assert.equal(fav.level, 'low');
   for (const p of out.picks) {
-    close(p.why.fair + p.why.lean, p.score, `${p.id}: fair + lean`, 1e-9);
-    assert.equal(p.score, Math.round(p.p * 1e4) / 1e4);
+    close(p.why.price + p.why.lean, p.score, `${p.id}: price + lean`);
+    close(p.score, kelly(p.p, p.odds), `${p.id}: Kelly`, 1e-4);
   }
   assert.equal(out.picks.find((p) => p.id === 'a').why.fitted, true);
   assert.equal(out.picks.find((p) => p.id === 'b').why.fitted, false);
 });
 
-// A row as the page builds it from a pick
+test('the analyst agreeing: a quarter more of a positive score, never a lower one', () => {
+  for (const s of [-0.08, -0.001, 0, 0.001, 0.05, 0.3]) {
+    const w = desk.withAnalyst(s);
+    assert.ok(w >= s, `${s} to ${w}`);
+    if (s <= 0) assert.equal(w, s);
+    else close(w, s * 1.25, 'a quarter more');
+  }
+});
+
+// A row as the page builds it from a pick (picks.mjs's score; the analyst's quarter where it agrees)
 const row = (pick, i, over = {}) => ({
   id: i,
   pick: pick.pick,
-  market: 'Spread',
+  market: 'Moneyline',
   confidence: pick.level,
   chance: pick.chance,
   sureness: pick.score,
@@ -69,67 +98,78 @@ const row = (pick, i, over = {}) => ({
   why: pick.why ?? null,
   ...over,
 });
+const agree = (r) => Object.assign(r, { source: 'Algorithm + Analyst', sureness: desk.withAnalyst(r.sureness) });
 
-test("betWhy: the parts add up to the row's score in points, the analyst's quarter on top, the gaps to the bets beside it the scores'", () => {
-  const now = new Date('2026-10-09T12:00:00Z');
+test("betWhy: the parts add up to the row's Kelly score in points, the analyst's quarter on top, the gaps to the bets beside it the scores'", () => {
   const ledger = {
     bets: [
-      bet({ id: 'a', model: 0.7, fair: 0.6, p: 0.635, ev: 0.04, intent: 'edge', odds: -150 }),
-      bet({ id: 'b', model: 0.62, fair: 0.55, p: 0.5745, ev: 0.03, intent: 'edge' }),
-      bet({ id: 'c', model: 0.5, fair: 0.58, p: 0.552, ev: -0.01, intent: 'action' }),
+      bet(DOG),
+      bet({ id: 'b', model: 0.62, fair: 0.55, p: 0.5745, ev: 0.097, intent: 'edge' }),
+      bet(FAV),
     ],
   };
-  const picks = buildPicks('nfl', ledger, {}, new Map(), now).picks;
-  const rows = picks.map((p, i) => row(p, i));
-  // (the analyst agrees with the second: a quarter more, as the page orders it)
-  rows[1].source = 'Algorithm + Analyst';
-  rows[1].sureness *= 1.25;
+  const rows = buildPicks('nfl', ledger, {}, new Map(), now).picks.map((p, i) => row(p, i));
+  // (the analyst agrees with the dog, and with the favorite: the favorite's no-edge score stays as it is)
+  agree(rows.find((r) => r.pick === 'TB ML'));
+  const favRow = rows.find((r) => r.pick === 'DAL ML');
+  const before = favRow.sureness;
+  agree(favRow);
+  assert.equal(favRow.sureness, before);
   rows.sort((x, y) => y.sureness - x.sureness);
   for (const [i, r] of rows.entries()) {
     const w = desk.betWhy(rows, i);
     close(w.parts.reduce((s, p) => s + p.amount, 0), r.sureness * 100, `${r.pick} #${i + 1}: parts`);
     close(w.score, r.sureness * 100, 'score');
     assert.equal(w.partial, false);
+    assert.ok(w.chanceText);
     assert.ok(w.parts.every((p) => p.title && p.width >= 0 && p.width <= 100));
-    assert.equal(Math.max(...w.parts.map((p) => p.width)), 100);
     for (const vs of w.vs) {
       close(vs.diff, (r.sureness - rows[vs.rank - 1].sureness) * 100, 'gap');
       close(vs.drivers.reduce((s, d) => s + d.amount, 0), vs.diff, 'the gap made of its parts', 1e-6);
       assert.equal(vs.above, vs.rank > i + 1);
     }
   }
-  const agreed = desk.betWhy(rows, 0);
-  assert.deepEqual(agreed.parts.map((p) => p.key), ['fair', 'lean', 'analyst']);
-  assert.equal(agreed.vs.length, 1);
-  // (the lean's hover says the trust, read back off the bet: (0.5745 − 0.55) / (0.62 − 0.55))
-  assert.match(agreed.parts[1].title, /Trust 0\.35 \(the untested start/);
-  // (a bet without an edge: low, and it says why)
-  const fav = rows.findIndex((r) => r.edge === false);
-  const w = desk.betWhy(rows, fav);
-  assert.equal(w.level, 'low');
-  assert.match(w.levelText, /no edge on the price/);
-  assert.equal(w.edgeText, '−1.0% a unit at −110 · 1 unit');
-  assert.ok(w.parts.find((p) => p.key === 'lean').amount < 0);
+  const dog = desk.betWhy(rows, rows.findIndex((r) => r.pick === 'TB ML'));
+  assert.deepEqual(dog.parts.map((p) => p.key), ['price', 'lean', 'analyst']);
+  assert.ok(dog.parts[2].amount > 0);
+  // (the lean's hover says the trust, read back off the bet: (0.415 − 0.38) / (0.48 − 0.38))
+  assert.match(dog.parts[1].title, /Trust 0\.35 \(the untested start/);
+  // (the favorite: last, no edge, low; the analyst adds nothing)
+  const at = rows.findIndex((r) => r.pick === 'DAL ML');
+  assert.equal(at, rows.length - 1);
+  const fav = desk.betWhy(rows, at);
+  assert.equal(fav.noEdge, true);
+  assert.equal(fav.level, 'low');
+  assert.match(fav.levelText, /no edge on the price/);
+  assert.equal(fav.chanceText, '70.0%');
+  assert.equal(fav.parts.find((p) => p.key === 'analyst').amount, 0);
+  assert.equal(fav.edgeText, '−2.0% a unit at −250 · 1 unit');
 });
 
-test('betWhy: an older picks file, the parts worked out from its chances; one with no chances, the chance alone', () => {
+test('betWhy: an older picks file, its Kelly score and parts worked out from its chances and price; one with no price, the chance alone', () => {
+  // (as the page reads one: no price part written, the score from kellyOf)
+  const p = { pick: 'NYR ML', odds: -217, model: 0.7894, fair: 0.6571, p: 0.7034 };
+  const score = desk.kellyOf(p.p, p.odds);
+  close(score, kelly(p.p, p.odds), 'kellyOf', 1e-4);
+  assert.equal(desk.kellyOf(undefined, -110), null);
+  assert.equal(desk.kellyOf(0.6, undefined), null);
   const old = [
-    { id: 0, pick: 'NYR ML', market: 'Moneyline', confidence: 'high', chance: 70, sureness: 0.7034, source: 'Algorithm', edge: true, model: 0.7894, fair: 0.6571, p: 0.7034, ev: 0.0276, units: 1.5, price: -217, book: 'DraftKings' },
+    { id: 0, pick: p.pick, market: 'Moneyline', confidence: 'high', chance: 70, sureness: score, source: 'Algorithm', edge: true, model: p.model, fair: p.fair, p: p.p, ev: 0.0276, units: 1.5, price: p.odds, book: 'DraftKings', why: { fair: 0.6571, lean: 0.0463, trust: 0.35, fitted: true, from: 'book' } },
     { id: 1, pick: 'Over 5.5', market: 'Game total', confidence: 'medium', chance: 55, sureness: 0.55, source: 'Algorithm' },
   ];
   const a = desk.betWhy(old, 0);
   assert.equal(a.partial, false);
-  close(a.parts.reduce((s, p) => s + p.amount, 0), 70.34, 'parts', 1e-9);
-  assert.match(a.parts[1].title, /Trust 0\.35 × the model/);
+  assert.deepEqual(a.parts.map((x) => x.key), ['price', 'lean']);
+  close(a.parts.reduce((s, x) => s + x.amount, 0), score * 100, 'parts');
+  assert.match(a.parts[1].title, /Trust 0\.35 \(fitted/);
   assert.equal(a.edgeText, '+2.8% a unit at −217 · 1.5 units');
   const b = desk.betWhy(old, 1);
   assert.equal(b.partial, true);
-  assert.deepEqual(b.parts.map((p) => p.key), ['chance']);
+  assert.deepEqual(b.parts.map((x) => x.key), ['chance']);
   close(b.parts[0].amount, 55, 'the chance alone');
   assert.equal(b.edgeText, null);
-  assert.equal(b.vs[0].rank, 1);
-  // (a prop's player named first, once)
+  // (a prop's player named first, once; the score signed)
   assert.equal(desk.betName({ pick: 'Over 5.5 strikeouts', player: 'Skubal' }), 'Skubal Over 5.5 strikeouts');
   assert.equal(desk.betName({ pick: 'Skubal Over 5.5', player: 'Skubal' }), 'Skubal Over 5.5');
-  assert.deepEqual([desk.betScoreText(70.344), desk.signedPoints(-0.004), desk.signedPoints(4.6)], ['70.34', '−0.004', '+4.60']);
+  assert.deepEqual([desk.betScoreText(3.124), desk.betScoreText(-1.05), desk.betScoreText(0.001), desk.signedPoints(-0.004)], ['+3.12', '−1.05', '0.00', '−0.004']);
 });

@@ -70,7 +70,7 @@
               @for (k of kindChips; track k.kind) {
                 <span><b [ngClass]="k.kind">{{ k.label }}</b> {{ k.name }}</span>
               }
-              <span><b>%</b> Its chance to win: the list runs likeliest first. Gray: no edge on the price (a bet the bot made, not one it likes)</span>
+              <span><b>#</b> The list runs by Kelly: the edge on the price, scaled by what it pays (click a rank for its makings). Pass: no edge on the price (a bet the bot made for the data, not one to make)</span>
             </span>
           </span>
         </div>
@@ -90,8 +90,9 @@
               <button type="button" class="bet-row" (click)="toggle(r.id)" [attr.aria-expanded]="open.has(r.id)">
                 <mat-icon class="bet-chevron" [fontIcon]="open.has(r.id) ? 'expand_more' : 'chevron_right'"></mat-icon>
                 <span class="bet-rank-slot" aria-hidden="true"></span>
-                <!-- (a like reads "Bet": it's the bet to make, as a fade is the side to go against) -->
-                <span class="bet-grade" [ngClass]="side(r)">{{ side(r) === 'like' ? 'bet' : 'fade' }}</span>
+                <!-- (a like reads "Bet": it's the bet to make, as a fade is the side to go against; one with no edge on
+                     its price reads "Pass") -->
+                <span class="bet-grade" [ngClass]="grade(r)">{{ grade(r) }}</span>
                 <span class="bet-main" [class.has-circle]="r.strength !== 'fade'">
                   <!-- (a fade says what it fades, and the bet to make instead) -->
                   @if (r.strength === 'fade') {
@@ -142,11 +143,11 @@
                 </span>
               </button>
               <!-- The rank tile (the #1 bet is the lock): a click (or Enter / Space) opens how its score is built; its
-                   hover, its place, its score and its confidence (the row's color) -->
+                   hover, its place, its Kelly score and its chance -->
               <button
                 type="button"
                 class="bet-rank"
-                [class.top]="i < 10"
+                [class.top]="i < 10 && grade(r) !== 'pass'"
                 [class.lock]="i === 0"
                 [class.open]="why?.id === r.id"
                 aria-haspopup="dialog"
@@ -171,7 +172,7 @@
                 <!-- (its chance to win on the left; where it's played and the weather then on the right, the wind in
                      amber when it could matter) -->
                 <div class="bet-foot">
-                  <p class="bet-meta bet-confidence" title="Its chance to win: the list runs likeliest first. Gray: no edge on the price (a bet the bot made, not one it likes)">{{ r.chance ?? '–' }}% to win</p>
+                  <p class="bet-meta bet-confidence" title="Its chance to win. The list runs by Kelly (the edge on the price, scaled by what it pays); gray: no edge on the price">{{ r.chance ?? '–' }}% to win</p>
                   @if (where(r); as w) {
                     <small class="bet-where" [class.windy]="w.windy"><mat-icon [fontIcon]="w.icon"></mat-icon>{{ w.text }}</small>
                   }
@@ -195,9 +196,9 @@
       </span>
     </button>
 
-    <!-- How a bet's score is built (its rank tile clicked): the book's fair chance and the model's lean on it,
-         adding up to the score the list went by (and the analyst's quarter where it agrees); its confidence and
-         its price; then the bets beside it -->
+    <!-- How a bet's Kelly score is built (its rank tile clicked): the price and the model's lean, adding up to
+         the score the list went by (and the analyst's quarter where it agrees and has an edge); its chance, its
+         confidence and its expected return; then the bets beside it -->
     @if (why; as w) {
       <div
         #whyPop
@@ -214,8 +215,11 @@
       >
         <div class="why-head">
           <p class="why-title">
-            <span class="why-score">Score <b>{{ betScoreText(w.score) }}</b></span>
+            <span class="why-score">Kelly <b [class.neg]="w.score <= 0">{{ betScoreText(w.score) }}</b></span>
             <span class="why-place">#{{ w.rank }} of {{ w.of }}</span>
+            @if (w.noEdge) {
+              <span class="why-pass">No edge</span>
+            }
           </p>
           <button type="button" class="why-close" aria-label="Close" (click)="closeWhy(true)"><mat-icon aria-hidden="true" fontIcon="close"></mat-icon></button>
         </div>
@@ -229,8 +233,11 @@
             </div>
           }
         </div>
-        <!-- (its confidence, and its price's expected return and stake) -->
+        <!-- (its chance to win, its confidence, and its price's expected return and stake) -->
         <div class="why-facts">
+          @if (w.chanceText) {
+            <p [title]="w.chanceTitle"><span>Chance to win</span> <b>{{ w.chanceText }}</b></p>
+          }
           <p [title]="w.levelTitle"><span>Confidence</span> <b [ngClass]="w.level">{{ w.levelText }}</b></p>
           @if (w.edgeText) {
             <p [title]="w.edgeTitle"><span>Expected return</span> <b>{{ w.edgeText }}</b></p>
@@ -255,9 +262,9 @@
           </div>
         }
         @if (w.partial) {
-          <p class="why-foot">The score is its chance to win, in points (this pick's file is from before the book's and the model's chances were kept)</p>
+          <p class="why-foot">The score is its chance to win, in points (this pick's file has no price to weigh it by)</p>
         } @else {
-          <p class="why-foot">The score is its chance to win, in points: the book's fair chance (the vig out), moved toward the model's by the trust the model has earned in that market (lean = trust × (model − book)); an analyst agreeing counts a quarter more</p>
+          <p class="why-foot">Kelly: how much of a bankroll the edge is worth at this price, the edge on the price scaled by what it pays (in points; 0 or under, no edge). An analyst agreeing counts a quarter more of a positive one</p>
         }
       </div>
     }

@@ -2,22 +2,23 @@
 // (apps/<sport>/src/StaticData/model/picks.json, written by every run when they change).
 //
 //   which    every bet it's placed on a game not started, a game market's or a prop's (not a guarded one): the
-//            user wants the bot's bets shown, the most likely first, while it's still learning (rein it in to the
+//            user wants the bot's bets shown, the best first, while it's still learning (rein it in to the
 //            edge bets alone once it's sharper). Only a showcase: nothing here feeds the bettor's learning
-//   score    its chance to win (p, below: the order); its edge score (scoreOf, the tie-break) its expected
-//            return per unit at the trusted chance (EV: the trust already in it, so a market whose
-//            trust is fitted at 0, the NFL's spreads and moneylines, never has an edge and never shows), times
-//            how far the trust can be leaned on: 1 once the market's is fitted (the backtest's closing lines and
-//            the graded bets), 0.5 while it's the untested start (a prop type with fewer than 40 graded: its
-//            edge is the projection's against an assumed trust)
-//   chance   what the page shows: the model's chance the bet wins, the trusted one (p: the book's fair chance
-//            pulled toward the model's by the market's trust), as a whole percent. Its band colors the row: high at
-//            60% or more, medium at 53%, low under (the edge bets' chances run from about 45% to 70%, a quarter
-//            under 52%, half under 57%, a quarter over 64%: the bands cut them into near thirds). A heavy
-//            favorite shows a high chance with little edge; the order is the score's, not the chance's
-//   N        the 40 likeliest a sport (TOP), by their chance to win (the score is the chance: the page orders by
-//            it), the page's 40 across all the sports. An edge bet's band is its chance's; one without an edge is
-//            low, whatever its chance (a favorite at a short price isn't a strong bet)
+//   score    its Kelly score (scoreParts, below: the order): the share of a bankroll its edge is worth at its
+//            price, (b·p − (1 − p)) / b with b what a unit pays and p its trusted chance (the book's fair chance
+//            pulled toward the model's by the market's trust). Value and likelihood together: a heavy favorite
+//            at a price with no edge scores 0 or under and sorts last, whatever its chance. Only the page's
+//            order: the bettor's own staking (desk.mjs stakeFor, by EV) is untouched. Its edge score (scoreOf,
+//            the tie-break) its expected return per unit at the trusted chance, times how far the trust can be
+//            leaned on: 1 once the market's is fitted (the backtest's closing lines and the graded bets), 0.5
+//            while it's the untested start (a prop type with fewer than 40 graded)
+//   chance   what the page shows beside it: the trusted chance the bet wins, as a whole percent. Its band
+//            colors the row: high at 60% or more, medium at 53%, low under (the edge bets' chances run from about
+//            45% to 70%, a quarter under 52%, half under 57%, a quarter over 64%: the bands cut them into near
+//            thirds)
+//   N        the 40 best a sport (TOP) by the Kelly score, the page's 40 across all the sports. An edge bet's
+//            band is its chance's; one without an edge is low, whatever its chance (a favorite at a short price
+//            isn't a strong bet)
 //   reason   written from the bet's own numbers: the model's chance against the book's, the price and book,
 //            the projection (a prop's) or the expected score, what the context saw (a backup quarterback, the
 //            weather, a back-to-back, players out, the goalie or pitcher), and a line that's moved its way
@@ -25,7 +26,7 @@
 //            record is of those only, overall and by band, not of every bet the desk made
 
 import { round } from './ratings.mjs';
-import { intentOf, record } from './desk.mjs';
+import { decimal, intentOf, record } from './desk.mjs';
 
 export const TOP = 40;
 const BANDS = { high: 0.6, medium: 0.53 };
@@ -46,19 +47,28 @@ export function scoreOf(bet, trust) {
   return round(bet.ev * (trust?.[key]?.fitted ? 1 : 0.5), 4);
 }
 
-// A bet's score (the order: its chance to win) split as the page's rank tile shows it: the book's fair chance
-// of its side, and the model's lean on it (the trust times the model's chance less the book's), adding up to
-// the score; the trust read back off the bet's own numbers (the one it was priced at), fitted or the untested
-// start, and where the fair chance came from
+// A bet's Kelly score (the order), and its parts as the page's rank tile shows them: what a unit pays (b) and
+// the price's break-even chance (p0), then the price's part, the book's own fair chance against that
+// break-even (its vig on this side: under 0, or over where the price beats its own fair chance), and the
+// model's lean, the trust times the model's chance less the book's; each scaled by what the price pays,
+// (b + 1) / b, so they add up to the score. The trust read back off the bet's own numbers (the one it was
+// priced at), fitted or the untested start, and where the fair chance came from
 export function scoreParts(bet, trust) {
-  const score = round(bet.p, 4);
-  const fair = round(bet.fair, 4);
+  const b = decimal(bet.odds) - 1;
+  const p0 = 1 / (b + 1);
+  const scale = (b + 1) / b;
+  const score = round((bet.p - p0) * scale, 4);
+  const price = round((bet.fair - p0) * scale, 4);
   const key = bet.market === 'prop' ? `prop:${bet.propType}` : bet.market;
   const gap = bet.model - bet.fair;
   return {
     score,
-    fair,
-    lean: round(score - fair, 4),
+    price,
+    lean: round(score - price, 4),
+    b: round(b, 4),
+    p0: round(p0, 4),
+    fair: round(bet.fair, 4),
+    p: round(bet.p, 4),
     trust: Math.abs(gap) > 1e-6 ? round((bet.p - bet.fair) / gap, 2) + 0 : null,
     fitted: !!trust?.[key]?.fitted,
     from: bet.oddsAssumed ? 'even' : bet.fairFrom === 'pinnacle' ? 'pinnacle' : 'book',
@@ -129,13 +139,13 @@ function whereOf(bet, game) {
   return { city, stadium, weather: roof || tempF !== null ? { roof: roof ?? 'outdoors', tempF, windMph } : null };
 }
 
-// The sport's picks: its bets on games not started, the likeliest first, the top TOP; each one marked
+// The sport's picks: its bets on games not started, the best Kelly score first, the top TOP; each one marked
 // published on the ledger (its level then), and the published ones' record
 export function buildPicks(sport, ledger, trust, games, now) {
   const open = ledger.bets.filter((b) => b.status === 'open' && Date.parse(b.start) > now.getTime() && !b.context?.guard);
   // (one a bet: a --dry run prices placed bets again in memory)
   const once = [...new Map(open.map((b) => [b.id, b])).values()];
-  // (the order: its chance to win; its edge score kept beside it)
+  // (the order: its Kelly score; its edge score kept beside it)
   const scored = once.map((b) => {
     const { score, ...why } = scoreParts(b, trust);
     return { b, score, why, edgeScore: scoreOf(b, trust) };
@@ -175,7 +185,7 @@ export function buildPicks(sport, ledger, trust, games, now) {
       p: b.p,
       ev: b.ev,
       units: b.units,
-      // (its score's parts, for the rank tile's breakdown: fair + lean is the score)
+      // (its score's parts, for the rank tile's breakdown: price + lean is the score)
       why,
       start: b.start,
       matchup: b.matchup,

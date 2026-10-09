@@ -538,7 +538,7 @@ test('buildPicks: the open bets not started, likeliest first, at most TOP, each 
   const bets = [
     bet({ id: 'hi', start: future, p: 0.64, ev: 0.05, intent: 'edge' }),
     bet({ id: 'mid', start: future, p: 0.55, ev: 0.02, intent: 'edge' }),
-    bet({ id: 'fav', start: future, p: 0.7, ev: -0.01, intent: 'action' }),
+    bet({ id: 'fav', start: future, p: 0.7, odds: -300, ev: -0.0667, intent: 'action' }),
     bet({ id: 'started', start: '2026-10-09T11:00:00Z', p: 0.9, ev: 0.1 }),
     bet({ id: 'guarded', start: future, p: 0.8, ev: 0.1, context: { guard: 'line moved' } }),
     bet({ id: 'old', start: '2026-10-01T17:00:00Z', status: 'won', profit: 1.36, published: true, publishedLevel: 'high' }),
@@ -546,9 +546,11 @@ test('buildPicks: the open bets not started, likeliest first, at most TOP, each 
   ];
   const ledger = { bets };
   const out = buildPicks('nfl', ledger, { spread: { fitted: true } }, new Map(), now);
-  assert.deepEqual(out.picks.map((p) => [p.id, p.level, p.chance]), [['fav', 'low', 70], ['hi', 'high', 64], ['mid', 'medium', 55]]);
-  assert.equal(out.picks[0].edge, false);
-  assert.deepEqual(out.picks[1].teams.map((t) => t.abbr), ['TB', 'DAL']);
+  // (by Kelly: the 70% favorite at -300 has no edge on its price and sorts last, its chance notwithstanding)
+  assert.deepEqual(out.picks.map((p) => [p.id, p.level, p.chance]), [['hi', 'high', 64], ['mid', 'medium', 55], ['fav', 'low', 70]]);
+  assert.equal(out.picks[2].edge, false);
+  assert.ok(out.picks[2].score < 0);
+  assert.deepEqual(out.picks[0].teams.map((t) => t.abbr), ['TB', 'DAL']);
   assert.ok(bets.find((b) => b.id === 'hi').published);
   assert.equal(bets.find((b) => b.id === 'mid').publishedLevel, 'medium');
   assert.equal(bets.find((b) => b.id === 'started').published, undefined);

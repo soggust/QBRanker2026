@@ -379,7 +379,8 @@ $chip-clay: #b0202b;
   text-align: center;
   text-transform: uppercase;
 
-  &.like {
+  &.like,
+  &.bet {
     background: v.$good;
   }
 
@@ -387,6 +388,12 @@ $chip-clay: #b0202b;
     background: v.$bad;
   }
 
+  // (no edge on the price: a bet the bot made for the data, not one to make; outlined, not filled)
+  &.pass {
+    background: none;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.35);
+    color: rgba(255, 255, 255, 0.6);
+  }
 }
 
 .bet-main,
@@ -983,6 +990,23 @@ img.bet-face {
   .why-place {
     color: #fff;
     font-weight: 700;
+  }
+
+  // (a score of 0 or under: red, and said)
+  .why-score b.neg {
+    color: var(--why-bad);
+    text-shadow: none;
+  }
+
+  .why-pass {
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    border-radius: 4px;
+    color: #ccc;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    padding: 0 5px;
+    text-transform: uppercase;
   }
 
   .why-close {

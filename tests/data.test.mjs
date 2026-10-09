@@ -177,7 +177,8 @@ for (const sport of SPORTS) {
       for (const key of ['id', 'pick', 'matchup', 'market', 'book', 'reason']) assert.equal(typeof p[key], 'string', `${at}: ${key}`);
       assert.ok(KINDS.has(p.kind), `${at}: kind ${p.kind}`);
       assert.ok(LEVELS.has(p.level), `${at}: level ${p.level}`);
-      assert.ok(Number.isFinite(p.score) && p.score > 0, `${at}: score ${p.score}`);
+      // (a Kelly score: 0 or under for a pick with no edge on its price; files before it, the chance)
+      assert.ok(Number.isFinite(p.score), `${at}: score ${p.score}`);
       assert.ok(p.score <= last, `${at}: not in score order`);
       last = p.score;
       assert.ok(Number.isFinite(p.odds), `${at}: odds`);

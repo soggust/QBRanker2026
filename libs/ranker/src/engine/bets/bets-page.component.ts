@@ -2,12 +2,13 @@ import { Component, ElementRef, HostListener, OnInit, ViewChild, isDevMode } fro
 import { SPORT_LINKS } from '@ranker/core/sports';
 import { insteadText } from '../player-card/analysis';
 import { americanOdds, headshot } from './bet-format';
-import { BetWhy, PickWhy, betScoreText, betWhy, signedPoints } from './bet-why';
+import { BetWhy, PickWhy, betScoreText, betWhy, kellyOf, signedPoints, withAnalyst } from './bet-why';
 import { TeamColors, loadTeamColors, pickTeamColor, splitPick } from './pick-style';
 
 // The Bets page (the sport bar's Bets link, #bets): the algorithm's top picks for every sport (each one's
 // data/model/picks.json, written by every run of the model desk: libs/ranker/scripts/model/picks.mjs), ranked
-// together by their chance to win (the likeliest first; a bet without an edge on its price shows as low). The
+// together by their Kelly score (value and likelihood: the edge on the price, scaled by what it pays; a bet
+// without an edge on its price scores 0 or under, sorts last and reads "Pass", its band low). The
 // NFL's AI bet desk's sheet for the week (data/analysis/bet-sheet.json) only marks the picks it agrees with
 // (the same game, market and side: "Algorithm + Analyst", ranked a little higher); its other picks aren't
 // shown. A row opens to its reasoning.
@@ -49,7 +50,7 @@ export interface BetRow {
   odds?: string;
   // (the call it makes: pickKey)
   key: string;
-  // (the order: its edge score, a quarter higher where the analyst agrees)
+  // (the order: its Kelly score, a quarter higher where the analyst agrees and it has an edge)
   sureness: number;
   // its type, for the filter chips
   betType: BetKind;
@@ -329,8 +330,9 @@ export class BetsPageComponent implements OnInit {
             key: pickKey(sport, p.matchup, p.kind, p.pick),
             pick: p.pick,
             odds: americanOdds(p.odds),
-            // (the order: its edge score; its chance shows, its band colors it)
-            sureness: p.score,
+            // (the order: its Kelly score, the file's, or worked out from its chance and price for a file from
+            // before it ranked by one; its chance shows, its band colors it)
+            sureness: Number.isFinite(p.why?.price) ? p.score : (kellyOf(p.p, p.odds) ?? p.score),
             chance: p.chance,
             betType: p.kind,
             side: p.side ?? null,
@@ -370,18 +372,18 @@ export class BetsPageComponent implements OnInit {
     // The algorithm's record on its published picks, all its sports together
     if (records.length) this.record = sumRecords(records);
     // Where the analyst's sheet makes the same call as an algorithm pick: marked as both's, its reasons added,
-    // and its edge counted a quarter higher in the order (two independent reads agreeing); the sheet's other
-    // picks aren't shown
+    // and its score counted a quarter higher in the order where it has an edge (two independent reads agreeing;
+    // never a negative one made worse); the sheet's other picks aren't shown
     const byKey = new Map(algoRows.map((r) => [r.key, r]));
     for (const s of sheetRows) {
       const a = byKey.get(s.key);
       if (!a || s.strength === 'fade') continue;
       a.source = 'Algorithm + Analyst';
-      a.sureness *= 1.25;
+      a.sureness = withAnalyst(a.sureness);
       a.reason = `${a.reason} Analyst: ${s.reason}`;
       a.risk = s.risk;
     }
-    // (all sports' picks together, the likeliest first)
+    // (all sports' picks together, the best Kelly score first)
     this.rows = algoRows.sort((a, b) => b.sureness - a.sureness || (a.game?.kickoff ?? '').localeCompare(b.game?.kickoff ?? ''));
     this.gameDays = this.buildGameDays();
   }
@@ -463,6 +465,13 @@ export class BetsPageComponent implements OnInit {
     return r.strength === 'fade' ? 'fade' : 'like';
   }
 
+  // Its chip: "Bet" (the bet to make), "Fade", or "Pass" for one with no edge on its price (a Kelly score of 0
+  // or under: a bet the bot made for the data, never one to make)
+  grade(r: BetRow): 'bet' | 'fade' | 'pass' {
+    if (r.strength === 'fade') return 'fade';
+    return r.edge === false || r.sureness <= 0 ? 'pass' : 'bet';
+  }
+
   // A bet's band, its row's color: its chance to win 60% or more, 53% or more, or under (picks.mjs)
   level(r: BetRow): 'high' | 'medium' | 'low' {
     return r.confidence ?? 'low';
@@ -482,10 +491,9 @@ export class BetsPageComponent implements OnInit {
   readonly signedPoints = signedPoints;
   readonly betScoreText = betScoreText;
 
-  // The rank tile's hover: its place, its score and its confidence ("#3 of 40 · Score 70.34 · High confidence")
+  // The rank tile's hover: its place, its Kelly score and its chance ("#2 of 40 · Kelly +3.12 · 64% to win")
   rankTitle(r: BetRow, i: number, n: number): string {
-    const level = this.level(r);
-    return `#${i + 1} of ${n} · Score ${betScoreText(r.sureness * 100)} · ${level[0].toUpperCase()}${level.slice(1)} confidence`;
+    return `#${i + 1} of ${n} · Kelly ${betScoreText(r.sureness * 100)}${r.chance != null ? ` · ${r.chance}% to win` : ''}`;
   }
 
   toggleWhy(index: number, event: Event): void {
