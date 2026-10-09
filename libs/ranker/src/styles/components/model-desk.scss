@@ -624,3 +624,9 @@ card-panel {
     }
   }
 }
+
+// (a game under way: its score and clock in the board's light under the teams; a final's in the usual gray)
+.desk-when.desk-live {
+  color: var(--scoreboard-led);
+  font-weight: 700;
+}

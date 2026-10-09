@@ -20,7 +20,10 @@
   <span class="desk-game">
     <img [src]="teamLogo(b.sport, teams[0])" alt="" (error)="hide($event)" />{{ teams[0] }}<span class="desk-at">@</span><img [src]="teamLogo(b.sport, teams[1])" alt="" (error)="hide($event)" />{{ teams[1] }}
   </span>
-  @if (when) {
+  @if (when === 'live') {
+    @let score = b.event ? scores.get(b.event) : undefined;
+    <small class="desk-when" [class.desk-live]="score && !score.final">{{ score?.text ?? 'Under way' }}</small>
+  } @else if (when) {
     <small class="desk-when">{{ b.start | date: when }}</small>
   }
 </ng-template>
@@ -284,10 +287,9 @@
             </thead>
             <tbody>
               @for (b of sorted('live', live, betValue); track b.id) {
-                @let score = b.event ? scores.get(b.event) : undefined;
                 <tr>
                   <th><img class="desk-league" [src]="leagueLogo(b.sport)" [alt]="b.sport.toUpperCase()" [title]="b.sport.toUpperCase()" /></th>
-                  <td class="desk-left"><ng-container *ngTemplateOutlet="gameCell; context: { $implicit: b }"></ng-container></td>
+                  <td class="desk-left"><ng-container *ngTemplateOutlet="gameCell; context: { $implicit: b, when: 'live' }"></ng-container></td>
                   <td class="desk-left"><ng-container *ngTemplateOutlet="pickCell; context: { $implicit: b }"></ng-container></td>
                   <td>{{ odds(b.odds) }}</td>
                   <td>{{ b.units }}</td>
@@ -321,11 +323,11 @@
                           }
                         </span>
                       }
-                      <b>{{ count }} / {{ b.line }} {{ unit }}</b><small>{{ score?.text ?? 'Under way' }}</small>
+                      <b>{{ count }} / {{ b.line }} {{ unit }}</b>
                     </td>
                   } @else {
                     @let edge = sideEdge(b);
-                    <td class="desk-score" [class.desk-final]="score?.final && edge === null" [style.color]="edgeColor(b)" [title]="edge === null ? '' : edge > 0 ? (b.market === 'spread' ? 'Covering by ' : 'Leading by ') + edge : edge < 0 ? (b.market === 'spread' ? 'Short of covering by ' : 'Trailing by ') + -edge : 'Level'">{{ score?.text ?? 'Under way' }}</td>
+                    <td class="desk-score" [style.color]="edgeColor(b)" [title]="edge === null ? '' : edge > 0 ? (b.market === 'spread' ? 'Covering by ' : 'Leading by ') + edge : edge < 0 ? (b.market === 'spread' ? 'Short of covering by ' : 'Trailing by ') + -edge : 'Level'">{{ sideText(b) }}</td>
                   }
                 </tr>
               }

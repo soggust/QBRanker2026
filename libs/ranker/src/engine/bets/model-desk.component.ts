@@ -318,7 +318,7 @@ export class ModelDeskComponent implements OnInit, OnDestroy {
   live: ModelBet[] = [];
   recent: ModelBet[] = [];
   // (each in-play game's score and clock, by its ESPN id, from ESPN's scoreboard every minute)
-  scores = new Map<string, { text: string; final: boolean }>();
+  scores = new Map<string, { text: string; score: string; detail: string; final: boolean }>();
   // (each in-play prop's stat so far, by the bet's id, from its game's box score every minute)
   propNow = new Map<string, number | null>();
   // (each in-play game's score as numbers and whether it's over: the bets settled here as soon as they're
@@ -370,10 +370,10 @@ export class ModelDeskComponent implements OnInit, OnDestroy {
         const home = side('home');
         if (!away || !home) continue;
         this.boards.set(String(event.id), { hs: Number(home.score) || 0, as: Number(away.score) || 0, final: !!event.status?.type?.completed });
-        this.scores.set(String(event.id), {
-          text: `${away.team?.abbreviation} ${away.score ?? 0} - ${home.team?.abbreviation} ${home.score ?? 0} · ${event.status?.type?.shortDetail ?? ''}`,
-          final: !!event.status?.type?.completed,
-        });
+        const score = `${away.team?.abbreviation} ${away.score ?? 0} - ${home.team?.abbreviation} ${home.score ?? 0}`;
+        const detail = event.status?.type?.shortDetail ?? '';
+        const final = !!event.status?.type?.completed;
+        this.scores.set(String(event.id), { text: final ? `Final · ${score}` : `${score} · ${detail}`, score, detail, final });
       }
     }
     // (the props in play: each game's summary once, its box score read for every prop on it)
@@ -558,6 +558,18 @@ export class ModelDeskComponent implements OnInit, OnDestroy {
     if (!game) return null;
     const margin = (b.side === 'home' ? 1 : -1) * (game.hs - game.as);
     return b.market === 'spread' ? margin + (b.line ?? 0) : margin;
+  }
+
+  // (a side in play, in words: where it stands at the score, or once the game's over, how it came out)
+  sideText(b: ModelBet): string {
+    const decided = this.provisional(b);
+    if (decided) return decided.status === 'won' ? 'Won' : decided.status === 'lost' ? 'Lost' : 'Push';
+    const edge = this.sideEdge(b);
+    if (edge === null) return 'Under way';
+    if (edge === 0) return 'Level';
+    const by = Math.abs(edge);
+    if (b.market === 'spread') return edge > 0 ? `Covering by ${by}` : `Short by ${by}`;
+    return edge > 0 ? `Leading by ${by}` : `Trailing by ${by}`;
   }
 
   // (its score's color: green covering or leading, red not, deeper the further (about two touchdowns, 12
