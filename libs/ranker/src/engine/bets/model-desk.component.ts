@@ -159,8 +159,9 @@ const UNIT_WORDS: Record<string, string> = { nfl: 'pts', nba: 'pts', nhl: 'goals
 // (how far ahead or behind a side has to be for its score's color to run all the way, by sport; the good and
 // bad of the site's results)
 const EDGE_FULL: Record<string, number> = { nfl: 14, nba: 12, nhl: 2, mlb: 3 };
-const GOOD = '#3ecf6e';
-const BAD = '#ff5a4f';
+// (the desk's own win and loss colors, model-desk.scss --win and --loss)
+const GOOD = 'var(--win)';
+const BAD = 'var(--loss)';
 // (the props a bar measures whatever their line: yards, a goalie's saves, a pitcher's outs; a short count is pips)
 const BAR_STATS = new Set(['passYds', 'rushYds', 'recYds', 'rushRecYds', 'saves', 'outs']);
 

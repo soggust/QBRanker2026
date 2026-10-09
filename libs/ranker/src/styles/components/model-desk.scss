@@ -7,6 +7,10 @@
 // ===========================================================================
 
 .model-desk {
+  // (a result's two colors, everywhere on the desk: a win the site's green; a loss the red of the Bets page's
+  // chips and the slot's knob (their clay, #b0202b), lifted to read on the board)
+  --win: #{v.$good};
+  --loss: #f03a4b;
   @include v.scoreboard-panel(10px, 0 4px 14px rgba(0, 0, 0, 0.45));
   color: #fff;
   margin: 0 auto 18px;
@@ -67,11 +71,11 @@
 }
 
 .up {
-  color: v.$good !important;
+  color: var(--win) !important;
 }
 
 .down {
-  color: v.$bad !important;
+  color: var(--loss) !important;
 }
 
 .desk-note {
@@ -313,7 +317,7 @@ card-panel {
 }
 
 .desk-broke {
-  color: v.$bad;
+  color: var(--loss);
 }
 
 // (a second table in a panel: the props by type under the markets, the props' projections under the terms)
@@ -550,11 +554,11 @@ card-panel {
   }
 
   &.won {
-    --meter: #{v.$good};
+    --meter: var(--win);
   }
 
   &.lost {
-    --meter: #{v.$bad};
+    --meter: var(--loss);
   }
 
   .pip {
