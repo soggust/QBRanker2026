@@ -1,0 +1,154 @@
+{
+  "teams": {
+    "ARI": {
+      "id": "29",
+      "color": "aa182c",
+      "alt": "000000"
+    },
+    "ATH": {
+      "id": "11",
+      "color": "003831",
+      "alt": "efb21e"
+    },
+    "ATL": {
+      "id": "15",
+      "color": "0c2340",
+      "alt": "ba0c2f"
+    },
+    "BAL": {
+      "id": "1",
+      "color": "df4601",
+      "alt": "000000"
+    },
+    "BOS": {
+      "id": "2",
+      "color": "0d2b56",
+      "alt": "bd3039"
+    },
+    "CHC": {
+      "id": "16",
+      "color": "0e3386",
+      "alt": "cc3433"
+    },
+    "CHW": {
+      "id": "4",
+      "color": "000000",
+      "alt": "c4ced4"
+    },
+    "CIN": {
+      "id": "17",
+      "color": "c6011f",
+      "alt": "ffffff"
+    },
+    "CLE": {
+      "id": "5",
+      "color": "002b5c",
+      "alt": "e31937"
+    },
+    "COL": {
+      "id": "27",
+      "color": "33006f",
+      "alt": "000000"
+    },
+    "DET": {
+      "id": "6",
+      "color": "0a2240",
+      "alt": "ff4713"
+    },
+    "HOU": {
+      "id": "18",
+      "color": "002d62",
+      "alt": "eb6e1f"
+    },
+    "KC": {
+      "id": "7",
+      "color": "004687",
+      "alt": "7ab2dd"
+    },
+    "LAA": {
+      "id": "3",
+      "color": "ba0021",
+      "alt": "c4ced4"
+    },
+    "LAD": {
+      "id": "19",
+      "color": "005a9c",
+      "alt": "ffffff"
+    },
+    "MIA": {
+      "id": "28",
+      "color": "00a3e0",
+      "alt": "000000"
+    },
+    "MIL": {
+      "id": "8",
+      "color": "13294b",
+      "alt": "ffc72c"
+    },
+    "MIN": {
+      "id": "9",
+      "color": "031f40",
+      "alt": "e20e32"
+    },
+    "NYM": {
+      "id": "21",
+      "color": "002d72",
+      "alt": "ff5910"
+    },
+    "NYY": {
+      "id": "10",
+      "color": "132448",
+      "alt": "c4ced4"
+    },
+    "PHI": {
+      "id": "22",
+      "color": "e81828",
+      "alt": "003278"
+    },
+    "PIT": {
+      "id": "23",
+      "color": "000000",
+      "alt": "fdb827"
+    },
+    "SD": {
+      "id": "25",
+      "color": "2f241d",
+      "alt": "ffc425"
+    },
+    "SEA": {
+      "id": "12",
+      "color": "005c5c",
+      "alt": "0c2c56"
+    },
+    "SF": {
+      "id": "26",
+      "color": "000000",
+      "alt": "fd5a1e"
+    },
+    "STL": {
+      "id": "24",
+      "color": "be0a14",
+      "alt": "001541"
+    },
+    "TB": {
+      "id": "30",
+      "color": "092c5c",
+      "alt": "8fbce6"
+    },
+    "TEX": {
+      "id": "13",
+      "color": "003278",
+      "alt": "c0111f"
+    },
+    "TOR": {
+      "id": "14",
+      "color": "134a8e",
+      "alt": "6cace5"
+    },
+    "WSH": {
+      "id": "20",
+      "color": "ab0003",
+      "alt": "11225b"
+    }
+  }
+}

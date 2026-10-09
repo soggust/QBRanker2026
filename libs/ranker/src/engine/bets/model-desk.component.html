@@ -36,18 +36,21 @@
   @if (b.market === 'prop' && b.athlete !== undefined && b.player) {
     <span class="desk-pick" [class.desk-lost]="lost">
       <a class="desk-player" [href]="playerLink(b)" target="_blank" rel="noopener" [title]="b.player + ' on ESPN'" tabindex="-1" aria-hidden="true"><img class="desk-face" [src]="headshot(b)" alt="" (error)="hide($event)" /></a>
-      <b><a class="desk-player" [href]="playerLink(b)" target="_blank" rel="noopener">{{ b.player }}</a>{{ pickRest(b) }}</b>
+      @let parts = pickParts(b);
+      <b><a class="desk-player" [href]="playerLink(b)" target="_blank" rel="noopener">{{ b.player }}</a>{{ " " }}<span class="desk-key" [style.color]="lost ? null : pickColor(b)">{{ parts[1] }}</span>{{ parts[2] }}</b>
     </span>
   } @else if (b.market === 'total') {
     <span class="desk-pick" [class.desk-lost]="lost">
       <span class="desk-badge" [class.over]="b.side === 'over'" [class.under]="b.side === 'under'" aria-hidden="true"><mat-icon [fontIcon]="b.side === 'over' ? 'arrow_upward' : 'arrow_downward'"></mat-icon></span>
-      <b>{{ b.pick }}</b>
+      @let parts = pickParts(b);
+      <b><span class="desk-key" [style.color]="lost ? null : pickColor(b)">{{ parts[1] }}</span>{{ parts[2] }}</b>
     </span>
   } @else {
     @let team = teamsOf(b)[b.side === 'home' ? 1 : 0];
     <span class="desk-pick" [class.desk-lost]="lost">
       <span class="desk-badge" aria-hidden="true"><img [src]="teamLogo(b.sport, team)" alt="" (error)="hide($event)" /></span>
-      <b>{{ b.pick }}</b>
+      @let parts = pickParts(b);
+      <b>{{ parts[0] }}<span class="desk-key" [style.color]="lost ? null : pickColor(b)">{{ parts[1] }}</span></b>
     </span>
   }
 </ng-template>
@@ -308,7 +311,7 @@
                     @let unit = b.market === 'prop' ? b.statLabel : totalWord(b);
                     <td class="desk-score" [class.up]="state === 'won'" [class.down]="state === 'lost'" [title]="(b.market === 'prop' ? b.player + ': ' : 'The game: ') + count + ' ' + unit + ' so far, ' + b.side + ' ' + b.line">
                       @if (m) {
-                        <span class="desk-meter" [class.won]="state === 'won'" [class.lost]="state === 'lost'" [class.under]="b.side === 'under'" aria-hidden="true">
+                        <span class="desk-meter" [class.won]="state === 'won'" [class.lost]="state === 'lost'" [class.under]="b.side === 'under'" [style.--meter]="state === 'won' || state === 'lost' ? null : pickColor(b)" aria-hidden="true">
                           @if (m.pips) {
                             @for (pip of m.pips; track $index) {
                               <span class="pip" [class.on]="pip.on" [class.past]="pip.past"></span>

@@ -79,9 +79,11 @@ async function runSport(sport) {
     context: path.join(CACHE, `context-${sport}.json`),
     backtest: path.join(ROOT, 'apps', sport, 'scripts/model/backtest.json'),
     picks: path.join(ROOT, 'apps', sport, 'src/StaticData/model/picks.json'),
+    teams: path.join(ROOT, 'apps', sport, 'src/StaticData/model/teams.json'),
   };
   // (--picks-only: the picks written from the ledger as it stands, nothing fetched, fit or bet)
   if (PICKS_ONLY) return writePicks(r, true);
+  await writeTeams(r);
   await loadHistory(r);
   await liveLines(r);
   fitRatings(r);
@@ -99,6 +101,25 @@ async function runSport(sport) {
   await betProps(r);
   writePicks(r);
   saveState(r);
+}
+
+// The league's teams' colors for the desk (ESPN's team list, which a browser can't ask: it sends no CORS
+// header): abbreviation -> { id, color, alt }, written when they change (once a season, about). A failed ask
+// leaves the file as it was
+async function writeTeams(r) {
+  try {
+    const res = await fetch(`https://site.api.espn.com/apis/site/v2/sports/${r.cfg.league}/teams`);
+    if (!res.ok) return;
+    const body = await res.json();
+    const teams = Object.fromEntries(
+      (body?.sports?.[0]?.leagues?.[0]?.teams ?? [])
+        .map(({ team }) => [team.abbreviation, { id: String(team.id), color: team.color ?? null, alt: team.alternateColor ?? null }])
+        .sort(([a], [b]) => a.localeCompare(b)),
+    );
+    if (Object.keys(teams).length) writeIfChanged(r.files.teams, { teams });
+  } catch (err) {
+    console.warn(`${r.sport}: teams' colors skipped (${err.message})`);
+  }
 }
 
 // 7. the public picks (picks.mjs): the best edge bets on games not started, written for the site's Bets page
@@ -582,6 +603,8 @@ async function betProps(r) {
       statLabel: x.prop.stat.label,
       player: x.prop.athlete.name,
       athlete: x.prop.athlete.id,
+      // (his team, ESPN's id: the desk colors the bet by it)
+      team: x.prop.athlete.team ?? null,
       side: x.side,
       line: x.prop.line,
       odds: x.odds,

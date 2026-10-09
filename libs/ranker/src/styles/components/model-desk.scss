@@ -649,3 +649,9 @@ card-panel {
     opacity: 0.5;
   }
 }
+
+// (the one word of a pick that says what the bet is, in its team's color: the board's light without one)
+.desk-key {
+  color: var(--scoreboard-led);
+  font-weight: 900;
+}
