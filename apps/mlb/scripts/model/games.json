@@ -4988,7 +4988,7 @@
 {"id":"401908005","date":"2026-10-08T02:00Z","season":2026,"type":3,"home":"25","away":"8","homeAbbr":"SD","awayAbbr":"MIL","neutral":false,"final":true,"hs":1,"as":3,"venue":"San Diego|California|","indoor":false},
 {"id":"401907993","date":"2026-10-09T00:00Z","season":2026,"type":3,"home":"4","away":"5","homeAbbr":"CHW","awayAbbr":"CLE","neutral":false,"final":false,"hs":null,"as":null,"venue":"Chicago|Illinois|","indoor":false},
 {"id":"401907994","date":"2026-10-11T00:00Z","season":2026,"type":3,"home":"5","away":"4","homeAbbr":"CLE","awayAbbr":"CHW","neutral":false,"final":false,"hs":null,"as":null,"venue":"Cleveland|Ohio|","indoor":false},
-{"id":"401908030","date":"2026-10-11T04:00Z","season":2026,"type":3,"home":"8","away":"19","homeAbbr":"MIL","awayAbbr":"LAD","neutral":false,"final":false,"hs":null,"as":null,"venue":"Milwaukee|Wisconsin|"},
+{"id":"401908030","date":"2026-10-12T00:00Z","season":2026,"type":3,"home":"8","away":"19","homeAbbr":"MIL","awayAbbr":"LAD","neutral":false,"final":false,"hs":null,"as":null,"venue":"Milwaukee|Wisconsin|","indoor":true},
 {"id":"401908031","date":"2026-10-12T04:00Z","season":2026,"type":3,"home":"8","away":"19","homeAbbr":"MIL","awayAbbr":"LAD","neutral":false,"final":false,"hs":null,"as":null,"venue":"Milwaukee|Wisconsin|"},
 {"id":"401908023","date":"2026-10-12T04:00Z","season":2026,"type":3,"home":"30","away":"-2","homeAbbr":"TB","awayAbbr":"TBD","neutral":false,"final":false,"hs":null,"as":null,"venue":"St. Petersburg|Florida|"},
 {"id":"401908024","date":"2026-10-13T04:00Z","season":2026,"type":3,"home":"30","away":"-2","homeAbbr":"TB","awayAbbr":"TBD","neutral":false,"final":false,"hs":null,"as":null,"venue":"St. Petersburg|Florida|"},
