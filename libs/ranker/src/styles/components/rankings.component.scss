@@ -611,7 +611,8 @@ section ul li.player:not(.header-row) {
     cursor: pointer;
   }
 
-  .player-name.card-target {
+  // (the name opens the card from the badge to its last letter: the gap between them counts as the name)
+  .card-link.card-target {
     margin-left: -1.6em;
     padding-left: 1.6em;
   }

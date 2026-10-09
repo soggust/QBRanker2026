@@ -457,13 +457,24 @@
 
 // (the summary over Overview: a line per side, its dot and its name in its color, what it has over the
 // rest after them)
+// (on a scoreboard card at the top of the Stats; what he's best at bright)
 .cmp-summary {
+  @include v.scoreboard-panel;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
   list-style: none;
   margin: 0 0 14px;
-  padding: 0;
+  padding: 12px 16px;
+
+  strong {
+    color: #fff;
+    font-weight: 800;
+  }
+
+  .cmp-summary-who {
+    margin-right: 4px;
+  }
 
   li {
     align-items: baseline;
@@ -517,11 +528,17 @@
 }
 
 // ---- Overview: the radar beside the skill bars
+// (the radar on a row of its own, centered; the skill bars under it, two columns of them on a wide card)
 .cmp-top {
-  align-items: stretch;
   display: grid;
   gap: 16px;
-  grid-template-columns: 420px minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.cmp-top > .cmp-radar {
+  justify-self: center;
+  max-width: 520px;
+  width: 100%;
 }
 
 .cmp-radar {
@@ -567,8 +584,9 @@
   gap: 11px;
   padding: 14px 16px;
 
-  &.alone {
-    grid-column: 1 / -1;
+  @media (min-width: 900px) {
+    column-gap: 36px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 

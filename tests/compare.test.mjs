@@ -107,25 +107,27 @@ function checkColumns(engine, view, sides) {
   assert.ok(led <= view.contested, `the sides lead ${led} columns of ${view.contested}`);
 }
 
-// A line per side, naming the groups it leads the most columns of (columns it does lead, counted as the
-// Stats tab counts them) and its edges
+// A line per side: what it's best at (its edges), then the groups it leads the most columns of (columns it
+// does lead, counted as the Stats tab counts them)
 function checkSummary(view, sides) {
   assert.equal(view.summary.length, sides.length, 'a line per side');
-  const rows = view.groups.flatMap((g) => g.rows);
-  view.summary.forEach((line, i) => {
-    assert.match(line, /^leads /, line);
-    assert.equal(line.startsWith('leads no column outright'), view.wins[i] === 0, `${line} (${view.wins[i]} led)`);
-    for (const [, title, won, of, named] of line.matchAll(/(?:leads |and )([A-Z][w ]*?) (d+) of (d+) (([^)]*))/g)) {
+  view.summary.forEach(({ best, leads }, i) => {
+    assert.match(leads, /^leads /, leads);
+    assert.equal(leads === 'leads no column outright', view.wins[i] === 0, `${leads} (${view.wins[i]} led)`);
+    let read = 0;
+    for (const [, title, won, of, named] of leads.matchAll(/(?:leads |; )([A-Z][^;(]*?) in (\d+) of (\d+)(?: categories)? \(([^)]*)\)/g)) {
       const group = view.groups.find((g) => g.title === title);
       assert.ok(group, `${title}: a group`);
-      assert.ok(+won <= +of && +of <= group.rows.length, line);
-      for (const label of named.replace(/ and d+ more$/, '').split(', ')) {
+      assert.ok(+won <= +of && +of <= group.rows.length, leads);
+      for (const label of named.replace(/ and \d+ more$/, '').split(', ')) {
         assert.ok(group.rows.some((r) => r.label === label && r.leaders.length === 1 && r.leaders[0] === i), `${label}: led by side ${i} in ${title}`);
       }
+      read++;
     }
-    for (const e of view.edges[i].slice(0, 2)) assert.ok(line.includes(e.skill), `${line}: ${e.skill}`);
+    if (view.wins[i]) assert.ok(read > 0, `${leads}: no group read`);
+    const edges = view.edges[i].slice(0, 2).map((e) => e.skill);
+    assert.equal(best, edges.length ? edges.join(' and ') : null, `side ${i}: best at its edges`);
   });
-  assert.ok(rows.length);
 }
 
 // Someone in a tab's careers file with a season besides the given one
@@ -382,11 +384,14 @@ test('the compare helpers: leaders, surnames, names for matching, the summary', 
   ];
   const edges = [[{ skill: 'Volume', by: 30 }], [{ skill: 'Accuracy', by: 18 }, { skill: 'Pocket', by: 12 }, { skill: 'Deep', by: 10 }], []];
   assert.deepEqual(summaryOf(groups, edges), [
-    'leads Box Score 4 of 6 (Yds, TD, Att and 1 more) and Advanced 1 of 8 (EPA/Play); clearly the best at Volume',
-    'leads Advanced 5 of 8 (Success, CPOE, Y/A and 2 more) and Box Score 2 of 6 (Rating, Comp %); clearly the best at Accuracy and Pocket',
-    'leads no column outright',
+    { best: 'Volume', leads: 'leads Box Score in 4 of 6 categories (Yds, TD, Att and 1 more); Advanced in 1 of 8 (EPA/Play)' },
+    { best: 'Accuracy and Pocket', leads: 'leads Advanced in 5 of 8 categories (Success, CPOE, Y/A and 2 more); Box Score in 2 of 6 (Rating, Comp %)' },
+    { best: null, leads: 'leads no column outright' },
   ]);
-  assert.deepEqual(summaryOf([], [[], [{ skill: 'Speed', by: 11 }]]), ['leads no column outright', 'leads no column outright; clearly the best at Speed']);
+  assert.deepEqual(summaryOf([], [[], [{ skill: 'Speed', by: 11 }]]), [
+    { best: null, leads: 'leads no column outright' },
+    { best: 'Speed', leads: 'leads no column outright' },
+  ]);
 });
 
 test('nfl: a pair from the grid gets a summary that matches the columns', async () => {

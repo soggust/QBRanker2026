@@ -146,14 +146,6 @@
       } @else {
         @switch (compare.tab) {
           @case ('overview') {
-            <!-- The summary: what each one has over the rest, a line each in his color -->
-            @if (v.summary; as lines) {
-              <ul class="cmp-summary">
-                @for (s of sides; track s.key; let i = $index) {
-                  <li [style.--side]="s.color"><i aria-hidden="true"></i><span><b>{{ s.tag }}</b> {{ lines[i] }}</span></li>
-                }
-              </ul>
-            }
             <!-- Skills: every side's shape on one radar (the skills they share), and each skill's bars -->
             @if (v.mixed) {
               <p class="cmp-mixed"><mat-icon fontIcon="info"></mat-icon>Different positions: each skill is where he stood among his own position, and only the same skill lines up</p>
@@ -194,7 +186,7 @@
                 </div>
               }
               <!-- (each bar grows in, its number ticking up with it) -->
-              <div class="cmp-skills" [class.alone]="!v.radar">
+              <div class="cmp-skills">
                 @for (sk of v.skills; track sk.id) {
                   <div class="cmp-skill">
                     <span class="cmp-skill-name">{{ sk.name }}</span>
@@ -257,6 +249,26 @@
             <!-- The grid's columns: each value against its own season (its tint, the bar: where it stood),
                  the leader's value lit; over each side's column, the columns it leads -->
             @let led = v.contested && sides.length > 1;
+            <!-- The summary on the scoreboard: what each one is best at, then the columns he leads, a line each in
+                 his color -->
+            @if (v.summary; as lines) {
+              <ul class="cmp-summary">
+                @for (s of sides; track s.key; let i = $index) {
+                  @let line = lines[i];
+                  <li [style.--side]="s.color">
+                    <i aria-hidden="true"></i>
+                    <span
+                      ><b class="cmp-summary-who">{{ s.tag }}</b>
+                      @if (line.best) {
+                        Best at <strong>{{ line.best }}</strong> · {{ line.leads }}
+                      } @else {
+                        {{ line.leads.charAt(0).toUpperCase() + line.leads.slice(1) }}
+                      }</span
+                    >
+                  </li>
+                }
+              </ul>
+            }
             @if (v.mixed) {
               <p class="cmp-mixed"><mat-icon fontIcon="info"></mat-icon>Different positions: a column they share goes to the bigger number; the bars, where each stood among his own position</p>
             }

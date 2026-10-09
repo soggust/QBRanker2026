@@ -104,9 +104,9 @@
                 (error)="noHeadshot(player)"
               />}</span
           >
-          <!-- The badge through the name opens the player card -->
-          <p class="player-name card-target" (click)="openCard(player)">
-            <strong class="card-link" role="button" tabindex="0" aria-keyshortcuts="C" [attr.aria-label]="picked.includes(player.gsisId) ? player.name + ', picked for Compare' : null" [attr.data-name]="player.name" (keydown.enter)="openCard(player)" (keydown.space)="$event.preventDefault(); openCard(player)">{{ player.name }}</strong>
+          <!-- The badge through the end of the name opens the player card (the rest of the cell picks the row) -->
+          <p class="player-name">
+            <strong class="card-link card-target" role="button" (click)="openCard(player)" tabindex="0" aria-keyshortcuts="C" [attr.aria-label]="picked.includes(player.gsisId) ? player.name + ', picked for Compare' : null" [attr.data-name]="player.name" (keydown.enter)="openCard(player)" (keydown.space)="$event.preventDefault(); openCard(player)">{{ player.name }}</strong>
             @if (statsBehind(player); as n) {
               <!-- His stats don't cover every game in his record yet (the data source catching up) -->
               <mat-icon

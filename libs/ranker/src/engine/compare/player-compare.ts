@@ -130,6 +130,12 @@ export interface CompareSkill {
   leaders: number[];
 }
 
+// A side's summary: the skills it's clearly best at (none: no clear edge), and the columns it leads
+export interface CompareSummary {
+  best: string | null;
+  leads: string;
+}
+
 export interface CompareView {
   // Every skill any side has, the first side's order first
   skills: CompareSkill[];
@@ -145,7 +151,7 @@ export interface CompareView {
   wins: number[];
   contested: number;
   // What each one has over the rest, in a line each (one side alone: none)
-  summary: string[] | null;
+  summary: CompareSummary[] | null;
   // More than one tab among them (the skills are each one's among his own tab's; a column two tabs share
   // goes to the bigger number)
   mixed: boolean;
@@ -626,27 +632,23 @@ export interface GroupTally {
   led: string[][];
 }
 
-// What each side has over the rest, in plain words: the groups it leads the most columns of (its two
-// biggest, three of the columns named), then the skills it's clearly the best at (its edges: two)
-// ("leads Advanced 5 of 8 (EPA/Play, Success, CPOE and 2 more) and Box Score 3 of 6 (Rating, Comp %, Y/A);
-// clearly the best at Accuracy and Pocket Presence")
-export function summaryOf(groups: GroupTally[], edges: { skill: string }[][]): string[] {
+// What each side has over the rest, in plain words: the skills it's clearly the best at (its edges: two),
+// then the groups it leads the most columns of (its two biggest, three of the columns named)
+// ({ best: "Accuracy and Pocket", leads: "leads Advanced in 5 of 8 categories (EPA/Play, Success, CPOE and 2
+// more); Box Score in 2 of 6 (Rating, Comp %)" })
+export function summaryOf(groups: GroupTally[], edges: { skill: string }[][]): CompareSummary[] {
   return edges.map((own, i) => {
     const led = groups
       .filter((g) => g.led[i].length)
       .sort((a, b) => b.led[i].length - a.led[i].length)
       .slice(0, 2)
-      .map((g) => {
+      .map((g, j) => {
         const columns = g.led[i];
         const more = columns.length > 3 ? ` and ${columns.length - 3} more` : '';
-        return `${g.title} ${columns.length} of ${g.contested} (${columns.slice(0, 3).join(', ')}${more})`;
+        return `${g.title} in ${columns.length} of ${g.contested}${j ? '' : ' categories'} (${columns.slice(0, 3).join(', ')}${more})`;
       });
     const best = own.slice(0, 2).map((e) => e.skill);
-    const parts = [
-      led.length ? `leads ${led.join(' and ')}` : 'leads no column outright',
-      ...(best.length ? [`clearly the best at ${best.join(' and ')}`] : []),
-    ];
-    return parts.join('; ');
+    return { best: best.length ? best.join(' and ') : null, leads: led.length ? `leads ${led.join('; ')}` : 'leads no column outright' };
   });
 }
 
