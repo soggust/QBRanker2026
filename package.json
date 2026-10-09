@@ -4,6 +4,7 @@
   "scripts": {
     "ng": "ng",
     "dev": "node dev.mjs",
+    "dev:accounts": "firebase emulators:exec --only auth,firestore --project qbranker2026 --ui \"node dev.mjs\"",
     "start": "ng serve nfl",
     "build": "ng build nfl && ng build mlb && ng build nba && ng build nhl && ng build mma",
     "rollover": "node scripts/rollover.mjs",
