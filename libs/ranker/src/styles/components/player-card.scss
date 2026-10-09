@@ -2047,6 +2047,27 @@
     text-align: left;
   }
 
+  // (the date and an upcoming game's time set like the hero's position: small bold caps; the date keeps
+  // its link color)
+  td.log-date,
+  tr.log-next td.log-result {
+    font-family: v.$font-base;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+
+    // (the date's a button: the browser's own text-transform undone)
+    .log-game {
+      letter-spacing: inherit;
+      text-transform: inherit;
+    }
+  }
+
+  tr.log-next td.log-result {
+    color: #fff;
+  }
+
   thead th,
   tr.log-next-head th {
     background: rgba(0, 0, 0, 0.25);
