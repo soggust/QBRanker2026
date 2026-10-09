@@ -75,7 +75,9 @@
   <td [class.up]="t.profit > 0" [class.down]="t.profit < 0">{{ units(t.profit) }}</td>
   <td>{{ pct(t.roi) }}</td>
   <td>{{ t.open }}</td>
-  <td [class.up]="(t.clvBeat ?? 0) > 0.5" [class.down]="t.clvBeat !== null && t.clvBeat < 0.5">{{ clvText(t) }}</td>
+  <!-- (the share that beat the close, the mean expected return at it under it: two short lines keep the panels'
+       tables in) -->
+  <td [class.up]="(t.clvBeat ?? 0) > 0.5" [class.down]="t.clvBeat !== null && t.clvBeat < 0.5">{{ clvBeatText(t) }}@if (clvEvText(t); as ev) {<small>{{ ev }}</small>}</td>
 </ng-template>
 
 <section class="model-desk" aria-label="Algorithm">
@@ -151,22 +153,40 @@
     <!-- (the bettor runs on GitHub only: the Model Desk workflow; locally, only ever with --dry) -->
     <p class="desk-note">Nothing yet: the bettor (GitHub's Model Desk workflow) hasn't run.</p>
   } @else {
-    <!-- (the bankroll after each graded bet) -->
+    <!-- (the profit after each graded bet, all of it and each sport's, in units from 0) -->
     @if (overall.bets) {
-      <div class="desk-curve">
-        <span class="log-chart-label">Bankroll<small>after each graded bet · {{ curveRange.min.toFixed(1) }}u to {{ curveRange.max.toFixed(1) }}u</small></span>
-        <svg viewBox="0 0 600 120" preserveAspectRatio="none" role="img" [attr.aria-label]="'Bankroll from ' + bankroll + ' to ' + balance.toFixed(1) + ' units'">
-          <line class="desk-start" x1="0" [attr.x2]="curveWidth" [attr.y1]="curveStartY" [attr.y2]="curveStartY" />
-          <!-- (the line and the wash under it, drawn in left to right whenever it changes; the balance now a dot
-               at its end, breathing) -->
+      <div class="desk-curve" [style.--total]="curveSolo ? 'var(--line-' + curveSolo + ')' : null">
+        <div class="desk-curve-head">
+          <span class="log-chart-label">Profit<small>after each graded bet · {{ curveRange.min.toFixed(1) }}u to {{ curveRange.max.toFixed(1) }}u</small></span>
+          <!-- (each line's color and its profit now: the total's first, then each sport's) -->
+          <ul class="desk-legend">
+            <li class="total" [title]="'Profit on every graded bet' + (curveSolo ? ' (' + curveSolo.toUpperCase() + ')' : '') + ': bankroll ' + (bankroll + curveProfit).toFixed(2) + 'u'">
+              <i></i>{{ curveSolo ? curveSolo.toUpperCase() : 'All' }}<b [class.up]="curveProfit > 0" [class.down]="curveProfit < 0">{{ units(curveProfit) }}</b>
+            </li>
+            @for (l of curveLines; track l.sport) {
+              <li [style.--line]="'var(--line-' + l.sport + ')'" [title]="'Profit on the ' + l.sport.toUpperCase() + ' bets graded'">
+                <i></i>{{ l.sport.toUpperCase() }}<b [class.up]="l.profit > 0" [class.down]="l.profit < 0">{{ units(l.profit) }}</b>
+              </li>
+            }
+          </ul>
+        </div>
+        <svg viewBox="0 0 600 120" preserveAspectRatio="none" role="img" [attr.aria-label]="'Profit after ' + overall.bets + ' graded bets: ' + units(curveProfit)">
+          <line class="desk-start" x1="0" [attr.x2]="curveWidth" [attr.y1]="curveZeroY" [attr.y2]="curveZeroY" />
+          <!-- (each sport's line under the total's, thinner, drawn in with it) -->
+          @for (l of curveLines; track l.path) {
+            <path class="desk-line desk-sport-line" [style.--line]="'var(--line-' + l.sport + ')'" [attr.d]="l.path" />
+          }
+          <!-- (the total's line and the wash between it and 0, drawn in left to right whenever it changes; the
+               profit now a dot at its end, breathing) -->
           @for (d of [curve]; track d) {
-            <path class="desk-area" [attr.d]="d + ' L' + curveWidth + ',120 L0,120 Z'" />
+            <path class="desk-area" [attr.d]="d + ' L' + curveWidth + ',' + curveZeroY + ' L0,' + curveZeroY + ' Z'" />
             <path class="desk-line" [attr.d]="d" />
             @if (curveEnd; as end) {
               <line class="desk-now" [attr.x1]="end.px" [attr.x2]="end.px" [attr.y1]="end.y" [attr.y2]="end.y" />
             }
           }
-          <!-- (a strip per point: the bankroll after that bet, and the bet, on hover; its dot shows) -->
+          <!-- (a strip per point: the profit after that bet, the bet, and each sport's so far, on hover; its dot
+               shows on the total's line) -->
           @for (s of curveSpots; track $index) {
             <g class="desk-spot">
               <rect [attr.x]="s.x" y="0" [attr.width]="s.w" height="120" />

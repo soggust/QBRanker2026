@@ -1,7 +1,7 @@
 // The Algorithm desk's arithmetic, pure (no Angular, no fetching: tests/model-desk.test.mjs runs it under
 // Node): its records, a bet's payout, a bet in play settled by the score as the run will grade it, the
-// meters, the calibration, the bankroll curve and the games' dropdown
-import { Board, CalibrationRow, CurveSpot, GameDay, Intent, Meter, ModelBet, Settled, Tally } from './desk-model';
+// meters, the calibration, the profit curves and the games' dropdown
+import { Board, CalibrationRow, CurveLine, CurveSpot, GameDay, Intent, Meter, ModelBet, Settled, Tally } from './desk-model';
 
 export const SPORTS = ['nfl', 'nba', 'nhl', 'mlb'];
 export const ESPN_LEAGUES: Record<string, string> = { nfl: 'football/nfl', nba: 'basketball/nba', nhl: 'hockey/nhl', mlb: 'baseball/mlb' };
@@ -139,25 +139,55 @@ export function calibrationOf(bets: ModelBet[]): CalibrationRow[] {
 export const gradedOrder = (bets: ModelBet[]): ModelBet[] =>
   bets.filter((b) => b.status !== 'open').sort((a, b) => (a.gradedAt ?? a.start).localeCompare(b.gradedAt ?? b.start) || a.start.localeCompare(b.start));
 
-// The bankroll after each graded bet, drawn into a 600 by 120 box (10 of headroom under it): the line's path,
-// its low and high, each point's hover strip and dot, and the last point (the balance now)
+// The profit after each graded bet, drawn into a 600 by 120 box (10 of headroom under it): every line in units
+// won from 0 on the one scale (the zero line across it), the total's and, when there's more than one sport, each
+// sport's own running profit (flat while another's bets are graded: at any bet they add up to the total's). The
+// total's values and path, the low and high (0 always in them), each point's hover strip and dot, the last
+// point (the profit now), and each sport's line
 export const CURVE_W = 600;
-export function bankrollCurve(graded: ModelBet[], start: number, units: (v: number) => string) {
-  let bank = start;
-  const points = [bank, ...graded.map((b) => (bank += b.profit))];
-  const min = Math.min(...points);
-  const max = Math.max(...points);
+export function profitCurves(graded: ModelBet[], start: number, units: (v: number) => string) {
+  const sports = SPORTS.filter((s) => graded.some((b) => b.sport === s));
+  const running: Record<string, number> = Object.fromEntries(sports.map((s) => [s, 0]));
+  let sum = 0;
+  const points = [{ total: 0, by: { ...running } }];
+  for (const b of graded) {
+    sum += b.profit;
+    running[b.sport] += b.profit;
+    points.push({ total: sum, by: { ...running } });
+  }
+  const lines = sports.length > 1 ? sports : [];
+  const values = points.flatMap((p) => [p.total, ...lines.map((s) => p.by[s])]);
+  const min = Math.min(0, ...values);
+  const max = Math.max(0, ...values);
   const span = max - min || 1;
-  const step = CURVE_W / Math.max(1, points.length - 1);
   const last = points.length - 1;
+  const step = CURVE_W / Math.max(1, last);
   const yOf = (v: number) => 110 - ((v - min) / span) * 100;
-  const path = points.map((v, i) => `${i ? 'L' : 'M'}${((i / Math.max(1, last)) * CURVE_W).toFixed(1)},${yOf(v).toFixed(1)}`).join(' ');
-  const spots: CurveSpot[] = points.map((v, i) => {
+  const pathOf = (vals: number[]) => vals.map((v, i) => `${i ? 'L' : 'M'}${(i * step).toFixed(1)},${yOf(v).toFixed(1)}`).join(' ');
+  const spots: CurveSpot[] = points.map((p, i) => {
     const b = graded[i - 1];
-    const title = b ? `After bet ${i} of ${last}: ${v.toFixed(2)}u (${units(b.profit)}, ${b.sport.toUpperCase()} ${b.pick}, ${b.status})` : `Start: ${v.toFixed(2)}u`;
-    return { x: Math.max(0, i * step - step / 2), w: i === 0 || i === last ? step / 2 : step, px: i * step, y: yOf(v), title };
+    const split = lines.length ? ` · ${lines.map((s) => `${s.toUpperCase()} ${units(p.by[s])}`).join(', ')}` : '';
+    const title = b
+      ? `After bet ${i} of ${last}: ${units(p.total)}, bankroll ${(start + p.total).toFixed(2)}u (${units(b.profit)}, ${b.sport.toUpperCase()} ${b.pick}, ${b.status})${split}`
+      : `Start: ${start.toFixed(2)}u`;
+    return { x: Math.max(0, i * step - step / 2), w: i === 0 || i === last ? step / 2 : step, px: i * step, y: yOf(p.total), title };
   });
-  return { path, range: { min, max }, spots, startY: yOf(start), end: spots[last] };
+  const totals = points.map((p) => p.total);
+  return {
+    totals,
+    path: pathOf(totals),
+    range: { min, max },
+    spots,
+    zeroY: yOf(0),
+    end: spots[last],
+    profit: sum,
+    lines: lines.map((sport): CurveLine => {
+      const values = points.map((p) => p.by[sport]);
+      return { sport, values, path: pathOf(values), profit: running[sport] };
+    }),
+    // (the one sport whose bets these all are, if so: the total is its line)
+    solo: sports.length === 1 ? sports[0] : null,
+  };
 }
 
 // (how many times it's rebought: 1,000 each time the balance would go under 0 with the open stakes out)

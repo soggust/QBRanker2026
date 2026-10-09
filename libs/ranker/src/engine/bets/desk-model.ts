@@ -161,8 +161,11 @@ export type Settled = { status: 'won' | 'lost' | 'push'; profit: number };
 
 export type CalibrationRow = { label: string; n: number; said: number; was: number };
 
-// (a point on the bankroll curve's hover: a strip across the chart, its dot, and what it was)
+// (a point on the profit curve's hover: a strip across the chart, its dot, and what it was)
 export type CurveSpot = { x: number; w: number; px: number; y: number; title: string };
+
+// (a sport's own line on the profit curve: its running profit at each point, its path, its profit now)
+export type CurveLine = { sport: string; values: number[]; path: string; profit: number };
 
 // (a prop or total in play as a meter: pips for a short count, a bar with the line notched for a big one)
 export type Meter = { pips: { on: boolean; past: boolean }[] | null; fill: number; mark: number; extra: number };

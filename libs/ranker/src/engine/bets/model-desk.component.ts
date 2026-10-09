@@ -11,12 +11,12 @@ import {
   SPORTS,
   STAKES,
   UNIT_WORDS,
-  bankrollCurve,
   calibrationOf,
   gameDaysOf,
   gradedOrder,
   intentOf,
   meterOf,
+  profitCurves,
   propState,
   provisional,
   rebuysFor,
@@ -25,7 +25,7 @@ import {
   tally,
   toWin,
 } from './desk-math';
-import { Board, CalibrationRow, Change, ContextRow, CurveSpot, GameDay, Meter, ModelBet, ModelState, OddsUsage, PropRow, PropType, Settled, SportTally, Tally, BacktestRow, TestNumbers } from './desk-model';
+import { Board, CalibrationRow, Change, ContextRow, CurveLine, CurveSpot, GameDay, Meter, ModelBet, ModelState, OddsUsage, PropRow, PropType, Settled, SportTally, Tally, BacktestRow, TestNumbers } from './desk-model';
 import { SummaryBox, athleteColors, liveStat, meterColor } from './live-props';
 import { TeamColors, loadTeamColors, pickTeamColor, splitPick } from './pick-style';
 
@@ -98,14 +98,19 @@ export class ModelDeskComponent implements OnInit, OnDestroy {
   byIntent: Tally[] = [];
   byProp: Tally[] = [];
   calibration: CalibrationRow[] = [];
+  // (the profit after each graded bet: the total's line, its low and high, the profit now)
   curve = '';
   curveRange = { min: 0, max: 0 };
-  // (the dashed line at the starting bankroll, and the last point: the balance now, its dot)
-  curveStartY = 0;
+  curveProfit = 0;
+  // (the dashed line at 0, and the last point: the profit now, its dot)
+  curveZeroY = 0;
   curveEnd: CurveSpot | null = null;
   // (each point's hover target: a strip across the chart, its dot, and what it was: "After bet 34 of 120:
-  // 104.30u (+1.82u, NFL Bills -3, won)")
+  // +4.30u, bankroll 1004.30u (+1.82u, NFL Bills -3, won) · NFL +6.10u, NBA -1.80u")
   curveSpots: CurveSpot[] = [];
+  // (each sport's own line, with more than one sport in it; or the one sport it all is, the total in its color)
+  curveLines: CurveLine[] = [];
+  curveSolo: string | null = null;
   // (the latest results' run: "W3")
   streak: string | null = null;
   // (the bets on games not started yet, and in play: started, not graded yet; the latest results)
@@ -201,14 +206,17 @@ export class ModelDeskComponent implements OnInit, OnDestroy {
     this.byStake = STAKES.map((u) => tally(`${u}u`, where((b) => b.units === u))).filter((t) => t.bets || t.open);
     this.calibration = calibrationOf(bets);
 
-    // (the bankroll after each graded bet, in grading order)
+    // (the profit after each graded bet, in grading order, the total's and each sport's)
     const graded = gradedOrder(bets);
-    const curve = bankrollCurve(graded, this.bankroll, units);
+    const curve = profitCurves(graded, this.bankroll, units);
     this.curve = curve.path;
     this.curveRange = curve.range;
+    this.curveProfit = curve.profit;
     this.curveSpots = curve.spots;
-    this.curveStartY = curve.startY;
+    this.curveZeroY = curve.zeroY;
     this.curveEnd = curve.end;
+    this.curveLines = curve.lines;
+    this.curveSolo = curve.solo;
     this.streak = streakOf(graded);
 
     this.graded = graded.slice(-40).reverse();
@@ -507,10 +515,13 @@ export class ModelDeskComponent implements OnInit, OnDestroy {
     return MARKET_NAMES[m] ?? m;
   }
 
-  // (a tally's CLV: the share of its bets that beat the close, and their mean expected return at it)
-  clvText(t: Tally): string {
-    if (!t.clvN) return '-';
-    return `${pct(t.clvBeat, 0)}${t.clvEv !== null ? ` · ${t.clvEv >= 0 ? '+' : ''}${(t.clvEv * 100).toFixed(1)}%` : ''}`;
+  // (a tally's CLV: the share of its bets that beat the close; under it, their mean expected return at it)
+  clvBeatText(t: Tally): string {
+    return t.clvN ? pct(t.clvBeat, 0) : '-';
+  }
+
+  clvEvText(t: Tally): string | null {
+    return t.clvN && t.clvEv !== null ? `${t.clvEv >= 0 ? '+' : ''}${(t.clvEv * 100).toFixed(1)}%` : null;
   }
 
   // (a bet's CLV: the points it beat the close by, else the chance it gained on it)

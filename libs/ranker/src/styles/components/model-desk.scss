@@ -85,6 +85,21 @@
   @include v.scoreboard-panel;
   margin-bottom: 12px;
   padding: 10px 14px;
+  // (the lines' colors: the total's the All chip's gold, each sport's its chip's clay lifted to read on the
+  // board (the NFL's navy to a blue, the NHL's black to silver); one sport on show, the total takes its color)
+  --total: #f2c54b;
+  --line-nfl: #6d9cff;
+  --line-nba: #f0604c;
+  --line-nhl: #c5ccd4;
+  --line-mlb: #3ec47e;
+
+  .desk-curve-head {
+    align-items: baseline;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 16px;
+    justify-content: space-between;
+  }
 
   .log-chart-label {
     font-size: 13px;
@@ -97,6 +112,47 @@
     }
   }
 
+  // (each line's swatch, its name and its profit now)
+  .desk-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 14px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+
+    li {
+      --line: var(--total);
+      align-items: center;
+      color: rgba(255, 255, 255, 0.7);
+      cursor: help;
+      display: flex;
+      font-size: 11px;
+      font-weight: 800;
+      gap: 5px;
+      letter-spacing: 0.04em;
+    }
+
+    i {
+      background: var(--line);
+      border-radius: 2px;
+      height: 3px;
+      width: 14px;
+    }
+
+    .total i {
+      height: 4px;
+      box-shadow: 0 0 4px var(--line);
+    }
+
+    b {
+      font-family: v.$font-hand;
+      font-variant-numeric: tabular-nums;
+      font-weight: 400;
+      letter-spacing: 0;
+    }
+  }
+
   svg {
     display: block;
     height: 120px;
@@ -106,28 +162,37 @@
 
   .desk-line {
     fill: none;
-    stroke: var(--scoreboard-led);
-    stroke-width: 2;
+    stroke: var(--total);
+    stroke-linejoin: round;
+    stroke-width: 2.5;
     vector-effect: non-scaling-stroke;
   }
 
-  // (a faint wash of the board's light under the line, fading to nothing at the floor)
+  // (a sport's line: thinner and a touch faded, under the total's)
+  .desk-sport-line {
+    opacity: 0.85;
+    stroke: var(--line);
+    stroke-width: 1.5;
+  }
+
+  // (a faint wash of the total's color between its line and 0)
   .desk-area {
-    fill: color-mix(in srgb, var(--scoreboard-led) 9%, transparent);
+    fill: color-mix(in srgb, var(--total) 9%, transparent);
     stroke: none;
   }
 
-  // (the balance now: a dot at the line's end that stays round however the chart stretches, a soft halo
+  // (the profit now: a dot at the total's end that stays round however the chart stretches, a soft halo
   // breathing round it)
   .desk-now {
-    stroke: var(--scoreboard-led);
+    stroke: var(--total);
     stroke-linecap: round;
     stroke-width: 7px;
     vector-effect: non-scaling-stroke;
-    filter: drop-shadow(0 0 3px var(--scoreboard-led));
+    filter: drop-shadow(0 0 3px var(--total));
     pointer-events: none;
   }
 
+  // (the zero line: even)
   .desk-start {
     stroke: rgba(255, 255, 255, 0.25);
     stroke-dasharray: 4 4;
@@ -146,7 +211,7 @@
 
     line {
       opacity: 0;
-      stroke: var(--scoreboard-led);
+      stroke: var(--total);
       stroke-linecap: round;
       stroke-width: 8px;
       transition: opacity 0.12s ease;
@@ -176,10 +241,11 @@ card-panel {
   padding: 12px 22px;
 }
 
+// (two panels a row on a wide screen, one on a narrower: By Sport's eight columns need about 460px)
 .desk-grid {
   display: grid;
   gap: 0 12px;
-  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(460px, 100%), 1fr));
 
   // (a shorter panel in a row stretches to the tallest, its body with it: the sport's edges, the NFL's
   // end zone, run all the way down)
@@ -192,9 +258,49 @@ card-panel {
       flex: 1;
     }
 
-    // (a table wider than its third of the row scrolls sideways rather than running past the edge)
+    // (a table wider than its half of the row scrolls sideways rather than running past the edge)
     .group-body {
       overflow-x: auto;
+    }
+  }
+
+  // (the breakdowns' columns a little closer, a long name (MLB Total Bases) on two lines)
+  .desk-table {
+    th,
+    td {
+      padding: 5px 6px;
+    }
+
+    tbody th {
+      white-space: normal;
+    }
+  }
+}
+
+// (on a phone the desk and its panels' bodies come in closer to their edges, the breakdowns a size smaller
+// and their columns closer still: By Market's and By Stake's six columns fit across)
+@media (max-width: 600px) {
+  .model-desk {
+    padding: 0 10px 12px;
+  }
+
+  .desk-top {
+    margin: 0 -10px 16px;
+    padding: 16px 10px 14px;
+  }
+
+  .desk-grid {
+    .group-body {
+      padding: 10px;
+    }
+
+    .desk-table {
+      font-size: 11.5px;
+
+      th,
+      td {
+        padding: 5px 4px;
+      }
     }
   }
 }

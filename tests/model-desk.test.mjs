@@ -357,20 +357,60 @@ test('calibrationOf: 5-point bands (the ends gathered), a broken premise countin
   assert.ok(Math.abs(rows[2].said - (0.3 * 0.97 + 0.9) / 1.3) < 1e-12);
 });
 
-test('the bankroll curve: from the start through each graded bet, its range, its last point the balance', () => {
+test('the profit curve: from 0 through each graded bet, its range (0 in it), its last point the profit now', () => {
   const graded = desk.gradedOrder([
     bet({ id: 'b', status: 'lost', profit: -2, gradedAt: '2026-10-02T00:00:00Z' }),
     bet({ id: 'a', status: 'won', profit: 3, gradedAt: '2026-10-01T00:00:00Z' }),
     bet({ id: 'o', status: 'open' }),
   ]);
   assert.deepEqual(graded.map((b) => b.id), ['a', 'b']);
-  const c = desk.bankrollCurve(graded, 1000, desk.units);
-  assert.deepEqual(c.range, { min: 1000, max: 1003 });
+  const c = desk.profitCurves(graded, 1000, desk.units);
+  assert.deepEqual(c.totals, [0, 3, 1]);
+  assert.deepEqual(c.range, { min: 0, max: 3 });
   assert.equal(c.path, 'M0.0,110.0 L300.0,10.0 L600.0,76.7');
   assert.equal(c.spots.length, 3);
   assert.equal(c.end.px, 600);
-  assert.match(c.spots[2].title, /^After bet 2 of 2: 1001\.00u \(-2\.00u, NFL DAL -3, lost\)$/);
-  assert.equal(c.startY, 110);
+  assert.equal(c.profit, 1);
+  assert.match(c.spots[2].title, /^After bet 2 of 2: \+1\.00u, bankroll 1001\.00u \(-2\.00u, NFL DAL -3, lost\)$/);
+  assert.equal(c.zeroY, 110);
+});
+
+// (bets in three sports, graded in turn)
+const MIXED = [
+  ['nfl', 2.5],
+  ['nba', -1],
+  ['nfl', -1.5],
+  ['nhl', 0.91],
+  ['nba', -2],
+  ['nhl', 1.2],
+  ['nfl', 0.45],
+].map(([sport, profit], i) => bet({ id: `m${i}`, sport, status: profit > 0 ? 'won' : 'lost', profit, gradedAt: `2026-10-0${i + 1}T00:00:00Z` }));
+
+test("the profit curve by sport: a line for each sport with bets graded, at every bet adding up to the total's", () => {
+  const c = desk.profitCurves(desk.gradedOrder(MIXED), 1000, desk.units);
+  assert.deepEqual(c.lines.map((l) => l.sport), ['nfl', 'nba', 'nhl']);
+  assert.equal(c.solo, null);
+  for (const l of c.lines) assert.equal(l.values.length, c.totals.length);
+  c.totals.forEach((total, i) => assert.ok(Math.abs(c.lines.reduce((s, l) => s + l.values[i], 0) - total) < 1e-9, `bet ${i}`));
+  // (each sport's line is its own bets' running profit, flat while another sport's are graded)
+  assert.deepEqual(c.lines[1].values, [0, 0, -1, -1, -1, -3, -3, -3]);
+  assert.ok(Math.abs(c.lines[0].profit - 1.45) < 1e-9);
+  assert.ok(Math.abs(c.profit - 0.56) < 1e-9);
+  // (one scale for every line: the NBA's low the chart's low, under 0, though the total never went there)
+  assert.equal(c.range.min, -3);
+  assert.equal(c.lines[1].path.split(' ').at(-1), 'L600.0,110.0');
+  assert.match(c.spots[2].title, / · NFL \+2\.50u, NBA -1\.00u, NHL \+0\.00u$/);
+});
+
+test('the profit curve with one sport on show (the chips): no lines of its own, the total its line', () => {
+  const nba = MIXED.filter((b) => b.sport === 'nba');
+  const c = desk.profitCurves(desk.gradedOrder(nba), 1000, desk.units);
+  assert.deepEqual(c.lines, []);
+  assert.equal(c.solo, 'nba');
+  assert.deepEqual(c.totals, [0, -1, -3]);
+  assert.deepEqual(c.range, { min: -3, max: 0 });
+  assert.equal(c.zeroY, 10);
+  assert.doesNotMatch(c.spots[1].title, / · /);
 });
 
 test('streakOf: the run of the latest results, pushes skipped', () => {
