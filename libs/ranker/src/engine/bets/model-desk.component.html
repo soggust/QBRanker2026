@@ -303,7 +303,7 @@
                        it; a side's result is the score) -->
                   @let count = countNow(b);
                   @if (count !== null) {
-                    @let state = propState(b);
+                    @let state = provisional(b)?.status ?? propState(b);
                     @let m = meter(b);
                     @let unit = b.market === 'prop' ? b.statLabel : totalWord(b);
                     <td class="desk-score" [class.up]="state === 'won'" [class.down]="state === 'lost'" [title]="(b.market === 'prop' ? b.player + ': ' : 'The game: ') + count + ' ' + unit + ' so far, ' + b.side + ' ' + b.line">
