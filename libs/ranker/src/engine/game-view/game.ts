@@ -280,10 +280,14 @@ export async function loadGame(league: string, eventId: string): Promise<GameVie
   const projection = (x: { gameProjection?: string } | undefined) => (x?.gameProjection ? Number(x.gameProjection) / 100 : null);
   const awayChance = projection(s.predictor?.awayTeam?.id === home.id ? s.predictor?.homeTeam : s.predictor?.awayTeam);
   const homeChance = projection(s.predictor?.awayTeam?.id === home.id ? s.predictor?.awayTeam : s.predictor?.homeTeam);
+  // (only the ones still in doubt for it: a player ESPN expects back before the game's day is left off;
+  // its return date on the game's day itself is a questionable one, kept)
+  const gameDay = comp.date ? new Date(comp.date).toLocaleDateString('en-CA', { timeZone: 'America/New_York' }) : null;
+  const backInTime = (returnDate?: string) => !!returnDate && !!gameDay && returnDate.slice(0, 10) < gameDay;
   const injuries = (s.injuries ?? [])
     .map((t) => ({
       side: sideOf(t.team?.id),
-      rows: (t.injuries ?? []).map((i) => ({
+      rows: (t.injuries ?? []).filter((i) => !backInTime(i.details?.returnDate)).map((i) => ({
         name: i.athlete?.displayName ?? '',
         position: i.athlete?.position?.abbreviation ?? null,
         status: i.status ?? '',
