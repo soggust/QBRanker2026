@@ -1291,7 +1291,8 @@ section ul li.empty-list {
 // edge on a strip of board, the name faded (the stats pass under where it was), so every stat keeps its
 // owner beside it. Nothing changes width, so the list never jumps under a finger or the pointer.
 section ul.scrolled-x li.player > div.player-info {
-  left: 0;
+  // (in from the edge, as the drag grip leaves it unscrolled; the strip reaches back to the edge)
+  left: 1.5em;
   pointer-events: none;
   position: sticky;
   z-index: 3;
@@ -1308,10 +1309,10 @@ section ul.scrolled-x li.player > div.player-info {
     bottom: -0.25em;
     box-shadow: 4px 0 8px rgba(0, 0, 0, 0.4);
     content: "";
-    left: -0.5em;
+    left: -2em;
     position: absolute;
     top: -0.25em;
-    width: 12em;
+    width: 13.5em;
     z-index: -1;
   }
 
