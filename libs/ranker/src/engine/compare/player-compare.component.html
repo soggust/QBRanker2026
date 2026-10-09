@@ -171,7 +171,7 @@
     <nav class="card-tabs" role="tablist">
       @for (tab of tabs; track tab.id) {
         <button type="button" role="tab" [class.active]="compare.tab === tab.id" [attr.aria-selected]="compare.tab === tab.id" (click)="compare.tab = tab.id; body.scrollTop = 0">
-          {{ tab.title }}
+          {{ tab.id === 'career' && compare.teamsOnly ? 'History' : tab.title }}
         </button>
       }
     </nav>
@@ -346,12 +346,14 @@
           @case ('career') {
             <!-- Career arcs: every season's standing (the default sliders), the compared one ringed -->
             @if (compare.arcs; as a) {
-              <card-panel class="ov-section tab-card cmp-panel" label="Career Arcs" icon="show_chart" [expandable]="false">
-                <!-- (along the bottom: their years in the league, or the seasons themselves) -->
+              <card-panel class="ov-section tab-card cmp-panel" [label]="compare.teamsOnly ? 'Team Arcs' : 'Career Arcs'" icon="show_chart" [expandable]="false">
+                <!-- (along the bottom: their years in the league, or the seasons themselves; teams alone, the seasons) -->
+                @if (!compare.teamsOnly) {
                 <mat-select panel-actions class="arc-by" [panelWidth]="null" [value]="a.byYear ? 'year' : 'season'" aria-label="Along the bottom" title="Along the bottom: their years in the league, or the seasons themselves" (valueChange)="compare.setArcBy($event)">
                   <mat-option value="year">Career Year</mat-option>
                   <mat-option value="season">Season</mat-option>
                 </mat-select>
+                }
                 <div class="group-body">
                   <div class="arc-box" #arcBox>
                   <svg class="cmp-arcs" [attr.viewBox]="'0 0 ' + a.width + ' ' + a.height" role="img" aria-label="Career arcs">

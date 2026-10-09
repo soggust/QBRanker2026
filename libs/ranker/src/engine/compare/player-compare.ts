@@ -247,6 +247,11 @@ export class PlayerCompare {
     return this.sides.length + this.loading >= COMPARE_MAX;
   }
 
+  // Teams alone (a team, a line, a defense): no careers, so their arcs run season by season
+  get teamsOnly(): boolean {
+    return this.sides.length > 0 && this.sides.every((s) => isTeamTab(s.position));
+  }
+
   // Opened: the rows picked in the grid (the table's season and tab), or nobody yet (the search ready)
   async start(picks: SkillPlayer[]): Promise<void> {
     this.reset();
@@ -552,7 +557,7 @@ export class PlayerCompare {
   private buildArcs(): CompareArcs | null {
     const sides = this.sides.filter((s) => s.career?.length);
     if (!sides.length || SPORT.careerOnly) return null;
-    const byYear = this.arcBy ? this.arcBy === 'year' : !sides.every((s) => isTeamTab(s.position));
+    const byYear = !this.teamsOnly && this.arcBy !== 'season';
     const xOf = (side: CompareSide, line: CardSeason) => (byYear ? side.career!.indexOf(line) + 1 : line.season);
     const xs = sides.flatMap((s) => s.career!.map((c) => xOf(s, c)));
     const lo = Math.min(...xs);
