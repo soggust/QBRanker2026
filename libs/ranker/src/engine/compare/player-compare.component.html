@@ -22,7 +22,7 @@
             <span class="tape-texture" aria-hidden="true"><img [src]="s.logo" alt="" /></span>
             <!-- (the name and the tab and team across the tape, then the player (a team, its logo) small beside
                  the season) -->
-            <button type="button" class="tape-name" [title]="'Open ' + s.name + '’s ' + s.seasonText + ' card'" (click)="openCard(s)">{{ s.name }}</button>
+            <span class="tape-name">{{ s.name }}</span>
             <span class="tape-team">{{ s.tabLabel }}@if (s.teamName) { · {{ s.teamName }}}</span>
             <div class="tape-meta">
               @if (s.photo) {

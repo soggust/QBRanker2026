@@ -345,10 +345,9 @@
   </footer>
 </section>
 
-<!-- The settings menu (the gear opens it), the compare view, and the player card (a name clicked; over
-     the compare view when opened from it) -->
+<!-- The settings menu (the gear opens it), the compare view, and the player card (a name clicked) -->
 <settings-menu #settings [position]="position"></settings-menu>
-<player-compare [compare]="compare" [openCard]="openCompareCard" [cardOpen]="compareCardOpen"></player-compare>
+<player-compare [compare]="compare"></player-compare>
 <player-card [cards]="cards" [compare]="compareFromCard"></player-card>
 <!-- (a game: from a Recent dot, or a game log's row) -->
 <game-view></game-view>

@@ -16,10 +16,6 @@ import { GameViewService } from '../game-view/game-view.service';
 })
 export class PlayerCompareComponent implements DoCheck {
   @Input({ required: true }) compare!: PlayerCompare;
-  // (a side's name: their card, that season)
-  @Input() openCard: (side: CompareSide) => void = () => undefined;
-  // (a card opened over it has the keys)
-  @Input() cardOpen: () => boolean = () => false;
 
   @ViewChild('search') searchBox?: ElementRef<HTMLInputElement>;
 
@@ -61,7 +57,7 @@ export class PlayerCompareComponent implements DoCheck {
 
   @HostListener('document:keydown', ['$event'])
   keys(event: KeyboardEvent): void {
-    if (!this.compare.open || this.games.game || this.cardOpen() || event.key !== 'Escape') return;
+    if (!this.compare.open || this.games.game || event.key !== 'Escape') return;
     if (this.compare.query) this.compare.search('');
     else this.compare.close();
     event.preventDefault();

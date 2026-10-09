@@ -24,7 +24,7 @@ import { SKILL_UNITS, emptyIn, recentCount, statIsEmpty } from '@ranker/engine/u
 import { StatReader } from '@ranker/engine/stat-reader';
 import { settingGroups, settingOptions, settingText, settingsAt } from '@ranker/engine/setting-options';
 import { CardHost, PlayerCards } from '@ranker/engine/player-card/player-cards';
-import { COMPARE_MAX, CompareSide, PlayerCompare } from '@ranker/engine/compare/player-compare';
+import { COMPARE_MAX, PlayerCompare } from '@ranker/engine/compare/player-compare';
 import { GameViewService, recentRef } from '@ranker/engine/game-view/game-view.service';
 import { SeasonContext } from '@ranker/engine/player-card/card.model';
 import { copyRankingsToClipboard } from '@ranker/core/clipboard';
@@ -409,15 +409,6 @@ export class SkillRankingsComponent implements OnChanges, CardHost {
     this.picked = [];
     this.compare.start(picks);
   }
-
-  // A side's name in the compare view: their card for that season, over it
-  readonly openCompareCard = (side: CompareSide) => {
-    this.games.backTo = null;
-    this.cards.tab = 'overview';
-    this.cards.openSeason(side.season, side.gsisId);
-  };
-
-  readonly compareCardOpen = () => !!this.cards.card;
 
   // The card's compare button: its season into the compare view (the card closes, the view under it)
   readonly compareFromCard = () => {
