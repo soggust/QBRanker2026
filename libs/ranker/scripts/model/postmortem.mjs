@@ -18,6 +18,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { summary } from './espn.mjs';
 import { CACHE, nflverseRows, pool } from './sources.mjs';
+import { intentOf } from './desk.mjs';
 
 const REGULATION = { nfl: 4, nba: 4, nhl: 3, mlb: 9 };
 const BLOWOUT = { nfl: 24, nba: 25, nhl: 4, mlb: 8 };
@@ -27,9 +28,8 @@ const HURT = /injur|left the game|exited|did not return|didn't return|helped off
 const EXIT = /left the game|left in the|exited|did not return|didn't return|helped off|carted off|(was|were) ejected|tossed/i;
 const NOT_PLAYER = /manager|coach|bench boss|rested|was out with|missed the game|sat out|did not play|didn't play/i;
 
-// (a bet with no edge, placed for the data, says so: its result is no verdict on the model's judgement;
-// bets from before the intent was kept go by their EV)
-export const intentOf = (bet) => bet.intent ?? (bet.ev > 0 ? 'edge' : 'action');
+// (a bet with no edge, placed for the data, says so: its result is no verdict on the model's judgement)
+export { intentOf };
 const actionTag = (bet) => (intentOf(bet) === 'action' ? ' (action bet: no edge, placed for the data)' : '');
 
 // A final's summary, kept (only the parts the post-mortem reads)

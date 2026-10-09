@@ -104,11 +104,28 @@
     width: 100%;
   }
 
-  path {
+  .desk-line {
     fill: none;
     stroke: var(--scoreboard-led);
     stroke-width: 2;
     vector-effect: non-scaling-stroke;
+  }
+
+  // (a faint wash of the board's light under the line, fading to nothing at the floor)
+  .desk-area {
+    fill: color-mix(in srgb, var(--scoreboard-led) 9%, transparent);
+    stroke: none;
+  }
+
+  // (the balance now: a dot at the line's end that stays round however the chart stretches, a soft halo
+  // breathing round it)
+  .desk-now {
+    stroke: var(--scoreboard-led);
+    stroke-linecap: round;
+    stroke-width: 7px;
+    vector-effect: non-scaling-stroke;
+    filter: drop-shadow(0 0 3px var(--scoreboard-led));
+    pointer-events: none;
   }
 
   .desk-start {
@@ -347,7 +364,8 @@ card-panel {
   color: var(--loss);
 }
 
-// (a second table in a panel: the props by type under the markets, the props' projections under the terms)
+// (a second table in a panel: the props by type under the markets, the edge and action under the stakes, the
+// props' projections under the terms)
 .desk-sub {
   margin-top: 14px;
 }
@@ -360,16 +378,6 @@ card-panel {
   font-weight: 700;
   letter-spacing: 0.04em;
   text-align: center;
-}
-
-// (an in-play game that's over, waiting for the next run to grade it)
-.desk-final {
-  color: rgba(255, 255, 255, 0.55);
-}
-
-// (a second table in a panel, under the first: a gap between)
-.desk-subtable {
-  margin-top: 14px;
 }
 
 // The sport chips under the header (the Bets page's view pills, each with its league's logo): the desk shows
@@ -550,11 +558,6 @@ card-panel {
       color: rgba(255, 255, 255, 0.8);
     }
   }
-}
-
-// (the market under a pick lined up with its words, past the circle)
-.desk-pick + small {
-  padding-left: 38px;
 }
 
 // (a game's start, under it)
@@ -739,4 +742,102 @@ card-panel {
 
 .desk-table td small {
   font-weight: 400;
+}
+
+// (a tile's run of results under its record: green on a winning run, red on a losing one)
+.desk-tile .desk-streak {
+  color: var(--loss);
+
+  &.hot {
+    color: var(--win);
+  }
+}
+
+// ===========================================================================
+// Motion, quick and quiet, as on a scoreboard (the tiles' numbers count up in the component): the bankroll
+// curve drawn in left to right and its last point breathing; an In Play meter filling and its pips lighting
+// one after another; a bet decided a win flashing green once. None of it with reduced motion. (The keyframes
+// outside any media query: Angular scopes their names and only rewrites references outside one.)
+// ===========================================================================
+
+.desk-curve {
+  .desk-line,
+  .desk-area {
+    animation: desk-draw 0.9s cubic-bezier(0.3, 0.6, 0.3, 1) both;
+  }
+
+  .desk-now {
+    animation:
+      desk-dot-in 0.3s ease-out 0.8s both,
+      desk-breathe 2.8s ease-in-out 1.1s infinite;
+  }
+}
+
+.desk-meter {
+  .fill {
+    animation: desk-fill 0.7s ease-out both;
+    transform-origin: left center;
+  }
+
+  .pip.on {
+    animation: desk-pip 0.35s ease-out both;
+    animation-delay: calc(min(var(--i, 0), 12) * 45ms);
+  }
+}
+
+.desk-table td.desk-flash {
+  animation: desk-flash 1.4s ease-out;
+}
+
+@keyframes desk-draw {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+@keyframes desk-dot-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes desk-breathe {
+  50% {
+    stroke-width: 10px;
+  }
+}
+
+@keyframes desk-fill {
+  from {
+    transform: scaleX(0);
+  }
+}
+
+@keyframes desk-pip {
+  from {
+    opacity: 0.2;
+    transform: scale(0.3);
+  }
+}
+
+@keyframes desk-flash {
+  0%,
+  15% {
+    background: color-mix(in srgb, var(--win) 38%, transparent);
+    text-shadow: 0 0 10px var(--win);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .desk-curve .desk-line,
+  .desk-curve .desk-area,
+  .desk-curve .desk-now,
+  .desk-meter .fill,
+  .desk-meter .pip.on,
+  .desk-table td.desk-flash {
+    animation: none;
+  }
 }

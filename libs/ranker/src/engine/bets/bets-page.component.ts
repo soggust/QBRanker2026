@@ -1,6 +1,7 @@
 import { Component, OnInit, isDevMode } from '@angular/core';
 import { SPORT_LINKS } from '@ranker/core/sports';
 import { insteadText } from '../player-card/analysis';
+import { americanOdds, headshot } from './bet-format';
 import { TeamColors, loadTeamColors, pickTeamColor, splitPick } from './pick-style';
 
 // The Bets page (the sport bar's Bets link, #bets): the algorithm's top picks for every sport (each one's
@@ -10,50 +11,51 @@ import { TeamColors, loadTeamColors, pickTeamColor, splitPick } from './pick-sty
 // (the same game, market and side: "Algorithm + Analyst", ranked a little higher); its other picks aren't
 // shown. A row opens to its reasoning.
 
+// A game as the picks and the AI desk's sheet name it
+type BetGame = { week: number; date: string; kickoff?: string | null; matchup: string; teams?: { abbr: string; logo: string | null }[]; line: { line: string; overUnder: number | null } | null };
+
+// (an AI desk report's bet: data/analysis/bets.json, read only for the week its latest reports are on)
 interface BetEntry {
-  sport: string;
-  // whose pick: the algorithm's, the analyst's, or both
-  source: string;
-  kind: 'team' | 'player';
-  position: string | null;
-  rowId: string;
-  team: string | null;
-  game: { week: number; date: string; kickoff?: string | null; matchup: string; teams?: { abbr: string; logo: string | null }[]; line: { line: string; overUnder: number | null } | null } | null;
-  market: string;
-  lean: string;
-  strength: 'like' | 'lean' | 'fade';
-  // how likely it wins, 1-10 (reports written before the score have none)
-  score?: number | null;
-  reason: string;
-  // (a bet desk pick: the most likely way it loses)
-  risk?: string;
-  confidence: 'low' | 'medium' | 'high' | null;
+  game: BetGame | null;
   at: string;
 }
 
-// One bet as the page shows it: the pick (a game total or a side read as the call itself), and how many
-// other reports make the same call
-export interface BetRow extends BetEntry {
+// One of the algorithm's picks as the page shows it
+export interface BetRow {
   id: number;
-  // (an algorithm pick's side, and a prop's player, his ESPN id and his team's: its circle and its color)
+  sport: string;
+  // whose pick: the algorithm's, or the algorithm's and the analyst's both
+  source: 'Algorithm' | 'Algorithm + Analyst';
+  game: BetGame | null;
+  // (its market's words: "Spread", "Passing Yards")
+  market: string;
+  // (always a like: a fade is the analyst's alone, and the analyst's own picks aren't shown)
+  strength: 'like' | 'fade';
+  reason: string;
+  // (the analyst's, where it agrees: the most likely way it loses)
+  risk?: string;
+  // (its band: its chance to win 60% or more, 53% or more, or under; picks.mjs)
+  confidence: 'low' | 'medium' | 'high' | null;
+  // (its side, and a prop's player, his ESPN id and his team's: its circle and its color)
   side?: string | null;
   player?: string | null;
   athleteId?: string | number | null;
   playerTeam?: string | null;
-  // (an algorithm pick's chance to win, a whole percent)
+  // (its chance to win, a whole percent)
   chance?: number;
   pick: string;
-  marketLabel: string;
-  // (an algorithm pick's price at DraftKings, its badge before it)
+  // (its price at DraftKings, under the pick)
   odds?: string;
-  agree: number;
+  // (the call it makes: pickKey)
   key: string;
-  // its score, or for an older report an estimate from its grade and the report's confidence
+  // (the order: its edge score, a quarter higher where the analyst agrees)
   sureness: number;
-  estimated: boolean;
   // its type, for the filter chips
   betType: BetKind;
 }
+
+// (an analyst's pick, as far as the page uses it: the call, its side, its case and its risk)
+type SheetCall = { key: string; strength: 'like' | 'fade'; reason: string; risk: string };
 
 // The bet desk's sheet (data/analysis/bet-sheet.json, scripts/analysis/bet-desk.mjs): the week's picks
 // from every report's bets, each with its case and its risk, and each game's venue and kickoff weather
@@ -81,7 +83,7 @@ interface SheetPick {
   grade?: { kind: BetKind } | null;
   risk: string;
   sources: string[];
-  game: BetEntry['game'];
+  game: BetGame | null;
 }
 // The types of bet, for the filter chips under the game dropdown: each a chip of its own color, like
 // casino chips' denominations
@@ -98,7 +100,7 @@ export const BET_KINDS: { kind: BetKind; label: string; name: string }[] = [
 
 // A bet's type: the desk's own grading kind when it has one; otherwise read from its market (a bet
 // on one of the game's teams' own numbers, "BAL under its rushing average", is a team stat)
-function kindOf(graded: BetKind | null | undefined, label: string, bet: string, game: BetEntry['game']): BetKind {
+function kindOf(graded: BetKind | null | undefined, label: string, bet: string, game: BetGame | null): BetKind {
   if (graded) return graded;
   if (/^spread$/i.test(label)) return 'spread';
   if (/moneyline/i.test(label)) return 'moneyline';
@@ -213,7 +215,7 @@ export class BetsPageComponent implements OnInit {
 
   // (a prop's player's ESPN headshot, for its circle)
   headshot(r: BetRow): string {
-    return `https://a.espncdn.com/combiner/i?img=/i/headshots/${r.sport}/players/full/${r.athleteId}.png&w=96&h=70`;
+    return headshot(r.sport, r.athleteId);
   }
 
   hide(event: Event): void {
@@ -282,11 +284,10 @@ export class BetsPageComponent implements OnInit {
         picks: (await get(`/${s.id}/data/model/picks.json`)) as Picks | null,
         bets: s.analysis ? await get(`/${s.id}/data/analysis/bets.json`) : null,
         sheet: s.analysis ? ((await get(`/${s.id}/data/analysis/bet-sheet.json`)) as Sheet | null) : null,
-
       })),
     );
     const algoRows: BetRow[] = [];
-    const sheetRows: BetRow[] = [];
+    const sheetRows: SheetCall[] = [];
     const records: BetRecord[] = [];
     for (const { sport, picks, bets: file, sheet } of files) {
       // The algorithm's picks
@@ -298,28 +299,18 @@ export class BetsPageComponent implements OnInit {
           algoRows.push({
             sport,
             source: 'Algorithm',
-            kind: p.kind === 'player' ? 'player' : 'team',
-            position: null,
-            rowId: '',
-            team: null,
             game: { week: 0, date: p.start.slice(0, 10), kickoff: p.start, matchup: p.matchup, teams: p.teams, line: null },
             market: p.market,
-            lean: p.pick,
             strength: 'like',
-            score: p.score,
             reason: p.reason,
             confidence: p.level,
-            at: picks.at,
             id: algoRows.length,
             key: pickKey(sport, p.matchup, p.kind, p.pick),
             pick: p.pick,
-            marketLabel: p.market,
-            odds: `${p.odds > 0 ? '+' : ''}${p.odds}`,
-            agree: 0,
+            odds: americanOdds(p.odds),
             // (the order: its edge score; its chance shows, its band colors it)
             sureness: p.score,
             chance: p.chance,
-            estimated: false,
             betType: p.kind,
             side: p.side ?? null,
             player: p.player ?? null,
@@ -338,30 +329,10 @@ export class BetsPageComponent implements OnInit {
         for (const p of sheet.picks) {
           const betType = kindOf(p.grade?.kind, p.label, p.bet, p.game);
           sheetRows.push({
-            sport,
-            source: 'Analyst',
-            kind: 'team',
-            position: null,
-            rowId: '',
-            team: null,
-            game: p.game,
-            // (a fade names what it goes against; its pick is the bet to make instead)
-            market: p.side === 'fade' && p.fades ? p.fades : p.label,
-            lean: p.bet,
+            key: p.game ? pickKey(sport, p.game.matchup, betType, p.bet) : `${sport}|sheet|${sheetRows.length}`,
             strength: p.side,
-            score: p.strength,
             reason: p.case,
             risk: p.risk,
-            confidence: null,
-            at: sheet.at,
-            id: 10000 + sheetRows.length,
-            key: p.game ? pickKey(sport, p.game.matchup, betType, p.bet) : `${sport}|sheet|${sheetRows.length}`,
-            pick: p.bet,
-            marketLabel: p.label,
-            agree: 0,
-            sureness: p.strength,
-            estimated: false,
-            betType,
           });
         }
       }
@@ -382,11 +353,6 @@ export class BetsPageComponent implements OnInit {
     }
     // (all sports' picks together, the likeliest first)
     this.rows = algoRows.sort((a, b) => b.sureness - a.sureness || (a.game?.kickoff ?? '').localeCompare(b.game?.kickoff ?? ''));
-  }
-
-  // A sport's label for a row
-  sportLabel(r: BetRow): string {
-    return r.sport.toUpperCase();
   }
 
   // A team logo's address: a path under the sport's own site, or a full address as it is

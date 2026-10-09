@@ -22,9 +22,8 @@ import { OFFICIAL_TERMS, gatherOfficials, officialsOf, refereesOf } from './offi
 import { FOOTBALL_TERMS, footballOf, gatherFootball } from './football.mjs';
 import { HOCKEY_TERMS, gatherHockey, hockeyOf } from './hockey.mjs';
 import { BASEBALL_TERMS, baseballOf, gatherBaseball } from './baseball.mjs';
-import { elevations, forecast, geocode, isoDay, miles, mlbHands, mlbPitching, mlbSchedule, nflverseGames, pitchLine, pool } from './sources.mjs';
+import { DAY, elevations, forecast, geocode, isoDay, miles, mlbHands, mlbPitching, mlbSchedule, nflverseGames, pitchLine, pool } from './sources.mjs';
 
-const DAY = 864e5;
 
 // A term: its key, its group (rest, travel, starters, weather), whether it moves the margin (m, the home side's
 // edge: a positive size favors the side it names) or the total (t), and its words

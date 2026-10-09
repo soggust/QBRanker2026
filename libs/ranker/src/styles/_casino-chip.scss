@@ -1,5 +1,14 @@
 @use "variables" as v;
 
+// (a rim's spots easing round as its dashes' offset moves; still with reduced motion)
+@mixin rim-turn {
+  transition: stroke-dashoffset 0.6s cubic-bezier(0.2, 0.7, 0.3, 1);
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+  }
+}
+
 // A round casino chip (the Bets page's filter chips, the Algorithm's sport chips): its color the --clay it's
 // given, a thick rim with cream spots (an SVG rect's dashes: <svg class="chip-rim"><rect pathLength="80" />),
 // an inlay ring, a little shine; dim until it's on (.on: full color, lifted)
@@ -67,6 +76,16 @@
     width: calc(100% - 6px);
     x: 3px;
     y: 3px;
+    @include rim-turn;
+  }
+
+  // (the rim turns two spots under the pointer, half a turn as it's picked)
+  &:hover rect {
+    stroke-dashoffset: -20;
+  }
+
+  &.on rect {
+    stroke-dashoffset: -40;
   }
 }
 
@@ -96,6 +115,12 @@
     width: calc(100% - 4px);
     x: 2px;
     y: 2px;
+    @include rim-turn;
+  }
+
+  &:hover rect,
+  &:focus-within rect {
+    stroke-dashoffset: -20;
   }
 }
 

@@ -24,7 +24,7 @@
 //            record is of those only, overall and by band, not of every bet the desk made
 
 import { round } from './ratings.mjs';
-import { record } from './desk.mjs';
+import { intentOf, record } from './desk.mjs';
 
 export const TOP = 40;
 const BANDS = { high: 0.6, medium: 0.53 };
@@ -34,7 +34,10 @@ const LABEL = { spread: 'Spread', total: 'Game total', ml: 'Moneyline' };
 const pct = (v) => `${Math.round(v * 100)}%`;
 const odds = (a) => (a > 0 ? `+${a}` : String(a));
 const logo = (sport, abbr) => `https://a.espncdn.com/combiner/i?img=/i/teamlogos/${sport}/500/${abbr.toLowerCase()}.png&w=40&h=40`;
-const level = (p) => (p >= BANDS.high ? 'high' : p >= BANDS.medium ? 'medium' : 'low');
+// (a chance's band: 60% and up high, 53% and up medium, low under)
+export const level = (p) => (p >= BANDS.high ? 'high' : p >= BANDS.medium ? 'medium' : 'low');
+// (a bet's band: its chance's if it has an edge, else low: a favorite at a short price isn't a strong bet)
+export const levelOf = (b, p) => (intentOf(b) === 'edge' ? level(p) : 'low');
 
 // A bet's score (see above): its EV, half for a market whose trust is still the untested start
 export function scoreOf(bet, trust) {
@@ -110,21 +113,17 @@ function whereOf(bet, game) {
 // published on the ledger (its level then), and the published ones' record
 export function buildPicks(sport, ledger, trust, games, now) {
   const open = ledger.bets.filter((b) => b.status === 'open' && Date.parse(b.start) > now.getTime() && !b.context?.guard);
-  const edgeOf = (b) => (b.intent ?? (b.ev > 0 ? 'edge' : 'action')) === 'edge';
-  // (a bet's band: its chance's if it has an edge, else low)
-  const levelOf = (b, p) => (edgeOf(b) ? level(p) : 'low');
   // (one a bet: a --dry run prices placed bets again in memory)
   const once = [...new Map(open.map((b) => [b.id, b])).values()];
   // (the order: its chance to win; its edge score kept beside it)
   const scored = once.map((b) => ({ b, score: round(b.p, 4), edgeScore: scoreOf(b, trust) }));
   scored.sort((x, y) => y.score - x.score || y.edgeScore - x.edgeScore || x.b.start.localeCompare(y.b.start));
   const top = scored.slice(0, TOP);
-  for (const { b, score } of top) {
+  for (const { b } of top) {
     if (!b.published) Object.assign(b, { published: true, publishedAt: now.toISOString() });
     // (its chance when shown, and its band: fixed from then on)
     if (!Number.isFinite(b.publishedP)) b.publishedP = b.p;
     b.publishedLevel = levelOf(b, b.publishedP);
-    void score;
   }
   const picks = top.map(({ b, score }, i) => {
     const g = games.get(b.event);
@@ -136,7 +135,7 @@ export function buildPicks(sport, ledger, trust, games, now) {
       score,
       chance: Math.round(b.p * 100),
       level: levelOf(b, b.p),
-      edge: edgeOf(b),
+      edge: intentOf(b) === 'edge',
       kind: KIND[b.market] ?? 'player',
       market: b.market === 'prop' ? b.statLabel : LABEL[b.market],
       pick: b.pick,

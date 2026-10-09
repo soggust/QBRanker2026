@@ -20,18 +20,16 @@
 // Only asked for with run.mjs --backtest, and only within history's budget (HISTORY_BUDGET).
 
 import path from 'node:path';
-import { CACHE, readJson, writeJson } from './sources.mjs';
+import { CACHE, DAY, isoSecond as iso, readJson, writeJson } from './sources.mjs';
 import { HISTORY_BUDGET, LINE_BOOKS, SPORT_KEYS, call, canSpend, linesFromEvent } from './oddsapi.mjs';
 import { choose, fitTrust, price, settle, stakeFor } from './desk.mjs';
 import { clvOf } from './clv.mjs';
 import { idOf } from './teamstats.mjs';
 import { round } from './ratings.mjs';
 
-const DAY = 864e5;
 const COST = 30;
 
 // Each sport's snapshots: when, as UTC times
-const iso = (t) => new Date(t).toISOString().slice(0, 19) + 'Z';
 function daily(from, to, hours) {
   const out = [];
   for (let t = Date.parse(from); t <= Date.parse(to); t += DAY) for (const h of hours) out.push(iso(t + h * 36e5));

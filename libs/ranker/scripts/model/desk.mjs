@@ -74,6 +74,18 @@ export function choose(market, trust, evScale) {
   return { ...pick, units: stakeFor(pick.ev, evScale) };
 }
 
+// (a bet with no edge, placed for the data, or one it saw value in; bets from before the intent was kept go
+// by their EV)
+export const intentOf = (bet) => bet.intent ?? (bet.ev > 0 ? 'edge' : 'action');
+
+// (a bet by how far it finished past its line, its side's way: won over 0, lost under, a push at 0; what it
+// paid, its stake back not counted: settle and props.mjs settleProp)
+export function outcomeOf(bet, edge) {
+  const status = edge > 0 ? 'won' : edge < 0 ? 'lost' : 'push';
+  const profit = status === 'won' ? bet.units * (decimal(bet.odds) - 1) : status === 'lost' ? -bet.units : 0;
+  return { status, profit: round(profit, 3) };
+}
+
 // A bet's words: "DAL -8.5", "Over 47.5", "TB ML"
 export function pickText(bet, game) {
   const abbr = bet.side === 'home' ? game.homeAbbr : game.awayAbbr;
@@ -89,9 +101,7 @@ export function settle(bet, game) {
   if (bet.market === 'spread') edge = (bet.side === 'home' ? margin : -margin) + bet.line;
   else if (bet.market === 'total') edge = (bet.side === 'over' ? 1 : -1) * (game.hs + game.as - bet.line);
   else edge = bet.side === 'home' ? margin : -margin;
-  const status = edge > 0 ? 'won' : edge < 0 ? 'lost' : 'push';
-  const profit = status === 'won' ? bet.units * (decimal(bet.odds) - 1) : status === 'lost' ? -bet.units : 0;
-  return { status, profit: round(profit, 3), final: `${game.awayAbbr} ${game.as} @ ${game.homeAbbr} ${game.hs}` };
+  return { ...outcomeOf(bet, edge), final: `${game.awayAbbr} ${game.as} @ ${game.homeAbbr} ${game.hs}` };
 }
 
 // The trust in the model a market has earned: of 0 to 1.2, the one that would have made its bets' chances

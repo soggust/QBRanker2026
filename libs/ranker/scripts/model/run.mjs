@@ -39,7 +39,7 @@ import { backtestBets, evaluate, snapshots, trustBets } from './backtest.mjs';
 import { buildPicks } from './picks.mjs';
 import { playerRows } from './playerlogs.mjs';
 import { PER_GAME, STATS, apiProps, board, fitProps, priceProps, rowsIndex, settleProp, statInFinal, withApiPrices } from './props.mjs';
-import { CACHE, readJson, writeJson } from './sources.mjs';
+import { CACHE, DAY, isoSecond, readJson, writeJson } from './sources.mjs';
 import { BANKROLL, MARKETS, choose, fairPair, fitTrust, pickText, price, record, settle } from './desk.mjs';
 
 const ROOT = path.resolve(import.meta.dirname, '../../../..');
@@ -50,7 +50,6 @@ const START_TRUST = 0.5;
 // (what a graded bet whose premise broke in the game counts for in the trust fit and the calibration: set by
 // hand, not fit: there aren't graded bets enough yet to fit it on)
 const DISRUPTED_WEIGHT = 0.3;
-const DAY = 864e5;
 const PROPS_ASKED = path.join(CACHE, 'odds-props.json');
 
 const read = readJson;
@@ -187,8 +186,8 @@ async function loadHistory(r) {
 async function liveLines(r) {
   r.linesSource = 'espn';
   if (!r.upcoming.length || !hasKey() || !canSpend('lines', 3)) return;
-  const from = r.now.toISOString().slice(0, 19) + 'Z';
-  const to = new Date(r.now.getTime() + 3 * DAY).toISOString().slice(0, 19) + "Z";
+  const from = isoSecond(r.now);
+  const to = isoSecond(r.now.getTime() + 3 * DAY);
   const events = await call('lines', `/sports/${SPORT_KEYS[r.sport]}/odds`, { markets: 'h2h,spreads,totals', bookmakers: LINE_BOOKS.join(','), commenceTimeFrom: from, commenceTimeTo: to });
   if (!Array.isArray(events)) return;
   let matched = 0;

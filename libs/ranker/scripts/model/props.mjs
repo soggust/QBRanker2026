@@ -18,7 +18,7 @@
 
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
-import { decimal, fairPair, stakeFor } from './desk.mjs';
+import { decimal, fairPair, outcomeOf, stakeFor } from './desk.mjs';
 import { fitStat, makeModel, nbOver, recal } from './project.mjs';
 import { nbaMatchups, nflMatchups } from './matchups.mjs';
 import { CACHE, get, pool } from './sources.mjs';
@@ -465,7 +465,5 @@ export async function statInFinal(sport, bet, body, pk) {
 export function settleProp(bet, value) {
   if (value === null || value === undefined) return { status: 'push', profit: 0, void: true, actual: null, final: 'did not play' };
   const edge = (bet.side === 'over' ? 1 : -1) * (value - bet.line);
-  const status = edge > 0 ? 'won' : edge < 0 ? 'lost' : 'push';
-  const profit = status === 'won' ? bet.units * (decimal(bet.odds) - 1) : status === 'lost' ? -bet.units : 0;
-  return { status, profit: round(profit, 3), actual: value, final: `${bet.player} ${value} ${bet.statLabel}` };
+  return { ...outcomeOf(bet, edge), actual: value, final: `${bet.player} ${value} ${bet.statLabel}` };
 }

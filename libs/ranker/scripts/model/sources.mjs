@@ -11,6 +11,9 @@ import { gunzipSync } from 'node:zlib';
 const ROOT = path.resolve(import.meta.dirname, '../../../..');
 export const CACHE = path.join(ROOT, '.cache/model');
 const HEADERS = { 'User-Agent': 'Mozilla/5.0 (sports-ranker model desk)' };
+// (a day in milliseconds; a time as UTC to the second, as The Odds API takes it: "2026-10-09T17:00:00Z")
+export const DAY = 864e5;
+export const isoSecond = (t) => new Date(t).toISOString().slice(0, 19) + 'Z';
 
 // A URL's body (JSON unless text), four tries, a pause after each refusal; null when it never comes
 export async function get(url, { text = false } = {}) {

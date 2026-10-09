@@ -10,7 +10,7 @@
       @if (ariaSort(table, key); as dir) {
         <mat-icon aria-hidden="true" [fontIcon]="dir === 'ascending' ? 'arrow_upward' : 'arrow_downward'"></mat-icon>
       }
-          @if (key === 'odds') {
+      @if (key === 'odds') {
         <span class="desk-crown" title="DraftKings: every price here is theirs"></span>
       }
     </button>
@@ -86,27 +86,27 @@
       <div class="desk-tiles">
         <div class="desk-tile" [title]="help['available'] + ' (bankroll ' + balance.toFixed(2) + 'u' + (rebuys ? ', ' + rebuys + ' rebuy' + (rebuys > 1 ? 's' : '') : '') + ')'">
           <small>Balance</small>
-          <b [class.up]="overall.profit > 0" [class.down]="overall.profit < 0">{{ available.toFixed(2) }}u</b>
+          <b [class.up]="overall.profit > 0" [class.down]="overall.profit < 0">{{ ticked(available).toFixed(2) }}u</b>
         </div>
         <div class="desk-tile" [title]="help['record']">
           <small>Record</small>
-          <b>{{ overall.won }}-{{ overall.lost }}-{{ overall.push }}</b>
+          <b>{{ ticked(overall.won, true) }}-{{ ticked(overall.lost, true) }}-{{ ticked(overall.push, true) }}@if (streak) {<small class="desk-streak" [class.hot]="streak[0] === 'W'" [title]="help['streak']">{{ streak }}</small>}</b>
         </div>
         <div class="desk-tile" [title]="help['profit']">
           <small>Profit</small>
-          <b [class.up]="overall.profit > 0" [class.down]="overall.profit < 0">{{ units(overall.profit) }}@if (pending.count) {<small [title]="pending.count + ' bets decided since the last run, graded officially on the next'">{{ units(pending.profit) }} pending</small>}</b>
+          <b [class.up]="overall.profit > 0" [class.down]="overall.profit < 0">{{ units(ticked(overall.profit)) }}@if (pending.count) {<small [title]="pending.count + ' bets decided since the last run, graded officially on the next'">{{ units(pending.profit) }} pending</small>}</b>
         </div>
         <div class="desk-tile" [title]="help['roi']">
           <small>ROI</small>
-          <b [class.up]="(overall.roi ?? 0) > 0" [class.down]="(overall.roi ?? 0) < 0">{{ pct(overall.roi) }}</b>
+          <b [class.up]="(overall.roi ?? 0) > 0" [class.down]="(overall.roi ?? 0) < 0">{{ pct(overall.roi === null ? null : ticked(overall.roi)) }}</b>
         </div>
         <div class="desk-tile" [title]="help['atRisk']">
           <small>At risk</small>
-          <b>{{ atRisk.toFixed(1) }}u<small>{{ overall.open }} bets</small></b>
+          <b>{{ ticked(atRisk).toFixed(1) }}u<small>{{ overall.open }} bets</small></b>
         </div>
         <div class="desk-tile" [title]="help['clv']">
           <small>Beat the close</small>
-          <b [class.up]="(overall.clvBeat ?? 0) > 0.5" [class.down]="overall.clvBeat !== null && overall.clvBeat < 0.5">{{ overall.clvN ? pct(overall.clvBeat, 0) : '-' }}</b>
+          <b [class.up]="(overall.clvBeat ?? 0) > 0.5" [class.down]="overall.clvBeat !== null && overall.clvBeat < 0.5">{{ overall.clvN ? pct(overall.clvBeat === null ? null : ticked(overall.clvBeat), 0) : '-' }}</b>
         </div>
       </div>
     }
@@ -148,15 +148,24 @@
   @if (loading) {
     <p class="desk-note" role="status">Loading…</p>
   } @else if (!states.length) {
-    <p class="desk-note">Nothing yet: run <code>node libs/ranker/scripts/model/run.mjs</code>.</p>
+    <!-- (the bettor runs on GitHub only: the Model Desk workflow; locally, only ever with --dry) -->
+    <p class="desk-note">Nothing yet: the bettor (GitHub's Model Desk workflow) hasn't run.</p>
   } @else {
     <!-- (the bankroll after each graded bet) -->
     @if (overall.bets) {
       <div class="desk-curve">
         <span class="log-chart-label">Bankroll<small>after each graded bet · {{ curveRange.min.toFixed(1) }}u to {{ curveRange.max.toFixed(1) }}u</small></span>
         <svg viewBox="0 0 600 120" preserveAspectRatio="none" role="img" [attr.aria-label]="'Bankroll from ' + bankroll + ' to ' + balance.toFixed(1) + ' units'">
-          <line class="desk-start" x1="0" x2="600" [attr.y1]="110 - ((bankroll - curveRange.min) / (curveRange.max - curveRange.min || 1)) * 100" [attr.y2]="110 - ((bankroll - curveRange.min) / (curveRange.max - curveRange.min || 1)) * 100" />
-          <path [attr.d]="curve" />
+          <line class="desk-start" x1="0" [attr.x2]="curveWidth" [attr.y1]="curveStartY" [attr.y2]="curveStartY" />
+          <!-- (the line and the wash under it, drawn in left to right whenever it changes; the balance now a dot
+               at its end, breathing) -->
+          @for (d of [curve]; track d) {
+            <path class="desk-area" [attr.d]="d + ' L' + curveWidth + ',120 L0,120 Z'" />
+            <path class="desk-line" [attr.d]="d" />
+            @if (curveEnd; as end) {
+              <line class="desk-now" [attr.x1]="end.px" [attr.x2]="end.px" [attr.y1]="end.y" [attr.y2]="end.y" />
+            }
+          }
           <!-- (a strip per point: the bankroll after that bet, and the bet, on hover; its dot shows) -->
           @for (s of curveSpots; track $index) {
             <g class="desk-spot">
@@ -242,7 +251,7 @@
             </tbody>
           </table>
           <!-- (the bets it saw value in apart from the ones placed only for the data: the edge's is the real record) -->
-          <table class="desk-table desk-subtable" [title]="help['intent']">
+          <table class="desk-table desk-sub" [title]="help['intent']">
             <thead><ng-container *ngTemplateOutlet="tallyHead; context: { $implicit: 'intent' }"></ng-container></thead>
             <tbody>
               @for (t of sorted('intent', byIntent, tallyValue); track t.label) {
@@ -310,7 +319,7 @@
                   <!-- (decided already: its result, pending the next run's grading; else what it pays) -->
                   @let decided = provisional(b);
                   @if (decided) {
-                    <td [class.up]="decided.status === 'won'" [class.down]="decided.status === 'lost'" title="Decided: graded officially on the next run">{{ units(decided.profit) }}<small>{{ decided.status }}</small></td>
+                    <td [class.up]="decided.status === 'won'" [class.down]="decided.status === 'lost'" [class.desk-flash]="decided.status === 'won'" title="Decided: graded officially on the next run">{{ units(decided.profit) }}<small>{{ decided.status }}</small></td>
                   } @else {
                     <td class="up">{{ units(toWin(b)) }}</td>
                   }
@@ -327,7 +336,7 @@
                         <span class="desk-meter" [class.won]="state === 'won'" [class.lost]="state === 'lost'" [class.under]="b.side === 'under'" [style.--meter]="state === 'won' || state === 'lost' ? null : pickColor(b)" aria-hidden="true">
                           @if (m.pips) {
                             @for (pip of m.pips; track $index) {
-                              <span class="pip" [class.on]="pip.on" [class.past]="pip.past"></span>
+                              <span class="pip" [class.on]="pip.on" [class.past]="pip.past" [style.--i]="$index"></span>
                             }
                             @if (m.extra) {
                               <span class="pip-extra">+{{ m.extra }}</span>
@@ -340,8 +349,7 @@
                       <b>{{ count }} / {{ b.line }} {{ unit }}</b>
                     </td>
                   } @else {
-                    @let edge = sideEdge(b);
-                    <td class="desk-score" [style.color]="edgeColor(b)" [title]="edge === null ? '' : edge > 0 ? (b.market === 'spread' ? 'Covering by ' : 'Leading by ') + edge : edge < 0 ? (b.market === 'spread' ? 'Short of covering by ' : 'Trailing by ') + -edge : 'Level'">{{ sideText(b) }}</td>
+                    <td class="desk-score" [style.color]="edgeColor(b)" [title]="sideTitle(b)">{{ sideText(b) }}</td>
                   }
                 </tr>
               }
@@ -354,36 +362,34 @@
     @if (open.length) {
       <card-panel class="tab-card group-results" label="Open Bets" icon="schedule">
         <div class="group-body">
-          @if (open.length) {
-            <table class="desk-table desk-bets">
-              <thead>
+          <table class="desk-table desk-bets">
+            <thead>
+              <tr>
+                @if (!sport) {<ng-container *ngTemplateOutlet="th; context: { $implicit: 'open', key: 'sport', label: 'Sport' }"></ng-container>}
+                <ng-container *ngTemplateOutlet="th; context: { $implicit: 'open', key: 'start', label: 'Game', help: 'The game and when it starts' }"></ng-container>
+                <ng-container *ngTemplateOutlet="th; context: { $implicit: 'open', key: 'pick', label: 'Pick' }"></ng-container>
+                <ng-container *ngTemplateOutlet="th; context: { $implicit: 'open', key: 'odds', label: 'Odds' }"></ng-container>
+                <ng-container *ngTemplateOutlet="th; context: { $implicit: 'open', key: 'units', label: 'Units' }"></ng-container>
+                <ng-container *ngTemplateOutlet="th; context: { $implicit: 'open', key: 'p', label: 'Its chance' }"></ng-container>
+                <ng-container *ngTemplateOutlet="th; context: { $implicit: 'open', key: 'fair', label: 'Book\'s' }"></ng-container>
+                <ng-container *ngTemplateOutlet="th; context: { $implicit: 'open', key: 'ev', label: 'EV' }"></ng-container>
+              </tr>
+            </thead>
+            <tbody>
+              @for (b of sorted('open', open, betValue); track b.id) {
                 <tr>
-                  @if (!sport) {<ng-container *ngTemplateOutlet="th; context: { $implicit: 'open', key: 'sport', label: 'Sport' }"></ng-container>}
-                  <ng-container *ngTemplateOutlet="th; context: { $implicit: 'open', key: 'start', label: 'Game', help: 'The game and when it starts' }"></ng-container>
-                  <ng-container *ngTemplateOutlet="th; context: { $implicit: 'open', key: 'pick', label: 'Pick' }"></ng-container>
-                  <ng-container *ngTemplateOutlet="th; context: { $implicit: 'open', key: 'odds', label: 'Odds' }"></ng-container>
-                  <ng-container *ngTemplateOutlet="th; context: { $implicit: 'open', key: 'units', label: 'Units' }"></ng-container>
-                  <ng-container *ngTemplateOutlet="th; context: { $implicit: 'open', key: 'p', label: 'Its chance' }"></ng-container>
-                  <ng-container *ngTemplateOutlet="th; context: { $implicit: 'open', key: 'fair', label: 'Book\'s' }"></ng-container>
-                  <ng-container *ngTemplateOutlet="th; context: { $implicit: 'open', key: 'ev', label: 'EV' }"></ng-container>
+                  @if (!sport) {<th><img class="desk-league" [src]="leagueLogo(b.sport)" [alt]="b.sport.toUpperCase()" [title]="b.sport.toUpperCase()" /></th>}
+                  <td class="desk-left"><ng-container *ngTemplateOutlet="gameCell; context: { $implicit: b, when: 'EEE h:mm a' }"></ng-container></td>
+                  <td class="desk-left" [title]="help['intent']"><ng-container *ngTemplateOutlet="pickCell; context: { $implicit: b }"></ng-container></td>
+                  <td [title]="help['betBook']">{{ odds(b.odds) }}</td>
+                  <td>{{ b.units }}</td>
+                  <td>{{ pct(b.p) }}</td>
+                  <td>{{ pct(b.fair) }}</td>
+                  <td [class.up]="b.ev > 0" [class.down]="b.ev < 0">{{ pct(b.ev) }}</td>
                 </tr>
-              </thead>
-              <tbody>
-                @for (b of sorted('open', open, betValue); track b.id) {
-                  <tr>
-                    @if (!sport) {<th><img class="desk-league" [src]="leagueLogo(b.sport)" [alt]="b.sport.toUpperCase()" [title]="b.sport.toUpperCase()" /></th>}
-                    <td class="desk-left"><ng-container *ngTemplateOutlet="gameCell; context: { $implicit: b, when: 'EEE h:mm a' }"></ng-container></td>
-                    <td class="desk-left" [title]="help['intent']"><ng-container *ngTemplateOutlet="pickCell; context: { $implicit: b }"></ng-container></td>
-                    <td [title]="help['betBook']">{{ odds(b.odds) }}</td>
-                    <td>{{ b.units }}</td>
-                    <td>{{ pct(b.p) }}</td>
-                    <td>{{ pct(b.fair) }}</td>
-                    <td [class.up]="b.ev > 0" [class.down]="b.ev < 0">{{ pct(b.ev) }}</td>
-                  </tr>
-                }
-              </tbody>
-            </table>
-          }
+              }
+            </tbody>
+          </table>
         </div>
       </card-panel>
     }
@@ -391,49 +397,47 @@
     @if (recent.length) {
       <card-panel class="tab-card group-advanced" label="Latest Results" icon="history">
         <div class="group-body">
-          @if (recent.length) {
-            <table class="desk-table desk-bets">
-              <thead>
+          <table class="desk-table desk-bets">
+            <thead>
+              <tr>
+                @if (!sport) {<ng-container *ngTemplateOutlet="th; context: { $implicit: 'recent', key: 'sport', label: 'Sport' }"></ng-container>}
+                <ng-container *ngTemplateOutlet="th; context: { $implicit: 'recent', key: 'start', label: 'Game', help: 'The game and when it was played' }"></ng-container>
+                <ng-container *ngTemplateOutlet="th; context: { $implicit: 'recent', key: 'pick', label: 'Pick' }"></ng-container>
+                <ng-container *ngTemplateOutlet="th; context: { $implicit: 'recent', key: 'odds', label: 'Odds' }"></ng-container>
+                <ng-container *ngTemplateOutlet="th; context: { $implicit: 'recent', key: 'units', label: 'Units' }"></ng-container>
+                <ng-container *ngTemplateOutlet="th; context: { $implicit: 'recent', key: 'p', label: 'Its chance' }"></ng-container>
+                <ng-container *ngTemplateOutlet="th; context: { $implicit: 'recent', key: 'final', label: 'Final' }"></ng-container>
+                <ng-container *ngTemplateOutlet="th; context: { $implicit: 'recent', key: 'result', label: 'Result' }"></ng-container>
+                <ng-container *ngTemplateOutlet="th; context: { $implicit: 'recent', key: 'clv', label: 'CLV', help: help['betClv'] }"></ng-container>
+                <ng-container *ngTemplateOutlet="th; context: { $implicit: 'recent', key: 'why', label: 'Why' }"></ng-container>
+              </tr>
+            </thead>
+            <tbody>
+              @for (b of sorted('recent', recent, betValue); track b.id) {
                 <tr>
-                  @if (!sport) {<ng-container *ngTemplateOutlet="th; context: { $implicit: 'recent', key: 'sport', label: 'Sport' }"></ng-container>}
-                  <ng-container *ngTemplateOutlet="th; context: { $implicit: 'recent', key: 'start', label: 'Game', help: 'The game and when it was played' }"></ng-container>
-                  <ng-container *ngTemplateOutlet="th; context: { $implicit: 'recent', key: 'pick', label: 'Pick' }"></ng-container>
-                  <ng-container *ngTemplateOutlet="th; context: { $implicit: 'recent', key: 'odds', label: 'Odds' }"></ng-container>
-                  <ng-container *ngTemplateOutlet="th; context: { $implicit: 'recent', key: 'units', label: 'Units' }"></ng-container>
-                  <ng-container *ngTemplateOutlet="th; context: { $implicit: 'recent', key: 'p', label: 'Its chance' }"></ng-container>
-                  <ng-container *ngTemplateOutlet="th; context: { $implicit: 'recent', key: 'final', label: 'Final' }"></ng-container>
-                  <ng-container *ngTemplateOutlet="th; context: { $implicit: 'recent', key: 'result', label: 'Result' }"></ng-container>
-                  <ng-container *ngTemplateOutlet="th; context: { $implicit: 'recent', key: 'clv', label: 'CLV', help: help['betClv'] }"></ng-container>
-                  <ng-container *ngTemplateOutlet="th; context: { $implicit: 'recent', key: 'why', label: 'Why' }"></ng-container>
+                  @if (!sport) {<th><img class="desk-league" [src]="leagueLogo(b.sport)" [alt]="b.sport.toUpperCase()" [title]="b.sport.toUpperCase()" /></th>}
+                  <td class="desk-left"><ng-container *ngTemplateOutlet="gameCell; context: { $implicit: b, when: 'MMM d' }"></ng-container></td>
+                  <td class="desk-left"><ng-container *ngTemplateOutlet="pickCell; context: { $implicit: b }"></ng-container></td>
+                  <td [title]="help['betBook']">{{ odds(b.odds) }}</td>
+                  @let r = result(b);
+                  <td [class.up]="r?.status === 'won'" [class.down]="r?.status === 'lost'">{{ b.units }}</td>
+                  <td>{{ pct(b.p) }}</td>
+                  <td>{{ finalScore(b) }}</td>
+                  <td [class.up]="(r?.profit ?? 0) > 0" [class.down]="(r?.profit ?? 0) < 0" [title]="b.status === 'open' ? 'From the final score; graded officially on the next run' : ''">{{ r ? r.status + ' ' + units(r.profit) : 'final' }}</td>
+                  <td [class.up]="b.clv?.beat === true" [class.down]="b.clv?.beat === false">{{ betClv(b) }}</td>
+                  <td class="desk-why" [title]="recapText(b)">
+                    @if (broke(b)) {
+                      <mat-icon class="desk-broke" fontIcon="healing" aria-label="Premise broke in the game"></mat-icon>
+                    }
+                    {{ b.why ?? '-' }}
+                    @if (b.recap?.link; as link) {
+                      <a [href]="link" target="_blank" rel="noopener" aria-label="ESPN recap"><mat-icon aria-hidden="true" fontIcon="open_in_new"></mat-icon></a>
+                    }
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                @for (b of sorted('recent', recent, betValue); track b.id) {
-                  <tr>
-                    @if (!sport) {<th><img class="desk-league" [src]="leagueLogo(b.sport)" [alt]="b.sport.toUpperCase()" [title]="b.sport.toUpperCase()" /></th>}
-                    <td class="desk-left"><ng-container *ngTemplateOutlet="gameCell; context: { $implicit: b, when: 'MMM d' }"></ng-container></td>
-                    <td class="desk-left"><ng-container *ngTemplateOutlet="pickCell; context: { $implicit: b }"></ng-container></td>
-                    <td [title]="help['betBook']">{{ odds(b.odds) }}</td>
-                    @let r = result(b);
-                    <td [class.up]="r?.status === 'won'" [class.down]="r?.status === 'lost'">{{ b.units }}</td>
-                    <td>{{ pct(b.p) }}</td>
-                    <td>{{ finalScore(b) }}</td>
-                    <td [class.up]="(r?.profit ?? 0) > 0" [class.down]="(r?.profit ?? 0) < 0" [title]="b.status === 'open' ? 'From the final score; graded officially on the next run' : ''">{{ r ? r.status + ' ' + units(r.profit) : 'final' }}</td>
-                    <td [class.up]="b.clv?.beat === true" [class.down]="b.clv?.beat === false">{{ betClv(b) }}</td>
-                    <td class="desk-why" [title]="recapText(b)">
-                      @if (broke(b)) {
-                        <mat-icon class="desk-broke" fontIcon="healing" aria-label="Premise broke in the game"></mat-icon>
-                      }
-                      {{ b.why ?? '-' }}
-                      @if (b.recap?.link; as link) {
-                        <a [href]="link" target="_blank" rel="noopener" aria-label="ESPN recap"><mat-icon aria-hidden="true" fontIcon="open_in_new"></mat-icon></a>
-                      }
-                    </td>
-                  </tr>
-                }
-              </tbody>
-            </table>
-          }
+              }
+            </tbody>
+          </table>
         </div>
       </card-panel>
     }
@@ -441,17 +445,15 @@
     @if (changes.length) {
       <card-panel class="tab-card group-support" label="What It's Changed" icon="auto_fix_high">
         <div class="group-body">
-          @if (changes.length) {
-            <ul class="desk-changes">
-              @for (c of changes; track c.at + c.what + c.sport) {
-                <li>
-                  <small>{{ c.at | date: 'MMM d, h:mm a' }} · {{ c.sport }}</small>
-                  <b>{{ c.what }}: {{ c.from }} → {{ c.to }}</b>
-                  <span>{{ c.why }}</span>
-                </li>
-              }
-            </ul>
-          }
+          <ul class="desk-changes">
+            @for (c of changes; track c.at + c.what + c.sport) {
+              <li>
+                <small>{{ c.at | date: 'MMM d, h:mm a' }} · {{ c.sport }}</small>
+                <b>{{ c.what }}: {{ c.from }} → {{ c.to }}</b>
+                <span>{{ c.why }}</span>
+              </li>
+            }
+          </ul>
         </div>
       </card-panel>
     }
@@ -566,8 +568,8 @@
                     <td [class.up]="(t.close.every.roi ?? 0) > 0" [class.down]="(t.close.every.roi ?? 0) < 0">{{ pct(t.close.every.roi) }}</td>
                     <td [class.up]="(t.early.every.roi ?? 0) > 0" [class.down]="(t.early.every.roi ?? 0) < 0">{{ pct(t.early.every.roi) }}</td>
                     <td>{{ pct(t.early.clv.beat, 0) }}</td>
-                    <td>{{ num(t.close.logLoss.model !== null && t.close.logLoss.market !== null ? t.close.logLoss.model - t.close.logLoss.market : null) }}</td>
-                    <td>{{ num(t.anchors.pinnacle !== null && t.anchors.own !== null ? t.anchors.own - t.anchors.pinnacle : null, 4) }}</td>
+                    <td>{{ num(modelVsMarket(t)) }}</td>
+                    <td>{{ num(pinnacleEdge(t), 4) }}</td>
                   </tr>
                 }
               </tbody>
