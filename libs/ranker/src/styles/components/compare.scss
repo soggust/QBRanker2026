@@ -40,23 +40,25 @@
   box-shadow:
     inset 0 3px 0 var(--side, transparent),
     0 4px 12px rgba(0, 0, 0, 0.3);
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  min-height: 196px;
+  // (the team card on the left, the name and the rest beside it; the rank and archetype along the bottom)
+  align-items: end;
+  column-gap: 12px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
   min-width: 0;
-  padding: 16px 12px 10px;
+  padding: 16px 12px 9px;
   position: relative;
+  row-gap: 10px;
 }
 
-// (the team card, at about the hero's half)
+// (the team card, the player standing in it)
 .tape-badge {
-  --w: 84px;
-  --h: 56px;
-  --card-r: 12px;
-  --shot-h: 72px;
-  --hang: 14px;
-  margin-top: 12px;
+  --w: 66px;
+  --h: 44px;
+  --card-r: 10px;
+  --shot-h: 58px;
+  --hang: 11px;
+  margin-top: 10px;
 }
 
 .tape-remove {
@@ -89,49 +91,58 @@
   align-items: flex-start;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 3px;
   min-width: 0;
+  // (clear of the remove button)
+  padding-right: 14px;
 }
 
-// (the season: the card's chip, a picker when they've more than one)
+// (the season, under the name: a quiet pill, its caret in the board's light; a picker when they've more
+// than one)
 .tape-season {
   align-items: center;
-  background: var(--scoreboard-dots), var(--scoreboard);
-  border: 1px solid var(--scoreboard-led);
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.22);
   border-radius: 999px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.45);
   box-sizing: border-box;
+  color: #fff;
   cursor: pointer;
   display: inline-flex;
   font-family: v.$font-base;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 800;
-  height: 28px;
-  letter-spacing: 1px;
-  padding: 0 8px 0 12px;
+  height: 22px;
+  letter-spacing: 0.8px;
+  margin-top: 4px;
+  padding: 0 6px 0 10px;
   text-transform: uppercase;
+  transition: border-color 0.15s;
   width: auto;
+
+  &.fixed {
+    cursor: default;
+    padding-right: 10px;
+  }
 
   .mat-mdc-select-trigger {
     gap: 4px;
   }
 
-  .mat-mdc-select-value,
+  .mat-mdc-select-value {
+    color: #fff;
+    max-width: none;
+  }
+
   .mat-mdc-select-arrow {
     color: var(--scoreboard-led);
   }
 
-  .mat-mdc-select-value {
-    max-width: none;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9);
-  }
-
   .mat-mdc-select-arrow-wrapper {
-    height: 18px;
+    height: 16px;
   }
 
-  &:hover {
-    filter: brightness(1.2);
+  &:not(.fixed):hover {
+    border-color: var(--scoreboard-led);
   }
 }
 
@@ -140,8 +151,8 @@
   border: none;
   color: #fff;
   cursor: pointer;
-  @include v.hand(19px);
-  line-height: 1.1;
+  @include v.hand(18px);
+  line-height: 1.08;
   max-width: 100%;
   padding: 0;
   text-align: left;
@@ -164,9 +175,11 @@
 
 .tape-foot {
   align-items: center;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
   display: flex;
   gap: 6px;
-  margin-top: auto;
+  grid-column: 1 / -1;
+  padding-top: 8px;
 }
 
 // (the rank that season, on the card's LED tile)
@@ -192,10 +205,11 @@
 
 .tape-archetype {
   color: var(--side);
-  font-size: 12px;
+  font-size: 11.5px;
   font-weight: 800;
-  line-height: 1.2;
-  margin: 0;
+  line-height: 1.15;
+  margin-left: auto;
+  text-align: right;
 }
 
 // The add slot: a dashed outline, the search in it, its hits dropping over the board
@@ -204,7 +218,11 @@
   background: rgba(0, 0, 0, 0.18);
   border: 1px dashed rgba(255, 255, 255, 0.22);
   box-shadow: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
   justify-content: center;
+  min-height: 110px;
   text-align: center;
 
   // (alone, the empty view's: two slots wide and short, the icon beside the search)
@@ -388,6 +406,22 @@
   &.small {
     font-size: 13px;
     padding: 20px 0 4px;
+  }
+}
+
+// (sides on different tabs: what lines up, said once over the tab)
+.cmp-mixed {
+  align-items: center;
+  color: #9a9a9a;
+  display: flex;
+  font-size: 12px;
+  font-weight: 700;
+  gap: 6px;
+  margin: 0 0 12px;
+
+  .mat-icon {
+    @include v.icon-size(15px);
+    flex: none;
   }
 }
 
@@ -807,9 +841,15 @@
   // (the tapes compact, so the comparisons keep most of the screen: a smaller team card and name, the
   // team and archetype left to their cards)
   .tape {
+    align-items: flex-start;
+    display: flex;
+    flex-direction: column;
     gap: 5px;
-    min-height: 0;
     padding: 10px 9px 8px;
+  }
+
+  .tape-foot {
+    align-self: stretch;
   }
 
   .tape-badge {

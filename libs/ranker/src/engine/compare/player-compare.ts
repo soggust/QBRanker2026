@@ -6,7 +6,9 @@
 // What it builds, once per change of sides: the skills (on one radar where they share three or more, and
 // as bars), the edges (where each one is clearly the best of them), how alike they are, the grid's columns
 // side by side (each side's tab's; the leader marked, the columns each one leads counted) and the career
-// arcs (every season's standing, the compared one ringed).
+// arcs (every season's standing, the compared one ringed). Sides on different tabs share only what's the
+// same skill or column by name, and a column they share goes to the bigger number: a percentile among
+// backs and one among receivers don't say who did more.
 import { SKILL_STATS, SkillPlayer, SkillPosition, SkillStat, presetWeights } from '@sport/positions';
 import { SPORT } from '@sport/sport';
 import { badgeColor, whiteLogo } from '@sport/team-colors';
@@ -90,6 +92,9 @@ export interface CompareHit {
 
 export interface CompareCell {
   text: string;
+  // The value the column shows (none: not ranked), and whether less is better
+  value: number | null;
+  lowerBetter: boolean;
   // Where it stood in its own season's list: 0 (last) to 1 (first); null: not ranked
   pct: number | null;
   rank: number | null;
@@ -120,6 +125,9 @@ export interface CompareView {
   // The columns each side leads outright, and how many had a leader
   wins: number[];
   contested: number;
+  // More than one tab among them (the skills are each one's among his own tab's; a column two tabs share
+  // goes to the bigger number)
+  mixed: boolean;
 }
 
 // The career arcs: each side's seasons as points (x: its year in the league; teams alone, the season), on
@@ -288,12 +296,12 @@ export class PlayerCompare {
       return;
     }
 
-    // (every skill any of them has, the first side's order first)
-    const skillIds = [...new Set(sides.flatMap((s) => s.skills.map((k) => k.id)))];
-    const skills = skillIds.map((id) => {
-      const pcts = sides.map((s) => s.skills.find((k) => k.id === id)?.pct ?? null);
-      const def = sides.flatMap((s) => s.skills).find((k) => k.id === id)!;
-      return { id, name: def.name, short: def.short, pcts, leaders: leadersOf(pcts) };
+    // (every skill any of them has, the first side's order first: one skill when its id and its name are
+    // the same, so a back's Rushing Efficiency and a receiver's Efficiency stay two)
+    const skillOf = (k: CardSkill) => `${k.id}|${k.name}`;
+    const skills = [...new Map(sides.flatMap((s) => s.skills.map((k) => [skillOf(k), k] as const))).values()].map((def) => {
+      const pcts = sides.map((s) => s.skills.find((k) => skillOf(k) === skillOf(def))?.pct ?? null);
+      return { id: skillOf(def), name: def.name, short: def.short, pcts, leaders: leadersOf(pcts) };
     });
 
     // (the radar: the skills all of them have)
@@ -342,7 +350,10 @@ export class PlayerCompare {
         .map(({ key, of }): CompareRow => {
           const shared = of.find((s): s is SkillStat => !!s)!;
           const cells = sides.map((side, i) => cell(side, of[i]));
-          const leaders = leadersOf(cells.map((c) => c.pct));
+          // (sides on one tab: whoever stood higher in his own season; across tabs, where a percentile
+          // among backs and one among receivers don't say who did more: the bigger number)
+          const tabs = new Set(sides.filter((_, i) => cells[i].value !== null).map((s) => s.position));
+          const leaders = leadersOf(tabs.size > 1 ? cells.map((c) => (c.value === null ? null : c.lowerBetter ? -c.value : c.value)) : cells.map((c) => c.pct));
           // (counted toward the columns each side leads: not display-only stats or the team around them)
           if (!shared.infoOnly && (!shared.support || shared.supportHelps) && leaders.length) {
             contested++;
@@ -354,12 +365,13 @@ export class PlayerCompare {
         .filter((row) => row.cells.some((c) => c.text !== '-')),
     }));
 
-    this.view = { skills, radar: radarView, edges, pairs, groups: groups.filter((g) => g.rows.length), wins, contested };
+    const mixed = new Set(sides.map((s) => s.position)).size > 1;
+    this.view = { skills, radar: radarView, edges, pairs, groups: groups.filter((g) => g.rows.length), wins, contested, mixed };
     this.arcs = this.buildArcs();
   }
 
   // Every side's tab's columns as its grid shows them (the Recent squares aside), merged: the groups in
-  // the order they first come, each with every stat any side shows, and each side's own definition of it
+  // the order they first come, each with every column any side shows, and each side's own stat for it
   private columns(): { id: string; title: string; icon: string; stats: { key: string; of: (SkillStat | null)[] }[] }[] {
     const out: ReturnType<PlayerCompare['columns']> = [];
     this.sides.forEach((side, i) => {
@@ -367,8 +379,10 @@ export class PlayerCompare {
         let merged = out.find((g) => g.id === group.id);
         if (!merged) out.push((merged = { id: group.id, title: group.title, icon: group.icon, stats: [] }));
         for (const stat of group.stats.filter((s) => s.format !== 'recent')) {
-          let row = merged.stats.find((s) => s.key === stat.key);
-          if (!row) merged.stats.push((row = { key: stat.key, of: this.sides.map(() => null) }));
+          // (one column when its key and its name are the same: a back's Total Yds aren't a receiver's)
+          const key = `${stat.key}|${stat.label}`;
+          let row = merged.stats.find((s) => s.key === key);
+          if (!row) merged.stats.push((row = { key, of: this.sides.map(() => null) }));
           row.of[i] = stat;
         }
       }
@@ -504,16 +518,16 @@ export class PlayerCompare {
 // A side's value in a column against its own season's list (none when its tab hasn't the column, or
 // another season's card wouldn't show it: a value from another tab, the table's season's)
 function cell(side: CompareSide, stat: SkillStat | null): CompareCell {
-  const none: CompareCell = { text: '-', pct: null, rank: null, of: 0, tint: null };
+  const lowerBetter = !!stat && (stat.format === 'rank' || (!!stat.negative && !stat.support));
+  const none: CompareCell = { text: '-', value: null, lowerBetter, pct: null, rank: null, of: 0, tint: null };
   if (!stat || (side.context && SPORT.tableSeasonOnly?.(stat))) return none;
   const { reader, player, list } = side;
   const value = reader.value(player, stat);
   const text = reader.format(player, stat);
   if (value === null || stat.infoOnly) return { ...none, text };
-  const lowerBetter = stat.format === 'rank' || (!!stat.negative && !stat.support);
   const values = list.map((p) => reader.value(p, stat)).filter((v): v is number => v !== null);
   const rank = 1 + values.filter((v) => (lowerBetter ? v < value : v > value)).length;
-  return { text, pct: rankPct(rank, values.length), rank, of: values.length, tint: reader.valueColor(player, stat) };
+  return { text, value, lowerBetter, pct: rankPct(rank, values.length), rank, of: values.length, tint: reader.valueColor(player, stat) };
 }
 
 // The best of a few percentiles: every side at the top (ties), none when fewer than two have one or

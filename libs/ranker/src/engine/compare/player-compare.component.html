@@ -24,7 +24,10 @@
                 <img class="comp-photo" [src]="s.photo" alt="" (error)="s.photo = null" />
               }
             </span>
+            <!-- (beside the team card: the name, the tab and team, the season under them) -->
             <div class="tape-text">
+              <button type="button" class="tape-name" [title]="'Open ' + s.name + '’s ' + s.seasonText + ' card'" (click)="openCard(s)">{{ s.name }}</button>
+              <span class="tape-team">{{ s.tabLabel }}@if (s.teamName) { · {{ s.teamName }}}</span>
               <!-- (the season: any other of theirs on that tab, from the picker) -->
               @if (!careerOnly && (s.career?.length ?? 0) > 1) {
                 <mat-select class="tape-season" [value]="s.season" [attr.aria-label]="'Season for ' + s.name" title="Another of their seasons" (valueChange)="compare.add(s.position, $event, s.gsisId, i)">
@@ -34,16 +37,15 @@
                   }
                 </mat-select>
               } @else {
-                <span class="season-chip">{{ s.seasonText }}</span>
+                <span class="tape-season fixed">{{ s.seasonText }}</span>
               }
-              <button type="button" class="tape-name" [title]="'Open ' + s.name + '’s ' + s.seasonText + ' card'" (click)="openCard(s)">{{ s.name }}</button>
-              <span class="tape-team">{{ s.tabLabel }}@if (s.teamName) { · {{ s.teamName }}}</span>
             </div>
+            <!-- (along the bottom: the rank that season, the archetype) -->
             <div class="tape-foot">
               <span class="tape-rank" [style.--tone]="rankTone(s.pct)" [title]="'#' + s.rank + ' of ' + s.of + ' that season, with your sliders'">{{ s.rank }}</span>
               <span class="tape-of">of {{ s.of }}</span>
+              <span class="tape-archetype">{{ s.archetype }}</span>
             </div>
-            <p class="tape-archetype">{{ s.archetype }}</p>
           </div>
         }
         <!-- (the add slot: a name typed, everyone the sport has had found, a click adds their best season) -->
@@ -114,6 +116,9 @@
         @switch (compare.tab) {
           @case ('overview') {
             <!-- Skills: every side's shape on one radar (the skills they share), and each skill's bars -->
+            @if (v.mixed) {
+              <p class="cmp-mixed"><mat-icon fontIcon="info"></mat-icon>Different positions: each skill is where he stood among his own position, and only the same skill lines up</p>
+            }
             <div class="cmp-top">
               @if (v.radar; as r) {
                 <div class="ov-radar cmp-radar">
@@ -201,6 +206,9 @@
             <!-- The grid's columns: each value against its own season (its tint, the bar: where it stood),
                  the leader's value lit; over each side's column, the columns it leads -->
             @let led = v.contested && sides.length > 1;
+            @if (v.mixed) {
+              <p class="cmp-mixed"><mat-icon fontIcon="info"></mat-icon>Different positions: a column they share goes to the bigger number; the bars, where each stood among his own position</p>
+            }
             <div class="cmp-stats" [style.--sides]="sides.length">
               <div class="cmp-row cmp-head">
                 <span></span>
