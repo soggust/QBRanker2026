@@ -2145,6 +2145,49 @@
     font-weight: 700;
   }
 
+  // (the result as a mini scoreboard: an LED tile, his team's score and theirs, the winner's lit green and
+  // the loser's red, the game view's board's; a tie in the board's own light)
+  .log-board {
+    @include v.led-tile;
+    border-radius: 4px;
+    display: inline-flex;
+    font-size: 11px;
+    gap: 3px;
+    height: 20px;
+    padding: 1px 6px 0;
+    vertical-align: middle;
+
+    b {
+      --tone: var(--scoreboard-led);
+      color: var(--tone);
+      font-weight: 400;
+      text-shadow: 0 0 6px color-mix(in srgb, var(--tone) 60%, transparent);
+    }
+
+    i {
+      color: rgba(255, 255, 255, 0.35);
+      font-family: v.$font-base;
+      font-style: normal;
+      font-weight: 900;
+    }
+
+    &.W .us,
+    &.L .them {
+      --tone: rgb(80, 207, 80);
+    }
+
+    &.L .us,
+    &.W .them {
+      --tone: #ff3b30;
+    }
+  }
+
+  .log-extra {
+    color: rgba(255, 255, 255, 0.55);
+    font-size: 10px;
+    margin-left: 4px;
+  }
+
   .log-outcome {
     border-radius: 3px;
     color: #111;

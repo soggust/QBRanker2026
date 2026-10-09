@@ -105,6 +105,13 @@ export class CardZonesTab extends CardTab {
 // Game Log: the season's games (a result opens its game) and the games to come
 @Component({ selector: 'card-games', templateUrl: './games.component.html', standalone: false })
 export class CardGamesTab extends CardTab {
+  // A result's score for its mini scoreboard ("27-7 OT": his team's, theirs, what follows); null when it
+  // isn't one (a game to come)
+  board(score: string): { us: string; them: string; extra: string } | null {
+    const m = /^(\d+)-(\d+)\s*(.*)$/.exec(score.trim());
+    return m ? { us: m[1], them: m[2], extra: m[3] } : null;
+  }
+
   // A row's game: ESPN's id, or its day and the two teams
   openGame(card: PlayerCard, row: GameLogViewRow): void {
     if (row.event) this.games.open({ event: row.event });
