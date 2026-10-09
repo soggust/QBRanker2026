@@ -325,6 +325,25 @@ export class ModelDeskComponent implements OnInit, OnDestroy {
   open: ModelBet[] = [];
   live: ModelBet[] = [];
   recent: ModelBet[] = [];
+  private graded: ModelBet[] = [];
+
+  // (the bets under way: In Play only while their game runs; once it's over they're Latest Results', first,
+  // with the result the scores give them until the run grades them)
+  private split(started: ModelBet[]): void {
+    const sorted = [...started].sort((a, b) => a.start.localeCompare(b.start));
+    this.live = sorted.filter((b) => !this.isOver(b));
+    this.recent = [...sorted.filter((b) => this.isOver(b)).reverse(), ...this.graded];
+  }
+
+  // (a bet's result in Latest Results: the run's grade, or for one not graded yet, the scores')
+  result(b: ModelBet): { status: string; profit: number } | null {
+    return b.status !== 'open' ? { status: b.status, profit: b.profit } : this.provisional(b);
+  }
+
+  // (a bet's final score: the run's, or the scoreboard's before it's graded)
+  finalScore(b: ModelBet): string {
+    return b.final ?? (b.event ? (this.scores.get(b.event)?.score ?? '') : '');
+  }
   // (each in-play game's score and clock, by its ESPN id, from ESPN's scoreboard every minute)
   scores = new Map<string, { text: string; score: string; detail: string; final: boolean }>();
   // (each in-play prop's stat so far, by the bet's id, from its game's box score every minute)
@@ -401,7 +420,7 @@ export class ModelDeskComponent implements OnInit, OnDestroy {
         if (!b.team) this.pickColors.delete(b.id);
       }
     }
-    this.live = live.sort((a, b) => a.start.localeCompare(b.start));
+    this.split(live);
     this.open = this.bets.filter((b) => b.status === 'open' && Date.parse(b.start) > now).sort((a, b) => a.start.localeCompare(b.start));
   }
 
@@ -444,8 +463,8 @@ export class ModelDeskComponent implements OnInit, OnDestroy {
 
     const now = Date.now();
     this.open = bets.filter((b) => b.status === 'open' && Date.parse(b.start) > now).sort((a, b) => a.start.localeCompare(b.start));
-    this.live = bets.filter((b) => b.status === 'open' && Date.parse(b.start) <= now).sort((a, b) => a.start.localeCompare(b.start));
-    this.recent = graded.slice(-40).reverse();
+    this.graded = graded.slice(-40).reverse();
+    this.split(bets.filter((b) => b.status === 'open' && Date.parse(b.start) <= now));
     this.changes = this.states
       .flatMap((s) => s.changelog.map((c) => ({ ...c, sport: s.label })))
       .sort((a, b) => b.at.localeCompare(a.at))
@@ -551,7 +570,7 @@ export class ModelDeskComponent implements OnInit, OnDestroy {
   get pending(): { count: number; profit: number } {
     let count = 0;
     let profit = 0;
-    for (const b of this.live) {
+    for (const b of this.bets) {
       const p = this.provisional(b);
       if (!p) continue;
       count++;
@@ -755,7 +774,8 @@ export class ModelDeskComponent implements OnInit, OnDestroy {
     : key === 'graded' ? (b.gradedAt ?? b.start)
     : key === 'market' ? b.market
     : key === 'pick' ? b.pick
-    : key === 'result' ? b.profit
+    : key === 'result' ? (this.result(b)?.profit ?? null)
+    : key === 'final' ? this.finalScore(b)
     : key === 'why' ? (b.why ?? null)
     : key === 'clv' ? (b.clv ? (b.clv.ev ?? b.clv.pts ?? null) : null)
     : (b as unknown as Record<string, unknown>)[key];

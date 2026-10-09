@@ -52,6 +52,18 @@ export function reasonOf(bet, game) {
   if (bet.market === 'prop' && bet.projection) {
     const p = bet.projection;
     out.push(`Projects ${p.mean} ${bet.statLabel.toLowerCase()} against a line of ${bet.line}${p.games ? ` (${p.rate} a game this season)` : ''}.`);
+    // (the defense against his role, and its funnel: said where they stand out; "not weighed" where the
+    // projection leaves them out, as it does while they haven't helped on past games)
+    // (his team is ESPN's id: the defense is the game's other side)
+    const defense = bet.team && game ? (String(bet.team) === String(game.home) ? game.awayAbbr : String(bet.team) === String(game.away) ? game.homeAbbr : null) : null;
+    const team = defense ?? 'The defense';
+    if (p.role && Number.isFinite(p.roleFactor) && Math.abs(p.roleFactor - 1) >= 0.1 && p.roleRank) {
+      const pctOff = Math.round(Math.abs(p.roleFactor - 1) * 100);
+      out.push(`${team} ${p.roleFactor < 1 ? 'holds' : 'gives'} ${p.role}s ${pctOff}% ${p.roleFactor < 1 ? 'under' : 'over'} their average (#${p.roleFactor < 1 ? p.roleRank.rank : p.roleRank.of - p.roleRank.rank + 1} in the league${p.roleUsed ? '' : '; not weighed: the role split hasn\'t helped on past games'}).`);
+    }
+    if (Number.isFinite(p.funnel) && Math.abs(p.funnel) >= 0.03) {
+      out.push(`${team} is a ${p.funnel > 0 ? 'pass' : 'run'} funnel: opponents pass ${Math.round(Math.abs(p.funnel) * 100)} points ${p.funnel > 0 ? 'more' : 'less'} often than usual${p.funnelUsed ? '' : ' (not weighed: it hasn\'t helped on past games)'}.`);
+    }
   } else if (Number.isFinite(bet.expMargin) && Number.isFinite(bet.expTotal)) {
     const h = (bet.expTotal + bet.expMargin) / 2;
     const a = (bet.expTotal - bet.expMargin) / 2;
@@ -80,7 +92,6 @@ export function reasonOf(bet, game) {
     const better = bet.market === 'spread' ? seen.line < bet.line : bet.side === 'over' ? seen.line > bet.line : bet.side === 'under' ? seen.line < bet.line : false;
     if (better) out.push(`The line has moved its way since (${bet.line} to ${seen.line}).`);
   } else if (seen && Number.isFinite(seen.fair) && seen.fair - bet.fair >= 0.015) out.push(`The market has moved its way since (${pct(bet.fair)} to ${pct(seen.fair)}).`);
-  void game;
   return out.join(' ');
 }
 

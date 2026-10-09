@@ -171,7 +171,7 @@ function easternToUtc(day, time) {
 // out can earn its way back in (run.mjs decides: want). The rest (each sport's schedule, box scores or
 // StatsAPI, the injury report, places) feed kept terms in every sport, and the props.
 export const OPTIONAL = {
-  nfl: { plays: ['nsEpa', 'nsEpaT', 'refWhistle'], snaps: ['olChanges'], fields: ['crosswind'], forecasts: ['cold', 'wind', 'crosswind'] },
+  nfl: { plays: ['nsEpa', 'nsEpaT', 'refWhistle', 'funnelT', 'paceT'], snaps: ['olChanges'], fields: ['crosswind'], forecasts: ['cold', 'wind', 'crosswind'] },
   nba: { officials: ['refTotal', 'refHome', 'refWhistle'] },
   nhl: { officials: ['refTotal', 'refHome', 'refWhistle'], xg: ['xgEdge', 'xgT', 'goalieX'] },
   mlb: { air: ['airThin'], bullpens: ['penTired', 'penTiredT'] },

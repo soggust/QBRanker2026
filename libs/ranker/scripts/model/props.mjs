@@ -20,6 +20,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { decimal, fairPair, stakeFor } from './desk.mjs';
 import { fitStat, makeModel, nbOver, recal } from './project.mjs';
+import { nbaMatchups, nflMatchups } from './matchups.mjs';
 import { CACHE, get, pool } from './sources.mjs';
 import { PROP_BOOKS, SPORT_KEYS, american, call, canSpend, hasKey } from './oddsapi.mjs';
 import { round } from './ratings.mjs';
@@ -41,23 +42,23 @@ const CATCH = (r) => r.s.targets >= 1;
 // count as having played it, which side's expected score is its game script, its context term
 export const STATS = {
   nfl: [
-    stat('passYds', 'Pass Yds', /^Total Passing Yards \(/, { played: QB, ctx: 'wind' }),
-    stat('passAtt', 'Pass Att', /^Total Passing Attempts/, { played: QB, ctx: 'wind' }),
-    stat('passCmp', 'Completions', /^Total Pass Completions/, { played: QB, ctx: 'wind' }),
+    stat('passYds', 'Pass Yds', /^Total Passing Yards \(/, { played: QB, ctx: 'wind', volume: 'pass' }),
+    stat('passAtt', 'Pass Att', /^Total Passing Attempts/, { played: QB, ctx: 'wind', volume: 'pass' }),
+    stat('passCmp', 'Completions', /^Total Pass Completions/, { played: QB, ctx: 'wind', volume: 'pass' }),
     stat('passTd', 'Pass TDs', /^Total Passing Touchdowns/, { played: QB, ctx: 'wind' }),
     stat('passInt', 'INTs', /^Total Passing Interceptions/, { played: QB, ctx: 'wind' }),
-    stat('rushYds', 'Rush Yds', /^Total Rushing Yards \(/, { played: RUSH }),
-    stat('rushAtt', 'Carries', /^Total Carries/, { played: RUSH }),
-    stat('recYds', 'Rec Yds', /^Total Receiving Yards \(/, { played: CATCH, ctx: 'backupQb' }),
-    stat('rec', 'Receptions', /^Total Receptions/, { played: CATCH, ctx: 'backupQb' }),
-    stat('rushRecYds', 'Rush+Rec Yds', /^Total Rushing Plus Receiving Yards/, { played: (r) => RUSH(r) || CATCH(r), ctx: 'backupQb' }),
+    stat('rushYds', 'Rush Yds', /^Total Rushing Yards \(/, { played: RUSH, roles: true, volume: 'rush' }),
+    stat('rushAtt', 'Carries', /^Total Carries/, { played: RUSH, roles: true, volume: 'rush' }),
+    stat('recYds', 'Rec Yds', /^Total Receiving Yards \(/, { played: CATCH, ctx: 'backupQb', roles: true, volume: 'pass', targets: true }),
+    stat('rec', 'Receptions', /^Total Receptions/, { played: CATCH, ctx: 'backupQb', roles: true, volume: 'pass', targets: true }),
+    stat('rushRecYds', 'Rush+Rec Yds', /^Total Rushing Plus Receiving Yards/, { played: (r) => RUSH(r) || CATCH(r), ctx: 'backupQb', roles: true, targets: true }),
   ],
   nba: [
-    stat('pts', 'Points', /^Total Points( \(|$)/, { played: (r) => r.s.min >= 10, ctx: 'usage', posGroup: () => 'all' }),
-    stat('reb', 'Rebounds', /^Total Rebounds/, { played: (r) => r.s.min >= 10, ctx: 'usage', posGroup: () => 'all' }),
-    stat('ast', 'Assists', /^Total Assists/, { played: (r) => r.s.min >= 10, ctx: 'usage', posGroup: () => 'all' }),
-    stat('fg3', 'Threes', /^Total (3-Point|Three|Made 3)/i, { played: (r) => r.s.min >= 10, ctx: 'usage', posGroup: () => 'all' }),
-    stat('pra', 'Pts+Reb+Ast', /Points.*Rebounds.*Assists/i, { played: (r) => r.s.min >= 10, ctx: 'usage', posGroup: () => 'all' }),
+    stat('pts', 'Points', /^Total Points( \(|$)/, { played: (r) => r.s.min >= 10, ctx: 'usage', posGroup: () => 'all', roles: true }),
+    stat('reb', 'Rebounds', /^Total Rebounds/, { played: (r) => r.s.min >= 10, ctx: 'usage', posGroup: () => 'all', roles: true }),
+    stat('ast', 'Assists', /^Total Assists/, { played: (r) => r.s.min >= 10, ctx: 'usage', posGroup: () => 'all', roles: true }),
+    stat('fg3', 'Threes', /^Total (3-Point|Three|Made 3)/i, { played: (r) => r.s.min >= 10, ctx: 'usage', posGroup: () => 'all', roles: true }),
+    stat('pra', 'Pts+Reb+Ast', /Points.*Rebounds.*Assists/i, { played: (r) => r.s.min >= 10, ctx: 'usage', posGroup: () => 'all', roles: true }),
   ],
   nhl: [
     stat('sog', 'Shots', /^Total Shots on Goal/, { played: (r) => r.pos !== 'G' && r.s.toi >= 5 }),
@@ -132,6 +133,8 @@ function markEligible(sport, st, rows) {
 // the state shows them
 export function fitProps(sport, rows, expPts, info) {
   const out = {};
+  // (each row's role and its defense's funnel, pace and target split, from the games before it: matchups.mjs)
+  const matchups = sport === 'nfl' ? nflMatchups(rows) : sport === 'nba' ? nbaMatchups(rows) : null;
   for (const st of STATS[sport]) {
     const mine = markEligible(
       sport,
@@ -156,7 +159,7 @@ export function fitProps(sport, rows, expPts, info) {
     // (each player's values, by season: his record at a line)
     const values = new Map();
     for (const r of sorted) values.set(r.pid, [...(values.get(r.pid) ?? []), [r.season, Math.max(0, Math.round(r.s[st.key]))]]);
-    out[st.key] = { stat: st, env, model, values, params: fitted.params, check: fitted.check, checkAll: fitted.checkAll, rows: mine.length, eligible: mine.filter((r) => r.eligible).length, seconds: Math.round((Date.now() - t0) / 100) / 10 };
+    out[st.key] = { stat: st, env, model, values, matchups, params: fitted.params, gains: fitted.gains, base: fitted.base, check: fitted.check, checkAll: fitted.checkAll, rows: mine.length, eligible: mine.filter((r) => r.eligible).length, seconds: Math.round((Date.now() - t0) / 100) / 10 };
   }
   return out;
 }
@@ -302,6 +305,8 @@ export function priceProps(sport, game, props, fitted, idx, exp, info, live, tru
     const home = String(a.team) === String(game.home) ? true : String(a.team) === String(game.away) ? false : null;
     if (home === null) continue;
     const row = { pid, name: a.name, pos: idx.pos(pid) ?? a.pos, date: game.date, season: game.season, team: home ? game.home : game.away, opp: home ? game.away : game.home, game: game.id, home, s: {} };
+    // (his role and the defense's funnel, pace and target split, as of now)
+    if (f.matchups) Object.assign(row, f.matchups.live(pid, row.team, row.opp, row.pos, game.season));
     const p = f.model.project(row);
     if (!p) continue;
     // (the game script and the context: this game's, from the game model's expectation and its terms)
@@ -309,7 +314,16 @@ export function priceProps(sport, game, props, fitted, idx, exp, info, live, tru
     const opp = home ? exp.awayPts : exp.homePts;
     const scriptV = (f.stat.script === 'opp' ? opp : own) / (f.env.avg || own || 1);
     const ctxV = ctxNow(f.stat.ctx, info, home);
-    const mu = Math.max(0.05, p.base * Math.pow(p.opp, f.params.a) * Math.pow(scriptV, f.params.b) * Math.exp(f.params.c * ctxV));
+    const mu = Math.max(0.05, (f.params.scale ?? 1) * p.base * Math.pow(p.opp, f.params.a) * Math.pow(scriptV, f.params.b) * Math.exp(f.params.c * ctxV) * p.funnelF * p.paceF * p.tgtF);
+    // (the defense against his role this season, whether or not the projection weighs it: its allowed over
+    // those players' usual, and its rank in the league, 1 the stingiest)
+    let roleRank = null;
+    let roleFactor = null;
+    if (p.role) {
+      const table = f.model.roleTable(p.role, game.season);
+      const at = table.findIndex((x) => String(x.opp) === String(row.opp));
+      if (at >= 0) (roleRank = { rank: at + 1, of: table.length }), (roleFactor = table[at].factor);
+    }
     const pOver = recal(nbOver(prop.line, mu, f.params.r), f.params.cal);
     // (the fair chance: his own record at this line, this season and half of last)
     let overs = 0;
@@ -358,7 +372,7 @@ export function priceProps(sport, game, props, fitted, idx, exp, info, live, tru
       ev,
       units: guard ? 0.5 : stakeFor(ev, evScale),
       guard,
-      projection: { mean: round(mu, 2), r: f.params.r, rate: round(p.rate, 2), recent: round(p.recent, 2), opp: round(p.opp, 3), script: round(scriptV, 3), ctx: round(ctxV, 2), games: p.games, lastSeason: p.prevGames, pOver: round(pOver, 4), fairOver: round(fairOver, 4), record: round(n, 1) },
+      projection: { mean: round(mu, 2), r: f.params.r, rate: round(p.rate, 2), recent: round(p.recent, 2), opp: round(p.opp, 3), posOpp: round(p.posOpp, 3), role: p.role, roleOpp: p.roleOpp === null ? null : round(p.roleOpp, 3), roleFactor: roleFactor === null ? null : round(roleFactor, 3), roleRank, roleUsed: Number.isFinite(f.params.roleK), funnel: p.funnel === null ? null : round(p.funnel, 3), funnelUsed: !!f.params.fun, funnelF: round(p.funnelF, 3), paceF: round(p.paceF, 3), tgtF: round(p.tgtF, 3), script: round(scriptV, 3), ctx: round(ctxV, 2), games: p.games, lastSeason: p.prevGames, pOver: round(pOver, 4), fairOver: round(fairOver, 4), record: round(n, 1) },
       move: prop.open !== null ? { open: prop.open, now: prop.line } : null,
     });
   }

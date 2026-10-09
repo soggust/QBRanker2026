@@ -19,6 +19,8 @@ export const FOOTBALL_TERMS = [
   term('nsEpaT', 'strength', 't', 'Neutral-script EPA (total)', "to the total per 0.1 EPA a play of both offenses and both defenses' allowed"),
   term('olChanges', 'starters', 'm', 'Line continuity', "per offensive-line starter the other side changed since its last game, less its own"),
   term('crosswind', 'weather', 't', 'Crosswind', 'to the total per 10 mph of wind across the field over 10 (outdoors)'),
+  term('funnelT', 'matchups', 't', 'Pass funnels (total)', "to the total per 10 points of both defenses' pass funnel (their opponents' pass share against them over their own)"),
+  term('paceT', 'matchups', 't', 'Defenses\' pace (total)', "to the total per 10% more plays both defenses' opponents run against them than they usually do"),
 ];
 
 const NEUTRAL = (p) => (p.play_type === 'pass' || p.play_type === 'run') && p.epa !== '' && p.epa !== 'NA' && Number(p.wp) >= 0.1 && Number(p.wp) <= 0.9 && Number(p.half_seconds_remaining) > 120;
@@ -42,7 +44,9 @@ export async function gatherFootball(cfg, history, upcoming, facts, live, part) 
   // (the plays: a season's file only when one of its finals is missing them; a past season's final the file
   // hasn't is tried once: null)
   const missing = (kept, g) => !kept[g.id] && !(g.season < current && g.id in kept);
-  const playSeasons = part === 'plays' ? [...new Set(finals.filter((g) => missing(facts.plays, g)).map((g) => g.season))].sort() : [];
+  // (a game's plays kept before its passes and runs were: asked again once)
+  const noCounts = (g) => facts.plays[g.id] && facts.plays[g.id].length < 9;
+  const playSeasons = part === 'plays' ? [...new Set(finals.filter((g) => missing(facts.plays, g) || noCounts(g)).map((g) => g.season))].sort() : [];
   for (const season of playSeasons) {
     const plays = await nflverseRows('pbp', `play_by_play_${season}.csv.gz`, ['game_id', 'posteam', 'home_team', 'play_type', 'epa', 'wp', 'half_seconds_remaining', 'penalty'], season === current ? 12 : 24 * 365);
     if (!plays) continue;
@@ -50,8 +54,10 @@ export async function gatherFootball(cfg, history, upcoming, facts, live, part) 
     for (const p of plays) {
       const id = espnOf.get(p.game_id);
       if (!id) continue;
-      const a = per.get(id) ?? [0, 0, 0, 0, 0];
+      const a = per.get(id) ?? [0, 0, 0, 0, 0, 0, 0, 0, 0];
       if (p.penalty === '1') a[4]++;
+      // (every run and pass, by side: [home passes, home runs, away passes, away runs] after the flags)
+      if (p.play_type === 'pass' || p.play_type === 'run') a[5 + (p.posteam === p.home_team ? 0 : 2) + (p.play_type === 'pass' ? 0 : 1)]++;
       if (NEUTRAL(p)) {
         const at = p.posteam === p.home_team ? 0 : 2;
         a[at] += Number(p.epa);
@@ -60,7 +66,7 @@ export async function gatherFootball(cfg, history, upcoming, facts, live, part) 
       per.set(id, a);
     }
     let n = 0;
-    for (const [id, a] of per) if (a[1] + a[3] > 20 && byId.get(id)?.final) (facts.plays[id] = [Math.round(a[0] * 100) / 100, a[1], Math.round(a[2] * 100) / 100, a[3], a[4]]), n++;
+    for (const [id, a] of per) if (a[1] + a[3] > 20 && byId.get(id)?.final) (facts.plays[id] = [Math.round(a[0] * 100) / 100, a[1], Math.round(a[2] * 100) / 100, a[3], a[4], a[5], a[6], a[7], a[8]]), n++;
     if (season < current) for (const g of finals) if (g.season === season && !facts.plays[g.id]) facts.plays[g.id] = null;
     console.log(`nfl: plays for ${n} games of ${season}`);
   }
@@ -144,6 +150,16 @@ export async function gatherFootball(cfg, history, upcoming, facts, live, part) 
 // The NFL's second-round terms for each game, in date order
 export function footballOf(facts, live) {
   const eff = new Map();
+  // (each offense's pass share and plays so far, each defense's funnel and pace against them: the same
+  // measures as the props' (matchups.mjs), from the plays)
+  const off = new Map();
+  const def = new Map();
+  const lg = { pass: 0.57, plays: 62 };
+  const decay = (x, season) => (!x ? null : x.season === season ? x : Object.fromEntries(Object.entries(x).map(([k, v]) => [k, k === 'season' ? season : x.season === season - 1 ? v * 0.5 : 0])));
+  const defense = (id, season) => {
+    const d = decay(def.get(id), season);
+    return d ? { funnel: d.funnel / (d.n + 4), pace: d.pace / (d.n + 4) } : { funnel: 0, pace: 0 };
+  };
   const value = (team, season) => {
     const e = eff.get(team);
     if (!e) return { net: 0, off: 0, def: 0 };
@@ -158,6 +174,9 @@ export function footballOf(facts, live) {
     const l = live.get(g.id);
     const h = value(g.home, g.season);
     const a = value(g.away, g.season);
+    // (each side's defense: its funnel and pace so far)
+    const dh = defense(g.home, g.season);
+    const da = defense(g.away, g.season);
     // (the line: the starters changed; a coming game's, its last five listed out)
     let ol = g.final ? facts.ol?.[g.id] : null;
     const flags = [];
@@ -180,12 +199,37 @@ export function footballOf(facts, live) {
         nsEpaT: (h.off + a.off + h.def + a.def) * 10,
         olChanges: ol ? (ol[1] ?? 0) - (ol[0] ?? 0) : 0,
         crosswind: Math.max(0, cross - 10) / 10,
+        funnelT: (dh.funnel + da.funnel) * 10,
+        paceT: (dh.pace + da.pace) * 10,
       },
-      info: { epa: [r3(h.net), r3(a.net)], olChanged: ol ?? null, crosswind: r3(cross) },
+      info: { epa: [r3(h.net), r3(a.net)], olChanged: ol ?? null, crosswind: r3(cross), funnel: [r3(dh.funnel), r3(da.funnel)], pace: [r3(dh.pace), r3(da.pace)] },
       flags,
       learn: () => {
         const p = facts.plays?.[g.id];
         if (!p) return;
+        if (p.length >= 9) {
+          for (const [team, opp, pass, run] of [
+            [g.home, g.away, p[5], p[6]],
+            [g.away, g.home, p[7], p[8]],
+          ]) {
+            const plays = pass + run;
+            if (plays < 20) continue;
+            const o = decay(off.get(team), g.season) ?? { season: g.season, pass: 0, plays: 0, n: 0 };
+            const norm = (o.pass + 3 * lg.pass * lg.plays) / (o.plays + 3 * lg.plays);
+            const normPlays = (o.plays + 3 * lg.plays) / (o.n + 3);
+            const d = decay(def.get(opp), g.season) ?? { season: g.season, funnel: 0, pace: 0, n: 0 };
+            d.funnel += pass / plays - norm;
+            d.pace += plays / normPlays - 1;
+            d.n++;
+            def.set(opp, d);
+            o.pass += pass;
+            o.plays += plays;
+            o.n++;
+            off.set(team, o);
+            lg.pass += (pass / plays - lg.pass) / 500;
+            lg.plays += (plays - lg.plays) / 500;
+          }
+        }
         for (const [team, off, offN, def, defN] of [
           [g.home, p[0], p[1], p[2], p[3]],
           [g.away, p[2], p[3], p[0], p[1]],

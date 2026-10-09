@@ -291,8 +291,7 @@
             </thead>
             <tbody>
               @for (b of sorted('live', live, betValue); track b.id) {
-                @let over = isOver(b);
-                <tr [class.desk-done]="over">
+                <tr>
                   @if (!sport) {<th><img class="desk-league" [src]="leagueLogo(b.sport)" [alt]="b.sport.toUpperCase()" [title]="b.sport.toUpperCase()" /></th>}
                   <td class="desk-left"><ng-container *ngTemplateOutlet="gameCell; context: { $implicit: b, when: 'live' }"></ng-container></td>
                   <td class="desk-left"><ng-container *ngTemplateOutlet="pickCell; context: { $implicit: b }"></ng-container></td>
@@ -405,10 +404,11 @@
                     <td class="desk-left"><ng-container *ngTemplateOutlet="gameCell; context: { $implicit: b, when: 'MMM d' }"></ng-container></td>
                     <td class="desk-left"><ng-container *ngTemplateOutlet="pickCell; context: { $implicit: b }"></ng-container></td>
                     <td [title]="help['betBook']">{{ odds(b.odds) }}</td>
-                    <td [class.up]="b.status === 'won'" [class.down]="b.status === 'lost'">{{ b.units }}</td>
+                    @let r = result(b);
+                    <td [class.up]="r?.status === 'won'" [class.down]="r?.status === 'lost'">{{ b.units }}</td>
                     <td>{{ pct(b.p) }}</td>
-                    <td>{{ b.final }}</td>
-                    <td [class.up]="b.profit > 0" [class.down]="b.profit < 0">{{ b.status }} {{ units(b.profit) }}</td>
+                    <td>{{ finalScore(b) }}</td>
+                    <td [class.up]="(r?.profit ?? 0) > 0" [class.down]="(r?.profit ?? 0) < 0" [title]="b.status === 'open' ? 'From the final score; graded officially on the next run' : ''">{{ r ? r.status + ' ' + units(r.profit) : 'final' }}</td>
                     <td [class.up]="b.clv?.beat === true" [class.down]="b.clv?.beat === false">{{ betClv(b) }}</td>
                     <td class="desk-why" [title]="recapText(b)">
                       @if (broke(b)) {

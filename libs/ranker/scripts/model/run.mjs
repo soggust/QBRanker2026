@@ -664,7 +664,7 @@ function saveState(r) {
           odds: "DraftKings' prices where the board has them (NBA, NHL, MLB); else -110 a side assumed, lines far from the player's usual not bet (NFL)",
           perGame: PER_GAME,
           lastRun: r.propRun,
-          types: Object.entries(r.props).map(([key, f]) => ({ key, label: f.stat.label, rows: f.rows, eligible: f.eligible, params: f.params, check: f.check, allPlayersBias: f.checkAll?.bias ?? null, trust: trust[`prop:${key}`] ?? null })),
+          types: Object.entries(r.props).map(([key, f]) => ({ key, label: f.stat.label, rows: f.rows, eligible: f.eligible, params: { ...f.params, roleK: Number.isFinite(f.params.roleK) ? f.params.roleK : null }, gains: f.gains, base: f.base, check: f.check, allPlayersBias: f.checkAll?.bias ?? null, trust: trust[`prop:${key}`] ?? null })),
         }
       : (state.props ?? null),
     postmortem: (() => {
@@ -690,7 +690,8 @@ function saveState(r) {
   } else {
     write(path.join(ROOT, '.cache/model', `dry-${sport}.json`), {
       params: state.params,
-      terms: (state.context?.terms ?? []).map((t) => [t.key, t.size, t.kept]),
+      terms: (state.context?.terms ?? []).map((t) => [t.key, t.size, t.kept, t.gain, t.games]),
+      propTypes: state.props?.types?.map((t) => ({ key: t.key, params: t.params, gains: t.gains, base: t.base?.logLoss, check: t.check?.logLoss })) ?? null,
       props: state.props?.types?.map((t) => [t.key, t.params]) ?? null,
       trust: state.trust,
       ...r.snapshot,
