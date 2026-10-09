@@ -1,10 +1,10 @@
 // The player card's data (click a name): built by player-cards.ts, drawn by the player card component
 import { SkillPlayer, SkillPosition } from '@sport/positions';
 import { AwardWin } from '@sport/awards';
-import { CardFlag } from '@ranker/engine/sport';
+import { CardBreakdown, CardFlag } from '@ranker/engine/sport';
 import { CardSkill } from '@ranker/engine/skills';
 
-export type { CardFlag, CardSkill };
+export type { CardBreakdown, CardFlag, CardSkill };
 
 export type CardTab = 'overview' | 'analysis' | 'stats' | 'seasons' | 'history' | 'games' | 'depth' | 'zones';
 
@@ -139,6 +139,8 @@ export interface PlayerCard {
   awards: AwardWin[];
   groups: { id: string; title: string; icon: string; stats: CardStat[] }[];
   overview: CardOverview;
+  // The sport's breakdown panel on the Overview (the NFL defense's vs Position), when the row has one
+  breakdown: CardBreakdown | null;
 }
 
 // Built by scripts/build-comps.mjs: per position, id -> [season, id, name, ESPN id, team, match]

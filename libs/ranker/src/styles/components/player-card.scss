@@ -711,6 +711,196 @@
   }
 }
 
+// The sport's breakdown (the NFL defense's vs Position): the take, a row per role (its values in the
+// hand, the one against expectations in its rank color, the rank on a small LED tile), where the targets
+// go as a split bar with the league's split as ticks, and the funnel as takes
+.breakdown .group-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.bd-take {
+  color: #eee;
+  cursor: help;
+  font-size: 14px;
+  line-height: 1.5;
+  margin: 0;
+}
+
+// (the table and the split kept to a readable width, not spread across a wide card)
+.bd-table,
+.bd-split {
+  max-width: 560px;
+}
+
+.bd-table {
+  display: flex;
+  flex-direction: column;
+}
+
+.bd-row {
+  align-items: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  display: grid;
+  gap: 10px;
+  grid-template-columns: 56px repeat(3, minmax(0, 1fr)) 40px;
+  padding: 6px 0;
+
+  &:last-child {
+    border-bottom: 0;
+  }
+
+  > span {
+    text-align: right;
+  }
+
+  > .bd-label {
+    text-align: left;
+  }
+
+  > span:last-child {
+    display: flex;
+    justify-content: flex-end;
+  }
+}
+
+.bd-head {
+  padding-top: 0;
+
+  > span {
+    color: #bdbdbd;
+    cursor: help;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+  }
+}
+
+.bd-label {
+  color: #fff;
+  cursor: help;
+  @include v.hand(15px);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+.bd-cell {
+  color: #ddd;
+  @include v.hand(15px);
+
+  &.toned {
+    @include v.tone-glow(40%, 6px);
+  }
+}
+
+// (the rank on a small LED tile, like the game view's fantasy ranks, in its rank color)
+.bd-rank {
+  @include v.led-tile;
+  @include v.tone-glow(60%, 8px);
+  border-radius: 5px;
+  font-size: 11px;
+  height: 24px;
+  padding-top: 1.5px;
+  width: 34px;
+}
+
+.bd-split {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.bd-split-title {
+  color: #bdbdbd;
+  cursor: help;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+}
+
+.bd-bar {
+  border-radius: 4px;
+  display: flex;
+  gap: 2px;
+  height: 18px;
+  overflow: hidden;
+  position: relative;
+
+  i {
+    align-items: center;
+    background: color-mix(in srgb, var(--group-color) 70%, #222);
+    display: flex;
+    flex: 1 1 0;
+    justify-content: center;
+    min-width: 0;
+
+    &:nth-child(2) {
+      background: color-mix(in srgb, var(--group-color) 45%, #222);
+    }
+
+    &:nth-child(3) {
+      background: color-mix(in srgb, var(--group-color) 25%, #222);
+    }
+
+    b {
+      color: #fff;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.7);
+    }
+  }
+
+  // (the league's split: a thin white mark where its parts would meet)
+  .bd-tick {
+    background: #fff;
+    bottom: 0;
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.8);
+    position: absolute;
+    top: 0;
+    transform: translateX(-1px);
+    width: 2px;
+  }
+}
+
+.bd-parts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 18px;
+
+  .bd-part {
+    align-items: baseline;
+    color: #8a8a8a;
+    cursor: help;
+    display: inline-flex;
+    font-size: 12px;
+    gap: 5px;
+  }
+
+  b {
+    color: #bdbdbd;
+    font-weight: 800;
+  }
+
+  em {
+    color: #fff;
+    font-style: normal;
+    @include v.hand(14px);
+  }
+}
+
+.bd-rank.bd-none {
+  --tone: #777;
+}
+
+.bd-note {
+  color: #8a8a8a;
+  font-size: 12px;
+  margin: 0;
+}
+
 // Similar seasons: three mini team cards (player standing in each), name, year and match score
 .comps-row {
   display: grid;

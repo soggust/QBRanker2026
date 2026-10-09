@@ -31,6 +31,7 @@ import { curve } from '../../../libs/ranker/scripts/grades.mjs';
 import { blendWithLastSeason } from '../../../libs/ranker/scripts/early-season.mjs';
 import { coachesFor } from './coaches.mjs';
 import { readLogFiles, removeOldFile, writeLogFiles } from './game-log-files.mjs';
+import { addVsPosition } from './vs-position.mjs';
 
 const CURRENT_SEASON = 2027;
 // MoneyPuck's season files start with 2008-09
@@ -559,6 +560,8 @@ async function buildSeason(season, part = 'regular') {
   await writeFile(file, JSON.stringify(out));
   // (this season's game logs, for the card's Game Log tab: the NHL's API doesn't let the site ask it)
   if (current && part === 'regular') await writeGameLogs(season, skaterRows, out.G);
+  // (each team against forwards and defensemen, from the season's game logs: vs-position.mjs; on its coaches' rows)
+  addVsPosition(dir, path.join(STATIC, 'game-logs'), season, [part]);
   const champion = [...teamAwards].find(([, a]) => a.includes('cup'))?.[0] ?? '?';
   const rookieCount = [...skaterRows, ...out.G].filter((u) => u.rookie).length;
   console.log(

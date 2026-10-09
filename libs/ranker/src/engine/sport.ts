@@ -90,6 +90,32 @@ export interface CardFlag {
   tone: 'good' | 'bad' | 'info';
 }
 
+// A breakdown panel on the card's Overview (SportConfig.cardBreakdown: the NFL defense's vs Position): a
+// one-line take, rows of values each with its rank on a small LED tile, a split, and takes for the
+// Overview's list under the archetype
+export interface CardBreakdown {
+  title: string;
+  icon: string;
+  // The panel's hover help
+  help: string;
+  take: string;
+  // A line of context under the table (none: nothing)
+  note?: string | null;
+  // Its takes, shown with the Overview's others under the archetype
+  flags: CardFlag[];
+  columns: { label: string; title: string }[];
+  rows: {
+    label: string;
+    title: string;
+    // tone: 0 (worst) to 1 (best), a value colored by how it reads (none: plain)
+    cells: { text: string; title?: string; tone?: number | null }[];
+    rank: number | null;
+    of: number;
+  }[];
+  // A whole split into parts (where the targets go): each part's share and the league's
+  split?: { title: string; help: string; parts: { label: string; share: number; league: number; title: string; note: string }[] } | null;
+}
+
 // What a sport's card takes get to work with
 export interface FlagContext {
   player: SkillPlayer;
@@ -308,6 +334,9 @@ export interface SportConfig {
   cardFlagsLast?: (context: FlagContext) => CardFlag[];
   // More for the card once it's open (the NFL's run blocking, read from a file per season)
   cardExtras?: (card: CardHost) => Promise<void>;
+  // A breakdown panel on the card's Overview for the rows that have one (the NFL defense's vs Position),
+  // from the row and the list the card is ranked in
+  cardBreakdown?: (player: SkillPlayer, position: string, list: SkillPlayer[]) => CardBreakdown | null;
 
   // --- Optional data and features (the NFL uses most of them; MMA the career-only ones) ---
   // One career table rather than seasons: no season dropdown, the card reads "Career" and has no

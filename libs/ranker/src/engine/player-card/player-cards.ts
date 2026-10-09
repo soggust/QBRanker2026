@@ -392,6 +392,10 @@ export class PlayerCards {
       }))
       .filter((group) => group.stats.length);
     const rows = context ? context.rows : SKILL_UNITS;
+    // (the sport's breakdown panel, and its takes among the Overview's, under the archetype)
+    const breakdown = SPORT.cardBreakdown?.(player, this.position, list) ?? null;
+    const overview = this.overview(reader, player, season, list, context);
+    if (breakdown) overview.flags = [...overview.flags, ...breakdown.flags];
     return {
       player,
       season,
@@ -412,7 +416,8 @@ export class PlayerCards {
       of: list.length,
       awards: awardsFor(player, this.position, season),
       groups,
-      overview: this.overview(reader, player, season, list, context),
+      overview,
+      breakdown,
       seasons: null,
       comps: null,
     };

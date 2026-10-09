@@ -43,7 +43,8 @@ function nhlGameLogs(season: number, id: number): Promise<NhlGameLogs> {
   });
 }
 import { teamRowsFromCoaches } from '@ranker/engine/team-rows';
-import { dataPart } from '@ranker/engine/data';
+import { DATA, dataPart } from '@ranker/engine/data';
+import { nhlVsPosOf, nhlVsPositionBreakdown } from './vs-position';
 import type { SkillPlayer } from './positions';
 import { seasonName } from './awards';
 
@@ -64,6 +65,10 @@ export function teamRows(): SkillPlayer[] {
       goalDiff: games ? Math.round((coaches.reduce((total, c) => total + (c.stats.goalDiff ?? 0) * c.games, 0) / games) * 100) / 100 : null,
       ptsOver: Math.round(sum('ptsOver') * 10) / 10,
     };
+  }).map((team) => {
+    // (vs Position: the same on each of the team's coach rows, vs-position.ts)
+    const coach = ((DATA.skillPlayers as Record<string, SkillPlayer[]>)['HC'] ?? []).find((c) => c.teamLogo === team.teamLogo && nhlVsPosOf(c));
+    return coach ? ({ ...team, vsPos: nhlVsPosOf(coach) } as SkillPlayer) : team;
   });
 }
 
@@ -202,6 +207,8 @@ export const SPORT: SportConfig = {
   // The NHL's player headshots
   headshot: (id) => `https://assets.nhle.com/mugs/nhl/latest/${id}.png`,
   cardFlags,
+  // (a team's vs Position: what it allowed to forwards and defensemen, vs-position.ts)
+  cardBreakdown: nhlVsPositionBreakdown,
   // The card's Team tab (teams and head coaches): the top unit on a rink, every line, the head coaches,
   // everyone who played (team-roster.ts)
   depthChart: {

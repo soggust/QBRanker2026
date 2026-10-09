@@ -20,6 +20,7 @@ import { buildQbUnits } from './qb-rows';
 import { OLINE_LEAN, computedValue, connectTeamGrades, fromOtherTabs } from './team-grades';
 import { blockingExtras } from './blocking';
 import { loadDepthChart } from './depth-chart';
+import { vsPositionBreakdown } from './vs-position';
 
 // NFL: what the engine needs to know about football (the rest is beside this file: positions,
 // skill-presets, skills, awards, team-colors, logo-eras, about/, and the NFL's own features:
@@ -202,6 +203,8 @@ export const SPORT: SportConfig = {
   },
   cardFlagsLast: castFlags,
   cardExtras: blockingExtras,
+  // (a defense's vs Position: what it allowed to each WR1, WR2, WR3, TE1 and RB1, its funnel, where the targets go)
+  cardBreakdown: vsPositionBreakdown,
 
   dataFiles: {
     games: 'games.json',

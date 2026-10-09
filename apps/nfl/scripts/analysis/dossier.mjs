@@ -325,6 +325,23 @@ async function main() {
     allowed[pos] = perTeam;
   }
 
+  // What each defense allows by role, from the site's DEF rows (vsPos: defense-vs-position.mjs), kept
+  // compact: each role's PPR points a game over what those same players averaged in their other games
+  // ([value, rank, of]; rank 1 held them furthest under), the funnel (opponents' neutral pass rate over
+  // their own norm, in points; rank 1 the strongest pass funnel) and the target split against it beside
+  // the league's ([share, league share])
+  const siteDefs = new Map((site.DEF ?? []).map((row) => [LOGO_TEAM[row.teamLogo?.match(/NFL_Icons\/(.+)\.png/)?.[1]], row.vsPos]).filter(([, v]) => v));
+  const vsPositionOf = (t) => {
+    const v = siteDefs.get(t);
+    if (!v) return null;
+    const of = siteDefs.size;
+    const out = { pprOverAvg: {} };
+    for (const role of ['WR1', 'WR2', 'WR3', 'TE1', 'RB1']) if (v[role]?.vs != null) out.pprOverAvg[role] = [v[role].vs, v[role].rank, of];
+    if (v.funnel?.score != null) out.passRateOverNorm = [v.funnel.score, v.funnel.rank, of];
+    if (v.targets) out.targetShare = Object.fromEntries(['WR', 'TE', 'RB'].map((g) => [g, [v.targets[g].share, v.targets[g].lg]]));
+    return out;
+  };
+
   // ---- weekly lookups
   const weeklyBy = group(regWeekly, 'player_id');
   const ngsBy = { QB: group(ngsPass, 'player_gsis_id'), WR: group(ngsRec, 'player_gsis_id'), TE: group(ngsRec, 'player_gsis_id'), RB: group(ngsRush, 'player_gsis_id') };
@@ -745,6 +762,7 @@ async function main() {
             oppInjuries: injuryList(next.opp, null, false, 12),
             oppDefense: teamCtx[next.opp],
             oppAllowsToPosition: allowed[p.pos][next.opp] ?? null,
+            oppVsPosition: vsPositionOf(next.opp),
           }
         : null,
     };
@@ -854,6 +872,7 @@ async function main() {
         defense: defRanked.get(t) ?? null,
         offensiveLine: olRanked.get(t) ?? null,
         playByPlay: teamCtx[t],
+        defenseVsPosition: vsPositionOf(t),
       },
       qbStarts: qbStarts(t),
       usage: usageOf(t),
@@ -894,6 +913,7 @@ async function main() {
             })(),
             opp: next.opp,
             oppSeason: { team: teamRanked.get(next.opp) ?? null, defense: defRanked.get(next.opp) ?? null, offensiveLine: olRanked.get(next.opp) ?? null, playByPlay: teamCtx[next.opp] },
+            oppVsPosition: vsPositionOf(next.opp),
             oppQbStarts: qbStarts(next.opp),
             oppInjuries: injuryList(next.opp, null, false, 14),
           }

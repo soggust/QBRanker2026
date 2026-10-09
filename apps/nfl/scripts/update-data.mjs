@@ -9,7 +9,9 @@
 //
 // RB/WR/TE/K/P lists and season stats come from nflverse player stats; team defenses
 // and head coaches come from nflverse play-by-play and schedules (coach names from
-// ESPN). All are written to skill-players.json.
+// ESPN). All are written to skill-players.json. Each defense's row also carries vsPos: what it allowed to
+// the offenses' WR1, WR2, WR3, TE1 and RB1, its run or pass funnel and where the targets go against it
+// (defense-vs-position.mjs, from the play-by-play; display only, the card's vs Position).
 //
 // Usage: npm run update-data              (the current season, 2026)
 //        SEASON=2025 npm run update-data  (a past season, written to src/StaticData/seasons/2025/;
@@ -36,6 +38,7 @@
 import { mkdir, readFile, rm, stat, writeFile } from 'node:fs/promises';
 import { pathToFileURL } from 'node:url';
 import { gunzipSync } from 'node:zlib';
+import { defenseVsPosition } from './defense-vs-position.mjs';
 
 const CURRENT_SEASON = 2026;
 const SEASON = Number(process.env.SEASON ?? CURRENT_SEASON);
@@ -268,6 +271,9 @@ async function loadNflverse(shared) {
     pfrRows: { pass: pfrPass, rush: pfrRush, rec: pfrRec, def: pfrDef, weekly: pfrWeekly },
     snaps,
     pfrByGsis: new Map(players.filter((p) => p.pfr_id && p.pfr_id !== 'NA').map((p) => [p.gsis_id, p.pfr_id])),
+    // (for defense vs position: each player's position, and snap counts' ids to gsis ids)
+    positionOf: new Map(players.map((p) => [p.gsis_id, p.position])),
+    gsisByPfr: new Map(players.filter((p) => p.pfr_id && p.pfr_id !== 'NA').map((p) => [p.pfr_id, p.gsis_id])),
     // Everyone who was a head coach in an earlier season (a coach not in here is in his first year)
     pastCoaches: new Set(
       schedule.filter((game) => Number(game.season) < SEASON).flatMap((game) => [game.home_coach, game.away_coach])
@@ -335,6 +341,7 @@ function nflversePart(season, part) {
 
   return {
     ...season,
+    part,
     pbp: season.seasonPbp.filter((play) => inPart(part, play.season_type)),
     playerStats: season.playerStatsByPart[part],
     ngs: Object.fromEntries(Object.entries(season.ngsRows).map(([type, rows]) => [type, ngsPart(rows, part, NGS_WEIGHTS[type])])),
@@ -1263,6 +1270,10 @@ function skillPlayers(nflverse) {
     HC: units(coachUnits, COMPETITIVE_KEYS.HC),
     OL: units(olineUnits, COMPETITIVE_KEYS.OL),
   };
+  // Each defense against the offense's WR1, WR2, WR3, TE1 and RB1, its funnel and where the targets go
+  // (defense-vs-position.mjs: every play counts, garbage time too)
+  const vsPos = defenseVsPosition({ ...nflverse, pbp: seasonPbp });
+  for (const unit of result.DEF) unit.vsPos = vsPos.get(unit.gsisId.replace(/^DEF-/, '')) ?? null;
   const competitiveEpa = competitivePlayerEpa(pbp);
   for (const [position, config] of Object.entries(SKILL_POSITIONS)) {
     const players = playerStats

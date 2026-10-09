@@ -46,6 +46,11 @@ export class CardStatsTab extends CardTab {
 @Component({ selector: 'card-overview', templateUrl: './overview.component.html', standalone: false })
 export class CardOverviewTab extends CardTab {
   readonly sortFlags = sortFlags;
+
+  // A breakdown split's league tick after part i: the league's shares up to and including it
+  splitAt(parts: { league: number }[], i: number): number {
+    return parts.slice(0, i + 1).reduce((a, p) => a + p.league, 0);
+  }
 }
 
 // Analysis: the AI write-up
