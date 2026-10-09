@@ -278,6 +278,19 @@ test('nfl: the career arcs, by career year or by season, the compared season rin
   check(compare.arcs, true);
   assert.deepEqual(compare.arcs.lines.map((l) => l.key), keys);
 
+  // (drawn at the width shown, a pixel a unit, so its labels stay one size: a phone's narrower and shorter,
+  // with fewer ticks; the same lines, not drawn in again)
+  const wide = compare.arcs;
+  compare.setArcWidth(320);
+  check(compare.arcs, true);
+  assert.equal(compare.arcs.width, 320);
+  assert.ok(compare.arcs.height < wide.height || wide.height === 180);
+  assert.ok(compare.arcs.xTicks.length <= wide.xTicks.length);
+  assert.ok(compare.arcs.xTicks.every((t, i, all) => i === 0 || t.x - all[i - 1].x >= 44), 'ticks 44px apart or more');
+  assert.deepEqual(compare.arcs.lines.map((l) => l.key), keys);
+  compare.setArcWidth(320.6);
+  assert.equal(compare.arcs.width, 320, 'a fraction of a pixel: not drawn again');
+
   // (teams alone: the seasons themselves, until switched)
   const teams = harness(engine, 'nfl', 'TM');
   await teams.compare.start(teams.host.playerList.slice(0, 2));

@@ -132,6 +132,16 @@
 }
 
 
+// (the word beside the cross: a phone's sheet only)
+.tape-remove-text {
+  display: none;
+}
+
+// (a phone's chips: hidden on wider screens, where every tape shows)
+.cmp-chips {
+  display: none;
+}
+
 // (the season, under the name: a quiet pill, its caret in the board's light; a picker when they've more
 // than one)
 .tape-season {
@@ -191,6 +201,7 @@
 
 .tape-team {
   color: rgba(255, 255, 255, 0.75);
+  margin-top: 2px;
   font-size: 10.5px;
   font-weight: 800;
   letter-spacing: 0.5px;
@@ -536,6 +547,15 @@
   }
 }
 
+// (a touch screen has no hover: a tap focuses it)
+@media (hover: none) {
+  .cmp-mixed:focus .cmp-mixed-pop {
+    opacity: 1;
+    transform: translateY(0);
+    visibility: visible;
+  }
+}
+
 .cmp-mixed-pop {
   background: #151a18;
   border: 1px solid #ffa74d;
@@ -585,9 +605,11 @@
   grid-template-columns: minmax(0, 1fr);
 }
 
+// (the card's radar column, 400px: its labels and legend the card's size)
 .cmp-top > .cmp-radar {
+  box-sizing: border-box;
   justify-self: center;
-  max-width: 520px;
+  max-width: 400px;
   width: 100%;
 }
 
@@ -987,11 +1009,12 @@
     }
   }
 
+  // (drawn a pixel a unit (the view measures the box): the card's chart labels' size)
   .arc-x,
   .arc-y {
     fill: #9a9a9a;
     font-family: v.$font-base;
-    font-size: 10px;
+    font-size: 11px;
     font-weight: 700;
   }
 
@@ -1181,7 +1204,70 @@
 }
 
 // ---------------------------------------------------------------------------
-// Narrow screens: the tapes two by two, the radar over the bars
+// Tablets: the four tapes still across, tighter (smaller type and padding; the rank, its count and the
+// archetype wrapping under each other when they must)
+// ---------------------------------------------------------------------------
+@media (min-width: 601px) and (max-width: 1023px) {
+  .tapes {
+    gap: 8px;
+  }
+
+  .tape {
+    padding: 11px 9px 8px;
+  }
+
+  .tape-name {
+    font-size: 15.5px;
+    padding-right: 24px;
+  }
+
+  .tape-remove {
+    height: 28px;
+    right: 1px;
+    top: 3px;
+    width: 28px;
+  }
+
+  .tape-team {
+    font-size: 9.5px;
+  }
+
+  .tape-meta {
+    margin: 4px 0 6px;
+  }
+
+  .tape-photo {
+    height: 26px;
+    width: 26px;
+  }
+
+  .tape-foot {
+    flex-wrap: wrap;
+    row-gap: 4px;
+  }
+
+  .tape-archetype {
+    font-size: 10.5px;
+  }
+
+  .tape-add {
+    min-height: 96px;
+    padding: 10px;
+  }
+
+  .tape-add-icon {
+    @include v.icon-size(24px);
+  }
+
+  // (the add slot in the last column: its hits drop toward the middle, not off the card)
+  .tape-add:not(:first-child) .tape-hits {
+    left: auto;
+    right: 0;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Narrow screens: the radar over the bars, the tables tighter
 // ---------------------------------------------------------------------------
 @media (max-width: 760px) {
   .compare-hero {
@@ -1194,32 +1280,6 @@
 
   .cmp-mixed-pop {
     width: min(300px, calc(100vw - 60px));
-  }
-
-  .tapes {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  // (the tapes compact, so the comparisons keep most of the screen: a smaller name, the archetype left to
-  // the card)
-  .tape {
-    padding: 10px 9px 8px;
-  }
-
-  .tape-name {
-    font-size: 15px;
-  }
-
-  .tape-archetype {
-    display: none;
-  }
-
-  .tape-add:first-child {
-    grid-column: span 2;
-  }
-
-  .tape-add .tape-add-icon {
-    display: none;
   }
 
   .cmp-col-head small {
@@ -1256,5 +1316,306 @@
   .cmp-row {
     gap: 8px;
     grid-template-columns: minmax(84px, 1.2fr) repeat(var(--sides), minmax(0, 1fr));
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Phones: the sides a row of chips (a pill each in its color: the face, the name and season, the rank on a
+// little LED), scrolling sideways when they don't fit; one tapped opens its tape in a sheet over the board
+// (the season picker, the rank, the archetype, Remove), the + chip the search. Alone, the search shows as is
+// ---------------------------------------------------------------------------
+@media (max-width: 600px) {
+  .compare-hero {
+    padding: 44px 12px 10px;
+  }
+
+  .cmp-mixed {
+    left: 12px;
+  }
+
+  .cmp-chips {
+    display: flex;
+    gap: 6px;
+    // (the row's edges at the screen's: a chip scrolls under the fade at either end)
+    margin: 0 -12px;
+    mask-image: linear-gradient(90deg, transparent, #000 12px, #000 calc(100% - 16px), transparent);
+    overflow-x: auto;
+    padding: 2px 12px 3px;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+
+  .cmp-chip {
+    -webkit-tap-highlight-color: transparent;
+    align-items: center;
+    background:
+      linear-gradient(100deg, color-mix(in srgb, var(--team-badge, #555) 34%, transparent), transparent 70%),
+      rgba(0, 0, 0, 0.32);
+    border: 1px solid color-mix(in srgb, var(--side) 50%, transparent);
+    border-radius: 999px;
+    box-sizing: border-box;
+    color: #fff;
+    cursor: pointer;
+    display: inline-flex;
+    flex: none;
+    gap: 6px;
+    height: 34px;
+    padding: 0 4px 0 3px;
+    transition:
+      border-color 0.15s,
+      box-shadow 0.15s,
+      transform 0.12s;
+
+    // (its sheet open: the rim lit in its color)
+    &.open {
+      border-color: var(--side);
+      box-shadow:
+        0 0 0 1px var(--side),
+        0 0 12px color-mix(in srgb, var(--side) 45%, transparent);
+    }
+
+    &:active {
+      transform: scale(0.96);
+    }
+  }
+
+  // (the face, round, on the team's color, ringed in the side's; none: the team's logo)
+  .chip-photo {
+    background: color-mix(in srgb, var(--team-badge, #555) 70%, #000);
+    border-radius: 50%;
+    box-shadow: 0 0 0 1.5px var(--side);
+    flex: none;
+    height: 26px;
+    object-fit: cover;
+    object-position: top;
+    width: 26px;
+  }
+
+  .chip-logo {
+    align-items: center;
+    display: flex;
+    justify-content: center;
+
+    img {
+      height: 72%;
+      object-fit: contain;
+      width: 72%;
+    }
+
+    &.white-logo img {
+      filter: brightness(0) invert(1);
+    }
+  }
+
+  .chip-name {
+    @include v.hand(14px);
+    line-height: 1;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+    white-space: nowrap;
+  }
+
+  // (the rank that season, on a little LED pill)
+  .chip-rank {
+    @include v.led-tile;
+    @include v.tone-glow(60%, 6px);
+    border-radius: 999px;
+    box-shadow:
+      inset 0 0 0 1px rgba(255, 255, 255, 0.14),
+      inset 0 0 5px rgba(0, 0, 0, 0.6);
+    font-size: 9.5px;
+    font-weight: 400;
+    height: 24px;
+    min-width: 26px;
+    padding: 1px 6px 0;
+  }
+
+  .chip-add {
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px dashed rgba(255, 255, 255, 0.3);
+    color: rgba(255, 255, 255, 0.75);
+    justify-content: center;
+    padding: 0;
+    width: 34px;
+
+    .mat-icon {
+      @include v.icon-size(20px);
+
+      &.spin {
+        animation: tape-spin 1s linear infinite;
+      }
+    }
+
+    &.open {
+      border-color: var(--scoreboard-led);
+      border-style: solid;
+      box-shadow: 0 0 10px color-mix(in srgb, var(--scoreboard-led) 35%, transparent);
+      color: var(--scoreboard-led);
+    }
+  }
+
+  // (one column: the sheet open, or the search alone)
+  .tapes {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .tape-add,
+  .tape-add:first-child {
+    flex-direction: column;
+    grid-column: auto;
+  }
+
+  // (only the sheet open shows; one removed eases out where it was)
+  .tape:not(.shown, .tape-out) {
+    display: none;
+  }
+
+  // (with chips: the sheet floats over the tabs and the body, under the chips)
+  .tapes.floating {
+    left: 8px;
+    position: absolute;
+    right: 8px;
+    top: calc(100% - 4px);
+    z-index: 20;
+
+    .tape {
+      background:
+        linear-gradient(160deg, color-mix(in srgb, var(--team-badge, #555) 30%, transparent), transparent 62%),
+        #171c1a;
+      box-shadow:
+        inset 0 3px 0 var(--side, transparent),
+        0 16px 36px rgba(0, 0, 0, 0.75);
+      padding: 14px 14px 11px;
+    }
+
+    .tape-add {
+      background: #171c1a;
+      border: 1px solid color-mix(in srgb, var(--scoreboard-led) 45%, transparent);
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.75);
+    }
+  }
+
+  // (a sheet's remove: the word beside the cross, clear of the name)
+  .tape-remove {
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 999px;
+    font-family: v.$font-base;
+    font-size: 11px;
+    font-weight: 800;
+    gap: 3px;
+    height: 28px;
+    letter-spacing: 0.5px;
+    padding: 0 10px 0 6px;
+    right: 10px;
+    text-transform: uppercase;
+    top: 10px;
+    width: auto;
+
+    .mat-icon {
+      @include v.icon-size(16px);
+    }
+  }
+
+  .tape-remove-text {
+    display: inline;
+  }
+
+  .tape-name {
+    padding-right: 96px;
+  }
+
+  // (the search: its icon left out, the box big enough not to zoom a phone, the hits in the sheet itself)
+  .tape-add {
+    align-items: stretch;
+    min-height: 0;
+    padding: 10px;
+  }
+
+  .tape-add .tape-add-icon {
+    display: none;
+  }
+
+  .tape-search {
+    font-size: 16px;
+    padding: 9px 11px;
+  }
+
+  .tape-hits {
+    box-shadow: none;
+    max-height: min(340px, 52vh);
+    padding: 2px;
+    position: static;
+    width: 100%;
+
+    button {
+      gap: 10px;
+      padding: 7px 6px;
+    }
+  }
+
+  // (the table's cells tighter, its labels narrower)
+  .cmp-row {
+    gap: 6px;
+    grid-template-columns: minmax(70px, 1.1fr) repeat(var(--sides), minmax(0, 1fr));
+  }
+
+  .cmp-head {
+    padding: 0 10px;
+  }
+
+  // (four names over four narrow columns: smaller, so a long one isn't cut)
+  .cmp-col-head {
+    font-size: 10px;
+    letter-spacing: 0.2px;
+  }
+
+  .cmp-summary {
+    padding: 10px 12px;
+
+    li {
+      font-size: 12.5px;
+    }
+  }
+
+  .arc-by {
+    width: 132px;
+  }
+}
+
+@media (max-width: 600px) and (prefers-reduced-motion: no-preference) {
+  .cmp-chip.chip-in {
+    animation: chip-in 0.22s cubic-bezier(0.3, 1.4, 0.5, 1);
+  }
+
+  .cmp-chip.chip-out {
+    animation: chip-out 0.16s ease-in forwards;
+    pointer-events: none;
+  }
+
+  .tape.shown {
+    animation: sheet-in 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+}
+
+@keyframes chip-in {
+  from {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+}
+
+@keyframes chip-out {
+  to {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+}
+
+@keyframes sheet-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
   }
 }

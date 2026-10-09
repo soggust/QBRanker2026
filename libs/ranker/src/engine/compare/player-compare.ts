@@ -173,7 +173,10 @@ export interface CompareArcs {
   lines: { key: string; name: string; color: string; points: string; dots: { x: number; y: number; title: string; now: boolean }[] }[];
 }
 
-const ARC = { width: 640, height: 210, left: 40, right: 14, top: 14, bottom: 28 };
+// (the board drawn at the width it's shown at (the view measures it), so its labels stay the size the
+// card's are; its height under a third of that, within limits)
+const ARC = { width: 640, left: 40, right: 14, top: 14, bottom: 28 };
+const arcHeight = (width: number) => Math.round(Math.min(300, Math.max(180, width * 0.3)));
 
 type SearchEntry = Omit<CompareHit, 'photo'> & { key: string; headshotId: number | null };
 type CareerNames = Awaited<ReturnType<SeasonDataService['careerNames']>>;
@@ -187,6 +190,8 @@ export class PlayerCompare {
   // The career arcs along the bottom: each one's years in the league, or the seasons themselves (null: by
   // year, unless they're all teams)
   arcBy: ArcBy | null = null;
+  // (the arcs' width on screen: the view measures it)
+  arcWidth = ARC.width;
   // Sides still loading (the add slot shows it), and the colors they'll take (picks load together)
   loading = 0;
   private claimed: string[] = [];
@@ -289,6 +294,13 @@ export class PlayerCompare {
   // The arcs' bottom switched (the Career tab's dropdown)
   setArcBy(by: ArcBy): void {
     this.arcBy = by;
+    this.arcs = this.buildArcs();
+  }
+
+  // The arcs' box resized: drawn again at its width (a pixel a unit)
+  setArcWidth(width: number): void {
+    if (Math.abs(width - this.arcWidth) < 2) return;
+    this.arcWidth = width;
     this.arcs = this.buildArcs();
   }
 
@@ -492,11 +504,14 @@ export class PlayerCompare {
     const xs = sides.flatMap((s) => s.career!.map((c) => xOf(s, c)));
     const lo = Math.min(...xs);
     const hi = Math.max(...xs, lo + 1);
-    const { width, height, left, right, top, bottom } = ARC;
+    const { left, right, top, bottom } = ARC;
+    const width = Math.max(240, Math.round(this.arcWidth));
+    const height = arcHeight(width);
     const round = (n: number) => Math.round(n * 10) / 10;
     const px = (x: number) => round(left + ((x - lo) / (hi - lo)) * (width - left - right));
     const py = (pct: number) => round(top + (1 - pct) * (height - top - bottom));
-    const step = Math.max(1, Math.ceil((hi - lo + 1) / 12));
+    // (a tick every 44px or more: fewer on a phone)
+    const step = Math.max(1, Math.ceil((hi - lo + 1) / Math.max(4, Math.min(12, Math.floor((width - left - right) / 44)))));
     const xTicks: CompareArcs['xTicks'] = [];
     for (let x = lo; x <= hi; x += step) xTicks.push({ x: px(x), label: byYear ? `Yr ${x}` : `’${String(x).slice(-2)}` });
     const yTicks = [1, 0.75, 0.5, 0.25, 0].map((p) => ({ y: py(p), label: p === 1 ? 'Top' : p === 0 ? 'Last' : `${p * 100}%` }));

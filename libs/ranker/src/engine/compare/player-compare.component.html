@@ -27,13 +27,47 @@
         </button>
       </div>
 
-      <div class="tapes" [style.--sides]="max">
+      <!-- (on a phone: a chip a side in a row, its color, face, name and rank; one tapped opens its tape in a
+           sheet over the board, the + chip the search. Wider screens: hidden, every tape shown) -->
+      @if (sides.length) {
+        <div class="cmp-chips">
+          @for (s of sides; track s.color) {
+            <button
+              type="button"
+              class="cmp-chip"
+              [class.open]="sheet === s.color"
+              [style.--side]="s.color"
+              [style.--team-badge]="s.badge"
+              [attr.aria-expanded]="sheet === s.color"
+              [attr.aria-label]="s.label + ', #' + s.rank + ' of ' + s.of"
+              (click)="toggle(s.color)"
+              animate.enter="chip-in"
+              animate.leave="chip-out"
+            >
+              @if (s.photo) {
+                <img class="chip-photo" [src]="s.photo" alt="" (error)="s.photo = null" />
+              } @else {
+                <span class="chip-photo chip-logo" [class.white-logo]="s.whiteLogo"><img [src]="s.logo" alt="" /></span>
+              }
+              <span class="chip-name">{{ s.tag }}</span>
+              <b class="chip-rank" [style.--tone]="rankTone(s.pct)">{{ s.rank }}</b>
+            </button>
+          }
+          @if (sides.length < max) {
+            <button type="button" class="cmp-chip chip-add" [class.open]="sheet === 'add'" [attr.aria-expanded]="sheet === 'add'" aria-label="Add someone" title="Add someone" (click)="toggle('add')">
+              <mat-icon [class.spin]="compare.loading" [fontIcon]="compare.loading ? 'autorenew' : 'add'"></mat-icon>
+            </button>
+          }
+        </div>
+      }
+
+      <div class="tapes" [class.floating]="sides.length" [style.--sides]="max">
         @for (s of sides; track s.color; let i = $index) {
           <!-- (a side's tape: the card's hero in miniature, a stripe of its color on top; kept by its color, so
                a season switched stays in place, and eased in and out) -->
-          <div class="tape" [style.--side]="s.color" [style.--team-badge]="s.badge" animate.enter="tape-in" animate.leave="tape-out">
-            <button type="button" class="tape-remove" [attr.aria-label]="'Remove ' + s.label" title="Remove" (click)="compare.remove(i)">
-              <mat-icon fontIcon="close"></mat-icon>
+          <div class="tape" [class.shown]="sheet === s.color" [style.--side]="s.color" [style.--team-badge]="s.badge" animate.enter="tape-in" animate.leave="tape-out">
+            <button type="button" class="tape-remove" [attr.aria-label]="'Remove ' + s.label" title="Remove" (click)="remove(i)">
+              <mat-icon fontIcon="close"></mat-icon><span class="tape-remove-text">Remove</span>
             </button>
             <!-- (the team's logo, big and faint, a texture behind it all) -->
             <span class="tape-texture" aria-hidden="true"><img [src]="s.logo" alt="" /></span>
@@ -70,7 +104,7 @@
         <!-- (the add slot: a name typed, everyone the sport has had found, a click or Enter adds their best
              season) -->
         @if (sides.length < max) {
-          <div class="tape tape-add">
+          <div class="tape tape-add" [class.shown]="sheet === 'add' || !sides.length">
             <mat-icon class="tape-add-icon" [class.spin]="compare.loading" [fontIcon]="compare.loading ? 'autorenew' : 'person_add'"></mat-icon>
             @if (compare.full) {
               <span class="tape-add-text">Loading…</span>
@@ -106,7 +140,7 @@
                         [attr.aria-selected]="h === compare.active"
                         [style.--team-badge]="hit.badge"
                         (mouseenter)="compare.active = h"
-                        (click)="compare.pick(hit)"
+                        (click)="pick(hit)"
                       >
                         <!-- (their headshot in the team's color; none, or it won't load: the team card) -->
                         @if (hit.photo) {
@@ -324,6 +358,7 @@
                   <mat-option value="season">Season</mat-option>
                 </mat-select>
                 <div class="group-body">
+                  <div class="arc-box" #arcBox>
                   <svg class="cmp-arcs" [attr.viewBox]="'0 0 ' + a.width + ' ' + a.height" role="img" aria-label="Career arcs">
                     @for (t of a.yTicks; track t.label) {
                       <line class="arc-grid" [class.mid]="t.label === '50%'" [attr.x1]="a.left" [attr.x2]="a.width - a.right" [attr.y1]="t.y" [attr.y2]="t.y"></line>
@@ -344,6 +379,7 @@
                       }
                     }
                   </svg>
+                  </div>
                   <div class="ov-legend cmp-legend">
                     @for (l of a.lines; track l.key) {
                       <span><i class="cmp-key" [style.--side]="l.color"></i>{{ l.name }}</span>
