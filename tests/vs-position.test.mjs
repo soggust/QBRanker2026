@@ -36,6 +36,9 @@ test(`NFL ${SEASON}: every defense has its vs-position numbers, ranked 1-32 per 
       assert.ok(b.rec <= b.tgt, `${at}: more catches than targets`);
     }
     assertRanks(blocks.map((b) => b.vs), blocks.map((b) => b.rank), role);
+    // (EPA a play to the role: a plausible number, ranked the stingiest first)
+    for (const [i, b] of blocks.entries()) assert.ok(b.epa > -1 && b.epa < 1, `${defs[i].name} ${role}: ${b.epa} EPA a play`);
+    assertRanks(blocks.map((b) => b.epa), blocks.map((b) => b.epaRank), `${role} EPA`);
   }
   // (the roles in their order: WR1s average more than WR2s)
   const avg = (role) => defs.reduce((a, d) => a + d.vsPos[role].exp, 0) / defs.length;

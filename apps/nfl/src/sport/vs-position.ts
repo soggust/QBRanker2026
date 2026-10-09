@@ -21,6 +21,10 @@ interface RoleLine {
   exp: number | null;
   vs: number | null;
   ydsVs: number | null;
+  // EPA a play to him (a target; the lead back's targets and carries), its rank (1 the stingiest); none
+  // before 2006
+  epa?: number | null;
+  epaRank?: number | null;
   rank: number | null;
 }
 export type VsPos = Record<Role, RoleLine> & {
@@ -74,6 +78,11 @@ export function vsPositionBreakdown(player: SkillPlayer, position: string, rows:
       title: ROLE_INFO[role].title,
       cells: [
         {
+          text: ok && line.epa != null ? signed(line.epa, 2) : '-',
+          tone: ok && line.epaRank != null ? rankPct(line.epaRank, of) : null,
+          title: ok && line.epa != null ? `${signed(line.epa, 2)} EPA a ${role === 'RB1' ? 'target or carry' : 'target'} to these ${ROLE_INFO[role].plural} (#${line.epaRank} of ${of})` : '',
+        },
+        {
           text: ok && line.ppr !== null ? line.ppr.toFixed(1) : '-',
           title: ok ? `${line.rec ?? 0} catches${line.tgt !== null ? ` on ${line.tgt} targets` : ''}, ${line.yds ?? 0} yards and ${line.td ?? 0} TDs a game` : '',
         },
@@ -85,10 +94,6 @@ export function vsPositionBreakdown(player: SkillPlayer, position: string, rows:
           text: ok && line.vs !== null ? signed(line.vs) : '-',
           tone: ok && line.rank !== null ? rankPct(line.rank, of) : null,
           title: ok && line.exp !== null ? `${line.ppr} PPR points a game, against the ${line.exp} these ${ROLE_INFO[role].plural} averaged in their other games` : '',
-        },
-        {
-          text: ok && line.ppr !== null ? Math.round(line.ppr * line.g).toString() : '-',
-          title: ok ? `${line.g} games` : '',
         },
       ],
       rank: ok ? line.rank : null,
@@ -171,10 +176,10 @@ export function vsPositionBreakdown(player: SkillPlayer, position: string, rows:
       "What this defense allowed to each offense's WR1, WR2, WR3, top tight end and lead back (each set by his share of the team's targets or carries in the games before), per game, and against what those same players averaged in their other games: holding an elite WR1 to his average reads as good defense. Every play counts, garbage time too.",
     flags,
     columns: [
+      { label: 'EPA / Play', title: "Expected points added a play to the role: a receiver's targets, the lead back's targets and carries (below zero: the defense won those plays; ranked, #1 the stingiest)" },
       { label: 'PPR / G', title: 'PPR fantasy points the role scored a game against this defense' },
       { label: 'Yds / G', title: "Receiving yards a game (a back's from scrimmage)" },
       { label: 'vs Avg', title: 'PPR points a game against what those same players averaged in their other games (below zero: held under their norm)' },
-      { label: 'FPTS', title: 'Fantasy points (PPR) the role scored against this defense, all its games' },
     ],
     rows: tableRows,
     lean,

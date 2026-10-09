@@ -337,6 +337,9 @@ async function main() {
     const of = siteDefs.size;
     const out = { pprOverAvg: {} };
     for (const role of ['WR1', 'WR2', 'WR3', 'TE1', 'RB1']) if (v[role]?.vs != null) out.pprOverAvg[role] = [v[role].vs, v[role].rank, of];
+    // (EPA a play to each role: a target, the lead back's targets and carries; rank 1 the stingiest)
+    const epa = Object.fromEntries(['WR1', 'WR2', 'WR3', 'TE1', 'RB1'].filter((role) => v[role]?.epa != null).map((role) => [role, [v[role].epa, v[role].epaRank, of]]));
+    if (Object.keys(epa).length) out.epaPerPlay = epa;
     if (v.funnel?.score != null) out.passRateOverNorm = [v.funnel.score, v.funnel.rank, of];
     if (v.targets) out.targetShare = Object.fromEntries(['WR', 'TE', 'RB'].map((g) => [g, [v.targets[g].share, v.targets[g].lg]]));
     return out;

@@ -68,7 +68,7 @@ export function defenseVsPosition({ pbp, snaps = [], positionOf, gsisByPfr, part
   const line = (game, player, team) => {
     const key = `${game}|${player}`;
     let l = players.get(key);
-    if (!l) players.set(key, (l = { game, player, team, tgt: 0, rec: 0, yds: 0, td: 0, car: 0, ryds: 0, rtd: 0, two: 0, fl: 0 }));
+    if (!l) players.set(key, (l = { game, player, team, tgt: 0, rec: 0, yds: 0, td: 0, car: 0, ryds: 0, rtd: 0, two: 0, fl: 0, epa: 0, repa: 0 }));
     return l;
   };
   let incompletions = 0;
@@ -113,6 +113,7 @@ export function defenseVsPosition({ pbp, snaps = [], positionOf, gsisByPfr, part
     if (p.pass_attempt === '1' && p.sack !== '1' && p.qb_spike !== '1' && receiver) {
       const l = line(p.game_id, receiver, off);
       l.tgt++;
+      l.epa += num(p.epa) ?? 0;
       s.tgt++;
       if (p.complete_pass === '1') {
         const yds = num(p.receiving_yards) ?? num(p.yards_gained) ?? 0;
@@ -127,6 +128,7 @@ export function defenseVsPosition({ pbp, snaps = [], positionOf, gsisByPfr, part
       const yds = num(p.rushing_yards) ?? num(p.yards_gained) ?? 0;
       l.car++;
       l.ryds += yds;
+      l.repa += num(p.epa) ?? 0;
       s.car++;
       s.rushYds += yds;
       if (p.rush_touchdown === '1' && (id(p.td_player_id) ?? rusher) === rusher) l.rtd++;
@@ -273,7 +275,7 @@ export function defenseVsPosition({ pbp, snaps = [], positionOf, gsisByPfr, part
     if (!t) {
       totals.set(def, (t = {
         games: 0,
-        roles: Object.fromEntries(VS_ROLES.map((r) => [r, { g: 0, tgt: 0, rec: 0, yds: 0, td: 0, ppr: 0, exp: 0, expYds: 0 }])),
+        roles: Object.fromEntries(VS_ROLES.map((r) => [r, { g: 0, tgt: 0, rec: 0, yds: 0, td: 0, ppr: 0, exp: 0, expYds: 0, epa: 0, plays: 0 }])),
         passYds: 0, rushYds: 0,
         fPlays: 0, fPasses: 0, fExp: 0,
         plays: 0, expPlays: 0, paceGames: 0,
@@ -303,6 +305,9 @@ export function defenseVsPosition({ pbp, snaps = [], positionOf, gsisByPfr, part
           r.yds += roleYds(role, l);
           r.td += l.td + l.rtd;
           r.ppr += ppr(l);
+          // (EPA on the plays that went to him: a receiver's targets, the lead back's carries too)
+          r.epa += l.epa + (role === 'RB1' ? l.repa : 0);
+          r.plays += l.tgt + (role === 'RB1' ? l.car : 0);
         }
         r.exp += avg.ppr;
         r.expYds += avg.yds;
@@ -369,6 +374,10 @@ export function defenseVsPosition({ pbp, snaps = [], positionOf, gsisByPfr, part
         vs: ppg === null ? null : r1(ppg - exp),
         // (yards against his average: receiving, a back's from scrimmage)
         ydsVs: r.g ? r1((r.yds - r.expYds) / r.g) : null,
+        // (EPA a play to him: per target, the lead back's per target or carry; none before 2006's
+        // play-by-play named a receiver on every target)
+        epa: hasTargets && r.plays ? Math.round((r.epa / r.plays) * 100) / 100 : null,
+        epaRank: null,
         rank: null,
       };
     }
@@ -417,6 +426,7 @@ export function defenseVsPosition({ pbp, snaps = [], positionOf, gsisByPfr, part
     for (const [team, b] of out) set(b, ranks.get(team) ?? null);
   };
   for (const role of VS_ROLES) rank((b) => b[role].vs, (b, v) => (b[role].rank = v));
+  for (const role of VS_ROLES) rank((b) => b[role].epa, (b, v) => (b[role].epaRank = v));
   rank((b) => b.pass.ypg, (b, v) => (b.pass.rank = v));
   rank((b) => b.run.ypg, (b, v) => (b.run.rank = v));
   rank((b) => b.funnel.score, (b, v) => (b.funnel.rank = v), true);
