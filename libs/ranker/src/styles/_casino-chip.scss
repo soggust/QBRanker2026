@@ -69,3 +69,77 @@
     y: 3px;
   }
 }
+
+// A dropdown that's a casino chip (the Bets page's game picker, the Algorithm's): its wrapper draws the rim's
+// spots over the select (<span><select /><svg class="chip-rim"><rect pathLength="220" /></svg></span>)
+@mixin dropdown-rim {
+  display: inline-flex;
+  position: relative;
+
+  .chip-rim {
+    height: 100%;
+    inset: 0;
+    overflow: visible;
+    pointer-events: none;
+    position: absolute;
+    width: 100%;
+  }
+
+  rect {
+    fill: none;
+    height: calc(100% - 4px);
+    // (round ends: half its height, the 52px chip less its 4px border)
+    rx: 24px;
+    stroke: #f4efe3;
+    stroke-dasharray: 4 6;
+    stroke-width: 4px;
+    width: calc(100% - 4px);
+    x: 2px;
+    y: 2px;
+  }
+}
+
+// ...and the select itself: the clay (its color given), a speckle and a sheen, a cream inlay ring, a caret
+@mixin dropdown($clay) {
+  appearance: none;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24'%3E%3Cpath fill='%23fff' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E") right 16px center / 14px no-repeat padding-box,
+    radial-gradient(ellipse at 30% 0%, rgba(255, 255, 255, 0.22), transparent 65%) padding-box,
+    linear-gradient(180deg, transparent 40%, rgba(0, 0, 0, 0.2)) padding-box,
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='c'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.35 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23c)'/%3E%3C/svg%3E") 0 0 / 120px padding-box,
+    // (the clay under its rim too: the spots are drawn over it, .bets-chip)
+    linear-gradient($clay, $clay) border-box;
+  border: 4px solid transparent;
+  border-radius: 999px;
+  box-shadow:
+    inset 0 0 0 3px $clay,
+    inset 0 0 0 4px rgba(255, 236, 196, 0.55),
+    0 2px 6px rgba(0, 0, 0, 0.45);
+  color: #fff;
+  cursor: pointer;
+  font-family: v.$font-base;
+  font-size: 13px;
+  font-weight: 800;
+  min-width: 220px;
+  padding: 13px 36px 13px 20px;
+  text-shadow: 0 1px 1.5px rgba(0, 0, 0, 0.6);
+  transition: filter 0.15s ease;
+
+  &:hover,
+  &:focus {
+    filter: brightness(1.12);
+    outline: none;
+  }
+
+  option,
+  optgroup {
+    background: #5e1016;
+    color: #fff;
+  }
+
+  // (the day headers in its open list, in gold)
+  optgroup {
+    color: #ffcd00;
+    font-weight: 800;
+  }
+}

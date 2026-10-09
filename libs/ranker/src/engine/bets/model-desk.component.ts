@@ -206,8 +206,43 @@ export class ModelDeskComponent implements OnInit, OnDestroy {
   private allBets: ModelBet[] = [];
   private allStates: ModelState[] = [];
 
+  // (one game on show, the dropdown left of the chips: its ESPN id; null every game. A new sport clears it)
+  game = '';
+
+  setGame(game: string): void {
+    this.game = game;
+    this.pick();
+    this.build();
+    this.loadScores();
+  }
+
+  // The dropdown's games: the sport's games with bets open, in play or graded in the last 3 days, by day
+  // (soonest first), each with its bet count
+  get gameDays(): { day: string; games: { event: string; label: string; count: number }[] }[] {
+    const recent = Date.now() - 3 * 864e5;
+    const bets = (this.sport ? this.allBets.filter((b) => b.sport === this.sport) : this.allBets).filter(
+      (b) => b.event && (b.status === 'open' || Date.parse(b.gradedAt ?? b.start) >= recent),
+    );
+    const games = new Map<string, { event: string; label: string; count: number; start: string; sport: string }>();
+    for (const b of bets) {
+      const g = games.get(b.event!) ?? { event: b.event!, label: b.matchup, count: 0, start: b.start, sport: b.sport };
+      g.count++;
+      games.set(b.event!, g);
+    }
+    const days = new Map<string, { day: string; games: { event: string; label: string; count: number }[] }>();
+    for (const g of [...games.values()].sort((a, b) => a.start.localeCompare(b.start))) {
+      const day = new Date(g.start).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+      const time = new Date(g.start).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+      const entry = days.get(day) ?? { day, games: [] };
+      entry.games.push({ event: g.event, label: `${this.sport ? '' : g.sport.toUpperCase() + ' · '}${g.label} · ${time}`, count: g.count });
+      days.set(day, entry);
+    }
+    return [...days.values()];
+  }
+
   setSport(sport: string | null): void {
     this.sport = sport;
+    this.game = '';
     try {
       if (sport) localStorage.setItem(SPORT_KEY, sport);
       else localStorage.removeItem(SPORT_KEY);
@@ -220,7 +255,8 @@ export class ModelDeskComponent implements OnInit, OnDestroy {
   }
 
   private pick(): void {
-    this.bets = this.sport ? this.allBets.filter((b) => b.sport === this.sport) : this.allBets;
+    const sport = this.sport ? this.allBets.filter((b) => b.sport === this.sport) : this.allBets;
+    this.bets = this.game ? sport.filter((b) => b.event === this.game) : sport;
     this.states = this.sport ? this.allStates.filter((s) => s.sport === this.sport) : this.allStates;
   }
 
