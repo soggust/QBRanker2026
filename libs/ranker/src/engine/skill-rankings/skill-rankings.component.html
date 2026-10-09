@@ -233,7 +233,8 @@
     }
   </ul>
 
-  <!-- The button bar (above the grid: the order is in the styles): filters, copy, the year, About, settings -->
+  <!-- The button bar (above the grid: the order is in the styles): filters, copy, the year, About, settings
+       (on phones: filters, the year, compare, and More for the rest) -->
   <footer>
     <!-- Filters menu (the menu's X closes it) -->
     <button
@@ -331,8 +332,8 @@
       <mat-icon aria-hidden="true" fontIcon="info"></mat-icon>
     </button>
 
-    <!-- "List copied", under the copy button -->
-    <div class="toast" [class.show]="toastVisible" [style.top.px]="toastAt.top" [style.left.px]="toastAt.left" role="status" aria-live="polite">{{ toastText }}</div>
+    <!-- "List copied", under the copy button (or a phone's More: its right edge in line with the button's) -->
+    <div class="toast" [class.show]="toastVisible" [style.top.px]="toastAt.top" [style.left.px]="toastAt.left" [style.right.px]="toastAt.right" [class.end]="toastAt.right !== null" role="status" aria-live="polite">{{ toastText }}</div>
 
     <!-- The settings menu (settings-menu.component) -->
     <button
@@ -344,10 +345,47 @@
       <mat-icon aria-hidden="false" aria-label="Settings Icon" fontIcon="settings"></mat-icon>
     </button>
 
+    <!-- Phones: copy, share, About and settings folded into one button's menu (the styles show it and
+         hide those four below 576px). Its Settings opens the settings menu itself, hung from this button
+         by the anchor inside it (a second trigger for the same menu, never clicked itself). -->
+    <button
+      type="button"
+      #moreButton
+      class="more-toggle"
+      [class.open]="settingsFromMore.menuOpen"
+      [matMenuTriggerFor]="moreMenu"
+      aria-label="More: copy, share, About and settings"
+      title="More"
+    >
+      <mat-icon aria-hidden="true" fontIcon="more_vert"></mat-icon>
+      <span
+        class="more-anchor"
+        aria-hidden="true"
+        [matMenuTriggerFor]="settings.menu"
+        [matMenuTriggerRestoreFocus]="false"
+        #settingsFromMore="matMenuTrigger"
+        (menuClosed)="moreButton.focus({ preventScroll: true })"
+      ></span>
+    </button>
   </footer>
+
+  <mat-menu #moreMenu="matMenu" class="more-menu" xPosition="before">
+    <button mat-menu-item type="button" (click)="copyList(moreButton)">
+      <mat-icon aria-hidden="true" fontIcon="content_copy"></mat-icon><span>Copy the list</span>
+    </button>
+    <button mat-menu-item type="button" (click)="shareList(moreButton)">
+      <mat-icon aria-hidden="true" fontIcon="share"></mat-icon><span>Share a link</span>
+    </button>
+    <button mat-menu-item type="button" (click)="openAbout()">
+      <mat-icon aria-hidden="true" fontIcon="info"></mat-icon><span>About &amp; FAQ</span>
+    </button>
+    <button mat-menu-item type="button" aria-haspopup="menu" (click)="openSettingsFromMore(settingsFromMore)">
+      <mat-icon aria-hidden="true" fontIcon="settings"></mat-icon><span>Settings</span>
+    </button>
+  </mat-menu>
 </section>
 
-<!-- The settings menu (the gear opens it), the compare view, and the player card (a name clicked) -->
+<!-- The settings menu (the gear opens it, or a phone's More), the compare view, and the player card (a name clicked) -->
 <settings-menu #settings [position]="position"></settings-menu>
 <player-compare [compare]="compare" [share]="shareCompare"></player-compare>
 <player-card [cards]="cards" [compare]="compareFromCard"></player-card>

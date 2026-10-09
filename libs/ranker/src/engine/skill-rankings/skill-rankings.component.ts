@@ -1,4 +1,5 @@
 import { Component, ElementRef, HostListener, Input, OnChanges, ViewChild } from '@angular/core';
+import { MatMenuTrigger } from '@angular/material/menu';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import {
@@ -105,7 +106,7 @@ export class SkillRankingsComponent implements OnChanges, CardHost {
   // "List copied" under the copy button
   toastVisible = false;
   toastText = '';
-  toastAt = { top: 0, left: 0 };
+  toastAt: { top: number; left: number | null; right: number | null } = { top: 0, left: 0, right: null };
   private toastTimer?: ReturnType<typeof setTimeout>;
 
   constructor(
@@ -563,6 +564,12 @@ export class SkillRankingsComponent implements OnChanges, CardHost {
     this.positionService.setAboutOpen(true);
   }
 
+  // Phones: the More menu's Settings opens the settings menu, hung from the More button (once the More
+  // menu has closed and handed focus back, so the settings menu takes it)
+  openSettingsFromMore(trigger: MatMenuTrigger): void {
+    setTimeout(() => trigger.openMenu());
+  }
+
   // The sport's footer dropdowns (MMA's Current / All-Time)
   settingText(setting: SportSetting): string {
     return settingText(setting, this.sportSettings);
@@ -615,7 +622,13 @@ export class SkillRankingsComponent implements OnChanges, CardHost {
 
   private toast(button: HTMLElement, text: string): void {
     const rect = button.getBoundingClientRect();
-    this.toastAt = { top: rect.bottom + 8, left: rect.left + rect.width / 2 };
+    const center = rect.left + rect.width / 2;
+    // (centered under the button; one near the right edge (a phone's More, the compare view's share) has
+    // the toast's right edge in line with its own, so the toast stays on screen)
+    this.toastAt =
+      center > innerWidth - 200
+        ? { top: rect.bottom + 8, left: null, right: Math.max(8, innerWidth - rect.right) }
+        : { top: rect.bottom + 8, left: center, right: null };
     this.toastText = text;
     this.toastVisible = true;
     clearTimeout(this.toastTimer);

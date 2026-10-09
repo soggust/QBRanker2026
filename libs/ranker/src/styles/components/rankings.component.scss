@@ -60,7 +60,8 @@ section footer {
   .copy-toggle,
   .share-toggle,
   .compare-toggle,
-  .info-toggle {
+  .info-toggle,
+  .more-toggle {
     align-items: center;
     @include v.leather;
     border: 1px solid rgba(0, 0, 0, 0.55);
@@ -92,6 +93,8 @@ section footer {
   .filter-toggle.open .mat-icon,
   .info-toggle.open .mat-icon,
   .compare-toggle.open .mat-icon,
+  .more-toggle.open .mat-icon,
+  .more-toggle[aria-expanded="true"] .mat-icon,
   .settings-toggle[aria-expanded="true"] .mat-icon {
     color: var(--scoreboard-led);
   }
@@ -170,6 +173,47 @@ section.rankings-wrapper > footer {
 
   .settings-toggle {
     order: 5;
+  }
+
+  // (More: phones only, below; the settings menu hangs from the anchor along its bottom edge)
+  .more-toggle {
+    display: none;
+    order: 6;
+    position: relative;
+  }
+
+  .more-anchor {
+    bottom: 0;
+    height: 0;
+    left: 0;
+    pointer-events: none;
+    position: absolute;
+    right: 0;
+  }
+}
+
+// The More menu (phones): its rows each an icon in the sport's light and a label, lit up when hovered
+// (the panel is in Material's overlay, outside this component: the scoreboard look is _base.scss's)
+::ng-deep .mat-mdc-menu-panel.more-menu {
+  min-width: 190px;
+
+  .mat-mdc-menu-item {
+    min-height: 44px;
+
+    .mat-icon {
+      color: var(--scoreboard-led);
+      margin-right: 14px;
+      @include v.icon-size(20px);
+    }
+
+    span {
+      font-weight: 700;
+    }
+
+    &:hover span,
+    &.cdk-keyboard-focused span {
+      color: var(--scoreboard-led) !important;
+    }
   }
 }
 
@@ -1265,6 +1309,15 @@ section.category-colors ul li.player:not(.header-row):not(.cdk-drag-preview) > .
     opacity: 1;
     visibility: visible;
   }
+
+  // (near the right edge: hung by its right edge, and on a phone wrapped rather than run off the screen)
+  &.end {
+    box-sizing: border-box;
+    max-width: calc(100vw - 16px);
+    transform: none;
+    white-space: normal;
+    width: max-content;
+  }
 }
 
 
@@ -1418,8 +1471,24 @@ section ul li.player > div.player-info .player-name {
 // an 11px base scales it all down together, and the team card, sized in px, steps down with it),
 // slimmer buttons, less room between the bars, just the year in the dropdown
 @media (max-width: 575px) {
+  // (copy, share, About and the gear fold into More; Compare, with its count, stays out, pushed right)
   section.rankings-wrapper > footer {
     margin-bottom: 8px;
+
+    .copy-toggle,
+    .share-toggle,
+    .info-toggle,
+    .settings-toggle {
+      display: none;
+    }
+
+    .compare-toggle {
+      margin-left: auto !important;
+    }
+
+    .more-toggle {
+      display: inline-flex;
+    }
   }
 
   section footer {
@@ -1428,7 +1497,8 @@ section ul li.player > div.player-info .player-name {
     .copy-toggle,
     .share-toggle,
     .compare-toggle,
-    .info-toggle {
+    .info-toggle,
+    .more-toggle {
       height: 36px;
       min-width: 36px;
       width: 36px;
