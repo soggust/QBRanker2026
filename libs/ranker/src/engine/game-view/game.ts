@@ -15,6 +15,7 @@ import { fantasyPoints } from './fantasy';
 import { gameChart } from './game-chart';
 import { GameBoxGroup, GameLeader, GamePlay, GamePlayGroup, GameTeam, GameTeamStat, GameView } from './game.model';
 import { BLACK_TEAMS, teamColor } from './team-color';
+import { TOO_CLOSE, distance, pickColor, shadesOf } from '../compare/side-colors';
 
 // The roofed parks and stadiums (no weather): domes and fixed roofs, then the retractable roofs
 
@@ -45,6 +46,13 @@ export async function loadGame(league: string, eventId: string): Promise<GameVie
   };
   const away = team('away');
   const home = team('home');
+  // (two teams whose colors look alike, the Panthers' red and the Hurricanes': the home side takes its
+  // alternate, or a shade of its own, whichever stands apart from the away side's)
+  if (distance(away.color, home.color) < TOO_CLOSE) {
+    const c = comp.competitors!.find((x) => x.homeAway === 'home')!;
+    const alt = c.team.alternateColor ? teamColor(c.team.alternateColor, undefined) : null;
+    home.color = pickColor([...(alt ? [alt] : []), ...shadesOf(home.color)], [away.color], []);
+  }
   const sideOf = (id: string | undefined): 'away' | 'home' | null => (id === away.id ? 'away' : id === home.id ? 'home' : null);
 
   // The periods' names: quarters, periods, innings, then overtime
