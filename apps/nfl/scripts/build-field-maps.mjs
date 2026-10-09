@@ -42,7 +42,7 @@ const MOVED_TEAMS = { OAK: 'LV', SD: 'LAC', STL: 'LA' };
 // (the play-by-play's columns this reads)
 export const COLUMNS = [
   'season_type', 'play_type', 'posteam', 'defteam', 'pass_attempt', 'sack', 'two_point_attempt', 'pass_location', 'air_yards',
-  'complete_pass', 'passing_yards', 'yards_gained', 'pass_touchdown', 'interception', 'epa', 'passer_player_id',
+  'complete_pass', 'passing_yards', 'receiving_yards', 'yards_gained', 'pass_touchdown', 'interception', 'epa', 'passer_player_id',
   'receiver_player_id', 'rusher_player_id', 'run_location', 'run_gap', 'rushing_yards', 'rush_touchdown', 'qb_scramble',
   'qb_kneel', 'field_goal_result', 'kick_distance', 'kicker_player_id', 'extra_point_result', 'punter_player_id',
   'punt_inside_twenty', 'touchback', 'punt_fair_catch', 'punt_blocked', 'return_yards',
@@ -89,11 +89,13 @@ const newLanes = () => LANES.map((lane) => ({ lane, att: 0, yds: 0, td: 0, epa: 
 const newBands = () => FG_BANDS.map((band) => ({ band, att: 0, made: 0 }));
 const newPunt = () => ({ n: 0, kicked: 0, gross: 0, net: 0, inside20: 0, touchbacks: 0, fairCatches: 0, blocked: 0, bands: PUNT_BANDS.map((band) => ({ band, n: 0 })) });
 
-function addPass(z, play) {
+// (yards: the passer's and a defense's the play's passing yards; a receiver's his own receiving yards, short of
+// what a lateral after his catch added, as his stats count them)
+function addPass(z, play, yards = 'passing_yards') {
   z.att++;
   if (yes(play.complete_pass)) {
     z.comp++;
-    z.yds += num(play.passing_yards) ?? num(play.yards_gained) ?? 0;
+    z.yds += num(play[yards]) ?? num(play.yards_gained) ?? 0;
   }
   if (yes(play.pass_touchdown)) z.td++;
   if (yes(play.interception)) z.int++;
@@ -153,7 +155,7 @@ export function tally(plays) {
       const passer = id(play.passer_player_id);
       if (passer) addPass(((player(passer).pass ??= newZones()))[z], play);
       const receiver = id(play.receiver_player_id);
-      if (receiver) addPass(((player(receiver).targets ??= newZones()))[z], play);
+      if (receiver) addPass(((player(receiver).targets ??= newZones()))[z], play, 'receiving_yards');
     } else if (type === 'run' && !yes(play.qb_kneel) && !yes(play.qb_scramble)) {
       const l = laneIndex(play.run_location, play.run_gap);
       if (l < 0) continue;
