@@ -101,10 +101,15 @@ card-panel {
     @include sport-panel.edges;
   }
 
+  // (right when shut, turned down when open)
   .panel-chevron {
     color: rgba(255, 255, 255, 0.55);
     @include v.icon-size(20px);
     margin: 0 -4px;
+  }
+
+  &:not(.closed) > .group-bar .panel-chevron {
+    transform: rotate(90deg);
   }
 }
 
@@ -146,6 +151,11 @@ card-panel.depth-panel {
 @media (prefers-reduced-motion: no-preference) {
   .stat-group.unfolding > .panel-body {
     animation: panel-unfold 0.24s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  // (and its chevron turns with it)
+  card-panel .panel-chevron {
+    transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
   }
 }
 

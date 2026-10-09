@@ -711,8 +711,8 @@ export class PlayerCards {
   }
 }
 
-// A line per season someone's in (the card's Career tab and history, the compare view's arcs), ranked with the default sliders (careers/<tab>.json for the finished
-// seasons, this season from its rows), each headline stat's best finished season lit (lowest for a
+// A line per season someone's in (the card's Career tab and history, the compare view's arcs), ranked with
+// the default sliders (careers/<tab>.json for the finished seasons, this season from its rows), each headline stat's best finished season lit (lowest for a
 // stat that counts against them; a few games into this season, a hot start would take it)
 export async function careerLines(data: SeasonDataService, tableSeason: number, position: SkillPosition, id: string): Promise<CardSeason[]> {
   const current = tableSeason === CURRENT_SEASON ? SKILL_UNITS : await data.rows(CURRENT_SEASON);

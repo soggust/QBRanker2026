@@ -28,7 +28,7 @@ export async function loadHighlights(game: GameView): Promise<GameVideo[]> {
 // (the recap first, then the plays as MLB lists them)
 const MLB = 'https://statsapi.mlb.com/api/v1';
 interface MlbSchedule {
-  dates?: { games?: { gamePk: number; teams: { home: { team: { name: string } }; away: { team: { name: string } } } }[] }[];
+  dates?: { games?: { gamePk: number; gameDate?: string; teams: { home: { team: { name: string } }; away: { team: { name: string } } } }[] }[];
 }
 interface MlbContent {
   highlights?: { highlights?: { items?: { headline?: string; duration?: string; image?: { cuts?: { width?: number; src?: string }[] }; playbacks?: { name?: string; url?: string }[] }[] } };
@@ -39,9 +39,15 @@ async function mlbHighlights(game: GameView): Promise<GameVideo[]> {
   const day = new Date(game.date).toLocaleDateString('en-CA', { timeZone: 'America/New_York' });
   const schedule = await fetchJson<MlbSchedule>(`${MLB}/schedule?sportId=1&date=${day}`, {});
   const same = (a: string, b: string) => a.toLowerCase() === b.toLowerCase() || a.split(' ').at(-1)?.toLowerCase() === b.split(' ').at(-1)?.toLowerCase();
+  // (a doubleheader's two: the one starting nearest the game's time)
+  const gap = (g: { gameDate?: string }) => {
+    const ms = Math.abs(Date.parse(g.gameDate ?? '') - Date.parse(game.date));
+    return Number.isNaN(ms) ? Infinity : ms;
+  };
   const found = (schedule.dates ?? [])
     .flatMap((d) => d.games ?? [])
-    .find((g) => same(g.teams.home.team.name, game.home.name) && same(g.teams.away.team.name, game.away.name));
+    .filter((g) => same(g.teams.home.team.name, game.home.name) && same(g.teams.away.team.name, game.away.name))
+    .sort((a, b) => gap(a) - gap(b))[0];
   if (!found) return [];
   const content = await fetchJson<MlbContent>(`${MLB}/game/${found.gamePk}/content`, {});
   const videos = (content.highlights?.highlights?.items ?? [])

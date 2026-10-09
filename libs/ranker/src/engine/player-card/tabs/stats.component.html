@@ -9,7 +9,7 @@
     </span>
     @if (s.dots) {
       <!-- (the game log's W/L squares, oldest first: each opens its game, its hover the score) -->
-      <span class="stat-value stat-dots" (mouseenter)="games.primeRecent(recentTeam(c), c.season)">
+      <span class="stat-value stat-dots" (mouseenter)="games.primeRecent(recentTeam(c), c.season)" (focusin)="games.primeRecent(recentTeam(c), c.season)">
         @for (d of s.dots; track $index) {
           @let i = s.dots.length - 1 - $index;
           <button

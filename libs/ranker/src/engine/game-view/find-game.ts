@@ -1,14 +1,11 @@
 // Finding a game: by its team, season and opponent (a Recent square: the nth meeting, newest first, on the
 // team's schedule), or by its date and a team in it (a game log's row without ESPN's id)
 
-// A Recent dot's game: its team's nth game against that opponent (home or away), newest first, among the
-// season's finished games (the regular season's and the playoffs')
-// A team's finished games that season, newest first (the regular season's and the playoffs'): each one's
-// id, its opponent and where, and the score the team's way ("24-17"); read once a visit
-
 import { espnSchedule, espnScoreboard } from '@ranker/core/game-logs';
 import { memo } from '@ranker/core/http';
 
+// A team's finished games that season, newest first (the regular season's and the playoffs'): each one's
+// id, its opponent and where, and the score the team's way ("24-17"); read once a visit
 export interface TeamResult {
   event: string;
   opponent: string;
@@ -37,6 +34,8 @@ export function nthMeeting(list: TeamResult[], opponentId: string, home: boolean
   return list.filter((r) => r.opponent === opponentId && (home === null || r.home === home))[nth] ?? null;
 }
 
+// A Recent dot's game: its team's nth game against that opponent (home or away), newest first, among the
+// season's finished games
 export async function findGame(
   league: string,
   teamId: string,

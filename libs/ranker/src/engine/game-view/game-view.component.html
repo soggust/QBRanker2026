@@ -199,7 +199,7 @@
                     @let team = t.side === 'away' ? g.away : g.home;
                     <div class="game-leader-col">
                       <h3 class="depth-unit">{{ team.short }}</h3>
-                      @for (x of t.games; track x.event) {
+                      @for (x of t.games; track $index) {
                         <!-- (the week or day: the game; the opponent: its team's card that season; the score on the
                              LED tiles, the team's first) -->
                         <div class="game-form-row">
@@ -240,7 +240,7 @@
                         <small>{{ i.position }}{{ i.detail ? ' · ' + i.detail : '' }}</small>
                         <b><ng-container *ngTemplateOutlet="who; context: { $implicit: i.name }"></ng-container></b>
                       </span>
-                      <span class="game-injury-status" [ngClass]="'s-' + i.status.toLowerCase().replace(' ', '-')">{{ i.status }}</span>
+                      <span class="game-injury-status" [ngClass]="'s-' + i.status.toLowerCase().replaceAll(' ', '-')">{{ i.status }}</span>
                     </div>
                   }
                 </div>

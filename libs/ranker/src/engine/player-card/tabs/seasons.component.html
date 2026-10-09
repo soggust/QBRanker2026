@@ -40,7 +40,7 @@
           [class.active]="s.season === c.season"
           [class.pending]="!s.yours"
           [style.--tone]="rankTone(s.pct)"
-          [title]="s.season === c.season ? 'Showing this season' : 'Open the ' + s.season + ' card'"
+          [title]="s.season === c.season ? 'Showing this season' : 'Open the ' + seasonText(s.season) + ' card'"
           (click)="s.season !== c.season && cards.openSeason(s.season, c.player.gsisId)"
         >
           <img [src]="s.logo" alt="" [class.white-logo]="whiteLogo(s.teamLogo)" />

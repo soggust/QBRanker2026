@@ -64,10 +64,12 @@ export class GameViewService {
     this.player = null;
     try {
       const id = await this.eventId(league, ref);
+      // (another game opened, or this one closed, while it was being found: that one's, not this)
+      if (ticket !== this.opened) return;
       if (!id) throw new Error('game not found');
-      this.current = { event: id };
       const game = await loadGame(league, id);
       if (ticket !== this.opened) return;
+      this.current = { event: id };
       this.game = game;
       // (the players the site has that season, for the names' links)
       this.players = null;
@@ -199,7 +201,6 @@ export function recentRef(
   return { team, opponent, home, season, nth };
 }
 
-// A team's ESPN id, or null when it isn't found
 // A name to match on: lower case, no accents, periods or suffixes ("Kenneth Walker III" -> "kenneth walker")
 export function nameKey(name: string): string {
   return name

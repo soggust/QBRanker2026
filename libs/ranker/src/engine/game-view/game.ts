@@ -18,7 +18,6 @@ import { BLACK_TEAMS, teamColor } from './team-color';
 import { TOO_CLOSE, distance, pickColor, shadesOf } from '../compare/side-colors';
 
 // The roofed parks and stadiums (no weather): domes and fixed roofs, then the retractable roofs
-
 const INDOORS = /mercedes-benz stadium|ford field|caesars superdome|superdome|u\.s\. bank stadium|allegiant|sofi stadium|tropicana field|edward jones dome|the dome at america's center|georgia dome|metrodome|rca dome|silverdome|kingdome|olympic stadium/i;
 const RETRACTABLE = /at&t stadium|lucas oil|nrg stadium|state farm stadium|university of phoenix stadium|rogers centre|chase field|minute maid|daikin park|loandepot|marlins park|american family field|miller park|t-mobile park|safeco field|globe life field/i;
 

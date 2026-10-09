@@ -153,9 +153,17 @@ export class GameViewComponent {
   }
 
   // The spray chart's view: cropped to the park's outline and every ball in play (a deep home run past the
-  // wall too), a little room around them
+  // wall too), a little room around them; kept per field and chart
+  private boxCache: { field: object; chart: GameChart; box: string } | null = null;
   sprayBox(game: GameView, chart: GameChart): string {
     const field = this.park(game);
+    if (this.boxCache?.field === field && this.boxCache.chart === chart) return this.boxCache.box;
+    const box = this.boxAround(field, chart);
+    this.boxCache = { field, chart, box };
+    return box;
+  }
+
+  private boxAround(field: { wall: string; fouls: string; infield: string }, chart: GameChart): string {
     const xs: number[] = [];
     const ys: number[] = [];
     for (const d of [field.wall, field.fouls, field.infield]) {
@@ -300,7 +308,11 @@ export class GameViewComponent {
 
   pitchLegend(chart: GameChart): { type: string; count: number; mph: number | null }[] {
     const byType = new Map<string, GamePitch[]>();
-    for (const p of this.pitches(chart)) byType.set(p.type, [...(byType.get(p.type) ?? []), p]);
+    for (const p of this.pitches(chart)) {
+      const list = byType.get(p.type);
+      if (list) list.push(p);
+      else byType.set(p.type, [p]);
+    }
     return [...byType.entries()]
       .map(([type, list]) => {
         const speeds = list.map((p) => p.mph).filter((v): v is number => v !== null);
@@ -348,13 +360,18 @@ export class GameViewComponent {
     return /intercept|fumble|downs/i.test(result);
   }
 
-  // The fantasy board in the Fantasy Scoring setting (the NFL's: a catch worth 1, a half or nothing), best first
+  // The fantasy board in the Fantasy Scoring setting (the NFL's: a catch worth 1, a half or nothing), best
+  // first; kept per game and setting (the same rows each check, so a headshot that failed stays failed)
+  private fantasyCache: { fantasy: GameFantasy[]; perCatch: number; rows: (GameFantasy & { total: number })[] } | null = null;
   fantasyRows(game: GameView): (GameFantasy & { total: number })[] {
     const scoring = this.positions.settings.sport['fantasyScoring'];
     const perCatch = scoring === 'std' ? 0 : scoring === 'half' ? 0.5 : 1;
-    return game.fantasy
+    if (this.fantasyCache?.fantasy === game.fantasy && this.fantasyCache.perCatch === perCatch) return this.fantasyCache.rows;
+    const rows = game.fantasy
       .map((p) => ({ ...p, total: Math.round((p.points + p.receptions * perCatch) * 10) / 10 }))
       .sort((a, b) => b.total - a.total);
+    this.fantasyCache = { fantasy: game.fantasy, perCatch, rows };
+    return rows;
   }
 
   // The plays the filter leaves (Scoring Only: just the ones that scored)

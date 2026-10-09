@@ -3,7 +3,7 @@ import { Component, EventEmitter, Input, Output, ViewEncapsulation } from '@angu
 // A panel, every one in the app: a bar with the section's icon and its label, and the panel's content
 // under it. Expandable (the default: the card's Season groups and Analysis sections, the filter menu's
 // stat groups, the FAQ's questions), the bar opens and shuts it, the chevron on its left (right when shut,
-// down when open), and on hover the bar lifts and the chevron lightens, never the accent color; not
+// turning down when open), and on hover the bar lifts and the chevron lightens, never the accent color; not
 // expandable (the card's Overview sections, Similar Seasons, Game Log, Career), the bar is just its title
 // and the content always shows. Its category color is the host's --group-color (a group-* class on it, or
 // a tab card's default). The filter menu's eye and drag grip ride on the bar's right (an element marked
@@ -18,7 +18,7 @@ import { Component, EventEmitter, Input, Output, ViewEncapsulation } from '@angu
     <div class="group-bar">
       @if (expandable) {
         <button type="button" class="panel-toggle" [attr.aria-expanded]="isOpen" (click)="toggle()">
-          <mat-icon class="panel-chevron" [fontIcon]="isOpen ? 'expand_more' : 'chevron_right'"></mat-icon>
+          <mat-icon class="panel-chevron" fontIcon="chevron_right"></mat-icon>
           @if (icon) {
             <mat-icon class="group-bar-icon" [fontIcon]="icon"></mat-icon>
           }

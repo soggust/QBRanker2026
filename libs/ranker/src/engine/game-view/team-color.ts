@@ -1,11 +1,10 @@
 // Team colors as the game view draws them (ESPN's, made to read on the dark board), and a player card
 // hero's
 
-// The black-clad teams' second colors, for when ESPN names no alternate (the NHL's): by its abbreviation
-
 import { ESPN_API, findEspnTeamId } from '@ranker/core/game-logs';
 import { fetchJson, memo } from '@ranker/core/http';
 
+// The black-clad teams' second colors, for when ESPN names no alternate (the NHL's): by its abbreviation
 export const BLACK_TEAMS: Record<string, string> = {
   BOS: 'ffb81c', // the Bruins' gold
   PIT: 'fcb514', // the Penguins' gold
