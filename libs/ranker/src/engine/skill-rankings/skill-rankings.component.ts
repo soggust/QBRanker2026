@@ -153,10 +153,15 @@ export class SkillRankingsComponent implements OnChanges, CardHost {
     service.seasonLoading$.pipe(takeUntilDestroyed()).subscribe((loading) => (this.seasonLoading = loading));
 
     // The sport's values from other tabs changed (SPORT.connect: the NFL's team grades): they show,
-    // and the list re-sorts unless it was dragged by hand
+    // and the list re-sorts unless it was dragged by hand (then just its scores, for the rank tiles)
     service.sportChanged$.pipe(takeUntilDestroyed()).subscribe(() => {
       this.dataVersion++;
-      if (this.position && !this.positionService.unitOrder(this.position)?.manual) this.sortPlayers();
+      if (!this.position) return;
+      if (!this.positionService.unitOrder(this.position)?.manual) this.sortPlayers();
+      else {
+        this.closeWhy();
+        this.totals = this.scoreTotals(this.ranker.listed(SKILL_UNITS, this.season, this.position));
+      }
     });
   }
 
@@ -223,7 +228,12 @@ export class SkillRankingsComponent implements OnChanges, CardHost {
   private restoreOrder(ids: string[]): void {
     const listed = this.ranker.listed(SKILL_UNITS, this.season, this.position);
     this.playerList = this.limited(this.ranker.inOrder(this.shown(listed), ids));
-    this.totals = this.ranker.scores(this.reader, listed, this.position, SKILL_UNITS).totals;
+    this.totals = this.scoreTotals(listed);
+  }
+
+  // (every row's score as the sliders have it, for a list in an order dragged by hand: the rank tiles' hovers)
+  private scoreTotals(listed: SkillPlayer[]): Map<SkillPlayer, number> {
+    return this.ranker.scores(this.reader, listed, this.position, SKILL_UNITS).totals;
   }
 
   // Remember this tab's order for when you come back
@@ -460,9 +470,7 @@ export class SkillRankingsComponent implements OnChanges, CardHost {
   }
 
   // The score as the list went by: "1.23"
-  scoreText(score: number): string {
-    return (Number(score.toFixed(2)) + 0).toFixed(2).replace('-', '−');
-  }
+  readonly scoreText = scoreText;
 
   // ---------------------------------------------------------------------------
   // Compare: rows picked in the grid, then the button

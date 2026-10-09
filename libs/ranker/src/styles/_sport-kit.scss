@@ -156,7 +156,11 @@ $switch: "html .mat-mdc-slide-toggle.mat-accent";
 // A painted line: the color lifted with a little white, a faint sheen down its middle ($across: the
 // sheen runs across a horizontal line)
 @function painted-line($color, $across: false) {
-  @return linear-gradient(if($across, 180deg, 90deg), transparent 35%, rgba(255, 255, 255, 0.35) 50%, transparent 65%),
+  $angle: 90deg;
+  @if $across {
+    $angle: 180deg;
+  }
+  @return linear-gradient($angle, transparent 35%, rgba(255, 255, 255, 0.35) 50%, transparent 65%),
     color-mix(in srgb, $color 85%, #fff);
 }
 

@@ -141,7 +141,8 @@ export function rankWhy(
     score,
     scoreRank,
     manual: options.manual,
-    movedByHeadToHead: !options.manual && !!beat && scoreRank !== index + 1,
+    // (a better score below it or a worse one above: a tie's order isn't a move)
+    movedByHeadToHead: !options.manual && !!beat && list.some((other, at) => (at < index ? total(other) < score : at > index && total(other) > score)),
     parts,
     vs,
   };

@@ -1748,10 +1748,6 @@ section ul li.player:not(.header-row) .count.rank-tile {
 
 .why-empty {
   color: #999;
-
-  .why-amount {
-    color: #aaa;
-  }
 }
 
 // The rows beside it: the gap, and the three stats making most of it
@@ -1806,10 +1802,14 @@ section ul li.player:not(.header-row) .count.rank-tile {
   }
 }
 
-// (a quick rise in, the bars filling from the left; none for anyone who's asked for less)
+// (a quick slide in from the tile's side, the bars filling from the left; none for anyone who's asked for less)
 @media (prefers-reduced-motion: no-preference) {
   .rank-why {
-    animation: why-rise 0.14s ease-out;
+    animation: why-drop 0.14s ease-out;
+
+    &.above {
+      animation-name: why-rise;
+    }
   }
 
   .why-bar i {
@@ -1817,9 +1817,17 @@ section ul li.player:not(.header-row) .count.rank-tile {
   }
 
   @media (max-width: 575px) {
-    .rank-why {
+    .rank-why,
+    .rank-why.above {
       animation: why-sheet 0.2s ease-out;
     }
+  }
+}
+
+@keyframes why-drop {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
   }
 }
 

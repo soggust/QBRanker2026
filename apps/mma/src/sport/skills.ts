@@ -28,7 +28,10 @@ const boxFights: SkillMinimum = { atLeast: 4, noun: 'fights with stats', attempt
 const BOX_MINIMUMS: SkillMinimums = Object.fromEntries(
   ['slpm', 'strDiff', 'strAcc', 'strDef', 'sapm', 'kd15', 'kdAgainst', 'td15', 'tdAcc', 'tdDef', 'sub15', 'adv15'].map((key) => [key, boxFights]),
 );
-export const SKILL_MINIMUMS: Partial<Record<SkillPosition, SkillMinimums>> = Object.fromEntries(POSITIONS.map((p) => [p, BOX_MINIMUMS]));
+// (and his KO share over 3 wins or more: one win by knockout isn't a 100% puncher)
+const winsOf = (p: SkillPlayer) => (p.stats as Record<string, number | null>)['wins'];
+const MMA_MINIMUMS: SkillMinimums = { ...BOX_MINIMUMS, koShare: { atLeast: 3, noun: 'wins', attempts: winsOf } };
+export const SKILL_MINIMUMS: Partial<Record<SkillPosition, SkillMinimums>> = Object.fromEntries(POSITIONS.map((p) => [p, MMA_MINIMUMS]));
 
 // Stats only skills read (skills.ts SkillDerived): how often he's been finished, per pro fight
 export const SKILL_DERIVED: SkillDerivedStats = {

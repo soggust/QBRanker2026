@@ -84,3 +84,36 @@ for (const sport of SPORTS) {
     t.diagnostic(`${sport}: ${tabs} lists checked, ${moved} rows above a better score by head to head`);
   });
 }
+
+// Tied scores: their order isn't head to head's doing (the second of two tied rows was said to be moved);
+// a better score below is
+test('mma: a tie in score is not a head-to-head move', async () => {
+  const { rankWhy, DEFAULT_SETTINGS } = await loadEngine('mma', { entry: path.join(import.meta.dirname, 'support/why-entry.ts') });
+  const row = (id) => ({ gsisId: id, name: id, fights: [], stats: {} });
+  const [a, b, c] = ['A', 'B', 'C'].map(row);
+  const reader = { label: () => '', name: () => '', listRank: () => null, format: () => '-', lastFive: () => [] };
+  const why = (list, scores, i) =>
+    rankWhy(list, i, { totals: new Map(list.map((r, k) => [r, scores[k]])), counted: [], parts: new Map() }, reader, { manual: false, settings: DEFAULT_SETTINGS.sport });
+
+  const tied = why([a, b, c], [1, 1, 0], 1);
+  assert.equal(tied.scoreRank, 1);
+  assert.ok(!tied.movedByHeadToHead && tied.vs.every((vs) => !vs.headToHead));
+
+  const moved = why([a, b], [0, 1], 0);
+  assert.equal(moved.scoreRank, 2);
+  assert.ok(moved.movedByHeadToHead && moved.vs[0].headToHead);
+  assert.ok(why([a, b], [0, 1], 1).movedByHeadToHead);
+});
+
+// The numbers as the breakdown writes them: a real minus, no "−0.00", three places under a hundredth
+test('rank-why: scores and shares as written', async () => {
+  const { scoreText, signedScore } = await loadEngine('nfl', { entry: path.join(import.meta.dirname, 'support/why-entry.ts') });
+  assert.equal(scoreText(21.044), '21.04');
+  assert.equal(scoreText(-0.5), '−0.50');
+  assert.equal(scoreText(-0.001), '0.00');
+  assert.equal(signedScore(0.12), '+0.12');
+  assert.equal(signedScore(-0.084), '−0.08');
+  assert.equal(signedScore(0.004), '+0.004');
+  assert.equal(signedScore(-0.0001), '0.000');
+  assert.equal(signedScore(0), '0.00');
+});

@@ -7,6 +7,9 @@ import { extras } from '@ranker/engine/row-fields';
 import { SportSettings, ValueContext } from '@ranker/engine/sport';
 import { recentCount, statValue } from '@ranker/engine/unit-scoring';
 import { CURRENT_SEASON } from '@ranker/engine/data';
+import type { RankerSettings } from '@ranker/engine/position.service';
+import { TintScale, tintFrom, tintScale } from '@ranker/core/value-tint';
+import { NUMBER, avg3, grade, gradeColor, innings } from '@ranker/core/format';
 
 // Minutes as minutes:seconds: 31.4 -> "31:24"
 const mmss = (minutes: number): string => {
@@ -14,9 +17,6 @@ const mmss = (minutes: number): string => {
   const total = Math.round(minutes * 60);
   return `${Math.floor(total / 60)}:${String(total % 60).padStart(2, '0')}`;
 };
-import type { RankerSettings } from '@ranker/engine/position.service';
-import { TintScale, tintFrom, tintScale } from '@ranker/core/value-tint';
-import { NUMBER, avg3, grade, gradeColor, innings } from '@ranker/core/format';
 
 export interface ReaderSource {
   position: SkillPosition;
@@ -49,6 +49,8 @@ export class StatReader {
   private scales = new Map<string, TintScale | null>();
   // (each column's values in the list, for Show Ranks; cleared with the scales)
   private rankValues = new Map<string, number[]>();
+  // (each rank column's rows at each rank, for its ties; cleared with the scales)
+  private rankCounts = new Map<string, Map<number, number>>();
   private scalesFor?: unknown[];
 
   constructor(private readonly source: ReaderSource) {}
@@ -106,6 +108,7 @@ export class StatReader {
     if (known && known[0] === s.list && known[1] === s.version && known[2] === s.settings && known[3] === s.weights) return;
     this.scales.clear();
     this.rankValues.clear();
+    this.rankCounts.clear();
     this.raws.clear();
     this.texts.clear();
     this.colors.clear();
@@ -158,7 +161,17 @@ export class StatReader {
     if (stat.format !== 'rank' || stat.noTies) return false;
     const rank = this.value(player, stat);
     if (rank === null) return false;
-    return (this.rows[this.position] ?? []).some((other) => other !== player && this.value(other, stat) === rank);
+    // (how many of the tab's rows hold each rank, counted once a column: every rank cell asks)
+    let counts = this.rankCounts.get(stat.key);
+    if (!counts) {
+      counts = new Map();
+      for (const other of this.rows[this.position] ?? []) {
+        const v = this.value(other, stat);
+        if (v !== null) counts.set(v, (counts.get(v) ?? 0) + 1);
+      }
+      this.rankCounts.set(stat.key, counts);
+    }
+    return (counts.get(rank) ?? 0) > 1;
   }
 
   // The last five results (newest first; 1 win, 0.5 tie, 0 loss), for a sport with a 'recent' stat

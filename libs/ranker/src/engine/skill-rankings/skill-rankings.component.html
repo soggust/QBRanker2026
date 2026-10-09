@@ -252,6 +252,7 @@
     <div
       #whyPop
       class="rank-why"
+      [class.above]="w.at.top === null"
       role="dialog"
       tabindex="-1"
       [attr.aria-label]="'Why ' + w.name + ' ranks #' + w.rank"

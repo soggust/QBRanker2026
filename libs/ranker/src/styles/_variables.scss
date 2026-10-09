@@ -171,7 +171,11 @@ $chalk-dust:
 // shade toward the bottom, the pebbled texture at $tile (soft-light over the brown); !important where
 // it must beat Material's own backgrounds
 @mixin leather($tile: 96px, $important: false) {
-  $flag: if($important, " !important", "");
+  // (@if, not if(): Sass deprecates the function)
+  $flag: "";
+  @if $important {
+    $flag: " !important";
+  }
   background:
     radial-gradient(ellipse at 35% 20%, rgba(255, 255, 255, 0.2), transparent 60%),
     linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(0, 0, 0, 0.18)),

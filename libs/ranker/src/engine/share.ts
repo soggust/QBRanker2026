@@ -28,9 +28,10 @@ interface Shared {
 
 const PARAM = 'list';
 
-// (JSON as URL-safe base64, and back)
+// (JSON as URL-safe base64, and back; byte by byte, not spread: a list with long dragged orders can
+// pass the engine's limit on a call's arguments)
 const encode = (data: unknown): string =>
-  btoa(String.fromCharCode(...new TextEncoder().encode(JSON.stringify(data))))
+  btoa(Array.from(new TextEncoder().encode(JSON.stringify(data)), (byte) => String.fromCharCode(byte)).join(''))
     .replace(/\+/g, '-')
     .replace(/\//g, '_')
     .replace(/=+$/, '');
