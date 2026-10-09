@@ -10,6 +10,8 @@
 // API's free quota covers a week's games many times over). MLB's need none of this: the site asks MLB's own
 // API, any game, any season.
 
+// (the keys: .env on this machine, the repo's secrets on GitHub)
+import './env.mjs';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 
