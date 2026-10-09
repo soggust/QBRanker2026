@@ -1,4 +1,4 @@
-import { Component, HostListener } from '@angular/core';
+import { AfterViewChecked, Component, ElementRef, HostListener, NgZone, OnDestroy, ViewChild } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { SPORT } from '@sport/sport';
 import { extras } from '@ranker/engine/row-fields';
@@ -8,9 +8,10 @@ import { SKILL_UNITS } from '@ranker/engine/unit-scoring';
 import { ordinal } from '@ranker/core/format';
 import { pitchColor } from '../player-card/zones';
 import { HOME, TracedPark, fieldSpot, loadTracedParks, tracedPark, wallPath } from './parks';
-import { GameArsenal, GameChart, GameFantasy, GameMark, GamePitch, GameTeam, GameView } from './game.model';
+import { GameArsenal, GameChart, GameFantasy, GameMark, GameMoment, GamePitch, GameTeam, GameView } from './game.model';
 import { GameWeather } from './venue';
 import { videoPlay, youtubeThumb, youtubeWatch } from './highlights';
+import { lineHead } from './wp-moments';
 import { PositionService } from '../position.service';
 
 import { GameTab, GameViewService } from './game-view.service';
@@ -29,11 +30,12 @@ import { GameTab, GameViewService } from './game-view.service';
   // (its look, the card's and its own, is global, kept to its element: styles/_cards.scss)
   standalone: false,
 })
-export class GameViewComponent {
+export class GameViewComponent implements AfterViewChecked, OnDestroy {
   constructor(
     readonly games: GameViewService,
     private positions: PositionService,
     private sanitizer: DomSanitizer,
+    private zone: NgZone,
   ) {}
 
   // How a clip plays (the NFL's open on YouTube), its page and its picture
@@ -240,6 +242,104 @@ export class GameViewComponent {
           });
     this.wpCache = { points, spots };
     return spots;
+  }
+
+  // The win probability's game time, played along with its draw (the CSS's wp-reveal, its line and fills
+  // sweeping open together, followed by its own clock): each frame the chart's head (lineHead) picks its
+  // play's moment for the readout ("Q3 8:42" and the score then) and takes the pen there, the logo of the
+  // team ahead then; at its end the pen rests on the last point, "Final" and the replay. Written straight
+  // to the page, outside Angular's checks (a frame at a time); none for anyone who's asked for less motion
+  // (no animation to follow)
+  @ViewChild('wpChart') private wpChart?: ElementRef<HTMLElement>;
+  @ViewChild('wpLine') private wpLine?: ElementRef<SVGPathElement>;
+  @ViewChild('wpHead') private wpHead?: ElementRef<HTMLElement>;
+  @ViewChild('wpWhen') private wpWhen?: ElementRef<HTMLElement>;
+  @ViewChild('wpScore') private wpScore?: ElementRef<HTMLElement>;
+  private wpOn: { line: SVGPathElement | null; game: string | null } = { line: null, game: null };
+  private wpFrame = 0;
+  // (the chart's animations, kept from its start: a finished one is no longer the page's to find)
+  private wpAnims: Animation[] = [];
+  private wpShown = -1;
+
+  // (a chart drawn: followed; the same chart showing another game: drawn again)
+  ngAfterViewChecked(): void {
+    const line = this.wpLine?.nativeElement ?? null;
+    const game = this.wpGame()?.id ?? null;
+    if (line === this.wpOn.line && game === this.wpOn.game) return;
+    const again = !!line && line === this.wpOn.line;
+    this.wpOn = { line, game };
+    this.playWp(again);
+  }
+
+  ngOnDestroy(): void {
+    cancelAnimationFrame(this.wpFrame);
+  }
+
+  replayWp(): void {
+    this.playWp(true);
+  }
+
+  private wpGame(): GameView | null {
+    const g = this.games.game;
+    return g && g !== 'loading' && g !== 'error' ? g : null;
+  }
+
+  private playWp(restart: boolean): void {
+    cancelAnimationFrame(this.wpFrame);
+    const chart = this.wpChart?.nativeElement;
+    if (!chart || !this.wpLine || !this.wpGame()) return;
+    chart.classList.remove('wp-playing', 'wp-done');
+    this.wpHead?.nativeElement.classList.remove('home', 'away');
+    if (!restart || !this.wpAnims.length) this.wpAnims = chart.querySelector('svg')!.getAnimations({ subtree: true });
+    // (the reveals all keep the same time: the first)
+    const draw = this.wpAnims[0];
+    if (!draw) return;
+    if (restart) {
+      for (const a of this.wpAnims) {
+        a.currentTime = 0;
+        a.play();
+      }
+    }
+    chart.classList.add('wp-playing');
+    this.wpShown = -1;
+    this.zone.runOutsideAngular(() => (this.wpFrame = requestAnimationFrame(() => this.wpTick(draw))));
+  }
+
+  private wpTick(draw: Animation): void {
+    const [chart, head] = [this.wpChart?.nativeElement, this.wpHead?.nativeElement];
+    const game = this.wpGame();
+    if (!chart || !head || !game) return;
+    const progress = draw.playState === 'finished' || draw.playState === 'idle' ? 1 : (draw.effect?.getComputedTiming().progress ?? 0);
+    const at = lineHead(game.winProbability ?? [], progress);
+    // (the pen: on the chart's head, by share, so it stays put however the chart stretches, kept whole
+    // inside its edges; the team above the middle ahead, the one below it behind, an even line keeping
+    // whoever was)
+    head.style.left = `clamp(10px, ${at.x / 10}%, calc(100% - 10px))`;
+    head.style.top = `clamp(10px, ${at.y / 2}%, calc(100% - 10px))`;
+    if (at.y !== 100) {
+      head.classList.toggle('home', at.y < 100);
+      head.classList.toggle('away', at.y > 100);
+    }
+    if (progress >= 1) {
+      chart.classList.replace('wp-playing', 'wp-done');
+      // (a game still on: where it is now)
+      const final = /^final/i.test(game.status);
+      this.wpWrite(final ? { when: game.status, away: Number(game.away.score), home: Number(game.home.score) } : (game.winMoments?.at(-1) ?? null));
+      return;
+    }
+    if (at.i !== this.wpShown) {
+      this.wpShown = at.i;
+      this.wpWrite(game.winMoments?.[at.i] ?? null);
+    }
+    this.wpFrame = requestAnimationFrame(() => this.wpTick(draw));
+  }
+
+  // (a moment's words: none where its play couldn't be found)
+  private wpWrite(m: GameMoment | null): void {
+    if (this.wpWhen) this.wpWhen.nativeElement.textContent = m?.when ?? '';
+    const score = m && m.away !== null && m.home !== null && !Number.isNaN(m.away + m.home) ? `${m.away}-${m.home}` : '';
+    if (this.wpScore) this.wpScore.nativeElement.textContent = score;
+    this.wpChart?.nativeElement.classList.toggle('wp-blank', !m);
   }
 
   // The chart tab's name: a shot chart (basketball, hockey), a spray chart (baseball), drives (football)

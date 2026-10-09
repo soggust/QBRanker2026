@@ -139,3 +139,63 @@ test("team colors on the dark board (the app's one rule, colors.ts): a dark one 
   assert.equal(teamColor(undefined, undefined), '#8a8f8c');
   assert.equal(teamColor('nope', undefined), '#8a8f8c');
 });
+
+test("the win probability's game time: each point's play by its id (the NFL's in its drives), the one before's where it's missing, none before the first", async () => {
+  const play = (id, period, clock, awayScore, homeScore) => ({ id, text: 'a play', period: { number: period }, clock: { displayValue: clock }, awayScore, homeScore });
+  serve({
+    header: { competitions: [{ status: { type: { detail: 'Final', completed: true, state: 'post' } }, competitors: [team('away', 'IND', '003b75', { score: '20' }), team('home', 'WAS', '5a1414', { score: '17' })] }] },
+    drives: { previous: [{ plays: [play('11', 1, '15:00', 0, 0), play('12', 3, '8:42', 14, 10)] }, { plays: [play('13', 5, '2:05', 20, 17)] }] },
+    winprobability: [
+      { homeWinPercentage: 0.43, playId: '1' },
+      { homeWinPercentage: 0.45, playId: '11' },
+      { homeWinPercentage: 0.4, playId: '12' },
+      { homeWinPercentage: 0.41, playId: '99' },
+      { homeWinPercentage: 0, playId: '13' },
+    ],
+  });
+  const g = await nfl.loadGame('football/nfl', '6');
+  assert.equal(g.winMoments.length, g.winProbability.length, 'in step with the points');
+  assert.deepEqual(g.winMoments, [
+    null,
+    { when: 'Q1 15:00', away: 0, home: 0 },
+    { when: 'Q3 8:42', away: 14, home: 10 },
+    { when: 'Q3 8:42', away: 14, home: 10 },
+    { when: 'OT 2:05', away: 20, home: 17 },
+  ]);
+  // (no play found at all, or no win probability: none)
+  assert.equal(nfl.wpMoments('football/nfl', { winprobability: [{ homeWinPercentage: 0.5, playId: '1' }], plays: [] }), null);
+  assert.equal(nfl.wpMoments('football/nfl', {}), null);
+});
+
+test("a play's moment in each sport: quarters, periods, half innings, overtimes and the shootout", () => {
+  const { momentLabel } = nfl;
+  const at = (number, clock, extra = {}) => ({ period: { number, ...extra }, clock: clock === undefined ? undefined : { displayValue: clock } });
+  assert.equal(momentLabel('basketball/nba', at(2, '43.8')), 'Q2 43.8');
+  assert.equal(momentLabel('basketball/nba', at(6, '1:10')), '2OT 1:10');
+  assert.equal(momentLabel('football/nfl', at(4, '0:02')), 'Q4 0:02');
+  assert.equal(momentLabel('hockey/nhl', at(2, '12:10')), 'P2 12:10');
+  assert.equal(momentLabel('hockey/nhl', at(4, '3:05')), 'OT 3:05');
+  assert.equal(momentLabel('hockey/nhl', at(5, '0:00')), 'SO', "a regular season's fifth: the shootout");
+  assert.equal(momentLabel('hockey/nhl', at(5, '14:30'), true), '2OT 14:30', "the playoffs': a second overtime");
+  assert.equal(momentLabel('baseball/mlb', at(6, undefined, { type: 'Top' })), 'Top 6th');
+  assert.equal(momentLabel('baseball/mlb', at(11, undefined, { type: 'Bottom' })), 'Bot 11th');
+  assert.equal(momentLabel('baseball/mlb', at(3, undefined, { type: 'end' })), 'End 3rd');
+  // (no clock: just the period; no period: nothing)
+  assert.equal(momentLabel('football/nfl', at(3)), 'Q3');
+  assert.equal(momentLabel('football/nfl', { clock: { displayValue: '1:00' } }), null);
+});
+
+test("the line's head as it draws: straight across, a play's worth each step, between two plays partway", () => {
+  const { lineHead } = nfl;
+  const points = [0.5, 0.5, 1];
+  assert.deepEqual(lineHead(points, 0), { x: 0, y: 100, i: 0 });
+  assert.deepEqual(lineHead(points, 1), { x: 1000, y: 0, i: 2 });
+  assert.deepEqual(lineHead(points, 0.2), { x: 200, y: 100, i: 0 });
+  assert.deepEqual(lineHead(points, 0.75), { x: 750, y: 50, i: 2 });
+  // (past either end: held there)
+  assert.deepEqual(lineHead(points, 1.2), lineHead(points, 1));
+  assert.deepEqual(lineHead(points, -1), lineHead(points, 0));
+  // (one point, or none)
+  assert.deepEqual(lineHead([0.7], 0.5).i, 0);
+  assert.equal(lineHead([], 0.5).y, 100);
+});

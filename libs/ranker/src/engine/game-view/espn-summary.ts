@@ -75,7 +75,7 @@ export interface EspnSummary {
     homeTeamOdds?: { favorite?: boolean };
     awayTeamOdds?: { favorite?: boolean };
   }[];
-  winprobability?: { homeWinPercentage?: number }[];
+  winprobability?: { homeWinPercentage?: number; playId?: string }[];
   predictor?: { homeTeam?: { id?: string; gameProjection?: string }; awayTeam?: { id?: string; gameProjection?: string } };
   injuries?: {
     team?: { id?: string };

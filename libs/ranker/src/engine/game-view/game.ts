@@ -7,7 +7,8 @@
 //
 // The rest of the view is in its own modules: the model (game.model.ts), ESPN's shapes (espn-summary.ts),
 // finding a game (find-game.ts), the chart (game-chart.ts), fantasy points (fantasy.ts), the venue's
-// weather and photo (venue.ts) and the teams' colors (team-color.ts).
+// weather and photo (venue.ts), the teams' colors (team-color.ts) and the win probability's game time
+// (wp-moments.ts).
 
 import { ESPN_API } from '@ranker/core/game-logs';
 import { awayFirst, EspnPlay, EspnSummary, EspnTeamRef, headshotOf, logoOf, numberOf, ownLogo } from './espn-summary';
@@ -15,6 +16,7 @@ import { fantasyPoints } from './fantasy';
 import { gameChart } from './game-chart';
 import { GameBoxGroup, GameLeader, GamePlay, GamePlayGroup, GameTeam, GameTeamStat, GameView } from './game.model';
 import { BLACK_TEAMS, gameColor } from './team-color';
+import { wpMoments } from './wp-moments';
 import { loadTeamColors, pickColor, teamShades } from '../colors';
 
 // The roofed parks and stadiums (no weather): domes and fixed roofs, then the retractable roofs
@@ -334,6 +336,7 @@ export async function loadGame(league: string, eventId: string): Promise<GameVie
     duration: info?.gameDuration ?? null,
     line,
     winProbability: s.winprobability?.length ? s.winprobability.map((w) => w.homeWinPercentage ?? 0.5) : null,
+    winMoments: wpMoments(league, s),
     leaders,
     teamStats,
     box,

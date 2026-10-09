@@ -280,9 +280,17 @@
             </div>
 
             @if (g.winProbability; as wp) {
-              <div class="chart-card game-wp" [style.--away-color]="g.away.color" [style.--home-color]="g.home.color">
+              <div class="chart-card game-wp" #wpChart [style.--away-color]="g.away.color" [style.--home-color]="g.home.color">
                 <div class="log-chart-head">
                   <span class="log-chart-label">Win probability<small>play by play</small></span>
+                  <!-- (the game time at the line's head as it draws, "Final" at its end, and the replay
+                  then; their words written as the line goes, wpTick) -->
+                  <span class="wp-clock">
+                    <span class="wp-when" #wpWhen></span><span class="wp-score" #wpScore></span>
+                    <button type="button" class="wp-replay" aria-label="Replay" title="Replay" (click)="replayWp()">
+                      <mat-icon fontIcon="replay"></mat-icon>
+                    </button>
+                  </span>
                   <span class="log-legend">
                     <span><i class="wp-key home"></i>{{ g.home.abbr }}</span>
                     <span><i class="wp-key away"></i>{{ g.away.abbr }}</span>
@@ -291,14 +299,15 @@
                 <div class="wp-chart">
                   <svg viewBox="0 0 1000 200" preserveAspectRatio="none" aria-hidden="true">
                     <defs>
-                      <!-- (each team's half; their rects sweep open with the line, wp-reveal) -->
+                      <!-- (each team's half, and the line; their rects sweep open together, wp-reveal) -->
                       <clipPath id="wp-top"><rect class="wp-reveal" x="0" y="0" width="1000" height="100" /></clipPath>
                       <clipPath id="wp-bottom"><rect class="wp-reveal" x="0" y="100" width="1000" height="100" /></clipPath>
+                      <clipPath id="wp-all"><rect class="wp-reveal" x="0" y="-10" width="1000" height="220" /></clipPath>
                     </defs>
                     <line class="wp-mid" x1="0" y1="100" x2="1000" y2="100" />
                     <path class="wp-fill home" clip-path="url(#wp-top)" [attr.d]="probabilityPath(wp, true)" />
                     <path class="wp-fill away" clip-path="url(#wp-bottom)" [attr.d]="probabilityPath(wp, true)" />
-                    <path class="wp-line" pathLength="1" [attr.d]="probabilityPath(wp)" />
+                    <path class="wp-line" clip-path="url(#wp-all)" #wpLine [attr.d]="probabilityPath(wp)" />
                     <!-- (a strip per play: both teams' chances after it on hover, the strip lit, its point a dot) -->
                     @for (s of probabilitySpots(g); track $index) {
                       <g class="wp-spot">
@@ -311,6 +320,18 @@
                   <span class="wp-edge top">{{ g.home.abbr }} 100%</span>
                   <span class="wp-edge mid">50%</span>
                   <span class="wp-edge bottom">{{ g.away.abbr }} 100%</span>
+                  <!-- (the pen: the team ahead then, its logo in a ring riding the line's head as it draws,
+                  resting at the end; the two logos crossfade as the lead changes, wpTick) -->
+                  <span class="wp-pen" #wpHead aria-hidden="true">
+                    @for (side of ['home', 'away']; track side) {
+                      @let t = side === 'home' ? g.home : g.away;
+                      <span class="wp-pen-team" [ngClass]="side" [style.--team]="t.color">
+                        @if (t.logo) {
+                          <img [src]="t.logo" alt="" />
+                        }
+                      </span>
+                    }
+                  </span>
                 </div>
               </div>
             }

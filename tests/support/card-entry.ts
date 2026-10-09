@@ -5,6 +5,7 @@
 export { percentile, percentileText, rankText, possessive, skillTitle, statTitle, zoneTitle, zoneWhere, leanShares, leanTitle } from '@ranker/engine/player-card/hover-text';
 export { gameLogView, columnLooks, splitVs } from '@ranker/engine/player-card/game-log-view';
 export { formWhen, injuryReport, returnDay, loadGame } from '@ranker/engine/game-view/game';
+export { lineHead, momentLabel, wpMoments } from '@ranker/engine/game-view/wp-moments';
 export { ownLogo } from '@ranker/engine/game-view/espn-summary';
 export { gameColor as teamColor } from '@ranker/engine/game-view/team-color';
 export { distance, TOO_CLOSE, teamColor as sharedTeamColor } from '@ranker/engine/colors';

@@ -274,6 +274,118 @@
   }
 }
 
+// (the game time at the chart's head as it draws, wp-moments.ts: in the chart's head beside its key, the
+// time in the hero's small bold caps, the score then lit like the board; "Final" and the replay once it's
+// drawn. Kept in place but unseen until it plays: none for less motion)
+
+// (the pen riding the line's head: the team ahead then, its logo in a ring of its color, the two
+// crossfading as the lead changes; resting on the last point once it's drawn)
+.wp-pen {
+  height: 20px;
+  opacity: 0;
+  pointer-events: none;
+  position: absolute;
+  transform: translate(-50%, -50%);
+  width: 20px;
+
+  .wp-playing &,
+  .wp-done & {
+    opacity: 1;
+  }
+}
+
+.wp-pen-team {
+  align-items: center;
+  background: #15181b;
+  border-radius: 50%;
+  box-shadow:
+    0 0 0 2px var(--team),
+    0 1px 4px rgba(0, 0, 0, 0.6);
+  display: flex;
+  inset: 0;
+  justify-content: center;
+  opacity: 0;
+  position: absolute;
+  transition: opacity 0.25s ease;
+
+  img {
+    height: 14px;
+    object-fit: contain;
+    width: 14px;
+  }
+
+  .wp-pen.home &.home,
+  .wp-pen.away &.away {
+    opacity: 1;
+  }
+}
+
+.wp-clock {
+  align-items: center;
+  align-self: center;
+  display: flex;
+  gap: 6px;
+  height: 18px;
+  margin-left: auto;
+  visibility: hidden;
+
+  .wp-playing:not(.wp-blank) &,
+  .wp-done & {
+    visibility: visible;
+  }
+}
+
+.wp-when {
+  color: #fff;
+  font-family: v.$font-base;
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.85);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.wp-score {
+  color: var(--scoreboard-led);
+  font-family: "DSEG7", sans-serif;
+  font-size: 10.5px;
+
+  &:empty {
+    display: none;
+  }
+}
+
+.wp-replay {
+  align-items: center;
+  background: none;
+  border: none;
+  border-radius: 5px;
+  color: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+  display: flex;
+  height: 18px;
+  justify-content: center;
+  padding: 0;
+  visibility: hidden;
+  width: 18px;
+
+  mat-icon {
+    font-size: 16px;
+    height: 16px;
+    width: 16px;
+  }
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--scoreboard-led);
+  }
+
+  .wp-done & {
+    visibility: visible;
+  }
+}
+
 .wp-key {
   border-radius: 2px;
   display: inline-block;
@@ -1642,14 +1754,14 @@
     animation: led-on 0.55s steps(1, end) backwards;
   }
 
-  // (the win probability charts the game: the line and its fills drawn play by play, over 8s)
-  .wp-line {
-    animation: wp-draw 8s linear backwards;
-    stroke-dasharray: 1;
-  }
-
+  // (the win probability charts the game: the line and its fills swept open play by play, over 8s)
   .wp-reveal {
     animation: wp-reveal 8s linear backwards;
+  }
+
+  // (the replay, once the line's drawn: in softly)
+  .wp-done .wp-replay {
+    animation: wp-replay-in 0.4s ease backwards;
   }
 
   .mark,
@@ -1704,12 +1816,9 @@
   }
 }
 
-@keyframes wp-draw {
+@keyframes wp-replay-in {
   from {
-    stroke-dashoffset: 1;
-  }
-  to {
-    stroke-dashoffset: 0;
+    opacity: 0;
   }
 }
 

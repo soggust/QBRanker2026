@@ -185,6 +185,8 @@ export interface GameView {
   line: { book: string | null; details: string; overUnder: number | null; spread: string | null; total: string | null } | null;
   // the home team's chance to win after each play (0-1), when ESPN has it
   winProbability: number[] | null;
+  // each of those points' moment in the game, its play's (wp-moments.ts), when ESPN's plays place them
+  winMoments: (GameMoment | null)[] | null;
   leaders: { side: 'away' | 'home'; rows: GameLeader[] }[];
   teamStats: GameTeamStat[];
   box: { side: 'away' | 'home'; groups: GameBoxGroup[] }[];
@@ -196,4 +198,11 @@ export interface GameView {
   // its videos in ESPN's summary (the game's highlights first; most games have none: highlights.ts looks
   // elsewhere)
   videos: GameVideo[];
+}
+
+// A win probability point's moment: "Q3 8:42", "Top 6th", and the score then
+export interface GameMoment {
+  when: string;
+  away: number | null;
+  home: number | null;
 }
