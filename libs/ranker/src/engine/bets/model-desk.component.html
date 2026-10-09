@@ -4,7 +4,7 @@
 
 <!-- (a column's header: its name, sorting its table, its explanation on hover) -->
 <ng-template #th let-table let-key="key" let-label="label" let-help="help">
-  <th [attr.aria-sort]="ariaSort(table, key)" [title]="help ?? this.help[key] ?? ''">
+  <th [class.desk-left]="key === 'pick'" [attr.aria-sort]="ariaSort(table, key)" [title]="help ?? this.help[key] ?? ''">
     <button type="button" class="desk-sort" [class.sorted]="ariaSort(table, key)" (click)="sortBy(table, key)">
       {{ label }}
       @if (ariaSort(table, key); as dir) {
@@ -22,16 +22,26 @@
   </span>
 </ng-template>
 
-<!-- (a bet's pick: a prop's player first, his headshot and name linking to his ESPN page in a new tab; the market
-     and whether it's an action bet under it) -->
+<!-- (a bet's pick, led by a circle: a prop's player (his headshot and name linking to his ESPN page in a new
+     tab), a total's arrow (up for the over, down for the under), a side's team; the market and whether it's an
+     action bet under it) -->
 <ng-template #pickCell let-b>
   @if (b.market === 'prop' && b.athlete !== undefined && b.player) {
     <span class="desk-pick">
       <a class="desk-player" [href]="playerLink(b)" target="_blank" rel="noopener" [title]="b.player + ' on ESPN'" tabindex="-1" aria-hidden="true"><img class="desk-face" [src]="headshot(b)" alt="" (error)="hide($event)" /></a>
       <b><a class="desk-player" [href]="playerLink(b)" target="_blank" rel="noopener">{{ b.player }}</a>{{ pickRest(b) }}</b>
     </span>
+  } @else if (b.market === 'total') {
+    <span class="desk-pick">
+      <span class="desk-badge" [class.over]="b.side === 'over'" [class.under]="b.side === 'under'" aria-hidden="true"><mat-icon [fontIcon]="b.side === 'over' ? 'arrow_upward' : 'arrow_downward'"></mat-icon></span>
+      <b>{{ b.pick }}</b>
+    </span>
   } @else {
-    <b>{{ b.pick }}</b>
+    @let team = teamsOf(b)[b.side === 'home' ? 1 : 0];
+    <span class="desk-pick">
+      <span class="desk-badge" aria-hidden="true"><img [src]="teamLogo(b.sport, team)" alt="" (error)="hide($event)" /></span>
+      <b>{{ b.pick }}</b>
+    </span>
   }
   <small>{{ marketName(b.market) }}{{ intentOf(b) === 'action' ? ' · action' : '' }}</small>
 </ng-template>
@@ -257,7 +267,7 @@
                 <tr>
                   <th><img class="desk-league" [src]="leagueLogo(b.sport)" [alt]="b.sport.toUpperCase()" [title]="b.sport.toUpperCase()" /></th>
                   <td class="desk-left"><ng-container *ngTemplateOutlet="gameCell; context: { $implicit: b }"></ng-container></td>
-                  <td><ng-container *ngTemplateOutlet="pickCell; context: { $implicit: b }"></ng-container></td>
+                  <td class="desk-left"><ng-container *ngTemplateOutlet="pickCell; context: { $implicit: b }"></ng-container></td>
                   <td>{{ odds(b.odds) }}</td>
                   <td>{{ b.units }}</td>
                   <!-- (decided already: its result, pending the next run's grading; else what it pays) -->
@@ -308,7 +318,7 @@
                     <th><img class="desk-league" [src]="leagueLogo(b.sport)" [alt]="b.sport.toUpperCase()" [title]="b.sport.toUpperCase()" /></th>
                     <td class="desk-left"><ng-container *ngTemplateOutlet="gameCell; context: { $implicit: b }"></ng-container></td>
                     <td>{{ b.start | date: 'EEE h:mm a' }}</td>
-                    <td [title]="help['intent']"><ng-container *ngTemplateOutlet="pickCell; context: { $implicit: b }"></ng-container></td>
+                    <td class="desk-left" [title]="help['intent']"><ng-container *ngTemplateOutlet="pickCell; context: { $implicit: b }"></ng-container></td>
                     <td [title]="help['betBook']">{{ odds(b.odds) }}<small>{{ b.book }}{{ b.fairFrom === 'pinnacle' ? ' · Pinnacle fair' : '' }}</small></td>
                     <td>{{ b.units }}</td>
                     <td>{{ pct(b.p) }}</td>
@@ -349,7 +359,7 @@
                     <th><img class="desk-league" [src]="leagueLogo(b.sport)" [alt]="b.sport.toUpperCase()" [title]="b.sport.toUpperCase()" /></th>
                     <td class="desk-left"><ng-container *ngTemplateOutlet="gameCell; context: { $implicit: b }"></ng-container></td>
                     <td>{{ b.start | date: 'MMM d' }}</td>
-                    <td><ng-container *ngTemplateOutlet="pickCell; context: { $implicit: b }"></ng-container></td>
+                    <td class="desk-left"><ng-container *ngTemplateOutlet="pickCell; context: { $implicit: b }"></ng-container></td>
                     <td [title]="help['betBook']">{{ odds(b.odds) }}<small>{{ b.book }}{{ b.fairFrom === 'pinnacle' ? ' · Pinnacle fair' : '' }}</small></td>
                     <td>{{ b.units }}</td>
                     <td>{{ pct(b.p) }}</td>

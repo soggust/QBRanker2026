@@ -439,7 +439,7 @@ card-panel {
   align-items: center;
   display: inline-flex;
   gap: 8px;
-  justify-content: flex-end;
+  justify-content: flex-start;
 }
 
 .desk-face {
@@ -463,4 +463,48 @@ card-panel {
   &:hover {
     @include v.link-lit;
   }
+}
+
+// (a pick's circle when it isn't a player: a side's team logo, a total's arrow; the headshot's size and ring)
+.desk-badge {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 50%;
+  display: inline-flex;
+  flex: none;
+  height: 30px;
+  justify-content: center;
+  width: 30px;
+
+  img {
+    height: 20px;
+    object-fit: contain;
+    width: 20px;
+  }
+
+  mat-icon {
+    @include v.icon-size(18px);
+    color: #fff;
+  }
+
+  // (over and under: the board's light up, a cooler shade down)
+  &.over {
+    background: color-mix(in srgb, var(--scoreboard-led) 22%, transparent);
+    border-color: color-mix(in srgb, var(--scoreboard-led) 55%, transparent);
+  }
+
+  &.under {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.28);
+
+    mat-icon {
+      color: rgba(255, 255, 255, 0.8);
+    }
+  }
+}
+
+// (the market under a pick lined up with its words, past the circle)
+.desk-pick + small {
+  padding-left: 38px;
 }
