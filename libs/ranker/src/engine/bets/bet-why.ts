@@ -57,6 +57,7 @@ export interface BetWhyPart {
 export interface BetWhyVs {
   name: string;
   rank: number;
+  place: string;
   above: boolean;
   diff: number;
   drivers: { label: string; amount: number; title: string }[];
@@ -67,6 +68,8 @@ export interface BetWhy {
   id: number;
   name: string;
   rank: number;
+  // (its place as the list shows it: a lock "Lock", above the ranks; the rest "#1" on, under the locks)
+  place: string;
   of: number;
   score: number;
   level: Confidence;
@@ -241,6 +244,8 @@ function partsOf(r: BetWhyRow): { parts: Omit<BetWhyPart, 'width'>[]; partial: b
 }
 
 export function betWhy(list: BetWhyRow[], index: number): BetWhy {
+  const locks = list.filter((r) => r.confidence === 'lock').length;
+  const placeOf = (i: number) => (list[i].confidence === 'lock' ? 'Lock' : `#${i + 1 - locks}`);
   const row = list[index];
   const score = row.sureness * 100;
   const { parts: raw, partial } = partsOf(row);
@@ -295,6 +300,7 @@ export function betWhy(list: BetWhyRow[], index: number): BetWhy {
     vs.push({
       name,
       rank: at + 1,
+      place: placeOf(at),
       above: at > index,
       diff,
       drivers,
@@ -306,7 +312,8 @@ export function betWhy(list: BetWhyRow[], index: number): BetWhy {
     id: row.id,
     name: betName(row),
     rank: index + 1,
-    of: list.length,
+    place: placeOf(index),
+    of: list.length - locks,
     score,
     level,
     noEdge,

@@ -208,7 +208,7 @@
         [class.sheet]="w.sheet"
         role="dialog"
         tabindex="-1"
-        [attr.aria-label]="'How ' + w.name + '’s score is built: #' + w.rank"
+        [attr.aria-label]="'How ' + w.name + '’s score is built: ' + w.place"
         [style.top.px]="w.at.top"
         [style.bottom.px]="w.at.bottom"
         [style.left.px]="w.at.left"
@@ -217,7 +217,7 @@
         <div class="why-head">
           <p class="why-title">
             <span class="why-score">Kelly <b [class.neg]="w.score <= 0">{{ betScoreText(w.score) }}</b></span>
-            <span class="why-place">#{{ w.rank }} of {{ w.of }}</span>
+            <span class="why-place">{{ w.place === 'Lock' ? 'Lock' : w.place + ' of ' + w.of }}</span>
             @if (w.noEdge) {
               <span class="why-pass">No edge</span>
             }
@@ -249,7 +249,7 @@
             @for (vs of w.vs; track vs.rank) {
               <p>
                 <span class="why-vs-head" [title]="vs.title"
-                  >vs <b>{{ vs.name }}</b> (#{{ vs.rank }}): <span class="why-amount" [class.hurts]="vs.diff < 0">{{ signedPoints(vs.diff) }}</span></span
+                  >vs <b>{{ vs.name }}</b> ({{ vs.place }}): <span class="why-amount" [class.hurts]="vs.diff < 0">{{ signedPoints(vs.diff) }}</span></span
                 >
                 @if (vs.drivers.length) {
                   <span class="why-drivers">
