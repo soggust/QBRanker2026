@@ -547,12 +547,12 @@ export class SkillRankingsComponent implements OnChanges, CardHost {
     return rowTeamNames(player);
   }
 
-  // A Recent square's hover: "W 24-17 @ Miami Dolphins" (the score once the team's results are in)
+  // A Recent square's hover: "24-17 W @ Miami Dolphins" (the score first, once the team's results are in)
   dotTitle(player: SkillPlayer, index: number): string {
     const title = this.reader.recentTitle(player, index);
     const vs = extras(player).lastFiveVs;
     const score = this.games.recentScore(this.recentTeam(player), vs, index, this.season);
-    return score ? title.replace(/^(\S+)/, `$1 ${score}`) : title;
+    return score ? `${score} ${title}` : title;
   }
 
   // Empty Recent slots for games not played yet (up to the tab's count: SPORT.recentGames)

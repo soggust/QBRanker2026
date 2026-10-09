@@ -29,7 +29,7 @@ export class CardStatsTab extends CardTab {
     const word = recentWord(result, extras(card.player).lastFiveOt?.[index]);
     const vs = this.recentVs(card)?.[index];
     const score = this.games.recentScore(this.recentTeam(card), this.recentVs(card), index, card.season);
-    return [word, score, vs ? (/^(@|vs) /.test(vs) ? vs : 'vs ' + vs) : null].filter(Boolean).join(' ');
+    return [score, word, vs ? (/^(@|vs) /.test(vs) ? vs : 'vs ' + vs) : null].filter(Boolean).join(' ');
   }
 
   // (decided past regulation: a lighter square)
