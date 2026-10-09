@@ -74,6 +74,28 @@ function linkedPosition(): Position {
   return POSITIONS.find((position) => position === linked) ?? POSITIONS[0];
 }
 
+// A player's card from a link (?card=<his ESPN id>&name=<his name>: the Algorithm's prop picks): the tab and
+// row he's in this season, by the id where the rows carry ESPN's (the NFL's, the NBA's) and by the name where
+// they don't; the link taken out of the address. Null when he isn't in the season's rows.
+function linkedCard(): { position: SkillPosition; gsisId: string } | null {
+  const url = new URL(location.href);
+  const id = url.searchParams.get('card');
+  const name = url.searchParams.get('name');
+  if (!id && !name) return null;
+  url.searchParams.delete('card');
+  url.searchParams.delete('name');
+  history.replaceState(null, '', url);
+  const key = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z]/g, '');
+  const tabs = (POSITIONS as SkillPosition[]).filter((position) => !SPORT.teamTabs?.includes(position));
+  for (const match of [(p: SkillPlayer) => !!id && String(p.id) === id, (p: SkillPlayer) => !!name && key(p.name) === key(name)]) {
+    for (const position of tabs) {
+      const row = (SKILL_UNITS[position] ?? []).find(match);
+      if (row) return { position, gsisId: row.gsisId };
+    }
+  }
+  return null;
+}
+
 // A grid's look for a shared link (PositionService.layout): tab -> row ids in their dragged order,
 // tab -> collapsed group ids, "TAB.group" -> column keys, tab -> the sidebar's group order
 export interface GridLayout {
@@ -95,6 +117,9 @@ export class PositionService {
   // (a shared list's link opened: its sliders, eyes and settings, applied once everything's set up)
   constructor() {
     applySharedLink(this, DEFAULT_SETTINGS);
+    // (a card's link: its tab open from the start, the card when the grid draws it)
+    this.pendingCard = linkedCard();
+    if (this.pendingCard) this.positionSubject.next(this.pendingCard.position);
     this.checkSeasonParts(dataSeason);
     // (a linked part the season doesn't have loaded its regular season: the address says so too)
     const url = new URL(location.href);
@@ -140,6 +165,16 @@ export class PositionService {
 
   setFiltersOpen(open: boolean): void {
     this.filtersOpenSubject.next(open);
+  }
+
+  // A card a link asked for (linkedCard), until the grid opens it on its tab
+  private pendingCard: { position: SkillPosition; gsisId: string } | null = null;
+
+  takePendingCard(position: SkillPosition): { position: SkillPosition; gsisId: string } | null {
+    const card = this.pendingCard;
+    if (!card || card.position !== position) return null;
+    this.pendingCard = null;
+    return card;
   }
 
   // The season on screen (the year selector). Sliders, eyes and column orders carry over to another

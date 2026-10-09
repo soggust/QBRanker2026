@@ -160,6 +160,9 @@ export class SkillRankingsComponent implements OnChanges, CardHost {
     const saved = this.positionService.unitOrder(this.position);
     if (saved?.manual) this.restoreOrder(saved.ids);
     else this.sortPlayers();
+    // (a card a link asked for: open on its tab, once)
+    const card = this.positionService.takePendingCard(this.position);
+    if (card) this.cards.openLinked(card, this.season);
   }
 
   get settings(): RankerSettings {

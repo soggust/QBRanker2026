@@ -285,8 +285,9 @@ export class ModelDeskComponent implements OnInit, OnDestroy {
     return `https://a.espncdn.com/combiner/i?img=/i/headshots/${b.sport}/players/full/${b.athlete}.png&w=96&h=70`;
   }
 
+  // (his card in the site's own app for his sport: ?card= opens his tab and his card there)
   playerLink(b: ModelBet): string {
-    return `https://www.espn.com/${b.sport}/player/_/id/${b.athlete}`;
+    return `/${b.sport}/?card=${b.athlete}&name=${encodeURIComponent(b.player ?? '')}`;
   }
 
   // (a prop's pick after the player's name: " Under 7.5 Carries")
