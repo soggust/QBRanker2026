@@ -76,9 +76,9 @@
           <tr>
             <th class="log-date">Date</th>
             <th class="log-opp">Opp</th>
-            <th class="log-result log-center">Result</th>
+            <th class="log-result">Result</th>
             @for (col of log.columns; track $index) {
-              <th [class.key]="log.chart?.keys?.includes($index)" [class.wide]="col.wide" [class.log-center]="centered(log.columns, $index)" [class.group-start]="log.groups && ($index === 0 || col.group !== log.columns[$index - 1].group)">{{ col.label }}</th>
+              <th [class.key]="log.chart?.keys?.includes($index)" [class.wide]="col.wide" [class.log-center]="centered(log.columns, $index)" [class.log-left]="scoreSide(log.columns, $index)" [class.group-start]="log.groups && ($index === 0 || col.group !== log.columns[$index - 1].group)">{{ col.label }}</th>
             }
           </tr>
         </thead>
@@ -105,7 +105,7 @@
                 </button>
               </td>
               <!-- (the result: a team's just its W or L, its scores on their tiles; a player's the score too) -->
-              <td class="log-result log-center">
+              <td class="log-result">
                 @if (g.outcome) {
                   <span class="log-outcome" [ngClass]="g.outcome">{{ g.outcome }}</span>
                 }
@@ -118,7 +118,7 @@
                   [class.key]="log.chart?.keys?.includes($index)"
                   [class.wide]="log.columns[$index].wide"
                   [class.group-start]="log.groups && ($index === 0 || log.columns[$index].group !== log.columns[$index - 1].group)"
-                  [class.log-center]="centered(log.columns, $index)"
+                  [class.log-center]="centered(log.columns, $index)" [class.log-left]="scoreSide(log.columns, $index)"
                 >
                   <!-- (a team's points for and against, each on its own little LED tile: the winner's lit green,
                        the loser's red, as on the game view's board) -->
@@ -137,7 +137,7 @@
             <tr class="log-avg">
               <td colspan="3">Per game</td>
               @for (a of log.average; track $index) {
-                <td [class.key]="log.chart?.keys?.includes($index)" [class.log-center]="centered(log.columns, $index)" [class.group-start]="log.groups && ($index === 0 || log.columns[$index].group !== log.columns[$index - 1].group)">{{ a }}</td>
+                <td [class.key]="log.chart?.keys?.includes($index)" [class.log-center]="centered(log.columns, $index)" [class.log-left]="scoreSide(log.columns, $index)" [class.group-start]="log.groups && ($index === 0 || log.columns[$index].group !== log.columns[$index - 1].group)">{{ a }}</td>
               }
             </tr>
           }
@@ -148,7 +148,11 @@
               <th class="log-date">Date</th>
               <th class="log-opp">Opp</th>
               <th class="log-result">Time</th>
-              <th class="log-next-detail" [attr.colspan]="log.columns.length">TV · Line</th>
+              <!-- (the TV under the first stat column (a team's PF), the line from the second on (its PA)) -->
+              <th class="log-next-detail" [attr.colspan]="tvSpan(log.columns.length)">TV</th>
+              @if (log.columns.length > 1) {
+                <th class="log-next-detail" [attr.colspan]="log.columns.length - tvSpan(log.columns.length)">Line</th>
+              }
             </tr>
           }
           @for (u of log.upcoming; track $index) {
@@ -167,16 +171,19 @@
                 </button>
               </td>
               <td class="log-result">{{ u.time }}</td>
-              <td class="log-next-detail" [attr.colspan]="log.columns.length">
+              <td class="log-next-detail" [attr.colspan]="tvSpan(log.columns.length)">
                 @if (u.tv) {
                   <span>{{ u.tv }}</span>
                 }
-                @if (u.line) {
-                  <span class="log-line" title="DraftKings, via ESPN"
-                    >{{ u.line }}@if (u.total) { · {{ u.total }}}@if (u.moneyline) { · ML {{ u.moneyline }}}</span
-                  >
+                @if (log.columns.length < 2) {
+                  <ng-container *ngTemplateOutlet="lineOf; context: { $implicit: u }"></ng-container>
                 }
               </td>
+              @if (log.columns.length > 1) {
+                <td class="log-next-detail" [attr.colspan]="log.columns.length - tvSpan(log.columns.length)">
+                  <ng-container *ngTemplateOutlet="lineOf; context: { $implicit: u }"></ng-container>
+                </td>
+              }
             </tr>
           }
         </tbody>
@@ -186,3 +193,10 @@
   }
   </div>
 </card-panel>
+
+<!-- (an upcoming game's line: DraftKings', via ESPN) -->
+<ng-template #lineOf let-u>
+  @if (u.line) {
+    <span class="log-line" title="DraftKings, via ESPN">{{ u.line }}@if (u.total) { · {{ u.total }}}@if (u.moneyline) { · ML {{ u.moneyline }}}</span>
+  }
+</ng-template>

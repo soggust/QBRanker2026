@@ -2145,10 +2145,16 @@
     font-weight: 700;
   }
 
-  // (a team's PF, PA (their tiles) and Record, and every log's Result, centered under their headers)
+  // (a team's Record centered under its header; its Result, PF and PA tiles left, over the games to come's
+  // Time, TV and Line)
   th.log-center,
   td.log-center {
     text-align: center;
+  }
+
+  th.log-left,
+  td.log-left {
+    text-align: left;
   }
 
   // (a team's points for and against, each on a little LED tile: the winner's lit green, the loser's red,
