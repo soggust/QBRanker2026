@@ -1128,6 +1128,20 @@ img.bet-face {
   }
 
   // Its confidence (in its band's color) and its price's return, a line each
+  // (the expected return, its most telling number: in the value colors, an edge green, none red)
+  .why-return {
+    font-size: 1.08em;
+
+    &.up {
+      color: v.$good;
+      text-shadow: 0 0 8px color-mix(in srgb, #{v.$good} 45%, transparent);
+    }
+
+    &.down {
+      color: v.$bad;
+    }
+  }
+
   .why-facts {
     border-top: 1px solid rgba(255, 255, 255, 0.12);
     display: flex;

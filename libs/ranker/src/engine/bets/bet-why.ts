@@ -80,6 +80,9 @@ export interface BetWhy {
   levelTitle: string;
   // (its price's expected return and its stake, where the file has them)
   edgeText: string | null;
+  // (the return itself, apart, in the value colors: an edge green, none red)
+  edgeReturn: string | null;
+  edgeUp: boolean;
   edgeTitle: string | null;
   parts: BetWhyPart[];
   vs: BetWhyVs[];
@@ -259,9 +262,13 @@ export function betWhy(list: BetWhyRow[], index: number): BetWhy {
   // Its price: what a unit's expected to return at its chance, and its stake
   let edgeText: string | null = null;
   let edgeTitle: string | null = null;
+  let edgeReturn: string | null = null;
+  let edgeUp = false;
   if (Number.isFinite(row.ev)) {
     const ev = row.ev! * 100;
-    edgeText = `${ev >= 0 ? '+' : '−'}${Math.abs(ev).toFixed(1)}% a unit${Number.isFinite(row.price) ? ` at ${odds(row.price!)}` : ''}${Number.isFinite(row.units) ? ` · ${row.units} unit${row.units === 1 ? '' : 's'}` : ''}`;
+    edgeReturn = `${ev >= 0 ? '+' : '−'}${Math.abs(ev).toFixed(1)}%`;
+    edgeUp = ev > 0;
+    edgeText = ` a unit${Number.isFinite(row.price) ? ` at ${odds(row.price!)}` : ''}${Number.isFinite(row.units) ? ` · ${row.units} unit${row.units === 1 ? '' : 's'}` : ''}`;
     edgeTitle = "Its expected return: its chance to win times the price's payout, less the stake (over 0 an edge). The bot's stake, 0.5 to 3 units, grows with it";
   }
 
@@ -308,6 +315,8 @@ export function betWhy(list: BetWhyRow[], index: number): BetWhy {
     levelText,
     levelTitle,
     edgeText,
+    edgeReturn,
+    edgeUp,
     edgeTitle,
     parts,
     vs,

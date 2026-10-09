@@ -143,7 +143,8 @@ test("betWhy: the parts add up to the row's Kelly score in points, the analyst's
   assert.match(fav.levelText, /no edge on the price/);
   assert.equal(fav.chanceText, '70.0%');
   assert.equal(fav.parts.find((p) => p.key === 'analyst').amount, 0);
-  assert.equal(fav.edgeText, '−2.0% a unit at −250 · 1 unit');
+  assert.equal(fav.edgeReturn + fav.edgeText, '−2.0% a unit at −250 · 1 unit');
+  assert.equal(fav.edgeUp, false, 'no edge: red');
 });
 
 test('betWhy: an older picks file, its Kelly score and parts worked out from its chances and price; one with no price, the chance alone', () => {
@@ -162,7 +163,8 @@ test('betWhy: an older picks file, its Kelly score and parts worked out from its
   assert.deepEqual(a.parts.map((x) => x.key), ['price', 'lean']);
   close(a.parts.reduce((s, x) => s + x.amount, 0), score * 100, 'parts');
   assert.match(a.parts[1].title, /Trust 0\.35 \(fitted/);
-  assert.equal(a.edgeText, '+2.8% a unit at −217 · 1.5 units');
+  assert.equal(a.edgeReturn + a.edgeText, '+2.8% a unit at −217 · 1.5 units');
+  assert.equal(a.edgeUp, true, 'an edge: green');
   const b = desk.betWhy(old, 1);
   assert.equal(b.partial, true);
   assert.deepEqual(b.parts.map((x) => x.key), ['chance']);

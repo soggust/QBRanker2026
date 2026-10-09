@@ -241,7 +241,7 @@
           }
           <p [title]="w.levelTitle"><span>Confidence</span> <b [ngClass]="w.level">{{ w.levelText }}</b></p>
           @if (w.edgeText) {
-            <p [title]="w.edgeTitle"><span>Expected return</span> <b>{{ w.edgeText }}</b></p>
+            <p [title]="w.edgeTitle"><span>Expected return</span> <b><span class="why-return" [class.up]="w.edgeUp" [class.down]="!w.edgeUp">{{ w.edgeReturn }}</span>{{ w.edgeText }}</b></p>
           }
         </div>
         @if (w.vs.length) {
