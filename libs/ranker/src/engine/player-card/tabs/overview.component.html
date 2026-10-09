@@ -149,9 +149,9 @@
   }
 }
 
-<!-- The three closest seasons by anyone else, 2000 on (finished seasons only) -->
+<!-- The three closest seasons by anyone else, 2000 on (finished seasons only); folds, starting shut -->
 @if (c.season !== currentSeason && c.comps?.length) {
-  <card-panel class="ov-section similar tab-card" [expandable]="false" label="Similar Seasons" icon="compare_arrows">
+  <card-panel class="ov-section similar tab-card" label="Similar Seasons" icon="compare_arrows">
     <div class="group-body">
     <div class="comps-row">
       @for (m of c.comps; track m.season + m.gsisId) {

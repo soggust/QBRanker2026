@@ -149,11 +149,11 @@
 }
 
 .comp-badge {
-  --w: 73px;
-  --h: 49px;
-  --card-r: 12px;
-  --shot-h: 62px;
-  --hang: 15px;
+  --w: 58px;
+  --h: 39px;
+  --card-r: 10px;
+  --shot-h: 50px;
+  --hang: 12px;
   flex: 0 0 auto;
 }
 
@@ -650,10 +650,6 @@
     --group-color: #ff7468;
   }
 
-  &.similar {
-    --group-color: var(--scoreboard-led);
-  }
-
   .comps-row {
     margin-top: 0;
   }
@@ -967,7 +963,7 @@
 .comps-row {
   display: grid;
   gap: 10px;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   margin-top: 12px;
 }
 
@@ -978,8 +974,8 @@
   cursor: pointer;
   display: flex;
   font-family: inherit;
-  gap: 12px;
-  padding: 16px 12px 10px;
+  gap: 10px;
+  padding: 10px 12px;
   text-align: left;
   transition: border-color 0.15s ease;
 
@@ -1005,12 +1001,12 @@
 
 .comp-season {
   color: var(--scoreboard-led);
-  @include v.hand(15px);
+  @include v.hand(12px);
   letter-spacing: 0.5px;
 }
 
 .comp-name {
-  @include v.hand(19px);
+  @include v.hand(14px);
   line-height: 1.15;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1020,11 +1016,11 @@
 
 .comp-match {
   flex: 0 0 auto;
-  @include v.hand(24px);
+  @include v.hand(17px);
   @include v.tone-glow(45%);
 
   small {
-    font-size: 11px;
+    font-size: 9px;
   }
 }
 
