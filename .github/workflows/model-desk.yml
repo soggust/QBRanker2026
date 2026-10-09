@@ -28,6 +28,9 @@ permissions:
 jobs:
   desk:
     runs-on: ubuntu-latest
+    # (a cold run is about 6 minutes, the build and deploy a few more: a hung source stops here, not after
+    # GitHub's 6 hours of runs queued behind it)
+    timeout-minutes: 45
 
     steps:
       - name: Checkout repository
@@ -96,7 +99,7 @@ jobs:
       # The public Bets page reads each sport's data/model/picks.json, served with the site: when the picks
       # changed, the site is built and deployed (pushes made with GITHUB_TOKEN don't trigger the Firebase
       # deploy workflow, so it's done here, as the data updates do). At most once a run, only when the picks
-      # changed: up to nine a day, fewer when the slate is quiet
+      # changed: up to one a run, fewer when the slate is quiet
       - name: Build project
         if: steps.commit.outputs.picks == 'true'
         run: npm run build

@@ -614,7 +614,8 @@ for (const id of [...activeSet]) {
   if (last.date >= sixMonths || last.league !== 'ufc') continue;
   const entry = (cache[id] ??= {});
   if (!entry.statusAt || entry.statusAt < monthAgo) {
-    entry.status = await ufcStatus(entry.bio?.name ?? last.fighters.find((f) => f.id === id).name);
+    // (a page that didn't load keeps the status known before)
+    entry.status = (await ufcStatus(entry.bio?.name ?? last.fighters.find((f) => f.id === id).name)) ?? entry.status ?? null;
     entry.statusAt = Date.now();
     statuses++;
   }

@@ -332,6 +332,9 @@ test('tally: the record, the units, the return on them, the open bets and the cl
   assert.ok(Math.abs(t.clvEv - 0.01) < 1e-12);
   const none = desk.tally('None', []);
   assert.deepEqual([none.roi, none.clvBeat, none.clvEv], [null, null, null]);
+  // (a void prop, no action: out of the record and its stake, as desk.mjs record)
+  const voided = desk.tally('Void', [...bets, bet({ market: 'prop', status: 'push', profit: 0, units: 1, void: true })]);
+  assert.deepEqual([voided.bets, voided.push, voided.staked], [3, 1, 4.5]);
 });
 
 test('rebuysFor: 1,000 more each time the open stakes would take the balance under 0', () => {
@@ -484,7 +487,9 @@ test("the column readers: a tally's record by its share won, a bet's CLV by its 
   assert.equal(read(b, 'clv'), 1.5);
   assert.equal(read(b, 'result'), 2);
   assert.equal(read(b, 'odds'), -110);
-  assert.equal(read(b, 'graded'), b.start);
+  // (a graded bet without its time by its start; one decided in play, not graded yet, the latest of all)
+  assert.equal(read({ ...b, status: 'won' }, 'graded'), b.start);
+  assert.ok(read(b, 'graded') > new Date().toISOString());
 });
 
 test('bet-format: odds, percents, units', () => {

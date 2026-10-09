@@ -131,11 +131,11 @@ export function fitTrust(bets, start) {
   return { trust: best.trust, n: decided.length, clvN: closed.length, fitted: true, logLoss: round(best.raw / n, 4) };
 }
 
-// A record: won, lost, pushed, units staked and won, the return on them
+// A record: won, lost, pushed, units staked and won, the return on them (a void prop, no action, isn't in it)
 export function record(bets) {
   const r = { bets: 0, won: 0, lost: 0, push: 0, staked: 0, profit: 0 };
   for (const b of bets) {
-    if (b.status === 'open') continue;
+    if (b.status === 'open' || b.void) continue;
     r.bets++;
     r[b.status === 'won' ? 'won' : b.status === 'lost' ? 'lost' : 'push']++;
     r.staked += b.units;

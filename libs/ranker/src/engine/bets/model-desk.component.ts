@@ -242,13 +242,15 @@ export class ModelDeskComponent implements OnInit, OnDestroy {
     this.byProp = [...new Set(props.map(typeOf))].map((label) => tally(label, props.filter((b) => typeOf(b) === label)));
   }
 
-  // The open bets as of now: the ones not started yet (soonest first), and the ones under way: In Play only
-  // while their game runs; once it's over they're Latest Results', first, with the result the scores give them
-  // until the run grades them
+  // The open bets as of now: the ones not started yet (soonest first; with them a game past its start that
+  // ESPN hasn't begun or has put off: a delayed start, a rainout), and the ones under way: In Play only while
+  // their game runs; once it's over they're Latest Results', first, with the result the scores give them until
+  // the run grades them
   private splitOpen(now: number): void {
     const open = this.bets.filter((b) => b.status === 'open');
-    this.open = open.filter((b) => Date.parse(b.start) > now).sort((a, b) => a.start.localeCompare(b.start));
-    const started = open.filter((b) => Date.parse(b.start) <= now).sort((a, b) => a.start.localeCompare(b.start));
+    const waiting = (b: ModelBet) => Date.parse(b.start) > now || this.notUnderWay(b);
+    this.open = open.filter(waiting).sort((a, b) => a.start.localeCompare(b.start));
+    const started = open.filter((b) => !waiting(b)).sort((a, b) => a.start.localeCompare(b.start));
     this.live = started.filter((b) => !this.isOver(b));
     this.recent = [...started.filter((b) => this.isOver(b)).reverse(), ...this.graded];
   }
@@ -258,8 +260,13 @@ export class ModelDeskComponent implements OnInit, OnDestroy {
   // its box score read for every prop on it
   private async loadScores(): Promise<void> {
     const live = this.bets.filter((b) => b.status === 'open' && Date.parse(b.start) <= Date.now());
-    for (const sport of new Set(live.map((b) => b.sport))) {
-      const board = await getJson<{ events?: ScoreboardEvent[] }>(`https://site.api.espn.com/apis/site/v2/sports/${ESPN_LEAGUES[sport]}/scoreboard`);
+    // (by each game's own day, ESPN's Eastern one: last night's late game is gone from today's default slate,
+    // and would sit In Play until graded)
+    const dayOf = (iso: string) => new Date(iso).toLocaleDateString('en-CA', { timeZone: 'America/New_York' }).replace(/-/g, '');
+    const slates = new Set(live.map((b) => `${b.sport}|${dayOf(b.start)}`));
+    for (const slate of slates) {
+      const [sport, day] = slate.split('|');
+      const board = await getJson<{ events?: ScoreboardEvent[] }>(`https://site.api.espn.com/apis/site/v2/sports/${ESPN_LEAGUES[sport]}/scoreboard?dates=${day}`);
       for (const event of board?.events ?? []) this.readEvent(event);
     }
     const props = live.filter((b) => b.market === 'prop' && b.event && b.athlete !== undefined && b.propType);
@@ -283,7 +290,7 @@ export class ModelDeskComponent implements OnInit, OnDestroy {
     const home = teams.find((t) => t.homeAway === 'home');
     if (!away || !home) return;
     const final = !!event.status?.type?.completed;
-    this.boards.set(String(event.id), { hs: Number(home.score) || 0, as: Number(away.score) || 0, final });
+    this.boards.set(String(event.id), { hs: Number(home.score) || 0, as: Number(away.score) || 0, final, state: event.status?.type?.state });
     const score = `${away.team?.abbreviation} ${away.score ?? 0} - ${home.team?.abbreviation} ${home.score ?? 0}`;
     const detail = event.status?.type?.shortDetail ?? '';
     this.scores.set(String(event.id), { text: final ? `Final · ${score}` : `${score} · ${detail}`, score, detail, final });
@@ -379,6 +386,12 @@ export class ModelDeskComponent implements OnInit, OnDestroy {
   // (an in-play bet whose game is over, waiting for the run to grade it)
   isOver(b: ModelBet): boolean {
     return !!this.boardOf(b)?.final;
+  }
+
+  // (a game past its start that isn't running: not begun at ESPN, or over without a final, put off)
+  private notUnderWay(b: ModelBet): boolean {
+    const board = this.boardOf(b);
+    return board?.state === 'pre' || (board?.state === 'post' && !board.final);
   }
 
   // (what an in-play bet's meter counts: a prop's stat so far, a total's points so far; null for the rest,
@@ -594,6 +607,6 @@ export class ModelDeskComponent implements OnInit, OnDestroy {
 // (an event on ESPN's scoreboard, as much as the desk reads)
 interface ScoreboardEvent {
   id: string | number;
-  status?: { type?: { completed?: boolean; shortDetail?: string } };
+  status?: { type?: { completed?: boolean; state?: 'pre' | 'in' | 'post'; shortDetail?: string } };
   competitions?: { competitors?: { homeAway: string; score?: string; team?: { abbreviation?: string } }[] }[];
 }

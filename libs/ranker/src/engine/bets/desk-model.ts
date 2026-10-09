@@ -38,6 +38,8 @@ export interface ModelBet {
   // (edge: it saw value; action: no edge, bet for the data. Older bets go by their EV)
   intent?: Intent;
   status: Status;
+  // (a prop whose player didn't play: no action, graded a push, out of the record)
+  void?: boolean;
   profit: number;
   final?: string;
   // (its post-mortem, once graded: the story, what broke its premise, the line saying why; weight under 1
@@ -153,8 +155,9 @@ export interface Tally {
 
 export type SportTally = Tally & { state: ModelState | null };
 
-// (a game in play as the scoreboard has it: home and away scores, and whether it's over)
-export type Board = { hs: number; as: number; final: boolean };
+// (a game in play as the scoreboard has it: home and away scores, whether it's over, and ESPN's state: not
+// begun, under way, or over (a final, or put off))
+export type Board = { hs: number; as: number; final: boolean; state?: 'pre' | 'in' | 'post' };
 
 // (a bet decided: by the run's grading, or in play by the score)
 export type Settled = { status: 'won' | 'lost' | 'push'; profit: number };

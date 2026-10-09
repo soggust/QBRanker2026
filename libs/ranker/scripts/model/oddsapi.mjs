@@ -3,7 +3,7 @@
 // past's lines for the backtest. Paid by the credit (20,000 a month), so every call is accounted for and
 // budgeted:
 //
-//   cost   /odds: markets x regions; /events/{id}/odds: the markets it returns x regions; /historical/...: ten
+//   cost   /events: free (the coming games' ids); /odds: markets x regions; /events/{id}/odds: the markets it returns x regions; /historical/...: ten
 //          times that. Up to 10 bookmakers named count as one region (the docs: "every group of 10 bookmakers
 //          is the equivalent of 1 region"), so the desk names just its book and Pinnacle (one region's cost,
 //          and Pinnacle sits in the eu region, which asking by region would add as a second) and never asks by
@@ -149,7 +149,8 @@ function record(feature, route, cost, remaining, used) {
   if (!u.cycleStart || (u.remaining !== null && remaining !== null && remaining > u.remaining + 1000)) u.cycleStart = at;
   if (remaining !== null) u.remaining = remaining;
   if (used !== null) u.used = used;
-  u.calls.push({ at, feature, route: route.replace(/\/events\/[^/]+\//, '/events/{id}/'), cost });
+  // (a free call (the event list) leaves no line: the log keeps the cycle's spending, and is cut to its last 3,000)
+  if (cost) u.calls.push({ at, feature, route: route.replace(/\/events\/[^/]+\//, '/events/{id}/'), cost });
   saveUsage(u);
 }
 

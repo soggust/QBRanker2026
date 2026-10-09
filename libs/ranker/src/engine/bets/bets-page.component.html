@@ -83,7 +83,7 @@
       <p class="bets-note">No picks right now: the algorithm posts its best bets as the coming games' lines come in.</p>
     } @else {
       <ol class="bets-list" [class.spinning]="spinning">
-        @for (r of shown; track r.id; let i = $index) {
+        @for (r of shown; track r.id; let i = $index, n = $count) {
           <li class="bet" [ngClass]="level(r)" [class.open]="open.has(r.id)" [style.--i]="i">
             <button type="button" class="bet-row" (click)="toggle(r.id)" [attr.aria-expanded]="open.has(r.id)">
               <mat-icon class="bet-chevron" [fontIcon]="open.has(r.id) ? 'expand_more' : 'chevron_right'"></mat-icon>
@@ -94,7 +94,7 @@
                 [class.top]="i < 10"
                 [class.lock]="i === 0"
                 [attr.aria-label]="i === 0 ? 'Lock, number 1' : null"
-                [title]="'#' + (i + 1) + ' of ' + shown.length + ' · ' + level(r) + ' confidence' + (r.chance != null ? ' · ' + r.chance + '% to win' : '')"
+                [title]="'#' + (i + 1) + ' of ' + n + ' · ' + level(r) + ' confidence' + (r.chance != null ? ' · ' + r.chance + '% to win' : '')"
               >
                 @if (i === 0) {
                   <mat-icon fontIcon="lock"></mat-icon>

@@ -46,7 +46,8 @@ export function gameOf(e) {
     const v = t.score?.value ?? Number(t.score?.displayValue ?? t.score);
     return Number.isFinite(v) ? v : null;
   };
-  const final = !!c.status?.type?.completed;
+  // (a game called off is never final, whatever ESPN's flag: its 0-0 would grade its bets)
+  const final = !!c.status?.type?.completed && !/postponed|cancel|suspended|forfeit/i.test(c.status?.type?.name ?? '');
   return {
     id: e.id,
     date: e.date,

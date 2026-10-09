@@ -88,7 +88,8 @@ export const betValue = (result: (b: ModelBet) => { profit: number } | null, fin
       sport: (b) => b.sport,
       game: (b) => b.matchup,
       start: (b) => b.start,
-      graded: (b) => b.gradedAt ?? b.start,
+      // (one decided in play, its game over but not graded yet: the latest, first)
+      graded: (b) => b.gradedAt ?? (b.status === 'open' ? '9999' : b.start),
       market: (b) => b.market,
       pick: (b) => b.pick,
       result: (b) => result(b)?.profit ?? null,

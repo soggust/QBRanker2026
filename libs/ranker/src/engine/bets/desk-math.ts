@@ -41,6 +41,8 @@ export function tally(label: string, bets: ModelBet[]): Tally {
       t.open++;
       continue;
     }
+    // (a void prop, no action: not in the record, as the bettor's desk.mjs record)
+    if (b.void) continue;
     t.bets++;
     t[b.status]++;
     t.staked += b.units;

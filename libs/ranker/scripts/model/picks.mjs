@@ -4,7 +4,8 @@
 //   which    every bet it's placed on a game not started, a game market's or a prop's (not a guarded one): the
 //            user wants the bot's bets shown, the most likely first, while it's still learning (rein it in to the
 //            edge bets alone once it's sharper). Only a showcase: nothing here feeds the bettor's learning
-//   score    its expected return per unit at the trusted chance (EV: the trust already in it, so a market whose
+//   score    its chance to win (p, below: the order); its edge score (scoreOf, the tie-break) its expected
+//            return per unit at the trusted chance (EV: the trust already in it, so a market whose
 //            trust is fitted at 0, the NFL's spreads and moneylines, never has an edge and never shows), times
 //            how far the trust can be leaned on: 1 once the market's is fitted (the backtest's closing lines and
 //            the graded bets), 0.5 while it's the untested start (a prop type with fewer than 40 graded: its
@@ -166,6 +167,6 @@ export function buildPicks(sport, ledger, trust, games, now) {
 
 // (a record as the page's: wins, losses, pushes, the win share; a void prop isn't counted)
 function tally(bets) {
-  const r = record(bets.filter((b) => !b.void));
+  const r = record(bets);
   return { wins: r.won, losses: r.lost, pushes: r.push, winPct: r.won + r.lost ? round(r.won / (r.won + r.lost), 4) : null, profit: r.profit };
 }

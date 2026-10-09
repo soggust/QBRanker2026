@@ -2,7 +2,7 @@
 @use "../casino-chip" as chip;
 
 // The Bets page: one scoreboard panel down the middle of the page, a row per call, most
-// confident first; like green, lean yellow, fade red (as on the card's Analysis tab).
+// confident first; like green, fade red (as on the card's Analysis tab).
 
 // The page on a card-room table: blue speed cloth (a tight crosshatch weave and a fine fiber over a soft
 // mottle, a warm light pooled in the middle, the edges falling off into shadow)
@@ -140,10 +140,14 @@
     @include v.icon-size(18px);
   }
 
+  &:focus-visible {
+    outline: 2px solid var(--scoreboard-led);
+    outline-offset: 2px;
+  }
+
   &:hover,
   &:focus {
     color: #fff;
-    outline: none;
 
     .kinds-key-pop {
       display: flex;
@@ -351,10 +355,6 @@ $chip-clay: #b0202b;
     background: v.$good;
   }
 
-  &.lean {
-    background: v.$caution;
-  }
-
   &.fade {
     background: v.$bad;
   }
@@ -465,8 +465,10 @@ $chip-clay: #b0202b;
   @include v.icon-size(20px);
 }
 
-// (open: a slightly lighter, neutral panel, so the reading is clean)
+// (open: a slightly lighter, neutral panel, so the reading is clean; it unfolds down from its row, as a card
+// panel does)
 .bet-reasons {
+  animation: bet-unfold 0.24s cubic-bezier(0.2, 0.8, 0.2, 1);
   background: color-mix(in srgb, var(--soft) 7%, #2a2e33);
   padding: 14px 20px 16px;
 
@@ -742,8 +744,20 @@ $arm-length: 175px;
 @media (prefers-reduced-motion: reduce) {
   .slot-handle.pulling .slot-lever,
   .slot-handle.pulling .slot-knob,
-  .bets-list.spinning .bet-row > * {
+  .bets-list.spinning .bet-row > *,
+  .bet-reasons {
     animation: none;
+  }
+}
+
+@keyframes bet-unfold {
+  from {
+    clip-path: inset(0 0 100% 0);
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    clip-path: inset(0);
   }
 }
 

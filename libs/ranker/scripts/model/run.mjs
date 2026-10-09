@@ -20,13 +20,13 @@
 // The Bets page's admin panel (dev only) reads state and ledger.
 //
 //   node libs/ranker/scripts/model/run.mjs [nfl nba nhl mlb] [--dry [--paid]] [--replace] [--all-sources]
-//   (--dry: no bets placed, state and ledger untouched, a snapshot of what the model made of the coming games
+//   (--dry: no bets placed, nothing committed touched (state, ledger, history, picks), a snapshot of what the model made of the coming games
 //   in .cache/model/dry-<sport>.json, priced from ESPN's free board (--paid: The Odds API's too); --replace: open bets on games not started yet taken back and priced
 //   again; --all-sources: every optional source asked, whether its terms are kept or not)
 
 // (the keys: .env on this machine, the repo's secrets on GitHub; first, so every module sees them)
 import '../env.mjs';
-import { mkdirSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { BOOK, LEAGUES, PROP_CAPS } from './leagues.mjs';
 import { gameOf, json, linesOf, scoreboard, teamIds, teamSchedule, ymd } from './espn.mjs';
@@ -55,9 +55,17 @@ const PROPS_ASKED = path.join(CACHE, 'odds-props.json');
 const read = readJson;
 const write = writeJson;
 
+// (a committed file the run builds on (the ledger, the state, the history): missing, a fresh start; there
+// but unreadable, the sport stops, rather than a fresh one being written over it)
+function readKept(file, fallback) {
+  return existsSync(file) ? JSON.parse(readFileSync(file, 'utf8')) : fallback;
+}
+
 // A file the workflow commits, written only when its content changed (ignoring what changes every run: when
 // it ran, the props' last-run counts); lines: an array written an item a line (small diffs)
 function writeIfChanged(file, data, { lines = false } = {}) {
+  // (--dry: nothing committed is touched, so a check on the code leaves the tree as the bots left it)
+  if (DRY) return false;
   const text = lines ? `[\n${data.map((x) => JSON.stringify(x)).join(',\n')}\n]\n` : JSON.stringify(data);
   const strip = (x) => (x && !Array.isArray(x) ? { ...x, updated: null, at: null, props: x.props ? { ...x.props, lastRun: null } : x.props } : x);
   const before = readJson(file, null);
@@ -90,7 +98,7 @@ async function runSport(sport) {
   await fitTheProps(r);
   await runBacktest(r);
   logContext(r);
-  r.ledger = read(r.files.ledger, { sport, bankroll: BANKROLL, bets: [] });
+  r.ledger = readKept(r.files.ledger, { sport, bankroll: BANKROLL, bets: [] });
   r.ledger.bankroll = BANKROLL;
   await captureClose(r);
   refitTrust(r);
@@ -124,9 +132,9 @@ async function writeTeams(r) {
 // 7. the public picks (picks.mjs): the best edge bets on games not started, written for the site's Bets page
 // when they change; the ones shown marked published on the ledger, so their record is theirs alone
 function writePicks(r, alone = false) {
-  const ledger = alone ? read(r.files.ledger, { bets: [] }) : r.ledger;
-  const trust = alone ? (read(r.files.state, {}).trust ?? {}) : r.trust;
-  const games = alone ? new Map(read(r.files.games, []).map((g) => [g.id, g])) : r.games;
+  const ledger = alone ? readKept(r.files.ledger, { bets: [] }) : r.ledger;
+  const trust = alone ? (readKept(r.files.state, {}).trust ?? {}) : r.trust;
+  const games = alone ? new Map(readKept(r.files.games, []).map((g) => [g.id, g])) : r.games;
   const out = buildPicks(r.sport, ledger, trust, games, r.now);
   if (DRY) {
     console.log(`${r.sport} (dry): ${out.picks.length} picks: ${out.picks.map((p) => `${p.level} ${p.pick} (${p.score})`).join(' | ')}`);
@@ -141,7 +149,7 @@ function writePicks(r, alone = false) {
 // coming games, with their lines), two seasons of the teams' schedules the first time
 async function loadHistory(r) {
   const { sport, cfg, now } = r;
-  const games = new Map(read(r.files.games, []).map((g) => [g.id, g]));
+  const games = new Map(readKept(r.files.games, []).map((g) => [g.id, g]));
   if (!games.size) {
     const current = (await json(`https://site.api.espn.com/apis/site/v2/sports/${cfg.league}/scoreboard`))?.leagues?.[0]?.season?.year;
     const ids = await teamIds(cfg.league);
@@ -161,7 +169,7 @@ async function loadHistory(r) {
   // (the last few days and the next two; and the day of any bet still open from before then, should the
   // runs ever have stopped a while)
   const days = new Set(Array.from({ length: 7 }, (_, i) => ymd(new Date(now.getTime() + (i - 4) * DAY))));
-  for (const bet of read(r.files.ledger, { bets: [] }).bets) {
+  for (const bet of readKept(r.files.ledger, { bets: [] }).bets) {
     if (bet.status === 'open' && Date.parse(bet.start) < now.getTime() - 4 * DAY) days.add(ymd(new Date(bet.start)));
   }
   for (const day of days) {
@@ -181,14 +189,25 @@ async function loadHistory(r) {
 }
 
 // 1b. the coming games' lines from The Odds API (oddsapi.mjs): the desk's book's prices, Pinnacle's fair
-// chance; one call for the sport (its three markets: 3 credits), only with games to bet and today's lines
-// allowance left. Without it (no key, no credits, the API down), ESPN's board, which is the same book's
+// chance; one call for the sport (its three markets: 3 credits), only with a game not bet yet (a game already
+// bet only notes the line it sees, which ESPN's board, the same book's, gives free: asked hourly, these used
+// up the day's allowance overnight) and today's lines allowance left. Otherwise ESPN's board, and The Odds
+// API's free event list for the ids its props are asked by
 async function liveLines(r) {
   r.linesSource = 'espn';
-  if (!r.upcoming.length || !hasKey() || !canSpend('lines', 3)) return;
-  const from = isoSecond(r.now);
-  const to = isoSecond(r.now.getTime() + 3 * DAY);
-  const events = await call('lines', `/sports/${SPORT_KEYS[r.sport]}/odds`, { markets: 'h2h,spreads,totals', bookmakers: LINE_BOOKS.join(','), commenceTimeFrom: from, commenceTimeTo: to });
+  if (!r.upcoming.length || !hasKey()) return;
+  const range = { commenceTimeFrom: isoSecond(r.now), commenceTimeTo: isoSecond(r.now.getTime() + 3 * DAY) };
+  const placed = new Set(readKept(r.files.ledger, { bets: [] }).bets.map((b) => b.id));
+  const unbet = DRY || REPLACE || r.upcoming.some((u) => !MARKETS.some((m) => placed.has(`${u.game.id}:${m}`)));
+  if (!unbet || !canSpend('lines', 3)) {
+    const list = await call('events', `/sports/${SPORT_KEYS[r.sport]}/events`, range);
+    for (const u of Array.isArray(list) ? r.upcoming : []) {
+      const ev = list.find((x) => sameGame(x, u));
+      if (ev) u.lines.oddsEvent = ev.id;
+    }
+    return;
+  }
+  const events = await call('lines', `/sports/${SPORT_KEYS[r.sport]}/odds`, { markets: 'h2h,spreads,totals', bookmakers: LINE_BOOKS.join(','), ...range });
   if (!Array.isArray(events)) return;
   let matched = 0;
   for (const u of r.upcoming) {
@@ -210,7 +229,6 @@ async function liveLines(r) {
     matched++;
   }
   r.linesSource = `the odds api (${matched} of ${r.upcoming.length} games)`;
-  r.oddsEvents = events;
   console.log(`${r.sport}: lines from The Odds API for ${matched} of ${r.upcoming.length} coming games`);
 }
 
@@ -225,7 +243,7 @@ function sameGame(ev, u) {
 // 2. the ratings, refit (each setting that moves logged with why)
 function fitRatings(r) {
   const { cfg, at } = r;
-  const state = read(r.files.state, { sport: r.sport, changelog: [] });
+  const state = readKept(r.files.state, { sport: r.sport, changelog: [] });
   const before = state.params ?? cfg.priors;
   const best = fit(r.history, { ...cfg.priors, sigma: before.sigma ?? cfg.priors.sigma, sigmaT: before.sigmaT ?? cfg.priors.sigmaT }, cfg.grid);
   const params = best?.params ?? before;
@@ -394,7 +412,8 @@ async function captureClose(r) {
         if (close) close.source = 'close';
         // (a prop whose board kept no price (the NFL's): the line and price The Odds API gave near the start)
         if (bet.market === 'prop' && close && close.odds === null && bet.seen && Date.parse(bet.start) - Date.parse(bet.seen.at) < 3 * 36e5) close = { ...bet.seen, source: 'odds api near the start' };
-        else if (bet.seen && r.now.getTime() - Date.parse(bet.start) > 3 * DAY) close = { ...bet.seen, source: 'last seen' };
+        // (none read for 3 days: the last line a run saw; a close read late, the runs having stopped, is kept)
+        else if (!close && bet.seen && r.now.getTime() - Date.parse(bet.start) > 3 * DAY) close = { ...bet.seen, source: 'last seen' };
         if (!close) continue;
         bet.close = close;
         bet.clv = clvOf(bet, close, bet.market === 'total' ? params.sigmaT : params.sigma);

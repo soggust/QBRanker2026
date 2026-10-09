@@ -447,7 +447,7 @@
                   <td [class.up]="b.clv?.beat === true" [class.down]="b.clv?.beat === false">{{ betClv(b) }}</td>
                   <td class="desk-why" [title]="recapText(b)">
                     @if (broke(b)) {
-                      <mat-icon class="desk-broke" fontIcon="healing" aria-label="Premise broke in the game"></mat-icon>
+                      <mat-icon class="desk-broke" fontIcon="healing" role="img" aria-hidden="false" aria-label="Premise broke in the game"></mat-icon>
                     }
                     {{ b.why ?? '-' }}
                     @if (b.recap?.link; as link) {

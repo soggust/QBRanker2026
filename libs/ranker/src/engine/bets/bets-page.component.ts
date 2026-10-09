@@ -353,6 +353,7 @@ export class BetsPageComponent implements OnInit {
     }
     // (all sports' picks together, the likeliest first)
     this.rows = algoRows.sort((a, b) => b.sureness - a.sureness || (a.game?.kickoff ?? '').localeCompare(b.game?.kickoff ?? ''));
+    this.gameDays = this.buildGameDays();
   }
 
   // A team logo's address: a path under the sport's own site, or a full address as it is
@@ -362,7 +363,11 @@ export class BetsPageComponent implements OnInit {
 
   // All games: the top 40 bets; a game: its top 15 (from all of its bets, not just those in the top 40)
   get shown(): BetRow[] {
-    const rows = this.inGame.filter((r) => !this.kinds.size || this.kinds.has(r.betType));
+    // (the chips on that this game has: a game without any of them shows all its bets, not an empty list
+    // whose chips have gone)
+    const inGame = this.inGame;
+    const kinds = [...this.kinds].filter((k) => inGame.some((r) => r.betType === k));
+    const rows = kinds.length ? inGame.filter((r) => kinds.includes(r.betType)) : inGame;
     return rows.slice(0, this.game ? this.gameLimit : this.limit);
   }
 
@@ -384,8 +389,10 @@ export class BetsPageComponent implements OnInit {
   }
 
   // The week's games with bets: the dropdown's choices under a header for each day, by kickoff (in the
-  // viewer's time zone; London's morning game first on Sunday), each with how many bets it has
-  get gameDays(): { day: string; games: { key: string; label: string; count: number }[] }[] {
+  // viewer's time zone; London's morning game first on Sunday), each with how many bets it has. Built once the
+  // picks are in (they don't change after), not on every check of the page
+  gameDays: { day: string; games: { key: string; label: string; count: number }[] }[] = [];
+  private buildGameDays(): { day: string; games: { key: string; label: string; count: number }[] }[] {
     const byGame = new Map<string, { key: string; label: string; day: string; at: number; count: number }>();
     for (const r of this.rows ?? []) {
       if (!r.game) continue;

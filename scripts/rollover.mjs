@@ -53,11 +53,16 @@ async function begunSeason() {
     .toISOString()
     .slice(0, 10)
     .replaceAll("-", "");
+  // (ESPN down or slow: not due tonight, rather than the night's update stopped; the next run asks again)
   const res = await fetch(
     `https://site.api.espn.com/apis/site/v2/sports/${ESPN[sport]}/scoreboard?dates=${yesterday}`,
-  );
-  if (!res.ok) throw new Error(`ESPN scoreboard: ${res.status}`);
-  const board = await res.json();
+    { signal: AbortSignal.timeout(30e3) },
+  ).catch(() => null);
+  const board = res?.ok ? await res.json().catch(() => null) : null;
+  if (!board) {
+    console.warn(`ESPN scoreboard unavailable (${res?.status ?? "no answer"}): no rollover check this run`);
+    return null;
+  }
   const season = board.leagues?.[0]?.season;
   const finished = (board.events ?? []).some((e) => e.status?.type?.completed);
   return season && season.type?.type >= 2 && finished ? season.year : null;

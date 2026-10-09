@@ -138,7 +138,11 @@ async function writeGameLogs(season, skaters, goalies) {
       if (type === 3 && body?.gameLog?.length) playoffGames[id] = body.gameLog.length;
       games.push(...(body?.gameLog ?? []));
     }
-    if (!games.length) return;
+    // (none came back, the API refusing: his log as it was, rather than none)
+    if (!games.length) {
+      if (known) logs[id] = known;
+      return;
+    }
     games.sort((a, b) => b.gameDate.localeCompare(a.gameDate));
     logs[id] = games.map((g) => {
       const date = new Date(`${g.gameDate}T12:00:00`).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
