@@ -5,6 +5,10 @@ import { percentileText } from '@ranker/engine/player-card/hover-text';
 import { COMPARE_MAX, CompareHit, CompareTab, PlayerCompare } from './player-compare';
 import { GameViewService } from '../game-view/game-view.service';
 import { ARC_DRAW_MS, arcDraw } from './arc-draw';
+// ---- tracker (phase 2) ----
+import { AccountService } from '../account/account.service';
+import { TrackerStore } from '../account/tracker/tracker.store';
+// ---- end tracker ----
 
 // The compare view: the player card's board with a tape per side across the top (team card, season, rank,
 // archetype; the season switchable, the side removable) and a slot to add one by name; then its tabs:
@@ -42,9 +46,52 @@ export class PlayerCompareComponent implements DoCheck, AfterViewChecked, OnDest
     private readonly el: ElementRef<HTMLElement>,
     private readonly zone: NgZone,
     private readonly cdr: ChangeDetectorRef,
+    // ---- tracker (phase 2) ----
+    readonly account: AccountService,
+    private readonly tracker: TrackerStore,
+    // ---- end tracker ----
   ) {}
 
+  // ---- tracker (phase 2) ----
+  // Pinned to the Tracker (signed in: the comparison as it is, its snapshot the baseline; signed out: the
+  // sign-in first), a note under the hero for a moment, with the way to the Tracker
+  pinning = false;
+  pinNote: { text: string; link: boolean } | null = null;
+  private pinTimer?: ReturnType<typeof setTimeout>;
+
+  get pinned(): boolean {
+    const { sides, tab } = this.compare;
+    return sides.length > 0 && this.tracker.pinnedSpecs().has(this.tracker.specFor(sides, tab));
+  }
+
+  async pin(): Promise<void> {
+    if (!this.account.signedIn()) {
+      this.account.openLogin();
+      return;
+    }
+    if (this.pinning || !this.compare.sides.length) return;
+    this.pinning = true;
+    try {
+      await this.tracker.pinCompare(this.compare.sides, this.compare.tab);
+      this.notePin({ text: 'Pinned to your Tracker', link: true });
+    } catch (error) {
+      console.error('Pin', error);
+      const full = (error as { code?: string }).code === 'full';
+      this.notePin({ text: full ? 'Your Tracker is full: unpin one first' : "Couldn't pin it", link: full });
+    } finally {
+      this.pinning = false;
+    }
+  }
+
+  private notePin(note: { text: string; link: boolean }): void {
+    this.pinNote = note;
+    clearTimeout(this.pinTimer);
+    this.pinTimer = setTimeout(() => (this.pinNote = null), 4200);
+  }
+  // ---- end tracker ----
+
   ngOnDestroy(): void {
+    clearTimeout(this.pinTimer);
     this.arcsObserver?.disconnect();
     this.stopArcs();
   }

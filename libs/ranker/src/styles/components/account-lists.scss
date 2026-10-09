@@ -1,0 +1,1487 @@
+@use "../variables" as v;
+@use "account-kit" as kit;
+
+// ===========================================================================
+// Saved lists and the Community (lists-page, list-view, community-page): a column down the sport's field
+// like the settings page; the lists as scoreboard cards; a list (and the consensus) drawn like the grid:
+// the chalkboard, the scoreboard header, the rank tiles, the team cards with their headshots, the names
+// in the hand, the numbers under them
+// ===========================================================================
+:host {
+  display: block;
+}
+
+:host(lists-page),
+:host(community-page) {
+  box-sizing: border-box;
+  height: calc(100% - var(--sport-bar-height));
+  overflow-y: auto;
+}
+
+:host(list-view) {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+}
+
+@include v.scrollbars($corner: false);
+@include kit.pills;
+@include kit.fields;
+@include kit.buttons;
+
+$board: var(--tex-chalk-plays) -1150px -420px / 2800px 1440px, v.$chalk-dust;
+
+.lists-page {
+  box-sizing: border-box;
+  color: #eee;
+  display: flex;
+  flex-direction: column;
+  font-family: v.$font-base;
+  gap: 16px;
+  margin: 0 auto;
+  max-width: 1080px;
+  padding: 22px 16px 56px;
+
+  // (a list itself: room for more of its columns)
+  &.wide {
+    max-width: 1320px;
+  }
+}
+
+.lists-loading {
+  align-items: center;
+  @include v.scoreboard-panel(12px);
+  color: rgba(255, 255, 255, 0.8);
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  padding: 28px;
+}
+
+.form-error {
+  color: #ffb4ae;
+  font-size: 13px;
+  margin: 0;
+}
+
+a.primary,
+a.secondary {
+  text-decoration: none;
+}
+
+.small-btn {
+  font-size: 11.5px !important;
+  min-height: 32px !important;
+  padding: 0 12px !important;
+}
+
+.spinner.tiny {
+  border-width: 1.5px;
+  height: 12px;
+  vertical-align: -2px;
+  width: 12px;
+}
+
+.dot {
+  opacity: 0.5;
+}
+
+// (where back to: My lists, the Community)
+.page-crumbs {
+  display: flex;
+  gap: 18px;
+
+  a {
+    align-items: center;
+    color: rgba(255, 255, 255, 0.75);
+    display: inline-flex;
+    font-size: 13px;
+    font-weight: 700;
+    gap: 6px;
+    text-decoration: none;
+
+    .mat-icon {
+      @include v.icon-size(17px);
+    }
+
+    &:hover,
+    &:focus-visible {
+      color: var(--scoreboard-led);
+      outline: none;
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// A page's head: its name and what it is, a button on the right
+// ---------------------------------------------------------------------------
+.lists-head {
+  align-items: center;
+  @include v.scoreboard-panel(12px, 0 6px 18px rgba(0, 0, 0, 0.45));
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+  padding: 16px 20px;
+
+  h2 {
+    color: #fff;
+    @include v.headline(22px);
+    letter-spacing: 0.75px;
+    margin: 0 0 4px;
+    text-transform: uppercase;
+  }
+
+  p {
+    color: rgba(255, 255, 255, 0.68);
+    font-size: 13px;
+    line-height: 1.45;
+    margin: 0;
+  }
+
+  .secondary {
+    flex: 0 0 auto;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Signed out, nothing yet, not available: one scoreboard panel, centered
+// ---------------------------------------------------------------------------
+.soon-panel {
+  align-items: center;
+  @include v.scoreboard-panel(12px, 0 12px 32px rgba(0, 0, 0, 0.5));
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 8vh auto 0;
+  max-width: 460px;
+  padding: 30px 26px 26px;
+  text-align: center;
+  width: 100%;
+
+  &.empty {
+    margin-top: 2vh;
+  }
+
+  h2 {
+    color: #fff;
+    @include v.headline(21px);
+    letter-spacing: 0.75px;
+    margin: 0;
+    text-transform: uppercase;
+  }
+
+  .primary {
+    margin-top: 6px;
+  }
+}
+
+.soon-icon {
+  color: var(--scoreboard-led);
+  @include v.icon-size(40px);
+}
+
+.soon-detail {
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 14px;
+  line-height: 1.5;
+  margin: 0;
+
+  strong {
+    color: #fff;
+  }
+}
+
+.soon-back {
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  margin-top: 6px;
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--scoreboard-led) 60%, transparent);
+  text-underline-offset: 3px;
+
+  &:hover,
+  &:focus-visible {
+    color: var(--scoreboard-led);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// The little chips: the sport's LED name, who sees a list, on the Community board
+// ---------------------------------------------------------------------------
+.sport-led {
+  color: var(--scoreboard-led);
+  font-weight: 900;
+  letter-spacing: 1px;
+  text-shadow: var(--scoreboard-glow);
+}
+
+.vis-chip,
+.community-chip {
+  align-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 999px;
+  color: rgba(255, 255, 255, 0.82);
+  display: inline-flex;
+  flex: 0 0 auto;
+  font-size: 11px;
+  font-weight: 800;
+  gap: 4px;
+  letter-spacing: 0.4px;
+  padding: 2px 9px 2px 6px;
+  text-decoration: none;
+  text-transform: uppercase;
+
+  .mat-icon {
+    @include v.icon-size(14px);
+  }
+
+  &.vis-public .mat-icon {
+    color: v.$good;
+  }
+
+  &.vis-private .mat-icon {
+    color: v.$caution;
+  }
+}
+
+.community-chip {
+  border-color: color-mix(in srgb, var(--scoreboard-led) 50%, transparent);
+  color: var(--scoreboard-led);
+
+  &:is(a):hover,
+  &:is(a):focus-visible {
+    background: color-mix(in srgb, var(--scoreboard-led) 12%, transparent);
+    outline: none;
+  }
+
+  &.small {
+    font-size: 10px;
+    margin-left: auto;
+    padding: 1px 7px 1px 5px;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// #lists: the cards (a scoreboard bar with the sport, tab and season; the title; the top five on the
+// chalkboard; the count and the date)
+// ---------------------------------------------------------------------------
+.sport-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.list-cards {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.list-card {
+  border: 1px solid #3a3a3a;
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
+  color: #eee;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  text-decoration: none;
+  transition:
+    transform 0.15s ease,
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+
+  &:hover,
+  &:focus-visible {
+    border-color: var(--scoreboard-led);
+    box-shadow:
+      0 10px 24px rgba(0, 0, 0, 0.5),
+      0 0 0 1px var(--scoreboard-led);
+    outline: none;
+    transform: translateY(-2px);
+
+    .card-title {
+      color: var(--scoreboard-led);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+
+    &:hover,
+    &:focus-visible {
+      transform: none;
+    }
+  }
+}
+
+.card-bar {
+  align-items: center;
+  background: var(--scoreboard-dots), var(--scoreboard);
+  border-bottom: 1px solid #333;
+  display: flex;
+  font-size: 11.5px;
+  gap: 8px;
+  padding: 8px 12px;
+
+  .card-where {
+    color: rgba(255, 255, 255, 0.8);
+    flex: 1;
+    font-weight: 700;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .vis-chip {
+    border: none;
+    padding: 0;
+  }
+}
+
+.card-title {
+  background: linear-gradient(rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.55)), #1c211e;
+  color: #fff;
+  @include v.headline(17px);
+  line-height: 1.25;
+  padding: 12px 14px 10px;
+  transition: color 0.15s ease;
+}
+
+// (a list's first rows: the place, the headshot or logo, the name; the cards' and the Community's)
+.card-top {
+  background:
+    linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)),
+    $board;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 1px;
+  list-style: none;
+  margin: 0;
+  padding: 8px 12px 10px;
+
+  li {
+    align-items: center;
+    display: flex;
+    gap: 10px;
+    height: 30px;
+    min-width: 0;
+  }
+
+  .t-rank {
+    @include v.led-tile;
+    flex: 0 0 26px;
+    font-size: 11px;
+    height: 22px;
+    padding-top: 1px;
+
+    &.first {
+      color: var(--scoreboard-led);
+      text-shadow: var(--scoreboard-glow);
+    }
+  }
+
+  .t-logo,
+  .t-photo {
+    flex: 0 0 26px;
+    height: 26px;
+    object-fit: contain;
+    width: 26px;
+  }
+
+  .t-photo {
+    background:
+      radial-gradient(circle at 30% 22%, rgba(255, 255, 255, 0.3), transparent 60%),
+      var(--team-badge, rgba(255, 255, 255, 0.08));
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 50%;
+    box-sizing: border-box;
+    object-fit: cover;
+    object-position: 50% 15%;
+  }
+
+  .t-name {
+    font-family: v.$font-hand;
+    font-size: 14px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9);
+    white-space: nowrap;
+  }
+}
+
+.card-foot {
+  align-items: center;
+  background: #161a18;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.6);
+  display: flex;
+  font-size: 12px;
+  gap: 6px;
+  padding: 8px 12px;
+}
+
+// ---------------------------------------------------------------------------
+// A list's own page: its name plate, the toolbar (As saved / Today, the owner's actions), who sees it
+// ---------------------------------------------------------------------------
+.list-hero {
+  @include v.scoreboard-panel(12px, 0 6px 18px rgba(0, 0, 0, 0.45));
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px 20px 18px;
+
+  h2 {
+    color: #fff;
+    @include v.headline(26px);
+    line-height: 1.15;
+    margin: 0;
+    overflow-wrap: anywhere;
+  }
+}
+
+.hero-chips {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.where-chip {
+  color: rgba(255, 255, 255, 0.85);
+  display: inline-flex;
+  font-size: 12px;
+  font-weight: 700;
+  gap: 8px;
+  letter-spacing: 0.3px;
+  margin-right: 4px;
+}
+
+.hero-by {
+  align-items: center;
+  color: rgba(255, 255, 255, 0.62);
+  display: flex;
+  flex-wrap: wrap;
+  font-size: 12.5px;
+  gap: 6px;
+
+  .hero-owner {
+    color: #fff;
+    font-weight: 800;
+    text-decoration: none;
+  }
+
+  a.hero-owner:hover,
+  a.hero-owner:focus-visible {
+    color: var(--scoreboard-led);
+    outline: none;
+  }
+}
+
+.hero-note {
+  border-left: 3px solid color-mix(in srgb, var(--scoreboard-led) 70%, transparent);
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 14px;
+  line-height: 1.5;
+  margin: 4px 0 0;
+  padding: 2px 0 2px 12px;
+  white-space: pre-line;
+}
+
+.list-toolbar {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+.mode-pills,
+.vis-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.list-actions {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.tool-btn {
+  align-items: center;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid #4a4a4a;
+  border-radius: 8px;
+  color: #fff;
+  cursor: pointer;
+  display: inline-flex;
+  font-family: v.$font-base;
+  font-size: 12px;
+  font-weight: 800;
+  gap: 5px;
+  height: 32px;
+  letter-spacing: 0.4px;
+  padding: 0 11px 0 8px;
+  transition:
+    border-color 0.12s ease,
+    color 0.12s ease;
+
+  .mat-icon {
+    @include v.icon-size(17px);
+  }
+
+  &:hover,
+  &:focus-visible {
+    border-color: var(--scoreboard-led);
+    color: var(--scoreboard-led);
+    outline: none;
+  }
+
+  &.lit {
+    border-color: color-mix(in srgb, var(--scoreboard-led) 60%, transparent);
+    color: var(--scoreboard-led);
+  }
+
+  &.danger-btn {
+    padding: 0 7px;
+
+    &:hover,
+    &:focus-visible {
+      border-color: v.$bad;
+      color: v.$bad;
+    }
+  }
+}
+
+.owner-line {
+  align-items: center;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 14px;
+  padding: 8px 12px;
+
+  .owner-label {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+  }
+
+  .owner-hint {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 12px;
+    margin-left: auto;
+  }
+}
+
+.today-note {
+  align-items: center;
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 10px;
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 12.5px;
+  line-height: 1.45;
+  margin: 0;
+  padding: 8px 12px;
+
+  .up {
+    color: v.$good;
+    font-weight: 800;
+  }
+
+  .down {
+    color: v.$bad;
+    font-weight: 800;
+  }
+
+  &.bad {
+    color: #ffb4ae;
+  }
+}
+
+.reorder-bar {
+  align-items: center;
+  background: color-mix(in srgb, var(--scoreboard-led) 10%, rgba(0, 0, 0, 0.5));
+  border: 1px solid color-mix(in srgb, var(--scoreboard-led) 55%, transparent);
+  border-radius: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 8px 12px;
+
+  > .mat-icon {
+    color: var(--scoreboard-led);
+    @include v.icon-size(20px);
+  }
+
+  .reorder-text {
+    color: #fff;
+    flex: 1;
+    font-size: 13px;
+    font-weight: 700;
+    min-width: 140px;
+  }
+}
+
+.list-toast {
+  @include v.scoreboard-panel(8px, 0 8px 24px rgba(0, 0, 0, 0.6));
+  animation: list-toast-in 0.18s ease;
+  bottom: 24px;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  left: 50%;
+  max-width: calc(100vw - 32px);
+  padding: 10px 16px;
+  position: fixed;
+  transform: translateX(-50%);
+  z-index: 50;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+
+@keyframes list-toast-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 8px);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// The list, drawn like the grid: one chalkboard, the scoreboard header, a row per player
+// ---------------------------------------------------------------------------
+.list-board {
+  background: $board;
+  border: 1px solid #1d2520;
+  border-radius: 9px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.45);
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+}
+
+.list-grid {
+  --who-w: 320px;
+  --cell-w: 84px;
+  list-style: none;
+  margin: 0;
+  min-width: max-content;
+  padding: 0;
+  width: 100%;
+
+  &.cdk-drop-list-dragging .row:not(.cdk-drag-placeholder) {
+    transition: transform 0.2s ease;
+  }
+}
+
+.row {
+  align-items: center;
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.12)) left bottom / 100% 0.5px no-repeat,
+    rgba(0, 0, 0, 0.1);
+  box-sizing: border-box;
+  color: #fff;
+  display: flex;
+  font-variant-numeric: tabular-nums;
+  height: 60px;
+  padding: 0 10px 0 6px;
+  text-shadow: var(--text-shadow-small);
+
+  &:not(.header-row):hover {
+    box-shadow: inset 0 0 0 100vmax rgba(255, 255, 255, 0.06);
+  }
+
+  &.gone .who {
+    opacity: 0.55;
+  }
+
+  &.header-row {
+    background: var(--scoreboard-dots), var(--scoreboard);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 11px;
+    font-weight: 800;
+    height: 40px;
+    letter-spacing: 0.6px;
+    position: relative;
+    text-transform: uppercase;
+    z-index: 3;
+
+    // (a long label on two lines at most)
+    .cell {
+      display: -webkit-box;
+      font-size: 10.5px;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+      line-height: 1.15;
+      overflow: hidden;
+      overflow-wrap: anywhere;
+    }
+
+    .head-name {
+      padding-left: 12px;
+    }
+  }
+
+  &.cdk-drag-preview {
+    background: $board;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 9px;
+    box-shadow: 0 1em 2.5em rgba(0, 0, 0, 0.55);
+    cursor: grabbing;
+    overflow: hidden;
+  }
+
+  &.cdk-drag-placeholder {
+    opacity: 0;
+  }
+
+  &.cdk-drag-animating {
+    transition: transform 0.2s ease;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    &.cdk-drag-animating {
+      transition: none;
+    }
+  }
+}
+
+// The name column: the grip, the rank tile, the team card, the name (pinned at the left while the
+// numbers scroll under it)
+.who {
+  align-items: center;
+  align-self: stretch;
+  box-sizing: border-box;
+  display: flex;
+  flex: 0 0 var(--who-w);
+  left: 0;
+  min-width: 0;
+  position: sticky;
+  z-index: 1;
+}
+
+.list-board.scrolled-x .row:not(.header-row) .who {
+  background: linear-gradient(90deg, #1f2824 88%, transparent);
+}
+
+.list-board.scrolled-x .row.header-row .who {
+  background: var(--scoreboard-dots), var(--scoreboard);
+}
+
+.grip {
+  color: rgba(255, 255, 255, 0.35);
+  cursor: grab;
+  flex: 0 0 auto;
+  @include v.icon-size(20px);
+  margin-right: 2px;
+
+  &:hover {
+    color: rgba(255, 255, 255, 0.85);
+  }
+}
+
+.list-grid:not(.mine) .who {
+  padding-left: 6px;
+}
+
+.rank-tile {
+  @include v.led-tile;
+  flex: 0 0 auto;
+  font-size: 15px;
+  font-weight: 900;
+  height: 36px;
+  margin-right: 14px;
+  padding-top: 2px;
+  width: 46px;
+
+  &.top-5 {
+    color: var(--scoreboard-led);
+    text-shadow: var(--scoreboard-glow);
+  }
+
+  &.top-10 {
+    color: var(--tint-good, #3ee07a);
+    text-shadow: 0 0 8px rgba(62, 224, 122, 0.6);
+  }
+
+  .lombardi {
+    background-color: var(--tint-good, #3ee07a);
+    filter: drop-shadow(0 0 4px rgba(62, 224, 122, 0.55));
+    height: 1.3em;
+    width: 1em;
+  }
+}
+
+.badge-slot {
+  --card-w: 58px;
+  --card-h: 39px;
+  --card-r: 9px;
+  --shot-h: 50px;
+  --shot-w: calc(var(--shot-h) * 1.379);
+  --shot-hang: 12px;
+  display: inline-flex;
+  flex: 0 0 auto;
+  height: var(--card-h);
+  margin-right: 14px;
+  position: relative;
+  width: var(--card-w);
+
+  .headshot {
+    bottom: 0;
+    clip-path: inset(-50% var(--shot-hang) 0 0 round 0 0 var(--card-r) 0);
+    filter: drop-shadow(-3px 1px 3px rgba(0, 0, 0, 0.55));
+    height: var(--shot-h);
+    object-fit: contain;
+    object-position: 50% 100%;
+    pointer-events: none;
+    position: absolute;
+    right: calc(var(--shot-hang) * -1);
+    width: var(--shot-w);
+    z-index: 1;
+  }
+}
+
+.team-badge {
+  @include v.team-card;
+  @include v.team-card-gloss(3px, 48%);
+  --orb: var(--card-h);
+  align-items: center;
+  border-radius: var(--card-r);
+  box-shadow:
+    inset 0 -3px 6px rgba(0, 0, 0, 0.35),
+    inset 0 1px 2px rgba(255, 255, 255, 0.45),
+    0 2px 4px rgba(0, 0, 0, 0.55);
+  display: inline-flex;
+  height: var(--card-h);
+  justify-content: center;
+  position: relative;
+  width: var(--card-w);
+
+  // (no team color known: another sport's list, a team the colors don't have)
+  &.no-color {
+    --team-badge: #2c3330;
+  }
+
+  .team-logo {
+    @include v.team-card-logo(var(--orb));
+    max-width: none;
+    object-fit: contain;
+  }
+
+  &.white-logo .team-logo {
+    @include v.white-logo(var(--orb));
+  }
+}
+
+.badge-slot.with-photo .team-badge .team-logo {
+  left: 30%;
+  opacity: 0.85;
+}
+
+.name {
+  color: #fff;
+  flex: 1;
+  font-family: v.$font-hand;
+  font-size: 15px;
+  font-synthesis: none;
+  font-weight: 400;
+  min-width: 0;
+  opacity: 0.95;
+  overflow: hidden;
+  padding-right: 10px;
+  text-overflow: ellipsis;
+  text-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.95),
+    0 0 6px rgba(0, 0, 0, 0.7);
+  white-space: nowrap;
+}
+
+// A number column: the value in the hand, the change since under it in green or red
+.cell {
+  align-items: center;
+  box-sizing: border-box;
+  display: flex;
+  flex: 0 0 var(--cell-w);
+  flex-direction: column;
+  gap: 1px;
+  justify-content: center;
+  padding: 0 4px;
+  text-align: center;
+
+  &.wide {
+    flex-basis: calc(var(--cell-w) * 1.25);
+  }
+
+  &.now-rank {
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    margin-right: 4px;
+  }
+
+  .val {
+    font-family: v.$font-hand;
+    font-size: 14px;
+    white-space: nowrap;
+
+    &.faint {
+      color: rgba(255, 255, 255, 0.5);
+      font-size: 12.5px;
+    }
+
+    .of {
+      color: rgba(255, 255, 255, 0.5);
+      font-size: 11px;
+    }
+  }
+
+  .delta {
+    align-items: center;
+    color: rgba(255, 255, 255, 0.55);
+    display: inline-flex;
+    font-family: v.$font-base;
+    font-size: 10.5px;
+    font-weight: 800;
+    line-height: 1;
+    white-space: nowrap;
+
+    .mat-icon {
+      @include v.icon-size(16px);
+      margin: 0 -2px 0 -4px;
+    }
+
+    &.up {
+      color: v.$good;
+    }
+
+    &.down {
+      color: v.$bad;
+    }
+  }
+}
+
+.row.header-row .cell.now-rank {
+  color: var(--scoreboard-led);
+}
+
+// ---------------------------------------------------------------------------
+// #community: the board picker, the consensus and the leaderboard side by side, then the lists' cards
+// ---------------------------------------------------------------------------
+.board-picker {
+  @include v.scoreboard-panel(12px, 0 6px 18px rgba(0, 0, 0, 0.45));
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 18px;
+}
+
+.picker-row {
+  align-items: center;
+  display: flex;
+  gap: 14px;
+}
+
+.picker-label {
+  color: rgba(255, 255, 255, 0.7);
+  flex: 0 0 60px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+}
+
+.picker-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+
+  a.game-filter {
+    text-decoration: none;
+  }
+}
+
+.season-pick {
+  background: rgba(0, 0, 0, 0.42);
+  border: 1px solid #4a4a4a;
+  border-radius: 8px;
+  color: #fff;
+  cursor: pointer;
+  font-family: v.$font-base;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 6px 10px;
+
+  &:focus-visible {
+    border-color: var(--scoreboard-led);
+    outline: none;
+  }
+
+  option {
+    background: #1e1e1e;
+  }
+}
+
+.community-grid {
+  align-items: start;
+  display: grid;
+  gap: 16px;
+  grid-template-columns: minmax(0, 1fr) 290px;
+}
+
+.section-bar {
+  align-items: baseline;
+  background: var(--scoreboard-dots), var(--scoreboard);
+  border: 1px solid #333;
+  border-bottom: none;
+  border-radius: 10px 10px 0 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  justify-content: space-between;
+  padding: 10px 14px;
+
+  h3 {
+    align-items: center;
+    color: var(--scoreboard-led);
+    display: flex;
+    font-size: 13px;
+    font-weight: 900;
+    gap: 7px;
+    letter-spacing: 1.2px;
+    margin: 0;
+    text-shadow: var(--scoreboard-glow);
+    text-transform: uppercase;
+
+    .mat-icon {
+      @include v.icon-size(18px);
+    }
+  }
+
+  .section-sub {
+    color: rgba(255, 255, 255, 0.65);
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  &.plain {
+    background: none;
+    border: none;
+    padding: 8px 2px 4px;
+  }
+}
+
+.consensus .list-board {
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+
+.consensus-grid {
+  --who-w: 300px;
+  --cell-w: 66px;
+
+  .cell {
+    flex-grow: 1;
+  }
+}
+
+.more-rows {
+  display: block;
+  margin: 10px 2px 0;
+}
+
+.section-foot {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 11.5px;
+  margin: 8px 2px 0;
+}
+
+.makers {
+  .makers-note {
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid #333;
+    border-radius: 0 0 10px 10px;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 13px;
+    margin: 0;
+    padding: 14px;
+  }
+}
+
+.makers-list {
+  background:
+    linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)),
+    $board;
+  border: 1px solid #1d2520;
+  border-radius: 0 0 10px 10px;
+  list-style: none;
+  margin: 0;
+  padding: 6px 12px;
+
+  li {
+    align-items: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    display: flex;
+    gap: 10px;
+    padding: 8px 0;
+
+    &:last-child {
+      border-bottom: none;
+    }
+  }
+
+  .m-rank {
+    @include v.led-tile;
+    flex: 0 0 24px;
+    font-size: 11px;
+    height: 22px;
+
+    &.first {
+      color: var(--scoreboard-led);
+      text-shadow: var(--scoreboard-glow);
+    }
+  }
+
+  .m-name {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    font-size: 13.5px;
+    font-weight: 800;
+    min-width: 0;
+
+    a {
+      color: #fff;
+      text-decoration: none;
+
+      &:hover,
+      &:focus-visible {
+        color: var(--scoreboard-led);
+        outline: none;
+      }
+    }
+  }
+
+  .m-lists {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  .m-score {
+    color: rgba(255, 255, 255, 0.7);
+    font-family: "DSEG7", sans-serif;
+    font-size: 13px;
+
+    &.pos {
+      color: v.$good;
+    }
+
+    &.neg {
+      color: v.$bad;
+    }
+  }
+}
+
+.entry-cards {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.entry-card {
+  align-items: stretch;
+  border: 1px solid #3a3a3a;
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
+  display: flex;
+  overflow: hidden;
+
+  &.mine {
+    border-color: color-mix(in srgb, var(--scoreboard-led) 45%, #3a3a3a);
+  }
+}
+
+// The votes: up, the score on an LED, down, down the card's left on the scoreboard
+.entry-votes {
+  align-items: center;
+  background: var(--scoreboard-dots), var(--scoreboard);
+  border-right: 1px solid #333;
+  display: flex;
+  flex: 0 0 52px;
+  flex-direction: column;
+  gap: 2px;
+  justify-content: flex-start;
+  padding: 10px 0;
+}
+
+.vote {
+  align-items: center;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  color: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  display: flex;
+  height: 30px;
+  justify-content: center;
+  padding: 0;
+  transition:
+    color 0.12s ease,
+    border-color 0.12s ease,
+    background 0.12s ease;
+  width: 36px;
+
+  .mat-icon {
+    @include v.icon-size(30px);
+  }
+
+  &:hover:not([disabled]),
+  &:focus-visible {
+    border-color: rgba(255, 255, 255, 0.3);
+    color: #fff;
+    outline: none;
+  }
+
+  &.up.on {
+    background: rgba(62, 207, 110, 0.14);
+    border-color: rgba(62, 207, 110, 0.6);
+    color: v.$good;
+  }
+
+  &.down.on {
+    background: rgba(255, 90, 79, 0.14);
+    border-color: rgba(255, 90, 79, 0.6);
+    color: v.$bad;
+  }
+
+  &[disabled] {
+    cursor: default;
+    opacity: 0.35;
+  }
+}
+
+.vote-score {
+  @include v.led-tile;
+  font-size: 13px;
+  height: 24px;
+  min-width: 34px;
+  padding: 1px 4px 0;
+
+  &.pos {
+    color: v.$good;
+    text-shadow: 0 0 6px rgba(62, 207, 110, 0.6);
+  }
+
+  &.neg {
+    color: v.$bad;
+    text-shadow: 0 0 6px rgba(255, 90, 79, 0.6);
+  }
+}
+
+.entry-main {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+
+  .card-top {
+    flex: 1;
+  }
+
+  .more-link {
+    align-self: stretch;
+    background: #161a18;
+    border-top: 1px solid rgba(255, 255, 255, 0.06) !important;
+    padding: 8px 12px;
+    text-align: left;
+  }
+}
+
+.entry-head {
+  align-items: center;
+  background: #1a1f1c;
+  display: flex;
+  gap: 10px;
+  padding: 10px 12px;
+}
+
+.entry-who {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.entry-title {
+  color: #fff;
+  @include v.headline(15.5px);
+  overflow: hidden;
+  text-decoration: none;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  &:hover,
+  &:focus-visible {
+    color: var(--scoreboard-led);
+    outline: none;
+  }
+}
+
+.entry-owner {
+  align-items: center;
+  color: rgba(255, 255, 255, 0.65);
+  display: flex;
+  font-size: 12px;
+  font-weight: 700;
+  gap: 6px;
+
+  a {
+    color: inherit;
+    text-decoration: none;
+
+    &:hover,
+    &:focus-visible {
+      color: var(--scoreboard-led);
+      outline: none;
+    }
+  }
+}
+
+.you-chip {
+  border: 1px solid color-mix(in srgb, var(--scoreboard-led) 55%, transparent);
+  border-radius: 999px;
+  color: var(--scoreboard-led);
+  font-size: 9.5px;
+  font-weight: 900;
+  letter-spacing: 0.8px;
+  padding: 0 6px;
+  text-transform: uppercase;
+}
+
+// ---------------------------------------------------------------------------
+// Narrower screens: the leaderboard under the consensus; phones: a tighter grid and stacked heads
+// ---------------------------------------------------------------------------
+@media (max-width: 900px) {
+  .community-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .lists-page {
+    gap: 12px;
+    padding: 14px 12px 40px;
+  }
+
+  .lists-head {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 10px;
+    padding: 14px 16px;
+
+    h2 {
+      font-size: 19px;
+    }
+  }
+
+  .list-hero {
+    padding: 14px 14px 16px;
+
+    h2 {
+      font-size: 21px;
+    }
+  }
+
+  .list-toolbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .tool-btn span {
+    display: none;
+  }
+
+  .tool-btn {
+    padding: 0 8px;
+  }
+
+  .tool-btn.lit span {
+    display: inline;
+  }
+
+  .owner-line .owner-hint {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .list-grid {
+    --who-w: 222px;
+    --cell-w: 68px;
+  }
+
+  .grip {
+    @include v.icon-size(16px);
+    margin-right: 0;
+  }
+
+  .consensus-grid {
+    --who-w: 206px;
+    --cell-w: 50px;
+  }
+
+  .row {
+    height: 52px;
+    padding: 0 6px 0 2px;
+  }
+
+  .rank-tile {
+    font-size: 12px;
+    height: 28px;
+    margin-right: 7px;
+    width: 30px;
+  }
+
+  .badge-slot {
+    --card-w: 44px;
+    --card-h: 30px;
+    --card-r: 7px;
+    --shot-h: 38px;
+    --shot-hang: 9px;
+    margin-right: 8px;
+  }
+
+  .name {
+    font-size: 13px;
+  }
+
+  .picker-row {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .entry-cards,
+  .list-cards {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

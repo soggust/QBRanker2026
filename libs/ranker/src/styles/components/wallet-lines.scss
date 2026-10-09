@@ -1,0 +1,386 @@
+@use "../variables" as v;
+
+// A game's every line (the Bets page: a row's open section, or on top when a game's chosen): a sportsbook's
+// board sunk into the felt, a row a team, a column a market, each price a little tile; the bot's pick on each
+// market lit in its band's color with its chip (Lock the casino's red and gold, Love green, Bet yellow, Pass an
+// outline, as the rows' own chips), and the prices on the slip ringed in gold.
+
+// (a lock's colors: the casino's red, and its padlock's gold; bets-page.scss's)
+$lock: #d8323c;
+$lock-gold: #ffcf4a;
+
+:host {
+  display: block;
+}
+
+.lines {
+  background:
+    linear-gradient(180deg, rgba(0, 0, 0, 0.32), rgba(0, 0, 0, 0.22)),
+    repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.02) 0 1px, transparent 1px 3px);
+  border: 1px solid rgba(255, 236, 196, 0.16);
+  border-radius: 10px;
+  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.45);
+  color: #fff;
+  margin-top: 14px;
+  padding: 10px 12px 8px;
+}
+
+.lines-head {
+  align-items: baseline;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.lines-title {
+  align-items: center;
+  color: rgba(255, 255, 255, 0.85);
+  display: inline-flex;
+  font-size: 11px;
+  font-weight: 900;
+  gap: 6px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.lines-crown {
+  @include v.book-crown(13px);
+}
+
+.lines-when {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 11.5px;
+  font-weight: 700;
+
+  &.live {
+    color: #ffc864;
+  }
+}
+
+.lines-note {
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 13px;
+  margin: 6px 0;
+}
+
+// The board: the team on the left, Spread, Total and Money across
+.lines-grid {
+  border-collapse: separate;
+  border-spacing: 6px 6px;
+  margin: 0 -6px;
+  table-layout: fixed;
+  width: calc(100% + 12px);
+
+  thead th {
+    color: rgba(255, 255, 255, 0.45);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    padding: 0;
+    text-align: center;
+    text-transform: uppercase;
+
+    &:first-child {
+      width: 78px;
+    }
+  }
+
+  tbody th {
+    padding: 0;
+    text-align: left;
+  }
+
+  td {
+    padding: 0;
+  }
+}
+
+.lines-team {
+  align-items: center;
+  color: #fff;
+  display: flex;
+  font-size: 14px;
+  font-weight: 900;
+  gap: 6px;
+
+  img {
+    height: 22px;
+    object-fit: contain;
+    width: 22px;
+  }
+}
+
+// One price: its line over its odds on a dark tile; lit on hover, gold-ringed on the slip
+.price {
+  --edge: #3a4047;
+  --wash: transparent;
+  align-items: center;
+  background: linear-gradient(var(--wash), var(--wash)), linear-gradient(180deg, #2c3238, #1e2226);
+  border: 1px solid var(--edge);
+  border-radius: 8px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.07),
+    0 1px 2px rgba(0, 0, 0, 0.4);
+  box-sizing: border-box;
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  font-family: v.$font-base;
+  gap: 1px;
+  justify-content: center;
+  min-height: 46px;
+  padding: 6px 4px;
+  position: relative;
+  transition:
+    border-color 0.12s ease,
+    transform 0.12s ease,
+    box-shadow 0.12s ease;
+  width: 100%;
+
+  &:hover:not([disabled]) {
+    border-color: var(--scoreboard-led);
+    transform: translateY(-1px);
+  }
+
+  &:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 2px;
+  }
+
+  &[disabled] {
+    cursor: default;
+    opacity: 0.45;
+  }
+
+  &.none {
+    align-items: center;
+    color: rgba(255, 255, 255, 0.3);
+    cursor: default;
+    display: flex;
+  }
+
+  // (the bot's pick: its band's color round it and washed in)
+  &.bot {
+    --edge: #{v.$neutral};
+  }
+
+  &.lock {
+    --edge: #{$lock};
+    --wash: rgba(216, 50, 60, 0.22);
+    box-shadow:
+      inset 0 0 0 1px rgba(255, 207, 74, 0.45),
+      0 0 10px rgba(216, 50, 60, 0.35);
+  }
+
+  &.love {
+    --edge: #{v.$good};
+    --wash: rgba(62, 207, 110, 0.16);
+    box-shadow: 0 0 10px rgba(62, 207, 110, 0.25);
+  }
+
+  &.bet {
+    --edge: #{v.$caution};
+    --wash: rgba(255, 205, 0, 0.12);
+  }
+
+  &.pass {
+    --edge: rgba(255, 255, 255, 0.35);
+  }
+
+  // (on the slip: a gold ring, like a chip set down on the line)
+  &.on {
+    --edge: #{$lock-gold};
+    --wash: rgba(255, 207, 74, 0.2);
+    box-shadow:
+      0 0 0 2px $lock-gold,
+      0 0 14px rgba(255, 207, 74, 0.45);
+  }
+}
+
+.price-line {
+  @include v.headline(15px);
+  letter-spacing: 0.2px;
+  line-height: 1.1;
+}
+
+.price-odds {
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 12.5px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+// (a moneyline's price alone: as big as a line)
+.price .price-odds:first-child,
+.price .price-chip + .price-odds {
+  color: #fff;
+  font-size: 15px;
+}
+
+.price-kelly {
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+// (the bot's chip on its pick: the rows' Lock / Love / Bet / Pass, small, over the tile's corner)
+.price-chip {
+  border-radius: 3px;
+  color: #111;
+  font-size: 8.5px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  line-height: 1;
+  padding: 2px 4px;
+  position: absolute;
+  right: 5px;
+  text-transform: uppercase;
+  top: -7px;
+
+  &.lock {
+    background: $lock;
+    box-shadow: inset 0 0 0 1px rgba(255, 207, 74, 0.7);
+    color: $lock-gold;
+  }
+
+  &.love {
+    background: v.$good;
+  }
+
+  &.bet {
+    background: v.$caution;
+  }
+
+  &.pass {
+    background: #2a2f34;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.35);
+    color: rgba(255, 255, 255, 0.75);
+  }
+}
+
+// The bot's props: a row each, the player's face, the bet, its price
+.lines-props {
+  border-top: 1px dashed rgba(255, 236, 196, 0.16);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 6px;
+  padding-top: 10px;
+}
+
+.lines-sub {
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  margin: 0;
+  text-transform: uppercase;
+
+  small {
+    color: rgba(255, 255, 255, 0.45);
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    margin-left: 6px;
+    text-transform: none;
+  }
+}
+
+.prop {
+  align-items: center;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: 34px minmax(0, 1fr) 92px;
+
+  .price {
+    min-height: 42px;
+  }
+}
+
+.prop-face {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 50%;
+  height: 34px;
+  object-fit: cover;
+  object-position: top;
+  width: 34px;
+}
+
+.prop-words {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+
+  b,
+  small {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  b {
+    font-size: 13.5px;
+    font-weight: 900;
+  }
+
+  small {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 12px;
+    font-weight: 700;
+  }
+}
+
+.lines-foot {
+  color: rgba(255, 255, 255, 0.4) !important;
+  font-size: 11px !important;
+  font-weight: 600;
+  line-height: 1.4 !important;
+  margin: 4px 0 0 !important;
+}
+
+// (phones: the team column narrower, the tiles a little shorter)
+@media (max-width: 575px) {
+  .lines {
+    padding: 8px 8px 6px;
+  }
+
+  .lines-grid {
+    border-spacing: 4px 6px;
+    margin: 0 -4px;
+    width: calc(100% + 8px);
+
+    thead th:first-child {
+      width: 58px;
+    }
+  }
+
+  .lines-team {
+    font-size: 13px;
+    gap: 4px;
+
+    img {
+      height: 18px;
+      width: 18px;
+    }
+  }
+
+  .price-line,
+  .price .price-odds:first-child,
+  .price .price-chip + .price-odds {
+    font-size: 14px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .price {
+    transition: none;
+
+    &:hover:not([disabled]) {
+      transform: none;
+    }
+  }
+}

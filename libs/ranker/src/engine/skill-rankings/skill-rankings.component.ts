@@ -32,6 +32,10 @@ import { copyRankingsToClipboard } from '@ranker/core/clipboard';
 import { RowGlide } from './row-glide';
 import { TabRanker } from './tab-ranker';
 import { RankWhy, rankWhy, scoreText, signedScore } from './rank-why';
+// ---- lists (phase 2) ----
+import { ListDraft } from '@ranker/engine/account/lists/lists.store';
+import { draftTitle, gridDraft } from '@ranker/engine/account/lists/grid-draft';
+// ---- end lists ----
 
 // A tab's rankings: the button bar, then the grid (a row per player, best first by the sliders, or as
 // dragged by hand), and the player card for a name clicked
@@ -684,6 +688,17 @@ export class SkillRankingsComponent implements OnChanges, CardHost {
       .then(() => this.toast(button, 'List copied to clipboard!'))
       .catch((err) => console.error('Failed to copy: ', err));
   }
+
+  // ---- lists (phase 2) ----
+  // "Save this list…" (the Share menu, a phone's More): the grid as it is now, frozen for the dialog
+  listDraft: ListDraft | null = null;
+  listTitle = '';
+
+  openSaveList(): void {
+    this.listDraft = gridDraft(this);
+    this.listTitle = draftTitle(this);
+  }
+  // ---- end lists ----
 
   // The list's link (its tab, season, sliders, eyes and settings: share.ts)
   shareList(button: HTMLElement): void {

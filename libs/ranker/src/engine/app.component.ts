@@ -24,6 +24,15 @@ const HASH_VIEWS: Record<string, View> = {
 export function viewOf(hash: string): View {
   const key = hash.replace(/^#/, '');
   if (key.startsWith('u/') && key.length > 2) return 'user';
+  // ---- lists (phase 2) ----
+  // (#lists/<uid>/<id>: one saved list; #community/<tab>/<season>: a board)
+  if (key.startsWith('lists/')) return 'lists';
+  if (key.startsWith('community/')) return 'community';
+  // ---- end lists ----
+  // ---- tracker (phase 2) ----
+  // (#tracker/<uid>: someone's tracker, read only)
+  if (key.startsWith('tracker/') && key.length > 8) return 'tracker';
+  // ---- end tracker ----
   return Object.hasOwn(HASH_VIEWS, key) ? HASH_VIEWS[key] : 'rankings';
 }
 

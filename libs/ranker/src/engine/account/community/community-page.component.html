@@ -1,0 +1,184 @@
+<div class="lists-page community-page">
+  <header class="lists-head">
+    <div class="lists-head-text">
+      <h2>Community</h2>
+      <p>Everyone’s submitted lists for a tab and season, the consensus they add up to, and the votes.</p>
+    </div>
+    @if (account.user()) {
+      <a class="secondary small-btn" href="#lists"><mat-icon aria-hidden="true" fontIcon="format_list_numbered"></mat-icon>My lists</a>
+    }
+  </header>
+
+  <!-- Which board: the sport (each its own page), the tab, the season -->
+  <div class="board-picker">
+    <div class="picker-row">
+      <span class="picker-label" id="cm-sport">Sport</span>
+      <div class="picker-pills" role="group" aria-labelledby="cm-sport">
+        @for (s of sports; track s.id) {
+          <a class="game-filter small" [class.active]="s.id === sportId" [attr.aria-current]="s.id === sportId ? 'page' : null" [href]="s.id === sportId ? '#community' : '/' + s.id + '/#community'">{{ s.label }}</a>
+        }
+      </div>
+    </div>
+    <div class="picker-row">
+      <span class="picker-label" id="cm-tab">Tab</span>
+      <div class="picker-pills" role="radiogroup" aria-labelledby="cm-tab">
+        @for (t of tabs; track t) {
+          <button type="button" role="radio" class="game-filter small" [class.active]="t === tab" [attr.aria-checked]="t === tab" [title]="tabNames[t] || t" (click)="pick(t, season)">{{ t }}</button>
+        }
+      </div>
+    </div>
+    <div class="picker-row">
+      <label class="picker-label" for="cm-season">Season</label>
+      <select id="cm-season" class="season-pick" [value]="season" (change)="pick(tab, +$any($event.target).value)">
+        @for (y of seasons; track y) {
+          <option [value]="y" [selected]="y === season">{{ seasonName(y) }}</option>
+        }
+      </select>
+    </div>
+  </div>
+
+  @if (state === 'loading') {
+    <div class="lists-loading" role="status"><span class="spinner" aria-hidden="true"></span>Loading the {{ boardName }} board…</div>
+  } @else if (state === 'error') {
+    <p class="form-error" role="alert">{{ error }}</p>
+  } @else if (!cards.length) {
+    <div class="soon-panel empty">
+      <mat-icon class="soon-icon" aria-hidden="true" fontIcon="groups"></mat-icon>
+      <h2>No lists yet</h2>
+      <p class="soon-detail">Nobody has submitted a {{ boardName }} list. Save one from the rankings (Share, then <strong>Save this list…</strong>), open it, and Submit to Community.</p>
+      @if (!account.user()) {
+        <button type="button" class="primary" (click)="account.openLogin()">Sign in</button>
+      }
+    </div>
+  } @else {
+    <div class="community-grid">
+      <!-- The consensus: every submitted order added up (a Borda count) -->
+      <section class="consensus" aria-labelledby="cm-consensus">
+        <div class="section-bar">
+          <h3 id="cm-consensus"><mat-icon aria-hidden="true" fontIcon="leaderboard"></mat-icon>Consensus</h3>
+          <span class="section-sub">{{ boardName }} · {{ cards.length }} {{ cards.length === 1 ? 'list' : 'lists' }}</span>
+        </div>
+        <div class="list-board" scrolledSideways>
+          <ul class="list-grid consensus-grid" aria-label="Consensus ranking">
+            <li class="row header-row" aria-hidden="true">
+              <span class="who"><span class="head-name">Player</span></span>
+              <span class="cell" title="Average place in the lists that have him">Avg</span>
+              <span class="cell" title="How many of the lists have him">Lists</span>
+              <span class="cell wide" title="Best and worst place">Range</span>
+              <span class="cell" title="Borda points: a #1 earns 50, a #2 49, and so on">Pts</span>
+            </li>
+            @for (row of rows.slice(0, allRows ? 50 : 15); track row.id; let i = $index) {
+              @let info = player(row.id);
+              <li class="row">
+                <span class="who" [style.--team-badge]="badge(info)">
+                  <span [ngClass]="rankClass(i)" class="rank-tile">@if (i === 0) {<span class="lombardi" aria-hidden="true"></span><span class="visually-hidden">1</span>} @else {{{ i + 1 }}}</span>
+                  <span class="badge-slot" [class.with-photo]="photo(row.id, info)" aria-hidden="true">
+                    <span class="team-badge" [class.white-logo]="white(info)" [class.no-color]="!badge(info)">
+                      @if (info.logo; as src) { <img class="team-logo" [src]="src" alt="" /> }
+                    </span>
+                    @if (photo(row.id, info); as src) { <img class="headshot" [src]="src" alt="" loading="lazy" (error)="noPhoto(row.id)" /> }
+                  </span>
+                  <span class="name">{{ info.name }}</span>
+                </span>
+                <span class="cell"><span class="val">#{{ avg(row) }}</span></span>
+                <span class="cell"><span class="val">{{ row.lists }}<span class="of">/{{ cards.length }}</span></span></span>
+                <span class="cell wide"><span class="val faint">{{ row.best === row.worst ? '#' + row.best : '#' + row.best + '–' + row.worst }}</span></span>
+                <span class="cell"><span class="val">{{ row.points }}</span></span>
+              </li>
+            }
+          </ul>
+        </div>
+        @if (rows.length > 15) {
+          <button type="button" class="link more-rows" [attr.aria-expanded]="allRows" (click)="allRows = !allRows">{{ allRows ? 'Show the top 15' : 'Show all ' + (rows.length > 50 ? 50 : rows.length) }}</button>
+        }
+        <p class="section-foot">Worked out from the submitted lists as they are now (each list’s #1 earns 50 points, its #2 49, and so on).</p>
+      </section>
+
+      <!-- The list makers with the most votes this season -->
+      <aside class="makers" aria-labelledby="cm-makers">
+        <div class="section-bar">
+          <h3 id="cm-makers"><mat-icon aria-hidden="true" fontIcon="emoji_events"></mat-icon>Top list makers</h3>
+          <span class="section-sub">{{ sportId.toUpperCase() }} · {{ seasonName(season) }}</span>
+        </div>
+        @if (makers === null) {
+          <p class="makers-note" role="status"><span class="spinner tiny" aria-hidden="true"></span> Counting votes…</p>
+        } @else if (!makers.length) {
+          <p class="makers-note">No votes yet.</p>
+        } @else {
+          <ol class="makers-list">
+            @for (maker of makers; track maker.owner; let i = $index) {
+              <li>
+                <span class="m-rank" [class.first]="i === 0">{{ i + 1 }}</span>
+                <account-avatar [photo]="makerProfile(maker)?.photo" [name]="maker.name" [size]="26"></account-avatar>
+                <span class="m-name">
+                  @if (makerProfile(maker)?.username; as username) {
+                    <a [href]="'#u/' + username">{{ maker.name }}</a>
+                  } @else {
+                    {{ maker.name }}
+                  }
+                  <span class="m-lists">{{ maker.lists }} {{ maker.lists === 1 ? 'list' : 'lists' }}</span>
+                </span>
+                <span class="m-score" [class.pos]="maker.score > 0" [class.neg]="maker.score < 0">{{ maker.score > 0 ? '+' : '' }}{{ maker.score }}</span>
+              </li>
+            }
+          </ol>
+        }
+      </aside>
+    </div>
+
+    <!-- The submitted lists, best voted first -->
+    <section class="entries" aria-labelledby="cm-entries">
+      <div class="section-bar plain">
+        <h3 id="cm-entries"><mat-icon aria-hidden="true" fontIcon="format_list_numbered"></mat-icon>Submitted lists</h3>
+        @if (voteError) { <span class="field-error" role="alert">{{ voteError }}</span> }
+      </div>
+      <ul class="entry-cards">
+        @for (card of cards; track card.entry.owner) {
+          @let mine = isMine(card);
+          <li class="entry-card" [class.mine]="mine">
+            <div class="entry-votes" role="group" [attr.aria-label]="'Votes for ' + card.entry.title">
+              <button type="button" class="vote up" [class.on]="card.tally.mine === 1" [disabled]="mine || voting === card.entry.owner" [attr.aria-pressed]="card.tally.mine === 1" [title]="mine ? 'Your own list' : 'Vote up'" aria-label="Vote up" (click)="vote(card, 1)">
+                <mat-icon aria-hidden="true" fontIcon="arrow_drop_up"></mat-icon>
+              </button>
+              <span class="vote-score" [class.pos]="card.tally.score > 0" [class.neg]="card.tally.score < 0" [title]="card.tally.up + ' up, ' + card.tally.down + ' down'">{{ card.tally.score }}</span>
+              <button type="button" class="vote down" [class.on]="card.tally.mine === -1" [disabled]="mine || voting === card.entry.owner" [attr.aria-pressed]="card.tally.mine === -1" [title]="mine ? 'Your own list' : 'Vote down'" aria-label="Vote down" (click)="vote(card, -1)">
+                <mat-icon aria-hidden="true" fontIcon="arrow_drop_down"></mat-icon>
+              </button>
+            </div>
+            <div class="entry-main">
+              <div class="entry-head">
+                <account-avatar [photo]="ownerProfile(card)?.photo" [name]="card.entry.ownerName" [size]="28"></account-avatar>
+                <div class="entry-who">
+                  <a class="entry-title" [href]="listHref(card)">{{ card.entry.title }}</a>
+                  <span class="entry-owner">
+                    @if (ownerProfile(card)?.username; as username) {
+                      <a [href]="'#u/' + username">{{ card.entry.ownerName }}</a>
+                    } @else {
+                      {{ card.entry.ownerName }}
+                    }
+                    @if (mine) { <span class="you-chip">You</span> }
+                  </span>
+                </div>
+              </div>
+              <ol class="card-top">
+                @for (id of open.has(card.entry.owner) ? card.entry.ids : card.entry.ids.slice(0, 5); track $index; let i = $index) {
+                  @let info = player(id, card, i);
+                  <li>
+                    <span class="t-rank" [class.first]="i === 0">{{ i + 1 }}</span>
+                    @if (info.logo; as src) { <img class="t-logo" [src]="src" alt="" loading="lazy" /> } @else { <span class="t-logo"></span> }
+                    <span class="t-name">{{ info.name }}</span>
+                  </li>
+                }
+              </ol>
+              @if (card.entry.ids.length > 5) {
+                <button type="button" class="link more-link" [attr.aria-expanded]="open.has(card.entry.owner)" (click)="toggle(card)">
+                  {{ open.has(card.entry.owner) ? 'Show the top 5' : 'Show all ' + card.entry.ids.length }}
+                </button>
+              }
+            </div>
+          </li>
+        }
+      </ul>
+    </section>
+  }
+</div>

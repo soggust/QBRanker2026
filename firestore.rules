@@ -38,8 +38,13 @@ service cloud.firestore {
     // Can the reader see the owner's kind of thing ('lists', 'presets', 'openBets', 'betHistory',
     // 'tracker'): the owner always; anyone when it's public; a friend when it's friends
     function canSee(owner, kind) {
-      let setting = get(/databases/$(database)/documents/users/$(owner)).data.visibility[kind];
-      return isOwner(owner) || setting == 'public' || (setting == 'friends' && isFriend(owner));
+      return isOwner(owner) || visibilityOf(owner, kind) == 'public'
+        || (visibilityOf(owner, kind) == 'friends' && isFriend(owner));
+    }
+
+    // (the owner's setting for a kind; the owner is checked first, so their own reads never need the profile)
+    function visibilityOf(owner, kind) {
+      return get(/databases/$(database)/documents/users/$(owner)).data.visibility[kind];
     }
 
     // -------------------------------------------------------------------------
@@ -167,5 +172,343 @@ service cloud.firestore {
       allow read: if true;
       allow write: if isAdmin();
     }
+
+    // ---- friends (phase 2) ----
+    // users/{uid}/friends/{other}: { status, since } on both sides. A request writes the asker's 'pending-out'
+    // and the other's 'pending-in' together; an accept turns both to 'friends'; a decline, cancel or unfriend
+    // deletes both. Each side writes its own doc, and the other's only as that mirror, in the same write.
+    function friendDoc(uid, other) {
+      return /databases/$(database)/documents/users/$(uid)/friends/$(other);
+    }
+
+    function validFriend(d, status) {
+      return d.keys().hasOnly(['status', 'since'])
+        && d.keys().hasAll(['status', 'since'])
+        && d.status == status
+        && d.since == request.time;
+    }
+
+    match /users/{uid}/friends/{other} {
+      // (either side of the pair; nobody else)
+      allow read: if isOwner(uid) || isOwner(other);
+
+      // (the counterpart is users/{other}/friends/{uid} in every case: new in this write, and saying the other half)
+      allow create: if uid != other
+        && !exists(friendDoc(other, uid))
+        && existsAfter(friendDoc(other, uid))
+        && (
+          // (asking someone who exists: mine pending-out, theirs pending-in)
+          (isOwner(uid) && validFriend(request.resource.data, 'pending-out')
+            && getAfter(friendDoc(other, uid)).data.status == 'pending-in'
+            && exists(/databases/$(database)/documents/users/$(other)))
+          // (the mirror: the asker writes the one asked's pending-in)
+          || (isOwner(other) && validFriend(request.resource.data, 'pending-in')
+            && getAfter(friendDoc(other, uid)).data.status == 'pending-out'
+            && exists(/databases/$(database)/documents/users/$(uid)))
+        );
+
+      // (accepting: the one asked turns their pending-in and the asker's pending-out to friends together)
+      allow update: if
+        (isOwner(uid) && resource.data.status == 'pending-in'
+          && validFriend(request.resource.data, 'friends')
+          && get(friendDoc(other, uid)).data.status == 'pending-out'
+          && getAfter(friendDoc(other, uid)).data.status == 'friends')
+        || (isOwner(other) && resource.data.status == 'pending-out'
+          && validFriend(request.resource.data, 'friends')
+          && get(friendDoc(other, uid)).data.status == 'pending-in'
+          && getAfter(friendDoc(other, uid)).data.status == 'friends');
+
+      // (declining, cancelling, unfriending or leaving: either side, both halves gone in the same write)
+      allow delete: if (isOwner(uid) || isOwner(other)) && !existsAfter(friendDoc(other, uid));
+    }
+    // ---- end friends ----
+
+    // ---- tracker (phase 2) ----
+    // users/{uid}/pins/{id}: a comparison pinned from the compare view: its title, the compare's link (share.ts:
+    // list=…&cmp=…), the sport, its place in the owner's order, the snapshot it was pinned at, and the days it's
+    // been looked at since (tracker-helpers.ts keeps the same limits). Seen by whoever the owner's tracker
+    // setting lets see it; written by the owner only, the link and sport fixed once pinned.
+    function validPin(d) {
+      return d.keys().hasAll(['title', 'spec', 'sport', 'order', 'baseline', 'history', 'createdAt', 'updatedAt'])
+        && d.keys().hasOnly(['title', 'spec', 'sport', 'order', 'baseline', 'history', 'createdAt', 'updatedAt'])
+        && d.title is string && d.title.size() > 0 && d.title.size() <= 80
+        && d.spec is string && d.spec.size() <= 4000
+        && d.spec.matches('^(list=[A-Za-z0-9_-]+&)?cmp=[^&\\s]+$')
+        && d.sport is string && d.sport.matches('^[a-z]{2,8}$')
+        && d.order is number
+        && d.baseline is map
+        && d.baseline.keys().hasAll(['at', 'sides', 'skills', 'rows'])
+        && d.baseline.at is number
+        && d.baseline.sides is list && d.baseline.sides.size() >= 1 && d.baseline.sides.size() <= 4
+        && d.history is list && d.history.size() <= 200
+        && d.updatedAt == request.time;
+    }
+
+    match /users/{uid}/pins/{pin} {
+      allow read: if canSee(uid, 'tracker');
+
+      allow create: if isOwner(uid)
+        && validPin(request.resource.data)
+        && request.resource.data.createdAt == request.time;
+
+      allow update: if isOwner(uid)
+        && validPin(request.resource.data)
+        && request.resource.data.createdAt == resource.data.createdAt
+        && request.resource.data.spec == resource.data.spec
+        && request.resource.data.sport == resource.data.sport;
+
+      allow delete: if isOwner(uid);
+    }
+    // ---- end tracker ----
+
+    // ---- wallet (phase 2) ----
+    // Play money. users/{uid}/wallet/main { balance, start, resets, createdAt, updatedAt, lastBet?, resetAt? }:
+    // made once at 1,000; after that its owner may only (a) take a new bet's stake out, in the same batch as
+    // the bet (lastBet names it; the bet's own rule checks the other half), or (b) reload it to 1,000, one more
+    // reset. Never under 0. Settling (winnings in, results on the bets) is the Admin SDK's: settle.mjs.
+    function walletPath(uid) {
+      return /databases/$(database)/documents/users/$(uid)/wallet/main;
+    }
+
+    function betPath(uid, id) {
+      return /databases/$(database)/documents/users/$(uid)/bets/$(id);
+    }
+
+    function walletKeys(d) {
+      return d.keys().hasAll(['balance', 'start', 'resets', 'createdAt', 'updatedAt'])
+        && d.keys().hasOnly(['balance', 'start', 'resets', 'createdAt', 'updatedAt', 'lastBet', 'resetAt']);
+    }
+
+    // (a bet's stake out: lastBet names a bet new in this write, the balance down by exactly its stake)
+    function placingBet(uid) {
+      let next = request.resource.data;
+      return next.resets == resource.data.resets
+        && next.get('resetAt', null) == resource.data.get('resetAt', null)
+        && next.lastBet is string
+        && next.lastBet != resource.data.get('lastBet', '')
+        && !exists(betPath(uid, next.lastBet))
+        && existsAfter(betPath(uid, next.lastBet))
+        && next.balance == resource.data.balance - getAfter(betPath(uid, next.lastBet)).data.stake
+        && next.balance >= 0;
+    }
+
+    // (a reload: back to 1,000 and one more reset; the bet binding left as it was)
+    function reloading() {
+      let next = request.resource.data;
+      return next.balance == 1000
+        && next.resets == resource.data.resets + 1
+        && next.resetAt == request.time
+        && next.get('lastBet', null) == resource.data.get('lastBet', null);
+    }
+
+    match /users/{uid}/wallet/{doc} {
+      allow read: if doc == 'main' && canSee(uid, 'betHistory');
+
+      allow create: if isOwner(uid) && doc == 'main'
+        && walletKeys(request.resource.data)
+        && !('lastBet' in request.resource.data)
+        && !('resetAt' in request.resource.data)
+        && request.resource.data.balance == 1000
+        && request.resource.data.start == 1000
+        && request.resource.data.resets == 0
+        && request.resource.data.createdAt == request.time
+        && request.resource.data.updatedAt == request.time;
+
+      allow update: if isOwner(uid) && doc == 'main'
+        && walletKeys(request.resource.data)
+        && request.resource.data.start == resource.data.start
+        && request.resource.data.createdAt == resource.data.createdAt
+        && request.resource.data.updatedAt == request.time
+        && (placingBet(uid) || reloading());
+
+      // (with the account; a wallet made again starts at 1,000, run 1)
+      allow delete: if isOwner(uid);
+    }
+
+    // A play bet as placed: open, on a game not started (the settler checks the real start, and the price
+    // against the board), a whole stake of at least 1 unit; a spread or moneyline a side, a total over or under,
+    // a prop the bot's (its pick's id in ref) with its player and stat
+    function noPropFields(d) {
+      return !('propType' in d) && !('athlete' in d) && !('player' in d) && !('statLabel' in d);
+    }
+
+    function validPlayMarket(d) {
+      return (d.market == 'spread' && d.side in ['home', 'away'] && noPropFields(d)
+          && d.line is number && d.line > -100 && d.line < 100)
+        || (d.market == 'ml' && d.side in ['home', 'away'] && noPropFields(d) && d.get('line', null) == null)
+        || (d.market == 'total' && d.side in ['over', 'under'] && noPropFields(d)
+          && d.line is number && d.line > 0 && d.line < 1000)
+        || (d.market == 'prop' && d.side in ['over', 'under'] && d.line is number && d.line >= 0 && d.line < 1000
+          && d.propType is string && d.propType.size() > 0 && d.propType.size() <= 20
+          && d.athlete is string && d.athlete.matches('^[0-9]{1,20}$')
+          && d.player is string && d.player.size() <= 60
+          && d.statLabel is string && d.statLabel.size() <= 40
+          && d.ref is string);
+    }
+
+    function validPlayBet(d) {
+      return d.keys().hasAll(['sport', 'event', 'matchup', 'start', 'market', 'side', 'odds', 'stake', 'pick', 'run', 'placedAt', 'status'])
+        && d.keys().hasOnly(['sport', 'event', 'matchup', 'start', 'market', 'side', 'line', 'odds', 'stake', 'pick', 'botPick', 'tier', 'kelly', 'ref', 'propType', 'athlete', 'player', 'statLabel', 'run', 'placedAt', 'status'])
+        && d.sport in ['nfl', 'nba', 'nhl', 'mlb']
+        && d.event is string && d.event.matches('^[0-9]{1,20}$')
+        && d.matchup is string && d.matchup.matches('^[A-Z0-9]{2,5} @ [A-Z0-9]{2,5}$')
+        && d.start is timestamp && d.start > request.time && d.start < request.time + duration.value(15, 'd')
+        && d.odds is int && ((d.odds >= 100 && d.odds <= 50000) || (d.odds <= -100 && d.odds >= -50000))
+        && d.stake is int && d.stake >= 1
+        && d.pick is string && d.pick.size() > 0 && d.pick.size() <= 80
+        && d.run is int && d.run >= 0
+        && d.placedAt == request.time
+        && d.status == 'open'
+        && (!('botPick' in d) || d.botPick is bool)
+        && (!('tier' in d) || d.tier in ['lock', 'love', 'bet', 'pass'])
+        && (!('kelly' in d) || d.kelly is number)
+        && (!('ref' in d) || (d.ref is string && d.ref.size() <= 80))
+        && validPlayMarket(d);
+    }
+
+    match /users/{uid}/bets/{bet} {
+      // (the owner; others by the owner's settings: open bets and the settled history apart)
+      allow read: if isOwner(uid)
+        || (resource.data.status == 'open' && canSee(uid, 'openBets'))
+        || (resource.data.status != 'open' && canSee(uid, 'betHistory'));
+
+      // (with its stake out of the wallet in the same write, in the wallet's current run)
+      allow create: if isOwner(uid)
+        && validPlayBet(request.resource.data)
+        && exists(walletPath(uid))
+        && request.resource.data.run == get(walletPath(uid)).data.resets
+        && getAfter(walletPath(uid)).data.get('lastBet', '') == bet
+        && getAfter(walletPath(uid)).data.balance == get(walletPath(uid)).data.balance - request.resource.data.stake;
+
+      // (settled only by the Admin SDK; deleted by its owner: Clear history, or the account going)
+      allow update: if false;
+      allow delete: if isOwner(uid);
+    }
+
+    // tallies/{uid}: the settler's record of a user's settled bets, lifetime and by day (kept through a cleared
+    // history: the leaderboards' source). Admin only
+    match /tallies/{uid} {
+      allow read: if canSee(uid, 'betHistory');
+      allow write: if false;
+    }
+
+    // leaderboards/{week|season|all}: public players' records, by profit (Admin only)
+    match /leaderboards/{period} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // lines/{sport_event}: the settler's snapshots of a game's lines, to check bets' prices against (Admin only)
+    match /lines/{id} {
+      allow read, write: if false;
+    }
+    // ---- end wallet ----
+
+    // ---- lists (phase 2) ----
+    // users/{uid}/presets/{id}: a tab's sliders and switched-off stats and groups under a name (lists-helpers.ts
+    // keeps the same limits). Seen by whoever the owner's presets setting lets see them; written by the owner.
+    function validPreset(d) {
+      return d.keys().hasAll(['sport', 'tab', 'name', 'settings', 'createdAt', 'updatedAt'])
+        && d.keys().hasOnly(['sport', 'tab', 'name', 'settings', 'visibility', 'createdAt', 'updatedAt'])
+        && d.sport is string && d.sport.matches('^[a-z]{2,8}$')
+        && d.tab is string && d.tab.matches('^[A-Za-z0-9]{1,12}$')
+        && d.name is string && d.name.size() > 0 && d.name.size() <= 40
+        && d.settings is map
+        && d.settings.keys().hasOnly(['weights', 'hidden', 'groups'])
+        && d.settings.weights is map && d.settings.weights.size() <= 120
+        && d.settings.hidden is list && d.settings.hidden.size() <= 120
+        && d.settings.groups is list && d.settings.groups.size() <= 12
+        && (!('visibility' in d) || isVisibility(d.visibility))
+        && d.updatedAt == request.time;
+    }
+
+    match /users/{uid}/presets/{preset} {
+      allow read: if canSee(uid, 'presets');
+      allow create: if isOwner(uid) && validPreset(request.resource.data) && request.resource.data.createdAt == request.time;
+      allow update: if isOwner(uid) && validPreset(request.resource.data) && request.resource.data.createdAt == resource.data.createdAt;
+      allow delete: if isOwner(uid);
+    }
+
+    // users/{uid}/lists/{id}: a saved list, frozen (its order, at most 50 players, and the numbers in the columns
+    // that were showing, at most 60). Each list says who sees it (its own visibility, which starts from the
+    // owner's lists setting): its owner always, anyone when public, a friend when friends. The community mark
+    // is the owner's to set and clear.
+    function validList(d) {
+      return d.keys().hasAll(['sport', 'tab', 'season', 'part', 'title', 'ids', 'snapshot', 'columns', 'visibility', 'createdAt', 'updatedAt'])
+        && d.keys().hasOnly(['sport', 'tab', 'season', 'part', 'basis', 'title', 'note', 'ids', 'snapshot', 'columns', 'labels', 'formats', 'lower', 'visibility', 'community', 'createdAt', 'updatedAt'])
+        && d.sport is string && d.sport.matches('^[a-z]{2,8}$')
+        && d.tab is string && d.tab.matches('^[A-Za-z0-9]{1,12}$')
+        && d.season is int && d.season >= 1900 && d.season <= 2100
+        && d.part in ['regular', 'post', 'all']
+        && (!('basis' in d) || (d.basis is string && d.basis.size() <= 12))
+        && d.title is string && d.title.size() > 0 && d.title.size() <= 80
+        && (!('note' in d) || (d.note is string && d.note.size() <= 500))
+        && d.ids is list && d.ids.size() <= 50
+        && d.snapshot is map && d.snapshot.size() <= 50
+        && d.columns is list && d.columns.size() <= 60
+        && (!('labels' in d) || (d.labels is list && d.labels.size() <= 60))
+        && (!('formats' in d) || (d.formats is list && d.formats.size() <= 60))
+        && (!('lower' in d) || (d.lower is list && d.lower.size() <= 60))
+        && isVisibility(d.visibility)
+        && (!('community' in d) || d.community == null
+          || (d.community is map && d.community.keys().hasOnly(['submitted', 'key'])
+            && d.community.submitted == true && d.community.key is string && d.community.key.size() <= 40))
+        && d.updatedAt == request.time;
+    }
+
+    match /users/{uid}/lists/{list} {
+      allow read: if isOwner(uid)
+        || resource.data.visibility == 'public'
+        || (resource.data.visibility == 'friends' && isFriend(uid));
+      allow create: if isOwner(uid) && validList(request.resource.data) && request.resource.data.createdAt == request.time;
+      allow update: if isOwner(uid) && validList(request.resource.data) && request.resource.data.createdAt == resource.data.createdAt;
+      allow delete: if isOwner(uid);
+    }
+
+    // community/{key}: a board (sport_tab_season). Its tally (the consensus and the votes added up) is the Admin
+    // SDK's to write; the browsers work it out from the entries for now.
+    match /community/{key} {
+      allow read: if true;
+      allow write: if isAdmin();
+
+      // community/{key}/entries/{uid}: one submitted list per user per board, anyone may read; only its owner
+      // writes it (submitting again replaces it) or takes it down; it must be one of the owner's own lists
+      match /entries/{owner} {
+        allow read: if true;
+        allow create, update: if isOwner(owner)
+          && key.matches('^[a-z]{2,8}_[A-Za-z0-9]{1,12}_[0-9]{4}$')
+          && request.resource.data.keys().hasAll(['listId', 'title', 'ownerName', 'ids', 'submittedAt'])
+          && request.resource.data.keys().hasOnly(['listId', 'title', 'ownerName', 'ids', 'names', 'logos', 'submittedAt'])
+          && request.resource.data.listId is string && request.resource.data.listId.size() <= 40
+          && request.resource.data.title is string && request.resource.data.title.size() > 0 && request.resource.data.title.size() <= 80
+          && request.resource.data.ownerName is string && request.resource.data.ownerName.size() <= 40
+          && request.resource.data.ids is list && request.resource.data.ids.size() > 0 && request.resource.data.ids.size() <= 50
+          && (!('names' in request.resource.data) || (request.resource.data.names is list && request.resource.data.names.size() == request.resource.data.ids.size()))
+          && (!('logos' in request.resource.data) || (request.resource.data.logos is list && request.resource.data.logos.size() == request.resource.data.ids.size()))
+          && request.resource.data.submittedAt == request.time
+          && existsAfter(/databases/$(database)/documents/users/$(owner)/lists/$(request.resource.data.listId));
+        allow delete: if isOwner(owner);
+
+        // .../votes/{voter}: { value: 1 or -1, voter }: one per person per entry, written by the voter on their
+        // own doc, never on their own entry; the voter takes it back, or the entry's owner clears them
+        match /votes/{voter} {
+          allow read: if true;
+          allow create, update: if isOwner(voter)
+            && voter != owner
+            && exists(/databases/$(database)/documents/community/$(key)/entries/$(owner))
+            && request.resource.data.keys().hasOnly(['value', 'voter'])
+            && request.resource.data.keys().hasAll(['value', 'voter'])
+            && request.resource.data.voter == voter
+            && request.resource.data.value in [1, -1];
+          allow delete: if isOwner(voter) || isOwner(owner);
+        }
+      }
+    }
+
+    // (a user's own votes, wherever they are: found to delete with the account)
+    match /{path=**}/votes/{voter} {
+      allow read: if signedIn() && resource.data.voter == request.auth.uid;
+    }
+    // ---- end lists ----
   }
 }

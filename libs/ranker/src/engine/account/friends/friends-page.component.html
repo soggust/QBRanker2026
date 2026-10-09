@@ -1,0 +1,146 @@
+<div class="account-page friends-page">
+  @if (!account.ready()) {
+    <div class="account-loading" role="status"><span class="spinner" aria-hidden="true"></span>Loading your account…</div>
+  } @else if (!account.user()) {
+    <!-- Signed out: what friends are for, and the way in -->
+    <div class="soon-panel signed-out">
+      <mat-icon class="soon-icon" aria-hidden="true" fontIcon="group"></mat-icon>
+      <h2>Friends</h2>
+      <p class="soon-detail">Sign in to add friends and see the lists, presets and bets they share with friends.</p>
+      <button type="button" class="primary" (click)="account.openLogin()">Sign in</button>
+    </div>
+  } @else {
+    <!-- Finding people by username -->
+    <card-panel class="account-panel" label="Find people" icon="person_search" [expandable]="false">
+      <div class="panel-pad">
+        <label class="field search-field">
+          <span class="visually-hidden">Search by username</span>
+          <span class="at-input search-input">
+            <mat-icon class="search-icon" aria-hidden="true" fontIcon="search"></mat-icon>
+            <input
+              name="search"
+              type="text"
+              autocomplete="off"
+              autocapitalize="off"
+              spellcheck="false"
+              placeholder="Search by username"
+              maxlength="21"
+              [(ngModel)]="query"
+              (ngModelChange)="queryChanged()"
+              (keydown.escape)="clear()"
+              aria-describedby="search-status"
+            />
+            @if (query) {
+              <button type="button" class="clear-search" aria-label="Clear the search" (click)="clear()">
+                <mat-icon aria-hidden="true" fontIcon="close"></mat-icon>
+              </button>
+            }
+          </span>
+        </label>
+        <div id="search-status" class="search-status" aria-live="polite">
+          @if (queryHint) {
+            <span class="field-hint">{{ queryHint }}</span>
+          } @else if (searchError) {
+            <span class="field-error">{{ searchError }}</span>
+          } @else if (searching && !results) {
+            <span class="field-hint"><span class="spinner tiny" aria-hidden="true"></span> Searching…</span>
+          } @else if (results && !results.length) {
+            <span class="field-hint">No one’s username starts with “{{ query.trim().replace('@', '') }}”.</span>
+          } @else if (!results) {
+            <span class="field-hint">Friends see what you share with friends (Profile &amp; settings, Privacy), and you see theirs.</span>
+          }
+        </div>
+        @if (results?.length) {
+          <ul class="people" [class.stale]="searching" aria-label="Search results">
+            @for (person of results; track person.uid) {
+              <li class="person">
+                <a class="person-link" [href]="profileHash(person.profile.username)">
+                  <account-avatar [photo]="person.profile.photo" [name]="person.profile.displayName" [size]="40"></account-avatar>
+                  <span class="person-names">
+                    <span class="person-name">{{ person.profile.displayName }}</span>
+                    <span class="person-user">&#64;{{ person.profile.username }}</span>
+                  </span>
+                </a>
+                <friend-button class="person-action" [uid]="person.uid" [name]="person.profile.displayName"></friend-button>
+              </li>
+            }
+          </ul>
+        }
+      </div>
+    </card-panel>
+
+    @if (!friends.loaded()) {
+      <div class="account-loading" role="status"><span class="spinner" aria-hidden="true"></span>Loading your friends…</div>
+    } @else {
+      @if (friends.error()) {
+        <p class="form-error" role="alert">{{ friends.error() }}</p>
+      }
+
+      <!-- Requests waiting on you -->
+      @if (groups.incoming.length) {
+        <card-panel class="account-panel requests-panel" [label]="'Requests · ' + groups.incoming.length" icon="person_add" [expandable]="false">
+          <ul class="people panel-pad" aria-label="Friend requests">
+            @for (entry of groups.incoming; track entry.uid) {
+              <ng-container *ngTemplateOutlet="row; context: { $implicit: entry }"></ng-container>
+            }
+          </ul>
+        </card-panel>
+      }
+
+      <!-- Your friends -->
+      <card-panel class="account-panel" [label]="groups.friends.length ? 'Friends · ' + groups.friends.length : 'Friends'" icon="group" [expandable]="false">
+        @if (groups.friends.length) {
+          <ul class="people panel-pad" aria-label="Your friends">
+            @for (entry of groups.friends; track entry.uid) {
+              <ng-container *ngTemplateOutlet="row; context: { $implicit: entry }"></ng-container>
+            }
+          </ul>
+        } @else {
+          <div class="panel-pad empty-friends">
+            <mat-icon aria-hidden="true" fontIcon="group_add"></mat-icon>
+            <p>No friends yet. Find someone by their username above and send a request; once they accept, you’ll see what they share with friends.</p>
+          </div>
+        }
+      </card-panel>
+
+      <!-- Requests you've sent -->
+      @if (groups.outgoing.length) {
+        <card-panel class="account-panel" [label]="'Sent · ' + groups.outgoing.length" icon="schedule_send" [expandable]="false">
+          <ul class="people panel-pad" aria-label="Requests you’ve sent">
+            @for (entry of groups.outgoing; track entry.uid) {
+              <ng-container *ngTemplateOutlet="row; context: { $implicit: entry }"></ng-container>
+            }
+          </ul>
+        </card-panel>
+      }
+    }
+  }
+</div>
+
+<!-- (a person: their avatar and names, to their profile; what you can do about them) -->
+<ng-template #row let-entry>
+  <li class="person">
+    @if (entry.profile; as p) {
+      <a class="person-link" [href]="profileHash(p.username)">
+        <account-avatar [photo]="p.photo" [name]="p.displayName" [size]="40"></account-avatar>
+        <span class="person-names">
+          <span class="person-name">{{ p.displayName }}</span>
+          <span class="person-user">&#64;{{ p.username }}</span>
+        </span>
+      </a>
+    } @else if (!entry.known) {
+      <span class="person-link loading" aria-hidden="true">
+        <span class="avatar-skeleton"></span>
+        <span class="person-names"><span class="line-skeleton"></span></span>
+      </span>
+    } @else {
+      <span class="person-link gone">
+        <account-avatar [photo]="null" name="?" [size]="40"></account-avatar>
+        <span class="person-names">
+          <span class="person-name">A deleted account</span>
+        </span>
+      </span>
+    }
+    <friend-button class="person-action" [uid]="entry.uid" [name]="entry.name"></friend-button>
+  </li>
+</ng-template>

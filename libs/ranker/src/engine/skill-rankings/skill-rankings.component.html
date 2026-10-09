@@ -332,7 +332,9 @@
     </button>
 
     <!-- Share the list: a link with its tab, season, sliders and settings (share.ts) -->
-    <button type="button" #shareButton (click)="shareList(shareButton)" aria-label="Share a link to this list" title="Share a link to this list" class="share-toggle">
+    <!-- lists (phase 2): Share opens a menu, a link or Save this list… -->
+    <button type="button" #shareButton [matMenuTriggerFor]="shareMenu" aria-label="Share: a link, or save this list" title="Share a link, or save this list" class="share-toggle">
+    <!-- end lists -->
       <mat-icon aria-hidden="true" fontIcon="share"></mat-icon>
     </button>
 
@@ -446,6 +448,17 @@
     </button>
   </footer>
 
+  <!-- lists (phase 2): the Share button's menu -->
+  <mat-menu #shareMenu="matMenu" class="more-menu">
+    <button mat-menu-item type="button" (click)="shareList(shareButton)">
+      <mat-icon aria-hidden="true" fontIcon="link"></mat-icon><span>Copy a link</span>
+    </button>
+    <button mat-menu-item type="button" (click)="openSaveList()">
+      <mat-icon aria-hidden="true" fontIcon="playlist_add"></mat-icon><span>Save this list…</span>
+    </button>
+  </mat-menu>
+  <!-- end lists -->
+
   <mat-menu #moreMenu="matMenu" class="more-menu" xPosition="before">
     <button mat-menu-item type="button" (click)="copyList(moreButton)">
       <mat-icon aria-hidden="true" fontIcon="content_copy"></mat-icon><span>Copy the list</span>
@@ -453,6 +466,11 @@
     <button mat-menu-item type="button" (click)="shareList(moreButton)">
       <mat-icon aria-hidden="true" fontIcon="share"></mat-icon><span>Share a link</span>
     </button>
+    <!-- lists (phase 2) -->
+    <button mat-menu-item type="button" (click)="openSaveList()">
+      <mat-icon aria-hidden="true" fontIcon="playlist_add"></mat-icon><span>Save this list…</span>
+    </button>
+    <!-- end lists -->
     <button mat-menu-item type="button" (click)="openAbout()">
       <mat-icon aria-hidden="true" fontIcon="info"></mat-icon><span>About &amp; FAQ</span>
     </button>
@@ -468,3 +486,8 @@
 <player-card [cards]="cards" [compare]="compareFromCard"></player-card>
 <!-- (a game: from a Recent dot, or a game log's row) -->
 <game-view></game-view>
+<!-- lists (phase 2): Save this list… -->
+@if (listDraft) {
+  <save-list-dialog [draft]="listDraft" [listed]="playerList.length" [suggestedTitle]="listTitle" (closed)="listDraft = null"></save-list-dialog>
+}
+<!-- end lists -->

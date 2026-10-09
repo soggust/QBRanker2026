@@ -20,6 +20,12 @@ import {
   SkillWeights,
   presetWeights,
 } from '@sport/positions';
+// ---- lists (phase 2) ----
+import { AccountService } from '@ranker/engine/account/account.service';
+import { PresetsStore } from '@ranker/engine/account/presets/presets.store';
+import { PresetBarComponent, SAVE_PRESET, SIGN_IN_PRESET } from '@ranker/engine/account/presets/preset-bar.component';
+import { USER_PRESET, UserPreset } from '@ranker/engine/account/lists/lists-helpers';
+// ---- end lists ----
 
 // A sidebar row: one stat, or a pair (e.g. rushing + receiving yards) shown as a parent slider with
 // the two as its expandable breakdown
@@ -55,10 +61,40 @@ export class SidebarComponent implements OnInit {
   skillWeights: SkillWeights = {};
   // Each tab's preset (null = default weights, shown as the dropdown's "Presets..." placeholder;
   // "Defaults" isn't a pickable preset, the Reset button goes back to it)
+  // (lists, phase 2: or a user preset, "user:<id>")
   skillPresets = Object.fromEntries(POSITIONS.map((position) => [position, null])) as Record<
     Position,
     SkillPreset | 'custom' | null
   >;
+
+  // ---- lists (phase 2) ----
+  // The user's own presets for this tab, under the built-in ones (signed in), and the dropdown's actions
+  readonly account = inject(AccountService);
+  private readonly presetsStore = inject(PresetsStore);
+  readonly savePreset = SAVE_PRESET;
+  readonly signInPreset = SIGN_IN_PRESET;
+  readonly userPresetValue = (preset: UserPreset) => USER_PRESET + preset.id;
+  private presetShown: SkillPreset | 'custom' | null = null;
+
+  get userPresets(): UserPreset[] {
+    return this.presetsStore.forTab(this.position);
+  }
+
+  // (what the dropdown showed when it opened: an action picked puts it back)
+  presetsOpened(open: boolean): void {
+    if (open) this.presetShown = this.skillPresets[this.position];
+  }
+
+  // A user preset put in place (its sliders here too), a new one picked, the one showing deleted
+  userPresetApplied(weights: SkillWeights): void {
+    this.skillWeights = { ...weights };
+    this.saveSkillWeights();
+  }
+
+  userPresetCleared(): void {
+    this.skillPresets[this.position] = 'custom';
+  }
+  // ---- end lists ----
 
   private readonly destroyRef = inject(DestroyRef);
 
@@ -164,8 +200,19 @@ export class SidebarComponent implements OnInit {
     return SKILL_PRESETS[this.position];
   }
 
-  onSkillPresetChange(): void {
+  onSkillPresetChange(bar?: PresetBarComponent): void {
     const preset = this.skillPresets[this.position];
+    // ---- lists (phase 2): Save as preset… (or Sign in), then the dropdown as it was; a user preset ----
+    if (preset === SAVE_PRESET || preset === SIGN_IN_PRESET) {
+      this.skillPresets[this.position] = this.presetShown;
+      bar?.saveNew();
+      return;
+    }
+    if (preset?.startsWith(USER_PRESET)) {
+      bar?.apply(preset.slice(USER_PRESET.length));
+      return;
+    }
+    // ---- end lists ----
     if (!preset || preset === 'custom') return;
     this.skillWeights = presetWeights(this.position, preset);
     this.saveSkillWeights();

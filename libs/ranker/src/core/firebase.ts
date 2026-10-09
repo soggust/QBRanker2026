@@ -31,6 +31,18 @@ export function usingEmulators(): boolean {
   }
 }
 
+// ---- lists (phase 2): the emulators' ports, for a dev run that needs its own (localStorage.emulatorPorts =
+// "<auth>,<firestore>", e.g. "9101,8101"); the defaults otherwise ----
+function emulatorPorts(): { auth: number; firestore: number } {
+  try {
+    const [auth, firestore] = (localStorage.getItem('emulatorPorts') ?? '').split(',').map(Number);
+    return { auth: auth || 9099, firestore: firestore || 8080 };
+  } catch {
+    return { auth: 9099, firestore: 8080 };
+  }
+}
+// ---- end lists ----
+
 let app: Promise<FirebaseApp> | null = null;
 let authPromise: Promise<Auth> | null = null;
 let dbPromise: Promise<Firestore> | null = null;
@@ -49,7 +61,7 @@ export function auth(): Promise<Auth> {
       persistence: [a.indexedDBLocalPersistence, a.browserLocalPersistence],
       popupRedirectResolver: a.browserPopupRedirectResolver,
     });
-    if (usingEmulators()) a.connectAuthEmulator(instance, 'http://127.0.0.1:9099', { disableWarnings: true });
+    if (usingEmulators()) a.connectAuthEmulator(instance, `http://127.0.0.1:${emulatorPorts().auth}`, { disableWarnings: true });
     return instance;
   });
   authPromise.catch(() => (authPromise = null));
@@ -60,7 +72,7 @@ export function auth(): Promise<Auth> {
 export function db(): Promise<Firestore> {
   dbPromise ??= Promise.all([firebaseApp(), import('firebase/firestore')]).then(([firebase, f]) => {
     const instance = f.getFirestore(firebase);
-    if (usingEmulators()) f.connectFirestoreEmulator(instance, '127.0.0.1', 8080);
+    if (usingEmulators()) f.connectFirestoreEmulator(instance, '127.0.0.1', emulatorPorts().firestore);
     return instance;
   });
   dbPromise.catch(() => (dbPromise = null));

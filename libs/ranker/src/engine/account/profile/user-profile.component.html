@@ -1,0 +1,277 @@
+<div class="account-page profile-page">
+  @switch (person().state) {
+    @case ('loading') {
+      <div class="account-loading" role="status"><span class="spinner" aria-hidden="true"></span>Loading &#64;{{ username }}…</div>
+    }
+    @case ('missing') {
+      <div class="soon-panel">
+        <mat-icon class="soon-icon" aria-hidden="true" fontIcon="person_off"></mat-icon>
+        <h2>No one’s here</h2>
+        <p class="soon-detail">No one has the username <strong>&#64;{{ username }}</strong>. They may have changed it.</p>
+        <a class="soon-back" href="#friends">Find people</a>
+      </div>
+    }
+    @case ('error') {
+      <div class="soon-panel">
+        <mat-icon class="soon-icon" aria-hidden="true" fontIcon="cloud_off"></mat-icon>
+        <h2>Couldn’t load the profile</h2>
+        <p class="soon-detail">{{ $any(person()).message }}</p>
+      </div>
+    }
+  }
+
+  @if (found; as f) {
+    @let p = f.profile;
+    <!-- Who: the picture, the names, the bio and team, and the friendship -->
+    <header class="account-hero profile-hero">
+      <account-avatar [photo]="p.photo" [name]="p.displayName" [size]="88"></account-avatar>
+      <div class="hero-text">
+        <h2>{{ p.displayName }}</h2>
+        <span class="hero-user">&#64;{{ p.username }}</span>
+        @if (p.bio) {
+          <p class="hero-bio">{{ p.bio }}</p>
+        }
+        <div class="hero-meta">
+          @if (p.favoriteTeam; as team) {
+            <span class="fav-team" [title]="'Favorite team (' + favoriteSport + ')'">
+              <img [src]="favoriteLogo" alt="" />{{ favoriteSport }}
+            </span>
+          }
+          @if (joined(p.createdAt); as since) {
+            <span class="joined"><mat-icon aria-hidden="true" fontIcon="calendar_month"></mat-icon>Joined {{ since }}</span>
+          }
+        </div>
+      </div>
+      <div class="hero-action">
+        @if (isSelf) {
+          <a class="secondary small-btn" href="#account"><mat-icon aria-hidden="true" fontIcon="edit"></mat-icon>Edit profile</a>
+        } @else {
+          <friend-button [uid]="f.uid" [name]="p.displayName"></friend-button>
+        }
+      </div>
+    </header>
+
+    @if (isSelf) {
+      <p class="self-note"><mat-icon aria-hidden="true" fontIcon="visibility"></mat-icon><span>This is your profile. Others see each section by your Privacy settings on <a href="#account">Profile &amp; settings</a>.</span></p>
+    }
+
+    <div class="profile-sections">
+      <!-- Saved lists -->
+      <card-panel class="account-panel lists-panel" label="Lists" icon="format_list_numbered" [expandable]="false">
+        <div class="panel-pad">
+          @if (access.lists !== 'shown') {
+            <ng-container *ngTemplateOutlet="hiddenTpl; context: { kind: 'lists' }"></ng-container>
+          } @else {
+            @switch (lists()?.state) {
+              @case ('ready') {
+                @let items = $any(lists()).value;
+                @if (items.length) {
+                  <ul class="item-list">
+                    @for (list of items; track list.id) {
+                      <li>
+                        <a class="item-link" [href]="'#lists/' + f.uid + '/' + list.id">
+                          <span class="item-title">{{ list.title }}</span>
+                          <span class="item-meta">
+                            <span class="sport-tag">{{ sportLabel(list.sport) }}</span>
+                            {{ list.tab }}@if (list.season) { · {{ list.season }} } @if (list.count) { · {{ list.count }} ranked }
+                          </span>
+                        </a>
+                      </li>
+                    }
+                  </ul>
+                } @else {
+                  <p class="empty-note">{{ isSelf ? 'You haven’t saved a list yet.' : 'No lists yet.' }}</p>
+                }
+              }
+              @case ('error') { <p class="form-error">{{ $any(lists()).message }}</p> }
+              @default { <ng-container *ngTemplateOutlet="loadingTpl"></ng-container> }
+            }
+          }
+        </div>
+      </card-panel>
+
+      <!-- Bets: the record and bankroll (history), what's still in play (open bets) -->
+      <card-panel class="account-panel bets-panel" label="Bets" icon="casino" [expandable]="false">
+        <div class="panel-pad bets-body">
+          @if (betsHidden) {
+            <ng-container *ngTemplateOutlet="hiddenTpl; context: { kind: betsKind }"></ng-container>
+          } @else {
+            <!-- (the record) -->
+            @if (access.betHistory === 'shown') {
+              @if (record; as r) {
+                <div class="record-strip" role="group" aria-label="Betting record">
+                  <div class="stat"><span class="stat-value">{{ recordText(r) }}</span><span class="stat-label">Record</span></div>
+                  <div class="stat"><span class="stat-value" [class.up]="r.profit > 0" [class.down]="r.profit < 0">{{ money(r.profit, true) }}</span><span class="stat-label">Profit</span></div>
+                  <div class="stat"><span class="stat-value" [class.up]="(r.roi ?? 0) > 0" [class.down]="(r.roi ?? 0) < 0">{{ r.roi === null ? '–' : (r.roi > 0 ? '+' : '') + r.roi + '%' }}</span><span class="stat-label">ROI</span></div>
+                  @if (balance() !== null) {
+                    <div class="stat"><span class="stat-value">{{ money(balance()!) }}</span><span class="stat-label">Bankroll</span></div>
+                  }
+                </div>
+              } @else if (settledBets()?.state === 'error') {
+                <p class="form-error">{{ $any(settledBets()).message }}</p>
+              } @else {
+                <ng-container *ngTemplateOutlet="loadingTpl"></ng-container>
+              }
+            }
+
+            <!-- (still in play) -->
+            <section class="bets-group" aria-labelledby="open-bets-h">
+              <h3 id="open-bets-h">Open bets</h3>
+              @if (access.openBets !== 'shown') {
+                <ng-container *ngTemplateOutlet="hiddenTpl; context: { kind: 'openBets', small: true }"></ng-container>
+              } @else {
+                @switch (openBets()?.state) {
+                  @case ('ready') {
+                    @let open = $any(openBets()).value;
+                    @if (open.length) {
+                      <ul class="bet-list">
+                        @for (bet of recent(open); track bet.id) {
+                          <ng-container *ngTemplateOutlet="betTpl; context: { $implicit: bet }"></ng-container>
+                        }
+                      </ul>
+                      @if (open.length > 6) { <p class="more-note">+ {{ open.length - 6 }} more</p> }
+                    } @else {
+                      <p class="empty-note">Nothing in play.</p>
+                    }
+                  }
+                  @case ('error') { <p class="form-error">{{ $any(openBets()).message }}</p> }
+                  @default { <ng-container *ngTemplateOutlet="loadingTpl"></ng-container> }
+                }
+              }
+            </section>
+
+            <!-- (settled lately) -->
+            <section class="bets-group" aria-labelledby="settled-bets-h">
+              <h3 id="settled-bets-h">Recent results</h3>
+              @if (access.betHistory !== 'shown') {
+                <ng-container *ngTemplateOutlet="hiddenTpl; context: { kind: 'betHistory', small: true }"></ng-container>
+              } @else if (settledBets()?.state === 'ready') {
+                @let settled = $any(settledBets()).value;
+                @if (settled.length) {
+                  <ul class="bet-list">
+                    @for (bet of recent(settled); track bet.id) {
+                      <ng-container *ngTemplateOutlet="betTpl; context: { $implicit: bet }"></ng-container>
+                    }
+                  </ul>
+                } @else {
+                  <p class="empty-note">No settled bets yet.</p>
+                }
+              } @else if (settledBets()?.state !== 'error') {
+                <ng-container *ngTemplateOutlet="loadingTpl"></ng-container>
+              }
+            </section>
+          }
+        </div>
+      </card-panel>
+
+      <!-- Presets -->
+      <card-panel class="account-panel presets-panel" label="Presets" icon="tune" [expandable]="false">
+        <div class="panel-pad">
+          @if (access.presets !== 'shown') {
+            <ng-container *ngTemplateOutlet="hiddenTpl; context: { kind: 'presets' }"></ng-container>
+          } @else {
+            @switch (presets()?.state) {
+              @case ('ready') {
+                @let items = $any(presets()).value;
+                @if (items.length) {
+                  <ul class="item-list">
+                    @for (preset of items; track preset.id) {
+                      <li class="item-row">
+                        <span class="item-title">{{ preset.name }}</span>
+                        <span class="item-meta"><span class="sport-tag">{{ sportLabel(preset.sport) }}</span>{{ preset.tab }}</span>
+                      </li>
+                    }
+                  </ul>
+                } @else {
+                  <p class="empty-note">{{ isSelf ? 'You haven’t saved a preset yet.' : 'No presets yet.' }}</p>
+                }
+              }
+              @case ('error') { <p class="form-error">{{ $any(presets()).message }}</p> }
+              @default { <ng-container *ngTemplateOutlet="loadingTpl"></ng-container> }
+            }
+          }
+        </div>
+      </card-panel>
+
+      <!-- Tracker -->
+      <card-panel class="account-panel tracker-panel" label="Tracker" icon="push_pin" [expandable]="false">
+        <div class="panel-pad">
+          @if (access.tracker !== 'shown') {
+            <ng-container *ngTemplateOutlet="hiddenTpl; context: { kind: 'tracker' }"></ng-container>
+          } @else {
+            @switch (pins()?.state) {
+              @case ('ready') {
+                @let items = $any(pins()).value;
+                @if (items.length) {
+                  <ul class="item-list">
+                    @for (pin of items.slice(0, 5); track pin.id) {
+                      <li class="item-row">
+                        <span class="item-title">{{ pin.title }}</span>
+                        @if (pin.sport) { <span class="item-meta"><span class="sport-tag">{{ sportLabel(pin.sport) }}</span></span> }
+                      </li>
+                    }
+                  </ul>
+                  <a class="panel-link" [href]="'#tracker/' + f.uid">
+                    Open {{ isSelf ? 'your' : firstName + '’s' }} tracker ({{ items.length }})<mat-icon aria-hidden="true" fontIcon="arrow_forward"></mat-icon>
+                  </a>
+                } @else {
+                  <p class="empty-note">{{ isSelf ? 'You haven’t pinned a comparison yet.' : 'Nothing pinned yet.' }}</p>
+                }
+              }
+              @case ('error') { <p class="form-error">{{ $any(pins()).message }}</p> }
+              @default { <ng-container *ngTemplateOutlet="loadingTpl"></ng-container> }
+            }
+          }
+        </div>
+      </card-panel>
+    </div>
+
+    <!-- (a section the viewer can't see: why, and for friends-only, how) -->
+    <ng-template #hiddenTpl let-kind="kind" let-small="small">
+      <div class="hidden-state" [class.small]="small">
+        <mat-icon aria-hidden="true" [fontIcon]="access[$any(kind)] === 'friends-only' ? 'group' : 'lock'"></mat-icon>
+        <span class="hidden-text">
+          <span class="hidden-title">{{ access[$any(kind)] === 'friends-only' ? 'Friends only' : 'Private' }}</span>
+          @if (!small) {
+            <span class="hidden-note">
+              {{ hidden($any(kind)) }}
+              @if (access[$any(kind)] === 'friends-only') {
+                @switch (relation) {
+                  @case ('none') { Add {{ firstName }} as a friend to see it. }
+                  @case ('pending-out') { You’ll see it once they accept. }
+                  @case ('pending-in') { Accept their request to see it. }
+                }
+              }
+            </span>
+          }
+        </span>
+      </div>
+    </ng-template>
+
+    <ng-template #betTpl let-bet>
+      <li class="bet" [class.won]="bet.status === 'won'" [class.lost]="bet.status === 'lost'">
+        <span class="bet-main">
+          <span class="bet-pick">
+            {{ bet.pick }}
+            @if (bet.odds !== null) { <span class="bet-odds">{{ oddsText(bet.odds) }}</span> }
+            @if (bet.botPick) { <span class="bot-tag" title="The Algorithm’s pick">Bot pick</span> }
+          </span>
+          <span class="bet-matchup"><span class="sport-tag">{{ sportLabel(bet.sport) }}</span>{{ bet.matchup }}</span>
+        </span>
+        <span class="bet-side">
+          @if (bet.status === 'open') {
+            <span class="bet-stake">{{ money(bet.stake) }}</span>
+            <span class="bet-when">{{ kickoff(bet.start) }}</span>
+          } @else {
+            <span class="bet-result" [class.up]="(bet.profit ?? 0) > 0" [class.down]="(bet.profit ?? 0) < 0">{{ betResult(bet) }} {{ bet.profit !== null && bet.status !== 'push' && bet.status !== 'void' ? money(bet.profit, true) : '' }}</span>
+            <span class="bet-when">{{ when(bet.settled || bet.start) }}</span>
+          }
+        </span>
+      </li>
+    </ng-template>
+  }
+</div>
+
+<ng-template #loadingTpl>
+  <div class="section-loading" role="status"><span class="spinner tiny" aria-hidden="true"></span>Loading…</div>
+</ng-template>

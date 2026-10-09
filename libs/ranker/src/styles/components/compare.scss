@@ -436,6 +436,51 @@
   }
 }
 
+// ---- tracker (phase 2) ----
+// (the pin beside the share: lit once this comparison's pinned; its note just under the controls)
+.cmp-pin.pinned .mat-icon {
+  color: var(--scoreboard-led);
+  text-shadow: var(--scoreboard-glow);
+}
+
+.cmp-pin .spin {
+  animation: tape-spin 0.9s linear infinite;
+}
+
+.cmp-pin-note {
+  margin: 0;
+  pointer-events: none;
+  position: absolute;
+  right: 10px;
+  top: 42px;
+  z-index: 3;
+}
+
+.cmp-pin-toast {
+  background: #111;
+  border: 1px solid color-mix(in srgb, var(--scoreboard-led) 60%, transparent);
+  border-radius: 999px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.55);
+  color: #fff;
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 6px 14px;
+  pointer-events: auto;
+  white-space: nowrap;
+
+  a {
+    color: var(--scoreboard-led);
+    font-weight: 800;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+// ---- end tracker ----
+
 // ---------------------------------------------------------------------------
 // Body
 // ---------------------------------------------------------------------------

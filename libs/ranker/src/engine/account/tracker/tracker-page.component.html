@@ -1,0 +1,368 @@
+<!-- The Tracker: a desk like the Algorithm's (the scoreboard on top, gunmetal under it), a scoreboard card per pin -->
+<div class="tracker-page">
+  <section class="tracker-desk" aria-labelledby="tracker-title">
+    <!-- (the top: whose tracker, the tiles, the sports and who sees it) -->
+    <header class="tracker-top">
+      <div class="tracker-head">
+        @if (owner) {
+          <account-avatar [photo]="$any(owner.photo)" [name]="owner.name" [size]="40"></account-avatar>
+        } @else {
+          <span class="tracker-badge" aria-hidden="true"><mat-icon fontIcon="push_pin"></mat-icon></span>
+        }
+        <div class="tracker-heading">
+          <h2 id="tracker-title">{{ owner ? owner.name + '’s Tracker' : 'Tracker' }}</h2>
+          <p class="tracker-sub">
+            @if (owner) {
+              &#64;{{ owner.username }} · comparisons they're following, measured again now
+            } @else {
+              Comparisons you've pinned from Compare, measured again every time you look
+            }
+          </p>
+        </div>
+      </div>
+
+      @if (state === 'ready' && cards.length) {
+        <div class="tracker-tiles">
+          <div class="tracker-tile"><small>Pinned</small><b>{{ tally.pins }}</b></div>
+          <div class="tracker-tile"><small>Climbing</small><b class="up">{{ tally.up }}</b></div>
+          <div class="tracker-tile"><small>Sliding</small><b class="down">{{ tally.down }}</b></div>
+        </div>
+      }
+
+      @if (state === 'ready' && (sportCounts.length > 1 || mine)) {
+        <div class="tracker-controls">
+          @if (sportCounts.length > 1) {
+            <nav class="tracker-sports" aria-label="Sport">
+              @for (s of sportCounts; track s.id) {
+                @if (s.id === sport) {
+                  <span class="game-filter small active" aria-current="page">{{ s.label }} · {{ s.count }}</span>
+                } @else {
+                  <a class="game-filter small" [href]="sportHref(s.id)">{{ s.label }} · {{ s.count }}</a>
+                }
+              }
+            </nav>
+          }
+          @if (mine) {
+            <div class="tracker-share" role="group" aria-label="Who sees your tracker">
+              <span class="tracker-share-label">Who sees it</span>
+              @for (c of choices; track c.value) {
+                <button type="button" class="game-filter small" [class.active]="visibility === c.value" [attr.aria-pressed]="visibility === c.value" (click)="setVisibility(c.value)">
+                  {{ c.label }}
+                </button>
+              }
+              @if (visibility !== 'private') {
+                <button type="button" class="tracker-icon" title="Copy the link to your tracker" aria-label="Copy the link to your tracker" (click)="copyLink()">
+                  <mat-icon fontIcon="link"></mat-icon>
+                </button>
+              }
+            </div>
+          }
+        </div>
+      }
+    </header>
+
+    <!-- (the states before the cards) -->
+    @if (signedOut) {
+      <div class="tracker-empty">
+        <mat-icon class="tracker-empty-icon" fontIcon="push_pin" aria-hidden="true"></mat-icon>
+        <h3>Follow a comparison all season</h3>
+        <p>Sign in, then pin any comparison from Compare: it lands here with a scoreboard of its own, showing how each side has moved since.</p>
+        <button type="button" class="primary" (click)="account.openLogin()">Sign in</button>
+      </div>
+    } @else if (state === 'wait') {
+      <div class="tracker-empty" role="status"><span class="spinner" aria-hidden="true"></span> Loading the tracker…</div>
+    } @else if (state === 'hidden') {
+      <div class="tracker-empty">
+        <mat-icon class="tracker-empty-icon" fontIcon="lock" aria-hidden="true"></mat-icon>
+        <h3>This tracker isn't shared with you</h3>
+        <p>{{ owner?.name || 'Its owner' }} keeps it to their friends, or to themselves.{{ account.user() ? '' : ' Friends see it once they sign in.' }}</p>
+        @if (!account.user()) {
+          <button type="button" class="primary" (click)="account.openLogin()">Sign in</button>
+        }
+      </div>
+    } @else if (state === 'missing') {
+      <div class="tracker-empty">
+        <mat-icon class="tracker-empty-icon" fontIcon="person_off" aria-hidden="true"></mat-icon>
+        <h3>No one here</h3>
+        <p>That account doesn't exist any more.</p>
+      </div>
+    } @else if (state === 'error') {
+      <div class="tracker-empty">
+        <mat-icon class="tracker-empty-icon" fontIcon="cloud_off" aria-hidden="true"></mat-icon>
+        <h3>Couldn't load the tracker</h3>
+        <p>Check the connection and try again.</p>
+      </div>
+    } @else if (!cards.length) {
+      <div class="tracker-empty">
+        <mat-icon class="tracker-empty-icon" fontIcon="push_pin" aria-hidden="true"></mat-icon>
+        @if (mine) {
+          <h3>Nothing pinned in {{ sportLabel }} yet</h3>
+          <p>
+            In the rankings, pick two or more rows and press <b>Compare</b> (or open a card's Compare), then the
+            <mat-icon class="inline-icon" fontIcon="push_pin" aria-hidden="true"></mat-icon> pin at the top. Each pin gets a card here showing where every
+            side stands now against where it stood the day you pinned it.
+          </p>
+          <a class="primary" [href]="'/' + sport + '/'">Go to the rankings</a>
+        } @else {
+          <h3>Nothing pinned in {{ sportLabel }}</h3>
+          <p>{{ owner?.name }} hasn't pinned any comparisons here.</p>
+        }
+      </div>
+    }
+
+    @if (state === 'ready' && cards.length) {
+      <div class="tracker-list" #list cdkDropList [cdkDropListData]="cards" [cdkDropListDisabled]="!mine" (cdkDropListDropped)="drop($event)">
+        @for (card of cards; track card.pin.id; let ci = $index) {
+          <article class="pin-card" cdkDrag [cdkDragDisabled]="!mine" [attr.aria-labelledby]="'pin-name-' + card.pin.id" [class.pin-busy]="card.busy">
+            <!-- (the card's top strip: the handle, its name, when it was pinned, its actions) -->
+            <header class="pin-head">
+              @if (mine) {
+                <span class="pin-handle" cdkDragHandle title="Drag to reorder" aria-hidden="true"><mat-icon fontIcon="drag_indicator"></mat-icon></span>
+              }
+              <div class="pin-title">
+                @if (card.draft !== null) {
+                  <input
+                    class="pin-title-input"
+                    [id]="'pin-title-' + card.pin.id"
+                    [value]="card.draft"
+                    maxlength="80"
+                    aria-label="Name this pin"
+                    (focus)="$any($event.target).select()"
+                    (input)="card.draft = $any($event.target).value"
+                    (keydown)="renameKey($event, card)"
+                    (blur)="saveRename(card)"
+                  />
+                } @else {
+                  <h3 [id]="'pin-name-' + card.pin.id">{{ card.pin.title }}</h3>
+                }
+                <span class="pin-when" [title]="'Pinned ' + pinnedDay(card)"><mat-icon fontIcon="push_pin" aria-hidden="true"></mat-icon>Pinned {{ sinceText(card.pin.baseline.at) }}</span>
+              </div>
+              <div class="pin-actions">
+                <a class="pin-open" [href]="openHref(card)" title="Open the full comparison" aria-label="Open the full comparison in Compare">
+                  <mat-icon fontIcon="compare_arrows" aria-hidden="true"></mat-icon><span class="pin-open-text">Compare</span>
+                </a>
+                @if (mine) {
+                  <button type="button" class="tracker-icon" [class.confirm]="card.confirm" [attr.aria-label]="card.confirm ? 'Press again to unpin' : 'Unpin'" [title]="card.confirm ? 'Press again to unpin' : 'Unpin'" (click)="unpin(card)">
+                    <mat-icon [fontIcon]="card.confirm ? 'delete_forever' : 'delete_outline'"></mat-icon>
+                  </button>
+                  <button type="button" class="tracker-icon" aria-label="More for this pin" title="More" [matMenuTriggerFor]="more" [matMenuTriggerRestoreFocus]="false">
+                    <mat-icon fontIcon="more_vert"></mat-icon>
+                  </button>
+                  <mat-menu #more="matMenu" class="tracker-menu" xPosition="before">
+                    <button mat-menu-item type="button" (click)="startRename(card)"><mat-icon fontIcon="edit"></mat-icon>Rename</button>
+                    <button mat-menu-item type="button" [disabled]="!card.now" (click)="repin(card)"><mat-icon fontIcon="restart_alt"></mat-icon>Re-pin from now</button>
+                    <button mat-menu-item type="button" [disabled]="ci === 0" (click)="move(ci, ci - 1)"><mat-icon fontIcon="arrow_upward"></mat-icon>Move up</button>
+                    <button mat-menu-item type="button" [disabled]="ci === cards.length - 1" (click)="move(ci, ci + 1)"><mat-icon fontIcon="arrow_downward"></mat-icon>Move down</button>
+                  </mat-menu>
+                }
+              </div>
+            </header>
+
+            <!-- (the sides: a tape each in its color, where it stands now and where it stood) -->
+            <div class="pin-sides" [style.--sides]="card.sides.length">
+              @for (s of card.sides; track s.key) {
+                <div class="pin-side" [style.--side]="s.color" [style.--team-badge]="s.badge">
+                  @if (s.logo) {
+                    <span class="pin-texture" aria-hidden="true"><img [src]="s.logo" alt="" /></span>
+                  }
+                  <div class="pin-who">
+                    <span class="pin-face" [class.logo-face]="!s.photo">
+                      @if (s.photo) {
+                        <img [src]="s.photo" alt="" (error)="s.photo = null" />
+                      } @else if (s.logo) {
+                        <img [src]="s.logo" alt="" [class.white-logo]="s.whiteLogo" />
+                      } @else {
+                        <mat-icon fontIcon="person" aria-hidden="true"></mat-icon>
+                      }
+                    </span>
+                    <div class="pin-names">
+                      <span class="pin-name">{{ s.name }}</span>
+                      <span class="pin-meta">{{ s.meta }}</span>
+                    </div>
+                  </div>
+                  <div class="pin-standing">
+                    @if (s.rank !== null) {
+                      <span class="pin-rank" [style.--tone]="s.tone" [title]="'#' + s.rank + ' of ' + s.of + ' now'">{{ s.rank }}</span>
+                      <span class="pin-of">of {{ s.of }}</span>
+                    } @else if (card.loading) {
+                      <span class="pin-rank pending" aria-label="Loading"><span class="spinner tiny" aria-hidden="true"></span></span>
+                    } @else {
+                      <span class="pin-rank pending" title="Not found now">–</span>
+                    }
+                    <span
+                      class="pin-move"
+                      [class.good]="(s.track.moved ?? 0) > 0"
+                      [class.bad]="(s.track.moved ?? 0) < 0"
+                      [title]="s.track.then ? '#' + s.track.then.rank + ' of ' + s.track.then.of + ' when pinned' : ''"
+                    >
+                      @if ((s.track.moved ?? 0) !== 0) {
+                        <mat-icon [fontIcon]="(s.track.moved ?? 0) > 0 ? 'arrow_upward' : 'arrow_downward'" aria-hidden="true"></mat-icon>
+                      }
+                      {{ moveText(s) }}
+                    </span>
+                  </div>
+                  <div class="pin-foot">
+                    @if (s.track.then) {
+                      <span>Pinned at <b>#{{ s.track.then.rank }}</b></span>
+                    }
+                    @if (s.track.now?.score != null) {
+                      <span class="pin-score" title="The list's score behind the rank (its sliders' weighted standard scores)">
+                        Score <b>{{ scoreText(s.track.now!.score!) }}</b>
+                        @if (s.track.scoreMove !== null && s.track.scoreMove !== 0) {
+                          <em [class.good]="s.track.scoreMove > 0" [class.bad]="s.track.scoreMove < 0">{{ signed(s.track.scoreMove, 2) }}</em>
+                        }
+                      </span>
+                    }
+                    @if (!s.live) {
+                      <span class="pin-final" title="A finished season: its numbers won't change">Final</span>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+
+            @if (card.error) {
+              <p class="pin-note" role="status"><mat-icon fontIcon="info" aria-hidden="true"></mat-icon>{{ card.error }}. What it was when pinned:</p>
+            }
+
+            <!-- (the rank since the pin: a step a side, a point each day it's been looked at) -->
+            @if (card.chart; as chart) {
+              <div class="pin-trend">
+                <div class="pin-trend-head">
+                  <span class="pin-label">Rank since pinned</span>
+                  @if (chart.single) {
+                    <small>Pinned today: the line grows each day you look</small>
+                  } @else {
+                    <small>Since {{ pinnedDay(card) }} · a point each day it's looked at</small>
+                  }
+                </div>
+                <svg class="pin-chart" [attr.viewBox]="'0 0 ' + chart.width + ' ' + chart.height" [attr.width]="chart.width" [attr.height]="chart.height" role="img" [attr.aria-label]="'Rank since pinned for ' + card.pin.title">
+                  @for (t of chart.yTicks; track t.label) {
+                    <line class="trend-grid" [attr.x1]="chart.left" [attr.x2]="chart.width - chart.right" [attr.y1]="t.y" [attr.y2]="t.y"></line>
+                    <text class="trend-y" [attr.x]="chart.left - 6" [attr.y]="t.y + 3.5" text-anchor="end">{{ t.label }}</text>
+                  }
+                  @for (t of chart.xTicks; track $index) {
+                    <text class="trend-x" [attr.x]="t.x" [attr.y]="chart.height - 6" [attr.text-anchor]="t.anchor">{{ t.label }}</text>
+                  }
+                  @if (!chart.single) {
+                    <line class="trend-pin" [attr.x1]="chart.pinX" [attr.x2]="chart.pinX" [attr.y1]="chart.top - 4" [attr.y2]="chart.height - chart.bottom"></line>
+                  }
+                  @for (l of chart.lines; track l.key) {
+                    <path class="trend-line" [attr.d]="l.path" [style.--side]="l.color"></path>
+                  }
+                  @for (l of chart.lines; track l.key) {
+                    @for (d of l.dots; track $index) {
+                      <circle class="trend-dot" [class.now]="d.now" [class.pinned]="d.pinned" [attr.r]="d.now ? 5 : d.pinned ? 4.5 : 3" [attr.cx]="d.x" [attr.cy]="d.y" [style.--side]="l.color">
+                        <title>{{ d.title }}</title>
+                      </circle>
+                    }
+                  }
+                </svg>
+              </div>
+            }
+
+            <!-- (the numbers: each side's now, its change since, colored better or worse) -->
+            @let skillRows = skills(card);
+            @let groups = statGroups(card);
+            @if (skillRows.length || groups.length) {
+              <div class="pin-table-wrap">
+                <table class="pin-table" [style.--sides]="card.sides.length">
+                  <thead>
+                    <tr>
+                      <th scope="col" class="pin-col-label"><span class="visually-hidden">Stat</span></th>
+                      @for (s of card.sides; track s.key) {
+                        <th scope="col" [style.--side]="s.color"><span class="pin-col-name">{{ s.head }}</span></th>
+                      }
+                    </tr>
+                  </thead>
+                  @if (skillRows.length) {
+                    <tbody>
+                      <tr class="pin-group"><th scope="rowgroup" [attr.colspan]="card.sides.length + 1">Skills <small>percentile</small></th></tr>
+                      @for (row of skillRows; track row.key) {
+                        <tr>
+                          <th scope="row" [title]="row.name">{{ row.label }}</th>
+                          @for (c of row.cells; track $index) {
+                            <td [title]="cellTitle(row, $index, card)">
+                              <span class="pin-val">{{ c.text }}</span>
+                              @if (c.delta && c.dir) {
+                                <span class="pin-delta" [class.good]="c.good" [class.bad]="c.good === false">{{ c.delta }}</span>
+                              }
+                            </td>
+                          }
+                        </tr>
+                      }
+                    </tbody>
+                  }
+                  @for (g of groups; track g.title) {
+                    <tbody>
+                      <tr class="pin-group"><th scope="rowgroup" [attr.colspan]="card.sides.length + 1">{{ g.title }}</th></tr>
+                      @for (row of g.rows; track row.key) {
+                        <tr>
+                          <th scope="row" [title]="row.name">{{ row.label }}</th>
+                          @for (c of row.cells; track $index) {
+                            <td [title]="cellTitle(row, $index, card)">
+                              <span class="pin-val">{{ c.text }}</span>
+                              @if (c.delta && c.dir) {
+                                <span class="pin-delta" [class.good]="c.good" [class.bad]="c.good === false">{{ c.delta }}</span>
+                              }
+                            </td>
+                          }
+                        </tr>
+                      }
+                    </tbody>
+                  }
+                </table>
+              </div>
+            }
+
+            <!-- (each side's games this season, the ones since the pin lit) -->
+            @if (card.logs === 'ready') {
+              <div class="pin-logs">
+                @for (strip of card.strips; track strip.key) {
+                  @let s = stripSide(card, strip.key);
+                  <div class="pin-log" [style.--side]="s?.color">
+                    <span class="pin-log-who">{{ s?.name }} <small>{{ strip.label }}</small></span>
+                    <div class="pin-log-bars" [class.diverging]="strip.diverging" role="img" [attr.aria-label]="s?.name + ', ' + strip.label + ' by game'">
+                      @for (b of strip.bars; track $index) {
+                        <span class="pin-log-bar" [class.after]="b.after" [class.neg]="b.neg" [style.--h]="b.h" [title]="b.title"></span>
+                      }
+                      @if (strip.pinAt !== null) {
+                        <span class="pin-log-pin" [style.--at]="strip.pinAt" title="Pinned here"></span>
+                      }
+                    </div>
+                  </div>
+                }
+              </div>
+            } @else if (card.logs === 'none') {
+              <p class="pin-note">No game logs for these sides.</p>
+            }
+
+            <footer class="pin-footer">
+              @if (hasMore(card)) {
+                <button type="button" class="pin-toggle" [attr.aria-expanded]="card.allStats" (click)="card.allStats = !card.allStats">
+                  <mat-icon [fontIcon]="card.allStats ? 'expand_less' : 'expand_more'" aria-hidden="true"></mat-icon>
+                  {{ card.allStats ? 'Key stats' : 'All stats (' + statCount(card) + ')' }}
+                </button>
+              }
+              @if (hasLogs(card)) {
+                <button type="button" class="pin-toggle" [attr.aria-expanded]="card.logs === 'ready'" [disabled]="card.logs === 'loading'" (click)="toggleLogs(card)">
+                  @if (card.logs === 'loading') {
+                    <span class="spinner tiny" aria-hidden="true"></span>
+                  } @else {
+                    <mat-icon fontIcon="bar_chart" aria-hidden="true"></mat-icon>
+                  }
+                  Game by game
+                </button>
+              }
+              <span class="pin-footnote">Ranked with the sliders it was pinned with</span>
+            </footer>
+          </article>
+        }
+      </div>
+    }
+  </section>
+
+  @if (toast) {
+    <div class="tracker-toast" role="status">{{ toast }}</div>
+  }
+</div>

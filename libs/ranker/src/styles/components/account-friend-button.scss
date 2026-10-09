@@ -1,0 +1,126 @@
+@use "../variables" as v;
+@use "account-kit" as kit;
+
+// ===========================================================================
+// What you can do about someone (friend-button.component.ts: Add friend, Requested, Accept / Decline,
+// Friends / Remove) and the account menu's count of requests waiting (friends-badge.component.ts)
+// ===========================================================================
+@include kit.buttons;
+@include kit.fields;
+
+:host(friend-button) {
+  align-items: center;
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.small-btn {
+  font-size: 11.5px !important;
+  min-height: 32px !important;
+  padding: 0 12px !important;
+}
+
+.spinner.tiny {
+  border-width: 1.5px;
+  height: 12px;
+  width: 12px;
+}
+
+// (Requested, Friends, You: a quiet tag; Friends lit green)
+.state-tag {
+  align-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 999px;
+  color: rgba(255, 255, 255, 0.75);
+  display: inline-flex;
+  font-family: v.$font-base;
+  font-size: 11px;
+  font-weight: 800;
+  gap: 5px;
+  letter-spacing: 0.8px;
+  padding: 4px 11px;
+  text-transform: uppercase;
+  white-space: nowrap;
+
+  .mat-icon {
+    @include v.icon-size(15px);
+  }
+
+  &.friends {
+    background: rgba(62, 207, 110, 0.1);
+    border-color: rgba(62, 207, 110, 0.4);
+    color: v.$good;
+  }
+}
+
+.link.quiet {
+  color: rgba(255, 255, 255, 0.5);
+
+  &:hover:not([disabled]),
+  &:focus-visible {
+    color: v.$bad;
+  }
+}
+
+.confirm-text {
+  color: #fff;
+  font-family: v.$font-base;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.field-error {
+  flex-basis: 100%;
+  text-align: right;
+}
+
+// ---------------------------------------------------------------------------
+// The badge: a lit count on the menu's Friends item, a dot on the avatar
+// ---------------------------------------------------------------------------
+:host(friends-badge) {
+  display: contents;
+}
+
+// (the dot: a zero-size mark just after the avatar in the sport bar's button, the dot on the avatar's corner)
+:host(friends-badge.as-dot) {
+  align-self: center;
+  display: block;
+  height: 0;
+  margin-left: -8px;
+  position: relative;
+  width: 0;
+}
+
+.friends-count {
+  align-items: center;
+  box-sizing: border-box;
+  background: var(--scoreboard-led);
+  border-radius: 999px;
+  box-shadow: 0 0 6px color-mix(in srgb, var(--scoreboard-led) 60%, transparent);
+  color: #141414 !important;
+  display: inline-flex;
+  font-family: v.$font-base;
+  font-size: 11px;
+  font-weight: 800;
+  height: 18px;
+  justify-content: center;
+  margin-left: 10px;
+  min-width: 18px;
+  padding: 0 5px;
+  vertical-align: 1px;
+}
+
+.friends-dot {
+  background: var(--scoreboard-led);
+  border: 2px solid #141414;
+  border-radius: 50%;
+  box-shadow: 0 0 6px var(--scoreboard-led);
+  height: 9px;
+  pointer-events: none;
+  left: -10px;
+  position: absolute;
+  top: -15px;
+  width: 9px;
+}

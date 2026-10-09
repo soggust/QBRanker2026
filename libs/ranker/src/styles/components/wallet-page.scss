@@ -1,0 +1,502 @@
+@use "../variables" as v;
+@use "../casino-chip" as casino;
+@use "account-kit" as kit;
+
+// ===========================================================================
+// #wallet (wallet-page.component): the Bets page's card room (its blue speed cloth, its royal-blue light),
+// the Algorithm desk's panel on it (model-desk.scss, loaded with this: the tiles, the curve, the tables), and
+// the wallet's own: Reload and Clear history, the confirmations, the leaderboard, the bot's chips
+// ===========================================================================
+
+$lock: #d8323c;
+$gold: #ffcf4a;
+
+:host {
+  // (the Bets page's accent: the card room's royal blue)
+  --scoreboard-led: #5b9dff;
+  --scoreboard-glow: 0 0 6px rgba(91, 157, 255, 0.6);
+  background:
+    radial-gradient(ellipse 60% 50% at 50% 30%, rgba(255, 236, 200, 0.1), transparent 70%),
+    radial-gradient(ellipse 120% 90% at 50% 40%, transparent 35%, rgba(0, 0, 0, 0.72) 100%),
+    repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.03) 0 1px, transparent 1px 3px),
+    repeating-linear-gradient(-45deg, rgba(0, 0, 0, 0.07) 0 1px, transparent 1px 3px),
+    radial-gradient(ellipse at 50% 30%, #1a63a8, #0e3f70 55%, #072443);
+  background-attachment: fixed;
+  box-sizing: border-box;
+  display: block;
+  height: calc(100% - var(--sport-bar-height));
+  overflow-y: auto;
+}
+
+@include kit.buttons;
+
+// (the desk's panels, chip-rimmed as on the Bets page and the Algorithm: card-panel.scss gives them to those two)
+:host ::ng-deep card-panel {
+  @include casino.panel;
+}
+
+.wallet-page {
+  margin: 0 auto;
+  max-width: 1100px;
+  padding: 26px 16px 90px;
+}
+
+.wallet-note {
+  text-align: center;
+}
+
+// Signed out: a scoreboard card with a little stack of chips
+.wallet-intro {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 8vh;
+  max-width: 460px;
+  padding: 30px 28px 28px;
+  text-align: center;
+
+  h2 {
+    @include v.headline(22px);
+    letter-spacing: 0.75px;
+    margin: 0;
+    text-transform: uppercase;
+  }
+
+  p {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 14px;
+    line-height: 1.55;
+    margin: 0;
+  }
+
+  .primary {
+    margin-top: 8px;
+  }
+}
+
+.wallet-intro-chips {
+  display: flex;
+  margin-bottom: 4px;
+
+  i {
+    border: 5px dashed #f4efe3;
+    border-radius: 50%;
+    box-shadow:
+      inset 0 0 0 3px var(--c),
+      inset 0 0 0 4px rgba(255, 236, 196, 0.5),
+      0 3px 6px rgba(0, 0, 0, 0.5);
+    display: block;
+    height: 30px;
+    margin: 0 -6px;
+    width: 30px;
+    background: var(--c);
+  }
+
+  .c100 {
+    --c: #1c1c1c;
+  }
+
+  .c25 {
+    --c: #1d8a4e;
+    transform: translateY(-6px);
+  }
+
+  .c5 {
+    --c: #c62828;
+  }
+}
+
+// The actions under the tiles: to the Bets page, Reload, Clear history
+.wallet-actions {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+
+  .secondary.open {
+    border-color: var(--scoreboard-led);
+    color: var(--scoreboard-led);
+  }
+}
+
+// (the way to the Bets page: the game dropdown's red clay chip)
+.wallet-cta {
+  align-items: center;
+  background:
+    radial-gradient(ellipse at 30% 0%, rgba(255, 255, 255, 0.22), transparent 65%),
+    #b0202b;
+  border-radius: 999px;
+  box-shadow:
+    inset 0 0 0 2px #b0202b,
+    inset 0 0 0 3px rgba(255, 236, 196, 0.55),
+    0 2px 6px rgba(0, 0, 0, 0.45);
+  color: #fff;
+  display: inline-flex;
+  font-size: 13px;
+  font-weight: 900;
+  gap: 6px;
+  letter-spacing: 0.06em;
+  min-height: 40px;
+  outline: 2px dashed rgba(244, 239, 227, 0.75);
+  outline-offset: -5px;
+  padding: 0 18px;
+  text-decoration: none;
+  text-shadow: 0 1px 1.5px rgba(0, 0, 0, 0.6);
+  text-transform: uppercase;
+
+  .mat-icon {
+    @include v.icon-size(18px);
+  }
+
+  &:hover,
+  &:focus-visible {
+    filter: brightness(1.12);
+  }
+}
+
+// A confirmation, under the actions
+.wallet-confirm {
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(91, 157, 255, 0.4);
+  border-radius: 10px;
+  margin: 12px auto 0;
+  max-width: 620px;
+  padding: 12px 14px;
+
+  &.danger-zone {
+    border-color: color-mix(in srgb, #{v.$bad} 60%, transparent);
+  }
+
+  p {
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 13px;
+    line-height: 1.5;
+    margin: 0;
+  }
+}
+
+.wallet-confirm-actions {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 10px;
+}
+
+.wallet-typed input {
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid #4a525a;
+  border-radius: 8px;
+  color: #fff;
+  font-family: v.$font-base;
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  padding: 9px 10px;
+  width: 110px;
+
+  &:focus {
+    border-color: v.$bad;
+    outline: none;
+  }
+}
+
+.wallet-message {
+  color: v.$good;
+  font-size: 13px;
+  font-weight: 700;
+  margin: 10px 0 0;
+  text-align: center;
+}
+
+.wallet-empty {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 6px 0 4px;
+  text-align: center;
+
+  p {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 14px;
+    margin: 0;
+  }
+}
+
+// (the bot's band beside a pick it made: the Bets page's chip, small)
+.w-tier {
+  border-radius: 3px;
+  color: #111;
+  flex-shrink: 0;
+  font-size: 8.5px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  margin-left: 6px;
+  padding: 2px 4px;
+  text-transform: uppercase;
+
+  &.lock {
+    background: $lock;
+    box-shadow: inset 0 0 0 1px rgba(255, 207, 74, 0.7);
+    color: $gold;
+  }
+
+  &.love {
+    background: v.$good;
+  }
+
+  &.bet {
+    background: v.$caution;
+  }
+
+  &.pass {
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.35);
+    color: rgba(255, 255, 255, 0.7);
+  }
+}
+
+.wallet-void {
+  color: rgba(255, 255, 255, 0.6);
+  font-style: italic;
+}
+
+.wallet-fine {
+  color: rgba(255, 255, 255, 0.45);
+  font-size: 11px;
+  line-height: 1.45;
+  margin: 8px 0 2px;
+}
+
+// You vs the bot: two rows, the names on the left
+.wallet-versus {
+  tbody th {
+    font-weight: 900;
+    text-align: left;
+  }
+
+  td {
+    font-size: 14px;
+    font-weight: 800;
+  }
+}
+
+// The leaderboard's periods: three small pills
+.wallet-periods {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 10px;
+
+  button {
+    background: rgba(0, 0, 0, 0.35);
+    border: 1px solid #4a525a;
+    border-radius: 999px;
+    color: rgba(255, 255, 255, 0.75);
+    cursor: pointer;
+    font-family: v.$font-base;
+    font-size: 12px;
+    font-weight: 800;
+    padding: 5px 12px;
+
+    &:hover {
+      border-color: var(--scoreboard-led);
+      color: #fff;
+    }
+
+    &:focus-visible {
+      outline: 2px solid #fff;
+      outline-offset: 2px;
+    }
+
+    &.active {
+      background: color-mix(in srgb, var(--scoreboard-led) 22%, transparent);
+      border-color: var(--scoreboard-led);
+      color: #fff;
+    }
+  }
+}
+
+.wallet-leaders {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+
+  li {
+    align-items: center;
+    border-radius: 8px;
+    display: grid;
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+    gap: 10px;
+    grid-template-columns: 28px 26px minmax(0, 1fr) auto auto 72px;
+    padding: 4px 6px;
+
+    &.me {
+      background: color-mix(in srgb, var(--scoreboard-led) 16%, transparent);
+      box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--scoreboard-led) 50%, transparent);
+    }
+  }
+}
+
+.leader-rank {
+  @include v.led-tile;
+  font-size: 12px;
+  height: 24px;
+  width: 28px;
+
+  &.top {
+    color: $gold;
+    text-shadow: 0 0 6px rgba(255, 207, 74, 0.6);
+  }
+}
+
+.leader-name {
+  color: #fff;
+  font-weight: 800;
+  overflow: hidden;
+  text-decoration: none;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  @include v.link-fade;
+
+  &:hover,
+  &:focus-visible {
+    @include v.link-lit;
+  }
+}
+
+.leader-record,
+.leader-roi {
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.leader-profit {
+  font-size: 14px;
+  font-weight: 900;
+  text-align: right;
+}
+
+// (a pick's chip beside its words in the tables)
+.wallet-bets .desk-pick {
+  align-items: center;
+}
+
+@media (max-width: 600px) {
+  .wallet-page {
+    padding: 14px 8px 90px;
+  }
+
+  .wallet-leaders li {
+    gap: 6px;
+    grid-template-columns: 24px 26px minmax(0, 1fr) auto 64px;
+  }
+
+  .leader-roi {
+    display: none;
+  }
+}
+
+// (a note's link: lit in the room's blue)
+.desk-note a,
+.wallet-fine a {
+  color: var(--scoreboard-led);
+  font-weight: 800;
+  text-decoration: none;
+
+  &:hover,
+  &:focus-visible {
+    text-decoration: underline;
+  }
+}
+
+// (the bets' tables: sideways inside their panel if they must; on a phone the sport's column goes (each game
+// shows its teams), the picks wrap, and the columns come in closer)
+.group-body {
+  overflow-x: auto;
+}
+
+@media (max-width: 600px) {
+  .group-body {
+    padding: 10px;
+  }
+
+  .wallet-bets {
+    font-size: 11.5px;
+
+    th,
+    td {
+      padding: 5px 4px;
+    }
+
+    tr > :first-child {
+      display: none;
+    }
+
+    td.desk-left {
+      white-space: normal;
+    }
+
+    .desk-pick b {
+      white-space: normal;
+    }
+
+    .desk-game img,
+    .desk-badge {
+      flex-shrink: 0;
+    }
+  }
+}
+
+// (the game under a pick: phones only, where the game's column goes)
+.w-phone-game {
+  display: none;
+}
+
+@media (max-width: 600px) {
+  .wallet-bets {
+    tr > :nth-child(2) {
+      display: none;
+    }
+
+    .w-phone-game {
+      color: rgba(255, 255, 255, 0.5);
+      display: block;
+      font-size: 10.5px;
+      font-weight: 700;
+      margin: 2px 0 0 36px;
+    }
+
+    .desk-group-count .w-phone-game {
+      margin-left: 0;
+    }
+  }
+}
+
+@media (max-width: 600px) {
+  .wallet-bets {
+    // (a game's own bets under its row: the game said once, above them)
+    .desk-grouped .w-phone-game {
+      display: none;
+    }
+
+    // (a result's words wrap under its amount)
+    td:last-child,
+    td:last-child small {
+      white-space: normal;
+    }
+
+    td:last-child small {
+      display: block;
+      max-width: 96px;
+      margin-left: auto;
+    }
+  }
+}

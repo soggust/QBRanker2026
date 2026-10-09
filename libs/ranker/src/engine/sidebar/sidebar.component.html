@@ -7,7 +7,8 @@
           [placeholder]="presetsLabel"
           title="Ready-made slider settings, each built around a style of play (hover an option to see what it weighs)"
           [(ngModel)]="skillPresets[skill]"
-          (ngModelChange)="onSkillPresetChange()"
+          (ngModelChange)="onSkillPresetChange(presetBar)"
+          (openedChange)="presetsOpened($event)"
         >
           @if (skillPresets[skill] === 'custom') {
             <mat-option value="custom" disabled="disabled">CUSTOM</mat-option>
@@ -17,7 +18,32 @@
           @for (option of skillPresetOptions; track option.key) {
             <mat-option [value]="option.key" [title]="option.description">{{ option.label | uppercase }}</mat-option>
           }
+          <!-- lists (phase 2): the user's own presets under the built-in ones, then Save as preset… (signed out: Sign in) -->
+          @if (account.user()) {
+            @if (userPresets.length) {
+              <mat-optgroup label="MY PRESETS">
+                @for (preset of userPresets; track preset.id) {
+                  <mat-option [value]="userPresetValue(preset)" [title]="preset.name">{{ preset.name | uppercase }}</mat-option>
+                }
+              </mat-optgroup>
+            }
+            <mat-option [value]="savePreset" title="Keep this tab's sliders under a name"><mat-icon fontIcon="add"></mat-icon>SAVE AS PRESET…</mat-option>
+          } @else {
+            <mat-option [value]="signInPreset" title="Sign in to save your own presets"><mat-icon fontIcon="login"></mat-icon>SIGN IN TO SAVE PRESETS</mat-option>
+          }
+          <!-- end lists -->
         </mat-select>
+        <!-- lists (phase 2): the user preset in use, and its Update / Rename / Delete -->
+        <preset-bar
+          #presetBar
+          [position]="skill"
+          [tabName]="presetsLabel.replace(' Presets...', '')"
+          [selected]="skillPresets[skill]"
+          (applied)="userPresetApplied($event)"
+          (picked)="skillPresets[skill] = $event"
+          (cleared)="userPresetCleared()"
+        ></preset-bar>
+        <!-- end lists -->
       </div>
 
       <!-- Stat groups; drag a card's handle to reorder the grid's groups -->

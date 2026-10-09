@@ -9,6 +9,9 @@
     [title]="name || 'Your account'"
   >
     <account-avatar [photo]="user.profile?.photo" [name]="name" [size]="26"></account-avatar>
+    <!-- friends (phase 2): a dot on the avatar while friend requests wait -->
+    <friends-badge dot></friends-badge>
+    <!-- end friends -->
     <span class="account-name">{{ first }}</span>
   </button>
 
@@ -29,6 +32,11 @@
     @for (item of items; track item.hash) {
       <a mat-menu-item [href]="item.hash" [class.current]="isOpen(item.hash)">
         <mat-icon aria-hidden="true" [fontIcon]="item.icon"></mat-icon><span>{{ item.label }}</span>
+        <!-- friends (phase 2): how many requests wait -->
+        @if (item.hash === '#friends') {
+          <friends-badge></friends-badge>
+        }
+        <!-- end friends -->
       </a>
     }
     <div class="account-divider" role="separator"></div>

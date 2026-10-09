@@ -1,4 +1,7 @@
-import { Component, ElementRef, HostListener, OnInit, ViewChild, isDevMode } from '@angular/core';
+import { Component, ElementRef, HostListener, OnInit, ViewChild, inject, isDevMode } from '@angular/core';
+// ---- wallet (phase 2) ----
+import { LinesService } from '../account/wallet/lines.service';
+// ---- end wallet ----
 import { SPORT_LINKS } from '@ranker/core/sports';
 import { insteadText } from '../player-card/analysis';
 import { americanOdds, headshot } from './bet-format';
@@ -66,6 +69,11 @@ export interface BetRow {
   price?: number;
   book?: string;
   why?: PickWhy | null;
+  // ---- wallet (phase 2) ----
+  // (its line, and its id in the bettor's ledger: "<ESPN event>:<market>", a prop "<event>:prop:<type>:<athlete>")
+  line?: number | null;
+  pickId?: string;
+  // ---- end wallet ----
 }
 
 // (an analyst's pick, as far as the page uses it: the call, its side, its case and its risk)
@@ -349,6 +357,10 @@ export class BetsPageComponent implements OnInit {
             price: p.odds,
             book: p.book,
             why: p.why ?? null,
+            // ---- wallet (phase 2) ----
+            line: p.line,
+            pickId: p.id,
+            // ---- end wallet ----
           });
         }
       }
@@ -390,7 +402,56 @@ export class BetsPageComponent implements OnInit {
     const locked = (r: BetRow) => (r.confidence === 'lock' ? 0 : 1);
     this.rows = algoRows.sort((a, b) => locked(a) - locked(b) || b.sureness - a.sureness || (a.game?.kickoff ?? '').localeCompare(b.game?.kickoff ?? ''));
     this.gameDays = this.buildGameDays();
+    // ---- wallet (phase 2) ----
+    this.buildBoards();
+    // ---- end wallet ----
   }
+
+  // ---- wallet (phase 2) ----
+  // Play betting: each game's every line (<game-lines>, ESPN's DraftKings board, the bot's picks lit), its
+  // ESPN id, start and the bot's picks on it, by the game filter's key; and the games on the boards the bot
+  // has no pick on, for the dropdown (their lines only). The slip (<bet-slip>) and #wallet do the rest.
+  readonly lines = inject(LinesService);
+  boards = new Map<string, { sport: string; event: string; start: string; matchup: string; picks: BetRow[] }>();
+  private buildBoards(): void {
+    for (const r of this.rows ?? []) {
+      const event = r.pickId?.split(':')[0];
+      if (!r.game || !event) continue;
+      const key = this.gameKey(r);
+      const b = this.boards.get(key) ?? { sport: r.sport, event, start: r.game.kickoff ?? r.game.date, matchup: r.game.matchup, picks: [] };
+      b.picks.push(r);
+      this.boards.set(key, b);
+    }
+    // (each sport's board on the days the picks are on: the lines, and the games without a pick)
+    void this.lines.games([...this.boards.values()]);
+  }
+
+  // (a game on ESPN's boards, not begun, with DraftKings' lines, that the bot has no pick on)
+  get moreGames(): { key: string; label: string }[] {
+    const out: { key: string; label: string; at: string }[] = [];
+    for (const g of this.lines.boards().values()) {
+      const key = `${g.sport}|${g.matchup}`;
+      if (g.state !== 'pre' || this.boards.has(key) || !(g.spread || g.total || g.ml)) continue;
+      const time = new Date(g.start).toLocaleString('en-US', { weekday: 'short', hour: 'numeric', minute: '2-digit' });
+      out.push({ key, label: `${g.sport.toUpperCase()} · ${g.matchup} · ${time}`, at: g.start });
+    }
+    return out.sort((a, b) => a.at.localeCompare(b.at) || a.label.localeCompare(b.label));
+  }
+
+  // (the chosen game's board: one with picks, or one from the boards alone)
+  boardFor(key: string): { sport: string; event: string; start: string; matchup: string; picks: BetRow[] } | null {
+    const known = this.boards.get(key);
+    if (known) return known;
+    for (const g of this.lines.boards().values()) {
+      if (`${g.sport}|${g.matchup}` === key) {
+        const board = { sport: g.sport, event: g.event, start: g.start, matchup: g.matchup, picks: [] };
+        this.boards.set(key, board);
+        return board;
+      }
+    }
+    return null;
+  }
+  // ---- end wallet ----
 
   // A team logo's address: a path under the sport's own site, or a full address as it is
   logoSrc(r: BetRow, logo: string): string {

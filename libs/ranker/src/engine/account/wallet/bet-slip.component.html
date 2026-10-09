@@ -1,0 +1,104 @@
+<!-- The bet slip: shut, a stack of chips in the corner with how many bets are on it; open, a drawer (a sheet
+     on phones): each bet with its stake in chips, what it'd win, then Place -->
+@if (!wallet.slipOpen() && (wallet.slip().length || wallet.placed()?.placed)) {
+  <button type="button" class="slip-tab" (click)="wallet.slipOpen.set(true)" [attr.aria-label]="'Bet slip, ' + wallet.slip().length + ' bets'">
+    <span class="slip-stack" aria-hidden="true"><i></i><i></i><i></i></span>
+    <span class="slip-tab-text">Bet slip</span>
+    <b class="slip-count">{{ wallet.slip().length }}</b>
+  </button>
+}
+
+@if (wallet.slipOpen()) {
+  <aside #panel class="slip" role="dialog" aria-label="Bet slip" tabindex="-1">
+    <header class="slip-head">
+      <h2>Bet slip</h2>
+      @if (account.signedIn()) {
+        <a class="slip-balance" href="#wallet" title="Your play money: open the wallet">
+          <small>Wallet</small><b>{{ wallet.balance() | number: '1.0-2' }}u</b>
+        </a>
+      }
+      <button type="button" class="slip-close" aria-label="Close the slip" (click)="close()"><mat-icon aria-hidden="true" fontIcon="close"></mat-icon></button>
+    </header>
+
+    @if (!account.signedIn()) {
+      <div class="slip-signin">
+        <p>Play along with the bot: <b>1,000 play units</b> to start, no real money. Sign in to place these.</p>
+        <button type="button" class="primary" (click)="account.openLogin()">Sign in</button>
+      </div>
+    }
+
+    @if (wallet.slip().length) {
+      <ol class="slip-list">
+        @for (s of wallet.slip(); track s.key) {
+          @let problem = s.stake > 0 ? wallet.problem(s) : null;
+          <li class="slip-item" [class.bot]="s.botPick">
+            <div class="slip-pick">
+              @if (s.tier) {
+                <span class="slip-tier" [ngClass]="s.tier" [title]="'The bot’s pick: ' + s.tier + (s.kelly !== null ? ', Kelly ' + s.kelly : '')">{{ s.tier }}</span>
+              }
+              <b class="slip-words">{{ s.pick }}</b>
+              <span class="slip-odds">{{ oddsText(s.odds) }}</span>
+              <button type="button" class="slip-remove" [attr.aria-label]="'Remove ' + s.pick" (click)="wallet.remove(s.key)"><mat-icon aria-hidden="true" fontIcon="close"></mat-icon></button>
+            </div>
+            <small class="slip-game">{{ s.sport.toUpperCase() }} · {{ s.matchup }} · {{ s.start | date: 'EEE h:mm a' }}</small>
+            <div class="slip-stake">
+              <label class="slip-amount">
+                <span class="visually-hidden">Stake on {{ s.pick }}, in units</span>
+                <input type="number" inputmode="numeric" min="1" step="1" placeholder="Stake" [value]="s.stake || ''" (input)="typed(s, $any($event.target).value)" />
+                <span aria-hidden="true">u</span>
+              </label>
+              <div class="slip-chips" role="group" [attr.aria-label]="'Add chips to the stake on ' + s.pick">
+                @for (c of chips; track c) {
+                  <button type="button" class="stake-chip" [ngClass]="'c' + c" [attr.aria-label]="'Add ' + c" [disabled]="room(s) - s.stake < 1" (click)="chip(s, c)">
+                    {{ c }}
+                    <svg class="chip-rim" aria-hidden="true"><rect pathLength="48" /></svg>
+                  </button>
+                }
+              </div>
+            </div>
+            @if (problem || failure(s); as why) {
+              <p class="slip-problem" role="alert">{{ why }}</p>
+            } @else if (s.stake > 0) {
+              <p class="slip-pays">To win <b>{{ toWin(s.stake, s.odds) | number: '1.2-2' }}</b> · Pays <b>{{ payout(s.stake, s.odds) | number: '1.2-2' }}</b></p>
+            }
+          </li>
+        }
+      </ol>
+    } @else if (wallet.placed()?.placed; as n) {
+      <p class="slip-done" role="status">
+        <mat-icon aria-hidden="true" fontIcon="check_circle"></mat-icon>{{ n }} bet{{ n > 1 ? 's' : '' }} placed. <a href="#wallet">See them in your wallet</a>
+      </p>
+    } @else {
+      <p class="slip-empty">Tap a price on any game's lines to add it here.</p>
+    }
+
+    @if (wallet.slip().length) {
+      <!-- (the tray: the slip's totals, and Place) -->
+      <footer class="slip-tray">
+        <div class="slip-totals">
+          <span><small>Stake</small><b>{{ totals.stake }}u</b></span>
+          <span><small>To win</small><b class="up">{{ totals.toWin | number: '1.2-2' }}u</b></span>
+          <span><small>Pays</small><b>{{ totals.payout | number: '1.2-2' }}u</b></span>
+        </div>
+        @if (error) {
+          <p class="slip-problem" role="alert">{{ error }}</p>
+        }
+        <div class="slip-actions">
+          <button type="button" class="link" (click)="wallet.clearSlip()">Clear</button>
+          @if (account.signedIn()) {
+            <button type="button" class="primary slip-place" [disabled]="!totals.count || problems || wallet.placing()" (click)="place()">
+              @if (wallet.placing()) {
+                <span class="spinner" aria-hidden="true"></span>Placing…
+              } @else {
+                Place {{ totals.count || '' }} bet{{ totals.count === 1 ? '' : 's' }}
+              }
+            </button>
+          } @else {
+            <button type="button" class="primary slip-place" (click)="account.openLogin()">Sign in to place</button>
+          }
+        </div>
+        <p class="slip-fine">Play money. Bets settle from the final score after the game; prices are checked against DraftKings' board.</p>
+      </footer>
+    }
+  </aside>
+}

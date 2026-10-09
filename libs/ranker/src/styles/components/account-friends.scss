@@ -1,0 +1,218 @@
+@use "../variables" as v;
+
+// ===========================================================================
+// The Friends page (#friends: friends-page.component.ts), on the account pages' column and panels
+// (account-page.scss): the username search, then rows of people (requests, friends, sent)
+// ===========================================================================
+
+// ---------------------------------------------------------------------------
+// The search: a magnifier in the field, a clear button at its end
+// ---------------------------------------------------------------------------
+.search-input {
+  .search-icon {
+    color: rgba(255, 255, 255, 0.45);
+    left: 10px;
+    pointer-events: none;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    @include v.icon-size(20px);
+  }
+
+  input {
+    padding-left: 38px !important;
+    padding-right: 40px;
+  }
+
+  &:focus-within .search-icon {
+    color: var(--scoreboard-led);
+  }
+}
+
+.clear-search {
+  align-items: center;
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.55);
+  cursor: pointer;
+  display: flex;
+  height: 100%;
+  justify-content: center;
+  position: absolute;
+  right: 0;
+  width: 40px;
+
+  .mat-icon {
+    @include v.icon-size(18px);
+  }
+
+  &:hover,
+  &:focus-visible {
+    color: var(--scoreboard-led);
+    outline: none;
+  }
+}
+
+.search-status {
+  margin-top: 8px;
+
+  &:empty {
+    display: none;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// People: the avatar and names (to the profile) on the left, what you can do on the right
+// ---------------------------------------------------------------------------
+.people {
+  display: flex;
+  flex-direction: column;
+  list-style: none;
+  margin: 0;
+
+  &.stale {
+    opacity: 0.6;
+  }
+}
+
+.panel-pad.people {
+  padding-bottom: 10px;
+  padding-top: 8px;
+}
+
+.panel-pad .people {
+  margin-top: 4px;
+  padding: 0;
+}
+
+.person {
+  align-items: center;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  min-height: 60px;
+  padding: 8px 0;
+
+  &:first-child {
+    border-top: none;
+  }
+}
+
+.person-link {
+  align-items: center;
+  border-radius: 10px;
+  color: inherit;
+  display: flex;
+  gap: 12px;
+  margin: -4px -8px;
+  min-width: 0;
+  padding: 4px 8px;
+  text-decoration: none;
+  transition: background 0.12s ease;
+
+  &:is(a):hover,
+  &:is(a):focus-visible {
+    background: rgba(255, 255, 255, 0.05);
+    outline: none;
+
+    .person-name {
+      color: var(--scoreboard-led);
+    }
+  }
+
+  &:is(a):focus-visible {
+    box-shadow: 0 0 0 2px var(--scoreboard-led);
+  }
+
+  &.gone {
+    opacity: 0.55;
+  }
+}
+
+.person-names {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.person-name,
+.person-user {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.person-name {
+  color: #fff;
+  font-size: 15px;
+  font-weight: 800;
+  transition: color 0.12s ease;
+}
+
+.person-user {
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 12.5px;
+}
+
+.person-action {
+  flex: 0 0 auto;
+}
+
+// (a friend's profile still loading)
+.avatar-skeleton,
+.line-skeleton {
+  background: rgba(255, 255, 255, 0.08);
+  display: block;
+}
+
+.avatar-skeleton {
+  border-radius: 50%;
+  flex: 0 0 auto;
+  height: 40px;
+  width: 40px;
+}
+
+.line-skeleton {
+  border-radius: 4px;
+  height: 12px;
+  width: 130px;
+}
+
+// (the requests waiting on you: the panel's edge lit)
+card-panel.requests-panel {
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--scoreboard-led) 55%, transparent),
+    0 6px 18px rgba(0, 0, 0, 0.45);
+}
+
+.empty-friends {
+  align-items: center;
+  display: flex;
+  gap: 14px;
+
+  .mat-icon {
+    color: color-mix(in srgb, var(--scoreboard-led) 70%, transparent);
+    flex: 0 0 auto;
+    @include v.icon-size(34px);
+  }
+
+  p {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 13.5px;
+    line-height: 1.5;
+    margin: 0;
+  }
+}
+
+// Phones: the action under the names when it won't fit beside them
+@media (max-width: 640px) {
+  .person {
+    flex-wrap: wrap;
+    row-gap: 6px;
+  }
+
+  .person-action {
+    margin-left: auto;
+  }
+}

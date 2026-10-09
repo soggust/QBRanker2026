@@ -22,6 +22,22 @@
             <mat-icon fontIcon="share"></mat-icon>
           </button>
         }
+        <!-- tracker (phase 2): (pinned to the Tracker, to follow over the season; signed out, the sign-in first) -->
+        @if (sides.length) {
+          <button
+            type="button"
+            class="cmp-pin"
+            [class.pinned]="pinned"
+            [disabled]="pinning"
+            [attr.aria-label]="pinned ? 'Pinned to your Tracker: pin again' : 'Pin to Tracker'"
+            [title]="pinned ? 'Pinned to your Tracker (pin again to start a new one)' : account.signedIn() ? 'Pin to Tracker: follow how they move this season' : 'Pin to Tracker (sign in first)'"
+            (click)="pin()"
+            animate.enter="share-in"
+          >
+            <mat-icon [class.spin]="pinning" [fontIcon]="pinning ? 'autorenew' : 'push_pin'"></mat-icon>
+          </button>
+        }
+        <!-- end tracker -->
         <button type="button" aria-label="Close" title="Close (Esc)" (click)="compare.close()">
           <mat-icon fontIcon="close"></mat-icon>
         </button>
@@ -165,6 +181,17 @@
       </div>
       <!-- (always there, so a screen reader hears it when it's said) -->
       <p class="compare-note" role="status">{{ compare.note }}</p>
+      <!-- tracker (phase 2): (pinned, or why not: under the pin for a moment, the way to the Tracker in it) -->
+      <p class="cmp-pin-note" role="status">
+        @if (pinNote) {
+          <span class="cmp-pin-toast" animate.enter="share-in"
+            >{{ pinNote.text }}@if (pinNote.link) {
+              · <a href="#tracker">Open Tracker</a>
+            }</span
+          >
+        }
+      </p>
+      <!-- end tracker -->
     </header>
 
     <nav class="card-tabs" role="tablist">

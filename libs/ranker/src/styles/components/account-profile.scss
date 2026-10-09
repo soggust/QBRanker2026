@@ -1,0 +1,488 @@
+@use "../variables" as v;
+
+// ===========================================================================
+// A public profile (#u/<username>: user-profile.component.ts), on the account pages' column and panels
+// (account-page.scss): the hero (picture, names, bio, team, the friendship), then a panel per thing they
+// share (lists, bets, presets, tracker), each its contents or why it's hidden
+// ===========================================================================
+
+.profile-hero {
+  align-items: flex-start;
+
+  .hero-text {
+    flex: 1;
+  }
+
+  .hero-bio {
+    color: rgba(255, 255, 255, 0.82);
+    font-size: 14px;
+    line-height: 1.5;
+    margin: 8px 0 0;
+    overflow-wrap: anywhere;
+    white-space: pre-line;
+  }
+
+  .hero-action {
+    align-self: center;
+    flex: 0 0 auto;
+  }
+
+  a.secondary {
+    text-decoration: none;
+  }
+}
+
+.hero-meta {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  margin-top: 10px;
+
+  &:empty {
+    display: none;
+  }
+}
+
+.fav-team,
+.joined {
+  align-items: center;
+  color: rgba(255, 255, 255, 0.62);
+  display: inline-flex;
+  font-size: 12px;
+  font-weight: 700;
+  gap: 6px;
+}
+
+.fav-team img {
+  background: radial-gradient(circle at 35% 30%, #3a3a3a, #161616 70%);
+  border: 1px solid #3a3a3a;
+  border-radius: 50%;
+  box-sizing: border-box;
+  height: 26px;
+  object-fit: contain;
+  padding: 3px;
+  width: 26px;
+}
+
+.joined .mat-icon {
+  @include v.icon-size(15px);
+}
+
+.self-note {
+  align-items: center;
+  align-self: flex-start;
+  background: rgba(0, 0, 0, 0.62);
+  border-radius: 999px;
+  color: rgba(255, 255, 255, 0.75);
+  display: flex;
+  font-size: 12.5px;
+  gap: 8px;
+  margin: -6px 0 0;
+  padding: 6px 14px 6px 10px;
+
+  .mat-icon {
+    color: var(--scoreboard-led);
+    flex: 0 0 auto;
+    @include v.icon-size(16px);
+  }
+
+  a {
+    color: var(--scoreboard-led);
+  }
+}
+
+// (the panels two across on a wide screen: Bets down the right, the rest stacked on the left; one column on a phone)
+.profile-sections {
+  align-items: start;
+  display: grid;
+  gap: 18px;
+  grid-template-areas:
+    'lists bets'
+    'presets bets'
+    'tracker bets';
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: auto auto 1fr;
+
+  > .lists-panel { grid-area: lists; }
+  > .bets-panel { grid-area: bets; }
+  > .presets-panel { grid-area: presets; }
+  > .tracker-panel { grid-area: tracker; }
+}
+
+// ---------------------------------------------------------------------------
+// A panel's rows: lists (links to the list), presets and pins
+// ---------------------------------------------------------------------------
+.item-list {
+  display: flex;
+  flex-direction: column;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+
+  li + li {
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+  }
+}
+
+.item-link,
+.item-row {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 9px 0;
+}
+
+.item-link {
+  border-radius: 8px;
+  color: inherit;
+  margin: 0 -8px;
+  padding: 9px 8px;
+  text-decoration: none;
+
+  &:hover,
+  &:focus-visible {
+    background: rgba(255, 255, 255, 0.05);
+    outline: none;
+
+    .item-title {
+      color: var(--scoreboard-led);
+    }
+  }
+
+  &:focus-visible {
+    box-shadow: 0 0 0 2px var(--scoreboard-led);
+  }
+}
+
+.item-title {
+  color: #fff;
+  font-size: 14px;
+  font-weight: 800;
+  overflow-wrap: anywhere;
+  transition: color 0.12s ease;
+}
+
+.item-meta {
+  align-items: center;
+  color: rgba(255, 255, 255, 0.55);
+  display: flex;
+  flex-wrap: wrap;
+  font-size: 12px;
+  gap: 4px;
+}
+
+.sport-tag {
+  border: 1px solid color-mix(in srgb, var(--scoreboard-led) 45%, transparent);
+  border-radius: 4px;
+  color: var(--scoreboard-led);
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  margin-right: 4px;
+  padding: 1px 5px;
+  text-transform: uppercase;
+}
+
+.panel-link {
+  align-items: center;
+  color: var(--scoreboard-led);
+  display: inline-flex;
+  font-size: 12.5px;
+  font-weight: 800;
+  gap: 4px;
+  margin-top: 10px;
+  text-decoration: none;
+
+  .mat-icon {
+    @include v.icon-size(16px);
+    transition: transform 0.12s ease;
+  }
+
+  &:hover .mat-icon,
+  &:focus-visible .mat-icon {
+    transform: translateX(3px);
+  }
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.empty-note,
+.more-note {
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 13px;
+  margin: 0;
+}
+
+.more-note {
+  font-size: 12px;
+  margin-top: 6px;
+}
+
+.section-loading {
+  align-items: center;
+  color: rgba(255, 255, 255, 0.55);
+  display: flex;
+  font-size: 12.5px;
+  gap: 8px;
+}
+
+// ---------------------------------------------------------------------------
+// Hidden: a lock (private) or two people (friends only), and why
+// ---------------------------------------------------------------------------
+.hidden-state {
+  align-items: center;
+  background: repeating-linear-gradient(-45deg, rgba(255, 255, 255, 0.025) 0 8px, transparent 8px 16px);
+  border: 1px dashed rgba(255, 255, 255, 0.16);
+  border-radius: 10px;
+  display: flex;
+  gap: 12px;
+  padding: 14px 16px;
+
+  > .mat-icon {
+    color: rgba(255, 255, 255, 0.45);
+    flex: 0 0 auto;
+    @include v.icon-size(24px);
+  }
+
+  &.small {
+    border-style: none;
+    background: none;
+    gap: 8px;
+    padding: 2px 0;
+
+    > .mat-icon {
+      @include v.icon-size(17px);
+    }
+  }
+}
+
+.hidden-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.hidden-title {
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+}
+
+.hidden-note {
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 12.5px;
+  line-height: 1.45;
+}
+
+// ---------------------------------------------------------------------------
+// Bets: the record on a strip of lit numbers, then the open and settled bets
+// ---------------------------------------------------------------------------
+.bets-body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.record-strip {
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  display: grid;
+  grid-auto-columns: minmax(0, 1fr);
+  grid-auto-flow: column;
+  padding: 10px 4px;
+}
+
+.stat {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+
+  & + .stat {
+    border-left: 1px solid rgba(255, 255, 255, 0.08);
+  }
+}
+
+.stat-value {
+  color: var(--scoreboard-led);
+  font-size: 17px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 800;
+  text-shadow: var(--scoreboard-glow);
+  white-space: nowrap;
+
+  &.up {
+    color: v.$good;
+    text-shadow: none;
+  }
+
+  &.down {
+    color: v.$bad;
+    text-shadow: none;
+  }
+}
+
+.stat-label {
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+}
+
+.bets-group h3 {
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1.2px;
+  margin: 0 0 6px;
+  text-transform: uppercase;
+}
+
+.bet-list {
+  display: flex;
+  flex-direction: column;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.bet {
+  align-items: center;
+  border-left: 3px solid rgba(255, 255, 255, 0.15);
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+  padding: 7px 0 7px 10px;
+
+  & + .bet {
+    margin-top: 4px;
+  }
+
+  &.won {
+    border-left-color: v.$good;
+  }
+
+  &.lost {
+    border-left-color: v.$bad;
+  }
+}
+
+.bet-main,
+.bet-side {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.bet-side {
+  align-items: flex-end;
+  flex: 0 0 auto;
+  text-align: right;
+}
+
+.bet-pick {
+  color: #fff;
+  font-size: 13.5px;
+  font-weight: 800;
+  overflow-wrap: anywhere;
+}
+
+.bet-odds {
+  color: rgba(255, 255, 255, 0.6);
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  margin-left: 4px;
+}
+
+.bot-tag {
+  border: 1px solid var(--scoreboard-led);
+  border-radius: 999px;
+  color: var(--scoreboard-led);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  margin-left: 6px;
+  padding: 0 6px;
+  text-transform: uppercase;
+  vertical-align: 1px;
+}
+
+.bet-matchup {
+  align-items: center;
+  color: rgba(255, 255, 255, 0.55);
+  display: flex;
+  font-size: 12px;
+}
+
+.bet-stake,
+.bet-result {
+  color: #fff;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 800;
+  white-space: nowrap;
+
+  &.up {
+    color: v.$good;
+  }
+
+  &.down {
+    color: v.$bad;
+  }
+}
+
+.bet-when {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 11.5px;
+  white-space: nowrap;
+}
+
+// ---------------------------------------------------------------------------
+// Phones: one column, the friendship button under the names
+// ---------------------------------------------------------------------------
+@media (max-width: 760px) {
+  .profile-sections {
+    grid-template-areas: 'lists' 'bets' 'presets' 'tracker';
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto;
+  }
+}
+
+@media (max-width: 640px) {
+  .profile-sections {
+    gap: 14px;
+  }
+
+  .profile-hero {
+    flex-wrap: wrap;
+    gap: 14px;
+
+    account-avatar {
+      --size: 64px !important;
+    }
+
+    .hero-text {
+      flex: 1 1 calc(100% - 80px);
+    }
+
+    .hero-action {
+      align-self: auto;
+      display: flex;
+      justify-content: flex-end;
+      width: 100%;
+    }
+  }
+
+  .stat-value {
+    font-size: 15px;
+  }
+}

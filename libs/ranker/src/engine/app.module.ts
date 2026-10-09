@@ -30,6 +30,15 @@ import { PositionService } from './position.service';
 import { BetsPageComponent } from './bets/bets-page.component';
 import { ModelDeskComponent } from './bets/model-desk.component';
 import { ACCOUNT_COMPONENTS } from './account/account-components';
+// ---- lists (phase 2) ----
+import { LISTS_COMPONENTS } from './account/lists/lists-components';
+// ---- end lists ----
+// ---- tracker (phase 2) ----
+import { TrackerPageComponent } from './account/tracker/tracker-page.component';
+// ---- end tracker ----
+// ---- wallet (phase 2) ----
+import { WALLET_COMPONENTS } from './account/wallet/wallet-components';
+// ---- end wallet ----
 
 @NgModule({
   declarations: [
@@ -53,6 +62,15 @@ import { ACCOUNT_COMPONENTS } from './account/account-components';
     BetsPageComponent,
     ModelDeskComponent,
     ...ACCOUNT_COMPONENTS,
+    // ---- lists (phase 2) ----
+    ...LISTS_COMPONENTS,
+    // ---- end lists ----
+    // ---- tracker (phase 2) ----
+    TrackerPageComponent,
+    // ---- end tracker ----
+    // ---- wallet (phase 2) ----
+    ...WALLET_COMPONENTS,
+    // ---- end wallet ----
   ],
   bootstrap: [AppComponent],
   // (the column headers' drag and drop reorders columns through the position service)

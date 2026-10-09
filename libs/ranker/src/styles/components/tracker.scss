@@ -1,0 +1,1107 @@
+@use "../variables" as v;
+@use "account-kit" as kit;
+
+// ===========================================================================
+// The Tracker (#tracker: tracker-page.component): a desk like the Algorithm's down the middle of the sport's
+// field (the scoreboard on top with its tiles, dark brushed gunmetal under it), and a scoreboard card per
+// pin: the sides as the compare view's tapes (each in its side's color, the team's logo faint behind), where
+// each stands now against when it was pinned, the rank since on a step chart, the numbers and their moves.
+// ===========================================================================
+:host {
+  box-sizing: border-box;
+  display: block;
+  height: calc(100% - var(--sport-bar-height));
+  overflow-y: auto;
+  // (a move's colors: better the site's green, worse its red)
+  --good: #{v.$good};
+  --bad: #{v.$bad};
+}
+
+@include v.scrollbars($corner: false);
+@include kit.pills;
+@include kit.buttons;
+
+.tracker-page {
+  box-sizing: border-box;
+  color: #eee;
+  font-family: v.$font-base;
+  margin: 0 auto;
+  max-width: 1100px;
+  padding: 26px 16px 48px;
+}
+
+.tracker-desk {
+  @include v.scoreboard-panel(12px, 0 12px 32px rgba(0, 0, 0, 0.5));
+  @include v.gunmetal;
+  padding: 0 18px 18px;
+}
+
+// ---------------------------------------------------------------------------
+// The top: whose tracker, the tiles, the sports and who sees it, on the scoreboard out to the edges
+// ---------------------------------------------------------------------------
+.tracker-top {
+  background: var(--scoreboard-dots), var(--scoreboard);
+  border-bottom: 1px solid color-mix(in srgb, var(--scoreboard-led) 55%, transparent);
+  border-radius: 11px 11px 0 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px 24px;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0 -18px 18px;
+  padding: 18px 20px 16px;
+}
+
+.tracker-head {
+  align-items: center;
+  display: flex;
+  gap: 14px;
+  min-width: 0;
+}
+
+.tracker-badge {
+  align-items: center;
+  background: radial-gradient(circle at 35% 30%, color-mix(in srgb, var(--scoreboard-led) 40%, #222), #151515 70%);
+  border: 1px solid color-mix(in srgb, var(--scoreboard-led) 60%, transparent);
+  border-radius: 50%;
+  box-shadow: 0 0 12px color-mix(in srgb, var(--scoreboard-led) 35%, transparent);
+  color: var(--scoreboard-led);
+  display: flex;
+  flex: none;
+  height: 42px;
+  justify-content: center;
+  width: 42px;
+
+  .mat-icon {
+    @include v.icon-size(22px);
+    transform: rotate(35deg);
+  }
+}
+
+.tracker-heading {
+  min-width: 0;
+
+  h2 {
+    color: #fff;
+    @include v.headline(22px);
+    letter-spacing: 0.75px;
+    margin: 0;
+    text-transform: uppercase;
+  }
+}
+
+.tracker-sub {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 12.5px;
+  margin: 2px 0 0;
+}
+
+.tracker-tiles {
+  display: flex;
+  gap: 8px;
+}
+
+.tracker-tile {
+  @include v.led-tile;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 78px;
+  padding: 6px 10px;
+
+  small {
+    color: rgba(255, 255, 255, 0.55);
+    font-family: v.$font-base;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  b {
+    font-family: v.$font-base;
+    font-size: 18px;
+    font-weight: 900;
+  }
+}
+
+.up {
+  color: var(--good);
+}
+
+.down {
+  color: var(--bad);
+}
+
+.tracker-controls {
+  align-items: center;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+  display: flex;
+  flex-basis: 100%;
+  flex-wrap: wrap;
+  gap: 10px 18px;
+  justify-content: space-between;
+  padding-top: 12px;
+}
+
+.tracker-sports,
+.tracker-share {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+
+  a.game-filter {
+    text-decoration: none;
+  }
+}
+
+.tracker-share {
+  margin-left: auto;
+}
+
+.tracker-share-label {
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  margin-right: 4px;
+  text-transform: uppercase;
+}
+
+// (a round icon button on the board: copy the link, unpin, the pin's menu)
+.tracker-icon {
+  align-items: center;
+  background: none;
+  border: none;
+  border-radius: 8px;
+  color: rgba(255, 255, 255, 0.65);
+  cursor: pointer;
+  display: inline-flex;
+  height: 34px;
+  justify-content: center;
+  padding: 0;
+  transition:
+    color 0.12s,
+    background 0.12s;
+  width: 34px;
+
+  .mat-icon {
+    @include v.icon-size(20px);
+  }
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--scoreboard-led);
+    outline-offset: 1px;
+  }
+
+  // (unpin asked once: press again)
+  &.confirm {
+    background: color-mix(in srgb, var(--bad) 18%, transparent);
+    color: var(--bad);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Before the cards: signed out, loading, private, none yet
+// ---------------------------------------------------------------------------
+.tracker-empty {
+  align-items: center;
+  color: rgba(255, 255, 255, 0.78);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0 auto;
+  max-width: 520px;
+  padding: 40px 12px 36px;
+  text-align: center;
+
+  &[role="status"] {
+    flex-direction: row;
+    justify-content: center;
+  }
+
+  h3 {
+    color: #fff;
+    @include v.headline(20px);
+    margin: 0;
+  }
+
+  p {
+    font-size: 14px;
+    line-height: 1.55;
+    margin: 0;
+  }
+
+  .primary {
+    margin-top: 8px;
+    text-decoration: none;
+  }
+}
+
+.tracker-empty-icon {
+  @include v.icon-size(44px);
+  color: var(--scoreboard-led);
+  filter: drop-shadow(0 0 10px color-mix(in srgb, var(--scoreboard-led) 50%, transparent));
+}
+
+.inline-icon {
+  @include v.icon-size(16px);
+  color: var(--scoreboard-led);
+  vertical-align: -3px;
+}
+
+.spinner.tiny {
+  border-width: 1.5px;
+  height: 12px;
+  width: 12px;
+}
+
+// ---------------------------------------------------------------------------
+// A pin's card
+// ---------------------------------------------------------------------------
+.tracker-list {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.pin-card {
+  @include v.scoreboard-panel(12px, 0 6px 18px rgba(0, 0, 0, 0.45));
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 0 14px 12px;
+
+  &.pin-busy {
+    opacity: 0.6;
+  }
+}
+
+// (a card on the move: lifted; its place a dashed slot)
+.pin-card.cdk-drag-preview {
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.65);
+}
+
+.pin-card.cdk-drag-placeholder {
+  background: transparent;
+  border: 1px dashed rgba(255, 255, 255, 0.25);
+  box-shadow: none;
+  opacity: 0.6;
+
+  > * {
+    visibility: hidden;
+  }
+}
+
+.tracker-list.cdk-drop-list-dragging .pin-card:not(.cdk-drag-placeholder) {
+  transition: transform 0.22s cubic-bezier(0, 0, 0.2, 1);
+}
+
+// The top strip: the handle, the name and when, the actions
+.pin-head {
+  align-items: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  display: flex;
+  gap: 8px;
+  margin: 0 -14px;
+  padding: 10px 10px 10px 8px;
+}
+
+.pin-handle {
+  color: rgba(255, 255, 255, 0.35);
+  cursor: grab;
+  display: flex;
+
+  &:hover {
+    color: #fff;
+  }
+
+  .mat-icon {
+    @include v.icon-size(22px);
+  }
+}
+
+.pin-title {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+
+  h3 {
+    color: #fff;
+    @include v.hand(19px);
+    line-height: 1.15;
+    margin: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.pin-title-input {
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid var(--scoreboard-led);
+  border-radius: 8px;
+  box-sizing: border-box;
+  color: #fff;
+  @include v.hand(17px);
+  max-width: 460px;
+  outline: none;
+  padding: 3px 10px;
+  width: 100%;
+}
+
+.pin-when {
+  align-items: center;
+  color: rgba(255, 255, 255, 0.5);
+  display: inline-flex;
+  font-size: 11px;
+  font-weight: 700;
+  gap: 4px;
+  letter-spacing: 0.03em;
+
+  .mat-icon {
+    @include v.icon-size(12px);
+    color: var(--scoreboard-led);
+    transform: rotate(35deg);
+  }
+}
+
+.pin-actions {
+  align-items: center;
+  display: flex;
+  flex: none;
+  gap: 2px;
+}
+
+// (the full comparison: a quiet pill that lights up)
+.pin-open {
+  align-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 999px;
+  color: #fff;
+  display: inline-flex;
+  font-size: 11px;
+  font-weight: 800;
+  gap: 5px;
+  height: 28px;
+  letter-spacing: 0.08em;
+  margin-right: 4px;
+  padding: 0 12px 0 9px;
+  text-decoration: none;
+  text-transform: uppercase;
+  transition:
+    border-color 0.12s,
+    color 0.12s;
+
+  .mat-icon {
+    @include v.icon-size(17px);
+  }
+
+  &:hover {
+    border-color: var(--scoreboard-led);
+    color: var(--scoreboard-led);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--scoreboard-led);
+    outline-offset: 2px;
+  }
+}
+
+// The sides: a tape each, as the compare view's
+.pin-sides {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(var(--sides, 2), minmax(0, 1fr));
+}
+
+.pin-side {
+  background:
+    linear-gradient(160deg, color-mix(in srgb, var(--team-badge, #555) 30%, transparent), transparent 62%),
+    rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  box-shadow:
+    inset 0 3px 0 var(--side, transparent),
+    0 4px 12px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+  overflow: hidden;
+  padding: 13px 12px 9px;
+  position: relative;
+
+  > :not(.pin-texture) {
+    position: relative;
+  }
+}
+
+.pin-texture {
+  inset: 0;
+  pointer-events: none;
+  position: absolute;
+
+  img {
+    height: 165%;
+    opacity: 0.08;
+    position: absolute;
+    right: -16%;
+    top: 50%;
+    transform: translateY(-50%) rotate(-8deg);
+  }
+}
+
+.pin-who {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+  min-width: 0;
+}
+
+// (the headshot ringed in the side's color; a team its logo)
+.pin-face {
+  align-items: center;
+  background: color-mix(in srgb, var(--team-badge, #333) 65%, #000);
+  border: 2px solid var(--side);
+  border-radius: 50%;
+  box-shadow: 0 0 10px color-mix(in srgb, var(--side) 35%, transparent);
+  display: flex;
+  flex: none;
+  height: 44px;
+  justify-content: center;
+  overflow: hidden;
+  width: 44px;
+
+  img {
+    height: 100%;
+    object-fit: cover;
+    object-position: top;
+    width: 100%;
+  }
+
+  &.logo-face img {
+    height: 72%;
+    object-fit: contain;
+    width: 72%;
+
+    &.white-logo {
+      filter: brightness(0) invert(1);
+    }
+  }
+
+  .mat-icon {
+    color: rgba(255, 255, 255, 0.6);
+  }
+}
+
+.pin-names {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.pin-name {
+  color: #fff;
+  @include v.hand(17px);
+  line-height: 1.08;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+  white-space: nowrap;
+}
+
+.pin-meta {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.pin-standing {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 8px;
+}
+
+// (the rank now, on the LED tile in its rank's color)
+.pin-rank {
+  @include v.led-tile;
+  @include v.tone-glow(60%, 8px);
+  border-radius: 6px;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.14),
+    inset 0 0 6px rgba(0, 0, 0, 0.6);
+  font-size: 18px;
+  height: 36px;
+  min-width: 46px;
+  padding: 2px 6px 0;
+
+  &.pending {
+    --tone: #888;
+    font-size: 14px;
+  }
+}
+
+.pin-of {
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+// (the move since: up green, down red, none grey)
+.pin-move {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  color: rgba(255, 255, 255, 0.7);
+  display: inline-flex;
+  font-size: 11px;
+  font-weight: 800;
+  gap: 2px;
+  height: 22px;
+  letter-spacing: 0.03em;
+  margin-left: auto;
+  padding: 0 9px 0 7px;
+  white-space: nowrap;
+
+  .mat-icon {
+    @include v.icon-size(14px);
+  }
+
+  &.good {
+    background: color-mix(in srgb, var(--good) 14%, transparent);
+    border-color: color-mix(in srgb, var(--good) 45%, transparent);
+    color: var(--good);
+  }
+
+  &.bad {
+    background: color-mix(in srgb, var(--bad) 14%, transparent);
+    border-color: color-mix(in srgb, var(--bad) 45%, transparent);
+    color: var(--bad);
+  }
+}
+
+.pin-foot {
+  align-items: center;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.55);
+  display: flex;
+  flex-wrap: wrap;
+  font-size: 11px;
+  font-weight: 700;
+  gap: 4px 12px;
+  padding-top: 7px;
+
+  b {
+    color: rgba(255, 255, 255, 0.9);
+  }
+
+  em {
+    font-style: normal;
+    margin-left: 2px;
+  }
+}
+
+.good {
+  color: var(--good);
+}
+
+.bad {
+  color: var(--bad);
+}
+
+.pin-final {
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  margin-left: auto;
+  padding: 1px 5px;
+  text-transform: uppercase;
+}
+
+.pin-note {
+  align-items: center;
+  color: rgba(255, 255, 255, 0.6);
+  display: flex;
+  font-size: 12px;
+  gap: 6px;
+  margin: 0;
+
+  .mat-icon {
+    @include v.icon-size(15px);
+    color: var(--scoreboard-led);
+  }
+}
+
+// The rank since the pin
+.pin-trend {
+  background: rgba(0, 0, 0, 0.22);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 10px;
+  padding: 8px 0 2px;
+}
+
+.pin-trend-head {
+  align-items: baseline;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 10px;
+  padding: 0 12px;
+
+  small {
+    color: rgba(255, 255, 255, 0.45);
+    font-size: 11px;
+    font-weight: 600;
+  }
+}
+
+.pin-label {
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.pin-chart {
+  display: block;
+  height: auto;
+  max-width: 100%;
+
+  .trend-grid {
+    stroke: rgba(255, 255, 255, 0.08);
+  }
+
+  .trend-x,
+  .trend-y {
+    fill: #9a9a9a;
+    font-family: v.$font-base;
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  .trend-pin {
+    stroke: color-mix(in srgb, var(--scoreboard-led) 55%, transparent);
+    stroke-dasharray: 3 3;
+  }
+
+  .trend-line {
+    fill: none;
+    filter: drop-shadow(0 0 3px color-mix(in srgb, var(--side) 45%, transparent));
+    stroke: var(--side);
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 2.4;
+  }
+
+  .trend-dot {
+    cursor: help;
+    fill: var(--side);
+    stroke: #1b1d1f;
+    stroke-width: 1.5;
+
+    &.pinned {
+      fill: #1b1d1f;
+      stroke: var(--side);
+      stroke-width: 2;
+    }
+
+    &.now {
+      filter: drop-shadow(0 0 5px var(--side));
+      stroke: #fff;
+      stroke-width: 2;
+    }
+  }
+}
+
+// The numbers: a row a skill or column, each side's now and its move
+.pin-table-wrap {
+  overflow-x: auto;
+}
+
+.pin-table {
+  border-collapse: collapse;
+  font-size: 12.5px;
+  min-width: 100%;
+  table-layout: fixed;
+
+  th,
+  td {
+    padding: 5px 8px;
+  }
+
+  thead th {
+    border-bottom: 2px solid var(--side, transparent);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-align: right;
+    text-transform: uppercase;
+  }
+
+  .pin-col-label {
+    border-bottom-color: transparent;
+    width: 34%;
+  }
+
+  .pin-col-name {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  tbody th {
+    color: rgba(255, 255, 255, 0.8);
+    font-weight: 700;
+    overflow: hidden;
+    text-align: left;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  tbody tr:not(.pin-group) {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.03);
+    }
+  }
+
+  td {
+    text-align: right;
+    white-space: nowrap;
+  }
+
+  .pin-group th {
+    color: var(--scoreboard-led);
+    font-size: 10.5px;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    padding-top: 12px;
+    text-shadow: var(--scoreboard-glow);
+    text-transform: uppercase;
+
+    small {
+      color: rgba(255, 255, 255, 0.4);
+      font-size: 10px;
+      letter-spacing: 0.04em;
+      margin-left: 6px;
+      text-shadow: none;
+      text-transform: none;
+    }
+  }
+}
+
+.pin-val {
+  color: #fff;
+  font-weight: 800;
+}
+
+.pin-delta {
+  border-radius: 4px;
+  color: rgba(255, 255, 255, 0.55);
+  display: inline-block;
+  font-size: 10.5px;
+  font-weight: 800;
+  margin-left: 6px;
+  min-width: 34px;
+  padding: 1px 4px;
+  text-align: center;
+
+  &.good {
+    background: color-mix(in srgb, var(--good) 14%, transparent);
+    color: var(--good);
+  }
+
+  &.bad {
+    background: color-mix(in srgb, var(--bad) 14%, transparent);
+    color: var(--bad);
+  }
+}
+
+// Game by game: a strip of bars a side, the games since the pin lit in its color
+.pin-logs {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.pin-log {
+  align-items: center;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: minmax(110px, 22%) 1fr;
+}
+
+.pin-log-who {
+  color: #fff;
+  font-size: 12px;
+  font-weight: 800;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  small {
+    color: rgba(255, 255, 255, 0.45);
+    display: block;
+    font-size: 10px;
+    font-weight: 700;
+  }
+}
+
+.pin-log-bars {
+  align-items: flex-end;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+  display: flex;
+  gap: 3px;
+  height: 46px;
+  position: relative;
+}
+
+.pin-log-bar {
+  background: color-mix(in srgb, var(--side) 32%, transparent);
+  border-radius: 2px 2px 0 0;
+  flex: 1;
+  height: calc(var(--h) * 1%);
+  max-width: 26px;
+  min-height: 2px;
+
+  &.after {
+    background: var(--side);
+    box-shadow: 0 0 6px color-mix(in srgb, var(--side) 40%, transparent);
+  }
+
+  &.neg {
+    opacity: 0.55;
+  }
+}
+
+.pin-log-pin {
+  border-left: 1px dashed color-mix(in srgb, var(--scoreboard-led) 70%, transparent);
+  bottom: 0;
+  left: calc(var(--at) * 100%);
+  position: absolute;
+  top: -4px;
+}
+
+.pin-footer {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+}
+
+.pin-toggle {
+  align-items: center;
+  background: none;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 999px;
+  color: rgba(255, 255, 255, 0.8);
+  cursor: pointer;
+  display: inline-flex;
+  font-family: v.$font-base;
+  font-size: 11px;
+  font-weight: 800;
+  gap: 4px;
+  height: 26px;
+  letter-spacing: 0.06em;
+  padding: 0 11px 0 7px;
+  text-transform: uppercase;
+  transition:
+    border-color 0.12s,
+    color 0.12s;
+
+  .mat-icon {
+    @include v.icon-size(17px);
+  }
+
+  .spinner {
+    margin: 0 3px;
+  }
+
+  // (the chevron lightens on a hover, never the accent)
+  &:hover:not([disabled]) {
+    border-color: rgba(255, 255, 255, 0.4);
+    color: #fff;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--scoreboard-led);
+    outline-offset: 2px;
+  }
+}
+
+.pin-footnote {
+  color: rgba(255, 255, 255, 0.35);
+  font-size: 10.5px;
+  margin-left: auto;
+}
+
+.tracker-toast {
+  background: #111;
+  border: 1px solid color-mix(in srgb, var(--scoreboard-led) 60%, transparent);
+  border-radius: 999px;
+  bottom: 24px;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.55);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  left: 50%;
+  padding: 9px 18px;
+  position: fixed;
+  transform: translateX(-50%);
+  z-index: 20;
+}
+
+// ---------------------------------------------------------------------------
+// Narrow screens: the tapes two a row (one, alone), the top stacked, the table scrolling sideways
+// ---------------------------------------------------------------------------
+@media (max-width: 760px) {
+  .pin-sides {
+    grid-template-columns: repeat(min(var(--sides, 2), 2), minmax(0, 1fr));
+  }
+
+  .tracker-share {
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 600px) {
+  .tracker-page {
+    padding: 14px 8px 32px;
+  }
+
+  .tracker-desk {
+    padding: 0 10px 12px;
+  }
+
+  .tracker-top {
+    margin: 0 -10px 14px;
+    padding: 14px 12px 12px;
+  }
+
+  .tracker-heading h2 {
+    font-size: 19px;
+  }
+
+  .tracker-tiles {
+    width: 100%;
+
+    .tracker-tile {
+      flex: 1;
+      min-width: 0;
+    }
+  }
+
+  .pin-card {
+    padding: 0 10px 10px;
+  }
+
+  .pin-head {
+    margin: 0 -10px;
+  }
+
+  .pin-open-text {
+    display: none;
+  }
+
+  .pin-open {
+    padding: 0 8px;
+  }
+
+  .pin-side {
+    gap: 8px;
+    padding: 11px 9px 8px;
+  }
+
+  .pin-face {
+    height: 36px;
+    width: 36px;
+  }
+
+  .pin-name {
+    font-size: 15px;
+  }
+
+  .pin-rank {
+    font-size: 15px;
+    height: 30px;
+    min-width: 38px;
+  }
+
+  .pin-move {
+    margin-left: 0;
+  }
+
+  // (each side a column wide enough for its value and move, the names column held in place)
+  .pin-table {
+    font-size: 12px;
+    min-width: max(100%, calc(120px + var(--sides, 2) * 96px));
+
+    .pin-col-label {
+      width: 120px;
+    }
+
+    tbody th,
+    .pin-col-label {
+      background: var(--scoreboard);
+      left: 0;
+      position: sticky;
+      z-index: 1;
+    }
+
+    .pin-group th {
+      background: none;
+      position: static;
+    }
+
+    th,
+    td {
+      padding: 5px 5px;
+    }
+  }
+
+  .pin-delta {
+    margin-left: 3px;
+    min-width: 0;
+  }
+
+  .pin-log {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+
+  .pin-footnote {
+    margin-left: 0;
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tracker-list.cdk-drop-list-dragging .pin-card:not(.cdk-drag-placeholder) {
+    transition: none;
+  }
+}
+
+// (a pin's menu opens in the overlay, outside the page: its icons lit to read on the dark panel)
+::ng-deep .tracker-menu .mat-mdc-menu-item:not([disabled]) .mat-icon {
+  color: rgba(255, 255, 255, 0.75);
+}

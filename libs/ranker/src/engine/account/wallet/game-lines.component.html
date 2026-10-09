@@ -1,0 +1,126 @@
+<!-- A game's every line at DraftKings, both sides: a row a team, a column a market; the bot's pick on each lit in
+     its band's color with its chip; a price clicked goes on the bet slip -->
+
+<!-- (one price: its line over its odds; the bot's chip in its corner where it's the bot's pick; lit gold while it's
+     on the slip) -->
+<ng-template #priceCell let-price let-label="label">
+  @if (price && price.odds !== null) {
+    @let bot = botOn(price.market, price.side);
+    @let t = tier(bot);
+    <button
+      type="button"
+      class="price"
+      [ngClass]="t ?? ''"
+      [class.bot]="!!bot"
+      [class.on]="wallet.slipKeys().has(keyOf(price))"
+      [attr.aria-pressed]="wallet.slipKeys().has(keyOf(price))"
+      [attr.aria-label]="label + ' ' + oddsText(price.odds) + (bot ? ', the bot’s pick (' + t + ')' : '')"
+      [title]="priceTitle(price, bot)"
+      [disabled]="!open"
+      (click)="take(price)"
+    >
+      @if (bot) {
+        <span class="price-chip" [ngClass]="t ?? ''" aria-hidden="true">{{ t }}</span>
+      }
+      @if (price.market !== 'ml') {
+        <b class="price-line">{{ price.market === 'total' ? (price.side === 'over' ? 'O ' : 'U ') + price.line : lineText(price.line) }}</b>
+      }
+      <span class="price-odds">{{ oddsText(price.odds) }}</span>
+      @if (bot) {
+        <small class="price-kelly">K {{ kellyText(bot) }}</small>
+      }
+    </button>
+  } @else {
+    <span class="price none" title="No price on the board">–</span>
+  }
+</ng-template>
+
+<section class="lines" [class.closed]="!open" [attr.aria-label]="'All lines: ' + matchupText">
+  <header class="lines-head">
+    <span class="lines-title"><span class="lines-crown" title="DraftKings"></span>All lines</span>
+    @if (board; as b) {
+      @if (b.state === 'pre') {
+        <small class="lines-when">{{ b.start | date: 'EEE MMM d · h:mm a' }}</small>
+      } @else {
+        <small class="lines-when live">
+          {{ b.away.abbr }} {{ b.away.score ?? '' }} · {{ b.home.abbr }} {{ b.home.score ?? '' }} · {{ b.detail }} · betting closed
+        </small>
+      }
+    }
+  </header>
+
+  @if (loading() && !board) {
+    <p class="lines-note" role="status">Reading the board…</p>
+  } @else if (!board || (!board.spread && !board.total && !board.ml)) {
+    <p class="lines-note">No DraftKings lines on ESPN's board for this game yet.</p>
+  } @else {
+    @let b = board!;
+    <table class="lines-grid">
+      <thead>
+        <tr>
+          <th scope="col"><span class="visually-hidden">Team</span></th>
+          <th scope="col">Spread</th>
+          <th scope="col">Total</th>
+          <th scope="col">Money</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th scope="row">
+            <span class="lines-team"><img [src]="logo(b.away.abbr)" alt="" (error)="hideImage($event)" />{{ b.away.abbr }}</span>
+          </th>
+          <td><ng-container *ngTemplateOutlet="priceCell; context: { $implicit: b.spread?.away, label: b.away.abbr + ' ' + lineText(b.spread?.away?.line ?? null) }"></ng-container></td>
+          <td><ng-container *ngTemplateOutlet="priceCell; context: { $implicit: b.total?.over, label: 'Over ' + (b.total?.over?.line ?? '') }"></ng-container></td>
+          <td><ng-container *ngTemplateOutlet="priceCell; context: { $implicit: b.ml?.away, label: b.away.abbr + ' to win' }"></ng-container></td>
+        </tr>
+        <tr>
+          <th scope="row">
+            <span class="lines-team"><img [src]="logo(b.home.abbr)" alt="" (error)="hideImage($event)" />{{ b.home.abbr }}</span>
+          </th>
+          <td><ng-container *ngTemplateOutlet="priceCell; context: { $implicit: b.spread?.home, label: b.home.abbr + ' ' + lineText(b.spread?.home?.line ?? null) }"></ng-container></td>
+          <td><ng-container *ngTemplateOutlet="priceCell; context: { $implicit: b.total?.under, label: 'Under ' + (b.total?.under?.line ?? '') }"></ng-container></td>
+          <td><ng-container *ngTemplateOutlet="priceCell; context: { $implicit: b.ml?.home, label: b.home.abbr + ' to win' }"></ng-container></td>
+        </tr>
+      </tbody>
+    </table>
+  }
+
+  <!-- (the bot's props on the game: its side, at its price) -->
+  @if (props().length) {
+    <div class="lines-props" role="list" aria-label="The bot's props">
+      <p class="lines-sub">The bot's props <small>its side, its price</small></p>
+      @for (p of props(); track p.pickId ?? p.pick) {
+        @let t = tier(p);
+        <div class="prop" role="listitem">
+          <img class="prop-face" [src]="face(p)" alt="" (error)="hideImage($event)" />
+          <span class="prop-words"><b>{{ p.player }}</b><small>{{ propWords(p) }}</small></span>
+          <button
+            type="button"
+            class="price bot"
+            [ngClass]="t ?? ''"
+            [class.on]="wallet.slipKeys().has(propKey(p))"
+            [attr.aria-pressed]="wallet.slipKeys().has(propKey(p))"
+            [attr.aria-label]="p.pick + ' ' + oddsText(p.price ?? null) + ', the bot’s pick (' + t + ')'"
+            [title]="p.pick + ' ' + oddsText(p.price ?? null) + ' · The bot’s pick: ' + t?.toUpperCase() + ', Kelly ' + kellyText(p)"
+            [disabled]="!open"
+            (click)="takeProp(p)"
+          >
+            <span class="price-chip" [ngClass]="t ?? ''" aria-hidden="true">{{ t }}</span>
+            <span class="price-odds">{{ oddsText(p.price ?? null) }}</span>
+            <small class="price-kelly">K {{ kellyText(p) }}</small>
+          </button>
+        </div>
+      }
+    </div>
+  }
+
+  @if (board) {
+    <p class="lines-foot">
+      @if (open) {
+        Tap a price to add it to your slip · the bot's picks lit in their band's color
+      } @else {
+        The game has started: these were the last prices
+      }
+    </p>
+  }
+</section>
