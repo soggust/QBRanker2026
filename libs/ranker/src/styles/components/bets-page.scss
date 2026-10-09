@@ -523,11 +523,14 @@ $chip-clay: #b0202b;
   @include v.icon-size(20px);
 }
 
-// (open: a slightly lighter, neutral panel, so the reading is clean; it unfolds down from its row, as a card
-// panel does)
+// (open: on the scoreboard, as a card panel's body is, a breath of its row's color in it; it unfolds down from its
+// row, as a card panel does)
 .bet-reasons {
   animation: bet-unfold 0.24s cubic-bezier(0.2, 0.8, 0.2, 1);
-  background: color-mix(in srgb, var(--soft) 7%, #2a2e33);
+  background:
+    linear-gradient(color-mix(in srgb, var(--soft) 6%, transparent), color-mix(in srgb, var(--soft) 6%, transparent)),
+    var(--scoreboard-dots),
+    var(--scoreboard);
   padding: 14px 20px 16px;
 
   p {

@@ -171,59 +171,59 @@
 
 // A panel on the Bets page or the Algorithm (card-panel.scss): the casino's, whichever sport it's opened from,
 // not the sport's (no sidelines, chalk or painted lines). Its outline is a chip's rim: a band in the panel's
-// category color, round at the corners, cream spots along its straight runs, a thin inlay line inside it; on
-// hover the spots light up, as a chip's do
+// category color (its own border, so its corners round cleanly), whole cream spots spaced evenly along each
+// straight run, clear of the corners, and a thin inlay line inside it; on hover the spots light up, as a chip's do
 @mixin panel {
   --rim: 4px;
   --corner: 14px;
+  // (a spot, 8px, in the middle of its 26px stretch of the band)
   --spot: 26px;
   --rim-clay: color-mix(in srgb, var(--group-color) 70%, #1a1a1a);
   --rim-spot: rgba(255, 236, 196, 0.78);
-  border: var(--rim) solid transparent;
+  border: var(--rim) solid var(--rim-clay);
   border-radius: var(--corner);
-  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.35);
+  box-shadow:
+    0 3px 8px rgba(0, 0, 0, 0.35),
+    inset 0 0 0 1px rgba(255, 236, 196, 0.3);
   outline: 0;
   overflow: visible;
   padding: 0;
   position: relative;
 
-  // (the band: round at the corners, the inlay line just inside it)
-  &::before {
-    border: var(--rim) solid var(--rim-clay);
-    border-radius: var(--corner);
-    box-shadow: inset 0 0 0 1px rgba(255, 236, 196, 0.35);
-    content: '';
-    inset: calc(var(--rim) * -1);
-    pointer-events: none;
-    position: absolute;
-    z-index: 1;
-  }
-
-  // (the spots: along each straight run, clear of the corners)
+  // (the spots: top and bottom on one layer, the sides on the other, each run's ends clear of the corners;
+  // `space` lays them out whole and evenly, the same gap at both ends)
+  &::before,
   &::after {
-    $across: repeating-linear-gradient(90deg, transparent 0 calc(var(--spot) - 8px), var(--rim-spot) calc(var(--spot) - 8px) var(--spot));
-    $down: repeating-linear-gradient(180deg, transparent 0 calc(var(--spot) - 8px), var(--rim-spot) calc(var(--spot) - 8px) var(--spot));
-    background:
-      $across center top / calc(100% - var(--corner) * 2) var(--rim) no-repeat,
-      $across center bottom / calc(100% - var(--corner) * 2) var(--rim) no-repeat,
-      $down left center / var(--rim) calc(100% - var(--corner) * 2) no-repeat,
-      $down right center / var(--rim) calc(100% - var(--corner) * 2) no-repeat;
     content: '';
-    inset: calc(var(--rim) * -1);
     pointer-events: none;
     position: absolute;
     transition: filter 0.3s ease;
     z-index: 1;
   }
 
+  &::before {
+    background:
+      linear-gradient(90deg, transparent 9px, var(--rim-spot) 9px 17px, transparent 17px) top / var(--spot) var(--rim) space no-repeat,
+      linear-gradient(90deg, transparent 9px, var(--rim-spot) 9px 17px, transparent 17px) bottom / var(--spot) var(--rim) space no-repeat;
+    inset: calc(var(--rim) * -1) calc(var(--corner) - var(--rim));
+  }
+
+  &::after {
+    background:
+      linear-gradient(180deg, transparent 9px, var(--rim-spot) 9px 17px, transparent 17px) left / var(--rim) var(--spot) no-repeat space,
+      linear-gradient(180deg, transparent 9px, var(--rim-spot) 9px 17px, transparent 17px) right / var(--rim) var(--spot) no-repeat space;
+    inset: calc(var(--corner) - var(--rim)) calc(var(--rim) * -1);
+  }
+
+  &:has(> .group-bar > .panel-toggle:hover)::before,
   &:has(> .group-bar > .panel-toggle:hover)::after {
     filter: brightness(1.3);
   }
 
-  // (the bar and the body inside the band, rounded to meet it)
+  // (the bar and the body inside the band, rounded to meet it, the inlay line round the bar too)
   > .group-bar {
     border-radius: calc(var(--corner) - var(--rim)) calc(var(--corner) - var(--rim)) 0 0;
-    box-shadow: none;
+    box-shadow: inset 0 0 0 1px rgba(255, 236, 196, 0.3);
   }
 
   &.closed > .group-bar {
@@ -242,6 +242,7 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
+    &::before,
     &::after {
       transition: none;
     }
