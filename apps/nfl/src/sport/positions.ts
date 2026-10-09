@@ -630,7 +630,6 @@ const RECEIVING_STATS: SkillStat[] = [
 const TEAM_STATS: SkillStat[] = [
   { key: 'winPct', label: 'Record', description: 'Win-loss record', kind: 'efficiency', format: 'record' },
   { key: 'recent', label: 'Recent', description: 'The last 5 games, newest first (newer ones count a little more)', kind: 'efficiency', format: 'recent' },
-  { key: 'topPerGame', label: 'TOP / Game', name: 'Time of Possession per Game', description: "The team's time with the ball per game (for context; not part of the ranking)", kind: 'efficiency', format: 'mmss', infoOnly: true },
     {
       key: 'pointDiffPerGame',
       label: 'Pt Diff / Game',
@@ -695,6 +694,7 @@ const TEAM_STATS: SkillStat[] = [
     format: 'rank',
     negative: true,
   },
+  { key: 'topPerGame', label: 'TOP / Game', name: 'Time of Possession per Game', description: "The team's time with the ball per game (for context; not part of the ranking)", kind: 'efficiency', format: 'mmss', infoOnly: true },
   {
     key: 'oneScoreWinPct',
     label: '1-Score Win %',
