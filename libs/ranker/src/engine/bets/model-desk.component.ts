@@ -156,6 +156,11 @@ const readSport = (): string | null => {
 const MARKET_NAMES: Record<string, string> = { spread: 'Spread', total: 'Total', ml: 'Moneyline', prop: 'Props' };
 // (each sport's scoring unit, for a context term's size)
 const UNIT_WORDS: Record<string, string> = { nfl: 'pts', nba: 'pts', nhl: 'goals', mlb: 'runs' };
+// (how far ahead or behind a side has to be for its score's color to run all the way, by sport; the good and
+// bad of the site's results)
+const EDGE_FULL: Record<string, number> = { nfl: 14, nba: 12, nhl: 2, mlb: 3 };
+const GOOD = '#3ecf6e';
+const BAD = '#ff5a4f';
 // (the props a bar measures whatever their line: yards, a goalie's saves, a pitcher's outs; a short count is pips)
 const BAR_STATS = new Set(['passYds', 'rushYds', 'recYds', 'rushRecYds', 'saves', 'outs']);
 
@@ -507,6 +512,25 @@ export class ModelDeskComponent implements OnInit, OnDestroy {
     if (b.market !== 'total' || !b.event) return null;
     const game = this.boards.get(b.event);
     return game ? game.hs + game.as : null;
+  }
+
+  // (a side in play, at the score: by how much it's covering (a spread: its margin plus its line) or leading (a
+  // moneyline); null for a total or a prop, or before there's a score)
+  sideEdge(b: ModelBet): number | null {
+    if ((b.market !== 'spread' && b.market !== 'ml') || !b.event) return null;
+    const game = this.boards.get(b.event);
+    if (!game) return null;
+    const margin = (b.side === 'home' ? 1 : -1) * (game.hs - game.as);
+    return b.market === 'spread' ? margin + (b.line ?? 0) : margin;
+  }
+
+  // (its score's color: green covering or leading, red not, deeper the further (about two touchdowns, 12
+  // points, 2 goals or 3 runs is all the way); white level)
+  edgeColor(b: ModelBet): string | null {
+    const edge = this.sideEdge(b);
+    if (edge === null || edge === 0) return null;
+    const share = Math.round(35 + 65 * Math.min(1, Math.abs(edge) / (EDGE_FULL[b.sport] ?? 10)));
+    return `color-mix(in srgb, ${edge > 0 ? GOOD : BAD} ${share}%, #fff)`;
   }
 
   // (a total's unit: the game's points, goals or runs)
