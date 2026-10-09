@@ -18,19 +18,21 @@
             <button type="button" class="tape-remove" [attr.aria-label]="'Remove ' + label(s)" title="Remove" (click)="compare.remove(i)">
               <mat-icon fontIcon="close"></mat-icon>
             </button>
-            <span class="comp-badge tape-badge" [class.with-photo]="s.photo">
-              <span class="comp-card" [class.white-logo]="s.whiteLogo"><img class="comp-logo" [src]="s.logo" alt="" /></span>
+            <!-- (the team's logo, big and faint, a texture behind it all) -->
+            <span class="tape-texture" aria-hidden="true"><img [src]="s.logo" alt="" /></span>
+            <!-- (the name and the tab and team across the tape, then the player (a team, its logo) small beside
+                 the season) -->
+            <button type="button" class="tape-name" [title]="'Open ' + s.name + '’s ' + s.seasonText + ' card'" (click)="openCard(s)">{{ s.name }}</button>
+            <span class="tape-team">{{ s.tabLabel }}@if (s.teamName) { · {{ s.teamName }}}</span>
+            <div class="tape-meta">
               @if (s.photo) {
-                <img class="comp-photo" [src]="s.photo" alt="" (error)="s.photo = null" />
+                <img class="tape-photo" [src]="s.photo" alt="" (error)="s.photo = null" />
+              } @else {
+                <img class="tape-photo tape-logo" [class.white-logo]="s.whiteLogo" [src]="s.logo" alt="" />
               }
-            </span>
-            <!-- (beside the team card: the name, the tab and team, the season under them) -->
-            <div class="tape-text">
-              <button type="button" class="tape-name" [title]="'Open ' + s.name + '’s ' + s.seasonText + ' card'" (click)="openCard(s)">{{ s.name }}</button>
-              <span class="tape-team">{{ s.tabLabel }}@if (s.teamName) { · {{ s.teamName }}}</span>
               <!-- (the season: any other of theirs on that tab, from the picker) -->
               @if (!careerOnly && (s.career?.length ?? 0) > 1) {
-                <mat-select class="tape-season" [value]="s.season" [attr.aria-label]="'Season for ' + s.name" title="Another of their seasons" (valueChange)="compare.add(s.position, $event, s.gsisId, i)">
+                <mat-select class="tape-season" [panelWidth]="null" [value]="s.season" [attr.aria-label]="'Season for ' + s.name" title="Another of their seasons" (valueChange)="compare.add(s.position, $event, s.gsisId, i)">
                   <mat-select-trigger>{{ s.seasonText }}</mat-select-trigger>
                   @for (line of s.career; track line.season) {
                     <mat-option [value]="line.season">{{ seasonText(line.season) }} · #{{ line.rank }}</mat-option>
@@ -129,12 +131,17 @@
                     @for (a of r.base.axes; track a.label) {
                       <line class="spoke" x1="0" y1="0" [attr.x2]="a.x" [attr.y2]="a.y"></line>
                     }
-                    @for (shape of r.shapes; track $index) {
-                      <polygon class="cmp-shape" [attr.points]="shape.points" [style.--side]="shape.color"></polygon>
+                    @for (shape of r.shapes; track $index; let si = $index) {
+                      <polygon class="cmp-shape" [attr.points]="shape.points" [style.--side]="shape.color">
+                        <title>{{ label(sides[si]) }}</title>
+                      </polygon>
                     }
-                    @for (shape of r.shapes; track $index) {
-                      @for (d of shape.dots; track $index) {
-                        <circle class="cmp-dot" r="3.2" [attr.cx]="d.x" [attr.cy]="d.y" [style.--side]="shape.color"></circle>
+                    <!-- (each point says whose it is, the skill and the percentile) -->
+                    @for (shape of r.shapes; track $index; let si = $index) {
+                      @for (d of shape.dots; track $index; let j = $index) {
+                        <circle class="cmp-dot" r="3.2" [attr.cx]="d.x" [attr.cy]="d.y" [style.--side]="shape.color">
+                          <title>{{ label(sides[si]) }} · {{ r.base.axes[j].label }}: {{ pct(d.pct) }}th percentile</title>
+                        </circle>
                       }
                     }
                     @for (a of r.base.axes; track a.label) {
@@ -169,12 +176,13 @@
             @if (sides.length > 1) {
               <!-- Edges: where each one is clearly the best of them (folded, like the card's sections) -->
               <card-panel class="ov-section tab-card cmp-panel" label="Edges" icon="bolt">
+                <p class="cmp-help">Where each one is clearly the best of them: his percentile at a skill (where he stood that season, 100 the top) minus the best of the others', 10 points or more</p>
                 <div class="group-body cmp-edges" [style.--sides]="sides.length">
                   @for (s of sides; track s.key; let i = $index) {
                     <div class="cmp-edge" [style.--side]="s.color">
                       <span class="cmp-edge-who">{{ label(s) }}</span>
                       @for (e of v.edges[i]; track e.skill) {
-                        <span class="cmp-edge-item"><b>{{ e.skill }}</b><em>+{{ e.by }}</em></span>
+                        <span class="cmp-edge-item" [title]="label(s) + ' stood ' + e.by + ' percentile points higher at ' + e.skill + ' than the best of the others'"><b>{{ e.skill }}</b><em>+{{ e.by }}</em></span>
                       } @empty {
                         <span class="cmp-edge-none">No clear edge</span>
                       }
@@ -185,6 +193,7 @@
 
               <!-- How alike: each pair's skill shapes -->
               <card-panel class="ov-section tab-card cmp-panel" label="How Alike" icon="join_inner">
+                <p class="cmp-help">How alike two players' skill shapes are: 100 minus the average gap between their skill percentiles, so 100% is the same profile</p>
                 <div class="group-body cmp-pairs">
                   @for (p of v.pairs; track $index) {
                     <div class="cmp-pair" title="One minus the average gap between their skill percentiles">

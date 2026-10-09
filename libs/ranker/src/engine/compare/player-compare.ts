@@ -115,7 +115,7 @@ export interface CompareView {
   // Every skill any side has: each side's percentile (null: not one of its tab's), the leaders
   skills: { id: string; name: string; pcts: (number | null)[]; leaders: number[] }[];
   // One radar, every side's shape on it (the skills all of them have, three or more)
-  radar: { base: CardRadar; shapes: { color: string; points: string; dots: { x: number; y: number }[] }[] } | null;
+  radar: { base: CardRadar; shapes: { color: string; points: string; dots: { x: number; y: number; pct: number }[] }[] } | null;
   // Where each side is clearly the best of them, biggest first
   edges: { skill: string; by: number }[][];
   // How alike each pair's skill shapes are (0-100)

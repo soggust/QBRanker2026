@@ -302,9 +302,11 @@ section ul li.player:not(.header-row) {
 // left and a faint wash of it, hovered or not
 section ul li.player.picked:not(.header-row):not(.cdk-drag-preview),
 section ul li.player.picked:not(.header-row):not(.cdk-drag-preview):hover {
+  // (the wash first: it eases from the hover's wash, which has the same shape, rather than the bar
+  // stretching across the row for a moment)
   box-shadow:
-    inset 3px 0 0 var(--scoreboard-led),
-    inset 0 0 0 100vmax color-mix(in srgb, var(--scoreboard-led) 9%, transparent);
+    inset 0 0 0 100vmax color-mix(in srgb, var(--scoreboard-led) 9%, transparent),
+    inset 3px 0 0 var(--scoreboard-led);
 }
 
 // The row you're dragging: a solid piece of board, lifted (it renders inside the list, so it keeps every
