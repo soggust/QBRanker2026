@@ -401,7 +401,7 @@ export class PlayerCards {
       name: player.name,
       positionName: POSITION_NAMES[this.position],
       positionLabel: SPORT.teamTabs?.includes(this.position) || this.position === SPORT.coachTab ? POSITION_NAMES[this.position] : this.position,
-      seasonLabel: SPORT.careerOnly ? 'Career' : isLiveSeason(season) ? 'This Season' : SPORT.seasonText(season),
+      seasonLabel: SPORT.careerOnly ? 'Career' : isLiveSeason(season) ? 'Current Season' : SPORT.seasonText(season),
       teamName: SPORT.teamName ? SPORT.teamName(player, this.position, rows) : (extras(player).teamName ?? null),
       teamLink: this.teamLink(player, rows),
       logo: SPORT.cardLogo ? SPORT.cardLogo(logoForSeason(player.teamLogo, season)) : logoForSeason(player.teamLogo, season),

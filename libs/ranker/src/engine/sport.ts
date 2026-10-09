@@ -293,7 +293,7 @@ export interface SportConfig {
   currentSeason: number;
   firstSeason: number;
   // A date safely after the current season's last game ("2026-06-30"): until then it reads as the
-  // current season ("CURRENT", "This Season", "so far"); after, by its name, like a finished one
+  // current season ("CURRENT", "Current Season", "so far"); after, by its name, like a finished one
   currentSeasonEnds: string;
   // How a season reads ("2025", or "2024-25" for a sport named for the year it ends in)
   seasonText: (season: number) => string;
