@@ -6,8 +6,10 @@
 //            tight end by targets), RB1 (its top back by carries); the rest WR4+, TE2+, RB2+. The NBA: a team's
 //            five with the most minutes a game are its starters (S), the rest its bench (B)
 //   funnel   the NFL: how much more (or less) a defense's opponents pass against it than they do on their own
-//            (their pass share of runs and passes, against their season's so far), pulled toward 0 by 4 games'
-//            worth: a pass funnel (over 0) means more passing against it, a run funnel (under 0) more running
+//            (passFunnel below: their pass rate over expected against it, nflverse's xpass, in neutral
+//            situations, less their own so far; the plain pass share where a game has no xpass), pulled
+//            toward 0 by 4 games' worth: a pass funnel (over 0) means more passing against it, a run funnel
+//            (under 0) more running
 //   pace     the NFL: its opponents' plays (runs and passes) against their own usual, pulled toward even by 4
 //            games
 //   targets  the NFL: the share of the targets it allows to wide receivers, tight ends and backs, against the
@@ -28,15 +30,76 @@ const decay = (t, season) => {
   return out;
 };
 
+// The NFL defenses' pass funnel, the props' and the game totals' (football.mjs funnelT) alike, learned a game
+// at a time in date order. A game's side, from the play-by-play (context.mjs's plays, football.mjs): its runs
+// and passes (pass, plays) and, in neutral situations (win chance 20-80%, outside the last two minutes of a
+// half) where nflverse has its chance of a pass (xpass, 2006 on), how many (xn) and their passes less xpass
+// summed (over). Its pass rate over expected (over / xn) against the offense's own so far (pulled toward the
+// league's by 100 such plays: about three games), weighted by its share of 25 such plays (a blowout counts
+// for less); without them (no xpass, or no play-by-play: the props' player logs), its pass share against the
+// offense's own so far, as before. Season to date, last season's at half weight; of(defense, season): pulled
+// toward 0 by 4 games' worth.
+export function passFunnel() {
+  const off = new Map();
+  const def = new Map();
+  const lg = { pass: 0.57, plays: 62, proe: 0, n: 0 };
+  const decay = (x, season, fresh) => {
+    if (!x) return fresh;
+    if (x.season === season) return x;
+    const half = x.season === season - 1 ? 0.5 : 0;
+    return Object.fromEntries(Object.entries(x).map(([k, v]) => [k, k === 'season' ? season : v * half]));
+  };
+  return {
+    of(id, season) {
+      const d = decay(def.get(id), season, null);
+      return d ? d.funnel / (d.n + 4) : 0;
+    },
+    learn(team, opp, season, { pass, plays, over = 0, xn = 0 }) {
+      if (!(plays > 20)) return;
+      const o = decay(off.get(team), season, { season, pass: 0, plays: 0, over: 0, xn: 0 });
+      const d = decay(def.get(opp), season, { season, funnel: 0, n: 0 });
+      if (xn >= 5) {
+        const w = Math.min(1, xn / 25);
+        const usual = (o.over + 100 * lg.proe) / (o.xn + 100);
+        d.funnel += w * (over / xn - usual);
+        d.n += w;
+        o.over += over;
+        o.xn += xn;
+        lg.proe += ((over / xn) - lg.proe) / Math.min(++lg.n, 500);
+      } else {
+        const usual = (o.pass + 3 * lg.pass * lg.plays) / (o.plays + 3 * lg.plays);
+        d.funnel += pass / plays - usual;
+        d.n++;
+      }
+      o.pass += pass;
+      o.plays += plays;
+      lg.pass += (pass / plays - lg.pass) / 500;
+      lg.plays += (plays - lg.plays) / 500;
+      off.set(team, o);
+      def.set(opp, d);
+    },
+  };
+}
+
+// (a game's side from the context's plays (football.mjs: each game's [.., home passes, home runs, away
+// passes, away runs, home over, home xn, away over, away xn]): null where it has none)
+export function sideOfPlays(p, home) {
+  if (!p || p.length < 9) return null;
+  const [pass, run] = home ? [p[5], p[6]] : [p[7], p[8]];
+  const [over, xn] = p.length >= 13 ? (home ? [p[9], p[10]] : [p[11], p[12]]) : [0, 0];
+  return { pass, plays: pass + run, over, xn };
+}
+
 // The NFL's matchups: every row given its role, its defense's funnel, pace and target share for its position
 // (row.role, row.funnel, row.pace, row.tgt), each from the games before it; and the same for a coming game
-// (live: a player's id, team, opponent, position and the season)
-export function nflMatchups(rows) {
+// (live: a player's id, team, opponent, position and the season). plays: the context's play-by-play facts by
+// game (football.mjs: facts.plays), for the funnel over expected; without a game's, its player logs' pass share
+export function nflMatchups(rows, pbp = null) {
   const games = new Map();
   for (const r of rows) {
     if (!r.team || !r.opp || !r.game) continue;
     const key = `${r.game}|${r.team}`;
-    const g = games.get(key) ?? { key, date: r.date, season: r.season, team: r.team, opp: r.opp, att: 0, car: 0, tgt: { WR: 0, TE: 0, RB: 0 }, rows: [] };
+    const g = games.get(key) ?? { key, game: r.game, home: r.home, date: r.date, season: r.season, team: r.team, opp: r.opp, att: 0, car: 0, tgt: { WR: 0, TE: 0, RB: 0 }, rows: [] };
     g.att += r.s.passAtt ?? 0;
     g.car += r.s.rushAtt ?? 0;
     const p = POS(r.pos);
@@ -50,13 +113,14 @@ export function nflMatchups(rows) {
   const team = new Map();
   const lg = { pass: 0.57, plays: 62, share: { WR: 0.6, TE: 0.2, RB: 0.2 }, n: 0 };
   const offOf = (id, season) => decay(off.get(id) ?? { season, att: 0, car: 0, n: 0 }, season);
-  const defOf = (id, season) => decay(def.get(id) ?? { season, funnel: 0, pace: 0, n: 0, WR: 0, TE: 0, RB: 0, all: 0 }, season);
+  const defOf = (id, season) => decay(def.get(id) ?? { season, pace: 0, n: 0, WR: 0, TE: 0, RB: 0, all: 0 }, season);
+  const funnel = passFunnel();
   const teamOf = (id, season) => decay(team.get(id) ?? { season, tgt: new Map(), car: new Map(), min: new Map(), n: 0 }, season);
   // (the defense's numbers before a game)
   const defense = (id, season, pos) => {
     const d = defOf(id, season);
     const share = pos && pos !== 'QB' ? (d[pos] + 60 * lg.share[pos]) / (d.all + 60) / lg.share[pos] : 1;
-    return { funnel: d.funnel / (d.n + 4), pace: 1 + d.pace / (d.n + 4), tgt: share };
+    return { funnel: funnel.of(id, season), pace: 1 + d.pace / (d.n + 4), tgt: share };
   };
   // (a player's role on his team before a game: his place among its players at his position, by targets (by
   // carries for a back))
@@ -92,10 +156,10 @@ export function nflMatchups(rows) {
       const o = offOf(g.team, g.season);
       const plays = g.att + g.car;
       if (plays > 20) {
-        const norm = (o.att + 3 * lg.pass * lg.plays) / (o.att + o.car + 3 * lg.plays);
         const normPlays = (o.att + o.car + 3 * lg.plays) / (o.n + 3);
         const d = defOf(g.opp, g.season);
-        d.funnel += g.att / plays - norm;
+        // (the funnel: from the game's play-by-play where the context has it, else its logs' pass share)
+        funnel.learn(g.team, g.opp, g.season, sideOfPlays(pbp?.[g.game], g.home) ?? { pass: g.att, plays });
         d.pace += plays / normPlays - 1;
         d.n++;
         for (const p of ['WR', 'TE', 'RB']) d[p] += g.tgt[p];

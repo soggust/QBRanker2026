@@ -26,12 +26,22 @@ interface RoleLine {
 export type VsPos = Record<Role, RoleLine> & {
   pass: { ypg: number | null; rank: number | null };
   run: { ypg: number | null; rank: number | null };
-  funnel: { rate: number | null; exp: number | null; score: number | null; rank: number | null; neutral: boolean };
+  // (method: 'proe' over nflverse's expected pass rate, 2006 on; 'rate' the plain pass rate before; missing on
+  // files built before it was kept: 'rate')
+  funnel: { rate: number | null; exp: number | null; score: number | null; rank: number | null; neutral: boolean; method?: 'proe' | 'rate' };
   pace: { plays: number | null; exp: number | null; diff: number | null; rank: number | null };
   targets: Record<(typeof GROUPS)[number], { share: number | null; lg: number | null; tgt: number | null; yds: number | null; ypt: number | null; rank: number | null }> | null;
 };
 
 export const vsPosOf = (player: SkillPlayer): VsPos | null => (player as { vsPos?: VsPos | null }).vsPos ?? null;
+
+// The funnel's hover help, by how it was measured (vsPos.funnel.method)
+export function funnelHelp(funnel: VsPos['funnel']): string {
+  const when = funnel.neutral ? ' in neutral situations (win probability 20-80%, outside each half\'s last two minutes)' : '';
+  return funnel.method === 'proe'
+    ? `Pass rate over expected: opponents' pass rate against this defense${when} over nflverse's expected pass rate for each play (it knows the down, distance, field position, time and score), against those same offenses' own pass rate over expected in their other games. Their usual rate is what they'd throw on those same plays elsewhere. The tick is their usual rate.`
+    : `Plain pass rate (no expected pass rate before 2006): opponents' pass rate against this defense${when}, against those same offenses' own rates in their other games. The tick is their usual rate.`;
+}
 
 // Who each role is (the row's hover), and what the take calls them
 const ROLE_INFO: Record<Role, { plural: string; title: string }> = {
@@ -99,12 +109,14 @@ export function vsPositionBreakdown(player: SkillPlayer, position: string, rows:
   const flags: CardFlag[] = [];
   if (score !== null && funnelRank !== null) {
     const amount = `${Math.abs(score).toFixed(1)}%`;
+    // (over expected: against what the down, distance, field position, time and score call for)
+    const usual = vs.funnel.method === 'proe' ? 'usual for the situation' : 'usual';
     if (score >= 2) {
-      flags.push({ icon: 'call_split', tone: 'info', text: `Pass funnel: opponents pass ${amount} more often than usual (#${funnelRank} of ${of})` });
+      flags.push({ icon: 'call_split', tone: 'info', text: `Pass funnel: opponents pass ${amount} more often than ${usual} (#${funnelRank} of ${of})` });
     } else if (score <= -2) {
-      flags.push({ icon: 'call_split', tone: 'info', text: `Run funnel: opponents pass ${amount} less often than usual (#${of + 1 - funnelRank} of ${of})` });
+      flags.push({ icon: 'call_split', tone: 'info', text: `Run funnel: opponents pass ${amount} less often than ${usual} (#${of + 1 - funnelRank} of ${of})` });
     } else {
-      flags.push({ icon: 'call_split', tone: 'info', text: `Neutral funnel: opponents pass about as often as usual (${signed(score)}%)` });
+      flags.push({ icon: 'call_split', tone: 'info', text: `Neutral funnel: opponents pass about as often as ${usual} (${signed(score)}%)` });
     }
   }
   if (lopsided.length) {
@@ -128,7 +140,7 @@ export function vsPositionBreakdown(player: SkillPlayer, position: string, rows:
               (way ? `, ${Math.abs(score).toFixed(1)} points ${way === 'pass' ? 'more' : 'less'} than they usually do` : ''),
             pass: vs.funnel.rate,
             usual: vs.funnel.exp,
-            help: "Opponents' pass rate against this defense in neutral situations (win probability 20-80%, outside each half's last two minutes), against those same offenses' own rates in their other games. The tick is their usual rate.",
+            help: funnelHelp(vs.funnel),
           };
         })()
       : null;

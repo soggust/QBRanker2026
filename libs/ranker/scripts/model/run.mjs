@@ -311,7 +311,7 @@ async function fitTheProps(r) {
     const t0 = Date.now();
     r.rows = await playerRows(sport, cfg, history, r.facts);
     const info = new Map([...(r.feats?.feats ?? new Map())].map(([id, f]) => [id, f.info]));
-    r.props = fitProps(sport, r.rows, r.expPts, info);
+    r.props = fitProps(sport, r.rows, r.expPts, info, r.facts);
     console.log(`${sport}: props' projections fit on ${r.rows.length} player games in ${Math.round((Date.now() - t0) / 1000)}s`);
   } catch (err) {
     console.warn(`${sport}: props left out (${err.stack ?? err})`);

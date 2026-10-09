@@ -809,7 +809,7 @@ export class ModelDeskComponent implements OnInit, OnDestroy {
 
   // (a prop type's matchup terms: each one's fitted size, or "left out", and its held-out gain)
   matchupText(t: PropType): string {
-    const names: Record<string, string> = { roleK: 'role split', fun: 'funnel', pc: 'pace', tg: 'target share' };
+    const names: Record<string, string> = { roleK: 'role split', fun: 'funnel (over expected)', pc: 'pace', tg: 'target share' };
     return Object.entries(t.gains ?? {})
       .map(([k, g]) => {
         const v = (t.params as unknown as Record<string, number | null>)[k];
@@ -877,7 +877,7 @@ export class ModelDeskComponent implements OnInit, OnDestroy {
     mae: "On the last 30% of the history (never fit on): how far its projection missed on average, against a plain season average's miss",
     overLine: "On the same held-out games, at a line at each player's median so far: its chance of going over against what happened (log loss, lower is better), against the player's own over-rate",
     sideHit: 'On those lines, how often the side it leaned (by 5 points or more) was right',
-    matchups: "The matchup terms (matchups.mjs), each kept only if the held-out games' over/under log loss is lower with it: the role split (the defense against his role on his team: an NFL WR1, WR2, WR3, TE1, RB1; an NBA starter or bench), pulled toward its position number by k games; the defense's pass or run funnel and pace (volume); the share of targets it allows his position. The gain: the held-out log loss without it less with it",
+    matchups: "The matchup terms (matchups.mjs), each kept only if the held-out games' over/under log loss is lower with it: the role split (the defense against his role on his team: an NFL WR1, WR2, WR3, TE1, RB1; an NBA starter or bench), pulled toward its position number by k games; the defense's pass or run funnel (how much more or less its opponents pass than nflverse's xpass expects, in neutral situations, against their own lean) and pace (volume); the share of targets it allows his position. The gain: the held-out log loss without it less with it",
     propSettings: 'Its fitted settings: K (games of pull toward his position), recent weight, opponent power, game-script power, context size, spread (r: lower is wider)',
     propTrust: "How much the prop type counts its projection against the player's own record (starts 0.5; refit on its graded props once 40 are; * not yet)",
     clv: "Closing-line value: how its bets' lines and prices compare with where the market closed, the market's last word before the game. The share that beat the close (a better line, or the same line at a better chance), and the mean expected return at the closing chance. The early skill signal: a few dozen results are mostly luck, but beating the close shows an edge from the first bets on; the trust in the model leans on it until results pile up",

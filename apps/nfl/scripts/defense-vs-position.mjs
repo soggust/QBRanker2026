@@ -3,9 +3,9 @@
 // funnel) and run more or fewer plays (pace); and where the targets go against it (WRs, TEs, RBs).
 // All from the play-by-play (and snap counts, from 2012, for who played), so every season back to 2000
 // has it. update-data.mjs adds it to each DEF row (vsPos) of every part it writes; run on its own, this
-// file adds it to finished seasons' files that are already written:
+// file adds it to the files that are already written (the current season's, in StaticData/ itself, too):
 //
-//   node apps/nfl/scripts/defense-vs-position.mjs            (every finished season, 2000 on)
+//   node apps/nfl/scripts/defense-vs-position.mjs            (every season, 2000 on, the current one too)
 //   node apps/nfl/scripts/defense-vs-position.mjs 2024 2025  (just those)
 //
 // Roles, per game: an offense's receivers (WR, TE) by their target share and its backs by their carry
@@ -21,9 +21,13 @@
 // regular season's roles and averages come from its own games; the playoffs' and both's from the
 // whole season, the playoffs included. Ranks: 1 the best defense (the least allowed over expected).
 //
-// Funnel: opponents' pass rate in neutral situations (win probability 20-80%, outside the last two
-// minutes of a half) against each offense's own neutral rate in its other games, in percentage points
-// (positive: they throw more on this defense than usual, a pass funnel). Rank 1 the strongest pass funnel.
+// Funnel: how much more (or less) opponents throw on this defense than they usually do, in percentage
+// points (positive: a pass funnel), in neutral situations (win probability 20-80%, outside the last two
+// minutes of a half; every play where win probability is missing from most). From 2006 on (method 'proe'):
+// their pass rate over expected against it (nflverse's xpass, which knows the down, distance, field
+// position, time and score), less each offense's own pass rate over expected in its other games. Before
+// 2006, with no xpass (method 'rate'): their plain pass rate against each offense's own in its other games.
+// Rank 1 the strongest pass funnel.
 // Pace: the opponents' offensive plays per game against their own average in their other games.
 import { readFile, writeFile } from 'node:fs/promises';
 import { gunzipSync } from 'node:zlib';
@@ -76,7 +80,7 @@ export function defenseVsPosition({ pbp, snaps = [], positionOf, gsisByPfr, part
     g.sides.set(off, def);
     const sideKey = `${p.game_id}|${off}`;
     let s = sides.get(sideKey);
-    if (!s) sides.set(sideKey, (s = { tgt: 0, car: 0, plays: 0, passes: 0, nPlays: 0, nPasses: 0, passYds: 0, rushYds: 0 }));
+    if (!s) sides.set(sideKey, (s = { tgt: 0, car: 0, plays: 0, passes: 0, nPlays: 0, nPasses: 0, x: [0, 0, 0], xn: [0, 0, 0], passYds: 0, rushYds: 0 }));
     const receiver = id(p.receiver_player_id);
     const rusher = id(p.rusher_player_id);
     if (p.two_point_attempt === '1') {
@@ -89,9 +93,19 @@ export function defenseVsPosition({ pbp, snaps = [], positionOf, gsisByPfr, part
       if (p.pass === '1') s.passes++;
       const wp = num(p.wp);
       const half = num(p.half_seconds_remaining);
-      if (wp !== null && wp >= 0.2 && wp <= 0.8 && (half === null || half > 120)) {
+      const isNeutral = wp !== null && wp >= 0.2 && wp <= 0.8 && (half === null || half > 120);
+      if (isNeutral) {
         s.nPlays++;
         if (p.pass === '1') s.nPasses++;
+      }
+      // (where nflverse has its chance of a pass, xpass: [plays, passes, xpass summed], all and neutral)
+      const xpass = num(p.xpass);
+      if (xpass !== null && Number.isFinite(xpass)) {
+        for (const x of isNeutral ? [s.x, s.xn] : [s.x]) {
+          x[0]++;
+          if (p.pass === '1') x[1]++;
+          x[2] += xpass;
+        }
       }
     }
     if (p.pass_attempt === '1' && p.sack !== '1' && p.qb_spike !== '1' && receiver) {
@@ -238,15 +252,17 @@ export function defenseVsPosition({ pbp, snaps = [], positionOf, gsisByPfr, part
       nPlays: all.reduce((a, s) => a + s.nPlays, 0),
       nPasses: all.reduce((a, s) => a + s.nPasses, 0),
       passes: all.reduce((a, s) => a + s.passes, 0),
+      x: [0, 1, 2].map((i) => all.reduce((a, s) => a + s.x[i], 0)),
+      xn: [0, 1, 2].map((i) => all.reduce((a, s) => a + s.xn[i], 0)),
     });
   }
-  const neutralShare = (() => {
-    const all = [...sides.values()];
-    const plays = all.reduce((a, s) => a + s.plays, 0);
-    return plays ? all.reduce((a, s) => a + s.nPlays, 0) / plays : 0;
-  })();
+  const allSides = [...sides.values()];
+  const allPlays = allSides.reduce((a, s) => a + s.plays, 0);
+  const shareOf = (get) => (allPlays ? allSides.reduce((a, s) => a + get(s), 0) / allPlays : 0);
   // (win probability missing from most plays: the funnel reads every play instead)
-  const neutral = neutralShare >= 0.3;
+  const neutral = shareOf((s) => s.nPlays) >= 0.3;
+  // (nflverse's xpass on most runs and passes (2006 on): the funnel over expected; without it, the plain rate)
+  const method = shareOf((s) => s.x[0]) >= 0.5 ? 'proe' : 'rate';
 
   // Each defense, over the part's games
   const totals = new Map();
@@ -291,14 +307,27 @@ export function defenseVsPosition({ pbp, snaps = [], positionOf, gsisByPfr, part
       }
       // Funnel and pace against the offense's other games
       const n = norms.get(off);
-      const plays = neutral ? s.nPlays : s.plays;
-      const passes = neutral ? s.nPasses : s.passes;
-      const restPlays = (neutral ? n.nPlays : n.plays) - plays;
-      const restPasses = (neutral ? n.nPasses : n.passes) - passes;
-      if (restPlays > 0 && plays > 0) {
-        t.fPlays += plays;
-        t.fPasses += passes;
-        t.fExp += (restPasses / restPlays) * plays;
+      if (method === 'proe') {
+        // (over expected: what they'd throw here is xpass plus the offense's own lean over it elsewhere)
+        const [plays, passes, xSum] = neutral ? s.xn : s.x;
+        const [allPlays, allPasses, allX] = neutral ? n.xn : n.x;
+        const restPlays = allPlays - plays;
+        if (restPlays > 0 && plays > 0) {
+          const lean = (allPasses - passes - (allX - xSum)) / restPlays;
+          t.fPlays += plays;
+          t.fPasses += passes;
+          t.fExp += xSum + lean * plays;
+        }
+      } else {
+        const plays = neutral ? s.nPlays : s.plays;
+        const passes = neutral ? s.nPasses : s.passes;
+        const restPlays = (neutral ? n.nPlays : n.plays) - plays;
+        const restPasses = (neutral ? n.nPasses : n.passes) - passes;
+        if (restPlays > 0 && plays > 0) {
+          t.fPlays += plays;
+          t.fPasses += passes;
+          t.fExp += (restPasses / restPlays) * plays;
+        }
       }
       if (n.games > 1) {
         t.plays += s.plays;
@@ -343,6 +372,8 @@ export function defenseVsPosition({ pbp, snaps = [], positionOf, gsisByPfr, part
     }
     block.pass = { ypg: r1(t.passYds / t.games), rank: null };
     block.run = { ypg: r1(t.rushYds / t.games), rank: null };
+    // (rate: their pass rate on the plays counted; exp: what they'd usually throw there (with 'proe', the
+    // situation's xpass plus their own lean over it); score: the difference, in points)
     const rate = t.fPlays ? t.fPasses / t.fPlays : null;
     const expRate = t.fPlays ? t.fExp / t.fPlays : null;
     block.funnel = {
@@ -351,6 +382,7 @@ export function defenseVsPosition({ pbp, snaps = [], positionOf, gsisByPfr, part
       score: rate === null ? null : r1((rate - expRate) * 100),
       rank: null,
       neutral,
+      method,
     };
     block.pace = {
       plays: t.paceGames ? r1(t.plays / t.paceGames) : null,
@@ -394,10 +426,13 @@ export function defenseVsPosition({ pbp, snaps = [], positionOf, gsisByPfr, part
 }
 
 // ---------------------------------------------------------------------------
-// Run on its own: add vsPos to finished seasons' DEF rows (every part already written)
+// Run on its own: add vsPos to the seasons' DEF rows (every part already written)
 // ---------------------------------------------------------------------------
 const CACHE = new URL('../../../.cache/nflverse/', import.meta.url);
-const SEASONS_DIR = new URL('../src/StaticData/seasons/', import.meta.url);
+const STATIC_DIR = new URL('../src/StaticData/', import.meta.url);
+const SEASONS_DIR = new URL('seasons/', STATIC_DIR);
+// (the current season, as update-data.mjs's CURRENT_SEASON: its files are StaticData/'s own)
+const CURRENT_SEASON = 2026;
 
 function parseCsv(text) {
   const rows = [];
@@ -437,7 +472,7 @@ async function backfill(seasons) {
     const started = Date.now();
     const pbp = await readCsvGz(`play_by_play_${year}.csv.gz`);
     const snaps = year >= 2012 ? await readCsvGz(`snap_counts_${year}.csv.gz`).catch(() => []) : [];
-    const dir = new URL(`${year}/`, SEASONS_DIR);
+    const dir = year === CURRENT_SEASON ? STATIC_DIR : new URL(`${year}/`, SEASONS_DIR);
     const done = [];
     for (const part of ['regular', 'post', 'all']) {
       const file = new URL(part === 'regular' ? 'skill-players.json' : `skill-players.${part}.json`, dir);
@@ -455,7 +490,7 @@ async function backfill(seasons) {
 
 if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) {
   const args = process.argv.slice(2).map(Number).filter(Boolean);
-  const seasons = args.length ? args : Array.from({ length: 2026 - 2000 }, (_, i) => 2000 + i);
+  const seasons = args.length ? args : Array.from({ length: CURRENT_SEASON + 1 - 2000 }, (_, i) => 2000 + i);
   backfill(seasons).catch((err) => {
     console.error(err.stack);
     process.exit(1);

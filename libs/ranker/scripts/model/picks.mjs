@@ -62,7 +62,7 @@ export function reasonOf(bet, game) {
       out.push(`${team} ${p.roleFactor < 1 ? 'holds' : 'gives'} ${p.role}s ${pctOff}% ${p.roleFactor < 1 ? 'under' : 'over'} their average (#${p.roleFactor < 1 ? p.roleRank.rank : p.roleRank.of - p.roleRank.rank + 1} in the league${p.roleUsed ? '' : '; not weighed: the role split hasn\'t helped on past games'}).`);
     }
     if (Number.isFinite(p.funnel) && Math.abs(p.funnel) >= 0.03) {
-      out.push(`${team} is a ${p.funnel > 0 ? 'pass' : 'run'} funnel: opponents pass ${Math.round(Math.abs(p.funnel) * 100)} points ${p.funnel > 0 ? 'more' : 'less'} often than usual${p.funnelUsed ? '' : ' (not weighed: it hasn\'t helped on past games)'}.`);
+      out.push(`${team} is a ${p.funnel > 0 ? 'pass' : 'run'} funnel: opponents pass ${Math.round(Math.abs(p.funnel) * 100)} points ${p.funnel > 0 ? 'more' : 'less'} often than usual for the situation${p.funnelUsed ? '' : ' (not weighed: it hasn\'t helped on past games)'}.`);
     }
   } else if (Number.isFinite(bet.expMargin) && Number.isFinite(bet.expTotal)) {
     const h = (bet.expTotal + bet.expMargin) / 2;

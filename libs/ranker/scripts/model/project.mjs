@@ -15,7 +15,7 @@
 //   script   his team's expected score from the game model (the ratings and context) over the average, to the
 //            power b: a game the model sees as high scoring or a blowout moves volume (the opponent's for a
 //            goalie's saves or a pitcher's outs)
-//   matchup  the NFL defense's funnel (its opponents' pass share against it over their own, matchups.mjs): a
+//   matchup  the NFL defense's funnel (its opponents' pass rate over expected against it over their own, matchups.mjs): a
 //            volume term, exp(fun x funnel) for a passing or receiving stat, exp(-fun x funnel) for a rushing one;
 //            its pace (its opponents' plays over their usual) to the power pc; the share of targets it allows to
 //            his position over the league's, to the power tg (a receiving stat)

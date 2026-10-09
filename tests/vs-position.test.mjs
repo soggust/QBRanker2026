@@ -61,13 +61,20 @@ test(`NFL ${SEASON}: what the defenses allowed adds up to the league's receiving
   assert.ok(passYards > 100000 && passYards < 140000, `${passYards} receiving yards in the league`);
 });
 
-test(`NFL ${SEASON}: funnel scores cancel out, and every target split adds up to 100%`, () => {
+test(`NFL ${SEASON}: funnel scores (over expected) cancel out, and every target split adds up to 100%`, () => {
   const defs = rows().DEF;
   const scores = defs.map((d) => d.vsPos.funnel.score);
   const mean = scores.reduce((a, v) => a + v, 0) / scores.length;
   assert.ok(Math.abs(mean) < 1, `funnel scores average ${mean} points`);
   assert.ok(scores.some((v) => v > 2) && scores.some((v) => v < -2), 'no pass or run funnel at all');
   assertRanks(scores, defs.map((d) => d.vsPos.funnel.rank), 'funnel', true);
+  // (over nflverse's expected pass rate from 2006 on: rate less exp is the score, both plain fractions)
+  for (const d of defs) {
+    const f = d.vsPos.funnel;
+    assert.equal(f.method, 'proe', `${d.name}: funnel method ${f.method}`);
+    assert.ok(f.rate > 0.4 && f.rate < 0.8 && f.exp > 0.4 && f.exp < 0.8, `${d.name}: pass rate ${f.rate} against ${f.exp}`);
+    assert.ok(Math.abs((f.rate - f.exp) * 100 - f.score) <= 0.2, `${d.name}: score ${f.score} isn't rate less exp`);
+  }
   for (const d of defs) {
     const t = d.vsPos.targets;
     const share = GROUPS.reduce((a, g) => a + t[g].share, 0);
@@ -77,6 +84,14 @@ test(`NFL ${SEASON}: funnel scores cancel out, and every target split adds up to
     assert.ok(t.WR.share > t.TE.share && t.WR.share > t.RB.share, `${d.name}: WRs not the most targeted`);
     assert.ok(Math.abs(d.vsPos.pace.diff) < 10, `${d.name}: pace ${d.vsPos.pace.diff}`);
   }
+});
+
+// Before 2006 nflverse has no expected pass rate: the funnel falls back to the plain rate, and says so
+test('NFL 2005: the funnel falls back to the plain pass rate, scores cancelling out', () => {
+  const defs = readJson(path.join(staticDir('nfl'), 'seasons', '2005', 'skill-players.json')).DEF;
+  for (const d of defs) assert.equal(d.vsPos.funnel.method, 'rate', `${d.name}: funnel method ${d.vsPos.funnel.method}`);
+  const mean = defs.reduce((a, d) => a + d.vsPos.funnel.score, 0) / defs.length;
+  assert.ok(Math.abs(mean) < 1, `funnel scores average ${mean} points`);
 });
 
 // The NHL's (apps/nhl/scripts/vs-position.mjs, on each head coach row): every team against forwards and

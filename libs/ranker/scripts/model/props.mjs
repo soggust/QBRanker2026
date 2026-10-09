@@ -130,11 +130,11 @@ function markEligible(sport, st, rows) {
 }
 
 // Every prop type's projection model fit and checked on the history (the check on the eligible players);
-// the state shows them
-export function fitProps(sport, rows, expPts, info) {
+// the state shows them (facts: the context's, whose play-by-play (facts.plays) gives the NFL's funnel)
+export function fitProps(sport, rows, expPts, info, facts = null) {
   const out = {};
   // (each row's role and its defense's funnel, pace and target split, from the games before it: matchups.mjs)
-  const matchups = sport === 'nfl' ? nflMatchups(rows) : sport === 'nba' ? nbaMatchups(rows) : null;
+  const matchups = sport === 'nfl' ? nflMatchups(rows, facts?.plays) : sport === 'nba' ? nbaMatchups(rows) : null;
   for (const st of STATS[sport]) {
     const mine = markEligible(
       sport,
