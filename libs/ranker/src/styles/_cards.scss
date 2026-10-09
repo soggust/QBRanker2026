@@ -1,12 +1,18 @@
-// The player card's and the game view's look (styles/components/player-card.scss, game-view.scss), loaded
+// The player card's, the compare view's and the game view's look (styles/components/player-card.scss,
+// compare.scss, game-view.scss), loaded
 // once for the whole page but kept to their own elements: nested under player-card and game-view, so it
 // reaches nothing else, and does reach the components inside them (the card's tabs). The game view is the
 // card's look plus its own, after it.
 @use "sass:meta";
 
 player-card,
+player-compare,
 game-view {
   @include meta.load-css("components/player-card");
+}
+
+player-compare {
+  @include meta.load-css("components/compare");
 }
 
 game-view {

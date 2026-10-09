@@ -2,15 +2,14 @@
 // showing in the grid, as ranks in the list it's ranked in (the table's, or another season's ranked the
 // same way); then the Overview (skills, archetype, flags, radar, scouting report), the seasons they're
 // in and similar seasons load in behind it.
-import { PER_GAME_LABELS, SKILL_STATS, SkillPlayer, SkillPosition, SkillStat, SkillStatGroup, headlineStats, presetWeights } from '@sport/positions';
+import { SKILL_STATS, SkillPlayer, SkillPosition, SkillStat, SkillStatGroup, headlineStats, presetWeights } from '@sport/positions';
 import { awardsFor } from '@sport/awards';
 import { SPORT } from '@sport/sport';
 import { extras, logoFile, rowTeamNames } from '@ranker/engine/row-fields';
 import { badgeColor, whiteLogo } from '@sport/team-colors';
 import { logoForSeason } from '@sport/logo-eras';
-import { SKILLS } from '@sport/skills';
 import { CardFlag, FlagContext, ValueContext } from '@ranker/engine/sport';
-import { CardSkill, standing, tierWord } from '@ranker/engine/skills';
+import { CardSkill } from '@ranker/engine/skills';
 import { CURRENT_SEASON, SEASONS, dataPart, dataSeason, isLiveSeason } from '@ranker/engine/data';
 import { DEFAULT_SPORT_SETTINGS, SKILL_UNITS, defaultRanking, statValue } from '@ranker/engine/unit-scoring';
 import { StatReader } from '@ranker/engine/stat-reader';
@@ -19,7 +18,7 @@ import { NUMBER, grade, innings, ordinal, rankPct, rankTone } from '@ranker/core
 import type { DepthPlayer, DepthView } from './depth-chart';
 import type { ZoneView } from './zones';
 import { CardOverview, CardSeason, CardStat, CardTab, CareerSeason, PlayerCard, SeasonContext } from './card.model';
-import { archetypeFor, overviewBlurb, profileFlags, scoutingReport, skillScores } from './overview';
+import { archetypeFor, overviewBlurb, profileFlags, scoutingReport, skillScores, skillsOf } from './overview';
 import { careerHistory } from './career-history';
 import { radar, radarShape } from './radar';
 import { GameLogView, gameLogView } from './game-log-view';
@@ -95,6 +94,10 @@ export class PlayerCards {
   private cardPosition: SkillPosition | null = null;
   private get position(): SkillPosition {
     return this.cardPosition ?? this.host.position;
+  }
+  // (the tab the card's on, for the compare view)
+  get tabPosition(): SkillPosition {
+    return this.position;
   }
   // (the card is on the table's tab: the table's own list and reader are its)
   private get onTable(): boolean {
@@ -468,42 +471,9 @@ export class PlayerCards {
     };
   }
 
-  // Each skill as a percentile in the list: the average of its stats' percentiles (volume stats per
-  // game), each stat turned the skill's way. Stats a season didn't record are skipped, and a skill with
-  // none of its stats is left out.
+  // Each skill as a percentile in the list (overview.ts skillsOf), on the card's tab's stats
   private skillsFor(reader: StatReader, player: SkillPlayer, list: SkillPlayer[]): CardSkill[] {
-    const out: CardSkill[] = [];
-    for (const def of SKILLS[this.position]) {
-      const pcts: number[] = [];
-      const evidence: CardSkill['evidence'] = [];
-      for (const [key, dir] of def.parts) {
-        const stat = this.stats.find((s) => s.key === key);
-        if (!stat || reader.empty(key)) continue;
-        const mine = reader.rate(player, stat);
-        if (mine === null) continue;
-        const values = list.map((p) => reader.rate(p, stat)).filter((v): v is number => v !== null);
-        if (values.length < 3) continue;
-        const below = values.filter((v) => v < mine).length;
-        const equal = values.filter((v) => v === mine).length - 1;
-        const high = (below + equal / 2) / (values.length - 1);
-        pcts.push(dir > 0 ? high : 1 - high);
-        const rank = 1 + values.filter((v) => (dir > 0 ? v > mine : v < mine)).length;
-        const label = stat.kind === 'volume' ? (PER_GAME_LABELS[stat.key] ?? `${stat.label} / Game`) : stat.label;
-        if (!evidence.some((e) => e.label === label)) evidence.push({ label, rank, of: values.length });
-      }
-      if (!pcts.length) continue;
-      const pct = pcts.reduce((a, v) => a + v, 0) / pcts.length;
-      out.push({
-        id: def.id,
-        name: def.name,
-        short: def.short,
-        pct,
-        tier: tierWord(pct),
-        standing: standing(pct),
-        evidence: evidence.sort((a, b) => a.rank / a.of - b.rank / b.of),
-      });
-    }
-    return out;
+    return skillsOf(this.position, this.stats, reader, player, list);
   }
 
   // Context the stats alone don't say: the sport's own takes (a small sample, luck: results against
@@ -604,45 +574,9 @@ export class PlayerCards {
     if (card.season !== CURRENT_SEASON && !partRow) this.loadComps(card);
   }
 
-  // A line per season they're in, ranked with the default sliders (careers/<tab>.json for the finished
-  // seasons, this season from its rows), each headline stat's best finished season lit (lowest for a
-  // stat that counts against them; a few games into this season, a hot start would take it)
-  private async seasonLines(id: string): Promise<CardSeason[]> {
-    const position = this.position;
-    const current = this.host.season === CURRENT_SEASON ? SKILL_UNITS : await this.data.rows(CURRENT_SEASON);
-    const headline = headlineStats(position);
-    const line = (season: number, teamLogo: string, games: number, rank: number, of: number, stats: (number | null)[]): CardSeason => ({
-      season,
-      // (the team's logo that season, and the team's own file: whiteLogo reads it)
-      logo: logoForSeason(teamLogo, season),
-      teamLogo,
-      games,
-      rank,
-      of,
-      pct: rankPct(rank, of),
-      stats: headline.map((stat, i) => ({ text: totalText(stat, stats[i] ?? null), label: stat.label, value: stats[i] ?? null, share: 0, best: false })),
-    });
-    const seasons = ((await this.data.careers(position))[id] ?? []).map(([season, logo, games, rank, of, stats]) =>
-      line(season, SPORT.teamLogo(logo), games, rank, of, stats),
-    );
-    const now = (current[position] ?? []).find((p) => p.gsisId === id);
-    if (now) {
-      const ranked = defaultRanking(position, presetWeights(position, 'default'), current);
-      const context: ValueContext = { position, settings: DEFAULT_SPORT_SETTINGS, rows: current, tableSeason: false, defaults: true };
-      const stats = headline.map((stat) => statValue(now, stat, context));
-      seasons.push(line(CURRENT_SEASON, now.teamLogo, now.games, ranked.indexOf(now) + 1, ranked.length, stats));
-    }
-    const finished = seasons.filter((s) => !isLiveSeason(s.season));
-    headline.forEach((stat, i) => {
-      const done = finished.map((s) => s.stats[i].value).filter((v): v is number => v !== null);
-      if (!seasons.some((s) => s.stats[i].value !== null)) return;
-      const best = stat.negative ? Math.min(...done) : Math.max(...done);
-      for (const s of seasons) {
-        const v = s.stats[i].value;
-        if (v !== null) s.stats[i].best = done.length > 1 && !isLiveSeason(s.season) && v === best;
-      }
-    });
-    return seasons;
+  // A line per season they're in (careerLines)
+  private seasonLines(id: string): Promise<CardSeason[]> {
+    return careerLines(this.data, this.host.season, this.position, id);
   }
 
   // The Seasons tab: re-rank every season with the current sliders (a season dragged by hand this visit
@@ -781,6 +715,46 @@ export class PlayerCards {
       console.error(err);
     }
   }
+}
+
+// A line per season someone's in (the card's Career tab and history, the compare view's arcs), ranked with the default sliders (careers/<tab>.json for the finished
+// seasons, this season from its rows), each headline stat's best finished season lit (lowest for a
+// stat that counts against them; a few games into this season, a hot start would take it)
+export async function careerLines(data: SeasonDataService, tableSeason: number, position: SkillPosition, id: string): Promise<CardSeason[]> {
+  const current = tableSeason === CURRENT_SEASON ? SKILL_UNITS : await data.rows(CURRENT_SEASON);
+  const headline = headlineStats(position);
+  const line = (season: number, teamLogo: string, games: number, rank: number, of: number, stats: (number | null)[]): CardSeason => ({
+    season,
+    // (the team's logo that season, and the team's own file: whiteLogo reads it)
+    logo: logoForSeason(teamLogo, season),
+    teamLogo,
+    games,
+    rank,
+    of,
+    pct: rankPct(rank, of),
+    stats: headline.map((stat, i) => ({ text: totalText(stat, stats[i] ?? null), label: stat.label, value: stats[i] ?? null, share: 0, best: false })),
+  });
+  const seasons = ((await data.careers(position))[id] ?? []).map(([season, logo, games, rank, of, stats]) =>
+    line(season, SPORT.teamLogo(logo), games, rank, of, stats),
+  );
+  const now = (current[position] ?? []).find((p) => p.gsisId === id);
+  if (now) {
+    const ranked = defaultRanking(position, presetWeights(position, 'default'), current);
+    const context: ValueContext = { position, settings: DEFAULT_SPORT_SETTINGS, rows: current, tableSeason: false, defaults: true };
+    const stats = headline.map((stat) => statValue(now, stat, context));
+    seasons.push(line(CURRENT_SEASON, now.teamLogo, now.games, ranked.indexOf(now) + 1, ranked.length, stats));
+  }
+  const finished = seasons.filter((s) => !isLiveSeason(s.season));
+  headline.forEach((stat, i) => {
+    const done = finished.map((s) => s.stats[i].value).filter((v): v is number => v !== null);
+    if (!seasons.some((s) => s.stats[i].value !== null)) return;
+    const best = stat.negative ? Math.min(...done) : Math.max(...done);
+    for (const s of seasons) {
+      const v = s.stats[i].value;
+      if (v !== null) s.stats[i].best = done.length > 1 && !isLiveSeason(s.season) && v === best;
+    }
+  });
+  return seasons;
 }
 
 // A headline stat on the Seasons tab: a season's total, formatted like the table ("4,183")

@@ -58,6 +58,7 @@ section footer {
   .settings-toggle,
   .copy-toggle,
   .share-toggle,
+  .compare-toggle,
   .info-toggle {
     align-items: center;
     @include v.leather;
@@ -89,6 +90,7 @@ section footer {
   // While the filters, the About panel or the settings menu are open, that button's icon is lit
   .filter-toggle.open .mat-icon,
   .info-toggle.open .mat-icon,
+  .compare-toggle.open .mat-icon,
   .settings-toggle[aria-expanded="true"] .mat-icon {
     color: var(--scoreboard-led);
   }
@@ -134,6 +136,26 @@ section.rankings-wrapper > footer {
 
   .share-toggle {
     order: 3;
+  }
+
+  // (Compare: the picks' count on a little LED tile at its corner)
+  .compare-toggle {
+    order: 3;
+    position: relative;
+  }
+
+  .compare-count {
+    @include v.led-tile;
+    border-radius: 9px;
+    color: var(--scoreboard-led);
+    font-size: 9px;
+    height: 17px;
+    min-width: 17px;
+    padding: 1px 4px 0;
+    position: absolute;
+    right: -6px;
+    text-shadow: var(--scoreboard-glow);
+    top: -6px;
   }
 
   .info-toggle {
@@ -274,6 +296,15 @@ section ul li.player:not(.header-row) {
       linear-gradient(rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.12)) left bottom / 100% 0.5px no-repeat,
       rgba(0, 0, 0, 0.1);
   }
+}
+
+// A row picked for Compare (a click on it, off its name and links): a bar of the board's light down its
+// left and a faint wash of it, hovered or not
+section ul li.player.picked:not(.header-row):not(.cdk-drag-preview),
+section ul li.player.picked:not(.header-row):not(.cdk-drag-preview):hover {
+  box-shadow:
+    inset 3px 0 0 var(--scoreboard-led),
+    inset 0 0 0 100vmax color-mix(in srgb, var(--scoreboard-led) 9%, transparent);
 }
 
 // The row you're dragging: a solid piece of board, lifted (it renders inside the list, so it keeps every
@@ -1374,6 +1405,7 @@ section ul li.player > div.player-info .player-name {
     .settings-toggle,
     .copy-toggle,
     .share-toggle,
+    .compare-toggle,
     .info-toggle {
       height: 36px;
       min-width: 36px;

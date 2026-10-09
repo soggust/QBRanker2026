@@ -16,6 +16,8 @@ import { GameViewService } from '../game-view/game-view.service';
 })
 export class PlayerCardComponent {
   @Input({ required: true }) cards!: PlayerCards;
+  // (the hero's compare button: this season into the compare view)
+  @Input() compare: (() => void) | null = null;
 
   constructor(readonly games: GameViewService) {}
 

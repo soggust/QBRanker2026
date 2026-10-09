@@ -65,7 +65,16 @@
       <li class="empty-list">{{ sport.copy.noneFound ?? 'No Players Found' }}</li>
     }
     @for (player of playerList; track player.gsisId; let i = $index) {
-      <li cdkDrag cdkDragPreviewContainer="parent" class="player" [attr.data-id]="player.gsisId">
+      <!-- (a click on a row, off its name and links, picks it for Compare) -->
+      <li
+        cdkDrag
+        cdkDragPreviewContainer="parent"
+        class="player"
+        [class.picked]="picked.includes(player.gsisId)"
+        [attr.data-id]="player.gsisId"
+        (cdkDragEnded)="rowDropped()"
+        (click)="pickRow(player, $event)"
+      >
         <mat-icon
           cdkDragHandle
           aria-hidden="false"
@@ -248,6 +257,21 @@
       <mat-icon aria-hidden="true" fontIcon="share"></mat-icon>
     </button>
 
+    <!-- Compare: the rows picked (a click on a row), or open to search anyone, any season -->
+    <button
+      type="button"
+      (click)="openCompare()"
+      class="compare-toggle"
+      [class.open]="picked.length"
+      [attr.aria-label]="picked.length ? 'Compare the ' + picked.length + ' picked' : 'Compare'"
+      [title]="picked.length ? 'Compare the ' + picked.length + ' picked' : 'Compare: click rows to pick them, or open and search anyone, any season'"
+    >
+      <mat-icon aria-hidden="true" fontIcon="compare_arrows"></mat-icon>
+      @if (picked.length) {
+        <span class="compare-count" aria-hidden="true">{{ picked.length }}</span>
+      }
+    </button>
+
     <!-- The sport's footer dropdowns (MMA's Current / All-Time), in the year selector's place -->
     @for (setting of footerSettings; track setting.key) {
       <mat-select
@@ -321,8 +345,10 @@
   </footer>
 </section>
 
-<!-- The settings menu (the gear opens it) and the player card (a name clicked) -->
+<!-- The settings menu (the gear opens it), the compare view, and the player card (a name clicked; over
+     the compare view when opened from it) -->
 <settings-menu #settings [position]="position"></settings-menu>
-<player-card [cards]="cards"></player-card>
+<player-compare [compare]="compare" [openCard]="openCompareCard" [cardOpen]="compareCardOpen"></player-compare>
+<player-card [cards]="cards" [compare]="compareFromCard"></player-card>
 <!-- (a game: from a Recent dot, or a game log's row) -->
 <game-view></game-view>

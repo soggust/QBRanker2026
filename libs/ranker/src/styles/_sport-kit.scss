@@ -6,7 +6,7 @@
 // Selectors
 // ---------------------------------------------------------------------------
 // The grid's buttons (filters, copy, info, settings)
-$footer-buttons: "section footer .filter-toggle, section footer .settings-toggle, section footer .copy-toggle, section footer .share-toggle, section footer .info-toggle";
+$footer-buttons: "section footer .filter-toggle, section footer .settings-toggle, section footer .copy-toggle, section footer .share-toggle, section footer .compare-toggle, section footer .info-toggle";
 
 // The filter menu's Reset and Clear All, in every state
 // (and the selectable pills, in the same hide: the game view's filters, All Plays / Scoring and the chart's
@@ -15,7 +15,7 @@ $menu-buttons: ".sidebar footer button, .sidebar footer button.negative, .sideba
 
 // A grid button whose panel is open, and any button pressed (open or hovered)
 $open-buttons: 'section footer .filter-toggle.open, section footer .info-toggle.open, section footer .settings-toggle[aria-expanded="true"]';
-$pressed-buttons: "#{$open-buttons}, section footer .filter-toggle:hover, section footer .copy-toggle:hover, section footer .share-toggle:hover, section footer .info-toggle:hover, section footer .settings-toggle:hover, .sidebar footer button:hover";
+$pressed-buttons: "#{$open-buttons}, section footer .filter-toggle:hover, section footer .copy-toggle:hover, section footer .share-toggle:hover, section footer .compare-toggle:hover, section footer .info-toggle:hover, section footer .settings-toggle:hover, .sidebar footer button:hover";
 
 // The year dropdown and the filter menu's presets dropdown, and their open lists
 $dropdowns: "section footer .mat-mdc-select.season-select, .sidebar .filters .mat-mdc-select";

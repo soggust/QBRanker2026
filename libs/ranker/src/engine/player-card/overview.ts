@@ -1,11 +1,50 @@
 // The Overview's words: the scouting report, the one-line take, the archetype, and the flags the
 // profile's shape raises
-import { SkillPlayer, SkillPosition } from '@sport/positions';
+import { PER_GAME_LABELS, SkillPlayer, SkillPosition, SkillStat } from '@sport/positions';
 import { SPORT } from '@sport/sport';
 import { ARCHETYPES, SKILLS, VOLUME_VS_EFFICIENCY, WINS_VS_PLAY, fallbackArchetype } from '@sport/skills';
 import { CardFlag } from '@ranker/engine/sport';
-import { CardSkill } from '@ranker/engine/skills';
+import { CardSkill, standing, tierWord } from '@ranker/engine/skills';
+import { StatReader } from '@ranker/engine/stat-reader';
 import { CardOverview } from './card.model';
+
+// Each skill as a percentile in the list: the average of its stats' percentiles (volume stats per
+// game), each stat turned the skill's way. Stats a season didn't record are skipped, and a skill with
+// none of its stats is left out. (The card's, and the compare view's: one way of reading a season.)
+export function skillsOf(position: SkillPosition, stats: SkillStat[], reader: StatReader, player: SkillPlayer, list: SkillPlayer[]): CardSkill[] {
+  const out: CardSkill[] = [];
+  for (const def of SKILLS[position]) {
+    const pcts: number[] = [];
+    const evidence: CardSkill['evidence'] = [];
+    for (const [key, dir] of def.parts) {
+      const stat = stats.find((s) => s.key === key);
+      if (!stat || reader.empty(key)) continue;
+      const mine = reader.rate(player, stat);
+      if (mine === null) continue;
+      const values = list.map((p) => reader.rate(p, stat)).filter((v): v is number => v !== null);
+      if (values.length < 3) continue;
+      const below = values.filter((v) => v < mine).length;
+      const equal = values.filter((v) => v === mine).length - 1;
+      const high = (below + equal / 2) / (values.length - 1);
+      pcts.push(dir > 0 ? high : 1 - high);
+      const rank = 1 + values.filter((v) => (dir > 0 ? v > mine : v < mine)).length;
+      const label = stat.kind === 'volume' ? (PER_GAME_LABELS[stat.key] ?? `${stat.label} / Game`) : stat.label;
+      if (!evidence.some((e) => e.label === label)) evidence.push({ label, rank, of: values.length });
+    }
+    if (!pcts.length) continue;
+    const pct = pcts.reduce((a, v) => a + v, 0) / pcts.length;
+    out.push({
+      id: def.id,
+      name: def.name,
+      short: def.short,
+      pct,
+      tier: tierWord(pct),
+      standing: standing(pct),
+      evidence: evidence.sort((a, b) => a.rank / a.of - b.rank / b.of),
+    });
+  }
+  return out;
+}
 
 // The scouting report: every skill, best first, split into strengths, average and weaknesses
 export function scoutingReport(skills: CardSkill[]) {

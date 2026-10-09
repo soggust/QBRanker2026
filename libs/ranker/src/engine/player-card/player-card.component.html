@@ -79,6 +79,12 @@
             <mat-icon fontIcon="arrow_back"></mat-icon>
           </button>
         }
+        <!-- (this season into the compare view, against anyone, any season) -->
+        @if (compare) {
+          <button type="button" class="card-compare" aria-label="Compare" [title]="'Compare ' + c.name + '’s ' + c.seasonLabel.toLowerCase() + ' with anyone'" (click)="compare()">
+            <mat-icon fontIcon="compare_arrows"></mat-icon>
+          </button>
+        }
         <button type="button" aria-label="Close" title="Close (Esc)" (click)="close()">
           <mat-icon fontIcon="close"></mat-icon>
         </button>

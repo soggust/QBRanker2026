@@ -1,0 +1,871 @@
+@use "../variables" as v;
+
+// ===========================================================================
+// The compare view (player-compare): the player card's board (player-card.scss, loaded with it) with a
+// tape per side across its hero, each in its side's color (a stripe on top, its shapes, bars and lines
+// all through the tabs), then Overview, Stats and Career.
+// ===========================================================================
+
+// (its panels without a category of their own in chalk, not a team's accent: there's no one team here)
+.compare-card {
+  --team-accent: #b9c2bf;
+}
+
+// ---------------------------------------------------------------------------
+// Hero: the tapes, side by side, and the add slot after them
+// ---------------------------------------------------------------------------
+.compare-hero {
+  background:
+    radial-gradient(ellipse at 50% -20%, rgba(255, 255, 255, 0.08), transparent 60%),
+    linear-gradient(135deg, #3d4744, #2b3230 75%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  flex: 0 0 auto;
+  padding: 16px 22px 18px;
+  position: relative;
+  z-index: 2;
+}
+
+.compare-head {
+  align-items: center;
+  display: flex;
+  gap: 14px;
+  min-height: 30px;
+  padding-right: 40px;
+}
+
+.compare-hint {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 12px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.tapes {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(var(--sides), minmax(0, 1fr));
+  margin-top: 14px;
+}
+
+.tape {
+  // (the team's color washing in from the top corner, over a dark panel; the side's stripe on top)
+  background:
+    linear-gradient(160deg, color-mix(in srgb, var(--team-badge, #555) 38%, transparent), transparent 62%),
+    rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  box-shadow:
+    inset 0 3px 0 var(--side, transparent),
+    0 4px 12px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 196px;
+  min-width: 0;
+  padding: 16px 12px 10px;
+  position: relative;
+}
+
+// (the team card, at about the hero's half)
+.tape-badge {
+  --w: 84px;
+  --h: 56px;
+  --card-r: 12px;
+  --shot-h: 72px;
+  --hang: 14px;
+  margin-top: 12px;
+}
+
+.tape-remove {
+  align-items: center;
+  background: none;
+  border: none;
+  border-radius: 6px;
+  color: rgba(255, 255, 255, 0.55);
+  cursor: pointer;
+  display: flex;
+  height: 24px;
+  justify-content: center;
+  padding: 0;
+  position: absolute;
+  right: 5px;
+  top: 7px;
+  width: 24px;
+
+  .mat-icon {
+    @include v.icon-size(17px);
+  }
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+  }
+}
+
+.tape-text {
+  align-items: flex-start;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+// (the season: the card's chip, a picker when they've more than one)
+.tape-season {
+  align-items: center;
+  background: var(--scoreboard-dots), var(--scoreboard);
+  border: 1px solid var(--scoreboard-led);
+  border-radius: 999px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.45);
+  box-sizing: border-box;
+  cursor: pointer;
+  display: inline-flex;
+  font-family: v.$font-base;
+  font-size: 10px;
+  font-weight: 700;
+  height: 20px;
+  letter-spacing: 1px;
+  padding: 0 6px 0 10px;
+  text-transform: uppercase;
+  width: auto;
+
+  .mat-mdc-select-trigger {
+    gap: 4px;
+  }
+
+  .mat-mdc-select-value,
+  .mat-mdc-select-arrow {
+    color: var(--scoreboard-led);
+  }
+
+  .mat-mdc-select-value {
+    max-width: none;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9);
+  }
+
+  .mat-mdc-select-arrow-wrapper {
+    height: 16px;
+  }
+}
+
+.tape-name {
+  background: none;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  @include v.hand(19px);
+  line-height: 1.1;
+  max-width: 100%;
+  padding: 0;
+  text-align: left;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+  transition: color 0.15s;
+
+  &:hover,
+  &:focus-visible {
+    color: var(--scoreboard-led);
+  }
+}
+
+.tape-team {
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.tape-foot {
+  align-items: center;
+  display: flex;
+  gap: 6px;
+  margin-top: auto;
+}
+
+// (the rank that season, on the card's LED tile)
+.tape-rank {
+  @include v.led-tile;
+  @include v.tone-glow(60%, 8px);
+  border-radius: 5px;
+  font-size: 11px;
+  height: 24px;
+  min-width: 34px;
+  padding: 1.5px 4px 0;
+}
+
+.tape-of {
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+// (the columns it leads, of those contested)
+.tape-wins {
+  color: rgba(255, 255, 255, 0.55);
+  cursor: help;
+  font-size: 11px;
+  font-weight: 700;
+  margin-left: auto;
+
+  b {
+    color: var(--side);
+    @include v.hand(16px);
+    font-weight: 400;
+  }
+}
+
+.tape-archetype {
+  color: var(--side);
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.2;
+  margin: 0;
+}
+
+// The add slot: a dashed outline, the search in it, its hits dropping over the board
+.tape-add {
+  align-items: center;
+  background: rgba(0, 0, 0, 0.18);
+  border: 1px dashed rgba(255, 255, 255, 0.22);
+  box-shadow: none;
+  justify-content: center;
+  text-align: center;
+
+  // (alone: the empty view's, two slots wide)
+  &:first-child {
+    grid-column: span 2;
+  }
+}
+
+.tape-add-icon {
+  color: rgba(255, 255, 255, 0.45);
+  @include v.icon-size(30px);
+
+  &.spin {
+    animation: tape-spin 1s linear infinite;
+  }
+}
+
+@keyframes tape-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.tape-add-text,
+.tape-none {
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 12px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.tape-search {
+  background: rgba(0, 0, 0, 0.38);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  box-sizing: border-box;
+  color: #fff;
+  font-family: v.$font-base;
+  font-size: 13px;
+  font-weight: 700;
+  outline: none;
+  padding: 8px 10px;
+  width: 100%;
+
+  &::placeholder {
+    color: rgba(255, 255, 255, 0.45);
+  }
+
+  &:focus {
+    border-color: var(--scoreboard-led);
+  }
+}
+
+.tape-hits {
+  background: #161b19;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 10px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6);
+  left: 0;
+  list-style: none;
+  margin: 0;
+  max-height: 340px;
+  overflow-y: auto;
+  padding: 6px;
+  position: absolute;
+  text-align: left;
+  top: calc(100% - 8px);
+  width: max(100%, 300px);
+  z-index: 20;
+
+  button {
+    align-items: center;
+    background: none;
+    border: none;
+    border-radius: 7px;
+    color: #eee;
+    cursor: pointer;
+    display: grid;
+    font-family: v.$font-base;
+    gap: 10px;
+    grid-template-columns: 36px minmax(0, 1fr) auto;
+    padding: 6px 8px;
+    text-align: left;
+    width: 100%;
+
+    &:hover,
+    &:focus-visible {
+      background: rgba(255, 255, 255, 0.07);
+    }
+  }
+}
+
+// (a hit's team, on a little team card)
+.hit-badge {
+  align-items: center;
+  background: var(--team-badge);
+  border-radius: 5px;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+  display: flex;
+  height: 25px;
+  justify-content: center;
+  width: 36px;
+
+  img {
+    height: 80%;
+    object-fit: contain;
+    width: 80%;
+  }
+
+  &.white-logo img {
+    filter: brightness(0) invert(1);
+  }
+}
+
+.hit-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+
+  b {
+    font-size: 13px;
+    font-weight: 800;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  small {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 11px;
+    font-weight: 700;
+  }
+}
+
+.hit-best {
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+
+  em {
+    color: var(--tone);
+    font-style: normal;
+    @include v.hand(13px);
+  }
+}
+
+.compare-note {
+  color: var(--scoreboard-led);
+  font-size: 12px;
+  font-weight: 800;
+  margin: 10px 0 0;
+  text-shadow: var(--scoreboard-glow);
+}
+
+// ---------------------------------------------------------------------------
+// Body
+// ---------------------------------------------------------------------------
+.compare-empty {
+  color: #9a9a9a;
+  font-size: 14px;
+  font-weight: 700;
+  margin: 0;
+  padding: 48px 0;
+  text-align: center;
+
+  &.small {
+    font-size: 13px;
+    padding: 20px 0 4px;
+  }
+}
+
+// (a line of each side's color: the legends' keys)
+.cmp-key {
+  background: var(--side);
+  border-radius: 2px;
+  display: inline-block;
+  height: 3px;
+  width: 16px;
+}
+
+// ---- Overview: the radar beside the skill bars
+.cmp-top {
+  align-items: stretch;
+  display: grid;
+  gap: 16px;
+  grid-template-columns: 420px minmax(0, 1fr);
+}
+
+.cmp-radar {
+  .cmp-shape {
+    animation: radar-grow 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+    fill: color-mix(in srgb, var(--side) 16%, transparent);
+    filter: drop-shadow(0 0 5px color-mix(in srgb, var(--side) 30%, transparent));
+    stroke: var(--side);
+    stroke-linejoin: round;
+    stroke-width: 2;
+    transform-box: view-box;
+    transform-origin: 0 0;
+  }
+
+  .cmp-dot {
+    fill: var(--side);
+    stroke: #121212;
+    stroke-width: 1.2;
+  }
+}
+
+.cmp-legend span {
+  text-transform: none;
+}
+
+.cmp-skills {
+  @include v.scoreboard-panel;
+  align-content: center;
+  display: grid;
+  gap: 11px;
+  padding: 14px 16px;
+
+  &.alone {
+    grid-column: 1 / -1;
+  }
+}
+
+.cmp-skill {
+  align-items: center;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: 118px minmax(0, 1fr);
+}
+
+.cmp-skill-name {
+  color: #ddd;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+}
+
+.cmp-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.cmp-bar {
+  align-items: center;
+  cursor: help;
+  display: grid;
+  gap: 8px;
+  grid-template-columns: minmax(0, 1fr) 24px;
+
+  .cmp-track {
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 4px;
+    display: block;
+    height: 7px;
+    overflow: hidden;
+
+    i {
+      background: color-mix(in srgb, var(--side) 45%, transparent);
+      border-radius: 4px;
+      display: block;
+      height: 100%;
+      transition: width 0.4s ease;
+    }
+  }
+
+  b {
+    color: rgba(255, 255, 255, 0.5);
+    @include v.hand(12px);
+    font-weight: 400;
+    text-align: right;
+  }
+
+  // (the best of them at it: its bar lit full, its number in its color)
+  &.lead {
+    .cmp-track i {
+      background: var(--side);
+      box-shadow: 0 0 6px color-mix(in srgb, var(--side) 55%, transparent);
+    }
+
+    b {
+      color: var(--side);
+    }
+  }
+}
+
+.cmp-panel {
+  margin-top: 16px;
+}
+
+// ---- Edges: a column per side, its color down the left
+.cmp-edges {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(var(--sides), minmax(0, 1fr));
+}
+
+.cmp-edge {
+  border-left: 3px solid var(--side);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 2px 0 2px 12px;
+}
+
+.cmp-edge-who {
+  color: var(--side);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  margin-bottom: 2px;
+  text-transform: uppercase;
+}
+
+.cmp-edge-item {
+  align-items: baseline;
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+
+  b {
+    color: #eee;
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  em {
+    color: v.$good;
+    font-style: normal;
+    @include v.hand(14px);
+  }
+}
+
+.cmp-edge-none {
+  color: #8a8a8a;
+  font-size: 12px;
+  font-style: italic;
+}
+
+// ---- How alike: a line per pair, a meter, the match
+.cmp-pairs {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.cmp-pair {
+  align-items: center;
+  cursor: help;
+  display: grid;
+  gap: 14px;
+  grid-template-columns: minmax(0, 1fr) 180px 48px;
+}
+
+.cmp-pair-who {
+  align-items: center;
+  color: #eee;
+  display: flex;
+  flex-wrap: wrap;
+  font-size: 13px;
+  font-weight: 700;
+  gap: 2px 0;
+
+  i {
+    background: var(--side);
+    border-radius: 50%;
+    display: inline-block;
+    height: 8px;
+    margin-right: 6px;
+    width: 8px;
+  }
+}
+
+.cmp-amp {
+  color: #8a8a8a;
+  margin: 0 10px;
+}
+
+.cmp-pair-meter {
+  background: rgba(255, 255, 255, 0.07);
+  border-radius: 4px;
+  display: block;
+  height: 8px;
+  overflow: hidden;
+
+  i {
+    background: linear-gradient(90deg, color-mix(in srgb, var(--scoreboard-led) 35%, transparent), var(--scoreboard-led));
+    border-radius: 4px;
+    display: block;
+    height: 100%;
+  }
+}
+
+.cmp-pair-pct {
+  @include v.hand(16px);
+  @include v.tone-glow(45%);
+  font-weight: 400;
+  text-align: right;
+}
+
+// ---- Stats: the grid's columns, a row per stat, a column per side (the header kept in view)
+.cmp-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.cmp-row {
+  align-items: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  display: grid;
+  gap: 12px;
+  grid-template-columns: minmax(120px, 1.4fr) repeat(var(--sides), minmax(0, 1fr));
+  padding: 5px 2px;
+
+  &:last-child {
+    border-bottom: 0;
+  }
+}
+
+.cmp-head {
+  background: #2b3230;
+  border-bottom: 0;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35);
+  padding: 8px 12px;
+  position: sticky;
+  top: -18px;
+  z-index: 3;
+}
+
+.cmp-col-head {
+  border-bottom: 2px solid var(--side);
+  color: var(--side);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  overflow: hidden;
+  padding-bottom: 3px;
+  text-align: right;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+
+  small {
+    color: rgba(255, 255, 255, 0.55);
+    font-size: 10px;
+  }
+}
+
+.cmp-group .group-body {
+  padding-top: 4px;
+}
+
+.cmp-label {
+  color: #cfcfcf;
+  cursor: help;
+  font-size: 12.5px;
+  font-weight: 700;
+}
+
+.cmp-cell {
+  align-items: flex-end;
+  cursor: help;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  b {
+    align-items: center;
+    color: #ddd;
+    display: inline-flex;
+    @include v.hand(15px);
+    font-weight: 400;
+    gap: 6px;
+  }
+
+  // (where it stood in its own season: a thin bar in the side's color)
+  .cmp-cell-bar {
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 2px;
+    display: block;
+    height: 3px;
+    overflow: hidden;
+    width: min(100%, 90px);
+
+    i {
+      background: color-mix(in srgb, var(--side) 60%, transparent);
+      display: block;
+      height: 100%;
+    }
+  }
+
+  // (the leader: a dot of its color before the value, its bar lit)
+  &.lead {
+    b::before {
+      background: var(--side);
+      border-radius: 50%;
+      box-shadow: 0 0 6px var(--side);
+      content: "";
+      height: 6px;
+      width: 6px;
+    }
+
+    .cmp-cell-bar i {
+      background: var(--side);
+    }
+  }
+}
+
+// ---- Career: the arcs
+.cmp-arcs {
+  display: block;
+  height: auto;
+  width: 100%;
+
+  .arc-grid {
+    stroke: rgba(255, 255, 255, 0.08);
+
+    &.mid {
+      stroke: rgba(255, 255, 255, 0.25);
+      stroke-dasharray: 3 3;
+    }
+  }
+
+  .arc-x,
+  .arc-y {
+    fill: #9a9a9a;
+    font-family: v.$font-base;
+    font-size: 10px;
+    font-weight: 700;
+  }
+
+  .arc-line {
+    fill: none;
+    stroke: var(--side);
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 2.4;
+  }
+
+  .arc-dot {
+    cursor: help;
+    fill: var(--side);
+    stroke: #1f2824;
+    stroke-width: 1.5;
+
+    // (the season compared: ringed in white, glowing)
+    &.now {
+      filter: drop-shadow(0 0 5px var(--side));
+      stroke: #fff;
+      stroke-width: 2.2;
+    }
+  }
+}
+
+.cmp-note {
+  color: #8a8a8a;
+  font-size: 12px;
+  margin: 10px 0 0;
+  text-align: center;
+}
+
+// ---------------------------------------------------------------------------
+// Narrow screens: the tapes two by two, the radar over the bars
+// ---------------------------------------------------------------------------
+@media (max-width: 760px) {
+  .compare-hero {
+    padding: 14px 14px 16px;
+  }
+
+  .compare-hint {
+    display: none;
+  }
+
+  .tapes {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  // (the tapes compact, so the comparisons keep most of the screen: a smaller team card and name, the
+  // team and archetype left to their cards)
+  .tape {
+    gap: 5px;
+    min-height: 0;
+    padding: 10px 9px 8px;
+  }
+
+  .tape-badge {
+    --w: 54px;
+    --h: 36px;
+    --card-r: 8px;
+    --shot-h: 46px;
+    --hang: 9px;
+    margin-top: 6px;
+  }
+
+  .tape-name {
+    font-size: 15px;
+  }
+
+  .tape-team,
+  .tape-archetype {
+    display: none;
+  }
+
+  .tape-add:first-child {
+    grid-column: span 2;
+  }
+
+  .tape-add .tape-add-icon {
+    display: none;
+  }
+
+  .cmp-col-head small {
+    display: none;
+  }
+
+  .cmp-top {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .cmp-skill {
+    grid-template-columns: 88px minmax(0, 1fr);
+  }
+
+  .cmp-edges {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .cmp-pair {
+    grid-template-columns: minmax(0, 1fr) 70px 42px;
+  }
+
+  .cmp-row {
+    gap: 8px;
+    grid-template-columns: minmax(84px, 1.2fr) repeat(var(--sides), minmax(0, 1fr));
+  }
+}

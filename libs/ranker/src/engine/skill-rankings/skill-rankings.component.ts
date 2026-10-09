@@ -24,6 +24,7 @@ import { SKILL_UNITS, emptyIn, recentCount, statIsEmpty } from '@ranker/engine/u
 import { StatReader } from '@ranker/engine/stat-reader';
 import { settingGroups, settingOptions, settingText, settingsAt } from '@ranker/engine/setting-options';
 import { CardHost, PlayerCards } from '@ranker/engine/player-card/player-cards';
+import { COMPARE_MAX, CompareSide, PlayerCompare } from '@ranker/engine/compare/player-compare';
 import { GameViewService, recentRef } from '@ranker/engine/game-view/game-view.service';
 import { SeasonContext } from '@ranker/engine/player-card/card.model';
 import { copyRankingsToClipboard } from '@ranker/core/clipboard';
@@ -93,6 +94,12 @@ export class SkillRankingsComponent implements OnChanges, CardHost {
   // The player card (a name clicked)
   readonly cards: PlayerCards;
 
+  // The compare view, and the rows picked for it (a click on a row, off its name and links), in the
+  // order they were picked
+  readonly compare: PlayerCompare;
+  picked: string[] = [];
+  private dragEnded = 0;
+
   private readonly glide = new RowGlide();
 
   // "List copied" under the copy button
@@ -113,6 +120,7 @@ export class SkillRankingsComponent implements OnChanges, CardHost {
       () => this.position && this.sortPlayers(),
     );
     this.cards = new PlayerCards(this, seasonData);
+    this.compare = new PlayerCompare(this, seasonData);
     // (the game view's names and teams open cards)
     this.cards.connectGames(games);
     const service = this.positionService;
@@ -137,6 +145,7 @@ export class SkillRankingsComponent implements OnChanges, CardHost {
       const changed = season !== this.season || service.seasonPart !== this.seasonPart;
       this.season = season;
       this.seasonPart = service.seasonPart;
+      if (changed) this.picked = [];
       if (changed && this.position) this.ngOnChanges();
     });
     service.seasonLoading$.pipe(takeUntilDestroyed()).subscribe((loading) => (this.seasonLoading = loading));
@@ -150,6 +159,8 @@ export class SkillRankingsComponent implements OnChanges, CardHost {
   }
 
   ngOnChanges(): void {
+    // (picks are a tab's own)
+    this.picked = [];
     // A new tab starts scrolled to the top-left of its list
     this.rankingsList?.nativeElement.scrollTo({ top: 0, left: 0 });
     this.stats = SKILL_STATS[this.position];
@@ -372,6 +383,51 @@ export class SkillRankingsComponent implements OnChanges, CardHost {
     this.games.backTo = null;
     this.cards.open(player);
   }
+
+  // ---------------------------------------------------------------------------
+  // Compare: rows picked in the grid, then the button
+  // ---------------------------------------------------------------------------
+  // A click on a row, anywhere but its name, its badge and its links (a drag just let go isn't one, nor a
+  // click that ends a text selection): picked, or unpicked
+  pickRow(player: SkillPlayer, event: MouseEvent): void {
+    const target = event.target as Element | null;
+    if (target?.closest('.card-target, .last-five, .drag-indicator, .group-icon, button, a')) return;
+    if (Date.now() - this.dragEnded < 300 || getSelection()?.toString()) return;
+    const at = this.picked.indexOf(player.gsisId);
+    if (at >= 0) this.picked.splice(at, 1);
+    else if (this.picked.length >= COMPARE_MAX) this.toast(event.currentTarget as HTMLElement, `Compare up to ${COMPARE_MAX} at a time`);
+    else this.picked.push(player.gsisId);
+  }
+
+  rowDropped(): void {
+    this.dragEnded = Date.now();
+  }
+
+  // The button: the picks compared (then let go), or the view open to search anyone
+  openCompare(): void {
+    const picks = this.picked.map((id) => this.playerList.find((p) => p.gsisId === id)).filter((p): p is SkillPlayer => !!p);
+    this.picked = [];
+    this.compare.start(picks);
+  }
+
+  // A side's name in the compare view: their card for that season, over it
+  readonly openCompareCard = (side: CompareSide) => {
+    this.games.backTo = null;
+    this.cards.tab = 'overview';
+    this.cards.openSeason(side.season, side.gsisId);
+  };
+
+  readonly compareCardOpen = () => !!this.cards.card;
+
+  // The card's compare button: its season into the compare view (the card closes, the view under it)
+  readonly compareFromCard = () => {
+    const card = this.cards.card;
+    if (!card) return;
+    const position = this.cards.tabPosition;
+    this.games.backTo = null;
+    this.cards.close();
+    this.compare.startWith(card.season, card.player.gsisId, position);
+  };
 
   // A Recent square decided past regulation (the NHL's overtime or shootout: a lighter square)
   recentOt(player: SkillPlayer, index: number): boolean {

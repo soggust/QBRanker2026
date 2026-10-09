@@ -13,6 +13,7 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { SkillRankingsComponent } from './skill-rankings/skill-rankings.component';
 import { SettingsMenuComponent } from './skill-rankings/settings-menu.component';
 import { PlayerCardComponent } from './player-card/player-card.component';
+import { PlayerCompareComponent } from './compare/player-compare.component';
 import { CARD_TABS } from '@ranker/engine/player-card/tabs/card-tabs';
 import { CardPanelComponent } from './player-card/card-panel.component';
 import { GameViewComponent } from './game-view/game-view.component';
@@ -35,6 +36,7 @@ import { ModelDeskComponent } from './bets/model-desk.component';
     SkillRankingsComponent,
     SettingsMenuComponent,
     PlayerCardComponent,
+    PlayerCompareComponent,
     ...CARD_TABS,
     CardPanelComponent,
     GameViewComponent,

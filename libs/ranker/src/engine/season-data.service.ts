@@ -48,6 +48,12 @@ export class SeasonDataService {
     return this.once('first-seasons', () => fetchOrEmpty<Record<string, number>>('data/careers/first-seasons.json'));
   }
 
+  // Everyone's name in the finished seasons, by tab (the compare view's search: { id: [name, headshot id,
+  // last season] })
+  careerNames(): Promise<Partial<Record<SkillPosition, Record<string, [string, number | null, number]>>>> {
+    return this.once('career-names', () => fetchOrEmpty('data/careers/names.json'));
+  }
+
   // A finished season's similar seasons
   comps(season: number): Promise<CompsFile> {
     return this.once(`comps.${season}`, () => fetchSeasonFile<CompsFile>(season, 'comps.json'), false);
