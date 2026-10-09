@@ -301,6 +301,23 @@ test('nfl: the career arcs, by career year or by season, the compared season rin
   // (Manning's first season sits left of the current QB's)
   assert.ok(compare.arcs.lines[1].dots[0].x < compare.arcs.lines[0].dots[0].x);
 
+  // (drawn in one sweep: every head at the same x at the same time, so the later line starts later; each
+  // dot lands as the sweep reaches it, each face rides its line's points and ends at rest)
+  const sweep = engine.arcDraw(compare.arcs);
+  assert.equal(sweep.faces[1].start, 0);
+  assert.ok(sweep.faces[0].start > 0, 'a line further right starts when the sweep gets there');
+  compare.arcs.lines.forEach((line, i) => {
+    const face = compare.arcs.faces[i];
+    const ride = sweep.faces[i];
+    line.dots.forEach((d, j) => {
+      assert.equal(sweep.dots[i][j], Math.round(((d.x - sweep.from) / (sweep.to - sweep.from)) * 1e4) / 1e4);
+      assert.ok(ride.keys.some((k) => k.offset === sweep.dots[i][j] && Math.abs(k.dx - (d.x - face.x)) < 1e-3 && Math.abs(k.dy - (d.y - face.y)) < 1e-3), 'the face at each season as the sweep reaches it');
+    });
+    assert.ok(ride.keys.every((k, n) => n === 0 || k.offset >= ride.keys[n - 1].offset), 'left to right');
+    assert.deepEqual([ride.keys[0].offset, ride.keys.at(-1)], [0, { offset: 1, dx: 0, dy: 0 }]);
+    assert.ok(ride.rest > sweep.dots[i].at(-1) && ride.rest <= 1, 'at rest past its last season');
+  });
+
   compare.setArcBy('year');
   check(compare.arcs, true);
   assert.deepEqual(compare.arcs.lines.map((l) => l.key), keys);

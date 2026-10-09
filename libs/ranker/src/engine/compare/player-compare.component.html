@@ -353,9 +353,15 @@
                   <mat-option value="season">Season</mat-option>
                 </mat-select>
                 }
+                <!-- (once they're drawn in: drawn again; none for anyone who's asked for less motion) -->
+                @if (motion) {
+                  <button panel-actions #arcReplay type="button" class="arc-replay" aria-label="Replay" title="Replay" (click)="replayArcs()">
+                    <mat-icon fontIcon="replay"></mat-icon>
+                  </button>
+                }
                 <div class="group-body">
                   <div class="arc-box" #arcBox>
-                  <svg class="cmp-arcs" [attr.viewBox]="'0 0 ' + a.width + ' ' + a.height" role="img" aria-label="Career arcs">
+                  <svg #arcSvg class="cmp-arcs" [attr.viewBox]="'0 0 ' + a.width + ' ' + a.height" role="img" aria-label="Career arcs">
                     @for (t of a.yTicks; track t.label) {
                       <line class="arc-grid" [class.mid]="t.label === '50%'" [attr.x1]="a.left" [attr.x2]="a.width - a.right" [attr.y1]="t.y" [attr.y2]="t.y"></line>
                       <text class="arc-y" [attr.x]="a.left - 6" [attr.y]="t.y + 3.5" text-anchor="end">{{ t.label }}</text>
@@ -363,13 +369,20 @@
                     @for (t of a.xTicks; track t.label) {
                       <text class="arc-x" [attr.x]="t.x" [attr.y]="a.height - 8" text-anchor="middle">{{ t.label }}</text>
                     }
-                    <!-- (each line drawn in, then its dots; made new when the bottom's switched: its key says which) -->
-                    @for (l of a.lines; track l.key) {
-                      <polyline class="arc-line" pathLength="1" [attr.points]="l.points" [style.--side]="l.color"></polyline>
-                    }
+                    <!-- (the lines drawn in one sweep left to right, uncovered by the clip's rect; each dot landing and
+                         each face riding its line's head as the sweep goes (the view drives it: arc-draw.ts); made new
+                         when the bottom's switched: its key says which) -->
+                    <clipPath id="cmp-arc-sweep">
+                      <rect class="arc-sweep" x="0" y="0" [attr.width]="a.width" [attr.height]="a.height"></rect>
+                    </clipPath>
+                    <g clip-path="url(#cmp-arc-sweep)">
+                      @for (l of a.lines; track l.key) {
+                        <polyline class="arc-line" [attr.points]="l.points" [style.--side]="l.color"></polyline>
+                      }
+                    </g>
                     @for (l of a.lines; track l.key) {
                       @for (d of l.dots; track $index) {
-                        <circle class="arc-dot" [class.now]="d.now" [attr.r]="d.now ? 6 : 3.2" [attr.cx]="d.x" [attr.cy]="d.y" [style.--side]="l.color" [style.--at]="(d.x - a.left) / (a.width - a.left - a.right)">
+                        <circle class="arc-dot" [class.now]="d.now" [attr.r]="d.now ? 6 : 3.2" [attr.cx]="d.x" [attr.cy]="d.y" [style.--side]="l.color">
                           <title>{{ d.title }}</title>
                         </circle>
                       }

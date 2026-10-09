@@ -733,6 +733,38 @@
   width: 150px;
 }
 
+// (the arcs drawn again: a small icon on the panel's bar, there once they're drawn)
+.arc-replay {
+  align-items: center;
+  background: none;
+  border: none;
+  border-radius: 5px;
+  color: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  display: inline-flex;
+  height: 26px;
+  justify-content: center;
+  margin-right: 6px;
+  padding: 0;
+  visibility: hidden;
+  width: 26px;
+
+  mat-icon {
+    font-size: 18px;
+    height: 18px;
+    width: 18px;
+  }
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+  }
+
+  &.arc-done {
+    visibility: visible;
+  }
+}
+
 // (a panel's line on how to read it, over its body)
 .cmp-help {
   color: #9a9a9a;
@@ -1015,6 +1047,9 @@
 
   .arc-dot {
     cursor: help;
+    // (popped in from its middle as the line reaches it)
+    transform-box: fill-box;
+    transform-origin: center;
     fill: var(--side);
     stroke: #1f2824;
     stroke-width: 1.5;
@@ -1102,7 +1137,7 @@
 // ---------------------------------------------------------------------------
 // Motion, quick and quiet (none for anyone who's asked their system for less): a tape eases in when added
 // and out when removed, the shapes grow, the bars fill and their numbers tick up, a leader's dot pops, the
-// career lines draw in and their seasons land after them, the hits and the summary's lines drop in
+// career arcs' Replay fades in (the arcs' sweep is the view's), the hits and the summary's lines drop in
 // ---------------------------------------------------------------------------
 @media (prefers-reduced-motion: no-preference) {
   .tape-in {
@@ -1164,24 +1199,9 @@
     animation: cmp-pop 0.28s 0.12s cubic-bezier(0.3, 1.6, 0.5, 1) backwards;
   }
 
-  .cmp-arcs {
-    .arc-line {
-      animation: arc-draw 0.5s cubic-bezier(0.3, 0, 0.6, 1) backwards;
-      stroke-dasharray: 1;
-    }
-
-    .arc-dot {
-      animation: cmp-pop 0.22s calc(var(--at, 0) * 0.5s) cubic-bezier(0.3, 1.6, 0.5, 1) backwards;
-      transform-box: fill-box;
-      transform-origin: center;
-    }
-
-    // (a face pops in as its line arrives)
-    .arc-face {
-      animation: cmp-pop 0.26s 0.45s cubic-bezier(0.3, 1.6, 0.5, 1) backwards;
-      transform-box: fill-box;
-      transform-origin: center;
-    }
+  // (the career lines' sweep is the view's (player-compare.component.ts); its Replay, once drawn, in softly)
+  .arc-replay.arc-done {
+    animation: hits-in 0.4s ease backwards;
   }
 }
 
@@ -1219,14 +1239,6 @@
   }
 }
 
-@keyframes arc-draw {
-  from {
-    stroke-dashoffset: 1;
-  }
-  to {
-    stroke-dashoffset: 0;
-  }
-}
 
 // ---------------------------------------------------------------------------
 // Tablets: the four tapes still across, tighter (smaller type and padding; the rank, its count and the

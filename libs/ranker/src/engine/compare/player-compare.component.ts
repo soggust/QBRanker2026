@@ -1,9 +1,10 @@
-import { ChangeDetectorRef, Component, DoCheck, ElementRef, HostListener, Input, NgZone, OnDestroy, ViewChild } from '@angular/core';
+import { AfterViewChecked, ChangeDetectorRef, Component, DoCheck, ElementRef, HostListener, Input, NgZone, OnDestroy, ViewChild } from '@angular/core';
 import { SPORT } from '@sport/sport';
 import { rankTone } from '@ranker/core/format';
 import { percentileText } from '@ranker/engine/player-card/hover-text';
 import { COMPARE_MAX, CompareHit, CompareTab, PlayerCompare } from './player-compare';
 import { GameViewService } from '../game-view/game-view.service';
+import { ARC_DRAW_MS, arcDraw } from './arc-draw';
 
 // The compare view: the player card's board with a tape per side across the top (team card, season, rank,
 // archetype; the season switchable, the side removable) and a slot to add one by name; then its tabs:
@@ -16,7 +17,7 @@ import { GameViewService } from '../game-view/game-view.service';
   // (its look is global, kept to its element: styles/components/compare.scss)
   standalone: false,
 })
-export class PlayerCompareComponent implements DoCheck, OnDestroy {
+export class PlayerCompareComponent implements DoCheck, AfterViewChecked, OnDestroy {
   @Input({ required: true }) compare!: PlayerCompare;
   // (the share button: the grid shares the link, its toast under the button)
   @Input() share?: (button: HTMLElement) => void;
@@ -45,6 +46,94 @@ export class PlayerCompareComponent implements DoCheck, OnDestroy {
 
   ngOnDestroy(): void {
     this.arcsObserver?.disconnect();
+    this.stopArcs();
+  }
+
+  // ---------------------------------------------------------------------------
+  // The career arcs drawn in (arc-draw.ts): one sweep left to right, the lines uncovered, each dot landing
+  // and each face riding its line's head as it goes; drawn again when shown, when a line's new (the bottom
+  // switched, a side added or removed) and on Replay. None for anyone who's asked their system for less
+  // motion: everything at rest, no Replay
+  // ---------------------------------------------------------------------------
+  readonly motion = typeof matchMedia !== 'function' || !matchMedia('(prefers-reduced-motion: reduce)').matches;
+  @ViewChild('arcSvg') private arcSvg?: ElementRef<SVGSVGElement>;
+  @ViewChild('arcReplay') private arcReplay?: ElementRef<HTMLElement>;
+  // (what was drawn last: the board, its lines, its width)
+  private drawn: { svg: SVGSVGElement; keys: string; width: number } | null = null;
+  private drawing: Animation[] = [];
+
+  ngAfterViewChecked(): void {
+    const svg = this.arcSvg?.nativeElement;
+    const arcs = this.compare.arcs;
+    if (!svg || !arcs) {
+      if (this.drawn) this.stopArcs();
+      this.drawn = null;
+      return;
+    }
+    const keys = arcs.lines.map((l) => l.key).join(' ');
+    if (this.drawn?.svg !== svg || this.drawn.keys !== keys) {
+      this.drawn = { svg, keys, width: arcs.width };
+      this.drawArcs();
+    } else if (this.drawn.width !== arcs.width) {
+      // (resized while drawing (the first measure, a phone turned): drawn again at the new size from as
+      // far as it had got)
+      this.drawn.width = arcs.width;
+      const at = this.drawing[0]?.currentTime;
+      if (at == null || this.drawing[0].playState === 'finished') return;
+      this.drawArcs();
+      for (const a of this.drawing) a.currentTime = at;
+    }
+  }
+
+  replayArcs(): void {
+    this.drawArcs();
+  }
+
+  private drawArcs(): void {
+    this.stopArcs();
+    const replay = this.arcReplay?.nativeElement;
+    replay?.classList.remove('arc-done');
+    const svg = this.drawn?.svg;
+    const arcs = this.compare.arcs;
+    if (!this.motion || !svg || !arcs || typeof svg.animate !== 'function') return;
+    const plan = arcDraw(arcs);
+    const ms = ARC_DRAW_MS;
+    const pop = 'cubic-bezier(0.3, 1.6, 0.5, 1)';
+    this.zone.runOutsideAngular(() => {
+      const run = (el: Element | null | undefined, keys: Keyframe[], options: KeyframeAnimationOptions) => {
+        if (el) this.drawing.push(el.animate(keys, { fill: 'backwards', ...options }));
+      };
+      // (the lines: uncovered left to right, the sweep's x the clip's right edge)
+      const scale = (x: number) => ({ transform: `scaleX(${x / arcs.width})` });
+      run(svg.querySelector('.arc-sweep'), [scale(plan.from), scale(plan.to)], { duration: ms });
+      // (each dot lands as the head reaches it)
+      const dots = svg.querySelectorAll('.arc-dot');
+      plan.dots.flat().forEach((at, i) => {
+        run(dots[i], [{ opacity: 0, scale: 0 }, { opacity: 1, scale: 1 }], { duration: 240, delay: at * ms, easing: pop });
+      });
+      // (each face pops in at its line's start, rides its head, settles just past its end, tied to it then)
+      const faces = svg.querySelectorAll('.arc-face');
+      plan.faces.forEach((ride, i) => {
+        const face = faces[i];
+        const { x, y } = arcs.faces[i];
+        run(face, ride.keys.map((k) => ({ offset: k.offset, translate: `${k.dx}px ${k.dy}px` })), { duration: ms });
+        const origin = `${x}px ${y}px`;
+        run(face, [{ opacity: 0, scale: 0.3, transformOrigin: origin }, { opacity: 1, scale: 1, transformOrigin: origin }], { duration: 300, delay: ride.start * ms, easing: pop });
+        run(face?.querySelector('.arc-face-tie'), [{ opacity: 0 }, { opacity: 1 }], { duration: 200, delay: ride.rest * ms });
+      });
+      // (drawn: the Replay shows)
+      const drawing = this.drawing;
+      Promise.all(drawing.map((a) => a.finished)).then(
+        () => drawing === this.drawing && replay?.classList.add('arc-done'),
+        () => {},
+      );
+    });
+  }
+
+  // (every animation stopped, everything at rest)
+  private stopArcs(): void {
+    for (const a of this.drawing) a.cancel();
+    this.drawing = [];
   }
 
   // On a phone the sides are chips in a row, one opened at a time into a sheet over the board (its id,
