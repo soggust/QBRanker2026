@@ -720,17 +720,21 @@
   gap: 12px;
 }
 
-// (the table and the pie side by side when there's room, the pie dropping under the table when not)
+// (the table across the panel and the pie apart at its right, the pie dropping under the table on a narrow
+// card; both clear of the headline)
 .bd-main {
-  align-items: flex-start;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 16px 40px;
+  align-items: start;
+  display: grid;
+  gap: 20px 64px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  margin-top: 14px;
+
+  @media (max-width: 720px) {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 .bd-table {
-  flex: 0 1 auto;
-  max-width: 560px;
   min-width: 0;
 }
 
@@ -740,8 +744,7 @@
   cursor: help;
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  max-width: 560px;
+  gap: 10px;
 }
 
 .bd-lean-head {
@@ -823,7 +826,7 @@
   display: grid;
   gap: 10px;
   // (the rank first, the role, then each column, kept close)
-  grid-template-columns: 34px 44px repeat(var(--bd-cols, 3), minmax(0, 72px));
+  grid-template-columns: 34px 52px repeat(var(--bd-cols, 3), minmax(0, 1fr));
   padding: 6px 0;
 
   &:last-child {
@@ -888,7 +891,8 @@
 .bd-split {
   display: flex;
   flex-direction: column;
-  gap: 7px;
+  gap: 12px;
+  padding-right: 8px;
 }
 
 .bd-split-title {
@@ -911,8 +915,8 @@
   border-radius: 50%;
   box-shadow: 0 1px 6px rgba(0, 0, 0, 0.5);
   flex: none;
-  height: 96px;
-  width: 96px;
+  height: 112px;
+  width: 112px;
 }
 
 .bd-swatch {
