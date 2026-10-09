@@ -409,7 +409,7 @@ export class SkillRankingsComponent implements OnChanges, CardHost {
   // The rank tile's hover: its place and its score ("Rank 1 · Score 21.04")
   rankTitle(player: SkillPlayer, index: number): string {
     const total = this.totals.get(player);
-    return `Rank ${index + 1}${total === undefined ? '' : ` · Score ${scoreText(total)}`} (click for why)`;
+    return `Rank ${index + 1}${total === undefined ? '' : ` · Score ${scoreText(total)}`}`;
   }
 
   toggleWhy(player: SkillPlayer, index: number, event: Event): void {
