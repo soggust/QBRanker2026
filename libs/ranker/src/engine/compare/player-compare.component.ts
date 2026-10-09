@@ -47,12 +47,12 @@ export class PlayerCompareComponent implements DoCheck, OnDestroy {
     this.arcsObserver?.disconnect();
   }
 
-  // On a phone the sides are chips in a row, one opened at a time into a sheet over the board (its color,
+  // On a phone the sides are chips in a row, one opened at a time into a sheet over the board (its id,
   // or 'add' for the search; null: none). Wider screens show every tape and ignore it
-  sheet: string | null = null;
+  sheet: number | 'add' | null = null;
   private readonly phone = typeof matchMedia === 'function' ? matchMedia('(max-width: 600px)') : null;
 
-  toggle(sheet: string): void {
+  toggle(sheet: number | 'add'): void {
     this.sheet = this.sheet === sheet ? null : sheet;
     if (this.sheet !== 'add') return;
     // (shown now, focused in the same tap, so a phone's keyboard comes up)
@@ -68,7 +68,7 @@ export class PlayerCompareComponent implements DoCheck, OnDestroy {
 
   // A side removed (its sheet with it)
   remove(i: number): void {
-    if (this.sheet === this.compare.sides[i]?.color) this.sheet = null;
+    if (this.sheet === this.compare.sides[i]?.uid) this.sheet = null;
     this.compare.remove(i);
   }
 

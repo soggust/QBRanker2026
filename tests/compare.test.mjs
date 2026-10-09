@@ -1,6 +1,7 @@
 // The compare view's model (libs/ranker/src/engine/compare/player-compare.ts), on the real data: rows
 // picked from the grid, then someone from another tab and another season added by a search. The sides
-// keep their own colors (removed, switched, raced), every column's leader is the side that stood highest
+// take their teams' colors (compare/side-colors.ts: the team's own hue, lifted to read on the board; the
+// same team or a close one a distinct shade, the same sides the same colors) and keep them (removed, switched, raced), every column's leader is the side that stood highest
 // in its own season (across tabs, the bigger number, less where less is better), sides on different tabs
 // share only the same skills and columns, the career arcs run by career year or by season with the
 // compared season ringed, the search ranks names starting with what's typed first and the table's own tab
@@ -81,6 +82,26 @@ function harness(engine, sport, position) {
   return { host, data, asked, compare: new engine.PlayerCompare(host, data) };
 }
 
+// The colors sides added in this order get: each its team's first clear of the ones before it
+function teamColorsOf(engine, sides) {
+  const { colors } = engine.PlayerCompare;
+  const taken = [];
+  for (const side of sides) taken.push(colors.pickColor(colors.choices(side), taken, engine.COMPARE_COLORS));
+  return taken;
+}
+
+// The sides' colors all told apart: none the same, each one light enough for the board, each pair far
+// enough apart
+function checkColors(engine, sides) {
+  const { colors } = engine.PlayerCompare;
+  const all = sides.map((s) => s.color);
+  assert.equal(new Set(all).size, all.length, `distinct: ${all}`);
+  for (const c of all) assert.ok(/^#[0-9a-f]{6}$/.test(c) && colors.lightness(c) >= 40, `${c}: too dark for the board`);
+  for (let i = 0; i < all.length; i++) {
+    for (let j = i + 1; j < all.length; j++) assert.ok(colors.distance(all[i], all[j]) >= colors.TOO_CLOSE, `${all[i]} and ${all[j]} too close`);
+  }
+}
+
 // Every side's career in (they load after the side, on their own)
 async function careersIn(compare) {
   for (let i = 0; i < 500 && compare.sides.some((s) => s.career === null); i++) await new Promise((r) => setImmediate(r));
@@ -138,12 +159,14 @@ async function withAnotherSeason(data, position, players, season) {
 
 test('nfl: two picked backs, then a quarterback from another season, compared', async () => {
   const engine = await engineFor('nfl');
-  const { COMPARE_MAX, COMPARE_COLORS } = engine;
+  const { COMPARE_MAX } = engine;
   const { host, data, compare } = harness(engine, 'nfl', 'RB');
 
   await compare.start(host.playerList.slice(0, 2));
   assert.equal(compare.sides.length, 2);
-  assert.deepEqual(compare.sides.map((s) => s.color), COMPARE_COLORS.slice(0, 2), 'picks loaded together take the first colors in order');
+  assert.deepEqual(compare.sides.map((s) => s.gsisId), host.playerList.slice(0, 2).map((p) => p.gsisId), 'in the order picked');
+  assert.deepEqual(compare.sides.map((s) => s.color), teamColorsOf(engine, compare.sides), "picks loaded together take their teams' colors, in order");
+  checkColors(engine, compare.sides);
   assert.deepEqual(compare.sides.map((s) => s.rank), [1, 2], "the table's top two are #1 and #2");
   checkColumns(engine, compare.view, compare.sides);
   assert.ok(compare.view.radar && compare.view.radar.shapes.length === 2, 'two backs share a radar');
@@ -185,14 +208,18 @@ test('nfl: two picked backs, then a quarterback from another season, compared', 
   assert.equal(compare.sides.length, COMPARE_MAX, 'no fifth side');
   assert.match(compare.note, /^Up to/);
 
-  // (a season switched in place keeps its color and its career; a side removed rebuilds)
+  // (a season switched in place keeps its place and its career, and its color on the same team (another
+  // team's: that team's, clear of the others'); a side removed rebuilds)
   await careersIn(compare);
-  const color = compare.sides[2].color;
+  const { color, uid } = compare.sides[2];
   const career = compare.sides[2].career;
+  const choices = engine.PlayerCompare.colors.choices(compare.sides[2]);
   const other = (await data.careers('QB'))[qb.gsisId].find(([season]) => season !== qb.season)[0];
   await compare.add('QB', other, qb.gsisId, 2);
   assert.equal(compare.sides[2].season, other);
-  assert.equal(compare.sides[2].color, color);
+  assert.equal(compare.sides[2].uid, uid, 'the same side, switched');
+  if (engine.PlayerCompare.colors.choices(compare.sides[2]).join() === choices.join()) assert.equal(compare.sides[2].color, color);
+  checkColors(engine, compare.sides);
   assert.equal(compare.sides[2].career, career, 'the same career, not loaded again');
   compare.remove(0);
   assert.equal(compare.sides.length, 3);
@@ -341,20 +368,22 @@ test('nfl: the search ranks names starting with what is typed first, then the ta
   assert.equal(new Set(compare.sides.map((s) => s.key)).size, compare.sides.length);
 });
 
-test('nfl: removing and switching sides keeps the colors, and a freed color goes to the next', async () => {
+test('nfl: removing and switching sides keeps the colors, and one added takes its team color clear of the rest', async () => {
   const engine = await engineFor('nfl');
-  const { COMPARE_COLORS } = engine;
   const { host, data, compare } = harness(engine, 'nfl', 'RB');
   await compare.start(host.playerList.slice(0, 3));
-  assert.deepEqual(compare.sides.map((s) => s.color), COMPARE_COLORS.slice(0, 3));
+  const colors = compare.sides.map((s) => s.color);
+  assert.deepEqual(colors, teamColorsOf(engine, compare.sides));
   const keys = compare.sides.map((s) => s.key);
 
   compare.remove(1);
-  assert.deepEqual(compare.sides.map((s) => s.color), [COMPARE_COLORS[0], COMPARE_COLORS[2]], 'the others keep theirs');
+  assert.deepEqual(compare.sides.map((s) => s.color), [colors[0], colors[2]], 'the others keep theirs');
   assert.deepEqual(compare.sides.map((s) => s.key), [keys[0], keys[2]]);
   assert.equal(compare.view.wins.length, 2);
   await compare.add('RB', host.season, host.playerList[3].gsisId);
-  assert.equal(compare.sides[2].color, COMPARE_COLORS[1], 'the freed color, to the next one in');
+  assert.deepEqual(compare.sides.slice(0, 2).map((s) => s.color), [colors[0], colors[2]], 'one added: the others keep theirs');
+  assert.equal(compare.sides[2].color, teamColorsOf(engine, compare.sides)[2], "its team's, clear of the two in");
+  checkColors(engine, compare.sides);
 
   // (a season switched while another side is removed: it's still that side that's switched)
   const vet = await withAnotherSeason(data, 'RB', host.playerList.slice(4), host.season);
@@ -539,5 +568,128 @@ test('nfl: two backs and a receiver: the backs share their skills, the receiver 
   for (const i of rbReceiving.leaders) assert.ok(i < 2, 'only a back can lead the backs at it');
   for (const s of skills.filter((k) => k.tab === 'WR')) {
     assert.deepEqual([s.pcts[0], s.pcts[1]], [null, null], `${s.name}: the receiver's alone`);
+  }
+});
+
+test('side colors: the team its own color (red red, green green), lifted to read on the board, the same team a shade apart', async () => {
+  const { PlayerCompare, COMPARE_COLORS } = await engineFor('nfl');
+  const { teamShades, pickColor, distance, hslOf, lightness, TOO_CLOSE } = PlayerCompare.colors;
+  const hueOf = (c) => hslOf(c)[0];
+  const sameHue = (a, b) => Math.min(Math.abs(hueOf(a) - hueOf(b)), 360 - Math.abs(hueOf(a) - hueOf(b))) < 3;
+  // (the primary first, whatever its hue: the Chiefs and the Falcons red, the Jets and the Packers green;
+  // a black's grey after the team's color)
+  for (const [team, colors] of [['Chiefs', ['#e31837', '#ffb612']], ['Falcons', ['#a71930', '#000000']], ['Jets', ['#115740', '#ffffff']], ['Packers', ['#204e32', '#ffb612']]]) {
+    const [first] = teamShades(colors);
+    assert.ok(sameHue(first, colors[0]), `the ${team}: ${first}, the hue of ${colors[0]}`);
+    assert.ok(lightness(first) >= 50, `the ${team}: ${first} lifted to read`);
+  }
+  assert.equal(teamShades(['#000000', '#ffb612'])[0], teamShades(['#ffb612'])[0], 'the Steelers: their gold before their black');
+  // (softened a little: the hue kept, a bit less saturated, lifted to read; a navy lifted, a gold toned down)
+  const [navy] = teamShades(['#0c2340']);
+  const soft = (c, from) => sameHue(c, from) && hslOf(c)[1] < hslOf(from)[1] && hslOf(c)[1] >= 0.5 * hslOf(from)[1] && lightness(c) >= 55;
+  assert.ok(soft(navy, '#0c2340'), navy);
+  const [gold] = teamShades(['#ffb612']);
+  assert.ok(soft(gold, '#ffb612') && gold !== '#ffb612', gold);
+  // (deterministic, and four on the same team all told apart)
+  for (const team of [['#e31837', '#ffb612'], ['#0c2340'], ['#000000'], ['#c8102e'], ['#29126f', '#000000'], ['#115740', '#ffffff']]) {
+    const four = () => {
+      const taken = [];
+      for (let i = 0; i < 4; i++) taken.push(pickColor(teamShades(team), taken, COMPARE_COLORS));
+      return taken;
+    };
+    const taken = four();
+    assert.deepEqual(taken, four());
+    assert.equal(new Set(taken).size, 4, `${team}: ${taken}`);
+    for (const c of taken) assert.ok(lightness(c) >= 40, `${team}: ${c}`);
+    assert.ok(distance(taken[0], taken[1]) >= TOO_CLOSE, `${team}: the second a shade apart`);
+  }
+  // (two teams too close: the second a shade apart; far enough: each its own)
+  const yankees = pickColor(teamShades(['#0c2340']), [], COMPARE_COLORS);
+  const redSox = pickColor(teamShades(['#0c2340']), [yankees], COMPARE_COLORS);
+  assert.ok(redSox !== yankees && distance(redSox, yankees) >= TOO_CLOSE);
+  assert.equal(pickColor(teamShades(['#ffb612']), [yankees], COMPARE_COLORS), gold);
+  // (the 49ers' red and the Chiefs' red too close: the Chiefs' second, their gold)
+  const niners = pickColor(teamShades(['#aa0000', '#b3995d']), [], COMPARE_COLORS);
+  assert.equal(pickColor(teamShades(['#e31837', '#ffb612']), [niners], COMPARE_COLORS), gold);
+  // (no team: the palette's first free one)
+  assert.equal(pickColor([], [], COMPARE_COLORS), COMPARE_COLORS[0]);
+  assert.equal(pickColor([], [COMPARE_COLORS[0]], COMPARE_COLORS), COMPARE_COLORS[1]);
+});
+
+test('every team in every sport: its own color, light enough for the board; mma: the palette', async () => {
+  for (const sport of ['nfl', 'nba', 'nhl', 'mlb', 'mma']) {
+    const engine = await engineFor(sport);
+    const { colors } = engine.PlayerCompare;
+    const logos = new Set(Object.values(engine.SKILL_UNITS).flatMap((rows) => (rows ?? []).map((r) => r.teamLogo)).filter(Boolean));
+    assert.ok(logos.size, `${sport}: teams`);
+    for (const teamLogo of logos) {
+      const choices = colors.choices({ player: { teamLogo } });
+      if (sport === 'mma') {
+        assert.deepEqual(choices, [], 'mma: no team colors');
+        continue;
+      }
+      assert.ok(choices.length, `${sport} ${teamLogo}: a color`);
+      for (const c of choices) assert.ok(colors.lightness(c) >= 50, `${sport} ${teamLogo}: ${c} too dark for the board`);
+      // (two of the same team: told apart)
+      const first = colors.pickColor(choices, [], engine.COMPARE_COLORS);
+      const second = colors.pickColor(choices, [first], engine.COMPARE_COLORS);
+      assert.ok(second !== first && colors.distance(first, second) >= colors.TOO_CLOSE, `${sport} ${teamLogo}: ${first} ${second}`);
+    }
+  }
+});
+
+test('nfl: the same sides get the same colors whatever order they load in; two Chiefs QBs told apart', async () => {
+  const engine = await engineFor('nfl');
+  const { host, compare } = harness(engine, 'nfl', 'QB');
+  const picks = host.playerList.slice(0, 4);
+  await compare.start(picks);
+  const first = compare.sides.map((s) => `${s.gsisId}:${s.color}`);
+  checkColors(engine, compare.sides);
+  await compare.start(picks);
+  assert.deepEqual(compare.sides.map((s) => `${s.gsisId}:${s.color}`), first, 'the same picks: the same colors');
+  // (a link's sides, loaded in any order, back in its order with the same colors)
+  const sides = compare.sides.map((s) => ({ position: s.position, season: s.season, gsisId: s.gsisId }));
+  await compare.openLinked({ sides, tab: 'overview' });
+  assert.deepEqual(compare.sides.map((s) => `${s.gsisId}:${s.color}`), first);
+
+  // (two Chiefs QBs: the second a shade of the Chiefs apart)
+  await compare.search('mahomes');
+  const mahomes = compare.hits.find((h) => h.name === 'Patrick Mahomes');
+  await compare.search('alex smith');
+  const smith = compare.hits.find((h) => h.name === 'Alex Smith' && h.seasons.includes(2017));
+  assert.ok(mahomes && smith, 'Mahomes and Alex Smith found');
+  await compare.start([]);
+  await compare.add('QB', mahomes.seasons.find((s) => s >= 2018), mahomes.id);
+  await compare.add('QB', 2017, smith.id);
+  assert.equal(compare.sides.length, 2);
+  assert.ok(compare.sides.every((s) => /Chiefs/.test(s.player.teamLogo)), compare.sides.map((s) => s.player.teamLogo).join());
+  checkColors(engine, compare.sides);
+  assert.equal(compare.sides[0].color, engine.PlayerCompare.colors.choices(compare.sides[0])[0], 'the first: the Chiefs red');
+});
+
+test('nfl: a face at the end of every career line, none on top of another', async () => {
+  const engine = await engineFor('nfl');
+  const { host, compare } = harness(engine, 'nfl', 'QB');
+  await compare.start(host.playerList.slice(0, 4));
+  await careersIn(compare);
+  for (const by of ['year', 'season']) {
+    compare.setArcBy(by);
+    for (const width of [640, 320]) {
+      compare.setArcWidth(width);
+      const { faces, lines, width: w, height } = compare.arcs;
+      assert.equal(faces.length, lines.length, 'a face a line');
+      faces.forEach((f, i) => {
+        const end = lines[i].dots.reduce((a, d) => (d.x >= a.x ? d : a));
+        assert.deepEqual(f.from, { x: end.x, y: end.y }, 'off its last season');
+        assert.equal(f.side, compare.sides.filter((s) => s.career?.length)[i]);
+        assert.ok(f.x > end.x && f.x + f.r <= w && f.y - f.r >= 0 && f.y + f.r <= height, 'past its end, on the board');
+      });
+      for (let i = 0; i < faces.length; i++) {
+        for (let j = i + 1; j < faces.length; j++) {
+          const [a, b] = [faces[i], faces[j]];
+          assert.ok(Math.abs(a.x - b.x) >= 2 * a.r || Math.abs(a.y - b.y) >= 2 * a.r, `${by} ${width}: faces ${i} and ${j} overlap`);
+        }
+      }
+    }
   }
 });

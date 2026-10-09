@@ -11,7 +11,7 @@
 // percentile among backs and one among receivers don't say who did more.
 import { SKILL_STATS, SkillPlayer, SkillPosition, SkillStat, presetWeights } from '@sport/positions';
 import { SPORT } from '@sport/sport';
-import { badgeColor, whiteLogo } from '@sport/team-colors';
+import { badgeColor, teamColors, whiteLogo } from '@sport/team-colors';
 import { logoForSeason } from '@sport/logo-eras';
 import { extras } from '@ranker/engine/row-fields';
 import { CURRENT_SEASON, isLiveSeason } from '@ranker/engine/data';
@@ -25,12 +25,23 @@ import { CardRadar, CardSeason, CareersFile, SeasonContext } from '@ranker/engin
 import { archetypeFor, skillsOf } from '@ranker/engine/player-card/overview';
 import { radar } from '@ranker/engine/player-card/radar';
 import type { SharedCompare } from '@ranker/engine/share';
+import * as sideColors from './side-colors';
 
 export const COMPARE_MAX = 4;
 
-// Each side's color, in the order they're added (soft, like the vs Position pie's: a blue, a gold, a sea
-// green, a lilac; the first two the furthest apart, for the usual pair)
+// Each side's color is its team's own (side-colors.ts: its primary, lifted to read on the board, a
+// shade apart from the others'); these, in order, where there's no team to go by (a fighter, a team the
+// sport doesn't know) or a team's own are all too close to the others' (soft, like the vs Position pie's: a
+// blue, a gold, a sea green, a lilac; the first two the furthest apart, for the usual pair)
 export const COMPARE_COLORS = ['#8ab4e0', '#e3cb8f', '#7fc8bb', '#c3a6e8'];
+// (a sport without teams: its sides take the palette's)
+const TEAMLESS = SPORT.id === 'mma';
+// (team-colors.ts's neutral greys for a team it doesn't know)
+const UNKNOWN_TEAM = new Set(['#3a3a3a', '#444444', '#222222']);
+
+// The career arcs' faces: each side's headshot (a team's logo) at the end of its line, this big, this far
+// past its last season's point
+const FACE = { r: 11, gap: 16 };
 
 // An edge: a skill a side is better at than the best of the rest by this much (percentile points)
 export const EDGE = 10;
@@ -53,7 +64,10 @@ export interface CompareSide {
   position: SkillPosition;
   season: number;
   gsisId: string;
+  // Its team's color (side-colors.ts), and an id it keeps while it's in (its season switched too: what the
+  // view tracks it by)
   color: string;
+  uid: number;
   player: SkillPlayer;
   name: string;
   // The name the narrow spots use: the last one, past a Jr. or a III ("Walker")
@@ -63,7 +77,8 @@ export interface CompareSide {
   tag: string;
   // "RB" (a team tab's name: "Team")
   tabLabel: string;
-  // "2013" ("2012-13"), and its short form for the tight spots ("’13")
+  // "2013 Season" ("2012-13 Season"; the live one "Current Season", as the grid's dropdown says it), and its
+  // short form for the tight spots ("’13")
   seasonText: string;
   short: string;
   teamName: string | null;
@@ -173,11 +188,24 @@ export interface CompareArcs {
   yTicks: { y: number; label: string }[];
   // (a line's key: its side's and the bottom's, so a line switched is drawn in again)
   lines: { key: string; name: string; color: string; points: string; dots: { x: number; y: number; title: string; now: boolean }[] }[];
+  // Each line's face, just past its last season's point (nudged apart where two end together): the side's
+  // headshot ringed in its color (none: its team's logo on its badge), and the point it hangs off
+  faces: CompareFace[];
+}
+
+export interface CompareFace {
+  key: string;
+  side: CompareSide;
+  x: number;
+  y: number;
+  r: number;
+  from: { x: number; y: number };
 }
 
 // (the board drawn at the width it's shown at (the view measures it), so its labels stay the size the
 // card's are; its height under a third of that, within limits)
-const ARC = { width: 640, left: 40, right: 14, top: 14, bottom: 28 };
+// (the right margin room for the faces past the lines' ends)
+const ARC = { width: 640, left: 40, right: FACE.gap + FACE.r + 6, top: 14, bottom: 28 };
 const arcHeight = (width: number) => Math.round(Math.min(300, Math.max(180, width * 0.3)));
 
 type SearchEntry = Omit<CompareHit, 'photo'> & { key: string; headshotId: number | null };
@@ -194,9 +222,11 @@ export class PlayerCompare {
   arcBy: ArcBy | null = null;
   // (the arcs' width on screen: the view measures it)
   arcWidth = ARC.width;
-  // Sides still loading (the add slot shows it), and the colors they'll take (picks load together)
+  // The sides' colors, by team (side-colors.ts, and a side's choices: the tests read them)
+  static readonly colors = { ...sideColors, choices: (side: CompareSide) => colorChoices(side) };
+  // Sides still loading (the add slot shows it)
   loading = 0;
-  private claimed: string[] = [];
+  private uids = 0;
   // The search: what's typed, what it found, the hit Enter picks (the arrow keys move it), and whether
   // it's found anything yet
   query = '';
@@ -220,7 +250,9 @@ export class PlayerCompare {
   // Opened: the rows picked in the grid (the table's season and tab), or nobody yet (the search ready)
   async start(picks: SkillPlayer[]): Promise<void> {
     this.reset();
+    const keys = picks.slice(0, COMPARE_MAX).map((p) => keyOf(this.host.position, this.host.season, p.gsisId));
     await Promise.all(picks.slice(0, COMPARE_MAX).map((p) => this.add(this.host.position, this.host.season, p.gsisId)));
+    this.settle(keys);
   }
 
   // From a link (share.ts): its sides in the link's order (the first four; anyone not found left out), on
@@ -230,9 +262,22 @@ export class PlayerCompare {
     if (tab === 'stats' || (tab === 'career' && !SPORT.careerOnly)) this.tab = tab;
     const keys = sides.slice(0, COMPARE_MAX).map((s) => keyOf(s.position, s.season, s.gsisId));
     await Promise.all(sides.slice(0, COMPARE_MAX).map((s) => this.add(s.position, s.season, s.gsisId)));
-    // (they load together, in whatever order they come back)
+    this.settle(keys);
+  }
+
+  // Sides loaded together (they come back in whatever order): put in the order they were asked for, and
+  // their colors picked again in that order, so the same sides always get the same colors
+  private settle(keys: string[]): void {
     this.sides.sort((a, b) => keys.indexOf(a.key) - keys.indexOf(b.key));
+    const taken: string[] = [];
+    for (const side of this.sides) taken.push((side.color = this.colorFor(side, taken)));
     this.build();
+  }
+
+  // A side's color: its team's first one far enough from the colors taken (the others'), else a shade of
+  // it, else the palette's (a fighter, a team not known: the palette's first free one)
+  private colorFor(side: CompareSide, taken: string[]): string {
+    return sideColors.pickColor(colorChoices(side), taken, COMPARE_COLORS);
   }
 
   // From a card: its season into the view (added when it's open, a fresh one otherwise)
@@ -254,15 +299,19 @@ export class PlayerCompare {
     const old = at === undefined ? undefined : this.sides[at];
     if (this.sides.some((s) => s.key === key && s !== old)) return this.say('That season is already in');
     if (!old && this.full) return this.say(`Up to ${COMPARE_MAX} at a time`);
-    const color = old?.color ?? COMPARE_COLORS.find((c) => !this.sides.some((s) => s.color === c) && !this.claimed.includes(c))!;
-    if (!old) this.claimed.push(color);
     this.loading++;
     try {
-      const side = await this.side(position, season, gsisId, color);
+      const side = await this.side(position, season, gsisId);
       if (!side || !this.open) return;
       const i = old ? this.sides.indexOf(old) : -1;
       // (the side switched was removed meanwhile, or the same season came in first: a double click)
       if ((old && i < 0) || this.sides.some((s) => s.key === key && s !== old)) return;
+      // (its color picked now, against the sides in: the ones in keep theirs. A season switched keeps its
+      // color, unless it's another team's: then the new team's, against the others')
+      const others = this.sides.filter((s) => s !== old).map((s) => s.color);
+      const sameTeam = old && colorChoices(old).join() === colorChoices(side).join();
+      side.color = old && sameTeam ? old.color : this.colorFor(side, others);
+      side.uid = old ? old.uid : ++this.uids;
       if (old) this.sides[i] = side;
       else this.sides.push(side);
       if (old?.position === position && old.gsisId === gsisId && old.career) side.career = old.career;
@@ -284,7 +333,6 @@ export class PlayerCompare {
       this.say("Couldn't load that season");
     } finally {
       this.loading--;
-      if (!old) this.claimed.splice(this.claimed.indexOf(color), 1);
     }
   }
 
@@ -317,7 +365,7 @@ export class PlayerCompare {
   // ---------------------------------------------------------------------------
   // A side: its season read as the card reads it
   // ---------------------------------------------------------------------------
-  private async side(position: SkillPosition, season: number, gsisId: string, color: string): Promise<CompareSide | null> {
+  private async side(position: SkillPosition, season: number, gsisId: string): Promise<CompareSide | null> {
     const { host } = this;
     const tableSeason = season === host.season;
     let player = tableSeason && position === host.position ? host.playerList.find((p) => p.gsisId === gsisId) : undefined;
@@ -348,14 +396,15 @@ export class PlayerCompare {
       position,
       season,
       gsisId,
-      color,
+      color: '',
+      uid: 0,
       player,
       name: player.name,
       surname: last,
       label: withShort(player.name, short),
       tag: withShort(last, short),
       tabLabel: tabLabel(position),
-      seasonText: SPORT.careerOnly ? 'Career' : isLiveSeason(season) ? 'This Season' : SPORT.seasonText(season),
+      seasonText: SPORT.careerOnly ? 'Career' : isLiveSeason(season) ? 'Current Season' : `${SPORT.seasonText(season)} Season`,
       short,
       teamName: teamName && teamName !== player.name ? teamName : null,
       ...teamLook(player.teamLogo, season),
@@ -528,7 +577,7 @@ export class PlayerCompare {
       }));
       return { key: `${side.key}/${byYear ? 'year' : 'season'}`, name: side.name, color: side.color, points: dots.map((d) => `${d.x},${d.y}`).join(' '), dots };
     });
-    return { width, height, left, right, byYear, xTicks, yTicks, lines };
+    return { width, height, left, right, byYear, xTicks, yTicks, lines, faces: facesOf(sides, lines, width, height) };
   }
 
   // ---------------------------------------------------------------------------
@@ -683,6 +732,40 @@ export function leadersOf(pcts: (number | null)[]): number[] {
   const top = Math.max(...known);
   if (known.every((p) => p === top)) return [];
   return pcts.flatMap((p, i) => (p === top ? [i] : []));
+}
+
+// The arcs' faces: each just past its line's last season (the rightmost point), nudged up or down (the
+// nearest way that's clear, kept on the board) off a face already placed where two end together
+function facesOf(sides: CompareSide[], lines: CompareArcs['lines'], width: number, height: number): CompareFace[] {
+  const { r, gap } = FACE;
+  const top = r + 1;
+  const bottom = height - ARC.bottom + r / 2;
+  const ends = lines.map((line, i) => {
+    const end = line.dots.reduce((a, d) => (d.x >= a.x ? d : a));
+    return { key: line.key, side: sides[i], x: Math.min(end.x + gap, width - r - 1), y: end.y, r, from: { x: end.x, y: end.y } };
+  });
+  const placed: CompareFace[] = [];
+  const clear = (x: number, y: number) => placed.every((f) => Math.abs(f.x - x) >= 2 * r + 2 || Math.abs(f.y - y) >= 2 * r + 2);
+  // (the highest first, so a nudge goes the same way every time)
+  for (const face of [...ends].sort((a, b) => a.y - b.y || a.x - b.x)) {
+    const want = Math.min(bottom, Math.max(top, face.y));
+    let y = want;
+    for (let step = 1; !clear(face.x, y) && step < 60; step++) {
+      const at = want + Math.ceil(step / 2) * 2 * (step % 2 ? 1 : -1);
+      if (at >= top && at <= bottom) y = at;
+    }
+    placed.push({ ...face, y });
+  }
+  // (in the lines' order)
+  return ends.map((e) => placed.find((f) => f.key === e.key)!);
+}
+
+// A side's color choices: its team's colors as the board shows them (none: a fighter, or a team the sport
+// doesn't know; the palette's then)
+function colorChoices(side: CompareSide): string[] {
+  if (TEAMLESS) return [];
+  const colors = teamColors(side.player.teamLogo ?? '').filter((c) => !UNKNOWN_TEAM.has(c.toLowerCase()));
+  return sideColors.teamShades(colors);
 }
 
 // A team's look that season: its logo (as the cards show it), its badge's color, whether it's drawn white

@@ -153,6 +153,7 @@
   color: #fff;
   cursor: pointer;
   display: inline-flex;
+  flex: none;
   font-family: v.$font-base;
   font-size: 11px;
   font-weight: 800;
@@ -161,6 +162,8 @@
   padding: 0 6px 0 10px;
   text-transform: uppercase;
   transition: border-color 0.15s;
+  // ("2012-13 Season" on one line: the pill as wide as it needs)
+  white-space: nowrap;
   width: auto;
 
   &.fixed {
@@ -1034,6 +1037,31 @@
       stroke-width: 2.2;
     }
   }
+
+  // (each line's face past its end: the headshot on the team's badge, ringed in the side's color)
+  .arc-face {
+    cursor: help;
+  }
+
+  .arc-face-tie {
+    stroke: var(--side);
+    stroke-width: 1.6;
+  }
+
+  .arc-face-disc {
+    fill: color-mix(in srgb, var(--team-badge, #555) 70%, #000);
+  }
+
+  .arc-face-logo.white-logo {
+    filter: brightness(0) invert(1);
+  }
+
+  .arc-face-ring {
+    fill: none;
+    filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.6));
+    stroke: var(--side);
+    stroke-width: 2;
+  }
 }
 
 .cmp-note {
@@ -1143,6 +1171,13 @@
 
     .arc-dot {
       animation: cmp-pop 0.22s calc(var(--at, 0) * 0.5s) cubic-bezier(0.3, 1.6, 0.5, 1) backwards;
+      transform-box: fill-box;
+      transform-origin: center;
+    }
+
+    // (a face pops in as its line arrives)
+    .arc-face {
+      animation: cmp-pop 0.26s 0.45s cubic-bezier(0.3, 1.6, 0.5, 1) backwards;
       transform-box: fill-box;
       transform-origin: center;
     }

@@ -31,16 +31,16 @@
            sheet over the board, the + chip the search. Wider screens: hidden, every tape shown) -->
       @if (sides.length) {
         <div class="cmp-chips">
-          @for (s of sides; track s.color) {
+          @for (s of sides; track s.uid) {
             <button
               type="button"
               class="cmp-chip"
-              [class.open]="sheet === s.color"
+              [class.open]="sheet === s.uid"
               [style.--side]="s.color"
               [style.--team-badge]="s.badge"
-              [attr.aria-expanded]="sheet === s.color"
+              [attr.aria-expanded]="sheet === s.uid"
               [attr.aria-label]="s.label + ', #' + s.rank + ' of ' + s.of"
-              (click)="toggle(s.color)"
+              (click)="toggle(s.uid)"
               animate.enter="chip-in"
               animate.leave="chip-out"
             >
@@ -62,10 +62,10 @@
       }
 
       <div class="tapes" [class.floating]="sides.length" [style.--sides]="max">
-        @for (s of sides; track s.color; let i = $index) {
-          <!-- (a side's tape: the card's hero in miniature, a stripe of its color on top; kept by its color, so
+        @for (s of sides; track s.uid; let i = $index) {
+          <!-- (a side's tape: the card's hero in miniature, a stripe of its color on top; kept by its id, so
                a season switched stays in place, and eased in and out) -->
-          <div class="tape" [class.shown]="sheet === s.color" [style.--side]="s.color" [style.--team-badge]="s.badge" animate.enter="tape-in" animate.leave="tape-out">
+          <div class="tape" [class.shown]="sheet === s.uid" [style.--side]="s.color" [style.--team-badge]="s.badge" animate.enter="tape-in" animate.leave="tape-out">
             <button type="button" class="tape-remove" [attr.aria-label]="'Remove ' + s.label" title="Remove" (click)="remove(i)">
               <mat-icon fontIcon="close"></mat-icon><span class="tape-remove-text">Remove</span>
             </button>
@@ -372,6 +372,42 @@
                           <title>{{ d.title }}</title>
                         </circle>
                       }
+                    }
+                    <!-- (each line's face just past its end, tied to it: the headshot ringed in its color (none, or
+                         it won't load: the team's logo on its badge), named on a hover) -->
+                    @for (f of a.faces; track f.key; let fi = $index) {
+                      <g class="arc-face" [style.--side]="f.side.color" [style.--team-badge]="f.side.badge">
+                        <title>{{ f.side.label }}</title>
+                        <line class="arc-face-tie" [attr.x1]="f.from.x" [attr.y1]="f.from.y" [attr.x2]="f.x" [attr.y2]="f.y"></line>
+                        <clipPath [attr.id]="'cmp-arc-face-' + fi">
+                          <circle [attr.cx]="f.x" [attr.cy]="f.y" [attr.r]="f.r"></circle>
+                        </clipPath>
+                        <circle class="arc-face-disc" [attr.cx]="f.x" [attr.cy]="f.y" [attr.r]="f.r"></circle>
+                        @if (f.side.photo) {
+                          <image
+                            [attr.href]="f.side.photo"
+                            [attr.x]="f.x - f.r"
+                            [attr.y]="f.y - f.r"
+                            [attr.width]="2 * f.r"
+                            [attr.height]="2 * f.r"
+                            preserveAspectRatio="xMidYMin slice"
+                            [attr.clip-path]="'url(#cmp-arc-face-' + fi + ')'"
+                            (error)="f.side.photo = null"
+                          ></image>
+                        } @else {
+                          <image
+                            class="arc-face-logo"
+                            [class.white-logo]="f.side.whiteLogo"
+                            [attr.href]="f.side.logo"
+                            [attr.x]="f.x - f.r * 0.7"
+                            [attr.y]="f.y - f.r * 0.7"
+                            [attr.width]="1.4 * f.r"
+                            [attr.height]="1.4 * f.r"
+                            preserveAspectRatio="xMidYMid meet"
+                          ></image>
+                        }
+                        <circle class="arc-face-ring" [attr.cx]="f.x" [attr.cy]="f.y" [attr.r]="f.r"></circle>
+                      </g>
                     }
                   </svg>
                   </div>
