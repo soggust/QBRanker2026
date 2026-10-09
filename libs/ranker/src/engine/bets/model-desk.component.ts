@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 
 // The algorithm's admin panel (the Bets page, dev only): the code-only desk's play-money betting
 // (libs/ranker/scripts/model/run.mjs: every market of every game, 0.5 to 3 units), read from each sport's
@@ -9,6 +9,8 @@ import { Component, OnInit } from '@angular/core';
 
 interface ModelBet {
   id: string;
+  // (its game's ESPN id: the live score)
+  event?: string;
   sport: string;
   start: string;
   placedAt: string;
@@ -133,6 +135,7 @@ export interface Tally {
   clvEv: number | null;
 }
 
+const ESPN_LEAGUES: Record<string, string> = { nfl: 'football/nfl', nba: 'basketball/nba', nhl: 'hockey/nhl', mlb: 'baseball/mlb' };
 const SPORTS = ['nfl', 'nba', 'nhl', 'mlb'];
 const MARKET_NAMES: Record<string, string> = { spread: 'Spread', total: 'Total', ml: 'Moneyline', prop: 'Props' };
 // (each sport's scoring unit, for a context term's size)
@@ -166,7 +169,7 @@ function tally(label: string, bets: ModelBet[]): Tally {
   styleUrls: ['../../styles/components/model-desk.scss'],
   standalone: false,
 })
-export class ModelDeskComponent implements OnInit {
+export class ModelDeskComponent implements OnInit, OnDestroy {
   loading = true;
   states: ModelState[] = [];
   bets: ModelBet[] = [];
@@ -179,8 +182,13 @@ export class ModelDeskComponent implements OnInit {
   calibration: { label: string; n: number; said: number; was: number }[] = [];
   curve = '';
   curveRange = { min: 0, max: 0 };
+  // (the bets on games not started yet, and in play: started, not graded yet)
   open: ModelBet[] = [];
+  live: ModelBet[] = [];
   recent: ModelBet[] = [];
+  // (each in-play game's score and clock, by its ESPN id, from ESPN's scoreboard every minute)
+  scores = new Map<string, { text: string; final: boolean }>();
+  private scoreTimer?: ReturnType<typeof setInterval>;
   changes: (ModelState['changelog'][number] & { sport: string })[] = [];
   contextRows: ContextRow[] = [];
   contextTests: { label: string; games: number; before: TestNumbers; after: TestNumbers }[] = [];
@@ -201,6 +209,37 @@ export class ModelDeskComponent implements OnInit {
     this.bets = files.flatMap((f) => (f.ledger?.bets ?? []) as ModelBet[]);
     this.build();
     this.loading = false;
+    this.loadScores();
+    this.scoreTimer = setInterval(() => this.loadScores(), 60_000);
+  }
+
+  ngOnDestroy(): void {
+    clearInterval(this.scoreTimer);
+  }
+
+  // The in-play games' scores: each sport's scoreboard (today's slate, the NFL's week), matched by ESPN id.
+  // A sport whose scoreboard won't load just shows no score.
+  private async loadScores(): Promise<void> {
+    const now = Date.now();
+    const live = this.bets.filter((b) => b.status === 'open' && Date.parse(b.start) <= now);
+    for (const sport of new Set(live.map((b) => b.sport))) {
+      const board = await fetch(`https://site.api.espn.com/apis/site/v2/sports/${ESPN_LEAGUES[sport]}/scoreboard`)
+        .then((res) => (res.ok ? res.json() : null))
+        .catch(() => null);
+      for (const event of board?.events ?? []) {
+        const teams = event.competitions?.[0]?.competitors ?? [];
+        const side = (where: string) => teams.find((t: { homeAway: string }) => t.homeAway === where);
+        const away = side('away');
+        const home = side('home');
+        if (!away || !home) continue;
+        this.scores.set(String(event.id), {
+          text: `${away.team?.abbreviation} ${away.score ?? 0} - ${home.team?.abbreviation} ${home.score ?? 0} · ${event.status?.type?.shortDetail ?? ''}`,
+          final: !!event.status?.type?.completed,
+        });
+      }
+    }
+    this.live = live.sort((a, b) => a.start.localeCompare(b.start));
+    this.open = this.bets.filter((b) => b.status === 'open' && Date.parse(b.start) > now).sort((a, b) => a.start.localeCompare(b.start));
   }
 
   private build(): void {
@@ -239,7 +278,9 @@ export class ModelDeskComponent implements OnInit {
     const span = max - min || 1;
     this.curve = points.map((v, i) => `${i ? 'L' : 'M'}${((i / Math.max(1, points.length - 1)) * 600).toFixed(1)},${(110 - ((v - min) / span) * 100).toFixed(1)}`).join(' ');
 
-    this.open = bets.filter((b) => b.status === 'open').sort((a, b) => a.start.localeCompare(b.start));
+    const now = Date.now();
+    this.open = bets.filter((b) => b.status === 'open' && Date.parse(b.start) > now).sort((a, b) => a.start.localeCompare(b.start));
+    this.live = bets.filter((b) => b.status === 'open' && Date.parse(b.start) <= now).sort((a, b) => a.start.localeCompare(b.start));
     this.recent = graded.slice(-40).reverse();
     this.changes = this.states
       .flatMap((s) => s.changelog.map((c) => ({ ...c, sport: s.label })))
@@ -280,8 +321,30 @@ export class ModelDeskComponent implements OnInit {
     return '0';
   }
 
+  // The account, as at a sportsbook: a bet's stake leaves the balance when it's placed and comes back with
+  // its winnings (or doesn't) when it's graded. Bankroll: the starting 100 plus what's been won or lost.
   get balance(): number {
     return this.bankroll + this.overall.profit;
+  }
+
+  // (the stakes on open bets, started or not)
+  get atRisk(): number {
+    return this.bets.filter((b) => b.status === 'open').reduce((sum, b) => sum + b.units, 0);
+  }
+
+  // (what's left to bet with)
+  get available(): number {
+    return this.balance - this.atRisk;
+  }
+
+  // (what a bet pays on top of its stake if it wins, at its American odds)
+  toWin(b: ModelBet): number {
+    return b.odds > 0 ? (b.units * b.odds) / 100 : (b.units * 100) / -b.odds;
+  }
+
+  // (the stakes in play right now)
+  get liveRisk(): number {
+    return this.live.reduce((sum, b) => sum + b.units, 0);
   }
 
   marketName(m: string): string {
@@ -420,6 +483,9 @@ export class ModelDeskComponent implements OnInit {
     profit: 'Units won or lost, stakes included',
     roi: 'Return on the units staked: profit ÷ staked',
     open: 'Bets placed on games not played yet',
+    available: "What's left to bet with: the bankroll (100 to start, plus what's been won or lost) less the stakes on open bets, as at a sportsbook",
+    atRisk: "The stakes on every open bet, started or not: out of the balance until they're graded",
+    live: 'Bets on games under way right now, with the score (ESPN, every minute); graded on the next run after the game ends',
     test: "How the ratings did on games they hadn't seen yet: winners picked right, and how far off the margins and totals were on average",
     sport: 'The league',
     game: 'Away @ home',

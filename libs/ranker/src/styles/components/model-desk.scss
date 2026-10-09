@@ -319,3 +319,18 @@ card-panel {
 .desk-sub {
   margin-top: 14px;
 }
+
+// (a tile's second line under its number: the open bets' count under what they stake)
+.desk-tile b small {
+  color: rgba(255, 255, 255, 0.55);
+  display: block;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-align: center;
+}
+
+// (an in-play game that's over, waiting for the next run to grade it)
+.desk-final {
+  color: rgba(255, 255, 255, 0.55);
+}

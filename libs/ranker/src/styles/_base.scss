@@ -179,20 +179,24 @@ about-panel ::-webkit-scrollbar-track {
   --scoreboard-glow: 0 0 6px rgba(91, 157, 255, 0.6);
 }
 
-// The Bets page's list scrolls in its panel, and the Algorithm desk in the page: a felt-blue thumb
+// The Bets page's list scrolls in its panel, and the Algorithm desk in the page (its panels' wide tables too,
+// sideways): a felt-blue thumb
 bets-page .bets-list::-webkit-scrollbar,
-bets-page model-desk::-webkit-scrollbar {
+bets-page model-desk::-webkit-scrollbar,
+bets-page model-desk ::-webkit-scrollbar {
   height: 10px;
   width: 10px;
 }
 
 bets-page .bets-list::-webkit-scrollbar-track,
-bets-page model-desk::-webkit-scrollbar-track {
+bets-page model-desk::-webkit-scrollbar-track,
+bets-page model-desk ::-webkit-scrollbar-track {
   background-color: rgba(0, 0, 0, 0.35) !important;
 }
 
 bets-page .bets-list::-webkit-scrollbar-thumb,
-bets-page model-desk::-webkit-scrollbar-thumb {
+bets-page model-desk::-webkit-scrollbar-thumb,
+bets-page model-desk ::-webkit-scrollbar-thumb {
   background: #1d5f9e !important;
   background-clip: padding-box !important;
 

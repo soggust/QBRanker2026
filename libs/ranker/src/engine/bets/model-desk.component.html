@@ -39,9 +39,9 @@
     <h2 class="desk-title"><mat-icon aria-hidden="true" fontIcon="query_stats"></mat-icon>Algorithm</h2>
     @if (!loading) {
       <div class="desk-tiles">
-        <div class="desk-tile" title="Play money: 100 units to start">
-          <small>Bankroll</small>
-          <b [class.up]="overall.profit > 0" [class.down]="overall.profit < 0">{{ balance.toFixed(2) }}u</b>
+        <div class="desk-tile" [title]="help['available'] + ' (bankroll ' + balance.toFixed(2) + 'u)'">
+          <small>Balance</small>
+          <b [class.up]="overall.profit > 0" [class.down]="overall.profit < 0">{{ available.toFixed(2) }}u</b>
         </div>
         <div class="desk-tile" [title]="help['record']">
           <small>Record</small>
@@ -55,9 +55,9 @@
           <small>ROI</small>
           <b [class.up]="(overall.roi ?? 0) > 0" [class.down]="(overall.roi ?? 0) < 0">{{ pct(overall.roi) }}</b>
         </div>
-        <div class="desk-tile" [title]="help['open']">
-          <small>Open</small>
-          <b>{{ overall.open }}</b>
+        <div class="desk-tile" [title]="help['atRisk']">
+          <small>At risk</small>
+          <b>{{ atRisk.toFixed(1) }}u<small>{{ overall.open }} bets</small></b>
         </div>
         <div class="desk-tile" [title]="help['clv']">
           <small>Beat the close</small>
@@ -187,6 +187,41 @@
       </card-panel>
       }
     </div>
+
+    <!-- (the bets on games under way: the score and clock from ESPN, every minute) -->
+    @if (live.length) {
+      <card-panel class="tab-card group-support" [label]="'In Play · ' + liveRisk.toFixed(1) + 'u'" icon="sports_score" [startOpen]="true">
+        <div class="group-body">
+          <table class="desk-table desk-bets">
+            <thead>
+              <tr>
+                <ng-container *ngTemplateOutlet="th; context: { $implicit: 'live', key: 'sport', label: 'Sport' }"></ng-container>
+                <ng-container *ngTemplateOutlet="th; context: { $implicit: 'live', key: 'game', label: 'Game' }"></ng-container>
+                <th [title]="help['live']">Score</th>
+                <ng-container *ngTemplateOutlet="th; context: { $implicit: 'live', key: 'pick', label: 'Pick' }"></ng-container>
+                <ng-container *ngTemplateOutlet="th; context: { $implicit: 'live', key: 'odds', label: 'Odds' }"></ng-container>
+                <ng-container *ngTemplateOutlet="th; context: { $implicit: 'live', key: 'units', label: 'Units' }"></ng-container>
+                <th title="What it pays on top of the stake if it wins">To win</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (b of sorted('live', live, betValue); track b.id) {
+                @let score = b.event ? scores.get(b.event) : undefined;
+                <tr>
+                  <th>{{ b.sport.toUpperCase() }}</th>
+                  <td class="desk-left">{{ b.matchup }}</td>
+                  <td class="desk-left" [class.desk-final]="score?.final">{{ score?.text ?? 'Under way' }}</td>
+                  <td><b>{{ b.pick }}</b><small>{{ marketName(b.market) }}</small></td>
+                  <td>{{ odds(b.odds) }}</td>
+                  <td>{{ b.units }}</td>
+                  <td class="up">{{ units(toWin(b)) }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </card-panel>
+    }
 
     <card-panel class="tab-card group-results" label="Open Bets" icon="schedule">
       <div class="group-body">
