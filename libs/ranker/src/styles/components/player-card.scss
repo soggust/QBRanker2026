@@ -2794,14 +2794,21 @@
     z-index: 5;
   }
 
-  // (a sub package's spot, the nickel back: quieter)
-  &.sub {
+  // (a sub package's spot, the nickel back in a base front: quieter; not the card's focus, an O-line card's
+  // skill players: quieter still. The chip alone, never its popover (a slot's opacity would fade the
+  // popover inside it too), and lit again on hover or open)
+  &.sub > .depth-chip {
     opacity: 0.7;
   }
 
-  // (not the card's focus: the O-line card's skill players)
-  &.dim {
+  &.dim > .depth-chip {
     opacity: 0.45;
+  }
+
+  &.open > .depth-chip,
+  > .depth-chip:hover,
+  > .depth-chip:focus-visible {
+    opacity: 1;
   }
 }
 
@@ -2927,6 +2934,30 @@
   top: -4px;
 }
 
+// (the Team tab's Current / Starters knob: the sport's own pills (.game-filter, below), sized for the
+// panel's bar; a past season's off, on its starters, its hover saying why)
+.depth-modes {
+  gap: 6px !important;
+  margin-right: 8px;
+
+  .game-filter {
+    font-size: 10.5px;
+    padding: 4px 12px;
+  }
+
+  .game-filter.off,
+  .game-filter.off:hover {
+    cursor: default;
+    opacity: 0.4;
+  }
+}
+
+@media (max-width: 480px) {
+  .depth-modes .game-filter {
+    padding: 4px 9px;
+  }
+}
+
 .depth-name {
   @include v.hand(11px);
   max-width: 84px;
@@ -3006,6 +3037,14 @@
     font-weight: 700;
     grid-column: 4;
   }
+}
+
+// (whom the one on the chip is in for: the Current knob's next man up)
+.depth-pop-note {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 11px;
+  font-style: italic;
+  margin-top: -2px;
 }
 
 // the special teams: a row of chips, with room above and below them
@@ -3298,6 +3337,18 @@
     opacity: 1;
     outline: 2px solid var(--scoreboard-led);
     outline-offset: 2px;
+  }
+
+  // (small, on a panel's bar: a thinner edge and a closer, finer ring, in step with its size)
+  &.small {
+    border-width: 1.5px !important;
+    font-size: 10.5px;
+    padding: 4px 12px;
+
+    &.active {
+      outline-offset: 1.5px;
+      outline-width: 1.5px;
+    }
   }
 }
 

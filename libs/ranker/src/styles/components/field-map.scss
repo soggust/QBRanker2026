@@ -549,16 +549,11 @@
 
 // ---- the switch on the bar: Efficiency or Volume
 
-// (the Efficiency / Volume switch: the sport's own pills (.game-filter, dressed by each theme: the NFL's leather,
-// MLB's hide), sized for the panel's bar)
+// (the Efficiency / Volume switch: the sport's own pills, small (.game-filter.small, dressed by each theme: the
+// NFL's leather, MLB's hide))
 .fm-modes {
   gap: 6px !important;
   margin-right: 8px;
-
-  .game-filter {
-    font-size: 10.5px;
-    padding: 4px 12px;
-  }
 }
 
 // ---- phone: the charts' own numbers a touch smaller, the strip's tighter

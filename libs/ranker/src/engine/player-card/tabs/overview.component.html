@@ -208,8 +208,8 @@
   <card-panel #fieldMapPanel class="ov-section tab-card field-map" label="Field Map" icon="stadium">
     @if (fm.pass && fieldMapPanel.isOpen) {
       <span panel-actions class="fm-modes" role="group" aria-label="The zones by">
-        <button type="button" class="game-filter" [class.active]="cards.fieldMapMode === 'efficiency'" [attr.aria-pressed]="cards.fieldMapMode === 'efficiency'" title="Each zone tinted by its EPA a throw against the league's there" (click)="cards.fieldMapMode = 'efficiency'">Efficiency</button>
-        <button type="button" class="game-filter" [class.active]="cards.fieldMapMode === 'volume'" [attr.aria-pressed]="cards.fieldMapMode === 'volume'" title="Each zone a bubble sized by its share of the throws" (click)="cards.fieldMapMode = 'volume'">Volume</button>
+        <button type="button" class="game-filter small" [class.active]="cards.fieldMapMode === 'efficiency'" [attr.aria-pressed]="cards.fieldMapMode === 'efficiency'" title="Each zone tinted by its EPA a throw against the league's there" (click)="cards.fieldMapMode = 'efficiency'">Efficiency</button>
+        <button type="button" class="game-filter small" [class.active]="cards.fieldMapMode === 'volume'" [attr.aria-pressed]="cards.fieldMapMode === 'volume'" title="Each zone a bubble sized by its share of the throws" (click)="cards.fieldMapMode = 'volume'">Volume</button>
       </span>
     }
     <div class="group-body">
