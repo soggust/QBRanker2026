@@ -5,10 +5,10 @@
 //
 // What it builds, once per change of sides: the skills (on one radar where they share three or more, and
 // as bars), the edges (where each one is clearly the best of them), how alike they are, the grid's columns
-// side by side (each side's tab's; the leader marked, the columns each one leads counted) and the career
-// arcs (every season's standing, the compared one ringed). Sides on different tabs share only what's the
-// same skill or column by name, and a column they share goes to the bigger number: a percentile among
-// backs and one among receivers don't say who did more.
+// side by side (each side's tab's; the leader marked, the columns each one leads counted), a verdict for a
+// pair and the career arcs (every season's standing, the compared one ringed). Sides on different tabs
+// share only what's the same skill or column by name, and a column they share goes to the bigger number: a
+// percentile among backs and one among receivers don't say who did more.
 import { SKILL_STATS, SkillPlayer, SkillPosition, SkillStat, presetWeights } from '@sport/positions';
 import { SPORT } from '@sport/sport';
 import { badgeColor, whiteLogo } from '@sport/team-colors';
@@ -23,19 +23,23 @@ import { rankPct } from '@ranker/core/format';
 import { CardHost, careerLines } from '@ranker/engine/player-card/player-cards';
 import { CardRadar, CardSeason, SeasonContext } from '@ranker/engine/player-card/card.model';
 import { archetypeFor, skillsOf } from '@ranker/engine/player-card/overview';
-import { radar, radarShape } from '@ranker/engine/player-card/radar';
+import { radar } from '@ranker/engine/player-card/radar';
 
 export const COMPARE_MAX = 4;
 
 // Each side's color, in the order they're added (soft, like the vs Position pie's: a blue, a gold, a sea
 // green, a lilac; the first two the furthest apart, for the usual pair)
-const COLORS = ['#8ab4e0', '#e3cb8f', '#7fc8bb', '#c3a6e8'];
+export const COMPARE_COLORS = ['#8ab4e0', '#e3cb8f', '#7fc8bb', '#c3a6e8'];
 
 // An edge: a skill a side is better at than the best of the rest by this much (percentile points)
-const EDGE = 10;
+export const EDGE = 10;
 
 const TABS = Object.keys(SKILL_STATS) as SkillPosition[];
 const isTeamTab = (position: SkillPosition) => !!SPORT.teamTabs?.includes(position);
+const keyOf = (position: SkillPosition, season: number, id: string) => `${position}/${season}/${id}`;
+
+export type CompareTab = 'overview' | 'stats' | 'career';
+export type ArcBy = 'year' | 'season';
 
 // The table the compare view opens from: the card's host, and its own reader
 export interface CompareHost extends CardHost {
@@ -53,6 +57,9 @@ export interface CompareSide {
   name: string;
   // The name the narrow spots use: the last one, past a Jr. or a III ("Walker")
   surname: string;
+  // As the legends and hovers name it ("Jamaal Charles ’13"), and the short of it ("Charles ’13")
+  label: string;
+  tag: string;
   // "RB" (a team tab's name: "Team")
   tabLabel: string;
   // "2013" ("2012-13"), and its short form for the tight spots ("’13")
@@ -112,9 +119,17 @@ export interface CompareRow {
   leaders: number[];
 }
 
+export interface CompareSkill {
+  id: string;
+  name: string;
+  // Each side's percentile (null: not one of its tab's), and the sides that lead it
+  pcts: (number | null)[];
+  leaders: number[];
+}
+
 export interface CompareView {
-  // Every skill any side has: each side's percentile (null: not one of its tab's), the leaders
-  skills: { id: string; name: string; pcts: (number | null)[]; leaders: number[] }[];
+  // Every skill any side has, the first side's order first
+  skills: CompareSkill[];
   // One radar, every side's shape on it (the skills all of them have, three or more)
   radar: { base: CardRadar; shapes: { color: string; points: string; dots: { x: number; y: number; pct: number }[] }[] } | null;
   // Where each side is clearly the best of them, biggest first
@@ -126,20 +141,25 @@ export interface CompareView {
   // The columns each side leads outright, and how many had a leader
   wins: number[];
   contested: number;
+  // Two sides: who leads more of it, in a line (the side: none when they're level)
+  verdict: { side: number | null; text: string } | null;
   // More than one tab among them (the skills are each one's among his own tab's; a column two tabs share
   // goes to the bigger number)
   mixed: boolean;
 }
 
-// The career arcs: each side's seasons as points (x: its year in the league; teams alone, the season), on
-// a 640 x 210 board
+// The career arcs: each side's seasons as points (x: its year in the league, or the season), on a board
+// the size of ARC, the plot inside its margins
 export interface CompareArcs {
   width: number;
   height: number;
+  left: number;
+  right: number;
   byYear: boolean;
   xTicks: { x: number; label: string }[];
   yTicks: { y: number; label: string }[];
-  lines: { color: string; points: string; dots: { x: number; y: number; title: string; now: boolean }[] }[];
+  // (a line's key: its side's and the bottom's, so a line switched is drawn in again)
+  lines: { key: string; name: string; color: string; points: string; dots: { x: number; y: number; title: string; now: boolean }[] }[];
 }
 
 const ARC = { width: 640, height: 210, left: 40, right: 14, top: 14, bottom: 28 };
@@ -151,20 +171,23 @@ export class PlayerCompare {
   sides: CompareSide[] = [];
   view: CompareView | null = null;
   arcs: CompareArcs | null = null;
-  tab: 'overview' | 'stats' | 'career' = 'overview';
+  tab: CompareTab = 'overview';
   // The career arcs along the bottom: each one's years in the league, or the seasons themselves (null: by
   // year, unless they're all teams)
-  arcBy: 'year' | 'season' | null = null;
+  arcBy: ArcBy | null = null;
   // Sides still loading (the add slot shows it), and the colors they'll take (picks load together)
   loading = 0;
   private claimed: string[] = [];
-  // The search: what's typed, what it found, and whether it's found anything yet
+  // The search: what's typed, what it found, the hit Enter picks (the arrow keys move it), and whether
+  // it's found anything yet
   query = '';
   hits: CompareHit[] = [];
+  active = 0;
   searched = false;
   // A note for a moment (a fifth pick, a season already in)
   note = '';
   private noteTimer?: ReturnType<typeof setTimeout>;
+  private index: Promise<SearchEntry[]> | null = null;
 
   constructor(
     private readonly host: CompareHost,
@@ -190,46 +213,54 @@ export class PlayerCompare {
   close(): void {
     this.open = false;
     this.sides = [];
-    this.view = null;
-    this.arcs = null;
+    this.build();
   }
 
-  // A season added (at: in place of the side there, its season switched)
+  // A season added (at: in place of the side there, its season switched, keeping its color and its
+  // career; it's that side that's switched, wherever it's moved to by the time this one's loaded)
   async add(position: SkillPosition, season: number, gsisId: string, at?: number): Promise<void> {
-    const key = `${position}/${season}/${gsisId}`;
-    if (this.sides.some((s, i) => s.key === key && i !== at)) return this.say('That season is already in');
-    if (at === undefined && this.full) return this.say(`Up to ${COMPARE_MAX} at a time`);
-    const color = at !== undefined ? this.sides[at].color : COLORS.find((c) => !this.sides.some((s) => s.color === c) && !this.claimed.includes(c))!;
-    if (at === undefined) this.claimed.push(color);
+    const key = keyOf(position, season, gsisId);
+    const old = at === undefined ? undefined : this.sides[at];
+    if (this.sides.some((s) => s.key === key && s !== old)) return this.say('That season is already in');
+    if (!old && this.full) return this.say(`Up to ${COMPARE_MAX} at a time`);
+    const color = old?.color ?? COMPARE_COLORS.find((c) => !this.sides.some((s) => s.color === c) && !this.claimed.includes(c))!;
+    if (!old) this.claimed.push(color);
     this.loading++;
     try {
       const side = await this.side(position, season, gsisId, color);
       if (!side || !this.open) return;
-      if (at !== undefined && this.sides[at]) this.sides[at] = side;
+      const i = old ? this.sides.indexOf(old) : -1;
+      // (the side switched was removed meanwhile, or the same season came in first: a double click)
+      if ((old && i < 0) || this.sides.some((s) => s.key === key && s !== old)) return;
+      if (old) this.sides[i] = side;
       else this.sides.push(side);
+      if (old?.position === position && old.gsisId === gsisId && old.career) side.career = old.career;
       this.build();
+      if (side.career) return;
       careerLines(this.data, this.host.season, position, gsisId)
-        .then((career) => (side.career = career))
-        .catch(() => (side.career = []))
-        .finally(() => (this.arcs = this.buildArcs()));
+        .catch(() => [])
+        .then((career) => {
+          side.career = career;
+          this.arcs = this.buildArcs();
+        });
     } catch (err) {
       console.error(err);
       this.say("Couldn't load that season");
     } finally {
       this.loading--;
-      if (at === undefined) this.claimed.splice(this.claimed.indexOf(color), 1);
+      if (!old) this.claimed.splice(this.claimed.indexOf(color), 1);
     }
-  }
-
-  // The arcs' bottom switched (the Career tab's dropdown)
-  setArcBy(by: 'year' | 'season'): void {
-    this.arcBy = by;
-    this.arcs = this.buildArcs();
   }
 
   remove(i: number): void {
     this.sides.splice(i, 1);
     this.build();
+  }
+
+  // The arcs' bottom switched (the Career tab's dropdown)
+  setArcBy(by: ArcBy): void {
+    this.arcBy = by;
+    this.arcs = this.buildArcs();
   }
 
   private reset(): void {
@@ -245,13 +276,14 @@ export class PlayerCompare {
   // ---------------------------------------------------------------------------
   private async side(position: SkillPosition, season: number, gsisId: string, color: string): Promise<CompareSide | null> {
     const { host } = this;
-    let player = season === host.season && position === host.position ? host.playerList.find((p) => p.gsisId === gsisId) : undefined;
+    const tableSeason = season === host.season;
+    let player = tableSeason && position === host.position ? host.playerList.find((p) => p.gsisId === gsisId) : undefined;
     let rows = SKILL_UNITS;
     let list = host.playerList;
     let context: SeasonContext | null = null;
     if (!player) {
       // (the whole season, as the card opens one: the sport's team names and values from other tabs read it)
-      rows = season === host.season ? SKILL_UNITS : await this.data.rows(season);
+      rows = tableSeason ? SKILL_UNITS : await this.data.rows(season);
       player = rows[position]?.find((p) => p.gsisId === gsisId);
       if (!player) return null;
       context = host.seasonContext(season, rows, position);
@@ -266,23 +298,24 @@ export class PlayerCompare {
     const pct = rankPct(rank, list.length);
     const skills = skillsOf(position, SKILL_STATS[position], reader, player, list);
     const teamName = SPORT.teamName ? SPORT.teamName(player, position, rows) : (extras(player).teamName ?? null);
-    const logo = logoForSeason(player.teamLogo, season);
+    const short = SPORT.careerOnly ? '' : `’${String(season).slice(-2)}`;
+    const last = surname(player.name);
     return {
-      key: `${position}/${season}/${gsisId}`,
+      key: keyOf(position, season, gsisId),
       position,
       season,
       gsisId,
       color,
       player,
       name: player.name,
-      surname: surname(player.name),
+      surname: last,
+      label: withShort(player.name, short),
+      tag: withShort(last, short),
       tabLabel: tabLabel(position),
       seasonText: SPORT.careerOnly ? 'Career' : isLiveSeason(season) ? 'This Season' : SPORT.seasonText(season),
-      short: SPORT.careerOnly ? '' : `’${String(season).slice(-2)}`,
+      short,
       teamName: teamName && teamName !== player.name ? teamName : null,
-      logo: SPORT.cardLogo ? SPORT.cardLogo(logo) : logo,
-      badge: badgeColor(player.teamLogo),
-      whiteLogo: whiteLogo(player.teamLogo),
+      ...teamLook(player.teamLogo, season),
       photo: host.headshot(player, 240),
       rank,
       of: list.length,
@@ -301,18 +334,18 @@ export class PlayerCompare {
   // ---------------------------------------------------------------------------
   private build(): void {
     const sides = this.sides;
-    if (!sides.length) {
-      this.view = null;
-      this.arcs = null;
-      return;
-    }
+    this.view = sides.length ? this.compareView(sides) : null;
+    this.arcs = this.buildArcs();
+  }
 
+  private compareView(sides: CompareSide[]): CompareView {
     // (every skill any of them has, the first side's order first: one skill when its id and its name are
     // the same, so a back's Rushing Efficiency and a receiver's Efficiency stay two)
-    const skillOf = (k: CardSkill) => `${k.id}|${k.name}`;
-    const skills = [...new Map(sides.flatMap((s) => s.skills.map((k) => [skillOf(k), k] as const))).values()].map((def) => {
-      const pcts = sides.map((s) => s.skills.find((k) => skillOf(k) === skillOf(def))?.pct ?? null);
-      return { id: skillOf(def), name: def.name, short: def.short, pcts, leaders: leadersOf(pcts) };
+    const skillKey = (k: CardSkill) => `${k.id}|${k.name}`;
+    const defs = new Map(sides.flatMap((s) => s.skills.map((k) => [skillKey(k), k] as const)));
+    const skills = [...defs].map(([id, def]): CompareSkill & { short: string } => {
+      const pcts = sides.map((s) => s.skills.find((k) => skillKey(k) === id)?.pct ?? null);
+      return { id, name: def.name, short: def.short, pcts, leaders: leadersOf(pcts) };
     });
 
     // (the radar: the skills all of them have)
@@ -323,20 +356,20 @@ export class PlayerCompare {
         : {
             base: radar(common.map((c) => ({ short: c.short, pct: 0 }))),
             shapes: sides.map((side, i) => {
-              const pcts = common.map((c) => ({ short: c.short, pct: c.pcts[i]! }));
-              return { color: side.color, points: radarShape(pcts.map((p) => p.pct)), dots: radar(pcts).dots };
+              const shape = radar(common.map((c) => ({ short: c.short, pct: c.pcts[i]! })));
+              return { color: side.color, points: shape.shape, dots: shape.dots };
             }),
           };
 
     // (edges: where a side beats the best of the others)
     const edges = sides.map((_, i) =>
       skills
-        .map((s) => {
+        .flatMap((s) => {
           const mine = s.pcts[i];
           const others = s.pcts.filter((p, j): p is number => j !== i && p !== null);
-          return mine === null || !others.length ? null : { skill: s.name, by: Math.round((mine - Math.max(...others)) * 100) };
+          const by = mine === null || !others.length ? 0 : Math.round((mine - Math.max(...others)) * 100);
+          return by >= EDGE ? [{ skill: s.name, by }] : [];
         })
-        .filter((e): e is { skill: string; by: number } => !!e && e.by >= EDGE)
         .sort((a, b) => b.by - a.by)
         .slice(0, 3),
     );
@@ -353,32 +386,39 @@ export class PlayerCompare {
     // (the columns: each side's tab's as the grid shows them, merged group by group)
     const wins = sides.map(() => 0);
     let contested = 0;
-    const groups = this.columns().map(({ id, title, icon, stats }) => ({
-      id,
-      title,
-      icon,
-      rows: stats
+    const groups = this.columns().flatMap(({ stats, ...group }) => {
+      const rows = stats
         .map(({ key, of }): CompareRow => {
-          const shared = of.find((s): s is SkillStat => !!s)!;
-          const cells = sides.map((side, i) => cell(side, of[i]));
+          const i = of.findIndex((s) => !!s);
+          const shared = of[i]!;
+          const cells = sides.map((side, j) => cell(side, of[j]));
           // (sides on one tab: whoever stood higher in his own season; across tabs, where a percentile
           // among backs and one among receivers don't say who did more: the bigger number)
-          const tabs = new Set(sides.filter((_, i) => cells[i].value !== null).map((s) => s.position));
+          const tabs = new Set(sides.filter((_, j) => cells[j].value !== null).map((s) => s.position));
           const leaders = leadersOf(tabs.size > 1 ? cells.map((c) => (c.value === null ? null : c.lowerBetter ? -c.value : c.value)) : cells.map((c) => c.pct));
           // (counted toward the columns each side leads: not display-only stats or the team around them)
           if (!shared.infoOnly && (!shared.support || shared.supportHelps) && leaders.length) {
             contested++;
             if (leaders.length === 1) wins[leaders[0]]++;
           }
-          const reader = sides[of.indexOf(shared)].reader;
+          const { reader } = sides[i];
           return { key, label: reader.label(shared), name: reader.name(shared), cells, leaders };
         })
-        .filter((row) => row.cells.some((c) => c.text !== '-')),
-    }));
+        .filter((row) => row.cells.some((c) => c.text !== '-'));
+      return rows.length ? [{ ...group, rows }] : [];
+    });
 
-    const mixed = new Set(sides.map((s) => s.position)).size > 1;
-    this.view = { skills, radar: radarView, edges, pairs, groups: groups.filter((g) => g.rows.length), wins, contested, mixed };
-    this.arcs = this.buildArcs();
+    return {
+      skills: skills.map(({ short: _, ...s }) => s),
+      radar: radarView,
+      edges,
+      pairs,
+      groups,
+      wins,
+      contested,
+      verdict: verdictOf(sides, wins, contested, skills),
+      mixed: new Set(sides.map((s) => s.position)).size > 1,
+    };
   }
 
   // Every side's tab's columns as its grid shows them (the Recent squares aside), merged: the groups in
@@ -389,7 +429,8 @@ export class PlayerCompare {
       for (const group of this.host.shownGroups(side.reader, side.position)) {
         let merged = out.find((g) => g.id === group.id);
         if (!merged) out.push((merged = { id: group.id, title: group.title, icon: group.icon, stats: [] }));
-        for (const stat of group.stats.filter((s) => s.format !== 'recent')) {
+        for (const stat of group.stats) {
+          if (stat.format === 'recent') continue;
           // (one column when its key and its name are the same: a back's Total Yds aren't a receiver's)
           const key = `${stat.key}|${stat.label}`;
           let row = merged.stats.find((s) => s.key === key);
@@ -412,8 +453,9 @@ export class PlayerCompare {
     const lo = Math.min(...xs);
     const hi = Math.max(...xs, lo + 1);
     const { width, height, left, right, top, bottom } = ARC;
-    const px = (x: number) => Math.round((left + ((x - lo) / (hi - lo)) * (width - left - right)) * 10) / 10;
-    const py = (pct: number) => Math.round((top + (1 - pct) * (height - top - bottom)) * 10) / 10;
+    const round = (n: number) => Math.round(n * 10) / 10;
+    const px = (x: number) => round(left + ((x - lo) / (hi - lo)) * (width - left - right));
+    const py = (pct: number) => round(top + (1 - pct) * (height - top - bottom));
     const step = Math.max(1, Math.ceil((hi - lo + 1) / 12));
     const xTicks: CompareArcs['xTicks'] = [];
     for (let x = lo; x <= hi; x += step) xTicks.push({ x: px(x), label: byYear ? `Yr ${x}` : `’${String(x).slice(-2)}` });
@@ -425,24 +467,18 @@ export class PlayerCompare {
         now: c.season === side.season,
         title: `${side.name}, ${SPORT.seasonText(c.season)}: #${c.rank} of ${c.of}${byYear ? ` (year ${xOf(side, c)})` : ''}`,
       }));
-      return { color: side.color, points: dots.map((d) => `${d.x},${d.y}`).join(' '), dots };
+      return { key: `${side.key}/${byYear ? 'year' : 'season'}`, name: side.name, color: side.color, points: dots.map((d) => `${d.x},${d.y}`).join(' '), dots };
     });
-    return { width, height, byYear, xTicks, yTicks, lines };
+    return { width, height, left, right, byYear, xTicks, yTicks, lines };
   }
 
   // ---------------------------------------------------------------------------
   // The search: everyone the sport has had, every tab, by name
   // ---------------------------------------------------------------------------
-  private index: Promise<SearchEntry[]> | null = null;
-
   async search(query: string): Promise<void> {
     this.query = query;
     const words = normalize(query).split(' ').filter(Boolean);
-    if (words.join('').length < 2) {
-      this.hits = [];
-      this.searched = false;
-      return;
-    }
+    if (words.join('').length < 2) return this.clearSearch(query);
     let entries: SearchEntry[];
     try {
       entries = await (this.index ??= this.entries());
@@ -458,15 +494,18 @@ export class PlayerCompare {
       (e.key.split(' ').some((part) => part.startsWith(words[0])) ? 2 : 0) + (e.position === this.host.position ? 1 : 0) + rankPct(e.best.rank, e.best.of) / 2;
     this.hits = entries
       .filter((e) => words.every((w) => e.key.includes(w)))
-      .sort((a, b) => score(b) - score(a))
-      .slice(0, 8);
+      .map((e) => ({ e, score: score(e) }))
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 8)
+      .map(({ e }) => e);
+    this.active = 0;
     this.searched = true;
   }
 
   // A hit picked: their best season in; that one's in already, the next one down (then up) that isn't
   async pick(hit: CompareHit): Promise<void> {
     this.clearSearch();
-    const taken = (season: number) => this.sides.some((s) => s.key === `${hit.position}/${season}/${hit.id}`);
+    const taken = (season: number) => this.sides.some((s) => s.key === keyOf(hit.position, season, hit.id));
     const below = hit.seasons.filter((s) => s < hit.best.season).reverse();
     const above = hit.seasons.filter((s) => s > hit.best.season);
     const season = [hit.best.season, ...below, ...above].find((s) => !taken(s));
@@ -474,9 +513,10 @@ export class PlayerCompare {
     await this.add(hit.position, season, hit.id);
   }
 
-  private clearSearch(): void {
-    this.query = '';
+  private clearSearch(query = ''): void {
+    this.query = query;
     this.hits = [];
+    this.active = 0;
     this.searched = false;
   }
 
@@ -486,7 +526,7 @@ export class PlayerCompare {
     const [names, careers, current] = await Promise.all([
       this.data.careerNames(),
       Promise.all(TABS.map((tab) => this.data.careers(tab).catch(() => ({})))),
-      this.host.season === CURRENT_SEASON ? Promise.resolve(SKILL_UNITS) : this.data.rows(CURRENT_SEASON),
+      this.host.season === CURRENT_SEASON ? SKILL_UNITS : this.data.rows(CURRENT_SEASON),
     ]);
     type Line = { season: number; logo: string; rank: number; of: number };
     return TABS.flatMap((position, t) => {
@@ -503,20 +543,18 @@ export class PlayerCompare {
         if (!known) byId.set(row.gsisId, { name: row.name, seasons: [line] });
         else if (!known.seasons.some((s) => s.season === CURRENT_SEASON)) known.seasons.push(line);
       }
-      return [...byId.entries()].map(([id, { name, seasons }]): SearchEntry => {
+      return [...byId].map(([id, { name, seasons }]): SearchEntry => {
         seasons.sort((a, b) => a.season - b.season);
-        const best = seasons.filter((s) => s.rank > 0).reduce((b, s) => (rankPct(s.rank, s.of) > rankPct(b.rank, b.of) ? s : b), seasons.at(-1)!);
+        // (their best ranked season; none ranked, the latest)
+        const best = seasons.reduce<Line | null>((b, s) => (s.rank > 0 && (!b || rankPct(s.rank, s.of) > rankPct(b.rank, b.of)) ? s : b), null) ?? seasons.at(-1)!;
         const [first, last] = [seasons[0].season, seasons.at(-1)!.season];
-        const logo = logoForSeason(best.logo, best.season);
         return {
           position,
           tabLabel: tabLabel(position),
           id,
           key: normalize(name),
           name,
-          logo: SPORT.cardLogo ? SPORT.cardLogo(logo) : logo,
-          badge: badgeColor(best.logo),
-          whiteLogo: whiteLogo(best.logo),
+          ...teamLook(best.logo, best.season),
           span: SPORT.careerOnly ? '' : first === last ? SPORT.seasonText(first) : `${first}-${last}`,
           best: { season: best.season, rank: best.rank, of: best.of },
           seasons: seasons.map((s) => s.season),
@@ -547,6 +585,24 @@ function cell(side: CompareSide, stat: SkillStat | null): CompareCell {
   return { text, value, lowerBetter, pct: rankPct(rank, values.length), rank, of: values.length, tint: reader.valueColor(player, stat) };
 }
 
+// Two sides, in a line: who leads more of the columns, then of the skills ("Charles ’13 leads 11 of 17
+// columns and 5 of 8 skills"; "Level at 8 columns each; Walker ’22 leads 5 of 8 skills")
+export function verdictOf(sides: { tag: string }[], wins: number[], contested: number, skills: { leaders: number[] }[]): CompareView['verdict'] {
+  if (sides.length !== 2 || !contested) return null;
+  const led = skills.filter((s) => s.leaders.length);
+  const skillWins = [0, 1].map((i) => led.filter((s) => s.leaders.length === 1 && s.leaders[0] === i).length);
+  const ahead = (w: number[]) => (w[0] === w[1] ? null : w[0] > w[1] ? 0 : 1);
+  const side = ahead(wins);
+  let text = side === null ? `Level at ${wins[0]} of ${contested} columns each` : `${sides[side].tag} leads ${wins[side]} of ${contested} columns`;
+  if (led.length) {
+    const top = ahead(skillWins);
+    if (top === null) text += `; the skills split ${skillWins[0]}-${skillWins[1]}`;
+    else if (top === side) text += ` and ${skillWins[top]} of ${led.length} skills`;
+    else text += `; ${sides[top].tag} leads ${skillWins[top]} of ${led.length} skills`;
+  }
+  return { side, text };
+}
+
 // The best of a few percentiles: every side at the top (ties), none when fewer than two have one or
 // they're all level
 export function leadersOf(pcts: (number | null)[]): number[] {
@@ -555,6 +611,17 @@ export function leadersOf(pcts: (number | null)[]): number[] {
   const top = Math.max(...known);
   if (known.every((p) => p === top)) return [];
   return pcts.flatMap((p, i) => (p === top ? [i] : []));
+}
+
+// A team's look that season: its logo (as the cards show it), its badge's color, whether it's drawn white
+function teamLook(teamLogo: string, season: number): { logo: string; badge: string; whiteLogo: boolean } {
+  const logo = logoForSeason(teamLogo, season);
+  return { logo: SPORT.cardLogo ? SPORT.cardLogo(logo) : logo, badge: badgeColor(teamLogo), whiteLogo: whiteLogo(teamLogo) };
+}
+
+// "Jamaal Charles ’13" (a career-only sport: just the name)
+function withShort(name: string, short: string): string {
+  return short ? `${name} ${short}` : name;
 }
 
 // "RB"; a team tab, its name ("Team")
@@ -571,7 +638,7 @@ export function surname(name: string): string {
 export function normalize(text: string): string {
   return text
     .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[̀-ͯ]/g, '')
     .toLowerCase()
     .replace(/[^a-z0-9 ]+/g, '')
     .replace(/\s+/g, ' ')

@@ -339,9 +339,11 @@
     text-align: left;
     width: 100%;
 
-    &:hover,
+    // (the one Enter picks: the arrows' or the pointer's)
+    &.active,
     &:focus-visible {
-      background: rgba(255, 255, 255, 0.07);
+      background: rgba(255, 255, 255, 0.08);
+      box-shadow: inset 2px 0 0 var(--scoreboard-led);
     }
   }
 }
@@ -400,6 +402,27 @@
     color: var(--tone);
     font-style: normal;
     @include v.hand(15px);
+  }
+}
+
+// (a pair's verdict under the tapes: the leader's dot, then the line; level, a dot in chalk)
+.compare-verdict {
+  align-items: center;
+  color: rgba(255, 255, 255, 0.82);
+  display: flex;
+  font-size: 12.5px;
+  font-weight: 700;
+  gap: 8px;
+  letter-spacing: 0.2px;
+  margin: 12px 0 0;
+
+  i {
+    background: var(--side, #b9c2bf);
+    border-radius: 50%;
+    box-shadow: 0 0 7px var(--side, transparent);
+    flex: none;
+    height: 8px;
+    width: 8px;
   }
 }
 
@@ -469,8 +492,9 @@
 }
 
 .cmp-radar {
+  // (a shape under the pointer: its fill brighter, the rest stay as they are)
   .cmp-shape {
-    animation: radar-grow 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+    cursor: help;
     fill: color-mix(in srgb, var(--side) 16%, transparent);
     filter: drop-shadow(0 0 5px color-mix(in srgb, var(--side) 30%, transparent));
     stroke: var(--side);
@@ -478,6 +502,11 @@
     stroke-width: 2;
     transform-box: view-box;
     transform-origin: 0 0;
+    transition: fill 0.15s;
+
+    &:hover {
+      fill: color-mix(in srgb, var(--side) 34%, transparent);
+    }
   }
 
   .cmp-dot {
@@ -490,16 +519,6 @@
     &:hover {
       r: 6;
       stroke: #fff;
-    }
-  }
-
-  // (a shape under the pointer: its fill brighter, the rest stay as they are)
-  .cmp-shape {
-    cursor: help;
-    transition: fill 0.15s;
-
-    &:hover {
-      fill: color-mix(in srgb, var(--side) 34%, transparent);
     }
   }
 }
@@ -560,7 +579,6 @@
       border-radius: 4px;
       display: block;
       height: 100%;
-      transition: width 0.4s ease;
     }
   }
 
@@ -910,6 +928,141 @@
   font-size: 12px;
   margin: 10px 0 0;
   text-align: center;
+}
+
+// ---------------------------------------------------------------------------
+// Counts that tick up to their number (the columns led, the skills' percentiles, how alike): the number
+// shown is a counter run to --to, read aloud from the hidden text inside
+// ---------------------------------------------------------------------------
+@property --n {
+  syntax: "<integer>";
+  inherits: false;
+  initial-value: 0;
+}
+
+.tick {
+  --n: var(--to);
+  counter-reset: n var(--n);
+
+  &::after {
+    content: counter(n);
+  }
+
+  &.pct::after {
+    content: counter(n) "%";
+  }
+}
+
+// (the number for a screen reader, kept off the screen)
+.tick-text {
+  clip-path: inset(50%);
+  height: 1px;
+  overflow: hidden;
+  position: absolute;
+  white-space: nowrap;
+  width: 1px;
+}
+
+// ---------------------------------------------------------------------------
+// Motion, quick and quiet (none for anyone who's asked their system for less): a tape eases in when added
+// and out when removed, the shapes grow, the bars fill and their numbers tick up, a leader's dot pops, the
+// career lines draw in and their seasons land after them, the hits drop in
+// ---------------------------------------------------------------------------
+@media (prefers-reduced-motion: no-preference) {
+  .tape-in {
+    animation: tape-in 0.26s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  .tape-out {
+    animation: tape-out 0.18s ease-in forwards;
+    pointer-events: none;
+  }
+
+  .tape-hits {
+    animation: hits-in 0.14s ease-out;
+  }
+
+  .cmp-radar .cmp-shape {
+    animation: radar-grow 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+  }
+
+  .cmp-track i,
+  .cmp-cell-bar i,
+  .cmp-pair-meter i {
+    animation: cmp-fill 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+    transform-origin: left;
+    transition: width 0.4s ease;
+  }
+
+  .tick {
+    transition: --n 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  @starting-style {
+    .tick {
+      --n: 0;
+    }
+  }
+
+  .cmp-cell.lead b::before {
+    animation: cmp-pop 0.28s 0.12s cubic-bezier(0.3, 1.6, 0.5, 1) backwards;
+  }
+
+  .cmp-arcs {
+    .arc-line {
+      animation: arc-draw 0.5s cubic-bezier(0.3, 0, 0.6, 1) backwards;
+      stroke-dasharray: 1;
+    }
+
+    .arc-dot {
+      animation: cmp-pop 0.22s calc(var(--at, 0) * 0.5s) cubic-bezier(0.3, 1.6, 0.5, 1) backwards;
+      transform-box: fill-box;
+      transform-origin: center;
+    }
+  }
+}
+
+@keyframes tape-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.97);
+  }
+}
+
+@keyframes tape-out {
+  to {
+    opacity: 0;
+    transform: scale(0.94);
+  }
+}
+
+@keyframes hits-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes cmp-fill {
+  from {
+    transform: scaleX(0);
+  }
+}
+
+@keyframes cmp-pop {
+  from {
+    opacity: 0;
+    transform: scale(0);
+  }
+}
+
+@keyframes arc-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
 }
 
 // ---------------------------------------------------------------------------
