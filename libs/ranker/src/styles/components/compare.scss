@@ -131,7 +131,6 @@
   }
 }
 
-
 // (the word beside the cross: a phone's sheet only)
 .tape-remove-text {
   display: none;
@@ -430,6 +429,11 @@
   font-weight: 800;
   margin: 10px 0 0;
   text-shadow: var(--scoreboard-glow);
+
+  // (nothing to say: no room taken)
+  &:empty {
+    margin: 0;
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -443,22 +447,14 @@
   padding: 28px 0;
   text-align: center;
 
-  small {
-    display: block;
-    font-size: 12px;
-    font-weight: 600;
-    margin-top: 6px;
-  }
-
   &.small {
     font-size: 13px;
     padding: 20px 0 4px;
   }
 }
 
-// (the summary over Overview: a line per side, its dot and its name in its color, what it has over the
-// rest after them)
-// (on a scoreboard card at the top of the Stats; what he's best at bright)
+// (the summary on a scoreboard card at the top of the Stats: a line per side, its dot and its name in its
+// color, what it has over the rest after them; what he's best at bright)
 .cmp-summary {
   @include v.scoreboard-panel;
   display: flex;
@@ -503,7 +499,6 @@
   }
 }
 
-// (sides on different tabs: what lines up, said once over the tab)
 // (different positions: a word in orange in the hero's top strip, how they line up in a popover on hover or
 // focus)
 .cmp-mixed {
@@ -1127,6 +1122,12 @@
     animation: cmp-pop 0.2s cubic-bezier(0.3, 1.6, 0.5, 1);
   }
 
+  // (a note drops in as it's said)
+  .compare-note:not(:empty),
+  .tape-none {
+    animation: hits-in 0.16s ease-out;
+  }
+
   .cmp-summary li {
     animation: hits-in 0.2s ease-out backwards;
 
@@ -1319,10 +1320,6 @@
 
   .cmp-wins {
     margin-right: 0;
-  }
-
-  .cmp-top {
-    grid-template-columns: minmax(0, 1fr);
   }
 
   .cmp-skill {

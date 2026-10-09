@@ -693,3 +693,23 @@ test('nfl: a face at the end of every career line, none on top of another', asyn
     }
   }
 });
+
+test('nfl: closed and opened again while a season loads, the old one stays out of the new view', async () => {
+  const engine = await engineFor('nfl');
+  const { host, data, compare } = harness(engine, 'nfl', 'QB');
+  const vet = await withAnotherSeason(data, 'QB', host.playerList, host.season);
+  const past = (await data.careers('QB'))[vet.gsisId].find(([s]) => s !== host.season)[0];
+  // (a past season, still loading when the view's opened afresh from the grid)
+  const linked = compare.openLinked({ sides: [{ position: 'QB', season: past, gsisId: vet.gsisId }] });
+  const picked = host.playerList.slice(0, 2).filter((p) => p.gsisId !== vet.gsisId);
+  await Promise.all([linked, compare.start(picked)]);
+  assert.deepEqual(compare.sides.map((s) => s.key), picked.map((p) => `QB/${host.season}/${p.gsisId}`), 'only the picks');
+  assert.equal(compare.loading, 0);
+  // (one added from a card, then closed before it's in: nothing)
+  compare.close();
+  const late = compare.startWith('QB', past, vet.gsisId);
+  compare.close();
+  await late;
+  assert.equal(compare.open, false);
+  assert.equal(compare.sides.length, 0);
+});

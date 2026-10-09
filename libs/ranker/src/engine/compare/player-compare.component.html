@@ -119,7 +119,7 @@
                 aria-label="Search for someone to add"
                 role="combobox"
                 aria-autocomplete="list"
-                aria-controls="cmp-hits"
+                [attr.aria-controls]="compare.hits.length ? 'cmp-hits' : null"
                 [attr.aria-expanded]="!!compare.hits.length"
                 [attr.aria-activedescendant]="compare.hits.length ? 'cmp-hit-' + compare.active : null"
                 [value]="compare.query"
@@ -163,9 +163,8 @@
           </div>
         }
       </div>
-      @if (compare.note) {
-        <p class="compare-note" role="status">{{ compare.note }}</p>
-      }
+      <!-- (always there, so a screen reader hears it when it's said) -->
+      <p class="compare-note" role="status">{{ compare.note }}</p>
     </header>
 
     <nav class="card-tabs" role="tablist">

@@ -227,6 +227,8 @@ export class PlayerCompare {
   // Sides still loading (the add slot shows it)
   loading = 0;
   private uids = 0;
+  // (one a close: a season still loading from before it isn't added to the view opened after it)
+  private session = 0;
   // The search: what's typed, what it found, the hit Enter picks (the arrow keys move it), and whether
   // it's found anything yet
   query = '';
@@ -255,9 +257,7 @@ export class PlayerCompare {
   // Opened: the rows picked in the grid (the table's season and tab), or nobody yet (the search ready)
   async start(picks: SkillPlayer[]): Promise<void> {
     this.reset();
-    const keys = picks.slice(0, COMPARE_MAX).map((p) => keyOf(this.host.position, this.host.season, p.gsisId));
-    await Promise.all(picks.slice(0, COMPARE_MAX).map((p) => this.add(this.host.position, this.host.season, p.gsisId)));
-    this.settle(keys);
+    await this.addAll(picks.map((p) => ({ position: this.host.position, season: this.host.season, gsisId: p.gsisId })));
   }
 
   // From a link (share.ts): its sides in the link's order (the first four; anyone not found left out), on
@@ -265,14 +265,18 @@ export class PlayerCompare {
   async openLinked({ sides, tab }: SharedCompare): Promise<void> {
     this.reset();
     if (tab === 'stats' || (tab === 'career' && !SPORT.careerOnly)) this.tab = tab;
-    const keys = sides.slice(0, COMPARE_MAX).map((s) => keyOf(s.position, s.season, s.gsisId));
-    await Promise.all(sides.slice(0, COMPARE_MAX).map((s) => this.add(s.position, s.season, s.gsisId)));
-    this.settle(keys);
+    await this.addAll(sides);
   }
 
   // Sides loaded together (they come back in whatever order): put in the order they were asked for, and
-  // their colors picked again in that order, so the same sides always get the same colors
-  private settle(keys: string[]): void {
+  // their colors picked again in that order, so the same sides always get the same colors (closed or
+  // opened afresh meanwhile: left as they are)
+  private async addAll(asked: { position: SkillPosition; season: number; gsisId: string }[]): Promise<void> {
+    const list = asked.slice(0, COMPARE_MAX);
+    const session = this.session;
+    await Promise.all(list.map((s) => this.add(s.position, s.season, s.gsisId)));
+    if (session !== this.session) return;
+    const keys = list.map((s) => keyOf(s.position, s.season, s.gsisId));
     this.sides.sort((a, b) => keys.indexOf(a.key) - keys.indexOf(b.key));
     const taken: string[] = [];
     for (const side of this.sides) taken.push((side.color = this.colorFor(side, taken)));
@@ -293,6 +297,7 @@ export class PlayerCompare {
 
   close(): void {
     this.open = false;
+    this.session++;
     this.sides = [];
     this.build();
   }
@@ -304,10 +309,12 @@ export class PlayerCompare {
     const old = at === undefined ? undefined : this.sides[at];
     if (this.sides.some((s) => s.key === key && s !== old)) return this.say('That season is already in');
     if (!old && this.full) return this.say(`Up to ${COMPARE_MAX} at a time`);
+    const session = this.session;
     this.loading++;
     try {
       const side = await this.side(position, season, gsisId);
-      if (!side || !this.open) return;
+      // (closed meanwhile, or closed and opened again: not this view's any more)
+      if (!side || !this.open || session !== this.session) return;
       const i = old ? this.sides.indexOf(old) : -1;
       // (the side switched was removed meanwhile, or the same season came in first: a double click)
       if ((old && i < 0) || this.sides.some((s) => s.key === key && s !== old)) return;
@@ -321,8 +328,9 @@ export class PlayerCompare {
       else this.sides.push(side);
       if (old?.position === position && old.gsisId === gsisId && old.career) side.career = old.career;
       this.build();
-      // (a career-only sport: no seasons to pick or chart)
+      // (the career kept from the season switched)
       if (side.career) return;
+      // (a career-only sport: no seasons to pick or chart)
       if (SPORT.careerOnly) {
         side.career = [];
         return;
@@ -649,7 +657,7 @@ export class PlayerCompare {
       const byId = new Map<string, { name: string; headshotId: number | null; seasons: Line[] }>();
       for (const [id, lines] of Object.entries(careers[t])) {
         const [name, headshotId] = names[position]?.[id] ?? [];
-        if (name) byId.set(id, { name, headshotId: headshotId ?? null, seasons: lines.map(([season, logo, , rank, of]) => ({ season, logo: SPORT.teamLogo(logo), rank, of })) });
+        if (name && lines.length) byId.set(id, { name, headshotId: headshotId ?? null, seasons: lines.map(([season, logo, , rank, of]) => ({ season, logo: SPORT.teamLogo(logo), rank, of })) });
       }
       const rows = current[position] ?? [];
       const ranked = rows.length ? defaultRanking(position, presetWeights(position, 'default'), current) : [];
