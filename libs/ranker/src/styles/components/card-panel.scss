@@ -1,5 +1,6 @@
 @use "../variables" as v;
 @use "sport-panel";
+@use "../casino-chip" as casino;
 
 // The panels (card-panel.component.ts): global (no view encapsulation), so these reach the bar the
 // component draws; scoped to card-panel. The spacing between panels and their content's look stay the
@@ -111,6 +112,12 @@ card-panel {
   &:not(.closed) > .group-bar .panel-chevron {
     transform: rotate(90deg);
   }
+}
+
+// (the Bets page's and the Algorithm's: the casino's chip-rimmed panel, the same from every sport)
+model-desk card-panel,
+bets-page card-panel {
+  @include casino.panel;
 }
 
 // (on the player card, and the game view: a little more room each side of the bar, the title in the hand;
