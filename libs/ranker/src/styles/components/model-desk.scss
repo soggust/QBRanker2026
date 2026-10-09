@@ -414,3 +414,53 @@ card-panel {
 .desk-score b {
   display: block;
 }
+
+// (a bet's game: each team's logo beside its abbreviation)
+.desk-game {
+  align-items: center;
+  display: inline-flex;
+  gap: 4px;
+  white-space: nowrap;
+
+  img {
+    height: 20px;
+    object-fit: contain;
+    width: 20px;
+  }
+
+  .desk-at {
+    color: rgba(255, 255, 255, 0.45);
+    margin: 0 4px;
+  }
+}
+
+// (a prop's pick: the player's headshot in a circle, his name a link to his ESPN page)
+.desk-pick {
+  align-items: center;
+  display: inline-flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.desk-face {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 50%;
+  display: block;
+  height: 30px;
+  object-fit: cover;
+  object-position: 50% 15%;
+  width: 30px;
+}
+
+.desk-player {
+  color: inherit;
+  text-decoration: none;
+  transition:
+    color 0.15s,
+    text-shadow 0.15s;
+
+  &:hover {
+    @include v.link-lit;
+  }
+}

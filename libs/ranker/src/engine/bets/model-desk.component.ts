@@ -222,6 +222,40 @@ export class ModelDeskComponent implements OnInit, OnDestroy {
     return this.allBets.filter((b) => b.status === 'open' && (!sport || b.sport === sport)).length;
   }
 
+  // (a game's two teams, away and home, from its matchup: "PHI @ OTT")
+  teamsOf(b: ModelBet): [string, string] {
+    const [away, home] = b.matchup.split(' @ ');
+    return [away ?? '', home ?? ''];
+  }
+
+  // (a team's logo, ESPN's at a small size, by its abbreviation: its version for a dark background, where
+  // a navy wordmark like the Capitals' would vanish on the board; the plain one if a team has none)
+  teamLogo(sport: string, abbr: string): string {
+    return `https://a.espncdn.com/combiner/i?img=/i/teamlogos/${sport}/500-dark/${abbr.toLowerCase()}.png&w=40&h=40`;
+  }
+
+  // (a prop's player: his ESPN headshot, and his ESPN page)
+  headshot(b: ModelBet): string {
+    return `https://a.espncdn.com/combiner/i?img=/i/headshots/${b.sport}/players/full/${b.athlete}.png&w=96&h=70`;
+  }
+
+  playerLink(b: ModelBet): string {
+    return `https://www.espn.com/${b.sport}/player/_/id/${b.athlete}`;
+  }
+
+  // (a prop's pick after the player's name: " Under 7.5 Carries")
+  pickRest(b: ModelBet): string {
+    return b.player && b.pick.startsWith(b.player) ? b.pick.slice(b.player.length) : ' ' + b.pick;
+  }
+
+  // (an image ESPN doesn't have: a dark-background logo falls back to the plain one, anything else steps
+  // out of the way)
+  hide(event: Event): void {
+    const img = event.target as HTMLImageElement;
+    if (img.src.includes('/500-dark/')) img.src = img.src.replace('/500-dark/', '/500/');
+    else img.style.visibility = 'hidden';
+  }
+
   // (a league's logo, ESPN's: in the chips and each bet's row)
   leagueLogo(sport: string): string {
     return `https://a.espncdn.com/i/teamlogos/leagues/500/${sport}.png`;
