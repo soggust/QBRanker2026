@@ -169,7 +169,8 @@ for (const sport of SPORTS) {
     assert.ok(Array.isArray(file.picks), 'picks.json: no picks list');
     if (file.record) for (const key of ['overall', 'byLevel']) assert.ok(file.record[key], `picks.json: record.${key}`);
     const KINDS = new Set(['spread', 'total', 'team_total', 'moneyline', 'player', 'team_stat']);
-    const LEVELS = new Set(['high', 'medium', 'low']);
+    // (the bands, by the Kelly score: a lock above them all; picks.mjs BANDS)
+    const LEVELS = new Set(['lock', 'high', 'medium', 'low']);
     let last = Infinity;
     for (const [i, p] of file.picks.entries()) {
       const at = `${sport} pick ${i + 1}`;
