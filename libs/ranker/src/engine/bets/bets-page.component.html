@@ -39,7 +39,7 @@
             <!-- (the algorithm's record on the picks it has shown: overall, then by its chance to win when shown) -->
             @if (record?.graded) {
               <span class="bets-record">
-                Record {{ wl(record!.overall) }} · 60%+ {{ wl(record!.byLevel.high) }} · 53–59% {{ wl(record!.byLevel.medium) }} · Under 53% {{ wl(record!.byLevel.low) }}
+                Record {{ wl(record!.overall) }}@if (record!.byLevel.lock; as lock) { · Lock {{ wl(lock) }}} · Love {{ wl(record!.byLevel.high) }} · Bet {{ wl(record!.byLevel.medium) }} · Pass {{ wl(record!.byLevel.low) }}
               </span>
             }
           </span>
@@ -82,6 +82,7 @@
     } @else if (!rows.length) {
       <p class="bets-note">No picks right now: the algorithm posts its best bets as the coming games' lines come in.</p>
     } @else {
+      @let locks = lockCount(shown);
       <ol class="bets-list" [class.spinning]="spinning" (scroll)="closeWhy()">
         @for (r of shown; track r.id; let i = $index, n = $count) {
           <li class="bet" [ngClass]="level(r)" [class.open]="open.has(r.id)" [style.--i]="i">
@@ -90,8 +91,8 @@
               <button type="button" class="bet-row" (click)="toggle(r.id)" [attr.aria-expanded]="open.has(r.id)">
                 <mat-icon class="bet-chevron" [fontIcon]="open.has(r.id) ? 'expand_more' : 'chevron_right'"></mat-icon>
                 <span class="bet-rank-slot" aria-hidden="true"></span>
-                <!-- (a like reads "Bet": it's the bet to make, as a fade is the side to go against; one with no edge on
-                     its price reads "Pass") -->
+                <!-- (a like reads by its band: Lock, Love, Bet, or Pass for a small edge or none on its price; a fade
+                     "Fade", the side to go against) -->
                 <span class="bet-grade" [ngClass]="grade(r)">{{ grade(r) }}</span>
                 <span class="bet-main" [class.has-circle]="r.strength !== 'fade'">
                   <!-- (a fade says what it fades, and the bet to make instead) -->
@@ -142,24 +143,24 @@
                   }
                 </span>
               </button>
-              <!-- The rank tile (the #1 bet is the lock): a click (or Enter / Space) opens how its score is built; its
+              <!-- The rank tile (a lock's a lock, above the ranks; the first bet under them #1): a click (or Enter / Space) opens how its score is built; its
                    hover, its place, its Kelly score and its chance -->
               <button
                 type="button"
                 class="bet-rank"
-                [class.top]="i < 10 && grade(r) !== 'pass'"
-                [class.lock]="i === 0"
+                [class.top]="i - locks < 10 && grade(r) !== 'pass'"
+                [class.lock]="r.confidence === 'lock'"
                 [class.open]="why?.id === r.id"
                 aria-haspopup="dialog"
                 [attr.aria-expanded]="why?.id === r.id"
-                [attr.aria-label]="(i === 0 ? 'Lock, number 1' : '#' + (i + 1)) + ': how its score is built'"
-                [title]="rankTitle(r, i, n)"
+                [attr.aria-label]="(r.confidence === 'lock' ? 'Lock' : '#' + (i + 1 - locks)) + ': how its score is built'"
+                [title]="rankTitle(r, i, n, locks)"
                 (click)="toggleWhy(i, $event)"
               >
-                @if (i === 0) {
+                @if (r.confidence === 'lock') {
                   <mat-icon fontIcon="lock"></mat-icon>
                 } @else {
-                  {{ i + 1 }}
+                  {{ i + 1 - locks }}
                 }
               </button>
             </div>

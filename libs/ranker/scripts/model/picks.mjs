@@ -12,12 +12,11 @@
 //            the tie-break) its expected return per unit at the trusted chance, times how far the trust can be
 //            leaned on: 1 once the market's is fitted (the backtest's closing lines and the graded bets), 0.5
 //            while it's the untested start (a prop type with fewer than 40 graded)
-//   chance   what the page shows beside it: the trusted chance the bet wins, as a whole percent. Its band
-//            colors the row: high at 60% or more, medium at 53%, low under (the edge bets' chances run from about
-//            45% to 70%, a quarter under 52%, half under 57%, a quarter over 64%: the bands cut them into near
-//            thirds)
+//   chance   what the page shows beside it: the trusted chance the bet wins, as a whole percent
+//   level    its band, the row's color and chip, by its Kelly score (BANDS): lock (10% or more, and a 60%
+//            chance), high (5%: LOVE), medium (2%: BET), low (PASS)
 //   N        the 40 best a sport (TOP) by the Kelly score, the page's 40 across all the sports. An edge bet's
-//            band is its chance's; one without an edge is low, whatever its chance (a favorite at a short price
+//            band is its score's; one without an edge is low, whatever its score (a favorite at a short price
 //            isn't a strong bet)
 //   reason   written from the bet's own numbers: the model's chance against the book's, the price and book,
 //            the projection (a prop's) or the expected score, what the context saw (a backup quarterback, the
@@ -29,17 +28,21 @@ import { round } from './ratings.mjs';
 import { decimal, intentOf, record } from './desk.mjs';
 
 export const TOP = 40;
-const BANDS = { high: 0.6, medium: 0.53 };
+// (the confidence bands, by the Kelly score: a bankroll's 5% or more high (the page's LOVE), 2% or more medium (BET),
+// under that low (PASS); a lock above them all: 10% or more and a 60% chance to win, a big edge on a likely
+// result. The page reads the same bands: bet-why.ts confidenceOf)
+export const BANDS = { lock: 0.1, lockChance: 0.6, high: 0.05, medium: 0.02 };
 const KIND = { spread: 'spread', total: 'total', ml: 'moneyline', prop: 'player' };
 const LABEL = { spread: 'Spread', total: 'Game total', ml: 'Moneyline' };
 
 const pct = (v) => `${Math.round(v * 100)}%`;
 const odds = (a) => (a > 0 ? `+${a}` : String(a));
 const logo = (sport, abbr) => `https://a.espncdn.com/combiner/i?img=/i/teamlogos/${sport}/500/${abbr.toLowerCase()}.png&w=40&h=40`;
-// (a chance's band: 60% and up high, 53% and up medium, low under)
-export const level = (p) => (p >= BANDS.high ? 'high' : p >= BANDS.medium ? 'medium' : 'low');
-// (a bet's band: its chance's if it has an edge, else low: a favorite at a short price isn't a strong bet)
-export const levelOf = (b, p) => (intentOf(b) === 'edge' ? level(p) : 'low');
+// (a Kelly score's band, with its chance for a lock: value and likelihood together, as the picks are ranked)
+export const level = (kelly, p = 0) =>
+  kelly >= BANDS.lock && p >= BANDS.lockChance ? 'lock' : kelly >= BANDS.high ? 'high' : kelly >= BANDS.medium ? 'medium' : 'low';
+// (a bet's band: its Kelly score's if it has an edge, else low: a favorite at a short price isn't a strong bet)
+export const levelOf = (b, kelly, p = b.p) => (intentOf(b) === 'edge' ? level(kelly, p) : 'low');
 
 // A bet's score (see above): its EV, half for a market whose trust is still the untested start
 export function scoreOf(bet, trust) {
@@ -152,11 +155,13 @@ export function buildPicks(sport, ledger, trust, games, now) {
   });
   scored.sort((x, y) => y.score - x.score || y.edgeScore - x.edgeScore || x.b.start.localeCompare(y.b.start));
   const top = scored.slice(0, TOP);
-  for (const { b } of top) {
+  for (const { b, score } of top) {
     if (!b.published) Object.assign(b, { published: true, publishedAt: now.toISOString() });
-    // (its chance when shown, and its band: fixed from then on)
+    // (its chance and its Kelly score when shown, and its band: fixed from then on, so the record by band is
+    // what the page said at the time)
     if (!Number.isFinite(b.publishedP)) b.publishedP = b.p;
-    b.publishedLevel = levelOf(b, b.publishedP);
+    if (!Number.isFinite(b.publishedKelly)) b.publishedKelly = score;
+    b.publishedLevel = levelOf(b, b.publishedKelly, b.publishedP);
   }
   const picks = top.map(({ b, score, why }, i) => {
     const g = games.get(b.event);
@@ -167,7 +172,7 @@ export function buildPicks(sport, ledger, trust, games, now) {
       sport,
       score,
       chance: Math.round(b.p * 100),
-      level: levelOf(b, b.p),
+      level: levelOf(b, score),
       edge: intentOf(b) === 'edge',
       kind: KIND[b.market] ?? 'player',
       market: b.market === 'prop' ? b.statLabel : LABEL[b.market],
@@ -195,7 +200,7 @@ export function buildPicks(sport, ledger, trust, games, now) {
     };
   });
   const published = ledger.bets.filter((b) => b.published);
-  const byLevel = Object.fromEntries(['high', 'medium', 'low'].map((l) => [l, tally(published.filter((b) => b.publishedLevel === l))]));
+  const byLevel = Object.fromEntries(['lock', 'high', 'medium', 'low'].map((l) => [l, tally(published.filter((b) => b.publishedLevel === l))]));
   return { sport, at: now.toISOString(), bands: BANDS, top: TOP, record: { graded: published.filter((b) => b.status !== 'open').length, overall: tally(published), byLevel }, picks };
 }
 

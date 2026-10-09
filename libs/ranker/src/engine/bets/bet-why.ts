@@ -27,7 +27,7 @@ export interface BetWhyRow {
   pick: string;
   player?: string | null;
   market: string;
-  confidence: 'low' | 'medium' | 'high' | null;
+  confidence: Confidence | null;
   chance?: number;
   // (the order: the Kelly score, a quarter more where the analyst agrees and it's over 0)
   sureness: number;
@@ -69,7 +69,7 @@ export interface BetWhy {
   rank: number;
   of: number;
   score: number;
-  level: 'low' | 'medium' | 'high';
+  level: Confidence;
   // (no edge on the price: a score of 0 or under)
   noEdge: boolean;
   // (its trusted chance to win, a fact beside the parts)
@@ -101,6 +101,17 @@ export function kellyOf(p: number | undefined | null, american: number | undefin
   return Math.round((p! - 1 / (b + 1)) * ((b + 1) / b) * 1e4) / 1e4;
 }
 
+// A pick's band, its row's color and its chip (picks.mjs BANDS, the same cuts): by its Kelly score, a lock above
+// them all at 10% or more with a 60% chance to win (a big edge on a likely result: LOCK), then 5% (LOVE), 2%
+// (BET), under that or without an edge low (PASS)
+export type Confidence = 'lock' | 'high' | 'medium' | 'low';
+export const BANDS = { lock: 0.1, lockChance: 0.6, high: 0.05, medium: 0.02 };
+export function confidenceOf(kelly: number, p: number | null | undefined, edge: boolean | undefined): Confidence {
+  if (edge === false || !(kelly > 0)) return 'low';
+  if (kelly >= BANDS.lock && (p ?? 0) >= BANDS.lockChance) return 'lock';
+  return kelly >= BANDS.high ? 'high' : kelly >= BANDS.medium ? 'medium' : 'low';
+}
+
 // (the analyst agreeing: a quarter more of a positive score, never a negative one made worse)
 export const withAnalyst = (score: number) => (score > 0 ? score * ANALYST : score);
 
@@ -119,7 +130,7 @@ export function signedPoints(amount: number): string {
 
 const pct = (v: number, digits = 1) => `${(v * 100).toFixed(digits)}%`;
 const odds = (a: number) => (a > 0 ? `+${a}` : `${a}`.replace('-', '−'));
-const LEVEL = { high: 'High', medium: 'Medium', low: 'Low' };
+const LEVEL: Record<Confidence, string> = { lock: 'Lock', high: 'High', medium: 'Medium', low: 'Low' };
 // (a book's: DraftKings', FanDuel's)
 const owner = (book: string) => (book.endsWith('s') ? `${book}'` : `${book}'s`);
 
@@ -237,13 +248,13 @@ export function betWhy(list: BetWhyRow[], index: number): BetWhy {
   const chance = Number.isFinite(row.p) ? pct(row.p!) : Number.isFinite(row.chance) ? `${row.chance}%` : null;
   const chanceTitle = "Its chance to win: the book's fair chance moved toward the model's by the trust the model has earned in that market. The score weighs it against the price";
 
-  // Its band: its chance's with an edge on the price; low without one, whatever its chance
+  // Its band: its Kelly score's with an edge on the price; low without one, whatever its chance
   const level = row.confidence ?? 'low';
   const noEdge = row.edge === false || (!partial && score <= 0);
   const levelText = noEdge ? `${LEVEL[level]}: no edge on the price` : LEVEL[level];
   const levelTitle = noEdge
     ? "Its confidence: low, whatever its chance, without an edge on the price (a bet the bot made for the data, not one it likes: a favorite at a short price isn't a strong bet)"
-    : 'Its confidence, by its chance to win: 60% or more high, 53% or more medium, under that low';
+    : 'Its confidence, by its Kelly score (value and likelihood together, as the picks are ranked): 10 or more with a 60% chance a lock, 5 or more high, 2 or more medium, under that low';
 
   // Its price: what a unit's expected to return at its chance, and its stake
   let edgeText: string | null = null;

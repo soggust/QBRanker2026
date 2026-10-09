@@ -526,10 +526,11 @@ test("every hover the desk's template asks for is written (desk-help.ts)", () =>
 // The public picks (picks.mjs) and the leagues' setup
 // ---------------------------------------------------------------------------
 
-test("picks.mjs bands: 60% and up high, 53% medium, under low; a bet without an edge low whatever its chance", () => {
-  assert.deepEqual([0.6, 0.5999, 0.53, 0.5299, 0.75].map(level), ['high', 'medium', 'medium', 'low', 'high']);
-  assert.equal(levelOf({ intent: 'action', ev: -0.01 }, 0.7), 'low');
-  assert.equal(levelOf({ ev: 0.02 }, 0.7), 'high');
+test("picks.mjs bands, by the Kelly score: 5% and up high, 2% medium, under low; a bet without an edge low whatever its score", () => {
+  assert.deepEqual([0.05, 0.0499, 0.02, 0.0199, 0.12, -0.03].map((k) => level(k)), ['high', 'medium', 'medium', 'low', 'high', 'low']);
+  assert.equal(level(0.12, 0.6), 'lock', 'a big edge on a likely result: a lock');
+  assert.equal(levelOf({ intent: 'action', ev: -0.01 }, 0.07), 'low');
+  assert.equal(levelOf({ ev: 0.02 }, 0.07), 'high');
 });
 
 test('buildPicks: the open bets not started, likeliest first, at most TOP, each marked published with its band then', () => {
@@ -537,7 +538,7 @@ test('buildPicks: the open bets not started, likeliest first, at most TOP, each 
   const future = '2026-10-10T17:00:00Z';
   const bets = [
     bet({ id: 'hi', start: future, p: 0.64, ev: 0.05, intent: 'edge' }),
-    bet({ id: 'mid', start: future, p: 0.55, ev: 0.02, intent: 'edge' }),
+    bet({ id: 'mid', start: future, p: 0.54, ev: 0.02, intent: 'edge' }),
     bet({ id: 'fav', start: future, p: 0.7, odds: -300, ev: -0.0667, intent: 'action' }),
     bet({ id: 'started', start: '2026-10-09T11:00:00Z', p: 0.9, ev: 0.1 }),
     bet({ id: 'guarded', start: future, p: 0.8, ev: 0.1, context: { guard: 'line moved' } }),
@@ -547,7 +548,7 @@ test('buildPicks: the open bets not started, likeliest first, at most TOP, each 
   const ledger = { bets };
   const out = buildPicks('nfl', ledger, { spread: { fitted: true } }, new Map(), now);
   // (by Kelly: the 70% favorite at -300 has no edge on its price and sorts last, its chance notwithstanding)
-  assert.deepEqual(out.picks.map((p) => [p.id, p.level, p.chance]), [['hi', 'high', 64], ['mid', 'medium', 55], ['fav', 'low', 70]]);
+  assert.deepEqual(out.picks.map((p) => [p.id, p.level, p.chance]), [['hi', 'lock', 64], ['mid', 'medium', 54], ['fav', 'low', 70]]);
   assert.equal(out.picks[2].edge, false);
   assert.ok(out.picks[2].score < 0);
   assert.deepEqual(out.picks[0].teams.map((t) => t.abbr), ['TB', 'DAL']);
@@ -592,3 +593,4 @@ test('byGame: each game once, its bets under it, in the order the sort put its f
   );
   assert.deepEqual(desk.byGame([]), []);
 });
+

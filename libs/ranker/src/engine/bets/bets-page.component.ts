@@ -2,7 +2,7 @@ import { Component, ElementRef, HostListener, OnInit, ViewChild, isDevMode } fro
 import { SPORT_LINKS } from '@ranker/core/sports';
 import { insteadText } from '../player-card/analysis';
 import { americanOdds, headshot } from './bet-format';
-import { BetWhy, PickWhy, betScoreText, betWhy, kellyOf, signedPoints, withAnalyst } from './bet-why';
+import { BetWhy, Confidence, PickWhy, betScoreText, betWhy, confidenceOf, kellyOf, signedPoints, withAnalyst } from './bet-why';
 import { TeamColors, loadTeamColors, pickTeamColor, splitPick } from './pick-style';
 
 // The Bets page (the sport bar's Bets link, #bets): the algorithm's top picks for every sport (each one's
@@ -37,7 +37,7 @@ export interface BetRow {
   // (the analyst's, where it agrees: the most likely way it loses)
   risk?: string;
   // (its band: its chance to win 60% or more, 53% or more, or under; picks.mjs)
-  confidence: 'low' | 'medium' | 'high' | null;
+  confidence: Confidence | null;
   // (its side, and a prop's player, his ESPN id and his team's: its circle and its color)
   side?: string | null;
   player?: string | null;
@@ -134,7 +134,8 @@ interface Tally {
 interface BetRecord {
   graded: number;
   overall: Tally;
-  byLevel: { high: Tally; medium: Tally; low: Tally };
+  // (a lock's only once a file has any)
+  byLevel: { lock?: Tally; high: Tally; medium: Tally; low: Tally };
 }
 interface Sheet {
   at: string;
@@ -157,7 +158,7 @@ interface Pick {
   score: number;
   // its chance to win, a whole percent (the band its level)
   chance: number;
-  level: 'high' | 'medium' | 'low';
+  level: Confidence;
   kind: BetKind;
   market: string;
   pick: string;
@@ -383,8 +384,11 @@ export class BetsPageComponent implements OnInit {
       a.reason = `${a.reason} Analyst: ${s.reason}`;
       a.risk = s.risk;
     }
-    // (all sports' picks together, the best Kelly score first)
-    this.rows = algoRows.sort((a, b) => b.sureness - a.sureness || (a.game?.kickoff ?? '').localeCompare(b.game?.kickoff ?? ''));
+    // (each one's band from its score as it now stands, the analyst's quarter in it; all sports' picks together,
+    // the locks above the rest, then the best Kelly score first)
+    for (const a of algoRows) a.confidence = confidenceOf(a.sureness, a.p ?? (a.chance != null ? a.chance / 100 : null), a.edge);
+    const locked = (r: BetRow) => (r.confidence === 'lock' ? 0 : 1);
+    this.rows = algoRows.sort((a, b) => locked(a) - locked(b) || b.sureness - a.sureness || (a.game?.kickoff ?? '').localeCompare(b.game?.kickoff ?? ''));
     this.gameDays = this.buildGameDays();
   }
 
@@ -465,16 +469,21 @@ export class BetsPageComponent implements OnInit {
     return r.strength === 'fade' ? 'fade' : 'like';
   }
 
-  // Its chip: "Bet" (the bet to make), "Fade", or "Pass" for one with no edge on its price (a Kelly score of 0
-  // or under: a bet the bot made for the data, never one to make)
-  grade(r: BetRow): 'bet' | 'fade' | 'pass' {
+  // Its chip, by its band (bet-why.ts confidenceOf): "Lock", "Love", "Bet", or "Pass" (a small edge, or none on
+  // its price: a bet the bot made for the data, never one to make); a fade "Fade"
+  grade(r: BetRow): 'lock' | 'love' | 'bet' | 'fade' | 'pass' {
     if (r.strength === 'fade') return 'fade';
-    return r.edge === false || r.sureness <= 0 ? 'pass' : 'bet';
+    return ({ lock: 'lock', high: 'love', medium: 'bet', low: 'pass' } as const)[this.level(r)];
   }
 
-  // A bet's band, its row's color: its chance to win 60% or more, 53% or more, or under (picks.mjs)
-  level(r: BetRow): 'high' | 'medium' | 'low' {
+  // A bet's band, its row's color: a lock, then its Kelly score 5 or more, 2 or more, or under (picks.mjs)
+  level(r: BetRow): Confidence {
     return r.confidence ?? 'low';
+  }
+
+  // (the locks shown: above the ranks, the first bet under them #1)
+  lockCount(rows: BetRow[]): number {
+    return rows.filter((r) => r.confidence === 'lock').length;
   }
 
   toggle(id: number): void {
@@ -491,9 +500,11 @@ export class BetsPageComponent implements OnInit {
   readonly signedPoints = signedPoints;
   readonly betScoreText = betScoreText;
 
-  // The rank tile's hover: its place, its Kelly score and its chance ("#2 of 40 · Kelly +3.12 · 64% to win")
-  rankTitle(r: BetRow, i: number, n: number): string {
-    return `#${i + 1} of ${n} · Kelly ${betScoreText(r.sureness * 100)}${r.chance != null ? ` · ${r.chance}% to win` : ''}`;
+  // The rank tile's hover: its place (a lock's, above the ranks), its Kelly score and its chance ("#2 of 40 ·
+  // Kelly +3.12 · 64% to win")
+  rankTitle(r: BetRow, i: number, n: number, locks: number): string {
+    const place = r.confidence === 'lock' ? 'Lock' : `#${i + 1 - locks} of ${n - locks}`;
+    return `${place} · Kelly ${betScoreText(r.sureness * 100)}${r.chance != null ? ` · ${r.chance}% to win` : ''}`;
   }
 
   toggleWhy(index: number, event: Event): void {
@@ -561,10 +572,11 @@ export class BetsPageComponent implements OnInit {
 
 // Records added up: the algorithm's sports' published picks together (wins, losses, pushes; the share won)
 function sumRecords(list: BetRecord[]): BetRecord {
-  const add = (pick: (r: BetRecord) => Tally): Tally => {
+  const add = (pick: (r: BetRecord) => Tally | undefined): Tally => {
     const t = { wins: 0, losses: 0, pushes: 0, winPct: null as number | null };
     for (const r of list) {
       const x = pick(r);
+      if (!x) continue;
       t.wins += x.wins;
       t.losses += x.losses;
       t.pushes += x.pushes;
@@ -572,9 +584,10 @@ function sumRecords(list: BetRecord[]): BetRecord {
     t.winPct = t.wins + t.losses ? t.wins / (t.wins + t.losses) : null;
     return t;
   };
+  const locks = add((r) => r.byLevel.lock);
   return {
     graded: list.reduce((n, r) => n + r.graded, 0),
     overall: add((r) => r.overall),
-    byLevel: { high: add((r) => r.byLevel.high), medium: add((r) => r.byLevel.medium), low: add((r) => r.byLevel.low) },
+    byLevel: { ...(locks.wins + locks.losses + locks.pushes ? { lock: locks } : {}), high: add((r) => r.byLevel.high), medium: add((r) => r.byLevel.medium), low: add((r) => r.byLevel.low) },
   };
 }

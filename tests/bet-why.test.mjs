@@ -173,3 +173,17 @@ test('betWhy: an older picks file, its Kelly score and parts worked out from its
   assert.equal(desk.betName({ pick: 'Skubal Over 5.5', player: 'Skubal' }), 'Skubal Over 5.5');
   assert.deepEqual([desk.betScoreText(3.124), desk.betScoreText(-1.05), desk.betScoreText(0.001), desk.signedPoints(-0.004)], ['+3.12', '−1.05', '0.00', '−0.004']);
 });
+
+test("the page's bands are the bettor's: Lock (10%+ Kelly and a 60% chance), Love (5%), Bet (2%), Pass, the same cut for every score", async () => {
+  const picks = await import('../libs/ranker/scripts/model/picks.mjs');
+  assert.deepEqual(desk.BANDS, picks.BANDS);
+  for (const kelly of [-0.05, 0, 0.0199, 0.02, 0.049, 0.05, 0.099, 0.1, 0.25]) {
+    for (const p of [0.45, 0.59, 0.6, 0.75]) {
+      const page = desk.confidenceOf(kelly, p, true);
+      assert.equal(page, kelly > 0 ? picks.level(kelly, p) : 'low', `kelly ${kelly}, chance ${p}`);
+    }
+  }
+  assert.equal(desk.confidenceOf(0.2, 0.7, true), 'lock');
+  assert.equal(desk.confidenceOf(0.2, 0.55, true), 'high', 'a big edge on a coin flip is no lock');
+  assert.equal(desk.confidenceOf(0.2, 0.7, false), 'low', 'no edge, no band');
+});
