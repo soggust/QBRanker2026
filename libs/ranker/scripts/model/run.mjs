@@ -24,6 +24,8 @@
 //   in .cache/model/dry-<sport>.json; --replace: open bets on games not started yet taken back and priced
 //   again; --all-sources: every optional source asked, whether its terms are kept or not)
 
+// (the keys: .env on this machine, the repo's secrets on GitHub; first, so every module sees them)
+import '../env.mjs';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { LEAGUES, PROP_CAPS } from './leagues.mjs';

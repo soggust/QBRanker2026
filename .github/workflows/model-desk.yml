@@ -49,6 +49,9 @@ jobs:
           restore-keys: model-desk-
 
       - name: Grade, refit and bet
+        env:
+          # (The Odds API: real lines and prices, props and history; without it the free ESPN board is used)
+          ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
         run: node libs/ranker/scripts/model/run.mjs
 
       # (the data checked before it's committed: a broken ledger or state stays out of master)

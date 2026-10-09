@@ -1333,10 +1333,11 @@ section ul.scrolled-x li.player > div.player-info {
   }
 }
 
-// (a bigger screen's drag grip pinned where it sits, over the strip: rows can still be dragged scrolled)
+// (a bigger screen's drag grip pinned near the edge, over the strip, a little more room before the rank than
+// unscrolled: rows can still be dragged scrolled)
 @media (min-width: 576px) {
   section ul.scrolled-x li.player > .drag-indicator {
-    left: 0.5em;
+    left: 0.25em;
     position: sticky;
     z-index: 4;
   }

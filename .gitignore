@@ -47,3 +47,6 @@ Thumbs.db
 
 # The model desk's facts (libs/ranker/scripts/model): a cache, kept under .cache/model now
 apps/*/scripts/model/context.json
+
+# Local keys (copy .env.example)
+.env
