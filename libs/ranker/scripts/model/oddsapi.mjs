@@ -42,7 +42,10 @@ export const PROP_BOOKS = [BOOK];
 // (a URL with its key taken out, for anything shown)
 export const redact = (s) => String(s).replace(/apiKey=[^&\s"']+/gi, 'apiKey=***');
 
-export const hasKey = () => !!process.env.ODDS_API_KEY;
+// (a --dry run, a check on the code, prices from ESPN's free board and spends nothing, unless --paid asks
+// for The Odds API's lines too)
+const DRY_FREE = process.argv.includes('--dry') && !process.argv.includes('--paid');
+export const hasKey = () => !!process.env.ODDS_API_KEY && !DRY_FREE;
 
 // The usage file: the cycle, the calls, the balance
 function usage() {

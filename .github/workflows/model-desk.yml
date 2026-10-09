@@ -2,15 +2,16 @@ name: Model Desk - Bets
 
 on:
   schedule:
-    # Every two hours from 12:17 to 04:17 UTC (8:17 AM to 12:17 AM Eastern): nine runs a day. GitHub runs
-    # scheduled workflows late, sometimes hours late, so no single slot can be counted on; with a run every two
-    # hours a late or missed one costs little. Between them they reach every game before it starts (NFL early
+    # Every hour, around the clock (24 runs a day; the repo is public, so its minutes are free). GitHub runs
+    # scheduled workflows late, and sometimes skips them, so no single slot can be counted on; hourly, a late or
+    # missed one costs little, and the West Coast's late games are graded overnight rather than the next
+    # morning. The Odds API's credits stay within oddsapi.mjs's daily allowance however often it runs. Between them they reach every game before it starts (NFL early
     # and London kickoffs, MLB day games, the night's NBA, NHL and MLB) to bet it, and every game after it
     # starts to read its close and grade it (clv.mjs: ESPN keeps the close after kickoff, so the close is never
     # missed, only read later). At :17, off the top of the hour when GitHub's queue is longest. Each run grades
     # what finished, refits the ratings, the context and the trust, and bets every market (and the props) of
     # every game in the next two days it hasn't bet yet (libs/ranker/scripts/model/run.mjs). Code only: free.
-    - cron: "17 0-4/2,12-22/2 * * *"
+    - cron: "17 * * * *"
   workflow_dispatch:
 
 # (one desk run at a time: a run that comes due while one is going waits; a second one due meanwhile

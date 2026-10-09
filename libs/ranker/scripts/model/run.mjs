@@ -19,9 +19,9 @@
 // built from, in .cache/model/context-<sport>.json (gitignored: a cache, rebuilt from the sources when lost).
 // The Bets page's admin panel (dev only) reads state and ledger.
 //
-//   node libs/ranker/scripts/model/run.mjs [nfl nba nhl mlb] [--dry] [--replace] [--all-sources]
+//   node libs/ranker/scripts/model/run.mjs [nfl nba nhl mlb] [--dry [--paid]] [--replace] [--all-sources]
 //   (--dry: no bets placed, state and ledger untouched, a snapshot of what the model made of the coming games
-//   in .cache/model/dry-<sport>.json; --replace: open bets on games not started yet taken back and priced
+//   in .cache/model/dry-<sport>.json, priced from ESPN's free board (--paid: The Odds API's too); --replace: open bets on games not started yet taken back and priced
 //   again; --all-sources: every optional source asked, whether its terms are kept or not)
 
 // (the keys: .env on this machine, the repo's secrets on GitHub; first, so every module sees them)
