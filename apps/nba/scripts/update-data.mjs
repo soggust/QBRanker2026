@@ -24,6 +24,8 @@ import { writeFile, readFile, mkdir, rm } from 'node:fs/promises';
 import path from 'node:path';
 import { curve } from '../../../libs/ranker/scripts/grades.mjs';
 import { blendWithLastSeason } from '../../../libs/ranker/scripts/early-season.mjs';
+import { carryForward, previousRows, sameSeason } from '../../../libs/ranker/scripts/carry-forward.mjs';
+import { fetchRetry } from '../../../libs/ranker/scripts/fetch.mjs';
 
 const CURRENT_SEASON = 2026;
 const FIRST_SEASON = 2001;
@@ -110,46 +112,35 @@ async function teamRecent(season, keep, teams, postTeams) {
 }
 
 // Basketball-Reference asks for no more than 20 requests a minute. A finished season's page (keep) is
-// read from the cache when it's there; every page is fetched once a run.
+// read from the cache when it's there, a whole page only (one cut off or empty is asked again, not kept
+// for good); every page is fetched once a run. A page it hasn't (a 404) is '' and noted in missing: its
+// own answer, unlike a failure (which throws)
 let lastRequest = 0;
 const fetched = new Map();
+const missing = new Set();
+const whole = (html) => html.includes('</html>');
 async function page(url, keep = false) {
   if (fetched.has(url)) return fetched.get(url);
   const file = path.join(CACHE, url.replace(`${BBREF}/`, '').replace(/[^\w.-]+/g, '_'));
   if (keep) {
     const html = await readFile(file, 'utf8').catch(() => null);
-    if (html) return fetched.set(url, html).get(url);
+    if (html && whole(html)) return fetched.set(url, html).get(url);
   }
-  for (let attempt = 1; ; attempt++) {
+  const pace = async () => {
     const wait = lastRequest + 3200 - Date.now();
     if (wait > 0) await new Promise((r) => setTimeout(r, wait));
     lastRequest = Date.now();
-    try {
-      const res = await fetch(url, { headers: { 'User-Agent': UA } });
-      if (res.status === 404) return fetched.set(url, '').get(url);
-      if (!res.ok) throw new Error(`${res.status} for ${url}`);
-      const html = await res.text();
-      if (keep) await mkdir(CACHE, { recursive: true }).then(() => writeFile(file, html));
-      return fetched.set(url, html).get(url);
-    } catch (err) {
-      if (attempt >= 3) throw err;
-      await new Promise((r) => setTimeout(r, 20000 * attempt));
-    }
+  };
+  const html = await fetchRetry(url, { headers: { 'User-Agent': UA }, backoff: 20000, notFound: null, before: pace });
+  if (html === null) {
+    missing.add(url);
+    return fetched.set(url, '').get(url);
   }
+  if (keep && whole(html)) await mkdir(CACHE, { recursive: true }).then(() => writeFile(file, html));
+  return fetched.set(url, html).get(url);
 }
 
-async function json(url) {
-  for (let attempt = 1; ; attempt++) {
-    try {
-      const res = await fetch(url);
-      if (!res.ok) throw new Error(`${res.status} for ${url}`);
-      return await res.json();
-    } catch (err) {
-      if (attempt >= 3) throw err;
-      await new Promise((r) => setTimeout(r, 1500 * attempt));
-    }
-  }
-}
+const json = (url) => fetchRetry(url, { as: 'json', backoff: 1500 });
 
 const decode = (s) =>
   s
@@ -208,6 +199,8 @@ const norm = (name) =>
     .replace(/\b(jr|sr|ii|iii|iv)\b\.?/g, '')
     .replace(/[^a-z]/g, '');
 const espnIds = new Map();
+// (null when the list fails or comes back empty: players keep any id found in another season, or the
+// one the last good run gave them, buildSeason)
 async function espnAthletes(season) {
   const out = new Map();
   try {
@@ -218,24 +211,27 @@ async function espnAthletes(season) {
       espnIds.set(key, Number(a.athlete.id));
     }
   } catch {
-    // (no ESPN list for the season: players keep any id found in another season)
+    return null;
   }
-  return out;
+  return out.size ? out : null;
 }
 
-// This season's injury report: ESPN athlete id -> status ("Out", "Day-To-Day"...)
+// This season's injury report: ESPN athlete id -> status ("Out", "Day-To-Day"...); null when it fails
+// (no report, or not one: the injuries are then the last good run's, buildSeason; an empty report is
+// ESPN's word that nobody is hurt)
 async function injuries() {
   const out = new Map();
   try {
     const data = await json('https://site.api.espn.com/apis/site/v2/sports/basketball/nba/injuries');
-    for (const team of data.injuries ?? []) {
+    if (!Array.isArray(data.injuries)) return null;
+    for (const team of data.injuries) {
       for (const i of team.injuries ?? []) {
         const id = Number(i.athlete?.links?.[0]?.href?.match(/\/id\/(\d+)/)?.[1] ?? i.athlete?.id);
         if (id) out.set(id, i.status ?? 'Injured');
       }
     }
   } catch {
-    // (no report: nobody is marked)
+    return null;
   }
   return out;
 }
@@ -267,7 +263,8 @@ function teamTable(html) {
 }
 
 // A season part's tables: the players' totals, advanced stats and on/off, and the teams. Null when the
-// part has none (the playoffs before they start).
+// part has none (the playoffs before they start: Basketball-Reference has no page for them, a 404, noted
+// in missing) or its page has no totals table (turned away or changed: unknown, buildSeason).
 async function partTables(season, part, keep) {
   const dir = part === 'post' ? 'playoffs' : 'leagues';
   const totals = playerTable(await page(`${BBREF}/${dir}/NBA_${season}_totals.html`, keep), 'totals_stats');
@@ -473,14 +470,23 @@ async function buildSeason(season, write) {
   if (!regular) return console.log(`${season}: no games yet`);
   const playoffs = await page(`${BBREF}/playoffs/NBA_${season}.html`, keep);
   const post = await partTables(season, 'post', keep);
+  // (no playoffs, by Basketball-Reference's own word: a 404 for their totals page)
+  const noPlayoffs = !post && missing.has(`${BBREF}/playoffs/NBA_${season}_totals.html`);
   const coachRows = table(await page(`${BBREF}/leagues/NBA_${season}_coaches.html`, keep), 'NBA_coaches');
   const coy = (await page(`${BBREF}/awards/awards_${season}.html`, keep))
     .split('id="coy"')[1]
     ?.match(/\/coaches\/([a-z0-9]+)\.html/)?.[1];
   // Last season's Box Plus/Minus (the roster's talent coming in, for the coaching lift below)
   const priorAdvanced = table(await page(`${BBREF}/leagues/NBA_${season - 1}_advanced.html`, true), 'advanced');
-  const espn = await espnAthletes(season);
-  const injured = current ? await injuries() : new Map();
+  const dir = current ? STATIC : path.join(STATIC, 'seasons', String(season));
+  const espnList = await espnAthletes(season);
+  const injuredList = current ? await injuries() : new Map();
+  // (ESPN's list failed: the ids the last good run gave, by name: carried forward,
+  // libs/ranker/scripts/carry-forward)
+  const espn =
+    espnList ?? new Map((await previousRows(path.join(dir, FILE.regular))).filter((u) => u.id != null && u.name).map((u) => [norm(u.name), u.id]));
+  if (!espnList) console.warn(`${season}: ESPN's athlete list failed, ${espn.size} ESPN ids kept from the last run`);
+  const injured = injuredList ?? new Map();
   const recent = await teamRecent(season, keep, regular.teams, post?.teams);
 
   // The Finals: the champion and the runner-up (their conference's champion)
@@ -497,18 +503,27 @@ async function buildSeason(season, write) {
     shared.awards.set(id, p.whole?.awards);
   }
 
-  const dir = current ? STATIC : path.join(STATIC, 'seasons', String(season));
   await mkdir(dir, { recursive: true });
   const tables = { regular, post, all: post && combine(regular, post) };
   for (const part of PARTS.filter((p) => write.includes(p))) {
     const file = path.join(dir, FILE[part]);
     if (!tables[part]) {
-      // (no playoffs yet: no playoffs or both, and none left over from an earlier season)
-      await rm(file, { force: true });
-      console.log(`${season} ${part}: no playoffs yet`);
+      // (no playoffs yet: no playoffs or both, and none left over from an earlier season; a playoffs page
+      // that came back without its table says nothing either way: the file stays)
+      if (noPlayoffs) await rm(file, { force: true });
+      console.log(`${season} ${part}: ${noPlayoffs ? 'no playoffs yet' : 'no playoff table on the page, the file left as it was'}`);
       continue;
     }
     const out = await buildPart(season, part, tables[part], shared);
+    // (the injury report failed: the injuries the last good run gave, carried forward)
+    if (!injuredList) {
+      const players = TABS.flatMap((tab) => out[tab]);
+      const hurt = carryForward(players, await previousRows(file), {
+        keep: (row, prev) => sameSeason(row, prev) && prev.injured && !row.injured,
+        fields: ['injured', 'injuryStatus'],
+      });
+      console.warn(`${season} ${part}: ESPN's injury report failed, ${hurt} injuries kept from the last run`);
+    }
     // (compact: the files are served to the browser as is)
     await writeFile(file, JSON.stringify(out));
     const everyone = TABS.flatMap((tab) => out[tab]);

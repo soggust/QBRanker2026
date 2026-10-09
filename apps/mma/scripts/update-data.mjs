@@ -25,6 +25,7 @@ import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import path from 'node:path';
 import { allFights } from './fights.mjs';
 import { shareRows } from '../../../libs/ranker/scripts/shared-rows.mjs';
+import { fetchRetry } from '../../../libs/ranker/scripts/fetch.mjs';
 import { PARAMS, cautious, deviationOn, history, rate, tabOf, weightOf } from './rating.mjs';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
@@ -110,23 +111,15 @@ const RANKING_DIVISIONS = {
   "Women's Bantamweight": 'WBW',
 };
 
-// A polite pace (a few requests a second at most), with retries
+// A polite pace (a few requests a second at most), with retries (libs/ranker/scripts/fetch.mjs; a 404: null)
 let lastRequest = 0;
-async function get(url, as = 'json') {
-  for (let attempt = 1; ; attempt++) {
-    const wait = lastRequest + 300 - Date.now();
-    if (wait > 0) await new Promise((r) => setTimeout(r, wait));
-    lastRequest = Date.now();
-    try {
-      const res = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0 (sports-ranker data script)' } });
-      if (res.status === 404) return null;
-      if (!res.ok) throw new Error(`${res.status} for ${url}`);
-      return as === 'json' ? await res.json() : await res.text();
-    } catch (err) {
-      if (attempt >= 3) throw err;
-      await new Promise((r) => setTimeout(r, 3000 * attempt));
-    }
-  }
+const pace = async () => {
+  const wait = lastRequest + 300 - Date.now();
+  if (wait > 0) await new Promise((r) => setTimeout(r, wait));
+  lastRequest = Date.now();
+};
+function get(url, as = 'json') {
+  return fetchRetry(url, { as, headers: { 'User-Agent': 'Mozilla/5.0 (sports-ranker data script)' }, backoff: 3000, notFound: null, before: pace });
 }
 
 const round = (v, d = 3) => (v === null || v === undefined || !Number.isFinite(v) ? null : Math.round(v * 10 ** d) / 10 ** d);
@@ -170,11 +163,14 @@ const num = (v) => {
 // attempted, submission attempts, ground advances, reversals]. From ESPN's athlete stats, every bout at
 // once; that comes back empty ({}) for some fighters (Francis Ngannou, Lyoto Machida, Nate Diaz: a
 // fifth of those with UFC fights), so any of his bouts (UFC and PFL ones, the leagues ESPN keeps stats
-// for) it leaves out are asked of the core API one by one (coreFightStats)
+// for) it leaves out are asked of the core API one by one (coreFightStats). byBout.failed: a bout's
+// call failed (not kept as asked: asked again next run)
 async function fightStats(id, bouts = []) {
   const byBout = await athleteFightStats(id);
   const missing = bouts.filter((b) => !byBout[b.id]);
-  if (missing.length) Object.assign(byBout, await coreFightStats(id, missing));
+  const core = missing.length ? await coreFightStats(id, missing) : {};
+  Object.assign(byBout, core);
+  Object.defineProperty(byBout, 'failed', { value: !!core.failed, configurable: true });
   return byBout;
 }
 
@@ -220,7 +216,10 @@ async function coreFightStats(id, bouts) {
   const byBout = {};
   for (const b of bouts) {
     if (!competitor.has(b.id)) continue;
-    const data = await get(competitor.get(b.id)).catch(() => null);
+    const data = await get(competitor.get(b.id)).catch(() => {
+      Object.defineProperty(byBout, 'failed', { value: true, configurable: true });
+      return null;
+    });
     const stats = (data?.splits?.categories ?? []).flatMap((c) => c.stats ?? []);
     const s = [0, 0, 0, 0, 0, 0, 0, 0];
     let tried = 0;
@@ -585,8 +584,11 @@ for (const id of needed) {
   const gaps = entry.stats && entry.core !== last && statBouts.some((b) => !entry.stats[b.id]);
   if (!entry.stats || entry.last !== last || gaps) {
     try {
-      entry.stats = await fightStats(id, statBouts);
-      entry.core = last;
+      // (what came back added to what was kept: a call that failed takes no bout's stats away, and isn't
+      // marked asked, core, so it's asked again)
+      const stats = await fightStats(id, statBouts);
+      entry.stats = { ...entry.stats, ...stats };
+      if (!stats.failed) entry.core = last;
     } catch {
       entry.stats ??= {};
     }

@@ -46,6 +46,19 @@ export function writeLogFiles(root, season, logs, playoffs) {
   return written;
 }
 
+// A player's game log this run (update-data's writeGameLogs): kept as it was (keep), or asked again for
+// these game types (2 the regular season, 3 the playoffs). His playoff games come from the games' own
+// type, never the calendar: played, his regular-season games; known, his log as written (knownPlayoffs
+// of them playoff games); postGames, the playoff reports' count for him (0: none; null: the reports
+// failed, and his log's count stands)
+export function gameLogPlan({ played, known, knownPlayoffs = 0, postGames }) {
+  // (the playoff games he has: the reports', or his log's when they say fewer: a report that failed or
+  // came back short never takes games off a log)
+  const post = Math.max(postGames ?? 0, knownPlayoffs);
+  const keep = played > 0 && known?.length === played + post && knownPlayoffs === post;
+  return { keep, types: post > 0 ? [3, 2] : [2] };
+}
+
 // (the old one-file layout, gone once converted)
 export function removeOldFile(file) {
   if (existsSync(file)) rmSync(file);

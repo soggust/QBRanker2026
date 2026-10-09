@@ -29,8 +29,9 @@ import { createHash } from 'node:crypto';
 import path from 'node:path';
 import { curve } from '../../../libs/ranker/scripts/grades.mjs';
 import { blendWithLastSeason } from '../../../libs/ranker/scripts/early-season.mjs';
+import { fetchRetry } from '../../../libs/ranker/scripts/fetch.mjs';
 import { coachesFor } from './coaches.mjs';
-import { readLogFiles, removeOldFile, writeLogFiles } from './game-log-files.mjs';
+import { gameLogPlan, readLogFiles, removeOldFile, writeLogFiles } from './game-log-files.mjs';
 import { addVsPosition } from './vs-position.mjs';
 
 const CURRENT_SEASON = 2027;
@@ -65,7 +66,8 @@ const CONFERENCE_TITLES = [5, 19];
 
 // A polite pace for every source (a few requests a second at most, one slot each even when asked
 // together). Each answer is asked once a run (the parts share them); a finished season's (cacheable,
-// set per season) are kept in CACHE_DIR too
+// set per season) are kept in CACHE_DIR too, all but an empty one (a 404 or no rows: asked again next
+// run, not read back for good)
 let nextSlot = 0;
 let cacheable = false;
 const asked = new Map();
@@ -77,70 +79,72 @@ async function cached(url, as, keep) {
   const file = path.join(CACHE_DIR, createHash('sha1').update(url).digest('hex') + '.json');
   if (keep) {
     try {
-      return JSON.parse(await readFile(file, 'utf8')).body;
+      const { body } = JSON.parse(await readFile(file, 'utf8'));
+      // (one kept empty before that rule: asked again)
+      if (!emptyAnswer(body)) return body;
     } catch {
       // (not asked before)
     }
   }
   const body = await fetchPolitely(url, as);
-  if (keep) {
+  if (keep && !emptyAnswer(body)) {
     await mkdir(CACHE_DIR, { recursive: true });
     await writeFile(file, JSON.stringify({ url, body }));
   }
   return body;
 }
-async function fetchPolitely(url, as) {
-  for (let attempt = 1; ; attempt++) {
+const emptyAnswer = (body) => body == null || body === '' || (Array.isArray(body.data) && !body.data.length);
+// (a 404: null; rate-limited, a 429: wait as long as the API asks, then try again: libs/ranker/scripts/fetch.mjs)
+function fetchPolitely(url, as) {
+  const before = async () => {
     const slot = Math.max(nextSlot, Date.now());
     nextSlot = slot + 350;
     if (slot > Date.now()) await new Promise((r) => setTimeout(r, slot - Date.now()));
-    try {
-      const res = await fetch(url, { headers: { 'User-Agent': 'sports-ranker data script' } });
-      if (res.status === 404) return null;
-      // (rate-limited: wait as long as the API asks, then try again)
-      if (res.status === 429 && attempt < 5) {
-        await new Promise((r) => setTimeout(r, (Number(res.headers.get('retry-after')) || 30) * 1000));
-        continue;
-      }
-      if (!res.ok) throw new Error(`${res.status} for ${url}`);
-      return as === 'json' ? await res.json() : await res.text();
-    } catch (err) {
-      if (attempt >= 3) throw err;
-      await new Promise((r) => setTimeout(r, 3000 * attempt));
-    }
-  }
+  };
+  return fetchRetry(url, { as, headers: { 'User-Agent': 'sports-ranker data script' }, attempts: 3, backoff: 3000, notFound: null, rateLimit: 4, before });
 }
 
-// Every listed player's game log this season, regular season and playoffs (from April on), newest first:
+// Every listed player's game log this season, regular season and playoffs, newest first:
 // { id: [[date, "@ TOR", result, ...the line], ...] } in game-logs/<season>/ (game-log-files.mjs: split so
 // a card loads only its share). One at a time at get()'s pace (the API rate-limits faster asking); a
 // player whose log already has every game he's played (no new ones since the last run) is kept as it was,
-// not asked again: on a game night about a third of them are asked, in the offseason none
-async function writeGameLogs(season, skaters, goalies) {
+// not asked again: on a game night about a third of them are asked, in the offseason none.
+// His playoff games come from the games' own type (the stats API's playoff reports, gameTypeId=3, and
+// the playoff game logs), not the calendar: a log keeps its playoff games through the summer.
+// (which logs to keep and which game types to ask: gameLogPlan, game-log-files.mjs)
+async function writeGameLogs(season, skaters, goalies, postGames) {
   const root = path.join(STATIC, 'game-logs');
   const before = readLogFiles(root, season);
   const players = [...skaters.map((u) => [u.id, false, u.games]), ...goalies.map((u) => [u.id, true, u.games])];
   const logs = {};
   // (each player's playoff games: the newest of his log, set apart on the card)
   const playoffGames = {};
-  const playoffs = new Date().getMonth() >= 3 && new Date().getMonth() <= 5;
   let kept = 0;
   const one = async ([id, goalie, played]) => {
     const known = before.logs[id];
-    if (!playoffs && !before.playoffs[id] && played > 0 && known?.length === played) {
+    const knownPlayoffs = before.playoffs[id] ?? 0;
+    const plan = gameLogPlan({ played, known, knownPlayoffs, postGames: postGames?.get(id) ?? (postGames ? 0 : null) });
+    const keepKnown = () => {
       logs[id] = known;
+      if (knownPlayoffs) playoffGames[id] = knownPlayoffs;
+    };
+    if (plan.keep) {
+      keepKnown();
       kept++;
       return;
     }
     const games = [];
-    for (const type of playoffs ? [3, 2] : [2]) {
+    let failed = false;
+    for (const type of plan.types) {
       const body = await get(`${WEB}/player/${id}/game-log/${seasonId(season)}/${type}`).catch(() => null);
+      if (!body) failed = true;
       if (type === 3 && body?.gameLog?.length) playoffGames[id] = body.gameLog.length;
       games.push(...(body?.gameLog ?? []));
     }
-    // (none came back, the API refusing: his log as it was, rather than none)
-    if (!games.length) {
-      if (known) logs[id] = known;
+    // (none came back, or a part of it didn't, the API refusing: his log as it was, rather than less)
+    if (!games.length || (failed && known)) {
+      delete playoffGames[id];
+      if (known) keepKnown();
       return;
     }
     games.sort((a, b) => b.gameDate.localeCompare(a.gameDate));
@@ -316,6 +320,14 @@ async function rookies(season, bios, kind) {
   return out;
 }
 
+// A season's skaters' playoff rows (the stats API's gameTypeId=3 report): [] when the API answers with no
+// rows (no playoff games yet), null when it doesn't answer as it should (a failure, a 404, no data list)
+async function playoffRows(season) {
+  const exp = encodeURIComponent(`seasonId=${seasonId(season)} and gameTypeId=3`);
+  const body = await get(`${STATS}/skater/summary?limit=-1&cayenneExp=${exp}`).catch(() => null);
+  return Array.isArray(body?.data) ? body.data : null;
+}
+
 // A season's part (PARTS): the regular season, the playoffs or both. Who won what, the rookies, the
 // teams' names and logos and the head coaches' stints are the season's either way; the games counted
 // are the part's
@@ -323,11 +335,15 @@ async function buildSeason(season, part = 'regular') {
   const current = season === CURRENT_SEASON;
   const dir = current ? STATIC : path.join(STATIC, 'seasons', String(season));
   const file = path.join(dir, PARTS[part].file);
-  // (no playoff games yet: no playoffs or both, and the current season's left from last year removed)
-  if (part !== 'regular' && !(await report('skater/summary', season, 3)).length) {
-    if (current) await rm(file, { force: true });
-    console.log(`${season} ${part}: no playoff games yet, no ${PARTS[part].file}`);
-    return;
+  // (no playoff games yet: no playoffs or both, and the current season's left from last year removed;
+  // only on the API's own word, an answer with no rows: a failed or empty answer keeps the file)
+  if (part !== 'regular') {
+    const playoffs = await playoffRows(season);
+    if (!playoffs?.length) {
+      if (playoffs && current) await rm(file, { force: true });
+      console.log(`${season} ${part}: ${playoffs ? 'no playoff games yet' : 'the playoff report failed'}, no ${PARTS[part].file} written`);
+      return;
+    }
   }
   const [skaters, realtime, faceoffs, skaterBios, goalies, goalieBios, teams, awardRows, teamList] = await Promise.all([
     partReport('skater/summary', season, part),
@@ -565,7 +581,12 @@ async function buildSeason(season, part = 'regular') {
   // (compact: the files are served to the browser as is)
   await writeFile(file, JSON.stringify(out));
   // (this season's game logs, for the card's Game Log tab: the NHL's API doesn't let the site ask it)
-  if (current && part === 'regular') await writeGameLogs(season, skaterRows, out.G);
+  if (current && part === 'regular') {
+    // (each player's playoff games, from the playoff reports: null when they fail)
+    const post = await Promise.all([playoffRows(season), report('goalie/summary', season, 3).catch(() => null)]);
+    const postGames = post.every(Array.isArray) ? new Map(post.flat().map((r) => [r.playerId, r.gamesPlayed ?? 0])) : null;
+    await writeGameLogs(season, skaterRows, out.G, postGames);
+  }
   // (each team against forwards and defensemen, from the season's game logs: vs-position.mjs; on its coaches' rows)
   addVsPosition(dir, path.join(STATIC, 'game-logs'), season, [part]);
   const champion = [...teamAwards].find(([, a]) => a.includes('cup'))?.[0] ?? '?';

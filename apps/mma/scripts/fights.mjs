@@ -9,6 +9,7 @@
 // round), method, fighters: [{ id, name, winner }, ...] }
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import path from 'node:path';
+import { fetchRetry } from '../../../libs/ranker/scripts/fetch.mjs';
 
 const DIR = path.join(import.meta.dirname, 'fights');
 const SITE = 'https://site.api.espn.com/apis/site/v2/sports/mma';
@@ -53,23 +54,14 @@ export function methodCode(name) {
   return m ? m.toUpperCase().slice(0, 12) : '?';
 }
 
-// A polite pace (several requests in flight, a few a second each), with retries
+// A polite pace (several requests in flight, a few a second each), with retries (libs/ranker/scripts/fetch.mjs;
+// a 404: null)
 let gate = Promise.resolve();
 async function get(url) {
   const turn = gate.then(() => new Promise((r) => setTimeout(r, 40)));
   gate = turn;
   await turn;
-  for (let attempt = 1; ; attempt++) {
-    try {
-      const res = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0 (sports-ranker data script)' } });
-      if (res.status === 404) return null;
-      if (!res.ok) throw new Error(`${res.status} for ${url}`);
-      return await res.json();
-    } catch (err) {
-      if (attempt >= 4) throw err;
-      await new Promise((r) => setTimeout(r, 2000 * attempt));
-    }
-  }
+  return fetchRetry(url, { as: 'json', headers: { 'User-Agent': 'Mozilla/5.0 (sports-ranker data script)' }, attempts: 4, backoff: 2000, notFound: null });
 }
 
 async function readJson(file, fallback) {
@@ -117,6 +109,12 @@ async function yearOf(league, year, kept) {
     );
   }
   for (const f of out) delete f.eventId;
+  // (a scoreboard that came back with nothing (a 404, or no events) where fights were kept: the kept year,
+  // not an empty one written over it)
+  if (!out.length && kept.length) {
+    console.warn(`${league} ${year}: the scoreboard came back empty, the ${kept.length} fights kept stand`);
+    return kept;
+  }
   return out;
 }
 

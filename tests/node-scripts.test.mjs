@@ -40,3 +40,16 @@ for (const sport of SPORTS) {
     assert.ok(rows > 0, `${sport}: no rows built`);
   });
 }
+
+// The nightly data scripts fetch through the one shared helper (libs/ranker/scripts/fetch.mjs: a timeout on
+// each try, retries), never fetch() bare: a source that hangs can't hold the run
+test('the data scripts fetch through libs/ranker/scripts/fetch.mjs, with its timeout', () => {
+  const scripts = [...SPORTS.map((sport) => `apps/${sport}/scripts/update-data.mjs`), 'apps/mma/scripts/fights.mjs'];
+  for (const script of scripts) {
+    const file = path.join(ROOT, script);
+    if (!fs.existsSync(file)) continue;
+    const source = fs.readFileSync(file, 'utf8');
+    assert.match(source, /import \{ fetchRetry \} from '\.\.\/\.\.\/\.\.\/libs\/ranker\/scripts\/fetch\.mjs';/, `${script}: not on the shared fetch`);
+    assert.doesNotMatch(source, /(^|[^.\w])fetch\(/m, `${script}: a bare fetch()`);
+  }
+});

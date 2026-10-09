@@ -28,6 +28,8 @@ import { createHash } from 'node:crypto';
 import path from 'node:path';
 import { curve } from '../../../libs/ranker/scripts/grades.mjs';
 import { blendWithLastSeason } from '../../../libs/ranker/scripts/early-season.mjs';
+import { carryForward, previousRows, previousTab, sameSeason } from '../../../libs/ranker/scripts/carry-forward.mjs';
+import { fetchRetry } from '../../../libs/ranker/scripts/fetch.mjs';
 
 const CURRENT_SEASON = 2026;
 const FIRST_SEASON = 2000;
@@ -73,39 +75,42 @@ async function limited(fn) {
 // Whether the season being built is a finished one, whose responses can come from the cache
 let cacheOn = false;
 
-// A URL's body, with retries; a finished season's from (and to) the cache
-async function text(url) {
+// A URL's body, with retries (libs/ranker/scripts/fetch.mjs); a finished season's from (and to) the
+// cache. Only a body valid() passes is kept (an empty or error answer is asked again next run, not
+// read back for good; one kept before this check is passed over the same way).
+const filled = (body) => body.trim().length > 0;
+async function text(url, valid = filled) {
   const file = cacheOn ? path.join(CACHE, `${createHash('sha1').update(url).digest('hex')}.txt`) : null;
   if (file) {
-    try {
-      return await readFile(file, 'utf8');
-    } catch {}
+    const kept = await readFile(file, 'utf8').catch(() => null);
+    if (kept !== null && valid(kept)) return kept;
   }
-  for (let attempt = 1; ; attempt++) {
-    try {
-      const body = await limited(async () => {
-        const res = await fetch(url);
-        if (!res.ok) throw new Error(`${res.status} for ${url}`);
-        return res.text();
-      });
-      if (file) {
-        await mkdir(CACHE, { recursive: true });
-        await writeFile(file, body);
-      }
-      return body;
-    } catch (err) {
-      if (attempt >= 3) throw err;
-      await new Promise((r) => setTimeout(r, 1500 * attempt));
-    }
+  const body = await limited(() => fetchRetry(url, { backoff: 1500 }));
+  if (file && valid(body)) {
+    await mkdir(CACHE, { recursive: true });
+    await writeFile(file, body);
   }
+  return body;
 }
 
-const json = async (url) => JSON.parse(await text(url));
+const isJson = (body) => {
+  try {
+    JSON.parse(body);
+    return true;
+  } catch {
+    return false;
+  }
+};
+const json = async (url) => JSON.parse(await text(url, isJson));
+// (a Savant CSV: its header names the player_id column; an error page doesn't)
+const isCsv = (body) => /\bplayer_id\b/.test(body.split('\n', 1)[0]);
 
-// A Savant leaderboard CSV as rows keyed by column, by MLBAM id (missing or empty: none)
+// A Savant leaderboard CSV as rows keyed by column, by MLBAM id; null when it fails (no CSV came back:
+// the columns it gives are then carried from the last good run: carryFailed)
 async function savant(url) {
   try {
-    const body = (await text(url)).replace(/^﻿/, '');
+    const body = (await text(url, isCsv)).replace(/^﻿/, '');
+    if (!isCsv(body)) return null;
     const lines = body.trim().split('\n');
     const split = (line) => {
       const out = [];
@@ -130,7 +135,7 @@ async function savant(url) {
     }
     return rows;
   } catch {
-    return new Map();
+    return null;
   }
 }
 
@@ -142,6 +147,7 @@ async function savantSearch(season, gameTypes, playerType) {
     `https://baseballsavant.mlb.com/statcast_search/csv?all=true&hfGT=${gameTypes.map((t) => `${t}%7C`).join('')}&hfSea=${season}%7C` +
     `&player_type=${playerType}&group_by=name&min_pitches=0&min_results=0&min_pas=0&sort_col=pitches&sort_order=desc`;
   const rows = await savant(url);
+  if (!rows) return null;
   return new Map(
     [...rows].map(([id, r]) => {
       const swings = num(r.swings);
@@ -169,16 +175,17 @@ const innings = (ip) => {
 };
 
 // Each team's home park run factor (100 = average; higher is friendlier to hitters), a three-year
-// rolling average from Baseball Savant's park factors (embedded in its page), by team id
+// rolling average from Baseball Savant's park factors (embedded in its page), by team id; null when
+// the page fails (the teams' park factors are then the last good run's: buildSeason)
 async function parkFactors(season) {
   try {
     const url = `https://baseballsavant.mlb.com/leaderboard/statcast-park-factors?type=year&year=${season}&batSide=&stat=index_wOBA&condition=All&rolling=3`;
-    const html = await text(url);
+    const html = await text(url, (body) => /var data = \[/.test(body));
     const match = html.match(/var data = (\[.*?\]);/s);
-    if (!match) return new Map();
+    if (!match) return null;
     return new Map(JSON.parse(match[1]).map((row) => [Number(row.main_team_id), Number(row.index_runs)]));
   } catch {
-    return new Map();
+    return null;
   }
 }
 
@@ -359,11 +366,20 @@ function computedSabermetrics(hitting, pitching, k) {
   return { sabH, sabP };
 }
 
+// The award winners by player id; out.failed: the badges whose list didn't load (theirs are then the last
+// good run's: carryFailed)
 async function awardsFor(season) {
   const out = new Map();
+  out.failed = new Set();
   for (const [badge, ids] of Object.entries(AWARDS)) {
     for (const id of ids) {
-      const list = (await json(`${API}/awards/${id}/recipients?season=${season}`).catch(() => ({}))).awards ?? [];
+      const list =
+        (
+          await json(`${API}/awards/${id}/recipients?season=${season}`).catch(() => {
+            out.failed.add(badge);
+            return {};
+          })
+        ).awards ?? [];
       for (const a of list) {
         const pid = a.player?.id;
         if (!pid) continue;
@@ -375,13 +391,21 @@ async function awardsFor(season) {
   return out;
 }
 
-// Players on a team's injured list right now (this season only)
+// Players on a team's injured list right now (this season only); out.failed: the teams whose roster
+// didn't load (their players' injuries are then the last good run's: carryFailed)
 async function injuredList() {
   const teams = (await json(`${API}/teams?sportId=1&season=${CURRENT_SEASON}`)).teams ?? [];
   const out = new Map();
+  out.failed = new Set();
   await Promise.all(
     teams.map(async (team) => {
-      const roster = (await json(`${API}/teams/${team.id}/roster?rosterType=40Man&season=${CURRENT_SEASON}`).catch(() => ({}))).roster ?? [];
+      const roster =
+        (
+          await json(`${API}/teams/${team.id}/roster?rosterType=40Man&season=${CURRENT_SEASON}`).catch(() => {
+            out.failed.add(team.id);
+            return {};
+          })
+        ).roster ?? [];
       for (const r of roster) {
         if (/^D\d/.test(r.status?.code ?? '')) out.set(r.person.id, r.status.description);
       }
@@ -390,7 +414,16 @@ async function injuredList() {
   return out;
 }
 
+// A Savant source that failed (null) as none, its columns (the rows' stats) noted in failed: carried
+// from the last good run (carryFailed)
+function orNone(rows, failed, ...keys) {
+  if (rows) return rows;
+  for (const key of keys) failed.add(key);
+  return new Map();
+}
+
 // The regular season's sources: the Stats API's stats and sabermetrics, Savant's leaderboards
+// (failed: the Statcast columns whose source failed)
 async function regularSources(season) {
   const [hitting, pitching, sabH, sabP, fielding] = await Promise.all([
     statsFor(season, 'hitting', 'season'),
@@ -401,6 +434,7 @@ async function regularSources(season) {
   ]);
   // Statcast (2015 on)
   const statcast = season >= 2015;
+  const failed = new Set();
   const [xBat, xPit, scBat, scPit, sprint, pitchCustom] = statcast
     ? await Promise.all([
         savant(`${SAVANT}/expected_statistics?type=batter&year=${season}&position=&team=&min=1&csv=true`),
@@ -416,7 +450,22 @@ async function regularSources(season) {
     season >= 2016
       ? await savant(`${SAVANT}/outs_above_average?type=Fielder&startYear=${season}&endYear=${season}&split=no&team=&range=year&min=1&pos=&roles=&viz=hide&csv=true`)
       : new Map();
-  return { hitting, pitching, sabH, sabP, fieldingSplits: fielding, fielding: fieldingOf(fielding), xBat, xPit, scBat, scPit, sprint, pitchCustom, oaa };
+  return {
+    hitting,
+    pitching,
+    sabH,
+    sabP,
+    fieldingSplits: fielding,
+    fielding: fieldingOf(fielding),
+    xBat: orNone(xBat, failed, 'xwoba'),
+    xPit: orNone(xPit, failed, 'xera', 'xwobaAllowed'),
+    scBat: orNone(scBat, failed, 'barrelPct', 'hardHitPct'),
+    scPit: orNone(scPit, failed, 'hardHitAllowed', 'barrelAllowed'),
+    sprint: orNone(sprint, failed, 'sprintSpeed'),
+    pitchCustom: orNone(pitchCustom, failed, 'whiffPct'),
+    oaa: orNone(oaa, failed, 'oaa'),
+    failed,
+  };
 }
 
 // The postseason's counts (none yet: null)
@@ -434,8 +483,12 @@ async function postCounts(season) {
 async function partSources(season, part, counts, constants) {
   const { hitting, pitching, fieldingSplits: fielding } = counts;
   const types = part === 'post' ? POST_TYPES : ['R', ...POST_TYPES];
-  const [bat, pit] = season >= 2015 ? await Promise.all([savantSearch(season, types, 'batter'), savantSearch(season, types, 'pitcher')]) : [new Map(), new Map()];
+  const [batRows, pitRows] = season >= 2015 ? await Promise.all([savantSearch(season, types, 'batter'), savantSearch(season, types, 'pitcher')]) : [new Map(), new Map()];
+  const failed = new Set();
+  const bat = orNone(batRows, failed, 'xwoba', 'barrelPct', 'hardHitPct');
+  const pit = orNone(pitRows, failed, 'xwobaAllowed', 'whiffPct', 'hardHitAllowed', 'barrelAllowed');
   return {
+    failed,
     hitting,
     pitching,
     ...computedSabermetrics(hitting, pitching, constants),
@@ -453,13 +506,22 @@ async function partSources(season, part, counts, constants) {
 async function buildSeason(season) {
   const current = season === CURRENT_SEASON;
   cacheOn = !current && process.env.CACHE !== '0';
-  const [regular, awards, injured, parks, teams] = await Promise.all([
+  const dir = current ? STATIC : path.join(STATIC, 'seasons', String(season));
+  const fileOf = (part) => path.join(dir, part === 'regular' ? 'skill-players.json' : `skill-players.${part}.json`);
+  const [regular, awards, injured, parkRows, teams] = await Promise.all([
     regularSources(season),
     awardsFor(season),
     current ? injuredList() : Promise.resolve(new Map()),
     parkFactors(season),
     teamSources(season),
   ]);
+  // (Savant's park factors didn't load: the teams' as the last good run had them)
+  const parks =
+    parkRows ??
+    new Map(
+      (await previousTab(fileOf('regular'), 'TM')).filter((t) => t.stats?.parkFactor != null).map((t) => [Number(t.gsisId.slice(3)), t.stats.parkFactor]),
+    );
+  if (!parkRows) console.warn(`${season}: park factors failed, ${parks.size} teams' kept from the last run`);
   const ctx = { season, current, awards, injured, parks, teams };
   const sources = { regular };
   if (PARTS.some((p) => p !== 'regular')) {
@@ -480,16 +542,55 @@ async function buildSeason(season) {
       }
     }
   }
-  const dir = current ? STATIC : path.join(STATIC, 'seasons', String(season));
   await mkdir(dir, { recursive: true });
   for (const part of PARTS) {
     if (!sources[part]) continue;
     const out = await buildRows(sources[part], part, ctx);
-    const file = part === 'regular' ? 'skill-players.json' : `skill-players.${part}.json`;
+    const file = fileOf(part);
+    carryFailed(out, await previousRows(file), sources[part].failed, { season, part, awards, injured, schedule: teams.schedule });
     // (compact: the files are served to the browser as is)
-    await writeFile(path.join(dir, file), JSON.stringify(out));
+    await writeFile(file, JSON.stringify(out));
     console.log(`${season} ${part}: ${[...TABS, 'TM'].map((t) => `${out[t].length} ${t}`).join(', ')}`);
   }
+}
+
+// What a failed source gives, carried from the part's last good file (libs/ranker/scripts/carry-forward)
+// into its rows, in place: the Statcast columns whose Savant source failed (failed), the badges of an
+// award list that didn't load, the injuries of a team whose roster didn't, and the teams' schedule
+// figures (Recent and playoff wins; the playoffs' and both's whole Teams tab, their records summed from
+// the schedule). Only from a row of this season's (sameSeason: not the file the rollover left behind)
+function carryFailed(out, before, failed, { season, part, awards, injured, schedule }) {
+  const players = TABS.flatMap((t) => out[t]);
+  const notes = [];
+  if (failed?.size) notes.push(`${carryForward(players, before, { stats: [...failed], keep: sameSeason })} rows' ${[...failed].join(', ')}`);
+  if (awards.failed.size) {
+    const n = carryForward(players, before, {
+      keep: sameSeason,
+      take: (row, prev) => {
+        const add = (prev.awards ?? []).filter((b) => awards.failed.has(b) && !row.awards.includes(b));
+        row.awards.push(...add);
+        return add.length > 0;
+      },
+    });
+    notes.push(`${n} rows' ${[...awards.failed].join(', ')} awards`);
+  }
+  if (injured.failed?.size) {
+    const teamOf = (row) => Number(row.teamLogo?.split('/').pop().replace('.svg', ''));
+    const n = carryForward(players, before, {
+      keep: (row, prev) => prev.injured && !row.injured && injured.failed.has(teamOf(prev)),
+      fields: ['injured', 'injuryStatus'],
+    });
+    notes.push(`${n} injuries (${injured.failed.size} rosters failed)`);
+  }
+  if (!schedule) {
+    const teams = before.filter((r) => r.gsisId?.startsWith('TM-'));
+    if (part === 'regular') notes.push(`${carryForward(out.TM, teams, { fields: ['lastFive', 'lastFiveVs'], stats: ['playoffWins'], keep: sameSeason })} teams' Recent`);
+    else if (teams.length) {
+      out.TM = teams;
+      notes.push('the Teams tab as it was');
+    }
+  }
+  if (notes.length) console.warn(`${season} ${part}: sources failed, kept from the last run: ${notes.join('; ')}`);
 }
 
 // A part's rows, every tab
@@ -664,12 +765,14 @@ async function teamSources(season) {
     teamStats('hitting', 'P').catch(() => new Map()),
     teamStats('pitching', 'P').catch(() => new Map()),
     // (every game, the regular season's and the postseason's: postseason wins, and the last five)
-    json(`${API}/schedule?sportId=1&season=${season}&gameType=R,${POST_TYPES.join(',')}`).catch(() => ({ dates: [] })),
+    // (null when it fails: the teams' schedule figures are then the last good run's, carryFailed)
+    json(`${API}/schedule?sportId=1&season=${season}&gameType=R,${POST_TYPES.join(',')}`).catch(() => null),
   ]);
   return { standings, hitting, pitching, postHitting, postPitching, schedule };
 }
 
 function teamRows({ standings, hitting, pitching, postHitting, postPitching, schedule }, part, teamDef, parks, logo) {
+  schedule ??= { dates: [] };
   const batting = part === 'regular' ? hitting : part === 'post' ? postHitting : mergeSplits(hitting, postHitting);
   const staff = part === 'regular' ? pitching : part === 'post' ? postPitching : mergeSplits(pitching, postPitching);
   const ops = new Map([...batting].map(([id, s]) => [id, num(s.stat.ops)]));

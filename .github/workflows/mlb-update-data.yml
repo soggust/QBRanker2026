@@ -21,6 +21,8 @@ permissions:
 jobs:
   update:
     runs-on: ubuntu-latest
+    # (a hung source stops the run, not six hours: the runs take 1-15 minutes)
+    timeout-minutes: 45
 
     steps:
       - name: Checkout repository

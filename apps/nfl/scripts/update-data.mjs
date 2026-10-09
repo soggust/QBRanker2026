@@ -38,6 +38,7 @@
 import { mkdir, readFile, rm, stat, writeFile } from 'node:fs/promises';
 import { pathToFileURL } from 'node:url';
 import { gunzipSync } from 'node:zlib';
+import { fetchRetry } from '../../../libs/ranker/scripts/fetch.mjs';
 import { defenseVsPosition } from './defense-vs-position.mjs';
 
 const CURRENT_SEASON = 2026;
@@ -75,17 +76,11 @@ const inPart = (part, type) => part === 'all' || (part === 'regular') === (type 
 // nflverse's season player stats file for a part
 const PLAYER_STATS = { regular: 'reg', post: 'post', all: 'regpost' };
 
+// (with retries and a timeout: libs/ranker/scripts/fetch.mjs)
 async function getJson(url, attempts = 3) {
-  for (let i = 1; ; i++) {
-    try {
-      const res = await fetch(url);
-      if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
-      return await res.json();
-    } catch (err) {
-      if (i >= attempts) throw new Error(`Failed to fetch ${url}: ${err.message}`);
-      await new Promise((r) => setTimeout(r, 1000 * i));
-    }
-  }
+  return fetchRetry(url, { as: 'json', attempts, backoff: 1000 }).catch((err) => {
+    throw new Error(`Failed to fetch ${url}: ${err.message.replace(` for ${url}`, '')}`);
+  });
 }
 
 // Map in small batches so we don't hammer ESPN
@@ -146,10 +141,11 @@ async function download(url) {
     const age = await stat(file).then((s) => Date.now() - s.mtimeMs, () => null);
     if (age !== null && (file.pathname.includes(`_${SEASON}.`) || age < FRESH_HOURS * 36e5)) return readFile(file);
   }
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`${res.status} ${res.statusText} for ${url}`);
-  const body = Buffer.from(await res.arrayBuffer());
-  if (PAST_SEASON) {
+  // (one try, as before, but held to a timeout: libs/ranker/scripts/fetch.mjs; the big play-by-play files
+  // get longer)
+  const body = await fetchRetry(url, { as: 'buffer', attempts: 1, timeout: 300000 });
+  // (an empty download isn't kept: asked again)
+  if (PAST_SEASON && body.length) {
     await mkdir(DOWNLOAD_CACHE, { recursive: true });
     await writeFile(file, body);
   }
@@ -1315,10 +1311,11 @@ const ESPN_CACHE = new URL(`../../../.cache/nfl-espn/${SEASON}.json`, import.met
 const espnCache = PAST_SEASON
   ? await readFile(ESPN_CACHE, 'utf8').then((text) => new Map(Object.entries(JSON.parse(text))), () => new Map())
   : new Map();
+// (an empty list isn't kept: asked again next run rather than read back for good)
 async function espnCached(key, fn) {
-  if (espnCache.has(key)) return espnCache.get(key);
+  if (espnCache.has(key) && !(Array.isArray(espnCache.get(key)) && !espnCache.get(key).length)) return espnCache.get(key);
   const value = await fn();
-  if (PAST_SEASON) espnCache.set(key, value);
+  if (PAST_SEASON && !(Array.isArray(value) && !value.length)) espnCache.set(key, value);
   return value;
 }
 async function saveEspnCache() {
@@ -1389,16 +1386,9 @@ async function qbBoxStats(id, part) {
 function espnSeasonTotals(id, type) {
   return espnCached(`stats.${type}.${id}`, async () => {
     const url = `https://sports.core.api.espn.com/v2/sports/football/leagues/nfl/seasons/${SEASON}/types/${type}/athletes/${id}/statistics`;
-    // (a failed call tried again, a few seconds apart; a 404 is an answer)
-    let res;
-    for (let i = 1; ; i++) {
-      res = await fetch(url).catch((err) => ({ ok: false, status: 0, statusText: err.message }));
-      if (res.ok || res.status === 404 || i >= 3) break;
-      await new Promise((r) => setTimeout(r, 1000 * i));
-    }
-    if (res.status === 404) return null;
-    if (!res.ok) throw new Error(`${res.status} ${res.statusText} for ${url}`);
-    const data = await res.json();
+    // (a failed call tried again, a few seconds apart; a 404 is an answer: libs/ranker/scripts/fetch.mjs)
+    const data = await fetchRetry(url, { as: 'json', backoff: 1000, notFound: null });
+    if (data === null) return null;
     const stat = (category, name) =>
       data.splits.categories.find((c) => c.name === category)?.stats.find((s) => s.name === name)?.value ?? 0;
     return {
