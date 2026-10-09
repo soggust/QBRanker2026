@@ -503,7 +503,8 @@
 }
 
 // (sides on different tabs: what lines up, said once over the tab)
-// (different positions: a word in orange, how they line up in a popover on hover or focus)
+// (different positions: a word in orange in the hero's top strip, how they line up in a popover on hover or
+// focus)
 .cmp-mixed {
   align-items: center;
   color: #ffa74d;
@@ -512,11 +513,15 @@
   font-size: 12px;
   font-weight: 800;
   gap: 5px;
+  left: 22px;
   letter-spacing: 0.4px;
-  margin: 0 0 12px;
+  margin: 0;
   outline: none;
-  position: relative;
+  // (in the top strip, level with the share and close buttons)
+  position: absolute;
   text-transform: uppercase;
+  top: 14px;
+  z-index: 3;
 
   .mat-icon {
     @include v.icon-size(16px);
@@ -1181,6 +1186,14 @@
 @media (max-width: 760px) {
   .compare-hero {
     padding: 44px 14px 14px;
+  }
+
+  .cmp-mixed {
+    left: 14px;
+  }
+
+  .cmp-mixed-pop {
+    width: min(300px, calc(100vw - 60px));
   }
 
   .tapes {

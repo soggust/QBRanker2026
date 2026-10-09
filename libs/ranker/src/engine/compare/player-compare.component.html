@@ -5,6 +5,16 @@
   <div class="card-backdrop" [class.suspended]="games.game" (click)="compare.close()"></div>
   <div class="player-card compare-card" [class.suspended]="games.game" role="dialog" aria-modal="true" dialogFocus aria-label="Compare">
     <header class="compare-hero">
+      <!-- (different positions: said once in the top strip, how they line up in a popover on hover or focus) -->
+      @if (v?.mixed) {
+        <p class="cmp-mixed" tabindex="0" aria-describedby="cmp-mixed-pop"
+          ><mat-icon fontIcon="info" aria-hidden="true"></mat-icon>Different positions<span class="cmp-mixed-pop" id="cmp-mixed-pop" role="tooltip"
+            >Each skill is where he stood among his own position, so each position's skills are their own rows, tagged with it, and only players at
+            that position lead them. A stat column they share goes to the bigger number; the bar under each value is where he stood among his own
+            position.</span
+          ></p
+        >
+      }
       <div class="card-controls">
         <!-- (a link that opens this comparison, the sides and the tab: share.ts) -->
         @if (share && sides.length) {
@@ -141,18 +151,11 @@
       @if (!v) {
         <p class="compare-empty">
           Search above, or click rows in the grid to pick them, then compare.
-          <small>Each one is read against {{ careerOnly ? 'the rest of the list' : 'his own season’s league' }}, ranked with your sliders.</small>
         </p>
       } @else {
         @switch (compare.tab) {
           @case ('overview') {
             <!-- Skills: every side's shape on one radar (the skills they share), and each skill's bars -->
-            @if (v.mixed) {
-              <!-- (different positions: said in a word, how they line up in a popover on hover or focus) -->
-              <p class="cmp-mixed" tabindex="0" [attr.aria-describedby]="'cmp-mixed-pop'"
-                ><mat-icon fontIcon="swap_horiz" aria-hidden="true"></mat-icon>Different positions<span class="cmp-mixed-pop" id="cmp-mixed-pop" role="tooltip">Each skill is where he stood among his own position, so each position's skills are its own rows (tagged with the position) and a player only leads the others at his position.</span></p
-              >
-            }
             <div class="cmp-top">
               @if (v.radar; as r) {
                 <div class="ov-radar cmp-radar">
@@ -271,12 +274,6 @@
                   </li>
                 }
               </ul>
-            }
-            @if (v.mixed) {
-              <!-- (different positions: said in a word, how they line up in a popover on hover or focus) -->
-              <p class="cmp-mixed" tabindex="0" [attr.aria-describedby]="'cmp-mixed-pop'"
-                ><mat-icon fontIcon="swap_horiz" aria-hidden="true"></mat-icon>Different positions<span class="cmp-mixed-pop" id="cmp-mixed-pop" role="tooltip">A column they share goes to the bigger number; the bar under each value is where he stood among his own position.</span></p
-              >
             }
             <div class="cmp-stats" [style.--sides]="sides.length">
               <div class="cmp-row cmp-head">
