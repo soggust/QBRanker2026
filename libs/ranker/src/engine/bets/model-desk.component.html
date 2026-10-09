@@ -15,16 +15,19 @@
 </ng-template>
 
 <!-- (a bet's game: each team's logo beside its abbreviation, away @ home) -->
-<ng-template #gameCell let-b>
+<ng-template #gameCell let-b let-when="when">
   @let teams = teamsOf(b);
   <span class="desk-game">
     <img [src]="teamLogo(b.sport, teams[0])" alt="" (error)="hide($event)" />{{ teams[0] }}<span class="desk-at">@</span><img [src]="teamLogo(b.sport, teams[1])" alt="" (error)="hide($event)" />{{ teams[1] }}
   </span>
+  @if (when) {
+    <small class="desk-when">{{ b.start | date: when }}</small>
+  }
 </ng-template>
 
 <!-- (a bet's pick, led by a circle: a prop's player (his headshot and name linking to his ESPN page in a new
-     tab), a total's arrow (up for the over, down for the under), a side's team; the market and whether it's an
-     action bet under it) -->
+     tab), a total's arrow (up for the over, down for the under), a side's team; whether it's an action bet
+     under it, if it is one) -->
 <ng-template #pickCell let-b>
   @if (b.market === 'prop' && b.athlete !== undefined && b.player) {
     <span class="desk-pick">
@@ -43,7 +46,9 @@
       <b>{{ b.pick }}</b>
     </span>
   }
-  <small>{{ marketName(b.market) }}{{ intentOf(b) === 'action' ? ' · action' : '' }}</small>
+  @if (intentOf(b) === 'action') {
+    <small [title]="help['intent']">action</small>
+  }
 </ng-template>
 
 <!-- (a breakdown's columns) -->
@@ -258,7 +263,7 @@
                 <ng-container *ngTemplateOutlet="th; context: { $implicit: 'live', key: 'odds', label: 'Odds' }"></ng-container>
                 <ng-container *ngTemplateOutlet="th; context: { $implicit: 'live', key: 'units', label: 'Units' }"></ng-container>
                 <th title="What it pays on top of the stake if it wins; once it's decided, what it came to (graded officially on the next run)">To win</th>
-                <th [title]="help['live']">Score</th>
+                <th [title]="help['live']">Result</th>
               </tr>
             </thead>
             <tbody>
@@ -277,10 +282,26 @@
                   } @else {
                     <td class="up">{{ units(toWin(b)) }}</td>
                   }
-                  <!-- (a prop: its count so far against the line, lit by how it stands; the game's score under it) -->
+                  <!-- (a prop: its meter (pips for a short count, a bar with the line notched for a big one), lit by how
+                       it stands, its count against the line, the game's score under it) -->
                   @if (b.market === 'prop' && propNow.get(b.id) !== undefined && propNow.get(b.id) !== null) {
                     @let state = propState(b);
+                    @let m = meter(b);
                     <td class="desk-score" [class.up]="state === 'won'" [class.down]="state === 'lost'" [title]="b.player + ': ' + propNow.get(b.id) + ' ' + b.statLabel + ' so far, ' + b.side + ' ' + b.line">
+                      @if (m) {
+                        <span class="desk-meter" [class.won]="state === 'won'" [class.lost]="state === 'lost'" [class.under]="b.side === 'under'" aria-hidden="true">
+                          @if (m.pips) {
+                            @for (pip of m.pips; track $index) {
+                              <span class="pip" [class.on]="pip.on" [class.past]="pip.past"></span>
+                            }
+                            @if (m.extra) {
+                              <span class="pip-extra">+{{ m.extra }}</span>
+                            }
+                          } @else {
+                            <span class="bar"><span class="fill" [style.width.%]="m.fill"></span><span class="mark" [style.left.%]="m.mark"></span></span>
+                          }
+                        </span>
+                      }
                       <b>{{ propNow.get(b.id) }} / {{ b.line }} {{ b.statLabel }}</b><small>{{ score?.text ?? 'Under way' }}</small>
                     </td>
                   } @else {
@@ -302,8 +323,7 @@
               <thead>
                 <tr>
                   <ng-container *ngTemplateOutlet="th; context: { $implicit: 'open', key: 'sport', label: 'Sport' }"></ng-container>
-                  <ng-container *ngTemplateOutlet="th; context: { $implicit: 'open', key: 'game', label: 'Game' }"></ng-container>
-                  <ng-container *ngTemplateOutlet="th; context: { $implicit: 'open', key: 'start', label: 'Starts' }"></ng-container>
+                  <ng-container *ngTemplateOutlet="th; context: { $implicit: 'open', key: 'start', label: 'Game', help: 'The game and when it starts' }"></ng-container>
                   <ng-container *ngTemplateOutlet="th; context: { $implicit: 'open', key: 'pick', label: 'Pick' }"></ng-container>
                   <ng-container *ngTemplateOutlet="th; context: { $implicit: 'open', key: 'odds', label: 'Odds' }"></ng-container>
                   <ng-container *ngTemplateOutlet="th; context: { $implicit: 'open', key: 'units', label: 'Units' }"></ng-container>
@@ -316,8 +336,7 @@
                 @for (b of sorted('open', open, betValue); track b.id) {
                   <tr>
                     <th><img class="desk-league" [src]="leagueLogo(b.sport)" [alt]="b.sport.toUpperCase()" [title]="b.sport.toUpperCase()" /></th>
-                    <td class="desk-left"><ng-container *ngTemplateOutlet="gameCell; context: { $implicit: b }"></ng-container></td>
-                    <td>{{ b.start | date: 'EEE h:mm a' }}</td>
+                    <td class="desk-left"><ng-container *ngTemplateOutlet="gameCell; context: { $implicit: b, when: 'EEE h:mm a' }"></ng-container></td>
                     <td class="desk-left" [title]="help['intent']"><ng-container *ngTemplateOutlet="pickCell; context: { $implicit: b }"></ng-container></td>
                     <td [title]="help['betBook']">{{ odds(b.odds) }}<small>{{ b.book }}{{ b.fairFrom === 'pinnacle' ? ' · Pinnacle fair' : '' }}</small></td>
                     <td>{{ b.units }}</td>
@@ -341,8 +360,7 @@
               <thead>
                 <tr>
                   <ng-container *ngTemplateOutlet="th; context: { $implicit: 'recent', key: 'sport', label: 'Sport' }"></ng-container>
-                  <ng-container *ngTemplateOutlet="th; context: { $implicit: 'recent', key: 'game', label: 'Game' }"></ng-container>
-                  <ng-container *ngTemplateOutlet="th; context: { $implicit: 'recent', key: 'start', label: 'Played' }"></ng-container>
+                  <ng-container *ngTemplateOutlet="th; context: { $implicit: 'recent', key: 'start', label: 'Game', help: 'The game and when it was played' }"></ng-container>
                   <ng-container *ngTemplateOutlet="th; context: { $implicit: 'recent', key: 'pick', label: 'Pick' }"></ng-container>
                   <ng-container *ngTemplateOutlet="th; context: { $implicit: 'recent', key: 'odds', label: 'Odds' }"></ng-container>
                   <ng-container *ngTemplateOutlet="th; context: { $implicit: 'recent', key: 'units', label: 'Units' }"></ng-container>
@@ -357,8 +375,7 @@
                 @for (b of sorted('recent', recent, betValue); track b.id) {
                   <tr>
                     <th><img class="desk-league" [src]="leagueLogo(b.sport)" [alt]="b.sport.toUpperCase()" [title]="b.sport.toUpperCase()" /></th>
-                    <td class="desk-left"><ng-container *ngTemplateOutlet="gameCell; context: { $implicit: b }"></ng-container></td>
-                    <td>{{ b.start | date: 'MMM d' }}</td>
+                    <td class="desk-left"><ng-container *ngTemplateOutlet="gameCell; context: { $implicit: b, when: 'MMM d' }"></ng-container></td>
                     <td class="desk-left"><ng-container *ngTemplateOutlet="pickCell; context: { $implicit: b }"></ng-container></td>
                     <td [title]="help['betBook']">{{ odds(b.odds) }}<small>{{ b.book }}{{ b.fairFrom === 'pinnacle' ? ' · Pinnacle fair' : '' }}</small></td>
                     <td>{{ b.units }}</td>

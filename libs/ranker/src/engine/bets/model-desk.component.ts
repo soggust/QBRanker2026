@@ -498,6 +498,26 @@ export class ModelDeskComponent implements OnInit, OnDestroy {
     return { count, profit };
   }
 
+  // A prop in play as a meter to cheer along with: a short count (carries, catches, TDs, shots, strikeouts)
+  // as a row of pips, one a unit up to the one past the line, lit as they come (the last one: the line
+  // crossed); a big one (yards, saves) as a bar with a notch at the line, filling as it goes
+  meter(b: ModelBet): { pips: { on: boolean; past: boolean }[] | null; fill: number; mark: number; extra: number } | null {
+    const now = this.propNow.get(b.id);
+    if (now === null || now === undefined || b.line === undefined) return null;
+    if (b.line <= 12.5) {
+      const count = Math.ceil(b.line);
+      return {
+        pips: Array.from({ length: count + 1 }, (_, i) => ({ on: i < now, past: i === count })),
+        fill: 0,
+        mark: 0,
+        extra: Math.max(0, now - count - 1),
+      };
+    }
+    // (the bar runs to a bit past the line, or to the count once it's past that)
+    const span = Math.max(b.line * 1.35, now);
+    return { pips: null, fill: Math.min(100, (now / span) * 100), mark: (b.line / span) * 100, extra: 0 };
+  }
+
   // (what a bet pays on top of its stake if it wins, at its American odds)
   toWin(b: ModelBet): number {
     return b.odds > 0 ? (b.units * b.odds) / 100 : (b.units * 100) / -b.odds;

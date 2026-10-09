@@ -508,3 +508,101 @@ card-panel {
 .desk-pick + small {
   padding-left: 38px;
 }
+
+// (a game's start, under it)
+.desk-when {
+  display: block;
+  margin-top: 3px;
+}
+
+// A prop in play's meter, over its count: pips for a short count (one a unit up to the line, lit as they come,
+// the last a ring: the line crossed), a bar with the line notched for a big one. The board's light while an
+// over climbs toward the line; amber while an under's count builds (the side to fear); green once it's won,
+// red once it's lost.
+.desk-meter {
+  --meter: var(--scoreboard-led);
+  align-items: center;
+  display: flex;
+  gap: 4px;
+  justify-content: flex-end;
+  margin-bottom: 5px;
+
+  &.under {
+    --meter: #f0b429;
+  }
+
+  &.won {
+    --meter: #{v.$good};
+  }
+
+  &.lost {
+    --meter: #{v.$bad};
+  }
+
+  .pip {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 50%;
+    height: 10px;
+    transition:
+      background 0.4s ease,
+      box-shadow 0.4s ease;
+    width: 10px;
+
+    &.on {
+      background: var(--meter);
+      border-color: transparent;
+      box-shadow: 0 0 6px color-mix(in srgb, var(--meter) 70%, transparent);
+    }
+
+    // (the line: crossed once it's lit)
+    &.past {
+      border: 2px solid rgba(255, 255, 255, 0.7);
+      height: 12px;
+      width: 12px;
+    }
+  }
+
+  .pip-extra {
+    color: var(--meter);
+    font-size: 10px;
+    font-weight: 900;
+  }
+
+  .bar {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 999px;
+    height: 8px;
+    position: relative;
+    width: 130px;
+  }
+
+  .fill {
+    background: linear-gradient(90deg, color-mix(in srgb, var(--meter) 55%, transparent), var(--meter));
+    border-radius: 999px;
+    bottom: 0;
+    box-shadow: 0 0 8px color-mix(in srgb, var(--meter) 55%, transparent);
+    left: 0;
+    position: absolute;
+    top: 0;
+    transition: width 0.8s ease;
+  }
+
+  // (the line)
+  .mark {
+    background: #fff;
+    border-radius: 1px;
+    bottom: -4px;
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.6);
+    position: absolute;
+    top: -4px;
+    width: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pip,
+    .fill {
+      transition: none;
+    }
+  }
+}
