@@ -151,6 +151,16 @@ $chalk-dust:
   color: #2e1705;
 }
 
+// Dark brushed gunmetal (the Bets page's slot machine, the Algorithm under its scoreboard): a soft sheen
+// down the middle, the metal's fine horizontal brushing
+@mixin gunmetal {
+  background:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.015), rgba(255, 255, 255, 0.045) 50%, rgba(255, 255, 255, 0.015)),
+    repeating-linear-gradient(180deg, rgba(255, 255, 255, 0.025) 0 1px, transparent 1px 3px),
+    linear-gradient(180deg, #282d32, #1d2125 45%, #16191c);
+  border-color: #3a4047;
+}
+
 @mixin plaque-steel {
   background: linear-gradient(180deg, #d9e6f2, #7f9bb5 55%, #56718a);
   border-color: rgba(220, 232, 244, 0.85);

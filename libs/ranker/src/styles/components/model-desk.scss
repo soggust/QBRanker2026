@@ -12,38 +12,35 @@
   --win: #{v.$good};
   --loss: #f03a4b;
   @include v.scoreboard-panel(10px, 0 4px 14px rgba(0, 0, 0, 0.45));
+  // (the Bets page's gunmetal under the scoreboard band on top)
+  @include v.gunmetal;
   color: #fff;
   margin: 0 auto 18px;
   max-width: 1200px;
-  padding: 16px 18px 18px;
+  padding: 0 18px 18px;
+}
+
+// The top: the bankroll's tiles, centered, and the game and sport chips under them, on the scoreboard out
+// to the panel's edges (as the Bets page's head)
+.desk-top {
+  background: var(--scoreboard-dots), var(--scoreboard);
+  border-bottom: 1px solid color-mix(in srgb, var(--scoreboard-led) 60%, transparent);
+  border-radius: 9px 9px 0 0;
+  margin: 0 -18px 16px;
+  padding: 16px 18px 14px;
 }
 
 .desk-head {
-  align-items: center;
   display: flex;
-  flex-wrap: wrap;
-  gap: 14px;
-  justify-content: space-between;
+  justify-content: center;
   margin-bottom: 14px;
-}
-
-.desk-title {
-  align-items: center;
-  display: flex;
-  font-family: v.$font-hand;
-  font-size: 20px;
-  font-weight: 400;
-  gap: 8px;
-
-  mat-icon {
-    color: var(--scoreboard-led);
-  }
 }
 
 .desk-tiles {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
+  justify-content: center;
 }
 
 .desk-tile {
@@ -354,7 +351,6 @@ card-panel {
   flex-wrap: wrap;
   gap: 12px;
   justify-content: space-between;
-  margin: 4px 0 16px;
 }
 
 .desk-chip {

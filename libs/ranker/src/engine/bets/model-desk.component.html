@@ -78,9 +78,10 @@
   <td [class.up]="(t.clvBeat ?? 0) > 0.5" [class.down]="t.clvBeat !== null && t.clvBeat < 0.5">{{ clvText(t) }}</td>
 </ng-template>
 
-<section class="model-desk">
+<section class="model-desk" aria-label="Algorithm">
+  <!-- (the top, on the scoreboard: the bankroll's tiles, then what's on show) -->
+  <div class="desk-top">
   <header class="desk-head">
-    <h2 class="desk-title"><mat-icon aria-hidden="true" fontIcon="query_stats"></mat-icon>Algorithm</h2>
     @if (!loading) {
       <div class="desk-tiles">
         <div class="desk-tile" [title]="help['available'] + ' (bankroll ' + balance.toFixed(2) + 'u' + (rebuys ? ', ' + rebuys + ' rebuy' + (rebuys > 1 ? 's' : '') : '') + ')'">
@@ -140,6 +141,7 @@
         <svg class="chip-rim" aria-hidden="true"><rect pathLength="80" /></svg>
       </button>
     }
+  </div>
   </div>
   </div>
 

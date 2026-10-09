@@ -38,12 +38,7 @@
 // wide screens a handle on its right side
 .bets-panel {
   @include v.scoreboard-panel(12px);
-  background:
-    // (a soft sheen down the middle, the metal's fine horizontal brushing, gunmetal)
-    linear-gradient(90deg, rgba(255, 255, 255, 0.015), rgba(255, 255, 255, 0.045) 50%, rgba(255, 255, 255, 0.015)),
-    repeating-linear-gradient(180deg, rgba(255, 255, 255, 0.025) 0 1px, transparent 1px 3px),
-    linear-gradient(180deg, #282d32, #1d2125 45%, #16191c);
-  border-color: #3a4047;
+  @include v.gunmetal;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.12),
     0 18px 40px rgba(0, 0, 0, 0.5);
