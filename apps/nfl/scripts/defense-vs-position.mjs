@@ -32,6 +32,8 @@
 import { readFile, writeFile } from 'node:fs/promises';
 import { gunzipSync } from 'node:zlib';
 import { pathToFileURL } from 'node:url';
+import path from 'node:path';
+import { currentSeason } from '../../../libs/ranker/scripts/wiki-staff.mjs';
 
 export const VS_ROLES = ['WR1', 'WR2', 'WR3', 'TE1', 'RB1'];
 const GROUPS = ['WR', 'TE', 'RB'];
@@ -432,7 +434,7 @@ const CACHE = new URL('../../../.cache/nflverse/', import.meta.url);
 const STATIC_DIR = new URL('../src/StaticData/', import.meta.url);
 const SEASONS_DIR = new URL('seasons/', STATIC_DIR);
 // (the current season, as update-data.mjs's CURRENT_SEASON: its files are StaticData/'s own)
-const CURRENT_SEASON = 2026;
+const CURRENT_SEASON = currentSeason(path.join(import.meta.dirname, '..'));
 
 function parseCsv(text) {
   const rows = [];
