@@ -68,7 +68,7 @@
         <div class="bd-table" role="table" [attr.aria-label]="b.title" [title]="b.help" [style.--bd-cols]="b.columns.length">
           <div class="bd-row bd-head" role="row">
             <span role="columnheader" title="Where the defense ranks, by what it allowed against the players' own averages (#1 the stingiest)">Rank</span>
-            <span role="columnheader"></span>
+            <span class="bd-pos" role="columnheader" title="Each offense's player in that role">vs Pos</span>
             @for (col of b.columns; track col.label) {
               <span role="columnheader" [title]="col.title">{{ col.label }}</span>
             }
@@ -99,15 +99,29 @@
         @if (b.split; as sp) {
           <div class="bd-split">
             <span class="bd-split-title" [title]="sp.help">{{ sp.title }}</span>
-            <!-- (each part's share of the targets, a slice of the pie; its key under it, the league's share in
-                 each part's note) -->
+            <!-- (each part's share of the targets a slice of the pie, centered under the title, its share inside
+                 it, the rest (the league's share, yards a target) in a popover on hover; the key at the right) -->
+            @let slices = pieSlices(sp.parts);
             <div class="bd-pie-row">
-              <div class="bd-pie" [style.background]="pie(sp.parts)" role="img" [attr.aria-label]="sp.title"></div>
+              <div class="bd-pie">
+                <svg viewBox="0 0 100 100" role="img" [attr.aria-label]="sp.title">
+                  @for (s of slices; track $index) {
+                    <path [attr.d]="s.d" [attr.fill]="s.color" [class.on]="pieHover === $index" (mouseenter)="pieHover = $index" (mouseleave)="pieHover = null" />
+                  }
+                </svg>
+                @for (s of slices; track $index) {
+                  <span class="bd-pie-pct" [style.left.%]="s.x" [style.top.%]="s.y">{{ s.pct }}</span>
+                }
+                @if (pieHover !== null && sp.parts[pieHover]; as p) {
+                  <div class="bd-pop" role="tooltip" [style.--pop-color]="pieColor(pieHover)">
+                    <b>{{ p.label }} <em>{{ (p.share * 100).toFixed(0) }}%</em></b>
+                    <span>{{ p.title }}</span>
+                  </div>
+                }
+              </div>
               <div class="bd-parts">
                 @for (p of sp.parts; track p.label; let i = $index) {
-                  <span class="bd-part" [title]="p.title"
-                    ><i class="bd-swatch" [style.background]="pieColor(i)"></i><b>{{ p.label }}</b> <em>{{ (p.share * 100).toFixed(0) }}%</em> <small>{{ p.note }}</small></span
-                  >
+                  <span class="bd-part" (mouseenter)="pieHover = i" (mouseleave)="pieHover = null"><i class="bd-swatch" [style.background]="pieColor(i)"></i><b>{{ p.label }}</b></span>
                 }
               </div>
             </div>

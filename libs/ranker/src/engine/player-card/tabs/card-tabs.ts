@@ -47,21 +47,29 @@ export class CardStatsTab extends CardTab {
 export class CardOverviewTab extends CardTab {
   readonly sortFlags = sortFlags;
 
-  // A breakdown split's league tick after part i: the league's shares up to and including it
   // (a split's pie: each part a slice in its own soft color: the NFL's WRs a blue, TEs a sea green, backs a gold)
   pieColor(i: number): string {
     return ['#8ab4e0', '#7fc8bb', '#e3cb8f'][i] ?? '#9aa0a6';
   }
 
-  pie(parts: { share: number }[]): string {
+  // The pie's slice under the pointer (its popover); null: none
+  pieHover: number | null = null;
+
+  // (each part's slice as an SVG path on a 100 x 100 box, clockwise from the top, with where its share
+  // sits inside it)
+  pieSlices(parts: { share: number }[]): { d: string; color: string; x: number; y: number; pct: string }[] {
     const total = parts.reduce((a, p) => a + p.share, 0) || 1;
+    const point = (a: number, r: number) => [50 + r * Math.sin(a), 50 - r * Math.cos(a)].map((v) => Math.round(v * 100) / 100);
     let at = 0;
-    const stops = parts.map((p, i) => {
+    return parts.map((p, i) => {
       const from = at;
-      at += (p.share / total) * 360;
-      return `${this.pieColor(i)} ${from}deg ${at}deg`;
+      at += (p.share / total) * 2 * Math.PI;
+      const [x0, y0] = point(from, 50);
+      const [x1, y1] = point(at, 50);
+      const [x, y] = point((from + at) / 2, 31);
+      const d = at - from >= 2 * Math.PI - 1e-6 ? 'M50,0 A50,50 0 1 1 49.99,0 Z' : `M50,50 L${x0},${y0} A50,50 0 ${at - from > Math.PI ? 1 : 0} 1 ${x1},${y1} Z`;
+      return { d, color: this.pieColor(i), x, y, pct: `${Math.round(p.share * 100)}%` };
     });
-    return `conic-gradient(${stops.join(', ')})`;
   }
 }
 
