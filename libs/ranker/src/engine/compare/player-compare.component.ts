@@ -4,10 +4,10 @@ import { rankPct, rankTone } from '@ranker/core/format';
 import { COMPARE_MAX, CompareSide, PlayerCompare } from './player-compare';
 import { GameViewService } from '../game-view/game-view.service';
 
-// The compare view: the player card's board with a tape per side across its hero (team card, season,
-// rank, archetype; the season switchable, the side removable) and a slot to add one by name, then its
-// tabs: Overview (the skills on one radar and as bars, the edges, how alike), Stats (the grid's columns
-// side by side) and Career (the arcs). Escape closes it.
+// The compare view: the player card's board with a tape per side across the top (team card, season, rank,
+// archetype; the season switchable, the side removable) and a slot to add one by name, then its tabs:
+// Overview (the skills on one radar and as bars, the edges, how alike), Stats (the grid's columns side by
+// side) and Career (the arcs). Escape clears the search, then closes it.
 @Component({
   selector: 'player-compare',
   templateUrl: './player-compare.component.html',
@@ -29,6 +29,12 @@ export class PlayerCompareComponent implements DoCheck {
   readonly rankTone = rankTone;
   readonly rankPct = rankPct;
   readonly careerOnly = !!SPORT.careerOnly;
+  // (a career-only sport has no seasons to chart)
+  readonly tabs: { id: PlayerCompare['tab']; title: string }[] = [
+    { id: 'overview', title: 'Overview' },
+    { id: 'stats', title: 'Stats' },
+    ...(this.careerOnly ? [] : [{ id: 'career' as const, title: 'Career' }]),
+  ];
 
   seasonText(season: number): string {
     return SPORT.seasonText(season);
@@ -39,12 +45,13 @@ export class PlayerCompareComponent implements DoCheck {
     return p === null ? '-' : String(Math.round(p * 100));
   }
 
-  // A side's slot in a row of cells (its column's color, its name for the hover)
+  // A side as the legends and hovers name it ("Jamaal Charles ’13")
   label(side: CompareSide): string {
-    return `${side.name}${side.short ? ' ' + side.short : ''}`;
+    return side.short ? `${side.name} ${side.short}` : side.name;
   }
 
-  // Opened empty, or with just one (from a card): straight into the search box (after the dialog takes the focus: a11y.directives.ts)
+  // Opened empty, or with just one (from a card): straight into the search box (after the dialog takes the
+  // focus: a11y.directives.ts)
   private wasOpen = false;
   ngDoCheck(): void {
     const opened = this.compare.open && !this.wasOpen;
@@ -54,9 +61,7 @@ export class PlayerCompareComponent implements DoCheck {
 
   @HostListener('document:keydown', ['$event'])
   keys(event: KeyboardEvent): void {
-    if (!this.compare.open || this.games.game || this.cardOpen()) return;
-    if (event.key !== 'Escape') return;
-    // (Escape clears a search first, then closes)
+    if (!this.compare.open || this.games.game || this.cardOpen() || event.key !== 'Escape') return;
     if (this.compare.query) this.compare.search('');
     else this.compare.close();
     event.preventDefault();

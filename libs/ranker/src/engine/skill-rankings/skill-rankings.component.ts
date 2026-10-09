@@ -426,7 +426,7 @@ export class SkillRankingsComponent implements OnChanges, CardHost {
     const position = this.cards.tabPosition;
     this.games.backTo = null;
     this.cards.close();
-    this.compare.startWith(card.season, card.player.gsisId, position);
+    this.compare.startWith(position, card.season, card.player.gsisId);
   };
 
   // A Recent square decided past regulation (the NHL's overtime or shootout: a lighter square)

@@ -1,18 +1,14 @@
-<!-- Compare: a tape per side across the hero, the add slot after them, then Overview, Stats and Career -->
+<!-- Compare: a tape per side across the top (the add slot after them), then Overview, Stats and Career -->
 @if (compare.open) {
   @let v = compare.view;
   @let sides = compare.sides;
   <div class="card-backdrop" [class.suspended]="games.game" (click)="compare.close()"></div>
   <div class="player-card compare-card" [class.suspended]="games.game" role="dialog" aria-modal="true" dialogFocus aria-label="Compare">
     <header class="compare-hero">
-      <div class="compare-head">
-        <p class="hero-kicker"><span class="season-chip">Compare</span></p>
-        <p class="compare-hint">{{ careerOnly ? 'Each one against the rest of the list, ranked with your sliders' : "Each one against his own season's league, ranked with your sliders" }}</p>
-        <div class="card-controls">
-          <button type="button" aria-label="Close" title="Close (Esc)" (click)="compare.close()">
-            <mat-icon fontIcon="close"></mat-icon>
-          </button>
-        </div>
+      <div class="card-controls">
+        <button type="button" aria-label="Close" title="Close (Esc)" (click)="compare.close()">
+          <mat-icon fontIcon="close"></mat-icon>
+        </button>
       </div>
 
       <div class="tapes" [style.--sides]="max">
@@ -29,37 +25,30 @@
               }
             </span>
             <div class="tape-text">
-              <!-- (the season: any other of theirs, from the picker) -->
+              <!-- (the season: any other of theirs on that tab, from the picker) -->
               @if (!careerOnly && (s.career?.length ?? 0) > 1) {
-                <mat-select class="tape-season" [value]="s.season" [attr.aria-label]="'Season for ' + s.name" (valueChange)="compare.add($event, s.gsisId, i)">
+                <mat-select class="tape-season" [value]="s.season" [attr.aria-label]="'Season for ' + s.name" title="Another of their seasons" (valueChange)="compare.add(s.position, $event, s.gsisId, i)">
                   <mat-select-trigger>{{ s.seasonText }}</mat-select-trigger>
                   @for (line of s.career; track line.season) {
                     <mat-option [value]="line.season">{{ seasonText(line.season) }} · #{{ line.rank }}</mat-option>
                   }
                 </mat-select>
               } @else {
-                <span class="season-chip tape-chip">{{ s.seasonText }}</span>
+                <span class="season-chip">{{ s.seasonText }}</span>
               }
               <button type="button" class="tape-name" [title]="'Open ' + s.name + '’s ' + s.seasonText + ' card'" (click)="openCard(s)">{{ s.name }}</button>
-              @if (s.teamName) {
-                <span class="tape-team">{{ s.teamName }}</span>
-              }
+              <span class="tape-team">{{ s.tabLabel }}@if (s.teamName) { · {{ s.teamName }}}</span>
             </div>
             <div class="tape-foot">
               <span class="tape-rank" [style.--tone]="rankTone(s.pct)" [title]="'#' + s.rank + ' of ' + s.of + ' that season, with your sliders'">{{ s.rank }}</span>
               <span class="tape-of">of {{ s.of }}</span>
-              @if (v && sides.length > 1 && v.contested) {
-                <span class="tape-wins" [title]="'Leads ' + v.wins[i] + ' of the ' + v.contested + ' columns'"
-                  ><b>{{ v.wins[i] }}</b> / {{ v.contested }}</span
-                >
-              }
             </div>
             <p class="tape-archetype">{{ s.archetype }}</p>
           </div>
         }
-        <!-- (the add slot: a name typed, everyone the tab has had found, a click adds their best season) -->
+        <!-- (the add slot: a name typed, everyone the sport has had found, a click adds their best season) -->
         @if (sides.length < max) {
-          <div class="tape tape-add" [class.busy]="compare.loading">
+          <div class="tape tape-add">
             <mat-icon class="tape-add-icon" [class.spin]="compare.loading" [fontIcon]="compare.loading ? 'autorenew' : 'person_add'"></mat-icon>
             @if (compare.full) {
               <span class="tape-add-text">Loading…</span>
@@ -78,16 +67,16 @@
               />
               @if (compare.hits.length) {
                 <ul class="tape-hits" role="listbox">
-                  @for (hit of compare.hits; track hit.id) {
+                  @for (hit of compare.hits; track hit.position + hit.id) {
                     <li>
                       <button type="button" role="option" (click)="compare.pick(hit)" [style.--team-badge]="hit.badge">
                         <span class="hit-badge" [class.white-logo]="hit.whiteLogo"><img [src]="hit.logo" alt="" /></span>
                         <span class="hit-text">
                           <b>{{ hit.name }}</b>
-                          <small>{{ hit.span }}</small>
+                          <small>{{ hit.tabLabel }}@if (hit.span) { · {{ hit.span }}}</small>
                         </span>
                         @if (!careerOnly) {
-                          <span class="hit-best" [title]="'Their best season, by the default sliders'">
+                          <span class="hit-best" title="Their best season, by the default sliders">
                             {{ seasonText(hit.best.season) }} <em [style.--tone]="rankTone(rankPct(hit.best.rank, hit.best.of))">#{{ hit.best.rank }}</em>
                           </span>
                         }
@@ -97,8 +86,6 @@
                 </ul>
               } @else if (compare.searched) {
                 <p class="tape-none">Nobody by that name</p>
-              } @else if (!sides.length) {
-                <p class="tape-none">Or pick rows in the grid (click a row), then compare</p>
               }
             }
           </div>
@@ -110,20 +97,23 @@
     </header>
 
     <nav class="card-tabs" role="tablist">
-      @for (tab of careerOnly ? ['overview', 'stats'] : ['overview', 'stats', 'career']; track tab) {
-        <button type="button" role="tab" [class.active]="compare.tab === tab" [attr.aria-selected]="compare.tab === tab" (click)="compare.tab = $any(tab); body.scrollTop = 0">
-          {{ tab === 'overview' ? 'Overview' : tab === 'stats' ? 'Stats' : 'Career' }}
+      @for (tab of tabs; track tab.id) {
+        <button type="button" role="tab" [class.active]="compare.tab === tab.id" [attr.aria-selected]="compare.tab === tab.id" (click)="compare.tab = tab.id; body.scrollTop = 0">
+          {{ tab.title }}
         </button>
       }
     </nav>
 
     <div class="card-body compare-body" #body>
       @if (!v) {
-        <p class="compare-empty">Add someone above to start</p>
+        <p class="compare-empty">
+          Search above, or click rows in the grid to pick them, then compare.
+          <small>Each one is read against {{ careerOnly ? 'the rest of the list' : 'his own season’s league' }}, ranked with your sliders.</small>
+        </p>
       } @else {
         @switch (compare.tab) {
           @case ('overview') {
-            <!-- Skills: every side's shape on one radar, and each skill's bars beside it -->
+            <!-- Skills: every side's shape on one radar (the skills they share), and each skill's bars -->
             <div class="cmp-top">
               @if (v.radar; as r) {
                 <div class="ov-radar cmp-radar">
@@ -160,7 +150,7 @@
                     <span class="cmp-skill-name">{{ sk.name }}</span>
                     <div class="cmp-bars">
                       @for (p of sk.pcts; track $index) {
-                        <div class="cmp-bar" [class.lead]="sk.leaders.includes($index)" [style.--side]="sides[$index].color" [title]="label(sides[$index]) + ': ' + pct(p) + 'th percentile'">
+                        <div class="cmp-bar" [class.lead]="sk.leaders.includes($index)" [style.--side]="sides[$index].color" [title]="label(sides[$index]) + ': ' + pct(p) + (p === null ? '' : 'th percentile')">
                           <span class="cmp-track"><i [style.width.%]="p === null ? 0 : 4 + p * 96"></i></span>
                           <b>{{ pct(p) }}</b>
                         </div>
@@ -172,8 +162,8 @@
             </div>
 
             @if (sides.length > 1) {
-              <!-- Edges: where each one is clearly the best of them -->
-              <card-panel class="ov-section tab-card cmp-panel" label="Edges" icon="bolt" [expandable]="false">
+              <!-- Edges: where each one is clearly the best of them (folded, like the card's sections) -->
+              <card-panel class="ov-section tab-card cmp-panel" label="Edges" icon="bolt">
                 <div class="group-body cmp-edges" [style.--sides]="sides.length">
                   @for (s of sides; track s.key; let i = $index) {
                     <div class="cmp-edge" [style.--side]="s.color">
@@ -189,10 +179,10 @@
               </card-panel>
 
               <!-- How alike: each pair's skill shapes -->
-              <card-panel class="ov-section tab-card cmp-panel" label="How Alike" icon="join_inner" [expandable]="false">
+              <card-panel class="ov-section tab-card cmp-panel" label="How Alike" icon="join_inner">
                 <div class="group-body cmp-pairs">
                   @for (p of v.pairs; track $index) {
-                    <div class="cmp-pair" [title]="'One minus the average gap between their skill percentiles'">
+                    <div class="cmp-pair" title="One minus the average gap between their skill percentiles">
                       <span class="cmp-pair-who"
                         ><i [style.--side]="sides[p.a].color"></i>{{ label(sides[p.a]) }}<span class="cmp-amp">&amp;</span><i [style.--side]="sides[p.b].color"></i>{{ label(sides[p.b]) }}</span
                       >
@@ -209,12 +199,18 @@
 
           @case ('stats') {
             <!-- The grid's columns: each value against its own season (its tint, the bar: where it stood),
-                 the leader's value lit -->
+                 the leader's value lit; over each side's column, the columns it leads -->
+            @let led = v.contested && sides.length > 1;
             <div class="cmp-stats" [style.--sides]="sides.length">
               <div class="cmp-row cmp-head">
                 <span></span>
-                @for (s of sides; track s.key) {
-                  <span class="cmp-col-head" [style.--side]="s.color">{{ s.surname }} <small>{{ s.short }}</small></span>
+                @for (s of sides; track s.key; let i = $index) {
+                  <span class="cmp-col-head" [style.--side]="s.color" [title]="label(s) + (led ? ': leads ' + v.wins[i] + ' of the ' + v.contested + ' columns with a leader' : '')"
+                    >{{ s.surname }} <small>{{ s.short }}</small>
+                    @if (led) {
+                      <em class="cmp-wins"><b>{{ v.wins[i] }}</b>/{{ v.contested }}</em>
+                    }
+                  </span>
                 }
               </div>
               @for (g of v.groups; track g.id) {
@@ -228,7 +224,7 @@
                             class="cmp-cell"
                             [class.lead]="row.leaders.includes($index)"
                             [style.--side]="sides[$index].color"
-                            [title]="cell.rank ? label(sides[$index]) + ': #' + cell.rank + ' of ' + cell.of + ' in ' + sides[$index].seasonText : label(sides[$index])"
+                            [title]="label(sides[$index]) + (cell.rank ? ': #' + cell.rank + ' of ' + cell.of + ' in ' + sides[$index].seasonText : '')"
                           >
                             <b [style.color]="cell.tint">{{ cell.text }}</b>
                             @if (cell.pct !== null) {

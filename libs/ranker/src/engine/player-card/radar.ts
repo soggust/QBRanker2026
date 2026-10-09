@@ -1,7 +1,6 @@
 // The Overview's skill radar: its geometry in a 320 x 290 box centered on 0,0. An axis per skill
 // clockwise from the top, rings at 25 / 50 / 75 / 100%, and a skill's point out along its axis by its
 // percentile (from a small hub, so a 0 doesn't vanish into the center).
-import { CardSkill } from '@ranker/engine/skills';
 import { CardRadar } from './card.model';
 
 const RADIUS = 100;
@@ -17,7 +16,7 @@ export function radarShape(pcts: number[]): string {
   return pcts.map((p, i) => point(i, pcts.length, p).join(',')).join(' ');
 }
 
-export function radar(skills: CardSkill[]): CardRadar {
+export function radar(skills: { short: string; pct: number }[]): CardRadar {
   const n = skills.length;
   const axes = skills.map((skill, i) => {
     const [x, y] = point(i, n, 1);
