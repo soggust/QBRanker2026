@@ -656,15 +656,28 @@ card-panel {
   font-weight: 900;
 }
 
-// The tables' values in the hand (DynaPuff, its lightest: the font comes in 400 to 700, so not the 200 asked
-// for), their bold bits at 600 rather than its heavy 700; a bet's game (its teams, and its time or score under them)
-// in Outfit bold
+// Numbers in the hand, words in Outfit. The tables' values (odds, units, chances, EV, records, profit, ROI, CLV,
+// a meter's count) in DynaPuff at its lightest (400: it has no 200), never bold; the wordy cells (a bet's game and
+// its time or score, its pick, the why and its recap, the notes and the changelog) in Outfit
 .desk-table td {
   font-family: v.$font-hand;
   font-weight: 400;
 
   b {
-    font-weight: 600;
+    font-weight: 400;
+  }
+}
+
+.desk-table td.desk-left,
+.desk-table td.desk-why,
+.desk-table td.desk-test,
+.desk-changes,
+.desk-note {
+  font-family: v.$font-heading;
+  font-weight: 500;
+
+  b {
+    font-weight: 700;
   }
 }
 
@@ -672,4 +685,9 @@ card-panel {
 .desk-table .desk-when {
   font-family: v.$font-heading;
   font-weight: 700;
+}
+
+// (a lost pick's colored word muted with the rest of it)
+.desk-pick.desk-lost .desk-key {
+  color: inherit;
 }
