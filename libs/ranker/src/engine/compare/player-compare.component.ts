@@ -1,6 +1,6 @@
 import { ChangeDetectorRef, Component, DoCheck, ElementRef, HostListener, Input, NgZone, OnDestroy, ViewChild } from '@angular/core';
 import { SPORT } from '@sport/sport';
-import { rankPct, rankTone } from '@ranker/core/format';
+import { rankTone } from '@ranker/core/format';
 import { percentileText } from '@ranker/engine/player-card/hover-text';
 import { COMPARE_MAX, CompareHit, CompareTab, PlayerCompare } from './player-compare';
 import { GameViewService } from '../game-view/game-view.service';
@@ -85,7 +85,6 @@ export class PlayerCompareComponent implements DoCheck, OnDestroy {
   readonly rankTone = rankTone;
   // ("92nd percentile", the card's words)
   readonly percentileText = percentileText;
-  readonly rankPct = rankPct;
   readonly seasonText = SPORT.seasonText;
   readonly careerOnly = !!SPORT.careerOnly;
   // (a career-only sport has no seasons to chart)

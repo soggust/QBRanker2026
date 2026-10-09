@@ -152,11 +152,6 @@
                           <b>{{ hit.name }}</b>
                           <small>{{ hit.tabLabel }}@if (hit.span) { · {{ hit.span }}}</small>
                         </span>
-                        @if (!careerOnly) {
-                          <span class="hit-best" title="Their best season, by the default sliders">
-                            {{ seasonText(hit.best.season) }} <em [style.--tone]="rankTone(rankPct(hit.best.rank, hit.best.of))">#{{ hit.best.rank }}</em>
-                          </span>
-                        }
                       </button>
                     </li>
                   }
