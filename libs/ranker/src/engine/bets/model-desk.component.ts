@@ -119,7 +119,10 @@ interface PropType {
   key: string;
   label: string;
   rows: number;
-  params: { K: number; w: number; a: number; b: number; c: number; r: number; cal?: number[] };
+  params: { K: number; w: number; a: number; b: number; c: number; r: number; cal?: number[]; roleK?: number | null; fun?: number; pc?: number; tg?: number };
+  // (the matchup terms' held-out gains: the line log loss without each less with it; null where the fit
+  // never took it up)
+  gains?: Record<string, number | null>;
   check: { n: number; mae: number; maeBase: number | null; logLoss: number | null; logLossBase: number | null; brier: number | null; brierBase: number | null; sideHit: number | null } | null;
   trust: { trust: number; n: number; fitted: boolean } | null;
 }
@@ -598,6 +601,11 @@ export class ModelDeskComponent implements OnInit, OnDestroy {
     return game ? game.hs + game.as : null;
   }
 
+  // (an in-play bet whose game is over, waiting for the run to grade it: its row muted)
+  isOver(b: ModelBet): boolean {
+    return !!(b.event && this.boards.get(b.event)?.final);
+  }
+
   // (a side in play, at the score: by how much it's covering (a spread: its margin plus its line) or leading (a
   // moneyline); null for a total or a prop, or before there's a score)
   sideEdge(b: ModelBet): number | null {
@@ -779,6 +787,19 @@ export class ModelDeskComponent implements OnInit, OnDestroy {
     return v === null || v === undefined ? '-' : v.toFixed(digits);
   }
 
+  // (a prop type's matchup terms: each one's fitted size, or "left out", and its held-out gain)
+  matchupText(t: PropType): string {
+    const names: Record<string, string> = { roleK: 'role split', fun: 'funnel', pc: 'pace', tg: 'target share' };
+    return Object.entries(t.gains ?? {})
+      .map(([k, g]) => {
+        const v = (t.params as unknown as Record<string, number | null>)[k];
+        const on = k === 'roleK' ? v !== null && v !== undefined : !!v;
+        const gain = g === null ? 'never fit in' : `held-out ${g >= 0 ? '+' : ''}${(g * 100).toFixed(2)}%`;
+        return `${names[k] ?? k} ${on ? (k === 'roleK' ? `k ${v}` : v) : 'left out'} (${gain})`;
+      })
+      .join(' · ');
+  }
+
   // (a prop type's value by column)
   readonly propValue = (t: PropRow, key: string): unknown =>
     key === 'sport' ? t.sport
@@ -836,6 +857,7 @@ export class ModelDeskComponent implements OnInit, OnDestroy {
     mae: "On the last 30% of the history (never fit on): how far its projection missed on average, against a plain season average's miss",
     overLine: "On the same held-out games, at a line at each player's median so far: its chance of going over against what happened (log loss, lower is better), against the player's own over-rate",
     sideHit: 'On those lines, how often the side it leaned (by 5 points or more) was right',
+    matchups: "The matchup terms (matchups.mjs), each kept only if the held-out games' over/under log loss is lower with it: the role split (the defense against his role on his team: an NFL WR1, WR2, WR3, TE1, RB1; an NBA starter or bench), pulled toward its position number by k games; the defense's pass or run funnel and pace (volume); the share of targets it allows his position. The gain: the held-out log loss without it less with it",
     propSettings: 'Its fitted settings: K (games of pull toward his position), recent weight, opponent power, game-script power, context size, spread (r: lower is wider)',
     propTrust: "How much the prop type counts its projection against the player's own record (starts 0.5; refit on its graded props once 40 are; * not yet)",
     clv: "Closing-line value: how its bets' lines and prices compare with where the market closed, the market's last word before the game. The share that beat the close (a better line, or the same line at a better chance), and the mean expected return at the closing chance. The early skill signal: a few dozen results are mostly luck, but beating the close shows an edge from the first bets on; the trust in the model leans on it until results pile up",

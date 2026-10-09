@@ -702,3 +702,8 @@ card-panel {
 .desk-table td small {
   font-weight: 400;
 }
+
+// (In Play: a game that's over, its bets waiting to be graded, muted whole: the live ones stand out)
+.desk-table tr.desk-done > * {
+  opacity: 0.5;
+}
