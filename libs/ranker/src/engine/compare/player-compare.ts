@@ -25,11 +25,11 @@ import { CardRadar, CardSeason, CareersFile, SeasonContext } from '@ranker/engin
 import { archetypeFor, skillsOf } from '@ranker/engine/player-card/overview';
 import { radar } from '@ranker/engine/player-card/radar';
 import type { SharedCompare } from '@ranker/engine/share';
-import * as sideColors from './side-colors';
+import * as sideColors from '../colors';
 
 export const COMPARE_MAX = 4;
 
-// Each side's color is its team's own (side-colors.ts: its primary, lifted to read on the board, a
+// Each side's color is its team's own (colors.ts: its primary, lifted to read on the board, a
 // shade apart from the others'); these, in order, where there's no team to go by (a fighter, a team the
 // sport doesn't know) or a team's own are all too close to the others' (soft, like the vs Position pie's: a
 // blue, a gold, a sea green, a lilac; the first two the furthest apart, for the usual pair)
@@ -64,7 +64,7 @@ export interface CompareSide {
   position: SkillPosition;
   season: number;
   gsisId: string;
-  // Its team's color (side-colors.ts), and an id it keeps while it's in (its season switched too: what the
+  // Its team's color (colors.ts), and an id it keeps while it's in (its season switched too: what the
   // view tracks it by)
   color: string;
   uid: number;
@@ -222,7 +222,7 @@ export class PlayerCompare {
   arcBy: ArcBy | null = null;
   // (the arcs' width on screen: the view measures it)
   arcWidth = ARC.width;
-  // The sides' colors, by team (side-colors.ts, and a side's choices: the tests read them)
+  // The sides' colors, by team (colors.ts, and a side's choices: the tests read them)
   static readonly colors = { ...sideColors, choices: (side: CompareSide) => colorChoices(side) };
   // Sides still loading (the add slot shows it)
   loading = 0;

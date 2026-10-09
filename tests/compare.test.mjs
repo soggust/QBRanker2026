@@ -1,6 +1,6 @@
 // The compare view's model (libs/ranker/src/engine/compare/player-compare.ts), on the real data: rows
 // picked from the grid, then someone from another tab and another season added by a search. The sides
-// take their teams' colors (compare/side-colors.ts: the team's own hue, lifted to read on the board; the
+// take their teams' colors (colors.ts: the team's own hue, lifted to read on the board; the
 // same team or a close one a distinct shade, the same sides the same colors) and keep them (removed, switched, raced), every column's leader is the side that stood highest
 // in its own season (across tabs, the bigger number, less where less is better), sides on different tabs
 // share only the same skills and columns, the career arcs run by career year or by season with the

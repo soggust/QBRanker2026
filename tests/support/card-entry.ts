@@ -6,7 +6,7 @@ export { percentile, percentileText, rankText, possessive, skillTitle, statTitle
 export { gameLogView, columnLooks, splitVs } from '@ranker/engine/player-card/game-log-view';
 export { formWhen, injuryReport, returnDay, loadGame } from '@ranker/engine/game-view/game';
 export { ownLogo } from '@ranker/engine/game-view/espn-summary';
-export { teamColor } from '@ranker/engine/game-view/team-color';
-export { distance, TOO_CLOSE } from '@ranker/engine/compare/side-colors';
+export { gameColor as teamColor } from '@ranker/engine/game-view/team-color';
+export { distance, TOO_CLOSE, teamColor as sharedTeamColor } from '@ranker/engine/colors';
 export { videoPlay, youtubeWatch, youtubeThumb } from '@ranker/engine/game-view/highlights';
 export * as vsPosition from '@sport/vs-position';

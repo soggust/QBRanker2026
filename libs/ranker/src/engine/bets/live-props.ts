@@ -3,6 +3,8 @@
 // play is the one the bet will be graded on. MLB's total bases aren't in ESPN's box score (the grader asks
 // MLB's): no count for them here.
 
+import { teamColor } from '../colors';
+
 interface BoxStats {
   name?: string;
   type?: string;
@@ -58,28 +60,10 @@ export function athleteColors(athlete: string, body: (SummaryBox & { boxscore?: 
   return null;
 }
 
-// A meter's color from a team's two: never one that reads as a result (green, or red: burgundy and maroon too;
-// they're the meter's won and lost), a real color before a near-gray (Vegas's gold over its slate), lifted if
-// it's too dark for the board; null when neither will do (the board's own light then)
+// A meter's color from a team's two (colors.ts teamColor, as everywhere): never one that reads as a result
+// (green, or red: burgundy and maroon too; they're the meter's won and lost), a real color before a grey
+// (Vegas's gold over its slate), lifted if it's too dark for the board; null when neither will do (the
+// board's own light then)
 export function meterColor(colors: { color?: string; alternateColor?: string } | null): string | null {
-  const usable = [colors?.color, colors?.alternateColor]
-    .filter((hex): hex is string => !!hex && /^[0-9a-f]{6}$/i.test(hex))
-    .map((hex) => hsl(hex))
-    .filter(([h, s]) => !(s > 0.3 && (h <= 11 || h >= 330 || (h >= 80 && h <= 165))));
-  const [h, s, l] = usable.find(([, sat]) => sat >= 0.25) ?? usable[0] ?? [];
-  if (h === undefined) return null;
-  // (a navy or a black lifted so it shows on the dark board; a gray left gray)
-  return `hsl(${Math.round(h)} ${Math.round(s! * 100)}% ${Math.round(Math.max(l!, 0.58) * 100)}%)`;
-}
-
-function hsl(hex: string): [number, number, number] {
-  const [r, g, b] = [0, 2, 4].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255);
-  const max = Math.max(r, g, b);
-  const min = Math.min(r, g, b);
-  const l = (max + min) / 2;
-  if (max === min) return [0, 0, l];
-  const d = max - min;
-  const s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-  const h = max === r ? (g - b) / d + (g < b ? 6 : 0) : max === g ? (b - r) / d + 2 : (r - g) / d + 4;
-  return [h * 60, s, l];
+  return teamColor([colors?.color, colors?.alternateColor], { noResults: true });
 }

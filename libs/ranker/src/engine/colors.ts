@@ -1,10 +1,38 @@
-// Each compare side's color: its team's own, so who's who reads without the legend (a red team red, a
-// green one green). A team's colors are softened a little for the dark board, keeping their hue: a bit
-// less saturated and lightened toward the view's soft palette, one too dark (a navy, a forest green, a deep
-// red) lifted until it shows, a black or a white a grey.
-// Two sides on the same team, or two teams too close to tell apart, get distinct shades: the later one
-// takes the team's next color, or a lighter or darker shade of its own. Pure (the same colors in, the same
-// colors out).
+// A team's color, the same wherever the app draws one (Compare's sides, the game view's two teams and a card's
+// hero, the Bets page's and the Algorithm's picks): its own, so who's who reads without a legend (a red team
+// red, a green one green), softened a little for the dark board, keeping its hue: a bit less saturated and
+// lightened toward the soft palette, one too dark (a navy, a forest green, a deep red) lifted until it shows,
+// a black or a white its other color, or a grey. Where green and red already say won and lost (the bets'
+// picks and meters), a team's green or red is passed over for its other color (noResults).
+// Two colors too close to tell apart (two sides on the same team, the Panthers' red and the Hurricanes'):
+// the later one takes its team's next color, or a lighter or darker shade of its own (pickColor). Pure (the
+// same colors in, the same colors out).
+
+// Each sport's teams' colors (data/model/teams.json: ESPN's team list as the bettor keeps it, every team's
+// alternate too, which a game's summary often leaves out; a browser can't ask ESPN's list itself), by
+// "sport:ABBR" and by "sport#espnId"; once a visit a sport, empty when it can't be read
+export type TeamColors = Map<string, { color?: string; alternateColor?: string }>;
+const teamLists = new Map<string, Promise<TeamColors>>();
+export async function loadTeamColors(sports: Iterable<string>): Promise<TeamColors> {
+  const colors: TeamColors = new Map();
+  for (const sport of new Set(sports)) {
+    if (!teamLists.has(sport)) teamLists.set(sport, readTeamList(sport));
+    for (const [key, pair] of await teamLists.get(sport)!) colors.set(key, pair);
+  }
+  return colors;
+}
+async function readTeamList(sport: string): Promise<TeamColors> {
+  const file = (await fetch(`/${sport}/data/model/teams.json`)
+    .then((res) => (res.ok ? res.json() : null))
+    .catch(() => null)) as { teams?: Record<string, { id: string; color: string | null; alt: string | null }> } | null;
+  const colors: TeamColors = new Map();
+  for (const [abbr, t] of Object.entries(file?.teams ?? {})) {
+    const pair = { color: t.color ?? undefined, alternateColor: t.alt ?? undefined };
+    colors.set(`${sport}:${abbr}`, pair);
+    colors.set(`${sport}#${t.id}`, pair);
+  }
+  return colors;
+}
 
 // [hue 0-360, saturation 0-1, lightness 0-1]
 type Hsl = [number, number, number];
@@ -23,18 +51,31 @@ const SOFT = { saturation: 0.82, most: 0.7, reads: 57, max: 0.72 };
 // (under this saturation a color reads as a grey)
 const GREY = 0.18;
 
-// A team's colors as a side shows them, best first: its own colors in its order (lifted to read), then
-// its greys (a black, a silver: they say the least)
-export function teamShades(colors: string[]): string[] {
+// A team's colors as the board shows them, best first: its own colors in its order (lifted to read), then
+// its greys (a black, a silver: they say the least); hex with its # or without (ESPN's), anything else
+// passed over; noResults: no green or red (burgundy and maroon too)
+export function teamShades(colors: (string | null | undefined)[], { noResults = false } = {}): string[] {
   const own: string[] = [];
   const greys: string[] = [];
-  for (const hex of colors) {
-    if (!/^#[0-9a-f]{6}$/i.test(hex)) continue;
+  for (const given of colors) {
+    const hex = `#${given?.replace(/^#/, '').toLowerCase()}`;
+    if (!/^#[0-9a-f]{6}$/.test(hex)) continue;
     const [h, s, l] = hslOf(hex);
+    if (noResults && readsAsResult([h, s, l])) continue;
     if (s < GREY) greys.push(hexOf([0, 0, Math.min(GREY_LIGHT.max, Math.max(l, GREY_LIGHT.min))]));
     else own.push(readable([h, Math.min(SOFT.most, s * SOFT.saturation), Math.min(SOFT.max, l)], SOFT.reads));
   }
   return [...new Set([...own, ...greys])];
+}
+
+// A team's one color (teamShades' first), null when it has none that will do
+export function teamColor(colors: (string | null | undefined)[], options: { noResults?: boolean } = {}): string | null {
+  return teamShades(colors, options)[0] ?? null;
+}
+
+// (a green or a red, the colors won and lost are drawn in)
+function readsAsResult([h, s]: Hsl): boolean {
+  return s > 0.3 && (h <= 11 || h >= 330 || (h >= 80 && h <= 165));
 }
 
 // (a color lifted, its hue and saturation kept, until it shows on the dark board)

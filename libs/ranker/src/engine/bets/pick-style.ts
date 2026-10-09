@@ -1,26 +1,11 @@
 // A bet's pick dressed up, the same on the Algorithm desk and the Bets page: its one word that says what the bet
 // is (a prop's or a total's over or under, a side's line or ML), in its team's color (never a green or a red:
 // live-props.ts meterColor), from each sport's team colors (data/model/teams.json, ESPN's team list as the
-// bettor keeps it: a browser can't ask ESPN's itself)
+// bettor keeps it, colors.ts loadTeamColors: a browser can't ask ESPN's itself)
+import { TeamColors } from '../colors';
 import { meterColor } from './live-props';
 
-export type TeamColors = Map<string, { color?: string; alternateColor?: string }>;
-
-// Each sport's teams' colors, by "sport:ABBR" and by "sport#espnId"
-export async function loadTeamColors(sports: Iterable<string>): Promise<TeamColors> {
-  const colors: TeamColors = new Map();
-  for (const sport of new Set(sports)) {
-    const file = (await fetch(`/${sport}/data/model/teams.json`)
-      .then((res) => (res.ok ? res.json() : null))
-      .catch(() => null)) as { teams?: Record<string, { id: string; color: string | null; alt: string | null }> } | null;
-    for (const [abbr, t] of Object.entries(file?.teams ?? {})) {
-      const pair = { color: t.color ?? undefined, alternateColor: t.alt ?? undefined };
-      colors.set(`${sport}:${abbr}`, pair);
-      colors.set(`${sport}#${t.id}`, pair);
-    }
-  }
-  return colors;
-}
+export { type TeamColors, loadTeamColors } from '../colors';
 
 // A pick's color: a prop its player's team's (by his team's ESPN id), a side the team it took's (by its
 // abbreviation); a total, no one's (null: the board's light, as with no team known)

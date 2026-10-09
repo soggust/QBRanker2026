@@ -71,9 +71,9 @@ test('two teams in the same color: the home side takes its alternate, the away s
     },
   });
   const g = await nfl.loadGame('hockey/nhl', '2');
-  assert.equal(g.away.color, '#c8102e');
+  assert.equal(g.away.color, nfl.sharedTeamColor(['c8102e']));
   assert.ok(nfl.distance(g.away.color, g.home.color) >= nfl.TOO_CLOSE, `${g.away.color} and ${g.home.color} look alike`);
-  assert.equal(g.home.color, '#b9975b');
+  assert.equal(g.home.color, nfl.sharedTeamColor(['b9975b']), "its alternate, as Compare's sides take it");
   assert.deepEqual(g.periodLabels, []);
 });
 
@@ -118,21 +118,21 @@ test("logos: the Rams' ESPN logos swapped for the app's own, everyone else's kep
   assert.equal(ownLogo(''), null);
 });
 
-test("team colors on the dark board: a bright one kept, a dark one lifted, a black swapped for its alternate's color", () => {
+test("team colors on the dark board (the app's one rule, colors.ts): a dark one lifted, a black swapped for its alternate's color", () => {
   const { teamColor } = nfl;
   const light = (hex) => {
     const [r, g, b] = hex.match(/[0-9a-f]{2}/gi).map((x) => parseInt(x, 16));
     return (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
   };
-  assert.equal(teamColor('e31837', undefined), '#e31837');
-  assert.equal(teamColor('#E31837', undefined), '#e31837', 'with its # and in capitals');
+  assert.equal(teamColor('e31837', undefined), nfl.sharedTeamColor(['#e31837']), "Compare's color for it");
+  assert.equal(teamColor('#E31837', undefined), teamColor('e31837', undefined), 'with its # and in capitals');
   // (the Ravens' purple: lightened until it reads, still a purple)
   const ravens = teamColor('241773', undefined);
   assert.ok(light(ravens) >= 0.2, ravens);
   const [r, g, b] = ravens.match(/[0-9a-f]{2}/gi).map((x) => parseInt(x, 16));
   assert.ok(b > r && r > g, `${ravens} is no longer purple`);
   // (the Bruins' black: their gold)
-  assert.equal(teamColor('000000', 'ffb81c'), '#ffb81c');
+  assert.equal(teamColor('000000', 'ffb81c'), nfl.sharedTeamColor(['ffb81c']));
   // (a black with a grey alternate: the black lifted)
   assert.ok(light(teamColor('000000', '333333')) >= 0.2);
   // (no colors at all, or ESPN's junk: a grey)

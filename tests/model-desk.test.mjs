@@ -133,10 +133,11 @@ test("athleteColors: the team whose table lists the player", () => {
 // Colors: a pick's never reads as a result
 // ---------------------------------------------------------------------------
 
+// (a color as [hue, saturation %, lightness %], by colors.ts's own reader)
 const parseHsl = (c) => {
-  const m = /^hsl\((\d+) (\d+)% (\d+)%\)$/.exec(c);
-  assert.ok(m, `not an hsl color: ${c}`);
-  return m.slice(1).map(Number);
+  assert.ok(/^#[0-9a-f]{6}$/.test(c), `not a hex color: ${c}`);
+  const [h, s, l] = desk.hslOf(c);
+  return [Math.round(h), Math.round(s * 100), Math.round(l * 100)];
 };
 // (the hue rounded: one just past a band's edge may round onto it)
 const readsAsResult = ([h, s]) => s > 30 && (h < 11 || h > 330 || (h > 80 && h < 165));
@@ -151,9 +152,11 @@ test('meterColor: a green or red team color is passed over for its other one; ne
 });
 
 test('meterColor: a navy or black is lifted to show on the dark board; a gray stays gray', () => {
-  const navy = parseHsl(desk.meterColor({ color: '002244' }));
-  assert.ok(navy[2] >= 58, `navy's lightness ${navy[2]}`);
-  assert.deepEqual(parseHsl(desk.meterColor({ color: 'c8102e', alternateColor: '000000' })), [0, 0, 58]);
+  // (how light a color reads: Lab's L*, as colors.ts lifts it)
+  const navy = desk.meterColor({ color: '002244' });
+  assert.ok(desk.lightness(navy) >= 52, `navy ${navy} too dark`);
+  // (a red with a black: the red passed over, the black a grey)
+  assert.equal(parseHsl(desk.meterColor({ color: 'c8102e', alternateColor: '000000' }))[1], 0);
   // (a real color before a near-gray: Vegas's gold over its slate)
   const [h] = parseHsl(desk.meterColor({ color: '333f48', alternateColor: 'b4975a' }));
   assert.ok(h > 30 && h < 50);
@@ -168,8 +171,13 @@ test('meterColor never gives a green or a red, and never a dark one, whatever th
     if (c === null) continue;
     const hsl = parseHsl(c);
     assert.ok(!readsAsResult(hsl), `${c} reads as a result`);
-    assert.ok(hsl[2] >= 58, `${c} too dark`);
+    assert.ok(desk.lightness(c) >= 52, `${c} too dark`);
   }
+});
+
+test("meterColor is the app's one team color (colors.ts), its greens and reds passed over", () => {
+  assert.equal(desk.meterColor({ color: '003594', alternateColor: '869397' }), desk.sharedTeamColor(['003594', '869397']));
+  assert.equal(desk.meterColor({ color: '007a33', alternateColor: 'ba9653' }), desk.sharedTeamColor(['ba9653']));
 });
 
 test('pickTeamColor: a side by its abbreviation, a prop by its team id, a total by no one', () => {
