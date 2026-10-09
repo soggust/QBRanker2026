@@ -63,6 +63,11 @@ jobs:
       - name: Build depth charts
         run: node apps/nfl/scripts/build-depth.mjs
 
+      # The card's Field Map: where each player's throws, targets, runs and kicks went (nflverse's play-by-play;
+      # a failed run keeps yesterday's file)
+      - name: Build field maps
+        run: node apps/nfl/scripts/build-field-maps.mjs || echo "field maps skipped"
+
       # (Wikipedia's staffs: a failed fetch keeps yesterday's file)
       - name: Build coaching staffs
         run: node apps/nfl/scripts/build-coaches.mjs || echo "coaches skipped"

@@ -138,8 +138,8 @@ async function main() {
   run([scriptFile], { SEASON: String(current) });
 
   // (the finished season's other files, by the sport's builders that keep one per season: the NFL's depth
-  // charts and staffs, the NBA's and MLB's staffs, the NHL's game logs)
-  for (const builder of ["build-depth.mjs", "build-coaches.mjs", "backfill-game-logs.mjs"]) {
+  // charts, field maps and staffs, the NBA's and MLB's staffs, the NHL's game logs)
+  for (const builder of ["build-depth.mjs", "build-field-maps.mjs", "build-coaches.mjs", "backfill-game-logs.mjs"]) {
     const file = path.join(ROOT, "apps", sport, "scripts", builder);
     if (existsSync(file)) run([file, String(current)]);
   }
