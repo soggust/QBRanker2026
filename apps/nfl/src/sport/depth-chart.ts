@@ -14,7 +14,7 @@ interface DepthFile {
   front: string | null;
   // its main personnel: how many backs, tight ends and receivers it had on the field (from the snap counts:
   // 2012 on)
-  personnel: { rb: number; te: number; wr: number } | null;
+  personnel: { rb: number; te: number; wr: number; avg?: { rb: number; te: number; wr: number } } | null;
   slots: { side: 'offense' | 'defense' | 'special'; key: string; abb: string; name: string; depth: string[] }[];
   players: Record<
     string,
@@ -63,6 +63,24 @@ const DEFENSE_43: Record<string, [number, number]> = {
   LCB8: [6, 64], SS9: [63, 18], FS10: [37, 14], RCB11: [94, 64], NB12: [17, 40],
 };
 const OLINE = new Set(['LT', 'LG', 'C', 'RG', 'RT']);
+
+// Each spot's position group, and the groups a spot borrows a healthy player from when its own chart has
+// none, nearest first (the Current knob's: a back at fullback, any lineman's backup on the line, a safety
+// at corner)
+const GROUP: Record<string, string> = {
+  X: 'WR', Z: 'WR', SLOT: 'WR', LT: 'OL', LG: 'OL', C: 'OL', RG: 'OL', RT: 'OL', QB: 'QB', TE: 'TE', TE2: 'TE', RB: 'RB', FB: 'FB',
+};
+const NEAR: Record<string, string[]> = {
+  WR: ['WR', 'TE', 'RB'], OL: ['OL'], QB: ['QB'], TE: ['TE', 'FB', 'WR'], RB: ['RB', 'FB', 'WR'], FB: ['FB', 'RB', 'TE'],
+  DL: ['DL', 'LB'], LB: ['LB', 'DL', 'DB'], DB: ['DB'],
+};
+
+// The groupings the field can draw (backs, tight ends, receivers: 11, 12, 21, 22), and how far one is from
+// the team's average on the field (none known: 11 first, then as listed)
+const GROUPINGS: [number, number, number][] = [[1, 1, 3], [1, 2, 2], [2, 1, 2], [2, 2, 1]];
+function personnelGap([rb, te, wr]: [number, number, number], avg: { rb: number; te: number; wr: number } | undefined): number {
+  return avg ? (rb - avg.rb) ** 2 + (te - avg.te) ** 2 + (wr - avg.wr) ** 2 : 0;
+}
 
 // The usage list's groups, in order
 const UNITS: [string, string][] = [
@@ -119,8 +137,7 @@ export async function loadDepthChart(logo: string, position: string, season: num
 
   // The offense in its main personnel: three receivers (X, the slot, Z), or two with a second tight end
   // (on the line's left) or a fullback (behind the quarterback), as the team mostly played
-  const offense = (): DepthSide => {
-    const p = file.personnel ?? { rb: 1, te: 1, wr: 3 };
+  const offenseSlots = (p: { rb: number; te: number; wr: number }): DepthSlot[] => {
     const te = chain('TE10');
     const rb = chain('RB11');
     const fb = chain('FB12');
@@ -138,9 +155,10 @@ export async function loadDepthChart(logo: string, position: string, season: num
     ];
     if (p.wr >= 2) spots.push(['Z', 'Z', 'Wide Receiver', chain('WR2')]);
     if (p.wr >= 3) spots.push(['SLOT', 'SLOT', 'Slot Receiver', chain('WR8')]);
-    if (p.te >= 2 && te[1]) spots.push(['TE2', 'TE', 'Tight End', [te[1]]]);
-    if (p.rb >= 2) spots.push(['FB', 'FB', 'Fullback', fb.length ? fb : rb[1] ? [rb[1]] : []]);
-    const slots: DepthSlot[] = spots.map(([key, label, name, depth]) => ({
+    // (the second tight end and a back at fullback with the ones behind them too: who'd fill in)
+    if (p.te >= 2 && te[1]) spots.push(['TE2', 'TE', 'Tight End', te.slice(1)]);
+    if (p.rb >= 2) spots.push(['FB', 'FB', 'Fullback', fb.length ? fb : rb.slice(1)]);
+    return spots.map(([key, label, name, depth]) => ({
       key,
       label,
       name,
@@ -148,8 +166,14 @@ export async function loadDepthChart(logo: string, position: string, season: num
       // (a lone back closer behind the quarterback; with a fullback, the I: deeper)
       y: key === 'RB' && p.rb < 2 ? 68 : SPOT[key][1],
       focus: position === 'OL' ? OLINE.has(key) : undefined,
+      group: GROUP[key],
+      near: NEAR[GROUP[key]],
       depth: depth.map((id) => player(id, 'offense')),
     }));
+  };
+  const offense = (): DepthSide => {
+    const p = file.personnel ?? { rb: 1, te: 1, wr: 3 };
+    const slots = offenseSlots(p);
     // (an O-Line card: its five alone)
     if (position === 'OL') {
       const line = slots.filter((s) => OLINE.has(s.key)).map((s) => ({ ...s, y: 50 }));
@@ -161,13 +185,19 @@ export async function loadDepthChart(logo: string, position: string, season: num
       set: file.personnel ? `${p.rb}${p.te} Personnel` : null,
       los: OFFENSE_LOS,
       slots,
+      // (the groupings it could line up in instead, the nearest its average on the field first: the
+      // snap counts give only that average, not each grouping's share; none known, 11 personnel first)
+      others: GROUPINGS.filter(([rb, te, wr]) => rb !== p.rb || te !== p.te || wr !== p.wr)
+        .map((g) => ({ g, err: personnelGap(g, file.personnel?.avg) }))
+        .sort((a, b) => a.err - b.err)
+        .map(({ g: [rb, te, wr] }) => ({ set: `${rb}${te} Personnel`, slots: offenseSlots({ rb, te, wr }) })),
     };
   };
 
-  const defense = (): DepthSide => {
-    const front = file.front ?? '4-3';
-    const layout = front === '3-4' ? DEFENSE_34 : DEFENSE_43;
-    const listed = file.slots.filter((s) => s.side === 'defense' && layout[s.key]);
+  const front = file.front ?? '4-3';
+  const layout = front === '3-4' ? DEFENSE_34 : DEFENSE_43;
+  type Listed = DepthFile['slots'][number];
+  const defenseSet = (listed: Listed[]): { set: string; slots: DepthSlot[] } => {
     // (a defense whose base has only two linebackers, or two down linemen: a nickel, its fifth defensive
     // back one of the eleven, and its formation by count, "Nickel 4-2-5")
     const nickel = listed.some((s) => s.key === 'NB12') && listed.filter((s) => s.key !== 'NB12').length < 11;
@@ -179,17 +209,36 @@ export async function loadDepthChart(logo: string, position: string, season: num
       const i = backers.indexOf(s);
       return i < 0 || !nickel ? layout[s.key][0] : backers.length === 1 ? 50 : 35 + (30 * i) / (backers.length - 1);
     };
-    const slots: DepthSlot[] = listed.map((s) => ({
-      key: s.key,
-      label: s.key === 'NB12' ? 'NICKEL' : s.abb,
-      name: s.name,
-      x: spread(s),
-      y: layout[s.key][1],
-      sub: s.key === 'NB12' && !nickel,
-      depth: s.depth.map((id) => player(id, 'defense')),
-    }));
-    const set = nickel ? `Nickel ${count('DL')}-${count('LB')}-${count('DB')}` : `Base ${front}`;
-    return { id: 'defense', title: 'Defense', set, los: DEFENSE_LOS, slots };
+    const slots: DepthSlot[] = listed.map((s) => {
+      const depth = s.depth.map((id) => player(id, 'defense'));
+      return {
+        key: s.key,
+        label: s.key === 'NB12' ? 'NICKEL' : s.abb,
+        name: s.name,
+        x: spread(s),
+        y: layout[s.key][1],
+        // (the nickel beside a base front: a sub package's spot, quieter; not when its starter's on the
+        // field most snaps anyway, a safety who plays it every down)
+        sub: s.key === 'NB12' && !nickel && !((depth[0]?.snaps ?? 0) >= 0.5),
+        group: unit(s.key),
+        near: NEAR[unit(s.key)],
+        depth,
+      };
+    });
+    return { set: nickel ? `Nickel ${count('DL')}-${count('LB')}-${count('DB')}` : `Base ${front}`, slots };
+  };
+  const defense = (): DepthSide => {
+    const listed = file.slots.filter((s) => s.side === 'defense' && layout[s.key]);
+    const base = defenseSet(listed);
+    // (a base front with a nickel on the chart: its nickel, one linebacker off for the fifth back, the
+    // least used first, for when a linebacker's spot can't be filled)
+    const nickelOk = listed.some((s) => s.key === 'NB12') && listed.length >= 12;
+    const snapsOf = (s: Listed) => file.players[s.depth[0]]?.def ?? 0;
+    const others = !nickelOk ? [] : listed
+      .filter((s) => /LB/.test(s.key))
+      .sort((a, b) => snapsOf(a) - snapsOf(b))
+      .map((lb) => defenseSet(listed.filter((s) => s !== lb)));
+    return { id: 'defense', title: 'Defense', ...base, los: DEFENSE_LOS, others };
   };
 
   // An O-Line or Defense card keeps to its own unit: its spots, its players, its changes; a team's
@@ -200,8 +249,8 @@ export async function loadDepthChart(logo: string, position: string, season: num
   const special = unit ? [] : [
     ['K', 'PK'], ['P', 'P'], ['LS', 'LS'], ['KR', 'KR'], ['PR', 'PR'],
   ].map(([label, key]) => {
-    const id = file.slots.find((s) => s.side === 'special' && s.key === key)?.depth[0];
-    return { label, player: id ? player(id, 'special') : null };
+    const depth = (file.slots.find((s) => s.side === 'special' && s.key === key)?.depth ?? []).map((id) => player(id, 'special'));
+    return { label, player: depth[0] ?? null, depth };
   });
 
   // Who's played: everyone with a snap or on the chart, by unit, the most-used first (his own side's
@@ -226,7 +275,7 @@ export async function loadDepthChart(logo: string, position: string, season: num
   };
   const LABEL: Record<string, string> = { WR1: 'X', WR2: 'Z', WR8: 'SLOT', NB12: 'NICKEL' };
   const ours = (c: { side: string; key: string }) =>
-    unit === 'DEF' ? c.side === 'defense' : unit === 'OL' ? c.side === 'offense' && OLINE.has(c.key.replace(/d+$/, '')) : true;
+    unit === 'DEF' ? c.side === 'defense' : unit === 'OL' ? c.side === 'offense' && OLINE.has(c.key.replace(/\d+$/, '')) : true;
   const timeline = (file.timeline ?? []).map((w) => ({
     week: w.week,
     changes: w.changes.filter(ours).map((c) => ({
@@ -257,5 +306,5 @@ export async function loadDepthChart(logo: string, position: string, season: num
 
   // (an O-Line or Defense card's list is its unit's players, not the whole roster)
   const usageTitle = unit ? 'Players' : undefined;
-  return { asOf: file.at, sides, special, usage, usageTitle, timeline: timeline.filter((w) => w.changes.length), coaches, teamGames: file.teamGames };
+  return { asOf: file.at, sides, special, injuries: current, usage, usageTitle, timeline: timeline.filter((w) => w.changes.length), coaches, teamGames: file.teamGames };
 }

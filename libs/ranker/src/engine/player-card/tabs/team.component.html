@@ -8,14 +8,37 @@
 } @else if (d === 'error') {
   <p class="card-note">The depth chart couldn't be loaded.</p>
 } @else {
+  <!-- The Current / Starters knob on each formation's bar (the NFL's: its injury report, depth-lineup.ts):
+       who's playing now (nobody the report keeps out on the field: the next healthy one at his spot, one
+       borrowed from the nearest group, or the next grouping), or the chart's starters; a past season has no
+       report, the knob off on its starters. The sport's own pills, sized for the bar -->
+  @let mode = cards.depthModeOf(d);
+  <ng-template #modes>
+    @if (d.injuries) {
+      <button type="button" class="game-filter small" [class.active]="mode === 'current'" [attr.aria-pressed]="mode === 'current'" title="Who's playing now: anyone Out, Doubtful, on injured reserve or suspended replaced by the next healthy player" (click)="cards.depthMode = 'current'">Current</button>
+      <button type="button" class="game-filter small" [class.active]="mode === 'starters'" [attr.aria-pressed]="mode === 'starters'" title="The depth chart's starters, hurt or not (their injury report flags on them)" (click)="cards.depthMode = 'starters'">Starters</button>
+    } @else {
+      <button type="button" class="game-filter small off" aria-disabled="true">Current</button>
+      <button type="button" class="game-filter small active off" aria-pressed="true" aria-disabled="true">Starters</button>
+    }
+  </ng-template>
+  @let modesTitle = d.injuries ? null : 'No injury report for a past season: the depth chart as it stood';
+
   @for (side of d.sides; track side.id) {
-    <!-- (the first, the card's own unit, open) -->
+    @let f = cards.formation(d, side);
+    @let line = f.lineup;
+    <!-- (the first, the card's own unit, open; its grouping the one drawn, its hover why when it isn't the main one) -->
     <card-panel
+      #panel
       class="tab-card depth-panel group-results"
       [startOpen]="$first"
-      [label]="side.title + (side.set ? ' · ' + side.set : '')"
+      [label]="side.title + (f.set ? ' · ' + f.set : '')"
+      [hint]="f.note ?? ''"
       [icon]="side.icon ?? (side.id === 'offense' ? 'sports_football' : 'shield')"
     >
+      @if (d.injuries !== undefined && panel.isOpen) {
+        <span panel-actions class="depth-modes" role="group" aria-label="The formation's players" [title]="modesTitle ?? ''"><ng-container *ngTemplateOutlet="modes" /></span>
+      }
       <div
         class="depth-field"
         [ngClass]="'surface-' + (side.surface ?? 'field')"
@@ -68,9 +91,11 @@
         @if (side.los !== null) {
           <span class="depth-los" aria-hidden="true"></span>
         }
-        @for (slot of side.slots; track slot.key) {
-          @let starter = slot.depth[0];
+        @for (slot of f.slots; track slot.key) {
+          @let at = line[slot.key];
+          @let starter = at.player;
           @let open = cards.depthOpen === side.id + slot.key;
+          <!-- (a sub package's spot, or not the card's focus: its chip quieter, never its popover) -->
           <div
             class="depth-slot"
             [class.sub]="slot.sub"
@@ -82,7 +107,14 @@
             [style.left.%]="slot.x"
             [style.top.%]="slot.y"
           >
-            <button type="button" class="depth-chip" [attr.aria-expanded]="open" [title]="slot.name" (click)="cards.toggleDepthSlot(side.id + slot.key)">
+            <!-- (one filling in for a starter who's out drawn like any starter: the hover and the popover say for whom) -->
+            <button
+              type="button"
+              class="depth-chip"
+              [attr.aria-expanded]="open"
+              [title]="slot.name + (slot.sub ? ' (a sub package spot, not in the base set)' : '') + (at.note ? ' · ' + at.note : '')"
+              (click)="cards.toggleDepthSlot(side.id + slot.key)"
+            >
               <span class="depth-pos">{{ slot.label }}</span>
               <span class="depth-head">
                 @if (starter?.headshot) {
@@ -99,12 +131,15 @@
                 <span class="depth-snaps">{{ starter!.snaps | percent: '1.0-0' }}</span>
               }
             </button>
-            <!-- (open: everyone at the spot, by depth) -->
+            <!-- (open: everyone at the spot, by depth; under its name, whom the one on the chip is in for) -->
             @if (open && slot.depth.length) {
               <div class="depth-pop">
                 <b>{{ slot.name }}</b>
+                @if (at.note) {
+                  <small class="depth-pop-note">{{ starter!.short }} {{ at.note.charAt(0).toLowerCase() + at.note.slice(1) }}</small>
+                }
                 @for (p of slot.depth; track $index) {
-                  <span class="depth-pop-row">
+                  <span class="depth-pop-row" [title]="at.inFor && $index === at.depth ? at.note : ''">
                     <i>{{ $index + 1 }}</i>
                     @if (p.link; as link) {<button type="button" class="depth-link" [title]="'Open ' + p.name" (click)="$event.stopPropagation(); cards.openLinked(link, c.season)">{{ p.name }}</button>} @else {<span>{{ p.name }}</span>}
                     @if (p.status) {
@@ -123,22 +158,31 @@
 
   <!-- (the team's card: an O-Line or Defense card keeps to its own unit) -->
   @if (d.special.length) {
-    <card-panel class="tab-card depth-special group-results" [label]="d.specialTitle ?? 'Special Teams'" icon="sports">
+    @let specialLine = cards.specialLineup(d);
+    <card-panel #specialPanel class="tab-card depth-special group-results" [label]="d.specialTitle ?? 'Special Teams'" icon="sports">
+      @if (d.injuries !== undefined && specialPanel.isOpen) {
+        <span panel-actions class="depth-modes" role="group" aria-label="The special teams' players" [title]="modesTitle ?? ''"><ng-container *ngTemplateOutlet="modes" /></span>
+      }
       <div class="group-body depth-special-row">
         @for (s of d.special; track s.label) {
+          @let at = specialLine[s.label];
+          @let sp = at.player;
           <span class="depth-special-item">
             <span class="depth-pos">{{ s.label }}</span>
-            <span class="depth-head small" [class.face-link]="s.player?.link" [title]="s.player?.link ? 'Open ' + s.player!.name : ''" (click)="openLink(s.player?.link, c.season)">
-              @if (s.player?.headshot) {
-                <img [src]="s.player!.headshot" alt="" loading="lazy" (error)="s.player!.headshot = null" />
+            <span class="depth-head small" [class.face-link]="sp?.link" [title]="(sp?.link ? 'Open ' + sp!.name : '') + (at.note ? (sp?.link ? ' · ' : '') + at.note : '')" (click)="openLink(sp?.link, c.season)">
+              @if (sp?.headshot) {
+                <img [src]="sp!.headshot" alt="" loading="lazy" (error)="sp!.headshot = null" />
               } @else {
-                <span class="depth-initial">{{ s.player?.name?.[0] ?? '?' }}</span>
+                <span class="depth-initial">{{ sp?.name?.[0] ?? '?' }}</span>
+              }
+              @if (sp?.status; as status) {
+                <span class="depth-status" [ngClass]="'s-' + status.toLowerCase()" [title]="sp!.statusText + (sp!.injury ? ' (' + sp!.injury + ')' : '')">{{ status }}</span>
               }
             </span>
-            <span class="depth-name">{{ s.player?.short ?? 'Open' }}</span>
+            <span class="depth-name">{{ sp?.short ?? 'Open' }}</span>
             <!-- (his usage: a second unit's minutes, a specialist's snaps) -->
-            @if (s.player?.snaps != null) {
-              <span class="depth-snaps">{{ s.player!.snaps | percent: '1.0-0' }}</span>
+            @if (sp?.snaps != null) {
+              <span class="depth-snaps">{{ sp!.snaps | percent: '1.0-0' }}</span>
             }
           </span>
         }

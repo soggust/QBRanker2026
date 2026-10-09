@@ -15,7 +15,8 @@ import { DEFAULT_SPORT_SETTINGS, SKILL_UNITS, defaultRanking, statValue } from '
 import { StatReader } from '@ranker/engine/stat-reader';
 import { SeasonDataService } from '@ranker/engine/season-data.service';
 import { NUMBER, grade, innings, ordinal, rankPct, rankTone } from '@ranker/core/format';
-import type { DepthPlayer, DepthView } from './depth-chart';
+import type { DepthPlayer, DepthSide, DepthView } from './depth-chart';
+import { DepthMode, Formation, SlotLineup, sideFormation, slotLineup } from './depth-lineup';
 import type { ZoneView } from './zones';
 import type { FieldMapView } from './field-map';
 import { CardOverview, CardSeason, CardStat, CardTab, CareerSeason, PlayerCard, SeasonContext } from './card.model';
@@ -242,8 +243,8 @@ export class PlayerCards {
     const link = (p: DepthPlayer | null | undefined) => {
       if (p) p.link = index.get(p.id) ?? (p.espnId ? index.get(`QB-${p.espnId}`) : undefined) ?? null;
     };
-    for (const side of view.sides) for (const slot of side.slots) slot.depth.forEach(link);
-    view.special.forEach((s) => link(s.player));
+    for (const side of view.sides) for (const f of [side, ...(side.others ?? [])]) for (const slot of f.slots) slot.depth.forEach(link);
+    view.special.forEach((s) => (s.depth ?? [s.player]).forEach(link));
     for (const g of view.usage) g.rows.forEach(link);
     for (const w of view.timeline) for (const ch of w.changes) [ch.from, ch.to].forEach(link);
     // (a head coach by his name, on the coaches' tab)
@@ -296,6 +297,34 @@ export class PlayerCards {
 
   toggleDepthSlot(key: string): void {
     this.depthOpen = this.depthOpen === key ? null : key;
+  }
+
+  // The formations' Current / Starters knob (kept across cards for the visit): who's playing now, the ones
+  // the injury report keeps out replaced by the next healthy man (depth-lineup.ts), or the chart's starters.
+  // A past season (no injury report) is always its starters
+  depthMode: DepthMode = 'current';
+  private formations = new WeakMap<object, { mode: DepthMode; formation: Formation }>();
+  private specials = new WeakMap<object, { mode: DepthMode; lineup: Record<string, SlotLineup> }>();
+  depthModeOf(view: DepthView): DepthMode {
+    return view.injuries ? this.depthMode : 'starters';
+  }
+  // (a side as drawn: its grouping, its chips by slot key)
+  formation(view: DepthView, side: DepthSide): Formation {
+    const mode = this.depthModeOf(view);
+    const kept = this.formations.get(side);
+    if (kept?.mode === mode) return kept.formation;
+    const formation = sideFormation(side, mode);
+    this.formations.set(side, { mode, formation });
+    return formation;
+  }
+  // (the special teams' chips by label, each spot its own: a returner can be at both)
+  specialLineup(view: DepthView): Record<string, SlotLineup> {
+    const mode = this.depthModeOf(view);
+    const kept = this.specials.get(view.special);
+    if (kept?.mode === mode) return kept.lineup;
+    const lineup = Object.fromEntries(view.special.map((s) => [s.label, slotLineup(s.depth ?? (s.player ? [s.player] : []), mode)]));
+    this.specials.set(view.special, { mode, lineup });
+    return lineup;
   }
 
   // A name in the table: their card for the table's season, ranked as the table has them (always on

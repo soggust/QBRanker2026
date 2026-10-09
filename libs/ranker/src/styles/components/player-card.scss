@@ -2934,27 +2934,16 @@
   top: -4px;
 }
 
-// (the Team tab's Current / Starters knob: the sport's own pills (.game-filter, below), sized for the
-// panel's bar; a past season's off, on its starters, its hover saying why)
+// (the Team tab's Current / Starters knob: the sport's own small pills, .game-filter.small below; a past
+// season's off, on its starters, its hover saying why)
 .depth-modes {
   gap: 6px !important;
   margin-right: 8px;
-
-  .game-filter {
-    font-size: 10.5px;
-    padding: 4px 12px;
-  }
 
   .game-filter.off,
   .game-filter.off:hover {
     cursor: default;
     opacity: 0.4;
-  }
-}
-
-@media (max-width: 480px) {
-  .depth-modes .game-filter {
-    padding: 4px 9px;
   }
 }
 

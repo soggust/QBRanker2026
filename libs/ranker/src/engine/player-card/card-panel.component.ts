@@ -22,14 +22,14 @@ import { Component, EventEmitter, Input, Output, ViewEncapsulation } from '@angu
           @if (icon) {
             <mat-icon class="group-bar-icon" [fontIcon]="icon"></mat-icon>
           }
-          <span>{{ label }}</span>
+          <span [attr.title]="hint || null">{{ label }}</span>
         </button>
       } @else {
         <span class="panel-title">
           @if (icon) {
             <mat-icon class="group-bar-icon" [fontIcon]="icon"></mat-icon>
           }
-          <span>{{ label }}</span>
+          <span [attr.title]="hint || null">{{ label }}</span>
         </span>
       }
       <!-- (the page's own controls on the bar's right: the filter menu's eye and drag grip) -->
@@ -48,6 +48,8 @@ import { Component, EventEmitter, Input, Output, ViewEncapsulation } from '@angu
 export class CardPanelComponent {
   @Input() label = '';
   @Input() icon = '';
+  // (the label's hover, when it needs one: why a formation isn't the team's main one)
+  @Input() hint = '';
   // (off: a title bar, no folding)
   @Input() expandable = true;
   // (the page's: bound, the page decides; left alone, the panel keeps its own, from startOpen)

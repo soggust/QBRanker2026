@@ -44,6 +44,10 @@ export interface DepthSlot {
   sub?: boolean;
   // (the card's focus: the O-line card's linemen)
   focus?: boolean;
+  // (its position group, "OL", and the groups it borrows a healthy player from when its own chart has
+  // none, nearest first, its own included: the Current knob's, depth-lineup.ts)
+  group?: string;
+  near?: string[];
   depth: DepthPlayer[];
 }
 
@@ -57,6 +61,9 @@ export interface DepthSide {
   // the line of scrimmage, y in percent (none: no line, a court or a rink's own markings)
   los: number | null;
   slots: DepthSlot[];
+  // its other groupings, the most used first (the Current knob's when a spot of the main one can't be
+  // filled: a team without a healthy fullback for its 21 personnel, a base defense in its nickel)
+  others?: { set: string | null; slots: DepthSlot[] }[];
   // what it's drawn on: a football field (the default), a basketball half court, a rink, a diamond, or
   // a plain chalkboard
   surface?: 'field' | 'court' | 'rink' | 'diamond' | 'plain';
@@ -96,7 +103,11 @@ export interface DepthView {
   // when the depth chart was last updated (ISO)
   asOf: string;
   sides: DepthSide[];
-  special: { label: string; player: DepthPlayer | null }[];
+  // (a spot's whole chart too, when the sport has it: the Current knob's next man up)
+  special: { label: string; player: DepthPlayer | null; depth?: DepthPlayer[] }[];
+  // the injury report: true for the season being played (the formations' Current / Starters knob,
+  // depth-lineup.ts), false for a past one (the knob shown off), unset for a sport without one
+  injuries?: boolean;
   // the panels' titles when not the football ones ("Special Teams", "Full Roster")
   specialTitle?: string;
   usageTitle?: string;

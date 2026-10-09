@@ -2,7 +2,8 @@
 // shares, the game log's view (its columns' looks, the outcomes, the chart), the game's injury report (a
 // player back before game day left off), how a highlight plays (the NFL's open on YouTube), and the vs
 // Position breakdown built from a season's real rows (the NFL's defenses, the NHL's teams), and the NFL's Field
-// Map read from its real files (each chart's total the row's own in the grid).
+// Map read from its real files (each chart's total the row's own in the grid), and the Team tab's formations
+// by the injury report (the ones out passed over for the next man up, or the chart's starters).
 import { test, before } from 'node:test';
 import assert from 'node:assert/strict';
 import path from 'node:path';
@@ -391,4 +392,105 @@ test("Field Map: a part's tone against the league's, faded by few plays, flipped
   assert.equal(spread([1, 2, 3, 99].map((value, i) => ({ value, plays: i < 3 ? 20 : 2 })), 12), Math.sqrt(2 / 3), 'the thin ones left out');
   // (the field: a stripe every other 5 yards, the 10 and 20 lines marked)
   assert.equal(nfl.PASS_FIELD.lines.filter((l) => l.band).length, 2);
+});
+
+// ---- the Team tab's formations by the injury report (player-card/depth-lineup.ts)
+
+// (a chart's player: his id, his short name, his flag; a spot: its group, the groups it borrows from)
+const man = (id, status = null) => ({ id, short: id, name: id, status, statusText: status, injury: null, snaps: null, games: 0, headshot: null, espnId: null });
+const spot = (key, group, near, ...depth) => ({ key, label: key, name: key, x: 0, y: 0, group, near, depth });
+const ids = (lineup) => Object.fromEntries(Object.entries(lineup).map(([k, l]) => [k, l.player?.id ?? null]));
+
+test('depth lineup: who the injury report keeps off the field (Out, Doubtful, IR, PUP, suspended; not Questionable)', () => {
+  const { sidelined } = nfl;
+  for (const s of ['O', 'D', 'IR', 'PUP', 'SUSP', 'IL']) assert.equal(sidelined(man('a', s)), true, s);
+  assert.equal(sidelined(man('a', 'Q')), false);
+  assert.equal(sidelined(man('a')), false);
+  assert.equal(sidelined(null), false);
+  // (a status the loader didn't shorten, by its words)
+  assert.equal(sidelined({ ...man('a', 'Reserve/COVID-19'), statusText: 'Reserve/COVID-19' }), true);
+  assert.equal(sidelined({ ...man('a', 'Day-To-Day'), statusText: 'Day-To-Day' }), false);
+});
+
+test('depth lineup: a starter out shows his listed backup (the next healthy one), in for him; Starters shows the starter', () => {
+  const { slotLineup } = nfl;
+  const qb = [man('Jackson', 'O'), man('Huntley', 'D'), man('Fagnano'), man('Thompson')];
+  const now = slotLineup(qb, 'current');
+  assert.deepEqual([now.player.id, now.depth, now.inFor.id, now.note], ['Fagnano', 2, 'Jackson', 'In for Jackson (O)']);
+  const chart = slotLineup(qb, 'starters');
+  assert.deepEqual([chart.player.id, chart.depth, chart.inFor, chart.note], ['Jackson', 0, null, null]);
+  // (a questionable starter plays; a hurt one with nobody healthy behind him never shows: nobody; nobody
+  // listed at all, none)
+  assert.equal(slotLineup([man('Flowers', 'Q'), man('Moore')], 'current').player.id, 'Flowers');
+  const alone = slotLineup([man('Stanley', 'IR'), man('Vinson', 'O')], 'current');
+  assert.deepEqual([alone.player, alone.inFor.id], [null, 'Stanley']);
+  assert.equal(slotLineup([man('Stanley', 'IR')], 'starters').player.id, 'Stanley');
+  assert.deepEqual(slotLineup([], 'current'), { player: null, depth: 0, inFor: null, note: null });
+  // (a backup already on the field elsewhere passed over)
+  assert.equal(slotLineup([man('Jurgens', 'O'), man('Ioane'), man('Pocic')], 'current', new Set(['Ioane'])).player.id, 'Pocic');
+});
+
+test('depth lineup: a side fills a hole from its own chart first, nobody at two spots', () => {
+  const { sideLineup } = nfl;
+  // (the center out: his backup starts at right guard, so the next one in; a tight end out: the second
+  // tight end starts at his own spot, the third fills in)
+  const slots = [
+    spot('C', 'OL', ['OL'], man('Jurgens', 'O'), man('Ioane'), man('Pocic')),
+    spot('RG', 'OL', ['OL'], man('Ioane'), man('Vorhees')),
+    spot('TE', 'TE', ['TE'], man('Andrews', 'IR'), man('Hibner'), man('Cuevas')),
+    spot('TE2', 'TE', ['TE'], man('Hibner'), man('Cuevas')),
+    spot('LG', 'OL', ['OL'], man('Simpson', 'Q'), man('Vorhees')),
+  ];
+  const now = sideLineup(slots, 'current');
+  assert.deepEqual(ids(now), { C: 'Pocic', RG: 'Ioane', TE: 'Cuevas', TE2: 'Hibner', LG: 'Simpson' });
+  assert.equal(now.C.note, 'In for Jurgens (O)');
+  assert.equal(now.RG.inFor, null);
+  const chart = sideLineup(slots, 'starters');
+  assert.deepEqual(ids(chart), { C: 'Jurgens', RG: 'Ioane', TE: 'Andrews', TE2: 'Hibner', LG: 'Simpson' });
+  assert.ok(Object.values(chart).every((l) => l.inFor === null));
+});
+
+test('depth lineup: a starter out with no listed backup borrows from the nearest group (a back at fullback, any lineman on the line, a safety at corner)', () => {
+  const { sideLineup, sidelined } = nfl;
+  const slots = [
+    spot('RB', 'RB', ['RB', 'FB', 'WR'], man('McCaffrey'), man('Black'), man('James')),
+    spot('FB', 'FB', ['FB', 'RB', 'TE'], man('Juszczyk', 'O')),
+    spot('RT', 'OL', ['OL'], man('McKivitz', 'IR')),
+    spot('LT', 'OL', ['OL'], man('Williams'), man('Lowe', 'O'), man('Cruz')),
+    spot('LCB', 'DB', ['DB'], man('Lenoir', 'SUSP')),
+    spot('SS', 'DB', ['DB'], man('Brown'), man('Mustapha')),
+  ];
+  const now = sideLineup(slots, 'current');
+  assert.deepEqual(ids(now), { RB: 'McCaffrey', FB: 'Black', RT: 'Cruz', LT: 'Williams', LCB: 'Mustapha', SS: 'Brown' });
+  assert.deepEqual([now.FB.depth, now.FB.note], [-1, 'In for Juszczyk (O)']);
+  assert.equal(now.LCB.inFor.id, 'Lenoir');
+  // (nobody out on the field in Current; every one of them on it in Starters)
+  assert.ok(Object.values(now).every((l) => !sidelined(l.player)));
+  assert.deepEqual(Object.values(sideLineup(slots, 'starters')).map((l) => l.player.id), ['McCaffrey', 'Juszczyk', 'McKivitz', 'Williams', 'Lenoir', 'Brown']);
+});
+
+test('depth formation: nobody healthy anywhere near a spot, the next grouping that can be fielded (Starters: the main one)', () => {
+  const { sideFormation } = nfl;
+  const common = [spot('QB', 'QB', ['QB'], man('Purdy')), spot('RB', 'RB', ['RB', 'FB'], man('McCaffrey')), spot('TE', 'TE', ['TE'], man('Kittle'))];
+  const wr = [spot('X', 'WR', ['WR'], man('Evans')), spot('Z', 'WR', ['WR'], man('Samuel'))];
+  // (21 personnel: the fullback out, nobody behind him, no back or tight end to spare)
+  const fullback = { ...spot('FB', 'FB', ['FB', 'RB', 'TE'], man('Juszczyk', 'O')), name: 'Fullback' };
+  const i21 = [...common, ...wr, fullback];
+  const p11 = [...common, ...wr, spot('SLOT', 'WR', ['WR'], man('Cooks'))];
+  const p12 = [...common, ...wr, spot('TE2', 'TE', ['TE'], man('Farrell', 'IR'))];
+  const side = { set: '21 Personnel', slots: i21, others: [{ set: '12 Personnel', slots: p12 }, { set: '11 Personnel', slots: p11 }] };
+  const now = sideFormation(side, 'current');
+  assert.equal(now.set, '11 Personnel');
+  assert.equal(now.note, 'No healthy fullback: their next most-used grouping');
+  assert.equal(now.lineup.SLOT.player.id, 'Cooks');
+  const chart = sideFormation(side, 'starters');
+  assert.deepEqual([chart.set, chart.note, chart.lineup.FB.player.id, chart.lineup.FB.player.status], ['21 Personnel', null, 'Juszczyk', 'O']);
+  // (a back to borrow: the main grouping kept, the back at fullback)
+  const deeper = [common[0], spot('RB', 'RB', ['RB', 'FB'], man('McCaffrey'), man('Black')), common[2], ...wr, fullback];
+  const borrow = sideFormation({ ...side, slots: deeper }, 'current');
+  assert.deepEqual([borrow.set, borrow.note, borrow.lineup.FB.player.id], ['21 Personnel', null, 'Black']);
+  // (no other grouping fields everyone: the one with the fewest open spots, the hole open, never the hurt one)
+  const stuck = sideFormation({ set: '21 Personnel', slots: i21, others: [{ set: '12 Personnel', slots: p12 }] }, 'current');
+  assert.equal(stuck.set, '21 Personnel');
+  assert.equal(stuck.lineup.FB.player, null);
 });
