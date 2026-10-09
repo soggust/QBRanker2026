@@ -67,6 +67,16 @@
     }
   </header>
 
+  <!-- (the sport on show: every panel, tile and list follows it) -->
+  <div class="desk-sports" role="group" aria-label="Sport">
+    <button type="button" class="desk-sport" [class.active]="!sport" [attr.aria-pressed]="!sport" (click)="setSport(null)">All</button>
+    @for (s of sports; track s) {
+      <button type="button" class="desk-sport" [class.active]="sport === s" [attr.aria-pressed]="sport === s" (click)="setSport(s)">
+        <img [src]="leagueLogo(s)" alt="" />{{ s.toUpperCase() }}
+      </button>
+    }
+  </div>
+
   @if (loading) {
     <p class="desk-note" role="status">Loading…</p>
   } @else if (!states.length) {
@@ -217,7 +227,7 @@
               @for (b of sorted('live', live, betValue); track b.id) {
                 @let score = b.event ? scores.get(b.event) : undefined;
                 <tr>
-                  <th>{{ b.sport.toUpperCase() }}</th>
+                  <th><img class="desk-league" [src]="leagueLogo(b.sport)" [alt]="b.sport.toUpperCase()" [title]="b.sport.toUpperCase()" /></th>
                   <td class="desk-left">{{ b.matchup }}</td>
                   <td class="desk-left" [class.desk-final]="score?.final">{{ score?.text ?? 'Under way' }}</td>
                   <td><b>{{ b.pick }}</b><small>{{ marketName(b.market) }}{{ intentOf(b) === 'action' ? ' · action' : '' }}</small></td>
@@ -253,7 +263,7 @@
             <tbody>
               @for (b of sorted('open', open, betValue); track b.id) {
                 <tr>
-                  <th>{{ b.sport.toUpperCase() }}</th>
+                  <th><img class="desk-league" [src]="leagueLogo(b.sport)" [alt]="b.sport.toUpperCase()" [title]="b.sport.toUpperCase()" /></th>
                   <td class="desk-left">{{ b.matchup }}</td>
                   <td>{{ b.start | date: 'EEE h:mm a' }}</td>
                   <td>{{ marketName(b.market) }}</td>
@@ -295,7 +305,7 @@
             <tbody>
               @for (b of sorted('recent', recent, betValue); track b.id) {
                 <tr>
-                  <th>{{ b.sport.toUpperCase() }}</th>
+                  <th><img class="desk-league" [src]="leagueLogo(b.sport)" [alt]="b.sport.toUpperCase()" [title]="b.sport.toUpperCase()" /></th>
                   <td class="desk-left">{{ b.matchup }}</td>
                   <td>{{ b.start | date: 'MMM d' }}</td>
                   <td><b>{{ b.pick }}</b><small>{{ marketName(b.market) }}{{ intentOf(b) === 'action' ? ' · action' : '' }}</small></td>

@@ -139,6 +139,15 @@ export interface Tally {
 
 const ESPN_LEAGUES: Record<string, string> = { nfl: 'football/nfl', nba: 'basketball/nba', nhl: 'hockey/nhl', mlb: 'baseball/mlb' };
 const SPORTS = ['nfl', 'nba', 'nhl', 'mlb'];
+const SPORT_KEY = 'deskSport';
+const readSport = (): string | null => {
+  try {
+    const saved = localStorage.getItem(SPORT_KEY);
+    return saved && SPORTS.includes(saved) ? saved : null;
+  } catch {
+    return null;
+  }
+};
 const MARKET_NAMES: Record<string, string> = { spread: 'Spread', total: 'Total', ml: 'Moneyline', prop: 'Props' };
 // (each sport's scoring unit, for a context term's size)
 const UNIT_WORDS: Record<string, string> = { nfl: 'pts', nba: 'pts', nhl: 'goals', mlb: 'runs' };
@@ -178,6 +187,36 @@ export class ModelDeskComponent implements OnInit, OnDestroy {
   // (play money: 1,000 to start, and 1,000 more whenever the balance would go under 0)
   readonly bankroll = 1000;
 
+  // The sport on show (the chips up top; null: every sport): the panels, the tiles and the lists are all built
+  // from its bets and state alone. Remembered on this browser.
+  readonly sports = SPORTS;
+  sport: string | null = readSport();
+  private allBets: ModelBet[] = [];
+  private allStates: ModelState[] = [];
+
+  setSport(sport: string | null): void {
+    this.sport = sport;
+    try {
+      if (sport) localStorage.setItem(SPORT_KEY, sport);
+      else localStorage.removeItem(SPORT_KEY);
+    } catch {
+      // (storage off: the choice lasts the visit)
+    }
+    this.pick();
+    this.build();
+    this.loadScores();
+  }
+
+  private pick(): void {
+    this.bets = this.sport ? this.allBets.filter((b) => b.sport === this.sport) : this.allBets;
+    this.states = this.sport ? this.allStates.filter((s) => s.sport === this.sport) : this.allStates;
+  }
+
+  // (a league's logo, ESPN's: in the chips and each bet's row)
+  leagueLogo(sport: string): string {
+    return `https://a.espncdn.com/i/teamlogos/leagues/500/${sport}.png`;
+  }
+
   overall!: Tally;
   bySport: (Tally & { state: ModelState | null })[] = [];
   byMarket: Tally[] = [];
@@ -210,8 +249,9 @@ export class ModelDeskComponent implements OnInit, OnDestroy {
     const files = await Promise.all(
       SPORTS.map(async (sport) => ({ sport, ledger: await get(`/${sport}/data/model/ledger.json`), state: (await get(`/${sport}/data/model/state.json`)) as ModelState | null })),
     );
-    this.states = files.map((f) => f.state).filter((s): s is ModelState => !!s);
-    this.bets = files.flatMap((f) => (f.ledger?.bets ?? []) as ModelBet[]);
+    this.allStates = files.map((f) => f.state).filter((s): s is ModelState => !!s);
+    this.allBets = files.flatMap((f) => (f.ledger?.bets ?? []) as ModelBet[]);
+    this.pick();
     this.build();
     this.loading = false;
     this.loadScores();

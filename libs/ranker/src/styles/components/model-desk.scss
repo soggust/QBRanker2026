@@ -339,3 +339,57 @@ card-panel {
 .desk-subtable {
   margin-top: 14px;
 }
+
+// The sport chips under the header (the Bets page's view pills, each with its league's logo): the desk shows
+// one sport, or all
+.desk-sports {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.desk-sport {
+  align-items: center;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 999px;
+  color: rgba(255, 255, 255, 0.75);
+  cursor: pointer;
+  display: inline-flex;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 800;
+  gap: 6px;
+  letter-spacing: 0.5px;
+  padding: 5px 14px;
+  text-transform: uppercase;
+  transition:
+    color 0.15s,
+    background 0.15s;
+
+  img {
+    height: 18px;
+    object-fit: contain;
+    width: 18px;
+  }
+
+  &:hover {
+    color: #fff;
+  }
+
+  &.active {
+    background: rgba(0, 0, 0, 0.6);
+    color: var(--scoreboard-led);
+    outline: 2px solid var(--scoreboard-led);
+    outline-offset: 2px;
+  }
+}
+
+// (a bet's league, by its logo, in the bet lists)
+.desk-league {
+  display: block;
+  height: 22px;
+  object-fit: contain;
+  width: 22px;
+}
