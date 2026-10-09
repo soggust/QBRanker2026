@@ -1,10 +1,11 @@
 // The card's Field Map (the NFL's, on the Overview: SPORT.fieldMap): a season by where on the field it
 // happened, from field-maps.json (apps/nfl/scripts/build-field-maps.mjs). A passer's throws, a catcher's
 // targets and what a defense allowed by zone (three across, four deep, looking downfield from behind the
-// offense); a runner's carries and what a defense allowed by lane; a kicker's field goals by distance; a
-// punter's punts down the field. Each part tinted against the league's in the same file (every team's plays
-// pooled), green the good side for the card's own row (a defense's weak spot red). Plain functions and the
-// charts' geometry (no Angular), so the tests read them as the card does.
+// offense); a runner's carries and what a defense allowed by lane; a kicker's field goals by distance (his
+// misses by how they missed, marked round the rings); a punter's punts down the field. Each part tinted
+// against the league's in the same file (every team's plays pooled), green the good side for the card's own
+// row (a defense's weak spot red). Plain functions and the charts' geometry (no Angular), so the tests read
+// them as the card does.
 
 export type FieldDepth = 'behind' | 'short' | 'mid' | 'deep';
 export type FieldSide = 'left' | 'middle' | 'right';
@@ -51,12 +52,18 @@ export interface FieldPunt {
   bands: { band: string; n: number }[];
 }
 
+// (a kick's misses by how: [wide left, wide right, short, blocked, other], the file's fields.miss order)
+export type KickMisses = number[];
+
 export interface FieldMapEntry {
   pass?: FieldZone[];
   targets?: FieldZone[];
   runs?: FieldLane[];
   fg?: FieldBand[];
+  // (each band's misses, in fg's order; files from before they were read have none)
+  fgMiss?: KickMisses[];
   xp?: { att: number; made: number };
+  xpMiss?: KickMisses;
   punt?: FieldPunt;
 }
 
@@ -85,7 +92,9 @@ interface PackedEntry {
   targets?: Packed[];
   runs?: Packed[];
   fg?: Packed[];
+  fgMiss?: Packed[];
   xp?: { att: number; made: number };
+  xpMiss?: Packed;
   punt?: Omit<FieldPunt, 'bands'> & { bands: number[] };
 }
 interface PackedSection {
@@ -114,7 +123,9 @@ function expandEntry(e: PackedEntry, fgBands: string[], puntBands: string[]): Fi
   if (e.targets) out.targets = e.targets.map(zone);
   if (e.runs) out.runs = e.runs.map(lane);
   if (e.fg) out.fg = e.fg.map((t, i) => ({ band: fgBands[i], att: t[0], made: t[1] }));
+  if (e.fgMiss) out.fgMiss = e.fgMiss;
   if (e.xp) out.xp = e.xp;
+  if (e.xpMiss) out.xpMiss = e.xpMiss;
   if (e.punt) out.punt = { ...e.punt, bands: e.punt.bands.map((n, i) => (typeof n === 'number' ? { band: puntBands[i], n } : (n as { band: string; n: number }))) };
   return out;
 }
@@ -569,7 +580,110 @@ export interface KickMapView {
   xp: string | null;
   xpTitle: string;
   posts: { x: number; y: number };
+  // (the misses, marked round the rings, and said under the chart; null: a file from before they were read)
+  misses: KickMissesView | null;
   aria: string;
+}
+
+// ---- a kicker's misses: each band's marked round its ring, wide left out past its left end, wide right past
+// its right (as he sees the posts), short, blocked and the rest inside it, a row after its makes over tries;
+// a count by a mark of more than one (a phone's: in its hover), all of them said in a line under the chart
+
+export const MISS_KINDS = ['left', 'right', 'short', 'blocked', 'other'] as const;
+export type MissKind = (typeof MISS_KINDS)[number];
+const MISS_WORDS: Record<MissKind, string> = { left: 'wide left', right: 'wide right', short: 'short', blocked: 'blocked', other: 'missed another way' };
+// (how far past a ring's end a wide one sits, along its arc: clear of the band's label; the row inside, its
+// marks and counts, after the ring's makes over tries, a hand-written figure about this wide)
+const WIDE_OUT = 12;
+const FIGURE = 2.9;
+const NEAR_MARK = 6;
+const NEAR_COUNT = 5;
+const NEAR_GAP = 3;
+
+export interface KickMissMark {
+  key: string;
+  kind: MissKind;
+  band: string;
+  n: number;
+  x: number;
+  y: number;
+  // (the count beside it, more than one; anchored away from the ring)
+  count: string;
+  nx: number;
+  ny: number;
+  anchor: 'start' | 'end';
+  // (its shape: a ball wide or the rest, a ball dropping short, a cross blocked)
+  d: string;
+  title: string;
+}
+
+export interface KickMissesView {
+  marks: KickMissMark[];
+  // ("2 wide right · 1 short", the extra points' apart; none: "No misses")
+  fg: string;
+  xp: string;
+  none: boolean;
+  aria: string;
+}
+
+// (a mark's shape at x, y)
+function missShape(kind: MissKind, x: number, y: number): string {
+  const r = 2.8;
+  const at = (dx: number, dy: number) => `${r1(x + dx)} ${r1(y + dy)}`;
+  if (kind === 'blocked') return `M${at(-2.6, -2.6)}L${at(2.6, 2.6)}M${at(2.6, -2.6)}L${at(-2.6, 2.6)}`;
+  if (kind === 'short') return `M${at(-3.2, -2.4)}H${r1(x + 3.2)}L${at(0, 3)}Z`;
+  return `M${at(-r, 0)}a${r} ${r} 0 1 0 ${2 * r} 0a${r} ${r} 0 1 0 ${-2 * r} 0Z`;
+}
+
+const yardsOf = (band: string) => (band === '<30' ? 'under 30 yds' : band === '60+' ? '60+ yds' : `${bandLabel(band)} yds`);
+const missList = (m: KickMisses | undefined) =>
+  MISS_KINDS.map((kind, i) => ({ kind, n: m?.[i] ?? 0 }))
+    .filter((k) => k.n)
+    .map((k) => `${k.n} ${k.kind === 'other' ? 'other' : MISS_WORDS[k.kind]}`)
+    .join(' · ');
+
+// The misses' marks and words (bands: the field goal bands' names, fgMiss's order); null when the file has
+// no misses to read
+// (mains: each ring's makes over tries as it reads, "9/11": the row inside goes after it)
+export function kickMisses(bands: string[], fgMiss: KickMisses[] | undefined, xpMiss?: KickMisses, mains: string[] = []): KickMissesView | null {
+  if (!fgMiss) return null;
+  const marks: KickMissMark[] = [];
+  bands.forEach((band, i) => {
+    const m = fgMiss[i] ?? [];
+    const r0 = RING_IN + i * RING_STEP;
+    const rm = r0 + RING_STEP / 2;
+    const title = (kind: MissKind, n: number) => `${n} ${MISS_WORDS[kind]} from ${yardsOf(band)}`;
+    // (wide: out past the ring's ends, at its middle)
+    for (const [k, side] of [[0, -1], [1, 1]] as const) {
+      const n = m[k] ?? 0;
+      if (!n) continue;
+      const a = side * (RING_ANGLE + WIDE_OUT / rm);
+      const x = r1(POSTS.x + rm * Math.sin(a));
+      const y = r1(POSTS.y + rm * Math.cos(a));
+      const kind = MISS_KINDS[k];
+      marks.push({ key: `${band}-${kind}`, kind, band, n, x, y, count: n > 1 ? String(n) : '', nx: r1(x + side * 5.5), ny: r1(y + 3), anchor: side < 0 ? 'end' : 'start', d: missShape(kind, x, y), title: title(kind, n) });
+    }
+    // (short, blocked, other: a row inside the ring, after its makes over tries)
+    const near = [2, 3, 4].filter((k) => m[k]).map((k) => ({ kind: MISS_KINDS[k], n: m[k] }));
+    // (each a mark and, more than one, its count after it)
+    const widths = near.map((k) => NEAR_MARK + (k.n > 1 ? NEAR_COUNT : 0));
+    let left = POSTS.x + (mains[i] ?? '').length * FIGURE + 4;
+    near.forEach((k, j) => {
+      const x = left + NEAR_MARK / 2;
+      const y = r1(POSTS.y + rm - 3);
+      marks.push({ key: `${band}-${k.kind}`, kind: k.kind, band, n: k.n, x: r1(x), y, count: k.n > 1 ? String(k.n) : '', nx: r1(x + NEAR_MARK / 2 + 1), ny: r1(y + 2.8), anchor: 'start', d: missShape(k.kind, x, y), title: title(k.kind, k.n) });
+      left += widths[j] + NEAR_GAP;
+    });
+  });
+  const fg = missList(fgMiss.reduce((t, m) => t.map((v, i) => v + (m[i] ?? 0)), [0, 0, 0, 0, 0]));
+  const xp = missList(xpMiss);
+  return {
+    marks,
+    fg,
+    xp,
+    none: !fg && !xp,
+    aria: !fg && !xp ? 'No misses' : [fg && `Field goals missed: ${fg.replaceAll(' · ', ', ')}`, xp && `extra points missed: ${xp.replaceAll(' · ', ', ')}`].filter(Boolean).join('; '),
+  };
 }
 
 // An annular slice: rings r0 to r1 around the posts, swung either side of straight down
@@ -580,7 +694,21 @@ function ring(r0: number, r1: number): string {
 
 const bandLabel = (band: string) => band.replace('-', '–');
 
-function kickMap(fg: FieldBand[], xp: { att: number; made: number } | undefined, league: FieldBand[], spreads: (number | null)[], leagueXp: number | null): KickMapView {
+function kickMap(
+  fg: FieldBand[],
+  xp: { att: number; made: number } | undefined,
+  league: FieldBand[],
+  spreads: (number | null)[],
+  leagueXp: number | null,
+  fgMiss?: KickMisses[],
+  xpMiss?: KickMisses,
+): KickMapView {
+  const misses = kickMisses(
+    fg.map((b) => b.band),
+    fgMiss,
+    xpMiss,
+    fg.map((b) => (b.att ? `${b.made}/${b.att}` : '')),
+  );
   const bands = fg.map((b, i) => {
     const lg = league.find((x) => x.band === b.band);
     const rate = b.att ? b.made / b.att : 0;
@@ -589,7 +717,8 @@ function kickMap(fg: FieldBand[], xp: { att: number; made: number } | undefined,
     const r0 = RING_IN + i * RING_STEP;
     const rm = r0 + RING_STEP / 2;
     const empty = !b.att;
-    const yards = b.band === '<30' ? 'under 30 yds' : b.band === '60+' ? '60+ yds' : `${bandLabel(b.band)} yds`;
+    const yards = yardsOf(b.band);
+    const missed = missList(fgMiss?.[i]);
     return {
       key: b.band,
       label: bandLabel(b.band),
@@ -604,7 +733,7 @@ function kickMap(fg: FieldBand[], xp: { att: number; made: number } | undefined,
       fill: empty ? 'rgba(255, 255, 255, 0.03)' : toneFill(t, 0.14, 0.6),
       title: empty
         ? `Field goals ${yards}: none tried`
-        : `Field goals ${yards}: ${b.made} of ${b.att} (${pct(b.made, b.att)})${lgRate !== null ? ` · league ${Math.round(lgRate * 100)}%` : ''}`,
+        : `Field goals ${yards}: ${b.made} of ${b.att} (${pct(b.made, b.att)})${lgRate !== null ? ` · league ${Math.round(lgRate * 100)}%` : ''}${missed ? `\nMissed: ${missed}` : ''}`,
       tone: t,
       empty,
     };
@@ -619,7 +748,8 @@ function kickMap(fg: FieldBand[], xp: { att: number; made: number } | undefined,
     xp: xp && xp.att ? `${xp.made}/${xp.att} extra points (${pct(xp.made, xp.att)})` : null,
     xpTitle: xp && xp.att ? `Extra points: ${xp.made} of ${xp.att}${leagueXp !== null ? ` · league ${Math.round(leagueXp * 100)}%` : ''}` : '',
     posts: POSTS,
-    aria: `Field goals by distance: ${bands.map((b) => `${b.label} ${b.empty ? 'none' : b.main.replace('/', ' of ')}`).join(', ')}${long ? `; makes out to ${long.band}` : ''}`,
+    misses,
+    aria: `Field goals by distance: ${bands.map((b) => `${b.label} ${b.empty ? 'none' : b.main.replace('/', ' of ')}`).join(', ')}${long ? `; makes out to ${long.band}` : ''}${misses ? `. ${misses.aria}` : ''}`,
   };
 }
 
@@ -831,7 +961,9 @@ export function fieldMapView(
       const xpAtt = kickers.reduce((a, p) => a + p.xp!.att, 0);
       const xpMade = kickers.reduce((a, p) => a + p.xp!.made, 0);
       const leagueXp = league.xp?.att ? league.xp.made / league.xp.att : xpAtt ? xpMade / xpAtt : null;
-      view.kicks = kickMap(entry.fg ?? league.fg.map((b) => ({ band: b.band, att: 0, made: 0 })), entry.xp, league.fg, spreads, leagueXp);
+      // (a kicker with only extra points: the bands empty, his misses none)
+      const fgMiss = entry.fgMiss ?? (!entry.fg && entry.xpMiss ? league.fg.map(() => [0, 0, 0, 0, 0]) : undefined);
+      view.kicks = kickMap(entry.fg ?? league.fg.map((b) => ({ band: b.band, att: 0, made: 0 })), entry.xp, league.fg, spreads, leagueXp, fgMiss, entry.xpMiss);
     }
   } else if (role === 'P') {
     if (entry.punt?.n) {

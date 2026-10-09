@@ -2,7 +2,8 @@
 // quarterback's throws by zone (behind the line, short, intermediate, deep; left, middle, right) and his
 // designed runs by lane; a receiver's or back's targets by the same zones, a back's carries by lane (the
 // ends, tackles and guards on each side, and the middle); a kicker's field goals by distance and his extra
-// points; a punter's punts (gross, net, inside the 20, touchbacks, fair catches, by distance); and each
+// points (the misses of each by how they missed: wide left or right, short, blocked, from the play's
+// description); a punter's punts (gross, net, inside the 20, touchbacks, fair catches, by distance); and each
 // defense's, what it allowed by zone and lane. The league's pooled the same way, what "average" is. One
 // file per season: StaticData/field-maps.json for the season being played, StaticData/seasons/<year>/ for
 // past ones, each with the regular season, the playoffs (null until they've begun) and both. Free: no AI.
@@ -45,7 +46,7 @@ export const COLUMNS = [
   'complete_pass', 'passing_yards', 'receiving_yards', 'yards_gained', 'pass_touchdown', 'interception', 'epa', 'passer_player_id',
   'receiver_player_id', 'rusher_player_id', 'run_location', 'run_gap', 'rushing_yards', 'rush_touchdown', 'qb_scramble',
   'qb_kneel', 'field_goal_result', 'kick_distance', 'kicker_player_id', 'extra_point_result', 'punter_player_id',
-  'punt_inside_twenty', 'touchback', 'punt_fair_catch', 'punt_blocked', 'return_yards',
+  'punt_inside_twenty', 'touchback', 'punt_fair_catch', 'punt_blocked', 'return_yards', 'desc',
 ];
 
 const num = (v) => (v === undefined || v === null || v === '' || v === 'NA' ? null : Number(v));
@@ -83,10 +84,26 @@ export function puntBand(distance) {
   return d < 40 ? 0 : d < 50 ? 1 : d < 60 ? 2 : 3;
 }
 
+// How a field goal or an extra point missed, from the play's description (nflverse has no column for it):
+// "No Good, Wide Left", "Wide Right", "Short", "Hit Left Upright" (wide left), "Hit Right Upright" (wide
+// right), "Hit Crossbar" (short), "BLOCKED"; anything else (a bad hold, no reason given) "other". Its
+// place in MISSES
+export const MISSES = ['left', 'right', 'short', 'blocked', 'other'];
+export function missKind(desc, result) {
+  if (result === 'blocked') return 3;
+  const m = /No Good,\s*(Wide Left|Wide Right|Short|Hit Left Upright|Hit Right Upright|Hit Crossbar)/i.exec(desc ?? '');
+  if (m) {
+    const how = m[1].toLowerCase();
+    return how.includes('left') ? 0 : how.includes('right') ? 1 : 2;
+  }
+  return /\bblocked\b/i.test(desc ?? '') ? 3 : 4;
+}
+
 // ---- the tallies (sums while counting; finished into the contract's shapes at the end)
 const newZones = () => DEPTHS.flatMap((depth) => SIDES.map((side) => ({ depth, side, att: 0, comp: 0, yds: 0, td: 0, int: 0, epa: 0 })));
 const newLanes = () => LANES.map((lane) => ({ lane, att: 0, yds: 0, td: 0, epa: 0, success: 0 }));
-const newBands = () => FG_BANDS.map((band) => ({ band, att: 0, made: 0 }));
+const newBands = () => FG_BANDS.map((band) => ({ band, att: 0, made: 0, miss: [0, 0, 0, 0, 0] }));
+const newXp = () => ({ att: 0, made: 0, miss: [0, 0, 0, 0, 0] });
 const newPunt = () => ({ n: 0, kicked: 0, gross: 0, net: 0, inside20: 0, touchbacks: 0, fairCatches: 0, blocked: 0, bands: PUNT_BANDS.map((band) => ({ band, n: 0 })) });
 
 // (yards: the passer's and a defense's the play's passing yards; a receiver's his own receiving yards, short of
@@ -132,7 +149,7 @@ function addPunt(p, play) {
 // play-by-play's gsis id) and each defense's (by its abbreviation). Plays are the play-by-play's rows (strings,
 // as read) or the same with numbers.
 export function tally(plays) {
-  const league = { pass: newZones(), runs: newLanes(), fg: newBands(), xp: { att: 0, made: 0 }, punt: newPunt() };
+  const league = { pass: newZones(), runs: newLanes(), fg: newBands(), xp: newXp(), punt: newPunt() };
   const players = new Map();
   const defenses = new Map();
   const player = (pid) => {
@@ -167,9 +184,11 @@ export function tally(plays) {
       const b = fgBand(play.kick_distance);
       if (b < 0 || !play.field_goal_result || play.field_goal_result === 'NA') continue;
       const made = play.field_goal_result === 'made';
+      const miss = made ? -1 : missKind(play.desc, play.field_goal_result);
       const add = (bands) => {
         bands[b].att++;
         if (made) bands[b].made++;
+        else bands[b].miss[miss]++;
       };
       add(league.fg);
       const kicker = id(play.kicker_player_id);
@@ -177,13 +196,15 @@ export function tally(plays) {
     } else if (type === 'extra_point') {
       const r = play.extra_point_result;
       if (!r || r === 'NA' || r === 'aborted') continue;
+      const miss = r === 'good' ? -1 : missKind(play.desc, r);
       const add = (xp) => {
         xp.att++;
         if (r === 'good') xp.made++;
+        else xp.miss[miss]++;
       };
       add(league.xp);
       const kicker = id(play.kicker_player_id);
-      if (kicker) add((player(kicker).xp ??= { att: 0, made: 0 }));
+      if (kicker) add((player(kicker).xp ??= newXp()));
     } else if (type === 'punt') {
       addPunt(league.punt, play);
       const punter = id(play.punter_player_id);
@@ -200,6 +221,7 @@ export const FIELDS = {
   zone: ['att', 'comp', 'yds', 'td', 'int', 'epa'],
   lane: ['att', 'yds', 'td', 'epa', 'success'],
   band: ['att', 'made'],
+  miss: MISSES,
   zones: DEPTHS.flatMap((depth) => SIDES.map((side) => `${depth}-${side}`)),
   lanes: LANES,
   fgBands: FG_BANDS,
@@ -209,6 +231,9 @@ const finishZones = (zones) => zones.map((z) => [z.att, z.comp, round(z.yds, 1),
 const finishLanes = (lanes) =>
   lanes.map((l) => [l.att, round(l.yds, 1), l.td, l.att ? round(l.epa / l.att, 3) : 0, l.att ? round(l.success / l.att, 3) : 0]);
 const finishBands = (bands) => bands.map((b) => [b.att, b.made]);
+// (how each band's misses went, in MISSES' order: wide left, wide right, short, blocked, other)
+const finishMisses = (bands) => bands.map((b) => b.miss);
+const finishXp = (xp) => ({ att: xp.att, made: xp.made });
 const finishPunt = ({ kicked, gross, net, ...p }) => ({
   n: p.n,
   gross: kicked ? round(gross / kicked, 1) : 0,
@@ -224,8 +249,14 @@ function finishPlayer(p) {
   if (p.pass) out.pass = finishZones(p.pass);
   if (p.targets) out.targets = finishZones(p.targets);
   if (p.runs) out.runs = finishLanes(p.runs);
-  if (p.fg) out.fg = finishBands(p.fg);
-  if (p.xp) out.xp = p.xp;
+  if (p.fg) {
+    out.fg = finishBands(p.fg);
+    out.fgMiss = finishMisses(p.fg);
+  }
+  if (p.xp) {
+    out.xp = finishXp(p.xp);
+    out.xpMiss = p.xp.miss;
+  }
   if (p.punt) out.punt = finishPunt(p.punt);
   return out;
 }
@@ -247,7 +278,15 @@ export function section(plays, { keys = null, qbs = new Map(), teams = null } = 
     defenses[`DEF-${team}`] = { pass: finishZones(d.pass), runs: finishLanes(d.runs) };
   }
   return {
-    league: { pass: finishZones(t.league.pass), runs: finishLanes(t.league.runs), fg: finishBands(t.league.fg), xp: t.league.xp, punt: finishPunt(t.league.punt) },
+    league: {
+      pass: finishZones(t.league.pass),
+      runs: finishLanes(t.league.runs),
+      fg: finishBands(t.league.fg),
+      fgMiss: finishMisses(t.league.fg),
+      xp: finishXp(t.league.xp),
+      xpMiss: t.league.xp.miss,
+      punt: finishPunt(t.league.punt),
+    },
     players,
     defenses,
   };

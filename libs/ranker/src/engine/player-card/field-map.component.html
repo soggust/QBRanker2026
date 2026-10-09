@@ -115,6 +115,19 @@
         <g class="fm-posts">
           <path [attr.d]="'M' + k.posts.x + ' ' + (k.posts.y + 12) + 'V' + k.posts.y + 'M' + (k.posts.x - 22) + ' ' + k.posts.y + 'H' + (k.posts.x + 22) + 'M' + (k.posts.x - 22) + ' ' + k.posts.y + 'V' + (k.posts.y - 32) + 'M' + (k.posts.x + 22) + ' ' + k.posts.y + 'V' + (k.posts.y - 32)" />
         </g>
+        <!-- (the misses: wide ones past a ring's ends, short, blocked and the rest inside its near edge) -->
+        @if (k.misses; as ms) {
+          @for (m of ms.marks; track m.key) {
+            <g class="fm-miss" [attr.data-kind]="m.kind">
+              <title>{{ m.title }}</title>
+              <circle class="fm-miss-hit" [attr.cx]="m.x" [attr.cy]="m.y" r="6" />
+              <path [attr.d]="m.d" />
+              @if (m.count) {
+                <text class="fm-miss-n" [attr.x]="m.nx" [attr.y]="m.ny" [attr.text-anchor]="m.anchor">{{ m.count }}</text>
+              }
+            </g>
+          }
+        }
       </svg>
       <p class="fm-note">
         <b>{{ k.total }}</b>
@@ -122,6 +135,20 @@
           <span [title]="k.xpTitle">{{ k.xp }}</span>
         }
       </p>
+      @if (k.misses; as ms) {
+        <p class="fm-note fm-miss-note">
+          @if (ms.none) {
+            <span>No misses</span>
+          } @else {
+            @if (ms.fg) {
+              <span><i class="fm-miss-key"></i>Misses: {{ ms.fg }}</span>
+            }
+            @if (ms.xp) {
+              <span>{{ ms.fg ? 'XP' : 'XP misses' }}: {{ ms.xp }}</span>
+            }
+          }
+        </p>
+      }
     </figure>
   }
 

@@ -382,6 +382,74 @@ test('Field Map: 2003, before the zones were charted: no pass maps, runs, kicks 
   assert.ok(nfl.fieldMapView(section, 'P', [rows.P[0].gsisId]).punts);
 });
 
+test("Field Map: a kicker's misses marked round the rings and said under them", () => {
+  const { kickMisses } = nfl;
+  const BANDS = ['<30', '30-39', '40-49', '50-59', '60+'];
+  // (Jason Myers' 2025, one more wide right from 50-59: one wide right under 30, wide left from 30-39, one
+  // each way from 40-49, two wide right and one blocked from 50-59, short from 60+)
+  const v = kickMisses(BANDS, [[0, 1, 0, 0, 0], [1, 0, 0, 0, 0], [1, 1, 0, 0, 0], [0, 2, 0, 1, 0], [0, 0, 1, 0, 0]], [0, 0, 0, 0, 0]);
+  assert.equal(v.fg, '2 wide left · 4 wide right · 1 short · 1 blocked');
+  assert.equal(v.xp, '');
+  assert.equal(v.none, false);
+  assert.deepEqual(v.marks.map((m) => m.key), ['<30-right', '30-39-left', '40-49-left', '40-49-right', '50-59-right', '50-59-blocked', '60+-short']);
+  const at = (key) => v.marks.find((m) => m.key === key);
+  // (wide left out past a ring's left end, wide right past its right, mirrored; the farther the band, the lower)
+  assert.ok(at('40-49-left').x < 160 - 40 && at('40-49-right').x > 160 + 40);
+  assert.equal(at('40-49-left').x + at('40-49-right').x, 320);
+  assert.equal(at('40-49-left').y, at('40-49-right').y);
+  assert.ok(at('50-59-right').y > at('40-49-right').y && at('40-49-right').y > at('<30-right').y);
+  // (short and blocked inside the ring, after its makes over tries: 50-59's ring 123 to 156 out from the posts
+  // at 40; past a wider figure, further along)
+  assert.ok(at('50-59-blocked').x > 160);
+  assert.ok(at('50-59-blocked').y > 40 + 123 && at('50-59-blocked').y < 40 + 156);
+  const after = kickMisses(BANDS, [[0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 2, 0, 1, 0], [0, 0, 0, 0, 0]], undefined, ['', '', '', '9/11', '']);
+  assert.ok(after.marks.find((m) => m.kind === 'blocked').x >= at('50-59-blocked').x + 4 * 2.9);
+  // (a count only past one, away from the ring; the words in the hover)
+  assert.equal(at('50-59-right').count, '2');
+  assert.equal(at('50-59-right').anchor, 'start');
+  assert.ok(at('50-59-right').nx > at('50-59-right').x);
+  assert.equal(at('40-49-left').count, '');
+  assert.equal(at('40-49-left').anchor, 'end');
+  assert.equal(at('50-59-right').title, '2 wide right from 50–59 yds');
+  assert.equal(at('<30-right').title, '1 wide right from under 30 yds');
+  assert.equal(at('60+-short').title, '1 short from 60+ yds');
+  assert.match(at('50-59-blocked').d, /^M[\d.]+ [\d.]+L[\d.]+ [\d.]+M/, 'a cross');
+
+  // (short, blocked and the rest side by side, right of the ring's middle)
+  const row = kickMisses(BANDS, [[0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 2, 1, 1], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0]], [1, 0, 0, 2, 0]);
+  const xs = row.marks.map((m) => m.x);
+  assert.deepEqual(row.marks.map((m) => m.kind), ['short', 'blocked', 'other']);
+  assert.ok(xs[0] < xs[1] && xs[1] < xs[2] && xs[0] > 160);
+  assert.ok(xs[1] - xs[0] > 6 + 5, 'room for the first one\'s count');
+  assert.equal(row.marks[2].title, '1 missed another way from 40–49 yds');
+  assert.equal(row.fg, '2 short · 1 blocked · 1 other');
+  assert.equal(row.xp, '1 wide left · 2 blocked');
+  assert.equal(row.aria, 'Field goals missed: 2 short, 1 blocked, 1 other; extra points missed: 1 wide left, 2 blocked');
+
+  // (none: no marks, "No misses"; a file from before the misses were read: none at all)
+  const clean = kickMisses(BANDS, BANDS.map(() => [0, 0, 0, 0, 0]), [0, 0, 0, 0, 0]);
+  assert.deepEqual(clean.marks, []);
+  assert.ok(clean.none);
+  assert.equal(clean.aria, 'No misses');
+  assert.equal(kickMisses(BANDS, undefined), null);
+
+  // (the real 2025 file: every kicker's marks count his misses, his grid's tries less makes)
+  const { file, rows } = fieldMaps(2025);
+  for (const r of rows.K) {
+    const k = nfl.fieldMapView(file.regular, 'K', [r.gsisId]).kicks;
+    assert.equal(k.misses.marks.reduce((a, m) => a + m.n, 0), r.stats.fgAtt - r.stats.fgMade, r.name);
+  }
+  const myers = rows.K.find((r) => r.name === 'Jason Myers');
+  const kicks = nfl.fieldMapView(file.regular, 'K', [myers.gsisId]).kicks;
+  assert.equal(kicks.misses.fg, '2 wide left · 3 wide right · 1 short · 1 blocked');
+  assert.match(kicks.bands[3].title, /\nMissed: 1 wide right · 1 blocked$/);
+  // (an older file without them: the chart as before)
+  const old = nfl.expandFieldMaps({ season: 2025, updated: '', regular: { league: { fg: [[1, 1], [0, 0], [0, 0], [0, 0], [0, 0]], pass: [], runs: [] }, players: { K9: { fg: [[1, 1], [0, 0], [0, 0], [0, 0], [2, 0]] } }, defenses: {} }, post: null, all: null });
+  const oldKicks = nfl.fieldMapView(old.regular, 'K', ['K9']).kicks;
+  assert.equal(oldKicks.misses, null);
+  assert.equal(oldKicks.bands.length, 5);
+});
+
 test("Field Map: a part's tone against the league's, faded by few plays, flipped for a defense", () => {
   const { tone, spread } = nfl;
   assert.equal(tone(0.5, 0.1, 0.2, 1000, 12), 0.988, '2 spreads out: full strength, all but');

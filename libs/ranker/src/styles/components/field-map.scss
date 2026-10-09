@@ -386,6 +386,82 @@
   stroke-width: 3.2px;
 }
 
+// (a kicker's misses: in the red the rings' bad side has, edged dark on the turf; a blocked one a cross, the
+// rest of other kinds hollow; their counts in the hover on a phone)
+.fm-miss {
+  cursor: help;
+
+  path {
+    fill: rgb(255, 90, 79);
+    filter: drop-shadow(0 1px 1.5px rgba(0, 0, 0, 0.7));
+    stroke: rgba(0, 0, 0, 0.55);
+    stroke-width: 0.8px;
+  }
+
+  &[data-kind="blocked"] path {
+    fill: none;
+    stroke: rgb(255, 90, 79);
+    stroke-linecap: round;
+    stroke-width: 1.8px;
+  }
+
+  &[data-kind="other"] path {
+    fill: none;
+    stroke: rgb(255, 90, 79);
+    stroke-width: 1.2px;
+  }
+
+  &:hover path {
+    fill: rgb(255, 140, 130);
+  }
+
+  &[data-kind="blocked"]:hover path,
+  &[data-kind="other"]:hover path {
+    fill: none;
+    stroke: rgb(255, 140, 130);
+  }
+}
+
+.fm-miss-hit {
+  fill: transparent;
+}
+
+.fm-miss-n {
+  fill: rgb(255, 150, 140);
+  font-size: 8px;
+  font-weight: 800;
+  paint-order: stroke;
+  pointer-events: none;
+  stroke: rgba(0, 0, 0, 0.6);
+  stroke-linejoin: round;
+  stroke-width: 2.2px;
+}
+
+@media (max-width: 575px) {
+  .fm-miss-n {
+    display: none;
+  }
+}
+
+.fm-miss-note {
+  margin-top: 4px;
+
+  span {
+    align-items: center;
+    cursor: default;
+    display: inline-flex;
+    gap: 5px;
+  }
+}
+
+.fm-miss-key {
+  background: rgb(255, 90, 79);
+  border-radius: 50%;
+  display: inline-block;
+  height: 7px;
+  width: 7px;
+}
+
 .fm-note {
   align-items: baseline;
   color: rgba(255, 255, 255, 0.6);
@@ -558,7 +634,7 @@
 
 // ---- phone: the charts' own numbers a touch smaller, the strip's tighter
 
-@media (max-width: 480px) {
+@media (max-width: 575px) {
   .field-map .group-body {
     padding-left: 12px;
     padding-right: 12px;

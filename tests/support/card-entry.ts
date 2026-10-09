@@ -12,5 +12,5 @@ export { gameColor as teamColor } from '@ranker/engine/game-view/team-color';
 export { distance, TOO_CLOSE, teamColor as sharedTeamColor } from '@ranker/engine/colors';
 export { videoPlay, youtubeWatch, youtubeThumb } from '@ranker/engine/game-view/highlights';
 export * as vsPosition from '@sport/vs-position';
-export { expandFieldMaps, fieldMapView, fieldMapEntry, tone, spread, PASS_FIELD } from '@ranker/engine/player-card/field-map';
+export { expandFieldMaps, fieldMapView, fieldMapEntry, kickMisses, tone, spread, PASS_FIELD } from '@ranker/engine/player-card/field-map';
 export { sidelined, slotLineup, sideLineup, sideFormation } from '@ranker/engine/player-card/depth-lineup';
