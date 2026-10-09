@@ -294,9 +294,9 @@ test('NHL 2025 vs Position: forwards and defensemen, ranked, their columns fille
   }
 });
 
-test("a last five game's when: the NFL by its week (preseason and playoff rounds named), others by the day", () => {
+test("a last five game's when: the NFL by its week (playoff rounds named, the preseason blank), others by the day", () => {
   const { formWhen } = nfl;
-  assert.equal(formWhen('football/nfl', 4, '2026-08-28T23:30Z'), 'Pre Wk 4');
+  assert.equal(formWhen('football/nfl', 4, '2026-08-28T23:30Z'), '', 'the preseason: blank');
   assert.equal(formWhen('football/nfl', 1, '2026-09-10T00:20Z'), 'Week 1');
   assert.equal(formWhen('football/nfl', 18, '2026-01-04T21:25Z'), 'Week 18', "the regular season's last week, in January");
   assert.equal(formWhen('football/nfl', 1, '2026-01-10T21:30Z'), 'Wild Card');

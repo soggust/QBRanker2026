@@ -284,7 +284,8 @@ export async function loadGame(league: string, eventId: string): Promise<GameVie
   const form = (s.lastFiveGames ?? [])
     .map((t) => ({
       side: sideOf(t.team?.id),
-      games: (t.events ?? []).map((e) => ({
+      // (the latest first)
+      games: [...(t.events ?? [])].reverse().map((e) => ({
         event: e.id ?? '',
         when: formWhen(league, e.week, e.gameDate),
         result: e.gameResult ?? '',
@@ -333,7 +334,7 @@ export async function loadGame(league: string, eventId: string): Promise<GameVie
   };
 }
 
-// A last-five game's when: the NFL's by its week ("Week 4"; the preseason's "Pre Wk 2" in August, the
+// A last-five game's when: the NFL's by its week ("Week 4"; none for the preseason's, in August; the
 // playoffs' by their round in January and February, ESPN numbering them 1 to 5), anyone else's by its day
 // ("05/21/2025", the Eastern day it was played)
 const PLAYOFF_ROUNDS = ['Wild Card', 'Divisional', 'Conference', 'Pro Bowl', 'Super Bowl'];
@@ -341,7 +342,7 @@ export function formWhen(league: string, week: number | undefined, date: string 
   const day = date ? new Date(date) : null;
   if (league.includes('football') && week) {
     const month = day ? day.getUTCMonth() : -1;
-    if (month === 7) return `Pre Wk ${week}`;
+    if (month === 7) return '';
     if ((month === 0 || month === 1) && week <= PLAYOFF_ROUNDS.length) return PLAYOFF_ROUNDS[week - 1];
     return `Week ${week}`;
   }
