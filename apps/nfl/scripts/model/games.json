@@ -2824,7 +2824,7 @@
 {"id":"401872977","date":"2026-10-04T20:25Z","season":2026,"type":2,"home":"26","away":"24","homeAbbr":"SEA","awayAbbr":"LAC","neutral":false,"final":true,"hs":30,"as":23,"venue":"Seattle|WA|USA","indoor":false},
 {"id":"401872978","date":"2026-10-05T00:20Z","season":2026,"type":2,"home":"29","away":"8","homeAbbr":"CAR","awayAbbr":"DET","neutral":false,"final":true,"hs":32,"as":26,"venue":"Charlotte|NC|USA","indoor":false},
 {"id":"401872979","date":"2026-10-06T00:15Z","season":2026,"type":2,"home":"18","away":"1","homeAbbr":"NO","awayAbbr":"ATL","neutral":false,"final":true,"hs":24,"as":45,"venue":"New Orleans|LA|USA","indoor":true},
-{"id":"401872980","date":"2026-10-09T00:15Z","season":2026,"type":2,"home":"6","away":"27","homeAbbr":"DAL","awayAbbr":"TB","neutral":false,"final":false,"hs":null,"as":null,"venue":"Arlington|TX|USA","indoor":true},
+{"id":"401872980","date":"2026-10-09T00:15Z","season":2026,"type":2,"home":"6","away":"27","homeAbbr":"DAL","awayAbbr":"TB","neutral":false,"final":true,"hs":16,"as":24,"venue":"Arlington|TX|USA","indoor":true},
 {"id":"401872981","date":"2026-10-11T13:30Z","season":2026,"type":2,"home":"30","away":"21","homeAbbr":"JAX","awayAbbr":"PHI","neutral":true,"final":false,"hs":null,"as":null,"venue":"London||England","indoor":false},
 {"id":"401872990","date":"2026-10-11T17:00Z","season":2026,"type":2,"home":"9","away":"3","homeAbbr":"GB","awayAbbr":"CHI","neutral":false,"final":false,"hs":null,"as":null,"venue":"Green Bay|WI|USA","indoor":false},
 {"id":"401872982","date":"2026-10-11T17:00Z","season":2026,"type":2,"home":"15","away":"4","homeAbbr":"MIA","awayAbbr":"CIN","neutral":false,"final":false,"hs":null,"as":null,"venue":"Miami Gardens|FL|USA","indoor":false},
