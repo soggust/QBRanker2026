@@ -807,13 +807,16 @@
   flex-direction: column;
   gap: 4px;
 
+  // (the value over its bar, as wide; a leader's dot at its left end, the value at the right)
   b {
     align-items: center;
     color: #ddd;
-    display: inline-flex;
+    display: flex;
     @include v.hand(15px);
     font-weight: 400;
     gap: 6px;
+    justify-content: flex-end;
+    width: min(100%, 90px);
   }
 
   // (where it stood in its own season: a thin bar in the side's color)
@@ -840,6 +843,7 @@
       box-shadow: 0 0 6px var(--side);
       content: "";
       height: 6px;
+      margin-right: auto;
       width: 6px;
     }
 
