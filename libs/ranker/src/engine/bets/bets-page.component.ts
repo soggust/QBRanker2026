@@ -2,13 +2,16 @@ import { Component, OnInit, isDevMode } from '@angular/core';
 import { SPORT_LINKS } from '@ranker/core/sports';
 import { insteadText } from '../player-card/analysis';
 
-// The Bets page (the sport bar's Bets link, #bets): every betting angle in the latest AI
-// analyses (each sport's data/analysis/bets.json, written with them), one row per bet, ranked by how sure
-// the analysis is that it wins (its 1-10 score; a fade can top the list), then by how many other reports
-// make the same call. A row opens to its reasoning.
+// The Bets page (the sport bar's Bets link, #bets): the algorithm's top picks for every sport (each one's
+// data/model/picks.json, written by every run of the model desk: libs/ranker/scripts/model/picks.mjs), ranked
+// together by edge (its score: the expected return at its trusted chance), each showing its chance to win. The
+// NFL's AI bet desk's sheet for the week (data/analysis/bet-sheet.json) only marks the picks it agrees with
+// (the same game, market and side: "Algorithm + Analyst", ranked a little higher); its other picks aren't
+// shown. A row opens to its reasoning.
 
 interface BetEntry {
   sport: string;
+  // whose pick: the algorithm's, the analyst's, or both
   source: string;
   kind: 'team' | 'player';
   position: string | null;
@@ -31,6 +34,8 @@ interface BetEntry {
 // other reports make the same call
 export interface BetRow extends BetEntry {
   id: number;
+  // (an algorithm pick's chance to win, a whole percent)
+  chance?: number;
   pick: string;
   marketLabel: string;
   agree: number;
@@ -115,45 +120,45 @@ interface Sheet {
   picks: SheetPick[];
 }
 
-// (an older report's bet, without a score: like 7, fade 6, lean 5, one more for a sure report, one less
-// for an unsure one)
-const ESTIMATE = { like: 7, fade: 6, lean: 5 };
-const SURE = { high: 3, medium: 2, low: 1 };
+// The algorithm's picks file (picks.mjs): its top picks on the games not started, each with its confidence
+// score and level, and its record on the picks it has shown
+interface Pick {
+  id: string;
+  sport: string;
+  score: number;
+  // its chance to win, a whole percent (the band its level)
+  chance: number;
+  level: 'high' | 'medium' | 'low';
+  kind: BetKind;
+  market: string;
+  pick: string;
+  line: number | null;
+  odds: number;
+  book: string;
+  start: string;
+  matchup: string;
+  teams: { abbr: string; logo: string | null }[];
+  where: GameInfo | null;
+  reason: string;
+}
+interface Picks {
+  at: string;
+  record: BetRecord | null;
+  picks: Pick[];
+}
 
 // A team as the schedule names it (the sportsbook's WSH and LAR are its WAS and LA)
 const team = (abbr: string) => ({ WSH: 'WAS', LAR: 'LA' })[abbr] ?? abbr;
 
-// The call a bet makes, the same however a report words it: a game total ("under 45.5"), a side
-// ("ATL +2.5", "BAL ml"), or anything else by its market and direction ("jackson rushing yards|under")
-function callKey(b: BetEntry): string {
-  const game = b.game?.matchup ?? '';
-  const lean = b.lean.trim();
-  // a game total: "Under 45.5", or a bare "Under" on the market "Over/Under 45.5"
-  const leanTotal = lean.match(/^(over|under)\s+(\d+(?:\.\d+)?)$/i);
-  const bare = lean.match(/^(over|under)$/i);
-  const marketTotal = b.market.match(/^(?:over\/under|over|under|o\/u|total)\s+(\d+(?:\.\d+)?)$/i);
-  if (leanTotal) return `${game}|total ${leanTotal[1].toLowerCase()} ${leanTotal[2]}`;
-  if (bare && marketTotal) return `${game}|total ${bare[1].toLowerCase()} ${marketTotal[1]}`;
-  // a moneyline ("LV ML", "LV +160" on the market "LV moneyline +160"), or a side: "ATL +2.5"
-  const ml = /\b(ML|moneyline)\b/i.test(`${lean} ${b.market}`) ? `${lean} ${b.market}`.match(/\b([A-Z]{2,3})\b/) : null;
-  if (ml) return `${game}|${team(ml[1])} ml`;
-  const spread = lean.match(/\b([A-Z]{2,3})\s*([+-]\d+(?:\.\d+)?)/);
-  if (spread) return `${game}|${team(spread[1])} ${spread[2]}`;
-  // anything else (a player's or a team's own numbers): its market and direction
-  const direction = lean.match(/\b(over|under|yes|no)\b/i)?.[1]?.toLowerCase() ?? lean.toLowerCase();
-  return `${game}|${b.market.toLowerCase().replace(/\s*\(.*\)/, '')}|${direction}`;
-}
-
-// The question a call answers, and its answer: a total ("...|total 43.5", over or under), or who wins the
-// game (its spread and moneyline together: the team backed); null for anything else (a player's or a
-// team's own numbers)
-function lineOf(key: string): { line: string; side: string } | null {
-  const [sport, game, call] = key.split('|');
-  const total = call?.match(/^total (over|under) (.+)$/);
-  if (total) return { line: `${sport}|${game}|total ${total[2]}`, side: total[1] };
-  const side = call?.match(/^([A-Z]{2,3}) (?:[+-][\d.]+|ml)$/);
-  if (side) return { line: `${sport}|${game}|winner`, side: side[1] };
-  return null;
+// The call a pick makes, the same whoever makes it: a game total's side, a team's side of the spread or
+// the moneyline, or a player bet as written ("nfl|TB @ DAL|total|under")
+function pickKey(sport: string, matchup: string, kind: BetKind, pick: string): string {
+  const [away, home] = matchup.split(' @ ').map(team);
+  const game = `${sport}|${away} @ ${home}`;
+  if (kind === 'total') return `${game}|total|${/^over/i.test(pick) ? 'over' : 'under'}`;
+  const side = pick.match(/^([A-Z]{2,4})\b/)?.[1];
+  if ((kind === 'spread' || kind === 'moneyline') && side) return `${game}|${kind}|${team(side)}`;
+  return `${game}|${kind}|${pick.toLowerCase()}`;
 }
 
 @Component({
@@ -180,7 +185,7 @@ export class BetsPageComponent implements OnInit {
   readonly insteadText = insteadText;
   // each game's venue and kickoff weather, from the bet desk's sheet ("nfl|CHI @ GB")
   places = new Map<string, GameInfo>();
-  // how the desk's earlier picks did (data/analysis/ledger.json)
+  // how the algorithm's published picks did (each sport's picks.json, added up), overall and by chance band
   record: BetRecord | null = null;
 
   // A record as "14-9" ("14-9-1" with a push)
@@ -211,38 +216,70 @@ export class BetsPageComponent implements OnInit {
   }
 
   async ngOnInit(): Promise<void> {
-    // the bets of every sport with AI analyses (sports.json's analysis)
     const get = (url: string) =>
       fetch(url, { cache: 'no-cache' })
         .then((res) => (res.ok ? res.json() : null))
         .catch(() => null);
+    // every sport's algorithm picks, and the AI desk's sheet where the sport has AI analyses (sports.json)
     const files = await Promise.all(
-      SPORT_LINKS.filter((s) => s.analysis).map(async (s) => ({
+      SPORT_LINKS.map(async (s) => ({
         sport: s.id,
-        bets: await get(`/${s.id}/data/analysis/bets.json`),
-        sheet: (await get(`/${s.id}/data/analysis/bet-sheet.json`)) as Sheet | null,
-        ledger: (await get(`/${s.id}/data/analysis/ledger.json`)) as { record: BetRecord | null } | null,
+        picks: (await get(`/${s.id}/data/model/picks.json`)) as Picks | null,
+        bets: s.analysis ? await get(`/${s.id}/data/analysis/bets.json`) : null,
+        sheet: s.analysis ? ((await get(`/${s.id}/data/analysis/bet-sheet.json`)) as Sheet | null) : null,
+
       })),
     );
-    const entries: BetEntry[] = [];
+    const algoRows: BetRow[] = [];
     const sheetRows: BetRow[] = [];
-    for (const { sport, bets: file, sheet, ledger } of files) {
-      // (the desk's graded record, once any of its picks are graded)
-      if (ledger?.record?.graded) this.record = ledger.record;
+    const records: BetRecord[] = [];
+    for (const { sport, picks, bets: file, sheet } of files) {
+      // The algorithm's picks
+      if (picks?.picks?.length || picks?.record) {
+        if (picks.record) records.push(picks.record);
+        if (!this.updated || picks.at > this.updated) this.updated = picks.at;
+        for (const p of picks.picks ?? []) {
+          if (p.where) this.places.set(`${sport}|${p.matchup}`, p.where);
+          algoRows.push({
+            sport,
+            source: 'Algorithm',
+            kind: p.kind === 'player' ? 'player' : 'team',
+            position: null,
+            rowId: '',
+            team: null,
+            game: { week: 0, date: p.start.slice(0, 10), kickoff: p.start, matchup: p.matchup, teams: p.teams, line: null },
+            market: p.market,
+            lean: p.pick,
+            strength: 'like',
+            score: p.score,
+            reason: p.reason,
+            confidence: p.level,
+            at: picks.at,
+            id: algoRows.length,
+            key: pickKey(sport, p.matchup, p.kind, p.pick),
+            pick: p.pick,
+            marketLabel: `${p.market} · ${p.book} ${p.odds > 0 ? '+' : ''}${p.odds}`,
+            agree: 0,
+            // (the order: its edge score; its chance shows, its band colors it)
+            sureness: p.score,
+            chance: p.chance,
+            estimated: false,
+            betType: p.kind,
+          });
+        }
+      }
       if (!file?.bets?.length) continue;
-      // (the latest run only: reports written within 6 hours of its newest, not an older pilot's)
+      // (the AI desk's sheet: only the coming week's, from its latest reports)
       const newest = Math.max(...file.bets.map((b: BetEntry) => Date.parse(b.at)));
       const latest = file.bets.filter((b: BetEntry) => newest - Date.parse(b.at) < 6 * 3600e3);
-      // (the coming week's games only: a team on a bye previews the week after, which would list its
-      // opponent twice)
       const week = Math.min(...latest.map((b: BetEntry) => b.game?.week ?? Infinity));
-      // The bet desk's sheet for this week, when there is one: its picks instead of the reports' own
       if (sheet?.week === week && sheet.picks?.length) {
-        for (const [matchup, info] of Object.entries(sheet.games ?? {})) this.places.set(`${sport}|${matchup}`, info);
+        for (const [matchup, info] of Object.entries(sheet.games ?? {})) if (!this.places.has(`${sport}|${matchup}`)) this.places.set(`${sport}|${matchup}`, info);
         for (const p of sheet.picks) {
+          const betType = kindOf(p.grade?.kind, p.label, p.bet, p.game);
           sheetRows.push({
             sport,
-            source: p.sources.join(' · '),
+            source: 'Analyst',
             kind: 'team',
             position: null,
             rowId: '',
@@ -258,64 +295,43 @@ export class BetsPageComponent implements OnInit {
             confidence: null,
             at: sheet.at,
             id: 10000 + sheetRows.length,
-            key: `${sport}|sheet|${sheetRows.length}`,
+            key: p.game ? pickKey(sport, p.game.matchup, betType, p.bet) : `${sport}|sheet|${sheetRows.length}`,
             pick: p.bet,
             marketLabel: p.label,
             agree: 0,
             sureness: p.strength,
             estimated: false,
-            betType: kindOf(p.grade?.kind, p.label, p.bet, p.game),
+            betType,
           });
         }
-        if (!this.updated || sheet.at > this.updated) this.updated = sheet.at;
-        continue;
       }
-      entries.push(...latest.filter((b: BetEntry) => b.game?.week === week));
-      if (!this.updated || file.at > this.updated) this.updated = file.at;
     }
-    // how many reports make each call
-    const keys = entries.map((b) => `${b.sport}|${callKey(b)}`);
-    const counts = new Map<string, number>();
-    for (const k of keys) counts.set(k, (counts.get(k) ?? 0) + 1);
-    const rows = entries.map((b, i): BetRow => {
-      const call = keys[i].split('|').slice(2).join('|');
-      const total = call.match(/^total (over|under) (.+)$/);
-      const side = call.match(/^([A-Z]{2,3}) ([+-][\d.]+)$/);
-      const ml = call.match(/^([A-Z]{2,3}) ml$/);
-      const [pick, marketLabel] = total
-        ? [`${total[1][0].toUpperCase()}${total[1].slice(1)} ${total[2]}`, 'Game total']
-        : side
-          ? [`${side[1]} ${side[2]}`, 'Spread']
-          : ml
-            ? [`${ml[1]} ML`, 'Moneyline']
-            : [b.lean, b.market];
-      const estimated = !b.score;
-      const sureness = b.score ?? Math.max(1, Math.min(10, ESTIMATE[b.strength] + SURE[b.confidence ?? 'medium'] - 2));
-      return { ...b, id: i, key: keys[i], pick, marketLabel, agree: (counts.get(keys[i]) ?? 1) - 1, sureness, estimated, betType: kindOf(null, marketLabel, pick, b.game) };
-    });
-    rows.sort((a, b) => b.sureness - a.sureness || b.agree - a.agree || (a.game?.date ?? '').localeCompare(b.game?.date ?? ''));
-    // the same call from several reports: listed once, as its highest-ranked report has it
-    const kept = new Map<string, BetRow>();
-    for (const r of rows) if (!kept.has(r.key)) kept.set(r.key, r);
-    // opposite answers to the same question (the over and the under; one team and the other, by spread
-    // or moneyline): the side more analyses back wins, its bets kept and the other's
-    // dropped; an even split shows neither
-    const questions = new Map<string, Map<string, BetRow[]>>();
-    for (const r of kept.values()) {
-      const q = lineOf(r.key);
-      if (!q) continue;
-      const answers = questions.get(q.line) ?? questions.set(q.line, new Map()).get(q.line)!;
-      answers.set(q.side, [...(answers.get(q.side) ?? []), r]);
+    // The algorithm's record on its published picks, all its sports together
+    if (records.length) this.record = sumRecords(records);
+    // Where the analyst's sheet makes the same call as an algorithm pick: marked as both's, its reasons added,
+    // and its edge counted a quarter higher in the order (two independent reads agreeing); the sheet's other
+    // picks aren't shown
+    const byKey = new Map(algoRows.map((r) => [r.key, r]));
+    for (const s of sheetRows) {
+      const a = byKey.get(s.key);
+      if (!a || s.strength === 'fade') continue;
+      a.source = 'Algorithm + Analyst';
+      a.sureness *= 1.25;
+      a.reason = `${a.reason} Analyst: ${s.reason}`;
+      a.risk = s.risk;
     }
-    for (const answers of questions.values()) {
-      if (answers.size < 2) continue;
-      const support = (rs: BetRow[]) => ({ count: rs.reduce((n, r) => n + r.agree + 1, 0), sure: Math.max(...rs.map((r) => r.sureness)) });
-      const ranked = [...answers.values()].map((rs) => ({ rs, ...support(rs) })).sort((a, b) => b.count - a.count || b.sure - a.sure);
-      const tied = ranked[0].count === ranked[1].count;
-      for (const [i, side] of ranked.entries()) if (tied || i > 0) for (const r of side.rs) kept.delete(r.key);
-    }
-    // (the desk's picks and any sport without a sheet, most sure first)
-    this.rows = [...sheetRows, ...kept.values()].sort((a, b) => b.sureness - a.sureness);
+    // (all sports' picks together, by edge)
+    this.rows = algoRows.sort((a, b) => b.sureness - a.sureness || (a.game?.kickoff ?? '').localeCompare(b.game?.kickoff ?? ''));
+  }
+
+  // A sport's label for a row
+  sportLabel(r: BetRow): string {
+    return r.sport.toUpperCase();
+  }
+
+  // A team logo's address: a path under the sport's own site, or a full address as it is
+  logoSrc(r: BetRow, logo: string): string {
+    return /^https?:/.test(logo) ? logo : `/${r.sport}/${logo}`;
   }
 
   // All games: the top 50 bets; a game: its top 15 (from all of its bets, not just those in the top 50)
@@ -383,9 +399,9 @@ export class BetsPageComponent implements OnInit {
     return r.strength === 'fade' ? 'fade' : 'like';
   }
 
-  // A bet's confidence as words: high (7 and up), medium (5-6), low
+  // A bet's band, its row's color: its chance to win 60% or more, 53% or more, or under (picks.mjs)
   level(r: BetRow): 'high' | 'medium' | 'low' {
-    return r.sureness >= 7 ? 'high' : r.sureness >= 5 ? 'medium' : 'low';
+    return r.confidence ?? 'low';
   }
 
   toggle(id: number): void {
@@ -402,4 +418,24 @@ export class BetsPageComponent implements OnInit {
     setTimeout(() => (this.pulling = false), 700);
     setTimeout(() => (this.spinning = false), 2400);
   }
+}
+
+// Records added up: the algorithm's sports' published picks together (wins, losses, pushes; the share won)
+function sumRecords(list: BetRecord[]): BetRecord {
+  const add = (pick: (r: BetRecord) => Tally): Tally => {
+    const t = { wins: 0, losses: 0, pushes: 0, winPct: null as number | null };
+    for (const r of list) {
+      const x = pick(r);
+      t.wins += x.wins;
+      t.losses += x.losses;
+      t.pushes += x.pushes;
+    }
+    t.winPct = t.wins + t.losses ? t.wins / (t.wins + t.losses) : null;
+    return t;
+  };
+  return {
+    graded: list.reduce((n, r) => n + r.graded, 0),
+    overall: add((r) => r.overall),
+    byLevel: { high: add((r) => r.byLevel.high), medium: add((r) => r.byLevel.medium), low: add((r) => r.byLevel.low) },
+  };
 }

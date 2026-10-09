@@ -159,6 +159,32 @@ for (const sport of SPORTS) {
       if (bet.market === 'prop') for (const key of ['player', 'propType']) assert.equal(typeof bet[key], 'string', `${at}: ${key}`);
     }
   });
+
+  // The public Bets page's picks (libs/ranker/scripts/model/picks.mjs): the algorithm's top bets, ranked
+  test(`${sport}: model picks are whole and ranked`, () => {
+    const picksPath = path.join(dir, 'picks.json');
+    if (!fs.existsSync(picksPath)) return;
+    const file = readJson(picksPath);
+    assert.ok(isDate(file.at), 'picks.json: at');
+    assert.ok(Array.isArray(file.picks), 'picks.json: no picks list');
+    if (file.record) for (const key of ['overall', 'byLevel']) assert.ok(file.record[key], `picks.json: record.${key}`);
+    const KINDS = new Set(['spread', 'total', 'team_total', 'moneyline', 'player', 'team_stat']);
+    const LEVELS = new Set(['high', 'medium', 'low']);
+    let last = Infinity;
+    for (const [i, p] of file.picks.entries()) {
+      const at = `${sport} pick ${i + 1}`;
+      assert.equal(p.sport, sport, `${at}: sport`);
+      for (const key of ['id', 'pick', 'matchup', 'market', 'book', 'reason']) assert.equal(typeof p[key], 'string', `${at}: ${key}`);
+      assert.ok(KINDS.has(p.kind), `${at}: kind ${p.kind}`);
+      assert.ok(LEVELS.has(p.level), `${at}: level ${p.level}`);
+      assert.ok(Number.isFinite(p.score) && p.score > 0, `${at}: score ${p.score}`);
+      assert.ok(p.score <= last, `${at}: not in score order`);
+      last = p.score;
+      assert.ok(Number.isFinite(p.odds), `${at}: odds`);
+      assert.ok(isDate(p.start), `${at}: start`);
+      assert.ok(Array.isArray(p.teams) && p.teams.length === 2, `${at}: teams`);
+    }
+  });
 }
 
 // The game view's kept highlights (libs/ranker/scripts/highlights.mjs writes StaticData/highlights/<season>.json):

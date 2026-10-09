@@ -36,6 +36,7 @@ import { finalSummary, postmortems, propPostmortem, usualRoles } from './postmor
 import { closeOf, closingLines, clvOf, clvSummary, propCloseOf } from './clv.mjs';
 import { LINE_BOOKS, SPORT_KEYS, call, canSpend, hasKey, linesFromEvent, usageSummary } from './oddsapi.mjs';
 import { backtestBets, evaluate, snapshots, trustBets } from './backtest.mjs';
+import { buildPicks } from './picks.mjs';
 import { playerRows } from './playerlogs.mjs';
 import { PER_GAME, STATS, apiProps, board, fitProps, priceProps, rowsIndex, settleProp, statInFinal, withApiPrices } from './props.mjs';
 import { CACHE, readJson, writeJson } from './sources.mjs';
@@ -59,7 +60,7 @@ const write = writeJson;
 // it ran, the props' last-run counts); lines: an array written an item a line (small diffs)
 function writeIfChanged(file, data, { lines = false } = {}) {
   const text = lines ? `[\n${data.map((x) => JSON.stringify(x)).join(',\n')}\n]\n` : JSON.stringify(data);
-  const strip = (x) => (x && !Array.isArray(x) ? { ...x, updated: null, props: x.props ? { ...x.props, lastRun: null } : x.props } : x);
+  const strip = (x) => (x && !Array.isArray(x) ? { ...x, updated: null, at: null, props: x.props ? { ...x.props, lastRun: null } : x.props } : x);
   const before = readJson(file, null);
   if (before && JSON.stringify(strip(before)) === JSON.stringify(strip(data))) return false;
   mkdirSync(path.dirname(file), { recursive: true });
@@ -77,7 +78,10 @@ async function runSport(sport) {
     ledger: path.join(ROOT, 'apps', sport, 'src/StaticData/model/ledger.json'),
     context: path.join(CACHE, `context-${sport}.json`),
     backtest: path.join(ROOT, 'apps', sport, 'scripts/model/backtest.json'),
+    picks: path.join(ROOT, 'apps', sport, 'src/StaticData/model/picks.json'),
   };
+  // (--picks-only: the picks written from the ledger as it stands, nothing fetched, fit or bet)
+  if (PICKS_ONLY) return writePicks(r, true);
   await loadHistory(r);
   await liveLines(r);
   fitRatings(r);
@@ -93,7 +97,24 @@ async function runSport(sport) {
   replaceOpen(r);
   betGames(r);
   await betProps(r);
+  writePicks(r);
   saveState(r);
+}
+
+// 7. the public picks (picks.mjs): the best edge bets on games not started, written for the site's Bets page
+// when they change; the ones shown marked published on the ledger, so their record is theirs alone
+function writePicks(r, alone = false) {
+  const ledger = alone ? read(r.files.ledger, { bets: [] }) : r.ledger;
+  const trust = alone ? (read(r.files.state, {}).trust ?? {}) : r.trust;
+  const games = alone ? new Map(read(r.files.games, []).map((g) => [g.id, g])) : r.games;
+  const out = buildPicks(r.sport, ledger, trust, games, r.now);
+  if (DRY) {
+    console.log(`${r.sport} (dry): ${out.picks.length} picks: ${out.picks.map((p) => `${p.level} ${p.pick} (${p.score})`).join(' | ')}`);
+    return;
+  }
+  const changed = writeIfChanged(r.files.picks, out);
+  if (alone) writeIfChanged(r.files.ledger, ledger);
+  console.log(`${r.sport}: ${out.picks.length} picks${changed ? ' written' : ' unchanged'}`);
 }
 
 // 1. the history: games.json brought up to date from the last few days' scoreboards (and the next two: the
@@ -735,6 +756,8 @@ const REPLACE = process.argv.includes('--replace');
 const ALL_SOURCES = process.argv.includes('--all-sources');
 // (--backtest: the backtest's historical snapshots bought, within history's budget: backtest.mjs)
 const BACKTEST = process.argv.includes('--backtest');
+// (--picks-only: only the picks, from the ledger as it is: no fetching, fitting or betting)
+const PICKS_ONLY = process.argv.includes('--picks-only');
 const args = process.argv.slice(2).filter((a) => !a.startsWith('--'));
 const sports = args.length ? args : Object.keys(LEAGUES);
 for (const sport of sports) {

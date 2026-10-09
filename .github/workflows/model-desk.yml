@@ -65,15 +65,22 @@ jobs:
       - name: Check the data
         run: npm test
 
-      # (the desk's history, ledger and state, each written only when something in it changed, so a run that
-      # learned nothing new commits nothing; the admin panel is dev only, so no deploy: the site picks them up
-      # with the next data update's)
+      # (the desk's history, ledger, state and picks, each written only when something in it changed, so a run
+      # that learned nothing new commits nothing; picks: whether the public Bets page's picks changed, the one
+      # thing here the live site shows)
       - name: Commit the desk
+        id: commit
         run: |
           git add apps/*/scripts/model apps/*/src/StaticData/model
           if git diff --cached --quiet; then
             echo "Nothing new"
+            echo "picks=false" >> "$GITHUB_OUTPUT"
             exit 0
+          fi
+          if git diff --cached --name-only | grep -q 'src/StaticData/model/picks.json'; then
+            echo "picks=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "picks=false" >> "$GITHUB_OUTPUT"
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -84,3 +91,19 @@ jobs:
             sleep $((attempt * 10))
           done
           exit 1
+
+      # The public Bets page reads each sport's data/model/picks.json, served with the site: when the picks
+      # changed, the site is built and deployed (pushes made with GITHUB_TOKEN don't trigger the Firebase
+      # deploy workflow, so it's done here, as the data updates do). At most once a run, only when the picks
+      # changed: up to nine a day, fewer when the slate is quiet
+      - name: Build project
+        if: steps.commit.outputs.picks == 'true'
+        run: npm run build
+
+      - name: Install Firebase CLI
+        if: steps.commit.outputs.picks == 'true'
+        run: npm install -g firebase-tools
+
+      - name: Deploy to Firebase
+        if: steps.commit.outputs.picks == 'true'
+        run: firebase deploy --token ${{ secrets.FIREBASE_TOKEN }}

@@ -1,5 +1,5 @@
-<!-- Every betting angle in the latest analyses, one row per bet, most confident first; a row opens to its
-     reasoning -->
+<!-- The algorithm's top picks for every sport, one row per bet, the biggest edge first, each with its chance
+     to win; a row opens to its reasoning -->
 <div class="bets-page" [class.desk-view]="view === 'desk'">
   <!-- (dev only: the bets, or the code-only model desk's play-money betting, its record and its changes to
        itself; one at a time) -->
@@ -36,10 +36,10 @@
         @if (updated) {
           <span class="bets-updated">
             Updated {{ updated | date: 'EEE MMM d, h:mm a' }}
-            <!-- (the desk's record so far: overall, then by confidence) -->
-            @if (record) {
+            <!-- (the algorithm's record on the picks it has shown: overall, then by its chance to win when shown) -->
+            @if (record?.graded) {
               <span class="bets-record">
-                Record {{ wl(record.overall) }} · High {{ wl(record.byLevel.high) }} · Medium {{ wl(record.byLevel.medium) }} · Low {{ wl(record.byLevel.low) }}
+                Record {{ wl(record!.overall) }} · 60%+ {{ wl(record!.byLevel.high) }} · 53–59% {{ wl(record!.byLevel.medium) }} · Under 53% {{ wl(record!.byLevel.low) }}
               </span>
             }
           </span>
@@ -70,6 +70,7 @@
               @for (k of kindChips; track k.kind) {
                 <span><b [ngClass]="k.kind">{{ k.label }}</b> {{ k.name }}</span>
               }
+              <span><b>%</b> Its chance to win; the list is ordered by edge (the expected return at that chance)</span>
             </span>
           </span>
         </div>
@@ -79,7 +80,7 @@
     @if (rows === null) {
       <p class="bets-note">Loading…</p>
     } @else if (!rows.length) {
-      <p class="bets-note">No bets in the latest analyses.</p>
+      <p class="bets-note">No picks right now: the algorithm posts its best bets as the coming games' lines come in.</p>
     } @else {
       <ol class="bets-list" [class.spinning]="spinning">
         @for (r of shown; track r.id; let i = $index) {
@@ -103,7 +104,7 @@
                   <small>{{ insteadText(r.pick) }}</small>
                 } @else {
                   <b>{{ r.pick }}</b>
-                  <small>{{ r.marketLabel }}</small>
+                  <small>{{ sportLabel(r) }} · {{ r.marketLabel }}@if (r.source !== 'Algorithm') { · {{ r.source }}}</small>
                 }
               </span>
               <span class="bet-game">
@@ -113,7 +114,7 @@
                     <b class="bet-matchup">
                       @for (t of r.game.teams; track t.abbr; let last = $last) {
                         @if (t.logo) {
-                          <img [src]="'/' + r.sport + '/' + t.logo" alt="" />
+                          <img [src]="logoSrc(r, t.logo)" alt="" />
                         }
                         {{ t.abbr }}
                         @if (!last) {
@@ -138,7 +139,7 @@
                   <p class="bet-risk"><b>Devil&#39;s Advocate:</b> {{ r.risk }}</p>
                 }
                 <!-- (the confidence shown is the bet's own; the report's overall confidence stays on its card) -->
-                <p class="bet-meta bet-confidence">{{ level(r) }} Confidence</p>
+                <p class="bet-meta bet-confidence" title="Its chance to win; the list is ordered by edge (the expected return at that chance)">{{ r.chance ?? '–' }}% to win</p>
               </div>
             }
           </li>
