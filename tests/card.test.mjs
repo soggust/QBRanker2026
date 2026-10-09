@@ -1,7 +1,8 @@
 // The player card's and the game view's plain parts (tests/support/card-entry.ts): the hover words every tab
 // shares, the game log's view (its columns' looks, the outcomes, the chart), the game's injury report (a
 // player back before game day left off), how a highlight plays (the NFL's open on YouTube), and the vs
-// Position breakdown built from a season's real rows (the NFL's defenses, the NHL's teams).
+// Position breakdown built from a season's real rows (the NFL's defenses, the NHL's teams), and the NFL's Field
+// Map read from its real files (each chart's total the row's own in the grid).
 import { test, before } from 'node:test';
 import assert from 'node:assert/strict';
 import path from 'node:path';
@@ -304,4 +305,90 @@ test("a last five game's when: the NFL by its week (playoff rounds named, the pr
   // (the Eastern day: a late West Coast game stays on its own night)
   assert.equal(formWhen('basketball/nba', undefined, '2025-05-22T02:30Z'), '05/21/2025');
   assert.equal(formWhen('hockey/nhl', undefined, undefined), '');
+});
+
+// ---- the Field Map (player-card/field-map.ts), read from the real field-maps.json as the card reads it
+
+const fieldMaps = (season) => {
+  const dir = season === 2026 ? staticDir('nfl') : path.join(staticDir('nfl'), 'seasons', String(season));
+  return { file: nfl.expandFieldMaps(readJson(path.join(dir, 'field-maps.json'))), rows: readJson(path.join(dir, 'skill-players.json')) };
+};
+
+test("Field Map: each chart's total is the row's own in the grid (carries, targets, field goals tried, punts)", () => {
+  const { file, rows } = fieldMaps(2026);
+  const section = file.regular;
+  const view = (role, row) => nfl.fieldMapView(section, role, [row.gsisId, row.id], { carries: row.stats.carries, targets: row.stats.targets });
+  // (Kyren Williams: 54 carries, every one with its lane)
+  const kyren = rows.RB.find((r) => r.gsisId === '00-0037840');
+  const k = view('RB', kyren);
+  assert.equal(k.runs.total, kyren.stats.carries);
+  assert.equal(k.runs.total, 54);
+  assert.equal(k.runs.count, '54 carries');
+  assert.deepEqual(k.runs.lanes.map((l) => l.sub), ['4', '1', '8', '23', '10', '1', '7']);
+  assert.equal(k.runs.lanes[3].main, (142 / 23).toFixed(1));
+  assert.ok(k.runsFirst);
+  // (every back's, receiver's and tight end's: the plays logged without a direction left out, never more than
+  // the grid's; a chart short of it says so in its hover)
+  const near = (map, grid) => map <= grid + 1 && map >= grid * 0.95;
+  for (const role of ['RB', 'WR', 'TE']) {
+    for (const r of rows[role]) {
+      const v = view(role, r);
+      assert.ok(v, `${r.name}: no Field Map`);
+      if (r.stats.targets >= 20) assert.ok(near(v.pass.total, r.stats.targets), `${r.name}: ${v.pass.total} targets, ${r.stats.targets} in the grid`);
+      if (v.runs && r.stats.carries >= 20) assert.ok(near(v.runs.total, r.stats.carries), `${r.name}: ${v.runs.total} carries, ${r.stats.carries} in the grid`);
+      if (v.runs && v.runs.total < r.stats.carries) assert.match(v.runs.help, new RegExp(`${v.runs.total} of ${r.stats.carries} carries charted`));
+      if (v.runs && v.runs.total >= r.stats.carries) assert.doesNotMatch(v.runs.help, /charted/);
+    }
+  }
+  for (const r of rows.K) {
+    const v = view('K', r);
+    assert.equal(v.kicks.bands.length, 5);
+    assert.equal(v.kicks.count, `${r.stats.fgAtt} ${r.stats.fgAtt === 1 ? 'try' : 'tries'}`, r.name);
+  }
+  for (const r of rows.P) assert.equal(view('P', r).punts.count, `${r.stats.punts} punt${r.stats.punts === 1 ? '' : 's'}`, r.name);
+});
+
+test("Field Map: a QB by his ESPN id (his throws and his runs), a defense's allowed, a missing row none", () => {
+  const { file, rows } = fieldMaps(2026);
+  const section = file.regular;
+  const games = readJson(path.join(staticDir('nfl'), 'games.json'));
+  const rodgers = games.find((q) => q.name === 'Aaron Rodgers');
+  const qb = nfl.fieldMapView(section, 'QB', [`QB-${rodgers.id}`, rodgers.id]);
+  assert.equal(qb.pass.kind, 'pass');
+  assert.equal(qb.pass.zones.length, 12);
+  assert.equal(qb.pass.total, section.players[String(rodgers.id)].pass.reduce((a, z) => a + z.att, 0));
+  assert.equal(nfl.fieldMapView(section, 'QB', ['QB-' + rodgers.id]).pass.total, qb.pass.total, 'the row id alone finds him');
+  // (a defense: what it allowed, its run lanes a strip; a weak spot red: its tone flipped)
+  const def = nfl.fieldMapView(section, 'DEF', [rows.DEF[0].gsisId]);
+  assert.equal(def.pass.kind, 'allowed');
+  assert.equal(def.strip.lanes.length, 7);
+  assert.equal(def.runs, null);
+  assert.equal(nfl.fieldMapView(section, 'RB', ['00-nobody']), null);
+});
+
+test('Field Map: 2003, before the zones were charted: no pass maps, runs, kicks and punts still there', () => {
+  const { file, rows } = fieldMaps(2003);
+  const section = file.regular;
+  const back = rows.RB[0];
+  const v = nfl.fieldMapView(section, 'RB', [back.gsisId]);
+  assert.equal(v.pass, null);
+  // (the old play-by-play leaves a few runs without a lane: never more than the grid's, nearly all of them)
+  assert.ok(v.runs.total <= back.stats.carries && v.runs.total >= back.stats.carries * 0.97, `${v.runs.total} of ${back.stats.carries}`);
+  const def = nfl.fieldMapView(section, 'DEF', [rows.DEF[0].gsisId]);
+  assert.equal(def.pass, null);
+  assert.ok(def.strip.total > 0);
+  assert.ok(nfl.fieldMapView(section, 'K', [rows.K[0].gsisId]).kicks);
+  assert.ok(nfl.fieldMapView(section, 'P', [rows.P[0].gsisId]).punts);
+});
+
+test("Field Map: a part's tone against the league's, faded by few plays, flipped for a defense", () => {
+  const { tone, spread } = nfl;
+  assert.equal(tone(0.5, 0.1, 0.2, 1000, 12), 0.988, '2 spreads out: full strength, all but');
+  assert.ok(tone(0.5, 0.1, 0.2, 3, 12) < 0.25, 'a few throws: faint');
+  assert.equal(tone(0.5, 0.1, 0.2, 1000, 12, true), -0.988);
+  assert.equal(tone(0.5, 0.1, 0.2, 0, 12), 0, 'none: neutral');
+  assert.equal(spread([{ value: 1, plays: 20 }, { value: 2, plays: 20 }], 12), null, 'too few rows');
+  assert.equal(spread([1, 2, 3, 99].map((value, i) => ({ value, plays: i < 3 ? 20 : 2 })), 12), Math.sqrt(2 / 3), 'the thin ones left out');
+  // (the field: a stripe every other 5 yards, the 10 and 20 lines marked)
+  assert.equal(nfl.PASS_FIELD.lines.filter((l) => l.band).length, 2);
 });

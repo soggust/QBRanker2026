@@ -11,6 +11,11 @@ game-view {
   @include meta.load-css("components/player-card");
 }
 
+// (the Overview's Field Map: field-map.scss)
+player-card {
+  @include meta.load-css("components/field-map");
+}
+
 player-compare {
   @include meta.load-css("components/compare");
 }

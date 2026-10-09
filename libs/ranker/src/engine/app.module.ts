@@ -16,6 +16,7 @@ import { PlayerCardComponent } from './player-card/player-card.component';
 import { PlayerCompareComponent } from './compare/player-compare.component';
 import { CARD_TABS } from '@ranker/engine/player-card/tabs/card-tabs';
 import { CardPanelComponent } from './player-card/card-panel.component';
+import { FieldMapComponent } from './player-card/field-map.component';
 import { GameViewComponent } from './game-view/game-view.component';
 import { ColumnHighlightDirective } from '@ranker/core/column-highlight.directive';
 import { ScrolledSidewaysDirective } from '@ranker/core/scrolled-sideways.directive';
@@ -39,6 +40,7 @@ import { ModelDeskComponent } from './bets/model-desk.component';
     PlayerCompareComponent,
     ...CARD_TABS,
     CardPanelComponent,
+    FieldMapComponent,
     GameViewComponent,
     ColumnHighlightDirective,
     ScrolledSidewaysDirective,

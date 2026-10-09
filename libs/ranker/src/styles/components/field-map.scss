@@ -1,0 +1,699 @@
+@use "../variables" as v;
+
+// The Field Map (the Overview's panel, player-card/field-map.component.html): each chart on the turf, darkened
+// under the chalk; its zones, lanes, rings and bars tinted green or red against the league's (inline), their
+// numbers in the hand; side by side when there's room, one under another on a phone
+// (loaded under player-card: _cards.scss)
+
+.field-map .group-body {
+  padding-bottom: 16px;
+  padding-top: 14px;
+}
+
+.fm-charts {
+  align-items: start;
+  display: grid;
+  gap: 18px 28px;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+}
+
+.fm-chart {
+  margin: 0;
+  max-width: 440px;
+  min-width: 0;
+  // (one alone: centered in the panel)
+  justify-self: center;
+  width: 100%;
+
+  svg {
+    display: block;
+    overflow: visible;
+    width: 100%;
+  }
+
+  // (the punts' field runs long: more room across)
+  &.fm-punts {
+    max-width: 540px;
+  }
+}
+
+.fm-head {
+  align-items: baseline;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 8px;
+  margin-bottom: 8px;
+
+  b {
+    color: #fff;
+    @include v.hand(15px);
+  }
+
+  small {
+    color: rgba(255, 255, 255, 0.55);
+    font-size: 11px;
+    font-weight: 700;
+  }
+}
+
+// ---- the field: the turf darkened, its stripes, the chalk
+
+.fm-shade {
+  fill: rgba(9, 17, 12, 0.76);
+}
+
+.fm-stripe {
+  fill: rgba(255, 255, 255, 0.035);
+}
+
+.fm-edge {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.75);
+  stroke-width: 1.6px;
+}
+
+.fm-yard {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.22);
+  stroke-width: 1px;
+
+  // (the 10 and the 20: where the depths change)
+  &.band {
+    stroke: rgba(255, 255, 255, 0.5);
+    stroke-width: 1.3px;
+  }
+}
+
+.fm-hash {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.3);
+  stroke-width: 0.9px;
+}
+
+// (the yard numbers painted along the sidelines)
+.fm-num {
+  dominant-baseline: central;
+  fill: rgba(255, 255, 255, 0.28);
+  font-family: v.$font-heading;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-anchor: middle;
+
+  &.flat {
+    dominant-baseline: auto;
+    font-size: 9px;
+  }
+}
+
+// (the line of scrimmage, a broadcast's blue)
+.fm-los {
+  stroke: #5fa8ff;
+  stroke-dasharray: 6 4;
+  stroke-width: 2px;
+  filter: drop-shadow(0 0 3px rgba(95, 168, 255, 0.6));
+}
+
+.fm-side {
+  fill: rgba(255, 255, 255, 0.55);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  text-anchor: middle;
+}
+
+// ---- a part's numbers: the value in the hand, what it's out of under it
+
+.fm-main,
+.fm-sub {
+  paint-order: stroke;
+  pointer-events: none;
+  stroke: rgba(0, 0, 0, 0.55);
+  stroke-linejoin: round;
+  text-anchor: middle;
+}
+
+.fm-main {
+  fill: #fff;
+  font-family: v.$font-hand;
+  font-size: 14px;
+  stroke-width: 3px;
+}
+
+.fm-sub {
+  fill: rgba(255, 255, 255, 0.75);
+  font-size: 9.5px;
+  font-weight: 800;
+  stroke-width: 2.5px;
+}
+
+// ---- the zones
+
+.fm-zone {
+  cursor: help;
+
+  .fm-zone-fill {
+    stroke: rgba(0, 0, 0, 0.28);
+    stroke-width: 1px;
+    transition:
+      fill 0.25s ease,
+      stroke 0.12s ease;
+  }
+
+  &:hover .fm-zone-fill {
+    stroke: rgba(255, 255, 255, 0.85);
+    stroke-width: 1.6px;
+  }
+
+  &.empty .fm-main {
+    fill: rgba(255, 255, 255, 0.35);
+  }
+}
+
+.fm-bubble {
+  stroke: rgba(255, 255, 255, 0.7);
+  stroke-width: 1.2px;
+  transition: stroke-width 0.12s ease;
+
+  .fm-zone:hover & {
+    stroke: #fff;
+    stroke-width: 2px;
+  }
+}
+
+// ---- the keys under a chart
+
+.fm-legend {
+  color: rgba(255, 255, 255, 0.6);
+  display: flex;
+  flex-wrap: wrap;
+  font-size: 11px;
+  font-weight: 700;
+  gap: 4px 14px;
+  justify-content: center;
+  margin-top: 8px;
+
+  span {
+    align-items: center;
+    display: inline-flex;
+    gap: 5px;
+  }
+
+  .fm-legend-note {
+    color: rgba(255, 255, 255, 0.42);
+  }
+}
+
+.fm-key {
+  border-radius: 3px;
+  display: inline-block;
+  height: 10px;
+  width: 10px;
+
+  &.good {
+    background: rgba(62, 224, 122, 0.7);
+  }
+
+  &.bad {
+    background: rgba(255, 90, 79, 0.7);
+  }
+
+  &.bubble {
+    border: 1.5px solid rgba(255, 255, 255, 0.7);
+    border-radius: 50%;
+  }
+}
+
+// ---- a defense's run lanes: a strip of seven cells, left end to right end
+
+.fm-strip {
+  margin-top: 16px;
+}
+
+.fm-strip-cells {
+  display: grid;
+  gap: 4px;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+
+.fm-cell {
+  align-items: center;
+  background: linear-gradient(var(--fill), var(--fill)), rgba(9, 17, 12, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 6px;
+  cursor: help;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 6px 2px 5px;
+  transition: border-color 0.12s ease;
+
+  &:hover {
+    border-color: rgba(255, 255, 255, 0.7);
+  }
+
+  small {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 1px;
+  }
+
+  b {
+    color: #fff;
+    @include v.hand(15px);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+  }
+
+  em {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 9.5px;
+    font-style: normal;
+    font-weight: 700;
+    min-height: 1em;
+    white-space: nowrap;
+  }
+
+  &.empty b {
+    color: rgba(255, 255, 255, 0.35);
+  }
+}
+
+// ---- the run lanes
+
+.fm-yd {
+  fill: rgba(255, 255, 255, 0.3);
+  font-size: 8px;
+  font-weight: 800;
+
+  &.end {
+    text-anchor: end;
+  }
+}
+
+.fm-lineman {
+  fill: rgba(0, 0, 0, 0.25);
+  stroke: rgba(255, 255, 255, 0.6);
+  stroke-width: 1.4px;
+
+  // (a tight end: not always there)
+  &.te {
+    stroke-dasharray: 2.5 2;
+    stroke: rgba(255, 255, 255, 0.4);
+  }
+}
+
+.fm-back {
+  fill: rgba(255, 255, 255, 0.85);
+  stroke: rgba(0, 0, 0, 0.4);
+  stroke-width: 1px;
+}
+
+.fm-lane {
+  cursor: help;
+
+  .fm-shaft {
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.55));
+    transition: filter 0.12s ease;
+  }
+
+  // (a wider, unseen stroke along it: an easy target for the hover)
+  .fm-shaft-hit {
+    fill: none;
+    stroke: transparent;
+    stroke-width: 14px;
+  }
+
+  &:hover .fm-shaft,
+  &:hover .fm-head-arrow {
+    filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.7));
+  }
+
+  &.empty .fm-shaft {
+    stroke-dasharray: 0.04 0.04;
+  }
+
+  &.empty .fm-main {
+    fill: rgba(255, 255, 255, 0.35);
+  }
+}
+
+// ---- the kicks
+
+.fm-band {
+  cursor: help;
+
+  .fm-ring-turf {
+    opacity: 0.55;
+  }
+
+  .fm-ring {
+    stroke: rgba(255, 255, 255, 0.35);
+    stroke-width: 1px;
+    transition: stroke 0.12s ease;
+  }
+
+  &:hover .fm-ring {
+    stroke: rgba(255, 255, 255, 0.9);
+    stroke-width: 1.6px;
+  }
+
+  &.empty .fm-ring {
+    stroke-dasharray: 3 3;
+    stroke: rgba(255, 255, 255, 0.25);
+  }
+
+  &.empty .fm-main {
+    fill: rgba(255, 255, 255, 0.35);
+  }
+}
+
+.fm-band-label {
+  fill: rgba(255, 255, 255, 0.5);
+  font-size: 9px;
+  font-weight: 800;
+}
+
+// (the uprights in their yellow)
+.fm-posts path {
+  fill: none;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.6));
+  stroke: #f5c518;
+  stroke-linecap: round;
+  stroke-width: 3.2px;
+}
+
+.fm-note {
+  align-items: baseline;
+  color: rgba(255, 255, 255, 0.6);
+  display: flex;
+  flex-wrap: wrap;
+  font-size: 12px;
+  font-weight: 700;
+  gap: 4px 14px;
+  justify-content: center;
+  margin: 8px 0 0;
+
+  b {
+    color: #fff;
+    font-weight: 800;
+  }
+
+  span {
+    cursor: help;
+  }
+}
+
+// ---- the punts
+
+.fm-inside20 {
+  fill: rgba(245, 197, 24, 0.08);
+}
+
+.fm-endzone {
+  fill: rgba(0, 0, 0, 0.28);
+}
+
+.fm-league-tick {
+  cursor: help;
+  fill: rgba(255, 255, 255, 0.55);
+}
+
+.fm-arc {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.85);
+  stroke-dasharray: 0.012 0.012;
+  stroke-linecap: round;
+  stroke-width: 1.6px;
+}
+
+.fm-ball {
+  fill: #8a4b23;
+  stroke: #fff;
+  stroke-width: 0.9px;
+}
+
+.fm-flight,
+.fm-return {
+  cursor: help;
+}
+
+.fm-return {
+  line {
+    stroke: rgba(255, 255, 255, 0.55);
+    stroke-dasharray: 3 2.5;
+    stroke-width: 1.4px;
+  }
+
+  circle {
+    fill: #fff;
+    stroke: rgba(0, 0, 0, 0.4);
+  }
+}
+
+.fm-mark {
+  cursor: help;
+  font-family: v.$font-hand;
+  font-size: 13px;
+  paint-order: stroke;
+  stroke: rgba(0, 0, 0, 0.6);
+  stroke-linejoin: round;
+  stroke-width: 3px;
+}
+
+.fm-mark-unit {
+  fill: rgba(255, 255, 255, 0.65);
+  font-family: v.$font-base;
+  font-size: 9px;
+  font-weight: 800;
+}
+
+.fm-bar {
+  cursor: help;
+
+  .fm-bar-bg {
+    fill: rgba(255, 255, 255, 0.04);
+  }
+
+  .fm-bar-fill {
+    fill: rgba(225, 232, 226, 0.5);
+    transition: filter 0.12s ease;
+  }
+
+  &:hover .fm-bar-fill {
+    filter: brightness(1.25);
+  }
+}
+
+.fm-bar-league {
+  stroke: rgba(255, 255, 255, 0.8);
+  stroke-dasharray: 2 2;
+  stroke-width: 1.2px;
+}
+
+.fm-bar-n,
+.fm-bar-label,
+.fm-bar-axis {
+  fill: rgba(255, 255, 255, 0.6);
+  font-size: 9px;
+  font-weight: 800;
+  text-anchor: middle;
+}
+
+.fm-bar-n {
+  fill: #fff;
+}
+
+.fm-bar-axis {
+  fill: rgba(255, 255, 255, 0.4);
+  text-anchor: start;
+}
+
+.fm-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin-top: 10px;
+}
+
+.fm-chip {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 999px;
+  cursor: help;
+  display: inline-flex;
+  gap: 7px;
+  padding: 4px 12px 4px 10px;
+
+  b {
+    @include v.hand(15px);
+  }
+
+  > span {
+    color: rgba(255, 255, 255, 0.75);
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  small {
+    color: rgba(255, 255, 255, 0.45);
+    font-size: 10px;
+    margin-left: 5px;
+  }
+}
+
+// ---- the switch on the bar: Efficiency or Volume
+
+.fm-modes {
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 999px;
+  gap: 0 !important;
+  margin-right: 8px;
+  padding: 2px !important;
+
+  button {
+    background: none;
+    border: none;
+    border-radius: 999px;
+    color: rgba(255, 255, 255, 0.6);
+    cursor: pointer;
+    font-family: v.$font-base;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    padding: 4px 10px;
+    text-transform: uppercase;
+    transition:
+      color 0.12s ease,
+      background-color 0.12s ease;
+
+    &:hover {
+      color: #fff;
+    }
+
+    &.active {
+      background: rgba(255, 255, 255, 0.12);
+      color: var(--scoreboard-led);
+      text-shadow: var(--scoreboard-glow);
+    }
+  }
+}
+
+// ---- phone: the charts' own numbers a touch smaller, the strip's tighter
+
+@media (max-width: 480px) {
+  .field-map .group-body {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .fm-modes button {
+    padding: 4px 7px;
+  }
+
+  .fm-cell {
+    padding: 5px 0 4px;
+
+    b {
+      font-size: 13px;
+    }
+
+    em {
+      font-size: 8.5px;
+    }
+  }
+}
+
+// ---- motion (none for anyone who's asked for less): the zones fill in near to far, the bubbles pop, the
+// arrows draw out of the backfield, the rings step out from the posts, the punt flies, the bars rise
+
+@media (prefers-reduced-motion: no-preference) {
+  .fm-zone-fill,
+  .fm-cell,
+  .fm-band {
+    animation: fm-fade 0.45s ease backwards;
+    animation-delay: calc(var(--i, 0) * 45ms);
+  }
+
+  .fm-zone text,
+  .fm-band text,
+  .fm-lane text {
+    animation: fm-fade 0.3s ease backwards;
+    animation-delay: calc(var(--i, 0) * 45ms + 250ms);
+  }
+
+  .fm-bubble {
+    animation: fm-pop 0.4s cubic-bezier(0.2, 0.8, 0.2, 1.3) backwards;
+    animation-delay: calc(var(--i, 0) * 40ms);
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+
+  .fm-lane .fm-shaft {
+    animation: fm-draw 0.6s cubic-bezier(0.3, 0.7, 0.3, 1) backwards;
+    animation-delay: calc(var(--i, 0) * 60ms);
+    stroke-dasharray: 1;
+  }
+
+  .fm-lane.empty .fm-shaft {
+    animation: fm-fade 0.4s ease backwards;
+    stroke-dasharray: 0.04 0.04;
+  }
+
+  .fm-head-arrow {
+    animation: fm-fade 0.2s ease backwards;
+    animation-delay: calc(var(--i, 0) * 60ms + 0.5s);
+  }
+
+  .fm-arc {
+    animation: fm-fade 0.7s ease backwards;
+  }
+
+  .fm-ball {
+    animation: fm-pop 0.35s cubic-bezier(0.2, 0.8, 0.2, 1.3) 0.45s backwards;
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+
+  .fm-return {
+    animation: fm-fade 0.35s ease 0.75s backwards;
+  }
+
+  .fm-bar-fill {
+    animation: fm-rise 0.45s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+    animation-delay: calc(var(--i, 0) * 60ms + 0.2s);
+    transform-box: fill-box;
+    transform-origin: bottom;
+  }
+}
+
+@keyframes fm-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes fm-pop {
+  from {
+    opacity: 0;
+    transform: scale(0);
+  }
+}
+
+@keyframes fm-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+}
+
+@keyframes fm-rise {
+  from {
+    transform: scaleY(0);
+  }
+}

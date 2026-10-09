@@ -20,6 +20,7 @@ import { buildQbUnits } from './qb-rows';
 import { OLINE_LEAN, computedValue, connectTeamGrades, fromOtherTabs } from './team-grades';
 import { blockingExtras } from './blocking';
 import { loadDepthChart } from './depth-chart';
+import { hasFieldMap, loadFieldMap } from './field-map';
 import { vsPositionBreakdown } from './vs-position';
 
 // NFL: what the engine needs to know about football (the rest is beside this file: positions,
@@ -200,6 +201,12 @@ export const SPORT: SportConfig = {
   depthChart: {
     has: (player, position, season) => TEAM_LOGS.includes(position) && season >= 2001 && !!logoName(player),
     load: (player, position, season) => loadDepthChart(logoName(player)!, position, season, season === SPORT.currentSeason),
+  },
+  // The Field Map on a QB's, a back's, a receiver's, a kicker's, a punter's and a defense's Overview
+  // (data/field-maps.json, data/seasons/<year>/field-maps.json: build-field-maps.mjs)
+  fieldMap: {
+    has: hasFieldMap,
+    load: (player, position, season, part) => loadFieldMap(player, position, season, part, season === SPORT.currentSeason),
   },
   cardFlagsLast: castFlags,
   cardExtras: blockingExtras,

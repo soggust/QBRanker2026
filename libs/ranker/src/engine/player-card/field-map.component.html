@@ -1,0 +1,243 @@
+<!-- The Field Map's charts, side by side when the card's wide enough (a back's runs first) -->
+@let v = view;
+<div class="fm-charts">
+  @if (v.runs && v.runsFirst) {
+    <ng-container *ngTemplateOutlet="runs"></ng-container>
+  }
+
+  <!-- Throws by zone: the field from behind the offense, the line of scrimmage near the bottom, three across
+       and four deep; each zone tinted against the league's there (efficiency) or a bubble its share (volume) -->
+  @if (v.pass; as p) {
+    <figure class="fm-chart fm-pass" [class.volume]="mode === 'volume'">
+      <figcaption class="fm-head" [title]="p.help">
+        <b>{{ p.title }}</b><small>{{ p.count }}</small>
+      </figcaption>
+      <svg [attr.viewBox]="passBox" role="img" [attr.aria-label]="p.aria">
+        <defs>
+          <pattern [attr.id]="id + '-turfp'" patternUnits="userSpaceOnUse" width="160" height="160">
+            <image [attr.href]="turf" width="160" height="160" />
+          </pattern>
+          <clipPath [attr.id]="id + '-field'"><polygon [attr.points]="passField.outline" /></clipPath>
+        </defs>
+        <g class="fm-ground" [attr.clip-path]="url('field')">
+          <polygon [attr.points]="passField.outline" [attr.fill]="url('turfp')" />
+          <polygon class="fm-shade" [attr.points]="passField.outline" />
+          @for (s of passField.stripes; track $index) {
+            <polygon class="fm-stripe" [attr.points]="s" />
+          }
+        </g>
+        <path class="fm-hash" [attr.d]="passField.hashes" />
+        @for (l of passField.lines; track l.d) {
+          <path class="fm-yard" [class.band]="l.band" [attr.d]="l.d" />
+        }
+        @for (n of passField.numbers; track $index) {
+          <text class="fm-num" [attr.transform]="rotate(n)">{{ n.text }}</text>
+        }
+        <polygon class="fm-edge" [attr.points]="passField.outline" />
+        @for (z of p.zones; track z.key; let i = $index) {
+          <g class="fm-zone" [class.empty]="z.empty" [style.--i]="i">
+            <title>{{ z.title }}</title>
+            <polygon class="fm-zone-fill" [attr.points]="z.points" [attr.fill]="mode === 'efficiency' ? z.fill : 'rgba(0, 0, 0, 0)'" />
+            @if (mode === 'volume') {
+              @if (!z.empty) {
+                <circle class="fm-bubble" [attr.cx]="z.cx" [attr.cy]="z.cy" [attr.r]="z.r" [attr.fill]="z.bubble" />
+              }
+              <text class="fm-main" [attr.x]="z.cx" [attr.y]="z.cy + 2">{{ z.count }}</text>
+              <text class="fm-sub" [attr.x]="z.cx" [attr.y]="z.cy + 13">{{ z.share }}</text>
+            } @else {
+              <text class="fm-main" [attr.x]="z.cx" [attr.y]="z.cy + 2">{{ z.main }}</text>
+              <text class="fm-sub" [attr.x]="z.cx" [attr.y]="z.cy + 14" [attr.fill]="z.subColor">{{ z.sub }}</text>
+            }
+          </g>
+        }
+        <line class="fm-los" [attr.x1]="passField.los.x1" [attr.x2]="passField.los.x2" [attr.y1]="passField.los.y" [attr.y2]="passField.los.y"><title>The line of scrimmage</title></line>
+        @for (s of passField.sides; track s.text) {
+          <text class="fm-side" [attr.x]="s.x" [attr.y]="s.y">{{ s.text }}</text>
+        }
+      </svg>
+      <div class="fm-legend" [title]="p.help">
+        @if (mode === 'volume') {
+          <span><i class="fm-key bubble"></i>Size: share of {{ p.kind === 'targets' ? 'his targets' : p.kind === 'pass' ? 'his throws' : 'the throws' }}</span>
+          <span><i class="fm-key good"></i><i class="fm-key bad"></i>Color: EPA vs the league</span>
+        } @else {
+          <span><i class="fm-key good"></i>{{ p.kind === 'allowed' ? 'Stingier' : 'Better' }} than the league</span>
+          <span><i class="fm-key bad"></i>{{ p.kind === 'allowed' ? 'Leakier' : 'Worse' }}</span>
+        }
+      </div>
+
+      <!-- (a defense's run lanes: a strip under its pass map, each lane's yards a carry allowed) -->
+      @if (v.strip; as s) {
+        <div class="fm-strip" role="img" [attr.aria-label]="s.aria">
+          <div class="fm-head" [title]="s.help">
+            <b>{{ s.title }}</b><small>{{ s.count }}</small>
+          </div>
+          <div class="fm-strip-cells">
+            @for (l of s.lanes; track l.key; let i = $index) {
+              <span class="fm-cell" [class.empty]="l.empty" [style.--fill]="l.fill" [style.--i]="i" [title]="l.title">
+                <small>{{ l.short }}</small>
+                <b>{{ l.main }}</b>
+                <em>{{ l.sub ? l.sub + ' car' : '' }}</em>
+              </span>
+            }
+          </div>
+        </div>
+      }
+    </figure>
+  }
+
+  @if (v.runs && !v.runsFirst) {
+    <ng-container *ngTemplateOutlet="runs"></ng-container>
+  }
+
+  <!-- Field goals by distance: rings stepping away from the uprights, each its makes over its tries -->
+  @if (v.kicks; as k) {
+    <figure class="fm-chart fm-kicks">
+      <figcaption class="fm-head" title="Field goals by distance: each ring its makes over its tries, the nearer the ring the shorter the kick, tinted against the league's make rate there">
+        <b>Field Goals</b><small>{{ k.count }}</small>
+      </figcaption>
+      <svg [attr.viewBox]="kickBox" role="img" [attr.aria-label]="k.aria">
+        <defs>
+          <pattern [attr.id]="id + '-turfk'" patternUnits="userSpaceOnUse" width="160" height="160">
+            <image [attr.href]="turf" width="160" height="160" />
+          </pattern>
+        </defs>
+        @for (b of k.bands; track b.key; let i = $index) {
+          <g class="fm-band" [class.empty]="b.empty" [style.--i]="i">
+            <title>{{ b.title }}</title>
+            <path class="fm-ring-turf" [attr.d]="b.path" [attr.fill]="url('turfk')" />
+            <path class="fm-ring" [attr.d]="b.path" [attr.fill]="b.fill" />
+            <text class="fm-main" [attr.x]="b.cx" [attr.y]="b.cy + 1">{{ b.main }}</text>
+            <text class="fm-sub" [attr.x]="b.cx" [attr.y]="b.cy + 12" [attr.fill]="b.subColor">{{ b.sub }}</text>
+            <text class="fm-band-label" [attr.x]="b.lx" [attr.y]="b.ly">{{ b.label }}</text>
+          </g>
+        }
+        <!-- (the uprights: the crossbar, its two posts, the stem down to the ground) -->
+        <g class="fm-posts">
+          <path [attr.d]="'M' + k.posts.x + ' ' + (k.posts.y + 12) + 'V' + k.posts.y + 'M' + (k.posts.x - 22) + ' ' + k.posts.y + 'H' + (k.posts.x + 22) + 'M' + (k.posts.x - 22) + ' ' + k.posts.y + 'V' + (k.posts.y - 32) + 'M' + (k.posts.x + 22) + ' ' + k.posts.y + 'V' + (k.posts.y - 32)" />
+        </g>
+      </svg>
+      <p class="fm-note">
+        <b>{{ k.total }}</b>
+        @if (k.xp) {
+          <span [title]="k.xpTitle">{{ k.xp }}</span>
+        }
+      </p>
+    </figure>
+  }
+
+  <!-- Punts: the average one's flight from a usual spot (his own 35) to where it came down, the return back to
+       where it ended, the league's as ticks; how far they went under it, band by band -->
+  @if (v.punts; as u) {
+    <figure class="fm-chart fm-punts">
+      <figcaption class="fm-head" title="The average punt from a usual spot (his own 35): its flight to where it came down (gross), the return back to where it ended (net); the league's of each as ticks. Under it, how far they went, the league's share of each a dashed line">
+        <b>Punting</b><small>{{ u.count }}</small>
+      </figcaption>
+      <svg [attr.viewBox]="puntBox" role="img" [attr.aria-label]="u.aria">
+        <defs>
+          <pattern [attr.id]="id + '-turfu'" patternUnits="userSpaceOnUse" width="160" height="160">
+            <image [attr.href]="turf" width="160" height="160" />
+          </pattern>
+        </defs>
+        <rect [attr.x]="0" [attr.y]="u.top" [attr.width]="u.end" [attr.height]="u.bottom - u.top" [attr.fill]="url('turfu')" />
+        <rect class="fm-shade" [attr.x]="0" [attr.y]="u.top" [attr.width]="u.end" [attr.height]="u.bottom - u.top" />
+        <rect class="fm-inside20" [attr.x]="u.lines[8].x" [attr.y]="u.top" [attr.width]="u.goal - u.lines[8].x" [attr.height]="u.bottom - u.top"><title>Inside the 20</title></rect>
+        <rect class="fm-endzone" [attr.x]="u.goal" [attr.y]="u.top" [attr.width]="u.end - u.goal" [attr.height]="u.bottom - u.top" />
+        @for (l of u.lines; track l.x) {
+          <line class="fm-yard" [class.band]="l.major" [attr.x1]="l.x" [attr.x2]="l.x" [attr.y1]="u.top" [attr.y2]="u.bottom" />
+        }
+        <line class="fm-yard band" [attr.x1]="u.goal" [attr.x2]="u.goal" [attr.y1]="u.top" [attr.y2]="u.bottom" />
+        @for (n of u.numbers; track n.x) {
+          <text class="fm-num flat" [attr.x]="n.x" [attr.y]="u.bottom - 5">{{ n.text }}</text>
+        }
+        <rect class="fm-edge" [attr.x]="0" [attr.y]="u.top" [attr.width]="u.end" [attr.height]="u.bottom - u.top" />
+        <line class="fm-los" [attr.x1]="u.los" [attr.x2]="u.los" [attr.y1]="u.top" [attr.y2]="u.bottom"><title>The line of scrimmage (his own 35)</title></line>
+        <!-- (the league's gross and net: ticks above and below the field) -->
+        <path class="fm-league-tick" [attr.d]="'M' + u.leagueGross + ' ' + u.top + 'l-4 -6h8z'"><title>League gross: the average punt's distance</title></path>
+        <path class="fm-league-tick" [attr.d]="'M' + u.leagueNet + ' ' + u.bottom + 'l-4 6h8z'"><title>League net</title></path>
+        <!-- (the return: back from where it came down to where it ended) -->
+        <g class="fm-return">
+          <title>{{ u.netTitle }}</title>
+          <line [attr.x1]="u.landX" [attr.x2]="u.netX" [attr.y1]="u.top + 36" [attr.y2]="u.top + 36" />
+          <circle [attr.cx]="u.netX" [attr.cy]="u.top + 36" r="3.5" />
+        </g>
+        <g class="fm-flight">
+          <title>{{ u.grossTitle }}</title>
+          <path class="fm-arc" [attr.d]="u.arc" pathLength="1" />
+          <ellipse class="fm-ball" [attr.cx]="u.landX" [attr.cy]="u.top + 22" rx="5" ry="3.2" />
+        </g>
+        <text class="fm-mark" [attr.x]="u.landX + 8" [attr.y]="u.top + 25" [attr.fill]="u.grossColor"><title>{{ u.grossTitle }}</title>{{ u.grossText }}<tspan class="fm-mark-unit"> gross</tspan></text>
+        <text class="fm-mark" [attr.x]="u.netX - 7" [attr.y]="u.top + 39.5" text-anchor="end" [attr.fill]="u.netColor"><title>{{ u.netTitle }}</title>{{ u.netText }}<tspan class="fm-mark-unit"> net</tspan></text>
+        <!-- (how far they went: a bar a band under its stretch of the field, the league's share a tick) -->
+        @for (b of u.bars; track b.label; let i = $index) {
+          <g class="fm-bar" [style.--i]="i">
+            <title>{{ b.title }}</title>
+            <rect class="fm-bar-bg" [attr.x]="b.x" y="112" [attr.width]="b.w" height="38" />
+            <rect class="fm-bar-fill" [attr.x]="b.x" [attr.y]="b.y" [attr.width]="b.w" [attr.height]="b.h" />
+            @if (b.leagueY !== null) {
+              <line class="fm-bar-league" [attr.x1]="b.x - 2" [attr.x2]="b.x + b.w + 2" [attr.y1]="b.leagueY" [attr.y2]="b.leagueY" />
+            }
+            <text class="fm-bar-n" [attr.x]="b.x + b.w / 2" [attr.y]="b.y - 3">{{ b.n }}</text>
+            <text class="fm-bar-label" [attr.x]="b.x + b.w / 2" y="162">{{ b.label }}</text>
+          </g>
+        }
+      </svg>
+      <div class="fm-chips">
+        @for (ch of u.chips; track ch.label) {
+          <span class="fm-chip" [title]="ch.title">
+            <b [style.color]="ch.color">{{ ch.value }}</b>
+            <span>{{ ch.label }}<small>{{ ch.sub }}</small></span>
+          </span>
+        }
+      </div>
+    </figure>
+  }
+</div>
+
+<!-- Carries by lane: arrows fanning from the backfield through the line's gaps, each as far past the line as
+     its yards a carry and as thick as its share, tinted against the league's in that lane -->
+<ng-template #runs>
+  @if (v.runs; as r) {
+    <figure class="fm-chart fm-runs">
+      <figcaption class="fm-head" [title]="r.help">
+        <b>{{ r.title }}</b><small>{{ r.count }}</small>
+      </figcaption>
+      <svg [attr.viewBox]="runBox" role="img" [attr.aria-label]="r.aria">
+        <defs>
+          <pattern [attr.id]="id + '-turfr'" patternUnits="userSpaceOnUse" width="160" height="160">
+            <image [attr.href]="turf" width="160" height="160" />
+          </pattern>
+        </defs>
+        <rect class="fm-ground-rect" x="0" y="0" [attr.width]="runWidth" [attr.height]="runHeight" rx="6" [attr.fill]="url('turfr')" />
+        <rect class="fm-shade" x="0" y="0" [attr.width]="runWidth" [attr.height]="runHeight" rx="6" />
+        @for (l of runField.lines; track l.y; let i = $index) {
+          @if (i % 2 === 0) {
+            <rect class="fm-stripe" x="0" [attr.y]="l.y" [attr.width]="runWidth" [attr.height]="runField.los - l.y" />
+          }
+          <line class="fm-yard" x1="0" [attr.x2]="runWidth" [attr.y1]="l.y" [attr.y2]="l.y" />
+          <text class="fm-yd" x="7" [attr.y]="l.y + 3">{{ l.text }}</text>
+          <text class="fm-yd end" [attr.x]="runWidth - 7" [attr.y]="l.y + 3">{{ l.text }}</text>
+        }
+        <line class="fm-los" x1="0" [attr.x2]="runWidth" [attr.y1]="runField.los" [attr.y2]="runField.los"><title>The line of scrimmage</title></line>
+        <!-- (the line: five linemen and a tight end each end, the back behind them) -->
+        @for (m of runField.linemen; track m.x) {
+          <circle class="fm-lineman" [class.te]="m.te" [attr.cx]="m.x" [attr.cy]="m.y" r="7" />
+        }
+        <circle class="fm-back" [attr.cx]="runField.back.x" [attr.cy]="runField.back.y" r="6"><title>The back</title></circle>
+        @for (l of r.lanes; track l.key; let i = $index) {
+          <g class="fm-lane" [class.empty]="l.empty" [style.--i]="i">
+            <title>{{ l.title }}</title>
+            <path class="fm-shaft-hit" [attr.d]="l.path" />
+            <path class="fm-shaft" [attr.d]="l.path" pathLength="1" [attr.stroke]="l.color" [attr.stroke-width]="l.width" />
+            <polygon class="fm-head-arrow" [attr.points]="l.head" [attr.fill]="l.color" />
+            <text class="fm-main" [attr.x]="l.lx" [attr.y]="l.ly - 1">{{ l.main }}</text>
+            <text class="fm-sub" [attr.x]="l.lx" [attr.y]="l.ly - 13">{{ l.sub }}</text>
+          </g>
+        }
+      </svg>
+      <div class="fm-legend" [title]="r.help">
+        <span><i class="fm-key good"></i>Better than the league</span>
+        <span><i class="fm-key bad"></i>Worse</span>
+      </div>
+    </figure>
+  }
+</ng-template>

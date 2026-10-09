@@ -17,6 +17,7 @@ import { SeasonDataService } from '@ranker/engine/season-data.service';
 import { NUMBER, grade, innings, ordinal, rankPct, rankTone } from '@ranker/core/format';
 import type { DepthPlayer, DepthView } from './depth-chart';
 import type { ZoneView } from './zones';
+import type { FieldMapView } from './field-map';
 import { CardOverview, CardSeason, CardStat, CardTab, CareerSeason, PlayerCard, SeasonContext } from './card.model';
 import { archetypeFor, overviewBlurb, profileFlags, scoutingReport, skillScores, skillsOf } from './overview';
 import { careerHistory } from './career-history';
@@ -157,10 +158,24 @@ export class PlayerCards {
     return this.loadOnce(this.zoneLoads, card, zones && (() => zones.load(card.player, this.position, card.season)));
   }
 
+  // The Overview's Field Map (the NFL's: the season by where on the field it happened, player-card/field-map.ts),
+  // for the part the card's season shows (the playoffs, or both, when the table's season is on one), loaded
+  // with the card and kept; null until it's in, or when there's none. Its zones by efficiency or by volume
+  // (kept across cards)
+  private fieldMaps = new Map<string, FieldMapView | null | 'loading' | 'error'>();
+  fieldMapMode: 'efficiency' | 'volume' = 'efficiency';
+  fieldMap(card: PlayerCard): FieldMapView | null {
+    const map = SPORT.fieldMap;
+    if (!map?.has(card.player, this.position, card.season)) return null;
+    const part = card.season === dataSeason ? dataPart : 'regular';
+    const view = this.loadOnce(this.fieldMaps, card, () => map.load(card.player, this.position, card.season, part), part);
+    return view === 'loading' || view === 'error' ? null : view;
+  }
+
   // A tab's view of a card (its season by zone, its game log, its depth chart), loaded the first time the tab
   // asks, then kept: the view, or still loading, or failed (and failed for a sport without one: no load)
-  private loadOnce<T>(cache: Map<string, T | 'loading' | 'error'>, card: PlayerCard, load: (() => Promise<T>) | undefined): T | 'loading' | 'error' {
-    const key = `${this.position}/${card.player.gsisId}/${card.season}`;
+  private loadOnce<T>(cache: Map<string, T | 'loading' | 'error'>, card: PlayerCard, load: (() => Promise<T>) | undefined, part = ''): T | 'loading' | 'error' {
+    const key = `${this.position}/${card.player.gsisId}/${card.season}${part ? '/' + part : ''}`;
     if (!cache.has(key) && load) {
       cache.set(key, 'loading');
       load()

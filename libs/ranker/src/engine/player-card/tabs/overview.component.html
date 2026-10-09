@@ -200,3 +200,20 @@
     </div>
   </card-panel>
 }
+
+<!-- The Field Map (the NFL's: a QB's, a back's, a receiver's, a kicker's, a punter's, a defense's): the season by
+     where on the field it happened, each part against the league's; folds, starting shut (none until its file's
+     in, or when the row has nothing in it). Open, the zones' Efficiency / Volume switch rides on its bar -->
+@if (cards.fieldMap(c); as fm) {
+  <card-panel #fieldMapPanel class="ov-section tab-card field-map" label="Field Map" icon="stadium">
+    @if (fm.pass && fieldMapPanel.isOpen) {
+      <span panel-actions class="fm-modes" role="group" aria-label="The zones by">
+        <button type="button" [class.active]="cards.fieldMapMode === 'efficiency'" [attr.aria-pressed]="cards.fieldMapMode === 'efficiency'" title="Each zone tinted by its EPA a throw against the league's there" (click)="cards.fieldMapMode = 'efficiency'">Efficiency</button>
+        <button type="button" [class.active]="cards.fieldMapMode === 'volume'" [attr.aria-pressed]="cards.fieldMapMode === 'volume'" title="Each zone a bubble sized by its share of the throws" (click)="cards.fieldMapMode = 'volume'">Volume</button>
+      </span>
+    }
+    <div class="group-body">
+      <card-field-map [view]="fm" [mode]="cards.fieldMapMode" />
+    </div>
+  </card-panel>
+}
