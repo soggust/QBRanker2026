@@ -130,7 +130,11 @@ export interface EspnSummary {
 // (the away team's first, as the score reads)
 export const awayFirst = (a: { side: 'away' | 'home' | null }, b: { side: 'away' | 'home' | null }): number => (a.side === b.side ? 0 : a.side === 'away' ? -1 : 1);
 export const headshotOf = (a: EspnAthlete | undefined): string | null => (typeof a?.headshot === 'string' ? a.headshot : (a?.headshot?.href ?? null));
-export const logoOf = (t: EspnTeamRef | undefined): string | null => t?.logos?.[0]?.href ?? t?.logo ?? null;
+// (ESPN's logos, but ours where theirs won't do: the Rams' blue LA vanishes on their own blue, so the yellow
+// one from the app's assets, as the grid and card show it)
+const OWN_LOGOS: [RegExp, string][] = [[/\/nfl\/500(?:-dark)?(?:\/scoreboard)?\/lar\.png$/, 'assets/NFL_Icons/hd/Rams.png']];
+export const ownLogo = (href: string | null | undefined): string | null => (href ? (OWN_LOGOS.find(([re]) => re.test(href))?.[1] ?? href) : null);
+export const logoOf = (t: EspnTeamRef | undefined): string | null => ownLogo(t?.logos?.[0]?.href ?? t?.logo);
 export const numberOf = (text: string): number | null => {
   const m = text.match(/^-?\d+(\.\d+)?/);
   return m ? Number(m[0]) : null;

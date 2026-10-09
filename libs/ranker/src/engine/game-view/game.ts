@@ -10,7 +10,7 @@
 // weather and photo (venue.ts) and the teams' colors (team-color.ts).
 
 import { ESPN_API } from '@ranker/core/game-logs';
-import { awayFirst, EspnPlay, EspnSummary, headshotOf, logoOf, numberOf } from './espn-summary';
+import { awayFirst, EspnPlay, EspnSummary, headshotOf, logoOf, numberOf, ownLogo } from './espn-summary';
 import { fantasyPoints } from './fantasy';
 import { gameChart } from './game-chart';
 import { GameBoxGroup, GameLeader, GamePlay, GamePlayGroup, GameTeam, GameTeamStat, GameView } from './game.model';
@@ -294,7 +294,7 @@ export async function loadGame(league: string, eventId: string): Promise<GameVie
         them: (e.atVs === '@' ? e.homeTeamScore : e.awayTeamScore) ?? '',
         at: (e.atVs === '@' ? '@' : 'vs') as '@' | 'vs',
         opponent: e.opponent?.abbreviation ?? '',
-        logo: e.opponentLogo ?? e.opponent?.logo ?? null,
+        logo: ownLogo(e.opponentLogo ?? e.opponent?.logo),
       })),
     }))
     .filter((t): t is GameView['form'][number] => !!t.side && t.games.length > 0)
