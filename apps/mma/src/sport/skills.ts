@@ -1,4 +1,4 @@
-import { leagueRank, type Archetype, type SkillDef } from '@ranker/engine/skills';
+import { leagueRank, type Archetype, type SkillDef, type SkillDerivedStats, type SkillMinimum, type SkillMinimums } from '@ranker/engine/skills';
 import { POSITIONS, SkillPlayer, SkillPosition } from '@sport/positions';
 
 // MMA skills and archetypes for the fighter card (their shapes and the words for them:
@@ -8,10 +8,10 @@ const MMA_SKILLS: SkillDef[] = [
   { id: 'accuracy', name: 'Striking Accuracy', short: 'Accuracy', parts: [['strAcc', 1]] },
   { id: 'striking-defense', name: 'Striking Defense', short: 'Str. Defense', parts: [['strDef', 1], ['sapm', -1]] },
   { id: 'power', name: 'Knockout Power', short: 'Power', parts: [['kd15', 1], ['finishRate', 1]] },
-  { id: 'wrestling', name: 'Wrestling', short: 'Wrestling', parts: [['td15', 1], ['tdAcc', 1]] },
+  { id: 'wrestling', name: 'Wrestling', short: 'Wrestling', parts: [['td15', 1, 2], ['tdAcc', 1]] },
   { id: 'takedown-defense', name: 'Takedown Defense', short: 'TD Defense', parts: [['tdDef', 1]] },
   { id: 'grappling', name: 'Grappling', short: 'Grappling', parts: [['sub15', 1], ['adv15', 1]] },
-  { id: 'durability', name: 'Durability', short: 'Chin', parts: [['kdAgainst', -1]] },
+  { id: 'durability', name: 'Durability', short: 'Chin', parts: [['kdAgainst', -1], ['finishedRate', -1]] },
   { id: 'winning', name: 'Winning', short: 'Winning', parts: [['winPct', 1], ['recent', 1], ['rating', 1]] },
   { id: 'competition', name: 'Level of Competition', short: 'Competition', parts: [['titleWins', 1], ['titleDefenses', 1], ['qualityWins', 1], ['bestWin', 1], ['oppRating', 1]] },
 ];
@@ -20,6 +20,25 @@ export const SKILLS: Record<SkillPosition, SkillDef[]> = Object.fromEntries(POSI
   SkillPosition,
   SkillDef[]
 >;
+
+// The box-score rates (strikes, takedowns, knockdowns, ground work) count toward a skill only over 4 or
+// more fights with box stats (skills.ts SkillMinimum: the rows have no attempt counts, so his fights
+// stand in for them); fewer, and a skill reads from his record's parts alone
+const boxFights: SkillMinimum = { atLeast: 4, noun: 'fights with stats', attempts: (p) => p.statFights ?? 0 };
+const BOX_MINIMUMS: SkillMinimums = Object.fromEntries(
+  ['slpm', 'strDiff', 'strAcc', 'strDef', 'sapm', 'kd15', 'kdAgainst', 'td15', 'tdAcc', 'tdDef', 'sub15', 'adv15'].map((key) => [key, boxFights]),
+);
+export const SKILL_MINIMUMS: Partial<Record<SkillPosition, SkillMinimums>> = Object.fromEntries(POSITIONS.map((p) => [p, BOX_MINIMUMS]));
+
+// Stats only skills read (skills.ts SkillDerived): how often he's been finished, per pro fight
+export const SKILL_DERIVED: SkillDerivedStats = {
+  finishedRate: {
+    key: 'finishedRate',
+    label: 'Finished / Fight',
+    kind: 'efficiency',
+    value: (p) => (p.games ? ((p.stats as Record<string, number | null>)['finished'] ?? 0) / p.games : null),
+  },
+};
 
 // Volume against efficiency on the card: (output, accuracy)
 export const VOLUME_VS_EFFICIENCY: Partial<Record<SkillPosition, [volume: string, efficiency: string]>> = Object.fromEntries(

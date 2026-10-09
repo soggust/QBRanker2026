@@ -204,12 +204,12 @@
                     @for (shape of r.shapes; track shape.color; let si = $index) {
                       @for (d of shape.dots; track $index; let j = $index) {
                         <circle class="cmp-dot" r="3.2" [attr.cx]="d.x" [attr.cy]="d.y" [style.--side]="shape.color">
-                          <title>{{ sides[si].label }} · {{ r.base.axes[j].label }}: {{ percentileText(d.pct) }}</title>
+                          <title>{{ sides[si].label }} · {{ r.base.axes[j].label }}: {{ percentileText(d.pct) }}&#10;{{ r.abouts[j] }}</title>
                         </circle>
                       }
                     }
                     @for (a of r.base.axes; track a.label) {
-                      <text class="axis-label" [attr.x]="a.lx" [attr.y]="a.ly" [attr.text-anchor]="a.anchor">{{ a.label }}</text>
+                      <text class="axis-label" [attr.x]="a.lx" [attr.y]="a.ly" [attr.text-anchor]="a.anchor"><title>{{ r.abouts[$index] }}</title>{{ a.label }}</text>
                     }
                   </svg>
                   <div class="ov-legend cmp-legend">
@@ -224,10 +224,10 @@
               <div class="cmp-skills">
                 @for (sk of v.skills; track sk.id) {
                   <div class="cmp-skill">
-                    <span class="cmp-skill-name">{{ sk.name }}@if (sk.tab) {<small class="cmp-skill-tab">{{ sk.tab }}</small>}</span>
+                    <span class="cmp-skill-name" [title]="sk.name + ': ' + sk.about">{{ sk.name }}@if (sk.tab) {<small class="cmp-skill-tab">{{ sk.tab }}</small>}</span>
                     <div class="cmp-bars">
                       @for (p of sk.pcts; track $index) {
-                        <div class="cmp-bar" [class.lead]="sk.leaders.includes($index)" [style.--side]="sides[$index].color" [title]="sides[$index].label + ': ' + (p === null ? '-' : percentileText(p))">
+                        <div class="cmp-bar" [class.lead]="sk.leaders.includes($index)" [style.--side]="sides[$index].color" [title]="sides[$index].label + ': ' + (p === null ? '-' : percentileText(p)) + '\n' + sk.name + ': ' + sk.about">
                           <span class="cmp-track"><i [style.width.%]="p === null ? 0 : 4 + p * 96"></i></span>
                           @if (p === null) {
                             <b>-</b>

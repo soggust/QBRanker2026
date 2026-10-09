@@ -1,38 +1,55 @@
 // The Overview's words: the scouting report, the one-line take, the archetype, and the flags the
 // profile's shape raises
-import { PER_GAME_LABELS, SkillPlayer, SkillPosition, SkillStat } from '@sport/positions';
+import { SkillPlayer, SkillPosition, SkillStat } from '@sport/positions';
 import { SPORT } from '@sport/sport';
-import { ARCHETYPES, SKILLS, VOLUME_VS_EFFICIENCY, WINS_VS_PLAY, fallbackArchetype } from '@sport/skills';
+import { ARCHETYPES, SKILLS, SKILL_DERIVED, SKILL_MINIMUMS, VOLUME_VS_EFFICIENCY, WINS_VS_PLAY, fallbackArchetype } from '@sport/skills';
 import { CardFlag } from '@ranker/engine/sport';
-import { CardSkill, standing, tierWord } from '@ranker/engine/skills';
+import { CardSkill, derivedRate, qualifies, standing, tierWord } from '@ranker/engine/skills';
+import { skillDefinition, skillPartLabel } from './hover-text';
 import { StatReader } from '@ranker/engine/stat-reader';
 import { CardOverview } from './card.model';
 
-// Each skill as a percentile in the list: the average of its stats' percentiles (volume stats per
-// game), each stat turned the skill's way. Stats a season didn't record are skipped, and a skill with
-// none of its stats is left out. (The card's, and the compare view's: one way of reading a season.)
+// Each skill as a percentile in the list: the weighted average of its stats' percentiles (volume stats
+// per game; each part's weight 1 unless its definition says), each stat turned the skill's way. Stats a
+// season didn't record are skipped, and so is a rate stat for a player without the volume it needs (the
+// sport's SKILL_MINIMUMS), who is also left out of the others' pool on it; a skill with none of its stats
+// is left out. A part can name a stat only skills read (the sport's SKILL_DERIVED: saves and holds as one). (The card's, and the compare view's: one way of reading a season.)
 export function skillsOf(position: SkillPosition, stats: SkillStat[], reader: StatReader, player: SkillPlayer, list: SkillPlayer[]): CardSkill[] {
   const out: CardSkill[] = [];
+  const minimums = SKILL_MINIMUMS[position] ?? {};
+  // (the tab's columns, and the stats only skills read where the tab has no column for them)
+  const derived = Object.values(SKILL_DERIVED).filter((d) => !stats.some((s) => s.key === d.key));
+  const readable = [...stats, ...derived];
   for (const def of SKILLS[position]) {
-    const pcts: number[] = [];
+    let sum = 0;
+    let weights = 0;
     const evidence: CardSkill['evidence'] = [];
-    for (const [key, dir] of def.parts) {
-      const stat = stats.find((s) => s.key === key);
-      if (!stat || reader.empty(key)) continue;
-      const mine = reader.rate(player, stat);
+    for (const [key, dir, weight = 1] of def.parts) {
+      const column = stats.find((s) => s.key === key);
+      const extra = column ? undefined : derived.find((d) => d.key === key);
+      if ((!column || reader.empty(key)) && !extra) continue;
+      if (weight <= 0) continue;
+      const rate = (p: SkillPlayer) => (extra ? derivedRate(extra, p) : reader.rate(p, column!));
+      const minimum = minimums[key];
+      if (!qualifies(minimum, player)) continue;
+      const mine = rate(player);
       if (mine === null) continue;
-      const values = list.map((p) => reader.rate(p, stat)).filter((v): v is number => v !== null);
+      const values = list.flatMap((p) => {
+        const v = qualifies(minimum, p) ? rate(p) : null;
+        return v === null ? [] : [v];
+      });
       if (values.length < 3) continue;
       const below = values.filter((v) => v < mine).length;
       const equal = values.filter((v) => v === mine).length - 1;
       const high = (below + equal / 2) / (values.length - 1);
-      pcts.push(dir > 0 ? high : 1 - high);
+      sum += weight * (dir > 0 ? high : 1 - high);
+      weights += weight;
       const rank = 1 + values.filter((v) => (dir > 0 ? v > mine : v < mine)).length;
-      const label = stat.kind === 'volume' ? (PER_GAME_LABELS[stat.key] ?? `${stat.label} / Game`) : stat.label;
+      const label = skillPartLabel(column ?? extra!);
       if (!evidence.some((e) => e.label === label)) evidence.push({ label, rank, of: values.length });
     }
-    if (!pcts.length) continue;
-    const pct = pcts.reduce((a, v) => a + v, 0) / pcts.length;
+    if (!weights) continue;
+    const pct = sum / weights;
     out.push({
       id: def.id,
       name: def.name,
@@ -41,6 +58,7 @@ export function skillsOf(position: SkillPosition, stats: SkillStat[], reader: St
       tier: tierWord(pct),
       standing: standing(pct),
       evidence: evidence.sort((a, b) => a.rank / a.of - b.rank / b.of),
+      about: skillDefinition(def, readable, minimums),
     });
   }
   return out;

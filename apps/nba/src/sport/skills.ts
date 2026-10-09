@@ -1,5 +1,5 @@
-import type { Archetype, SkillDef } from '@ranker/engine/skills';
-import { SkillPosition } from '@sport/positions';
+import type { Archetype, SkillDef, SkillDerivedStats, SkillMinimums } from '@ranker/engine/skills';
+import { SkillPlayer, SkillPosition } from '@sport/positions';
 
 // NBA skills and archetypes for the player card (their shapes and the words for them:
 // libs/ranker/src/engine/skills.ts)
@@ -8,12 +8,12 @@ import { SkillPosition } from '@sport/positions';
 // count; the archetypes below are what differ)
 const NBA_SKILLS: SkillDef[] = [
   { id: 'scoring', name: 'Scoring', short: 'Scoring', parts: [['points', 1], ['usgPct', 1]] },
-  { id: 'efficiency', name: 'Efficiency', short: 'Efficiency', parts: [['tsPct', 1], ['fgPct', 1], ['per', 1]] },
-  { id: 'shooting', name: 'Shooting', short: 'Shooting', parts: [['threes', 1], ['fg3Pct', 1], ['ftPct', 1]] },
-  { id: 'playmaking', name: 'Playmaking', short: 'Playmaking', parts: [['assists', 1], ['astPct', 1], ['tovPct', -1]] },
+  { id: 'efficiency', name: 'Efficiency', short: 'Efficiency', parts: [['tsPct', 1, 3], ['per', 1]] },
+  { id: 'shooting', name: 'Shooting', short: 'Shooting', parts: [['threes', 1], ['fg3Pct', 1], ['ftPct', 1, 0.5]] },
+  { id: 'playmaking', name: 'Playmaking', short: 'Playmaking', parts: [['assists', 1, 2], ['astPct', 1, 2], ['tovPct', -1]] },
   { id: 'rebounding', name: 'Rebounding', short: 'Rebounding', parts: [['rebounds', 1], ['trbPct', 1]] },
   { id: 'defense', name: 'Defense', short: 'Defense', parts: [['dbpm', 1], ['stlPct', 1], ['blkPct', 1]] },
-  { id: 'impact', name: 'Impact', short: 'Impact', parts: [['bpm', 1], ['onOff', 1], ['ws48', 1]] },
+  { id: 'impact', name: 'Impact', short: 'Impact', parts: [['bpm', 1, 2], ['onOff', 1], ['ws48', 1, 2]] },
   { id: 'value', name: 'Overall Value', short: 'Value', parts: [['ws', 1], ['vorp', 1]] },
 ];
 
@@ -40,6 +40,47 @@ export const SKILLS: Record<SkillPosition, SkillDef[]> = {
     { id: 'close', name: 'Close Games', short: 'Close Games', parts: [['pythDiff', 1]] },
   ],
 };
+
+// The shooting percentages count toward a skill only with the attempts a game behind them (skills.ts
+// SkillMinimum): 3P % 1.5 a game, FT % 1 (the data's own floor, 25 and 20 a season, lets a 2-for-4 bench
+// shooter through on a few games). The attempts: the row's fg3a and fta where the data has them, else
+// worked out from what it has: 3-point attempts from makes and 3P %, free throws from points, makes,
+// FG % and TS % (TS % = PTS / 2(FGA + 0.44 FTA), and PTS = 2 FG + 3PM + FT; within a few attempts)
+const stat = (p: SkillPlayer, key: string): number | null => (p.stats as Record<string, number | null | undefined>)[key] ?? null;
+export function threeAttempts(p: SkillPlayer): number | null {
+  const own = stat(p, 'fg3a');
+  if (own !== null) return own;
+  const made = stat(p, 'threes');
+  const pct = stat(p, 'fg3Pct');
+  return made !== null && pct ? made / (pct / 100) : null;
+}
+export function freeThrowAttempts(p: SkillPlayer): number | null {
+  const own = stat(p, 'fta');
+  if (own !== null) return own;
+  const [points, threes, fg, ft, ts] = ['points', 'threes', 'fgPct', 'ftPct', 'tsPct'].map((k) => stat(p, k));
+  if (points === null || fg === null || ft === null || !ts) return null;
+  const f = fg / 100;
+  const shots = points / (2 * (ts / 100));
+  // (a big who makes most of his shots and few free throws: too close to call, he counts as usual)
+  const per = ft / 100 - 0.88 * f;
+  if (per < 0.1) return null;
+  const fta = (points - (threes ?? 0) - 2 * f * shots) / per;
+  return Number.isFinite(fta) && fta >= 0 ? fta : null;
+}
+const SHOOTING_MINIMUMS: SkillMinimums = {
+  fg3Pct: { perGame: 1.5, noun: 'attempts', attempts: threeAttempts },
+  ftPct: { perGame: 1, noun: 'attempts', attempts: freeThrowAttempts },
+};
+export const SKILL_MINIMUMS: Partial<Record<SkillPosition, SkillMinimums>> = {
+  PG: SHOOTING_MINIMUMS,
+  SG: SHOOTING_MINIMUMS,
+  SF: SHOOTING_MINIMUMS,
+  PF: SHOOTING_MINIMUMS,
+  C: SHOOTING_MINIMUMS,
+};
+
+// (every stat a skill reads is a column)
+export const SKILL_DERIVED: SkillDerivedStats = {};
 
 // The counting and rate skills whose split reads as "empty stats" or "earning more minutes"
 export const VOLUME_VS_EFFICIENCY: Partial<Record<SkillPosition, [volume: string, efficiency: string]>> = {

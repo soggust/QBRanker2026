@@ -1,13 +1,58 @@
 // The player card's Overview: related stats rolled up into skills (each a 0-1 percentile in the list,
-// the average of its stats' percentiles), an archetype picked from the skill profile, and the words
-// for how good a skill is. Counting stats count per game, so missed games don't sink a skill. Each
+// the weighted average of its stats' percentiles), an archetype picked from the skill profile, and the
+// words for how good a skill is. Counting stats count per game, so missed games don't sink a skill. Each
 // sport defines its skills and archetypes (apps/<sport>/src/sport/skills.ts) with these shapes.
 
 import { DATA } from '@ranker/engine/data';
 import type { SkillPlayer } from '@sport/positions';
 
-// A stat in a skill: +1 when more is better for the skill, -1 when less is
-export type SkillPart = [key: string, dir: 1 | -1];
+// A stat in a skill: +1 when more is better for the skill, -1 when less is, and how much it counts in
+// the skill's average (1 when left out: 0.5 counts half as much as each of the others)
+export type SkillPart = [key: string, dir: 1 | -1, weight?: number];
+
+// A rate stat's qualifying volume (a sport's SKILL_MINIMUMS, by tab then stat key): a player counts on
+// the stat in a skill only with enough of what it's a rate of, so a 2-for-4 shooter neither ranks high
+// on it nor moves anyone else's percentile. Below it, the part is skipped for him (his skill comes from
+// its other parts) and he's left out of its pool. perGame: at least that many for each game he played
+// (3-point attempts for 3P %: scales with the season); atLeast: that many all told (an MMA fighter's
+// fights with box stats); both: the larger. attempts: his count (null when the row can't say: he counts
+// as usual); noun: what's counted, for the hover ("attempts", "fights with stats").
+export interface SkillMinimum {
+  perGame?: number;
+  atLeast?: number;
+  noun: string;
+  attempts: (player: SkillPlayer) => number | null | undefined;
+}
+export type SkillMinimums = Record<string, SkillMinimum>;
+
+// Whether a player has the volume a part asks for (always with no minimum, or no count to go on)
+export function qualifies(minimum: SkillMinimum | undefined, player: SkillPlayer): boolean {
+  if (!minimum) return true;
+  const attempts = minimum.attempts(player);
+  if (attempts == null || !Number.isFinite(attempts)) return true;
+  const need = Math.max((minimum.perGame ?? 0) * (player.games || 0), minimum.atLeast ?? 0);
+  // (half an attempt's grace: a count worked out from rounded rates can land a hair short)
+  return attempts >= need - 0.5;
+}
+
+// A stat only skills read (a sport's SKILL_DERIVED, by key), worked out from the row: saves and holds
+// together, fumbles per touch, a season's total of a stat its column shows per game. kind 'volume' reads
+// per game, as a counting column does; 'efficiency' as it is. A part names it like any stat (a column of
+// the tab's with the same key is read instead).
+export interface SkillDerived {
+  key: string;
+  label: string;
+  kind: 'volume' | 'efficiency';
+  value: (player: SkillPlayer) => number | null | undefined;
+}
+export type SkillDerivedStats = Record<string, SkillDerived>;
+
+// A derived stat's value for a skill (per game for a 'volume' one; null when the row can't say)
+export function derivedRate(stat: SkillDerived, player: SkillPlayer): number | null {
+  const v = stat.value(player);
+  if (v == null || !Number.isFinite(v)) return null;
+  return stat.kind === 'volume' ? (player.games ? v / player.games : null) : v;
+}
 
 export interface SkillDef {
   id: string;
@@ -62,6 +107,8 @@ export interface CardSkill {
   tier: string;
   standing: string;
   evidence: { label: string; rank: number; of: number }[];
+  // What it's made of, for its hovers (hover-text.ts skillDefinition)
+  about?: string;
 }
 
 // How good a skill is, in words

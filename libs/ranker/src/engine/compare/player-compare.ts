@@ -130,6 +130,8 @@ export interface CompareSkill {
   // Each side's percentile (null: not one of its tab's), and the sides that lead it
   pcts: (number | null)[];
   leaders: number[];
+  // What it's made of (hover-text.ts skillDefinition), for its hovers
+  about: string;
 }
 
 // A side's summary: the skills it's clearly best at (none: no clear edge), and the columns it leads
@@ -142,7 +144,7 @@ export interface CompareView {
   // Every skill any side has, the first side's order first
   skills: CompareSkill[];
   // One radar, every side's shape on it (the skills all of them have, three or more)
-  radar: { base: CardRadar; shapes: { color: string; points: string; dots: { x: number; y: number; pct: number }[] }[] } | null;
+  radar: { base: CardRadar; shapes: { color: string; points: string; dots: { x: number; y: number; pct: number }[] }[]; abouts: string[] } | null;
   // Where each side is clearly the best of them, biggest first
   edges: { skill: string; by: number }[][];
   // How alike each pair's skill shapes are (0-100)
@@ -388,7 +390,7 @@ export class PlayerCompare {
     const defs = new Map(sides.flatMap((s) => s.skills.map((k) => [skillKey(s, k), { def: k, side: s }] as const)));
     const skills = [...defs].map(([id, { def, side }]): CompareSkill & { short: string } => {
       const pcts = sides.map((s) => s.skills.find((k) => skillKey(s, k) === id)?.pct ?? null);
-      return { id, name: def.name, tab: mixed ? side.tabLabel : null, short: def.short, pcts, leaders: leadersOf(pcts) };
+      return { id, name: def.name, tab: mixed ? side.tabLabel : null, short: def.short, pcts, leaders: leadersOf(pcts), about: def.about ?? '' };
     });
 
     // (the radar: the skills all of them have)
@@ -402,6 +404,8 @@ export class PlayerCompare {
               const shape = radar(common.map((c) => ({ short: c.short, pct: c.pcts[i]! })));
               return { color: side.color, points: shape.shape, dots: shape.dots };
             }),
+            // (each axis' skill, what it's made of)
+            abouts: common.map((c) => `${c.name}: ${c.about}`),
           };
 
     // (edges: where a side beats the best of the others)

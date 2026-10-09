@@ -1,4 +1,4 @@
-import { leagueRank, type Archetype, type SkillDef } from '@ranker/engine/skills';
+import { leagueRank, type Archetype, type SkillDef, type SkillDerivedStats, type SkillMinimums } from '@ranker/engine/skills';
 import { SkillPosition } from '@sport/positions';
 
 // MLB skills and archetypes for the player card (their shapes and the words for them:
@@ -8,13 +8,19 @@ import { SkillPosition } from '@sport/positions';
 const HITTER_SKILLS: SkillDef[] = [
   { id: 'contact', name: 'Contact', short: 'Contact', parts: [['avg', 1], ['kPct', -1]] },
   { id: 'power', name: 'Power', short: 'Power', parts: [['homeRuns', 1], ['slg', 1], ['barrelPct', 1], ['hardHitPct', 1]] },
-  { id: 'discipline', name: 'Plate Discipline', short: 'Discipline', parts: [['bbPct', 1], ['kPct', -1], ['obp', 1]] },
+  { id: 'discipline', name: 'Plate Discipline', short: 'Discipline', parts: [['bbPct', 1, 2], ['obp', 1]] },
   { id: 'hitting', name: 'Hitting', short: 'Hitting', parts: [['wrcPlus', 1], ['xwoba', 1]] },
   { id: 'production', name: 'Run Production', short: 'Production', parts: [['rbi', 1], ['runs', 1]] },
   { id: 'speed', name: 'Speed', short: 'Speed', parts: [['stolenBases', 1], ['sprintSpeed', 1], ['bsr', 1]] },
-  { id: 'defense', name: 'Defense', short: 'Defense', parts: [['defRuns', 1], ['oaa', 1], ['fieldingPct', 1], ['rangeFactor', 1]] },
+  // (the runs he saved count most; fielding % and range factor only a little: they miss what he got to)
+  { id: 'defense', name: 'Defense', short: 'Defense', parts: [['defRuns', 1, 2], ['oaa', 1, 2], ['fieldingPct', 1, 0.5], ['rangeFactor', 1, 0.5]] },
   { id: 'value', name: 'Overall Value', short: 'Value', parts: [['war', 1]] },
 ];
+
+// A catcher's range factor counts his putouts on strikeouts: his staff's, not his range
+const CATCHER_SKILLS: SkillDef[] = HITTER_SKILLS.map((s) =>
+  s.id === 'defense' ? { ...s, parts: s.parts.filter(([key]) => key !== 'rangeFactor') } : s,
+);
 
 export const SKILLS: Record<SkillPosition, SkillDef[]> = {
   TM: [
@@ -26,7 +32,7 @@ export const SKILLS: Record<SkillPosition, SkillDef[]> = {
     { id: 'roster', name: 'Roster', short: 'Roster', parts: [['hitters', 1], ['rotation', 1], ['bullpen', 1]] },
     { id: 'close', name: 'Close Games', short: 'Close Games', parts: [['pythDiff', 1]] },
   ],
-  C: HITTER_SKILLS,
+  C: CATCHER_SKILLS,
   '1B': HITTER_SKILLS,
   '2B': HITTER_SKILLS,
   '3B': HITTER_SKILLS,
@@ -35,10 +41,10 @@ export const SKILLS: Record<SkillPosition, SkillDef[]> = {
   DH: HITTER_SKILLS.filter((s) => s.id !== 'defense'),
   SP: [
     { id: 'strikeouts', name: 'Missing Bats', short: 'Strikeouts', parts: [['kPct', 1], ['whiffPct', 1], ['strikeOuts', 1]] },
-    { id: 'control', name: 'Control', short: 'Control', parts: [['bbPct', -1], ['whip', -1]] },
+    { id: 'control', name: 'Control', short: 'Control', parts: [['bbPct', -1, 2], ['whip', -1]] },
     { id: 'runPrevention', name: 'Run Prevention', short: 'Runs', parts: [['era', -1], ['fip', -1], ['xera', -1]] },
     { id: 'contact', name: 'Limiting Damage', short: 'Contact', parts: [['hr9', -1], ['hardHitAllowed', -1], ['barrelAllowed', -1]] },
-    { id: 'durability', name: 'Durability', short: 'Innings', parts: [['ip', 1]] },
+    { id: 'durability', name: 'Durability', short: 'Innings', parts: [['ipSeason', 1, 2], ['ip', 1]] },
     { id: 'winning', name: 'Winning', short: 'Winning', parts: [['winPct', 1]] },
     { id: 'value', name: 'Overall Value', short: 'Value', parts: [['war', 1]] },
   ],
@@ -47,9 +53,27 @@ export const SKILLS: Record<SkillPosition, SkillDef[]> = {
     { id: 'control', name: 'Control', short: 'Control', parts: [['bbPct', -1], ['whip', -1]] },
     { id: 'runPrevention', name: 'Run Prevention', short: 'Runs', parts: [['era', -1], ['fip', -1], ['xfip', -1]] },
     { id: 'contact', name: 'Limiting Damage', short: 'Contact', parts: [['xwobaAllowed', -1], ['hardHitAllowed', -1]] },
-    { id: 'leverage', name: 'High-Leverage Role', short: 'Leverage', parts: [['saves', 1], ['holds', 1]] },
-    { id: 'value', name: 'Overall Value', short: 'Value', parts: [['war', 1], ['ip', 1]] },
+    { id: 'leverage', name: 'High-Leverage Role', short: 'Leverage', parts: [['saveHolds', 1]] },
+    { id: 'value', name: 'Overall Value', short: 'Value', parts: [['war', 1]] },
   ],
+};
+
+// No rate stat needs a volume of its own to count toward a skill (skills.ts SkillMinimum): the list's
+// Min setting is on plate appearances and innings already
+export const SKILL_MINIMUMS: Partial<Record<SkillPosition, SkillMinimums>> = {};
+
+// Stats only skills read (skills.ts SkillDerived): a starter's season of innings (his IP column reads
+// per game: a short season of long starts isn't a workhorse's), and a reliever's saves and holds as one
+// (a closer has few holds and a setup man few saves: both are the late innings)
+const statOf = (p: { stats: object }, key: string): number | null => (p.stats as Record<string, number | null | undefined>)[key] ?? null;
+export const SKILL_DERIVED: SkillDerivedStats = {
+  ipSeason: { key: 'ipSeason', label: 'IP (season)', kind: 'efficiency', value: (p) => statOf(p, 'ip') },
+  saveHolds: {
+    key: 'saveHolds',
+    label: 'SV + HLD',
+    kind: 'volume',
+    value: (p) => (statOf(p, 'saves') === null && statOf(p, 'holds') === null ? null : (statOf(p, 'saves') ?? 0) + (statOf(p, 'holds') ?? 0)),
+  },
 };
 
 // The counting and rate skills whose split reads as "compiler" or "earning more playing time"
@@ -122,7 +146,8 @@ export const ARCHETYPES: Record<SkillPosition, Archetype[]> = {
     { name: 'Innings Eater', test: (s) => s['durability'] >= 0.8 },
   ],
   RP: [
-    { name: 'Lockdown Closer', test: (s) => s['leverage'] >= 0.85 && s['runPrevention'] >= 0.7 },
+    // (High-Leverage Role is saves and holds together: a closer is the one whose are mostly saves)
+    { name: 'Lockdown Closer', test: (s, _o, p) => s['leverage'] >= 0.85 && s['runPrevention'] >= 0.7 && (p.stats.saves ?? 0) > (p.stats.holds ?? 0) },
     { name: 'Setup Ace', test: (s) => s['leverage'] >= 0.7 && s['runPrevention'] >= 0.75 },
     { name: 'Strikeout Artist', test: (s) => s['strikeouts'] >= 0.85 },
     { name: 'High-Wire Act', test: (s) => s['control'] <= 0.2 && s['strikeouts'] >= 0.6 },

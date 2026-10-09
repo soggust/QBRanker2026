@@ -1,5 +1,5 @@
-import { leagueRank, type Archetype, type SkillDef } from '@ranker/engine/skills';
-import { SkillPosition } from '@sport/positions';
+import { leagueRank, type Archetype, type SkillDef, type SkillDerivedStats, type SkillMinimums } from '@ranker/engine/skills';
+import { SkillPlayer, SkillPosition } from '@sport/positions';
 
 // NHL skills and archetypes for the player card (their shapes and the words for them:
 // libs/ranker/src/engine/skills.ts)
@@ -12,8 +12,8 @@ const SKATER_SKILLS: SkillDef[] = [
   { id: 'playmaking', name: 'Playmaking', short: 'Playmaking', parts: [['assists', 1], ['ppPoints', 1]] },
   { id: 'shooting', name: 'Shot Volume', short: 'Shooting', parts: [['shots', 1], ['hdShots', 1]] },
   { id: 'possession', name: 'Driving Play', short: 'Possession', parts: [['xgfPct', 1], ['cfPct', 1], ['xgfRel', 1]] },
-  { id: 'defense', name: 'Defense', short: 'Defense', parts: [['takeaways', 1], ['blocks', 1], ['giveaways', -1]] },
-  { id: 'physical', name: 'Physicality', short: 'Physical', parts: [['hits', 1], ['blocks', 1]] },
+  { id: 'defense', name: 'Defense', short: 'Defense', parts: [['takeaways', 1], ['blocks', 1]] },
+  { id: 'physical', name: 'Physicality', short: 'Physical', parts: [['hits', 1]] },
   { id: 'value', name: 'Overall Value', short: 'Value', parts: [['gameScore', 1], ['points', 1]] },
 ];
 const CENTER_SKILLS: SkillDef[] = [
@@ -31,7 +31,7 @@ export const SKILLS: Record<SkillPosition, SkillDef[]> = {
     { id: 'stopping', name: 'Shot Stopping', short: 'Stopping', parts: [['gsax', 1], ['gsaxPer60', 1]] },
     { id: 'saving', name: 'Save Percentage', short: 'Save %', parts: [['savePct', 1], ['gaa', -1]] },
     { id: 'danger', name: 'Big Saves', short: 'High Danger', parts: [['hdSavePct', 1]] },
-    { id: 'workload', name: 'Workload', short: 'Workload', parts: [['saves', 1], ['shutouts', 1]] },
+    { id: 'workload', name: 'Workload', short: 'Workload', parts: [['gamesStarted', 1]] },
     { id: 'winning', name: 'Winning', short: 'Winning', parts: [['winPct', 1]] },
   ],
   TM: [
@@ -52,6 +52,14 @@ export const SKILLS: Record<SkillPosition, SkillDef[]> = {
     { id: 'close', name: 'Close Games', short: 'Close Games', parts: [['ptsOver', 1]] },
   ],
 };
+
+// Shooting % counts toward Finishing only with the shots a game behind it (skills.ts SkillMinimum): a
+// forward's 1 a game, a defenseman's half that (he shoots less, from farther out)
+const shots = (perGame: number): SkillMinimums => ({ shootingPct: { perGame, noun: 'shots', attempts: (p: SkillPlayer) => p.stats.shots ?? null } });
+export const SKILL_MINIMUMS: Partial<Record<SkillPosition, SkillMinimums>> = { C: shots(1), LW: shots(1), RW: shots(1), D: shots(0.5) };
+
+// (every stat a skill reads is a column: a goalie's Starts is his season's)
+export const SKILL_DERIVED: SkillDerivedStats = {};
 
 // Volume against efficiency on the card: (counting skill, rate skill)
 export const VOLUME_VS_EFFICIENCY: Partial<Record<SkillPosition, [volume: string, efficiency: string]>> = {
@@ -78,7 +86,8 @@ const FORWARD: Archetype[] = [
   { name: 'Power Forward', test: (s) => s['scoring'] >= 0.7 && s['physical'] >= 0.75 },
   { name: 'Play Driver', test: (s) => s['possession'] >= 0.85 },
   { name: 'Shoot-First Volume Shooter', test: (s) => s['shooting'] >= 0.8 && s['finishing'] <= 0.35 },
-  { name: 'Grinder', test: (s) => s['physical'] >= 0.8 && s['scoring'] <= 0.4 },
+  // (Physicality is hits alone: a bar a little higher than a blend's, so it stays the few who hit most)
+  { name: 'Grinder', test: (s) => s['physical'] >= 0.85 && s['scoring'] <= 0.4 },
   { name: 'Defensive Forward', test: (s) => s['defense'] >= 0.8 && s['possession'] >= 0.6 },
 ];
 
@@ -96,7 +105,7 @@ export const ARCHETYPES: Record<SkillPosition, Archetype[]> = {
     { name: 'Offensive Defenseman', test: (s) => s['playmaking'] >= 0.85 && s['shooting'] >= 0.6 },
     { name: 'Shutdown Defenseman', test: (s) => s['possession'] >= 0.75 && s['defense'] >= 0.75 && s['playmaking'] <= 0.6 },
     { name: 'Puck-Moving Defenseman', test: (s) => s['playmaking'] >= 0.7 && s['possession'] >= 0.7 },
-    { name: 'Physical Defenseman', test: (s) => s['physical'] >= 0.85 },
+    { name: 'Physical Defenseman', test: (s) => s['physical'] >= 0.92 },
     { name: 'Power-Play Quarterback', test: (s) => s['playmaking'] >= 0.8 && s['possession'] <= 0.5 },
   ],
   G: [

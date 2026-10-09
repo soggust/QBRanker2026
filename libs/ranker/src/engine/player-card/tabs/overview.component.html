@@ -159,7 +159,7 @@
         @for (s of side.list; track s.id) {
           <div class="skill-card" [style.--pct]="s.pct" [style.--tone]="rankTone(s.pct)">
             <div class="skill-head">
-              <span class="skill-name">{{ s.name }}</span>
+              <span class="skill-name" [title]="s.about ?? ''">{{ s.name }}</span>
               <span class="skill-standing">{{ s.standing }}</span>
             </div>
             <span class="stat-bar" [title]="skillTitle(s)"><i></i></span>

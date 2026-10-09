@@ -1,5 +1,5 @@
-import type { Archetype, SkillDef } from '@ranker/engine/skills';
-import { SkillPosition } from '@sport/positions';
+import type { Archetype, SkillDef, SkillDerivedStats, SkillMinimum, SkillMinimums } from '@ranker/engine/skills';
+import { SkillPlayer, SkillPosition } from '@sport/positions';
 
 // NFL skills and archetypes for the player card (their shapes and the words for them:
 // libs/ranker/src/engine/skills.ts)
@@ -9,7 +9,8 @@ export const SKILLS: Record<SkillPosition, SkillDef[]> = {
     { id: 'accuracy', name: 'Accuracy', short: 'Accuracy', parts: [['compPct', 1], ['cpoe', 1], ['badThrowPct', -1]] },
     { id: 'efficiency', name: 'Efficiency', short: 'Efficiency', parts: [['epaPerPlay', 1], ['successRate', 1], ['ypa', 1], ['rating', 1]] },
     { id: 'downfield', name: 'Pushing the Ball', short: 'Downfield', parts: [['adot', 1], ['aggressiveness', 1], ['ypa', 1]] },
-    { id: 'security', name: 'Ball Security', short: 'Security', parts: [['ints', -1], ['fumbles', -1]] },
+    // (per throw: a passer who throws more has more to give away)
+    { id: 'security', name: 'Ball Security', short: 'Security', parts: [['intPct', -1, 2], ['fumblesPerAttempt', -1]] },
     // (how often pressure ends in a sack: what it says about him, scrambler or statue, is the AI Analysis's
     // call, not this card's)
     { id: 'pocket', name: 'Avoiding Sacks', short: 'Sacks', parts: [['pressureToSack', -1]] },
@@ -23,21 +24,22 @@ export const SKILLS: Record<SkillPosition, SkillDef[]> = {
     { id: 'workload', name: 'Workload', short: 'Workload', parts: [['carries', 1], ['snapShare', 1], ['rushYards', 1]] },
     { id: 'receiving', name: 'Receiving', short: 'Receiving', parts: [['receptions', 1], ['recYards', 1], ['targets', 1], ['epaPerTarget', 1]] },
     { id: 'scoring', name: 'Scoring & Chains', short: 'Scoring', parts: [['rushTds', 1], ['recTds', 1], ['firstDowns', 1]] },
-    { id: 'security', name: 'Ball Security', short: 'Security', parts: [['fumbles', -1], ['drops', -1]] },
+    // (per touch: a workhorse handles it more; drops are the Receiving's, not lost balls)
+    { id: 'security', name: 'Ball Security', short: 'Security', parts: [['fumblesPerTouch', -1]] },
   ],
   WR: [
     { id: 'role', name: 'Target Share', short: 'Role', parts: [['targets', 1], ['targetShare', 1], ['airYardsShare', 1]] },
     { id: 'production', name: 'Production', short: 'Production', parts: [['recYards', 1], ['receptions', 1]] },
-    { id: 'scoring', name: 'Scoring', short: 'Scoring', parts: [['recTds', 1], ['rushTds', 1]] },
+    { id: 'scoring', name: 'Scoring', short: 'Scoring', parts: [['totalTds', 1]] },
     { id: 'efficiency', name: 'Efficiency', short: 'Efficiency', parts: [['epaPerTarget', 1], ['catchPct', 1]] },
     { id: 'separation', name: 'Getting Open', short: 'Separation', parts: [['separation', 1]] },
     { id: 'deep', name: 'Deep Threat', short: 'Deep', parts: [['adot', 1], ['airYardsShare', 1]] },
     { id: 'yac', name: 'After the Catch', short: 'YAC', parts: [['yac', 1], ['yacOverExp', 1]] },
-    { id: 'hands', name: 'Hands', short: 'Hands', parts: [['dropPct', -1], ['drops', -1], ['fumbles', -1]] },
+    { id: 'hands', name: 'Hands', short: 'Hands', parts: [['dropPct', -1]] },
   ],
   TE: [],
   K: [
-    { id: 'accuracy', name: 'Accuracy', short: 'Accuracy', parts: [['fgPct', 1], ['fgOverExp', 1], ['patPct', 1]] },
+    { id: 'accuracy', name: 'Accuracy', short: 'Accuracy', parts: [['fgOverExp', 1, 2], ['fgPct', 1], ['patPct', 1]] },
     { id: 'range', name: 'Range', short: 'Range', parts: [['fg50', 1], ['fgLong', 1]] },
     { id: 'value', name: 'Points Added', short: 'Value', parts: [['epaPerKick', 1]] },
     { id: 'volume', name: 'Volume', short: 'Volume', parts: [['fgMade', 1]] },
@@ -45,7 +47,7 @@ export const SKILLS: Record<SkillPosition, SkillDef[]> = {
   P: [
     { id: 'distance', name: 'Leg', short: 'Distance', parts: [['grossAvg', 1], ['netAvg', 1]] },
     { id: 'placement', name: 'Placement', short: 'Placement', parts: [['inside20Pct', 1], ['inside20', 1], ['touchbacks', -1]] },
-    { id: 'hang', name: 'Hang Time', short: 'Hang', parts: [['fairCatchPct', 1], ['netAvg', 1]] },
+    { id: 'hang', name: 'Limiting Returns', short: 'Returns', parts: [['fairCatchPct', 1]] },
     { id: 'value', name: 'Field Flipping', short: 'Value', parts: [['epaPerPunt', 1]] },
   ],
   DEF: [
@@ -86,6 +88,59 @@ export const SKILLS: Record<SkillPosition, SkillDef[]> = {
 };
 // Tight ends are graded like receivers
 SKILLS.TE = SKILLS.WR;
+
+// The per-play rates count toward a skill only with the volume a game behind them (skills.ts
+// SkillMinimum): a back's per-carry rates 3 carries a game and his EPA / target 1 target, a receiver's
+// catch, drop and EPA rates 2 targets, a kicker's FG % and XP % an attempt of each
+const count = (key: string, perGame: number, noun: string): SkillMinimum => ({
+  perGame,
+  noun,
+  attempts: (p: SkillPlayer) => (p.stats as Record<string, number | null | undefined>)[key] ?? null,
+});
+const RECEIVER_MINIMUMS: SkillMinimums = {
+  catchPct: count('targets', 2, 'targets'),
+  dropPct: count('targets', 2, 'targets'),
+  epaPerTarget: count('targets', 2, 'targets'),
+};
+export const SKILL_MINIMUMS: Partial<Record<SkillPosition, SkillMinimums>> = {
+  RB: {
+    ypc: count('carries', 3, 'carries'),
+    epaPerCarry: count('carries', 3, 'carries'),
+    ryoePerAtt: count('carries', 3, 'carries'),
+    yacoPerCarry: count('carries', 3, 'carries'),
+    epaPerTarget: count('targets', 1, 'targets'),
+  },
+  WR: RECEIVER_MINIMUMS,
+  TE: RECEIVER_MINIMUMS,
+  K: { fgPct: count('fgAtt', 1, 'FG attempts'), patPct: count('patAtt', 1, 'XP attempts') },
+};
+
+// Stats only skills read (skills.ts SkillDerived): a receiver's touchdowns however he scored them, a
+// back's fumbles per touch, and a passer's interceptions and fumbles per attempt (his attempts: passing
+// yards over yards per attempt, where the row has no count of them)
+const stat = (p: SkillPlayer, key: string): number | null => (p.stats as Record<string, number | null | undefined>)[key] ?? null;
+const passAttempts = (p: SkillPlayer): number | null => {
+  const yards = stat(p, 'passYards');
+  const ypa = stat(p, 'ypa');
+  return stat(p, 'passAttempts') ?? (yards !== null && ypa ? yards / ypa : null);
+};
+const per = (count: number | null, of: number | null): number | null => (count !== null && of ? count / of : null);
+export const SKILL_DERIVED: SkillDerivedStats = {
+  totalTds: {
+    key: 'totalTds',
+    label: 'TDs',
+    kind: 'volume',
+    value: (p) => stat(p, 'totalTds') ?? (stat(p, 'recTds') === null && stat(p, 'rushTds') === null ? null : (stat(p, 'recTds') ?? 0) + (stat(p, 'rushTds') ?? 0)),
+  },
+  fumblesPerTouch: {
+    key: 'fumblesPerTouch',
+    label: 'Fum / Touch',
+    kind: 'efficiency',
+    value: (p) => per(stat(p, 'fumbles') ?? 0, (stat(p, 'carries') ?? 0) + (stat(p, 'receptions') ?? 0)),
+  },
+  intPct: { key: 'intPct', label: 'INT %', kind: 'efficiency', value: (p) => per(stat(p, 'ints'), passAttempts(p)) },
+  fumblesPerAttempt: { key: 'fumblesPerAttempt', label: 'Fum / Att', kind: 'efficiency', value: (p) => per(stat(p, 'fumbles') ?? 0, passAttempts(p)) },
+};
 
 // The volume and efficiency skills whose split reads as "compiler" or "underused"
 export const VOLUME_VS_EFFICIENCY: Partial<Record<SkillPosition, [volume: string, efficiency: string]>> = {
