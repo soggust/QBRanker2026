@@ -549,39 +549,15 @@
 
 // ---- the switch on the bar: Efficiency or Volume
 
+// (the Efficiency / Volume switch: the sport's own pills (.game-filter, dressed by each theme: the NFL's leather,
+// MLB's hide), sized for the panel's bar)
 .fm-modes {
-  background: rgba(0, 0, 0, 0.35);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  border-radius: 999px;
-  gap: 0 !important;
+  gap: 6px !important;
   margin-right: 8px;
-  padding: 2px !important;
 
-  button {
-    background: none;
-    border: none;
-    border-radius: 999px;
-    color: rgba(255, 255, 255, 0.6);
-    cursor: pointer;
-    font-family: v.$font-base;
-    font-size: 10px;
-    font-weight: 800;
-    letter-spacing: 1px;
-    padding: 4px 10px;
-    text-transform: uppercase;
-    transition:
-      color 0.12s ease,
-      background-color 0.12s ease;
-
-    &:hover {
-      color: #fff;
-    }
-
-    &.active {
-      background: rgba(255, 255, 255, 0.12);
-      color: var(--scoreboard-led);
-      text-shadow: var(--scoreboard-glow);
-    }
+  .game-filter {
+    font-size: 10.5px;
+    padding: 4px 12px;
   }
 }
 
@@ -593,8 +569,8 @@
     padding-right: 12px;
   }
 
-  .fm-modes button {
-    padding: 4px 7px;
+  .fm-modes .game-filter {
+    padding: 4px 9px;
   }
 
   .fm-cell {
