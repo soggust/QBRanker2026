@@ -33,7 +33,7 @@
 .tape {
   // (the team's color washing in from the top corner, over a dark panel; the side's stripe on top)
   background:
-    linear-gradient(160deg, color-mix(in srgb, var(--team-badge, #555) 38%, transparent), transparent 62%),
+    linear-gradient(160deg, color-mix(in srgb, var(--team-badge, #555) 28%, transparent), transparent 62%),
     rgba(0, 0, 0, 0.3);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 10px;
@@ -61,7 +61,7 @@
 
   img {
     height: 165%;
-    opacity: 0.13;
+    opacity: 0.08;
     position: absolute;
     right: -18%;
     top: 50%;
@@ -590,6 +590,19 @@
 
 .cmp-panel {
   margin-top: 16px;
+}
+
+// (the arcs' bottom: the theme's dropdown (_sport-kit.scss $dropdowns), sized for a panel's bar, clear of
+// its edge)
+.arc-by {
+  align-items: center;
+  box-sizing: border-box;
+  display: inline-flex;
+  font-size: 12px;
+  height: 30px;
+  margin-right: 6px;
+  padding: 0 10px 0 14px;
+  width: 150px;
 }
 
 // (a panel's line on how to read it, over its body)

@@ -261,6 +261,11 @@
             <!-- Career arcs: every season's standing (the default sliders), the compared one ringed -->
             @if (compare.arcs; as a) {
               <card-panel class="ov-section tab-card cmp-panel" label="Career Arcs" icon="show_chart" [expandable]="false">
+                <!-- (along the bottom: their years in the league, or the seasons themselves) -->
+                <mat-select panel-actions class="arc-by" [panelWidth]="null" [value]="a.byYear ? 'year' : 'season'" aria-label="Along the bottom" title="Along the bottom: their years in the league, or the seasons themselves" (valueChange)="compare.setArcBy($event)">
+                  <mat-option value="year">Career Year</mat-option>
+                  <mat-option value="season">Season</mat-option>
+                </mat-select>
                 <div class="group-body">
                   <svg class="cmp-arcs" [attr.viewBox]="'0 0 ' + a.width + ' ' + a.height" role="img" aria-label="Career arcs">
                     @for (t of a.yTicks; track t.label) {
@@ -289,7 +294,7 @@
                     }
                   </div>
                   <p class="cmp-note">
-                    {{ a.byYear ? 'Their years in the league along the bottom' : 'Season by season' }}; each season's rank with the default sliders against that
+                    {{ a.byYear ? 'Their years in the league along the bottom' : 'The seasons along the bottom' }}; each season's rank with the default sliders against that
                     year's league, the season compared ringed
                   </p>
                 </div>

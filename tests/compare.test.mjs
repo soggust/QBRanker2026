@@ -150,3 +150,22 @@ test('the compare helpers: leaders, surnames, names for matching', async () => {
   assert.equal(normalize('Luka Dončić'), 'luka doncic');
   assert.equal(normalize("  Ja'Marr   CHASE "), 'jamarr chase');
 });
+
+test('nfl: the same player picked again adds his next season down, until none are left', async () => {
+  const engine = await loadEngine('nfl', { entry: ENTRY });
+  const { PlayerCompare } = engine;
+  const { host, data } = harness(engine, 'nfl', 'QB');
+  const compare = new PlayerCompare(host, data);
+  await compare.start([]);
+  await compare.search('peyton manning');
+  const hit = compare.hits.find((h) => h.name === 'Peyton Manning');
+  await compare.pick(hit);
+  await compare.search('peyton manning');
+  await compare.pick(compare.hits.find((h) => h.name === 'Peyton Manning'));
+  assert.equal(compare.sides.length, 2);
+  const [first, second] = compare.sides.map((s) => s.season);
+  assert.equal(first, hit.best.season);
+  const below = hit.seasons.filter((s) => s < hit.best.season).at(-1);
+  assert.equal(second, below ?? hit.seasons.find((s) => s > hit.best.season), 'the next season down');
+  assert.equal(compare.note, '', 'no "already in" while he has others');
+});

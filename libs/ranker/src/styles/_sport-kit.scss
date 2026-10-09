@@ -17,8 +17,9 @@ $menu-buttons: ".sidebar footer button, .sidebar footer button.negative, .sideba
 $open-buttons: 'section footer .filter-toggle.open, section footer .info-toggle.open, section footer .settings-toggle[aria-expanded="true"]';
 $pressed-buttons: "#{$open-buttons}, section footer .filter-toggle:hover, section footer .copy-toggle:hover, section footer .share-toggle:hover, section footer .compare-toggle:hover, section footer .info-toggle:hover, section footer .settings-toggle:hover, .sidebar footer button:hover";
 
-// The year dropdown and the filter menu's presets dropdown, and their open lists
-$dropdowns: "section footer .mat-mdc-select.season-select, .sidebar .filters .mat-mdc-select";
+// The year dropdown, the filter menu's presets dropdown and the compare view's arcs dropdown, and their
+// open lists
+$dropdowns: "section footer .mat-mdc-select.season-select, .sidebar .filters .mat-mdc-select, player-compare .mat-mdc-select.arc-by";
 $open-list: ".mdc-menu-surface.mat-mdc-select-panel";
 
 // The settings menu's switches

@@ -85,9 +85,10 @@ export interface CompareHit {
   logo: string;
   badge: string;
   whiteLogo: boolean;
-  // "2008-2016", and the season a click adds (their best by the default sliders)
+  // "2008-2016", the season a click adds (their best by the default sliders), and every season they have
   span: string;
   best: { season: number; rank: number; of: number };
+  seasons: number[];
 }
 
 export interface CompareCell {
@@ -151,6 +152,9 @@ export class PlayerCompare {
   view: CompareView | null = null;
   arcs: CompareArcs | null = null;
   tab: 'overview' | 'stats' | 'career' = 'overview';
+  // The career arcs along the bottom: each one's years in the league, or the seasons themselves (null: by
+  // year, unless they're all teams)
+  arcBy: 'year' | 'season' | null = null;
   // Sides still loading (the add slot shows it), and the colors they'll take (picks load together)
   loading = 0;
   private claimed: string[] = [];
@@ -217,6 +221,12 @@ export class PlayerCompare {
     }
   }
 
+  // The arcs' bottom switched (the Career tab's dropdown)
+  setArcBy(by: 'year' | 'season'): void {
+    this.arcBy = by;
+    this.arcs = this.buildArcs();
+  }
+
   remove(i: number): void {
     this.sides.splice(i, 1);
     this.build();
@@ -225,6 +235,7 @@ export class PlayerCompare {
   private reset(): void {
     this.close();
     this.tab = 'overview';
+    this.arcBy = null;
     this.clearSearch();
     this.open = true;
   }
@@ -395,7 +406,7 @@ export class PlayerCompare {
   private buildArcs(): CompareArcs | null {
     const sides = this.sides.filter((s) => s.career?.length);
     if (!sides.length || SPORT.careerOnly) return null;
-    const byYear = !sides.every((s) => isTeamTab(s.position));
+    const byYear = this.arcBy ? this.arcBy === 'year' : !sides.every((s) => isTeamTab(s.position));
     const xOf = (side: CompareSide, line: CardSeason) => (byYear ? side.career!.indexOf(line) + 1 : line.season);
     const xs = sides.flatMap((s) => s.career!.map((c) => xOf(s, c)));
     const lo = Math.min(...xs);
@@ -452,10 +463,15 @@ export class PlayerCompare {
     this.searched = true;
   }
 
-  // A hit picked: their best season in (another of theirs from the tape's season picker)
+  // A hit picked: their best season in; that one's in already, the next one down (then up) that isn't
   async pick(hit: CompareHit): Promise<void> {
     this.clearSearch();
-    await this.add(hit.position, hit.best.season, hit.id);
+    const taken = (season: number) => this.sides.some((s) => s.key === `${hit.position}/${season}/${hit.id}`);
+    const below = hit.seasons.filter((s) => s < hit.best.season).reverse();
+    const above = hit.seasons.filter((s) => s > hit.best.season);
+    const season = [hit.best.season, ...below, ...above].find((s) => !taken(s));
+    if (season === undefined) return this.say('Every one of their seasons is already in');
+    await this.add(hit.position, season, hit.id);
   }
 
   private clearSearch(): void {
@@ -503,6 +519,7 @@ export class PlayerCompare {
           whiteLogo: whiteLogo(best.logo),
           span: SPORT.careerOnly ? '' : first === last ? SPORT.seasonText(first) : `${first}-${last}`,
           best: { season: best.season, rank: best.rank, of: best.of },
+          seasons: seasons.map((s) => s.season),
         };
       });
     });
