@@ -38,6 +38,8 @@ export interface BetRow extends BetEntry {
   chance?: number;
   pick: string;
   marketLabel: string;
+  // (an algorithm pick's price at DraftKings, its badge before it)
+  odds?: string;
   agree: number;
   key: string;
   // its score, or for an older report an estimate from its grade and the report's confidence
@@ -258,7 +260,8 @@ export class BetsPageComponent implements OnInit {
             id: algoRows.length,
             key: pickKey(sport, p.matchup, p.kind, p.pick),
             pick: p.pick,
-            marketLabel: `${p.market} · ${p.book} ${p.odds > 0 ? '+' : ''}${p.odds}`,
+            marketLabel: p.market,
+            odds: `${p.odds > 0 ? '+' : ''}${p.odds}`,
             agree: 0,
             // (the order: its edge score; its chance shows, its band colors it)
             sureness: p.score,

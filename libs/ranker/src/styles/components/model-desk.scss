@@ -691,3 +691,13 @@ card-panel {
 .desk-pick.desk-lost .desk-key {
   color: inherit;
 }
+
+// (the book a bet's priced at, a tiny DK before its odds; and the small notes under values thin, as the
+// numbers are)
+.desk-book {
+  @include v.book-badge;
+}
+
+.desk-table td small {
+  font-weight: 400;
+}

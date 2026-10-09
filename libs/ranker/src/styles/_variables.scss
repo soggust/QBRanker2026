@@ -226,3 +226,20 @@ $chalk-dust:
   color: var(--scoreboard-led);
   text-shadow: var(--scoreboard-glow);
 }
+
+// The sportsbook a bet's priced at, as a tiny badge before its odds (DraftKings: DK in its green on black)
+@mixin book-badge {
+  background: #111;
+  border: 1px solid rgba(83, 211, 55, 0.55);
+  border-radius: 3px;
+  color: #53d337;
+  display: inline-block;
+  font-family: $font-heading;
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: 0.3px;
+  line-height: 1;
+  margin-right: 5px;
+  padding: 2px 3px;
+  vertical-align: 1px;
+}

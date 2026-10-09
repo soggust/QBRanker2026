@@ -796,3 +796,8 @@ $arm-length: 175px;
     overflow-y: auto;
   }
 }
+
+// (the book a pick's priced at, a tiny DK before its odds)
+.bet-book {
+  @include v.book-badge;
+}
