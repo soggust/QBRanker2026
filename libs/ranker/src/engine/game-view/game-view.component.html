@@ -611,7 +611,14 @@
               @let v = videos[games.video] ?? videos[0];
               <div class="chart-card game-video-card">
                 <div class="game-video">
-                  @if (v.youtube) {
+                  <!-- (the NFL's videos won't play off YouTube: the NFL blocks them on other sites, so its show their
+                       picture and open on YouTube) -->
+                  @if (v.youtube && g.league.includes('football')) {
+                    <a class="game-video-out" [href]="'https://www.youtube.com/watch?v=' + v.youtube" target="_blank" rel="noopener" [title]="'Watch ' + v.title + ' on YouTube'">
+                      <img [src]="'https://i.ytimg.com/vi/' + v.youtube + '/hqdefault.jpg'" alt="" />
+                      <span class="game-video-play"><mat-icon fontIcon="play_arrow" aria-hidden="true"></mat-icon>Watch on YouTube</span>
+                    </a>
+                  } @else if (v.youtube) {
                     <iframe [src]="youtubeUrl(v.youtube)" [title]="v.title" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe>
                   } @else {
                     <video [src]="v.src" [poster]="v.thumb ?? ''" controls playsinline preload="metadata"></video>

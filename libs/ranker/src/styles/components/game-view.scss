@@ -1419,6 +1419,43 @@
   }
 }
 
+// (an NFL video: its picture, opening it on YouTube)
+.game-video-out {
+  display: block;
+  height: 100%;
+  position: relative;
+
+  img {
+    display: block;
+    height: 100%;
+    object-fit: cover;
+    transition: filter 0.15s;
+    width: 100%;
+  }
+
+  &:hover img,
+  &:focus-visible img {
+    filter: brightness(1.15);
+  }
+}
+
+.game-video-play {
+  align-items: center;
+  background: rgba(0, 0, 0, 0.72);
+  border-radius: 999px;
+  color: #fff;
+  display: flex;
+  font-size: 14px;
+  font-weight: 800;
+  gap: 4px;
+  left: 50%;
+  padding: 8px 16px 8px 10px;
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  white-space: nowrap;
+}
+
 .game-video-title {
   color: #fff;
   font-size: 14px;

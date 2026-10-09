@@ -118,7 +118,7 @@ export function vsPositionBreakdown(player: SkillPlayer, position: string, rows:
     } else if (score <= -2) {
       flags.push({ icon: 'call_split', tone: 'info', text: `Run funnel: opponents pass ${amount} less often than usual (#${of + 1 - funnelRank} of ${of})` });
     } else {
-      flags.push({ icon: 'call_split', tone: 'info', text: `Neutral: opponents pass about as often as usual (${signed(score)}%)` });
+      flags.push({ icon: 'call_split', tone: 'info', text: `Neutral funnel: opponents pass about as often as usual (${signed(score)}%)` });
     }
   }
   if (lopsided.length) {
