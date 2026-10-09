@@ -157,6 +157,14 @@
         <svg viewBox="0 0 600 120" preserveAspectRatio="none" role="img" [attr.aria-label]="'Bankroll from ' + bankroll + ' to ' + balance.toFixed(1) + ' units'">
           <line class="desk-start" x1="0" x2="600" [attr.y1]="110 - ((bankroll - curveRange.min) / (curveRange.max - curveRange.min || 1)) * 100" [attr.y2]="110 - ((bankroll - curveRange.min) / (curveRange.max - curveRange.min || 1)) * 100" />
           <path [attr.d]="curve" />
+          <!-- (a strip per point: the bankroll after that bet, and the bet, on hover; its dot shows) -->
+          @for (s of curveSpots; track $index) {
+            <g class="desk-spot">
+              <rect [attr.x]="s.x" y="0" [attr.width]="s.w" height="120" />
+              <line [attr.x1]="s.px" [attr.x2]="s.px" [attr.y1]="s.y" [attr.y2]="s.y" />
+              <title>{{ s.title }}</title>
+            </g>
+          }
         </svg>
       </div>
     }
@@ -261,7 +269,7 @@
               </thead>
               <tbody>
                 @for (c of sorted('calib', calibration, calibrationValue); track c.label) {
-                  <tr>
+                  <tr [title]="'Bets it gave ' + c.label + ': won ' + pct(c.was) + ' of ' + c.n + ' (it said ' + pct(c.said) + ')'">
                     <th>{{ c.label }}</th>
                     <td>{{ c.n }}</td>
                     <td>{{ pct(c.said) }}</td>

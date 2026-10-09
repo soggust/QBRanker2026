@@ -1393,6 +1393,70 @@
   }
 }
 
+// (the win probability: a strip per play, unseen until the pointer lights it and shows its point, a dot
+// that stays round however the chart stretches)
+.wp-chart .wp-spot {
+  cursor: help;
+
+  rect {
+    fill: transparent;
+    transition: fill 0.12s ease;
+  }
+
+  line {
+    opacity: 0;
+    stroke: #fff;
+    stroke-linecap: round;
+    stroke-width: 7px;
+    transition: opacity 0.12s ease;
+    vector-effect: non-scaling-stroke;
+  }
+
+  &:hover {
+    rect {
+      fill: rgba(255, 255, 255, 0.1);
+    }
+
+    line {
+      opacity: 1;
+    }
+  }
+}
+
+// (the predictor, the team stats' and the fantasy bars, the pass zones)
+.game-stat-bar,
+.game-fantasy-bar,
+.pass-zone {
+  cursor: help;
+  transition:
+    filter 0.12s ease,
+    background-color 0.12s ease;
+
+  &:hover {
+    filter: brightness(1.15);
+  }
+}
+
+// (the linescore's scores: a period's lightens, its cell a shade lighter)
+.game-linescore td {
+  cursor: help;
+  transition:
+    color 0.12s ease,
+    background-color 0.12s ease;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.06);
+  }
+
+  &:hover:not(.total) {
+    color: #fff;
+  }
+}
+
+.game-fantasy-bar:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
 // (the game view's links: the same hover as every link, the glow included)
 .game-form-team,
 .game-form-score,

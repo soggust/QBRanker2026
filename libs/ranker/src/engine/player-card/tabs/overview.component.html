@@ -25,12 +25,13 @@
         @for (a of o.radar.axes; track a.label) {
           <line class="spoke" x1="0" y1="0" [attr.x2]="a.x" [attr.y2]="a.y"></line>
         }
-        <polygon class="shape" [attr.points]="o.radar.shape"></polygon>
+        <polygon class="shape" [attr.points]="o.radar.shape"><title>{{ possessive(c.name) }} skills{{ sport.careerOnly ? '' : ', ' + seasonText(c.season) }}: each point a skill's percentile, the dashed ring the league average</title></polygon>
+        <!-- (each point, and each skill's name, says its standing and percentile on hover) -->
         @for (d of o.radar.dots; track $index) {
-          <circle class="dot" r="3.5" [attr.cx]="d.x" [attr.cy]="d.y" [style.fill]="rankTone(d.pct)"></circle>
+          <circle class="dot" r="3.5" [attr.cx]="d.x" [attr.cy]="d.y" [style.fill]="rankTone(d.pct)"><title>{{ skillTitle(o.skills[$index]) }}</title></circle>
         }
         @for (a of o.radar.axes; track a.label) {
-          <text class="axis-label" [attr.x]="a.lx" [attr.y]="a.ly" [attr.text-anchor]="a.anchor">{{ a.label }}</text>
+          <text class="axis-label" [attr.x]="a.lx" [attr.y]="a.ly" [attr.text-anchor]="a.anchor"><title>{{ skillTitle(o.skills[$index]) }}</title>{{ a.label }}</text>
         }
       </svg>
       <div class="ov-legend">
@@ -54,7 +55,7 @@
             <b class="bd-lean-label" [class.pass]="l.tone === 'pass'" [class.run]="l.tone === 'run'">{{ l.label }}</b>
             <span>{{ l.text }}</span>
           </div>
-          <div class="bd-lean-bar">
+          <div class="bd-lean-bar" [title]="'Pass ' + (l.pass * 100).toFixed(0) + '% · Run ' + ((1 - l.pass) * 100).toFixed(0) + '%' + (l.usual !== null ? ' (offenses usually pass ' + (l.usual * 100).toFixed(0) + '%)' : '')">
             <i class="pass" [style.flex-grow]="l.pass"><b>Pass {{ (l.pass * 100).toFixed(0) }}%</b></i>
             <i class="run" [style.flex-grow]="1 - l.pass"><b>Run {{ ((1 - l.pass) * 100).toFixed(0) }}%</b></i>
             @if (l.usual !== null) {
@@ -150,10 +151,10 @@
               <span class="skill-name">{{ s.name }}</span>
               <span class="skill-standing">{{ s.standing }}</span>
             </div>
-            <span class="stat-bar"><i></i></span>
+            <span class="stat-bar" [title]="skillTitle(s)"><i></i></span>
             <span class="skill-evidence">
               @for (e of s.evidence; track e.label) {
-                <span><b [style.--tone]="rankTone(rankPct(e.rank, e.of))">#{{ e.rank }}</b> {{ e.label }}</span>
+                <span [title]="e.label + ': #' + e.rank + ' of ' + e.of"><b [style.--tone]="rankTone(rankPct(e.rank, e.of))">#{{ e.rank }}</b> {{ e.label }}</span>
               }
             </span>
           </div>
@@ -181,7 +182,7 @@
             <span class="comp-season">{{ seasonText(m.season) }}</span>
             <span class="comp-name">{{ m.name }}</span>
           </span>
-          <span class="comp-match" [style.--tone]="rankTone((m.match - 60) / 40)">{{ m.match }}<small>%</small></span>
+          <span class="comp-match" [style.--tone]="rankTone((m.match - 60) / 40)" [title]="m.match + '% alike'">{{ m.match }}<small>%</small></span>
         </button>
       }
     </div>

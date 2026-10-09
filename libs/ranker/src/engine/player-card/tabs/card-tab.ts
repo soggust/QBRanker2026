@@ -2,7 +2,7 @@ import { Directive, Input, inject } from '@angular/core';
 import { SPORT } from '@sport/sport';
 import { whiteLogo } from '@sport/team-colors';
 import { CURRENT_SEASON, isLiveSeason } from '@ranker/engine/data';
-import { rankPct, rankTone } from '@ranker/core/format';
+import { ordinal, rankPct, rankTone } from '@ranker/core/format';
 import { GameViewService } from '../../game-view/game-view.service';
 import { PlayerCard } from '../card.model';
 import { PlayerCards } from '../player-cards';
@@ -30,6 +30,11 @@ export abstract class CardTab {
 
   seasonText(season: number): string {
     return SPORT.seasonText(season);
+  }
+
+  // A 0-1 standing as a hover's words: "88th percentile"
+  pctText(pct: number): string {
+    return `${ordinal(Math.max(1, Math.min(99, Math.round(pct * 100))))} percentile`;
   }
 
   // Logos drawn in white on the board (e.g. the Giants')

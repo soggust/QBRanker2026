@@ -15,7 +15,7 @@
           [class.pending]="!s.yours"
           [style.--pct]="s.pct"
           [style.--tone]="rankTone(s.pct)"
-          [title]="s.season + ': #' + s.rank + ' of ' + s.of"
+          [title]="seasonText(s.season) + ' · #' + s.rank + ' of ' + s.of"
           (click)="s.season !== c.season && cards.openSeason(s.season, c.player.gsisId)"
         >
           <span class="arc-rank">#{{ s.rank }}</span>
@@ -55,7 +55,7 @@
               [class.tinted]="h.tint"
               [style.--share]="h.share"
               [style.--tint]="h.tint"
-              [title]="h.best ? 'Career best' : ''"
+              [title]="h.label + ': ' + h.text + (s.yours && h.value !== null ? ' · ' + pctText(h.share) + ' that year' : '') + (h.best ? ' · Career best' : '')"
             >
               <b>{{ h.text }}</b>
               <i></i>

@@ -5,6 +5,7 @@ import { extras } from '@ranker/engine/row-fields';
 import { badgeColor, whiteLogo } from '@sport/team-colors';
 import { logoForSeason } from '@sport/logo-eras';
 import { SKILL_UNITS } from '@ranker/engine/unit-scoring';
+import { ordinal } from '@ranker/core/format';
 import { pitchColor } from '../player-card/zones';
 import { HOME, TracedPark, fieldSpot, loadTracedParks, tracedPark, wallPath } from './parks';
 import { GameArsenal, GameChart, GameFantasy, GameMark, GamePitch, GameTeam, GameView } from './game.model';
@@ -200,6 +201,33 @@ export class GameViewComponent {
     return fill ? `M0,100 L${xy.join(' L')} L1000,100 Z` : `M${xy.join(' L')}`;
   }
 
+  // The win probability's hover targets: a thin strip per play across the chart, each saying both teams'
+  // chances after it ("KC 72% · BUF 28% (play 34 of 160)"); kept per game
+  private wpCache: { points: number[]; spots: { x: number; w: number; px: number; y: number; title: string }[] } | null = null;
+  probabilitySpots(game: GameView): { x: number; w: number; px: number; y: number; title: string }[] {
+    const points = game.winProbability ?? [];
+    if (this.wpCache?.points === points) return this.wpCache.spots;
+    const n = points.length;
+    const step = n > 1 ? 1000 / (n - 1) : 1000;
+    const spots =
+      n < 2
+        ? []
+        : points.map((p, i) => {
+            const home = Math.round(p * 1000) / 10;
+            const away = Math.round((100 - home) * 10) / 10;
+            const when = i === 0 ? 'the start' : i === n - 1 ? 'final' : `play ${i} of ${n - 1}`;
+            return {
+              x: Math.max(0, i * step - step / 2),
+              w: i === 0 || i === n - 1 ? step / 2 : step,
+              px: i * step,
+              y: (1 - p) * 200,
+              title: `${game.home.abbr} ${home}% · ${game.away.abbr} ${away}% (${when})`,
+            };
+          });
+    this.wpCache = { points, spots };
+    return spots;
+  }
+
   // The chart tab's name: a shot chart (basketball, hockey), a spray chart (baseball), drives (football)
   chartTitle(game: GameView): string {
     const kind = game.chart?.kind;
@@ -283,6 +311,20 @@ export class GameViewComponent {
   }
 
   // A pass zone's shade: its share of the team's attempts
+  // A zone's share of all the attempts, for its hover: "34%"
+  attShare(zones: { att: number }[], att: number): string {
+    const all = zones.reduce((a, z) => a + z.att, 0);
+    return `${all ? Math.round((att / all) * 100) : 0}%`;
+  }
+
+  // A linescore column's name, for its hover: "3rd quarter", "7th inning", "2nd period", or its own ("OT")
+  periodName(game: GameView, label: string): string {
+    const n = Number(label);
+    if (!Number.isInteger(n) || n < 1) return label;
+    const unit = game.league.includes('baseball') ? 'inning' : game.league.includes('hockey') ? 'period' : 'quarter';
+    return `${ordinal(n)} ${unit}`;
+  }
+
   zoneShare(zones: { att: number }[], att: number): number {
     const most = Math.max(...zones.map((z) => z.att), 1);
     return att / most;

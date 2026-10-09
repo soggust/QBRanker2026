@@ -321,6 +321,9 @@ export class ModelDeskComponent implements OnInit, OnDestroy {
   calibration: { label: string; n: number; said: number; was: number }[] = [];
   curve = '';
   curveRange = { min: 0, max: 0 };
+  // (each point's hover target: a strip across the chart, its dot, and what it was: "After bet 34 of 120:
+  // 104.30u (+1.82u, NFL Bills -3, won)")
+  curveSpots: { x: number; w: number; px: number; y: number; title: string }[] = [];
   // (the bets on games not started yet, and in play: started, not graded yet)
   open: ModelBet[] = [];
   live: ModelBet[] = [];
@@ -460,6 +463,13 @@ export class ModelDeskComponent implements OnInit, OnDestroy {
     this.curveRange = { min, max };
     const span = max - min || 1;
     this.curve = points.map((v, i) => `${i ? 'L' : 'M'}${((i / Math.max(1, points.length - 1)) * 600).toFixed(1)},${(110 - ((v - min) / span) * 100).toFixed(1)}`).join(' ');
+    const step = 600 / Math.max(1, points.length - 1);
+    const last = points.length - 1;
+    this.curveSpots = points.map((v, i) => {
+      const b = graded[i - 1];
+      const what = b ? `After bet ${i} of ${last}: ${v.toFixed(2)}u (${this.units(b.profit)}, ${b.sport.toUpperCase()} ${b.pick}, ${b.status})` : `Start: ${v.toFixed(2)}u`;
+      return { x: Math.max(0, i * step - step / 2), w: i === 0 || i === last ? step / 2 : step, px: i * step, y: 110 - ((v - min) / span) * 100, title: what };
+    });
 
     const now = Date.now();
     this.open = bets.filter((b) => b.status === 'open' && Date.parse(b.start) > now).sort((a, b) => a.start.localeCompare(b.start));

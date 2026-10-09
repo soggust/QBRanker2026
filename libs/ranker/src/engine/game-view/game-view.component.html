@@ -181,7 +181,7 @@
                 </div>
                 <div class="predictor-row">
                   <span class="predictor-side away"><b>{{ p.away | percent: '1.0-1' }}</b><small>{{ g.away.abbr }}</small></span>
-                  <span class="game-stat-bar predictor-bar"><i class="away" [style.width.%]="p.away * 100"></i><i class="home" [style.width.%]="p.home * 100"></i></span>
+                  <span class="game-stat-bar predictor-bar" [title]="g.away.abbr + ' ' + (p.away | percent: '1.0-1') + ' · ' + g.home.abbr + ' ' + (p.home | percent: '1.0-1') + ' to win (ESPN)'"><i class="away" [style.width.%]="p.away * 100"></i><i class="home" [style.width.%]="p.home * 100"></i></span>
                   <span class="predictor-side home"><b>{{ p.home | percent: '1.0-1' }}</b><small>{{ g.home.abbr }}</small></span>
                 </div>
               </div>
@@ -263,9 +263,9 @@
                         {{ t.abbr }}
                       </th>
                       @for (p of g.periodLabels; track $index) {
-                        <td>{{ t.periods[$index] ?? '' }}</td>
+                        <td [title]="t.periods[$index] != null ? t.abbr + ', ' + periodName(g, p) + ': ' + t.periods[$index] : ''">{{ t.periods[$index] ?? '' }}</td>
                       }
-                      <td class="total">{{ t.score }}</td>
+                      <td class="total" [title]="t.abbr + ' final: ' + t.score">{{ t.score }}</td>
                     </tr>
                   }
                 </tbody>
@@ -291,6 +291,14 @@
                     <path class="wp-fill home" clip-path="url(#wp-top)" [attr.d]="probabilityPath(wp, true)" />
                     <path class="wp-fill away" clip-path="url(#wp-bottom)" [attr.d]="probabilityPath(wp, true)" />
                     <path class="wp-line" pathLength="1" [attr.d]="probabilityPath(wp)" />
+                    <!-- (a strip per play: both teams' chances after it on hover, the strip lit, its point a dot) -->
+                    @for (s of probabilitySpots(g); track $index) {
+                      <g class="wp-spot">
+                        <rect [attr.x]="s.x" y="0" [attr.width]="s.w" height="200" />
+                        <line [attr.x1]="s.px" [attr.x2]="s.px" [attr.y1]="s.y" [attr.y2]="s.y" />
+                        <title>{{ s.title }}</title>
+                      </g>
+                    }
                   </svg>
                   <span class="wp-edge top">{{ g.home.abbr }} 100%</span>
                   <span class="wp-edge mid">50%</span>
@@ -317,7 +325,7 @@
                       <span class="game-stat-mid">
                         <small>{{ st.label }}</small>
                         @if (st.awayShare !== null) {
-                          <span class="game-stat-bar"><i class="away" [style.width.%]="st.awayShare * 100"></i><i class="home" [style.width.%]="(1 - st.awayShare) * 100"></i></span>
+                          <span class="game-stat-bar" [title]="st.label + ': ' + g.away.abbr + ' ' + st.away + ' · ' + g.home.abbr + ' ' + st.home"><i class="away" [style.width.%]="st.awayShare * 100"></i><i class="home" [style.width.%]="(1 - st.awayShare) * 100"></i></span>
                         }
                       </span>
                       <b>{{ st.home }}</b>
@@ -430,7 +438,7 @@
                         <p class="game-drive-sub">{{ t.passers.join(', ') }}</p>
                         <div class="pass-zones">
                           @for (z of t.zones; track z.key) {
-                            <div class="pass-zone" [style.--share]="zoneShare(t.zones, z.att)">
+                            <div class="pass-zone" [style.--share]="zoneShare(t.zones, z.att)" [title]="team.abbr + ' passes, ' + z.key + ': ' + z.comp + ' of ' + z.att + ' for ' + z.yds + ' yds' + (z.td ? ', ' + z.td + ' TD' : '') + (z.int ? ', ' + z.int + ' INT' : '') + ' (' + attShare(t.zones, z.att) + ' of the attempts)'">
                               <small>{{ z.key }}</small>
                               <b>{{ z.comp }}/{{ z.att }}</b>
                               <span>{{ z.yds }} yds{{ z.td ? ' · ' + z.td + ' TD' : '' }}{{ z.int ? ' · ' + z.int + ' INT' : '' }}</span>
@@ -595,7 +603,7 @@
                         <ng-container *ngTemplateOutlet="gem; context: { $implicit: team }"></ng-container>
                       </b>
                       <small>{{ p.parts.join(' · ') }}</small>
-                      <span class="game-fantasy-bar"><i [style.width.%]="(rows[0].total > 0 ? (p.total > 0 ? p.total : 0) / rows[0].total : 0) * 100"></i></span>
+                      <span class="game-fantasy-bar" [title]="p.name + ': ' + (p.total | number: '1.1-1') + ' fantasy pts (#' + (i + 1) + ' of ' + rows.length + ')'"><i [style.width.%]="(rows[0].total > 0 ? (p.total > 0 ? p.total : 0) / rows[0].total : 0) * 100"></i></span>
                     </span>
                     <span class="game-fantasy-points" [class.negative]="p.total < 0">{{ p.total | number: '1.1-1' }}</span>
                   </div>

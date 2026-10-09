@@ -5,7 +5,8 @@ import { extras, rowTeamNames } from '@ranker/engine/row-fields';
 import { recentWord } from '@ranker/engine/stat-reader';
 import { recentRef } from '../../game-view/game-view.service';
 import { evidenceText, insteadText, paragraphs } from '../analysis';
-import { PlayerCard } from '../card.model';
+import type { CardSkill } from '@ranker/engine/skills';
+import { CardStat, PlayerCard } from '../card.model';
 import type { GameLogViewRow } from '../game-log-view';
 import { sortFlags } from '../overview';
 import { ZoneStat, ZoneView, pitchColor } from '../zones';
@@ -36,6 +37,12 @@ export class CardStatsTab extends CardTab {
     return !!extras(card.player).lastFiveOt?.[index];
   }
 
+  // A tile's bar on hover: "Passing Yds: 4,183 (#3 of 32) · Avg 3,610"
+  statTitle(s: CardStat): string {
+    const rank = s.rank !== null ? ` (${s.tied ? 'T-' : '#'}${s.rank} of ${s.of})` : '';
+    return `${s.name}${s.display ? ': ' + s.display : ''}${rank}${s.avg !== null ? ' · Avg ' + s.avg : ''}`;
+  }
+
   openRecent(card: PlayerCard, index: number): void {
     const ref = recentRef(this.recentTeam(card), this.recentVs(card), index, card.season);
     if (ref) this.games.open(ref);
@@ -46,6 +53,16 @@ export class CardStatsTab extends CardTab {
 @Component({ selector: 'card-overview', templateUrl: './overview.component.html', standalone: false })
 export class CardOverviewTab extends CardTab {
   readonly sortFlags = sortFlags;
+
+  // "Lamar Jackson's", "San Francisco 49ers'" (the radar's hover)
+  possessive(name: string): string {
+    return name + (name.endsWith('s') ? "'" : "'s");
+  }
+
+  // A skill's hover (its radar point, name and bar): "Accuracy: Top 8% · 92nd percentile"
+  skillTitle(skill: CardSkill | undefined): string {
+    return skill ? `${skill.name}: ${skill.standing} · ${this.pctText(skill.pct)}` : '';
+  }
 
   // (a split's pie: each part a slice in its own soft color: the NFL's WRs a blue, TEs a sea green, backs a gold)
   pieColor(i: number): string {
@@ -99,6 +116,19 @@ export class CardZonesTab extends CardTab {
   // The stat showing (the first until another is picked)
   zoneStat(view: ZoneView): ZoneStat {
     return view.stats.find((st) => st.key === this.cards.zoneStat) ?? view.stats[0];
+  }
+
+  // A box's hover: "Slugging, low left: .512 (catcher's view)"
+  zoneTitle(stat: ZoneStat, zone: string): string {
+    const n = Number(zone);
+    const where =
+      n > 10
+        ? `outside the zone, ${['high left', 'high right', 'low left', 'low right'][n - 11]}`
+        : n === 5
+          ? 'middle of the zone'
+          : `${['high', 'middle', 'low'][Math.floor((n - 1) / 3)]} ${['left', 'middle', 'right'][(n - 1) % 3]}`;
+    const value = stat.zones[zone]?.value;
+    return `${stat.label}, ${where}${value ? ': ' + value : ': none'} (catcher's view)`;
   }
 }
 

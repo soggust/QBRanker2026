@@ -203,7 +203,7 @@
               }
             </span>
             <span class="depth-row-name">@if (p.link; as link) {<button type="button" class="depth-link" [title]="'Open ' + p.name" (click)="$event.stopPropagation(); cards.openLinked(link, c.season)">{{ p.name }}</button>} @else {<span>{{ p.name }}</span>}<small>{{ p.pos }}</small></span>
-            <span class="depth-bar"><i [style.width.%]="(p.snaps ?? 0) * 100"></i></span>
+            <span class="depth-bar" [title]="p.name + ': ' + (p.snaps != null ? (p.snaps | percent: '1.0-0') + ' of the playing time' : 'no playing time yet') + ' · ' + p.games + ' G'"><i [style.width.%]="(p.snaps ?? 0) * 100"></i></span>
             <span class="depth-row-pct">{{ p.snaps != null ? (p.snaps | percent: '1.0-0') : '—' }}</span>
             <span class="depth-row-games">{{ p.games }}G</span>
             <span class="depth-row-status">

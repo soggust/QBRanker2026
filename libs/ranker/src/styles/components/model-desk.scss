@@ -116,6 +116,36 @@
     stroke-dasharray: 4 4;
     vector-effect: non-scaling-stroke;
   }
+
+  // (a strip per point, unseen until the pointer lights it and shows the point, a dot that stays round
+  // however the chart stretches)
+  .desk-spot {
+    cursor: help;
+
+    rect {
+      fill: transparent;
+      transition: fill 0.12s ease;
+    }
+
+    line {
+      opacity: 0;
+      stroke: var(--scoreboard-led);
+      stroke-linecap: round;
+      stroke-width: 8px;
+      transition: opacity 0.12s ease;
+      vector-effect: non-scaling-stroke;
+    }
+
+    &:hover {
+      rect {
+        fill: rgba(255, 255, 255, 0.07);
+      }
+
+      line {
+        opacity: 1;
+      }
+    }
+  }
 }
 
 // (the panels spaced as on the card: 12px apart, the body well in from the edges)
@@ -544,6 +574,18 @@ card-panel {
   gap: 4px;
   justify-content: flex-end;
   margin-bottom: 5px;
+
+  // (its count against the line is its cell's hover: the help cursor, and it lightens)
+  cursor: help;
+  transition: filter 0.15s;
+
+  &:hover {
+    filter: brightness(1.15);
+
+    .bar {
+      background: rgba(255, 255, 255, 0.16);
+    }
+  }
 
   &.under {
     --meter: #f0b429;

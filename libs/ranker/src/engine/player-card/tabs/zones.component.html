@@ -19,11 +19,11 @@
     </div>
     <div class="zone-grid">
       @for (z of ['11', '12', '13', '14']; track z) {
-        <span class="zone-out" [ngClass]="'z' + z" [style.background]="zs.zones[z]?.color"><b>{{ zs.zones[z]?.value }}</b></span>
+        <span class="zone-out" [ngClass]="'z' + z" [style.background]="zs.zones[z]?.color" [title]="zoneTitle(zs, z)"><b>{{ zs.zones[z]?.value }}</b></span>
       }
       <span class="zone-in">
         @for (z of ['01', '02', '03', '04', '05', '06', '07', '08', '09']; track z) {
-          <span [style.background]="zs.zones[z]?.color"><b>{{ zs.zones[z]?.value }}</b></span>
+          <span [style.background]="zs.zones[z]?.color" [title]="zoneTitle(zs, z)"><b>{{ zs.zones[z]?.value }}</b></span>
         }
       </span>
     </div>
@@ -36,7 +36,7 @@
         @for (p of zv.arsenal; track p.type) {
           <div class="arsenal-pitch">
             <span class="arsenal-pitch-name"><i [style.background]="pitchColor(p.type)"></i>{{ p.type }}</span>
-            <span class="arsenal-pitch-bar"><i [style.width.%]="p.share * 100" [style.background]="pitchColor(p.type)"></i></span>
+            <span class="arsenal-pitch-bar" [title]="p.type + ': ' + (p.share * 100 | number: '1.1-1') + '% of pitches' + (p.mph !== null ? ' · ' + (p.mph | number: '1.1-1') + ' mph' : '') + ' · ' + (p.count | number) + ' thrown'"><i [style.width.%]="p.share * 100" [style.background]="pitchColor(p.type)"></i></span>
             <b>{{ p.share * 100 | number: '1.1-1' }}%</b>
             <span class="arsenal-pitch-mph">{{ p.mph !== null ? (p.mph | number: '1.1-1') + ' mph' : '' }}</span>
             <small>{{ p.count }}</small>

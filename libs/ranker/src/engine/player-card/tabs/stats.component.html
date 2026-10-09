@@ -28,7 +28,8 @@
     } @else {
       <span class="stat-value" [style.color]="s.tint">{{ s.display }}</span>
     }
-    <span class="stat-bar" [class.empty]="s.rank === null"><i></i></span>
+    <!-- (the bar says the value, its rank and the list's average on hover) -->
+    <span class="stat-bar" [class.empty]="s.rank === null" [title]="statTitle(s)"><i></i></span>
     <span class="stat-avg">{{ s.avg !== null ? 'Avg ' + s.avg : '' }}</span>
   </div>
 </ng-template>

@@ -3471,6 +3471,59 @@
   }
 }
 
+// (the card's other charts say what they are on hover: the help cursor, and the mark lightens; the
+// radar's points grow)
+.ov-radar {
+  .dot {
+    cursor: help;
+    transition:
+      r 0.15s,
+      filter 0.15s;
+
+    &:hover {
+      filter: brightness(1.15);
+      r: 5.5;
+    }
+  }
+
+  .shape,
+  .axis-label {
+    cursor: help;
+  }
+}
+
+.stat-bar,
+.bd-lean-bar,
+.arsenal-pitch-bar,
+.depth-bar,
+.zone-out,
+.zone-in > span {
+  cursor: help;
+  transition: filter 0.15s;
+
+  &:hover {
+    filter: brightness(1.15);
+  }
+}
+
+// (a stat bar's track lightens under the pointer too)
+.stat-bar:hover,
+.depth-bar:hover,
+.arsenal-pitch-bar:hover {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+// (in the career arc and the season lines, which open their seasons: the bar just lightens)
+.arc .arc-bar,
+.season-row .readout i {
+  transition: filter 0.15s;
+}
+
+.arc:hover .arc-bar,
+.season-row .readout:hover i {
+  filter: brightness(1.15);
+}
+
 // A headshot that opens the player's card (his name does too): the pointer, a small lift, its ring lit
 .face-link {
   cursor: pointer;
