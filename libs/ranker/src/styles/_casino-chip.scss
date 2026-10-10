@@ -173,8 +173,9 @@
 // not the sport's (no sidelines, chalk or painted lines). Its outline is a chip's rim: a band in the panel's
 // category color (its own border, so its corners round cleanly), whole cream spots spaced evenly along each
 // straight run, clear of the corners, and a thin inlay line inside it; on hover the spots light up, as a chip's do
-@mixin panel {
-  --rim: 4px;
+// ($chip-bar: its bar a chip's face too, the Algorithm's panels; the others keep the scoreboard bar)
+@mixin panel($chip-bar: false) {
+  --rim: 6px;
   --corner: 14px;
   // (a spot, 8px, in the middle of its 26px stretch of the band)
   --spot: 26px;
@@ -270,27 +271,37 @@
   }
 
   // (the bar and the body inside the band, rounded to meet it, the inlay line round the bar too)
-  // (its bar a chip's face, not the scoreboard: the panel's color as clay, a sheen from the top, a shade at the
-  // foot and the clay's speckle, as the dropdown and the wallet's chips; its icon cream on it)
   > .group-bar {
-    --bar-clay: color-mix(in srgb, var(--group-color) 62%, #161616);
-    background:
-      radial-gradient(ellipse at 30% 0%, rgba(255, 255, 255, 0.18), transparent 65%),
-      linear-gradient(180deg, transparent 40%, rgba(0, 0, 0, 0.22)),
-      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='c'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.35 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23c)'/%3E%3C/svg%3E") 0 0 / 120px,
-      var(--bar-clay);
     border-radius: calc(var(--corner) - var(--rim)) calc(var(--corner) - var(--rim)) 0 0;
     box-shadow: inset 0 0 0 1px rgba(255, 236, 196, 0.3);
-    text-shadow: 0 1px 1.5px rgba(0, 0, 0, 0.6);
-    transition: filter 0.15s ease;
-
-    .group-bar-icon {
-      color: #f4efe3;
-    }
   }
 
-  &:has(> .group-bar > .panel-toggle:hover) > .group-bar {
-    filter: brightness(1.12);
+  @if $chip-bar {
+    // (its bar a chip's face, not the scoreboard: the panel's color as clay, a sheen from the top, a shade at the
+    // foot and the clay's speckle, as the dropdown and the wallet's chips; its icon cream on it)
+    > .group-bar {
+      --bar-clay: color-mix(in srgb, var(--group-color) 62%, #161616);
+      background:
+        radial-gradient(ellipse at 30% 0%, rgba(255, 255, 255, 0.18), transparent 65%),
+        linear-gradient(180deg, transparent 40%, rgba(0, 0, 0, 0.22)),
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='c'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.35 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23c)'/%3E%3C/svg%3E") 0 0 / 120px,
+        var(--bar-clay);
+      border-radius: calc(var(--corner) - var(--rim)) calc(var(--corner) - var(--rim)) 0 0;
+      box-shadow: inset 0 0 0 1px rgba(255, 236, 196, 0.3);
+      // (its title lifted off the clay: a firm drop shadow and a soft dark halo)
+      text-shadow:
+        0 1px 2px rgba(0, 0, 0, 0.85),
+        0 0 8px rgba(0, 0, 0, 0.55);
+      transition: filter 0.15s ease;
+
+      .group-bar-icon {
+        color: #f4efe3;
+      }
+    }
+
+    &:has(> .group-bar > .panel-toggle:hover) > .group-bar {
+      filter: brightness(1.12);
+    }
   }
 
   &.closed > .group-bar {

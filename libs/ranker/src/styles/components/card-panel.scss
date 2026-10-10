@@ -120,9 +120,13 @@ card-panel {
 }
 
 // (the Bets page's and the Algorithm's: the casino's chip-rimmed panel, the same from every sport)
-model-desk card-panel,
 bets-page card-panel {
   @include casino.panel;
+}
+
+// (the Algorithm's: their bars chips' faces too)
+model-desk card-panel {
+  @include casino.panel($chip-bar: true);
 }
 
 // (on the player card, and the game view: a little more room each side of the bar, the title in the hand;
