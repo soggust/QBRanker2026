@@ -1,8 +1,9 @@
 @use "../variables" as v;
 @use "../casino-chip" as chip;
 
-// (a lock's colors: the casino's red, the game selector's, and its padlock's gold)
-$lock: #d8323c;
+// (a lock's colors: chocolate, and its padlock's gold)
+// (a lock's color: chocolate)
+$lock: #d2691e;
 $lock-gold: #ffcf4a;
 
 // The Bets page: one scoreboard panel down the middle of the page, a row per call, most
@@ -278,11 +279,11 @@ $chip-clay: #b0202b;
   border-radius: 6px;
   overflow: hidden;
 
-  // (a lock: the casino's red, the game selector's, never the red of a loss)
+  // (a lock: chocolate, never the red of a loss)
   &.lock {
     --tint: #{$lock};
-    // (its rail a bright red, not the gold)
-    --rail: linear-gradient(135deg, #b3121f, #ff4a55 30%, #e0202d 55%, #ff5c66 75%, #a50f1b);
+    // (its rail chocolate, not the gold)
+    --rail: linear-gradient(135deg, #7a3b10, #e8914a 30%, #d2691e 55%, #f0a060 75%, #6e3410);
   }
 
   &.high {
@@ -406,14 +407,14 @@ $chip-clay: #b0202b;
     text-shadow: 0 0 8px rgba(62, 224, 122, 0.6);
   }
 
-  // a lock: above the ranks, its padlock a bright soft red, glowing like the digits
+  // a lock: above the ranks, its padlock a light chocolate, glowing like the digits
   &.lock {
-    color: #ff6b74;
+    color: #f0a060;
     padding-top: 0;
     text-shadow: none;
 
     .mat-icon {
-      filter: drop-shadow(0 0 6px rgba(255, 107, 116, 0.6));
+      filter: drop-shadow(0 0 6px rgba(240, 160, 96, 0.6));
       @include v.icon-size(19px);
     }
   }

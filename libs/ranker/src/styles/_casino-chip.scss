@@ -474,7 +474,7 @@ $felt-nap: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' wid
   }
 }
 
-// A LOCK tag that wants the eye: a glint sweeping across it every few seconds and a soft red pulse round it
+// A LOCK tag that wants the eye: a glint sweeping across it every few seconds and a soft glowing pulse round it
 // (none with reduced motion). The keyframes at a stylesheet's root (lock-shine-keyframes), where Angular scopes
 // their names with the rules that use them
 @mixin lock-shine-keyframes {
@@ -492,10 +492,10 @@ $felt-nap: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' wid
   @keyframes lock-pulse {
     0%,
     100% {
-      box-shadow: 0 0 0 0 rgba(255, 74, 85, 0);
+      box-shadow: 0 0 0 0 rgba(232, 145, 74, 0);
     }
     50% {
-      box-shadow: 0 0 10px 1px rgba(255, 74, 85, 0.55);
+      box-shadow: 0 0 10px 1px rgba(232, 145, 74, 0.55);
     }
   }
 }

@@ -7,7 +7,7 @@
 // outline, as the rows' own chips), and the prices on the slip ringed in gold.
 
 // (a lock's colors: the casino's red, and its padlock's gold; bets-page.scss's)
-$lock: #d8323c;
+$lock: #d2691e;
 $lock-gold: #ffcf4a;
 
 :host {
@@ -177,9 +177,9 @@ $lock-gold: #ffcf4a;
   }
 
   &.lock {
-    --edge: #ff3b47;
-    --wash: rgba(216, 50, 60, 0.06);
-    box-shadow: 0 0 10px rgba(255, 59, 71, 0.4);
+    --edge: #e07a30;
+    --wash: rgba(210, 105, 30, 0.06);
+    box-shadow: 0 0 10px rgba(224, 122, 48, 0.4);
   }
 
   &.love {
