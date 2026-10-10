@@ -38,7 +38,7 @@
 
 <!-- (the open bets, by game: the wallet's panel, and the Bets page's Open Bets tab alone) -->
 <ng-template #openPanel>
-<card-panel class="tab-card group-support" [label]="'Open Bets · ' + tally().atRisk + 'u'" icon="schedule">
+<card-panel class="tab-card group-support" [label]="'Open Bets · ' + tally().atRisk + 'u'" icon="schedule" [expandable]="!only">
   <div class="group-body">
       <table class="desk-table desk-bets wallet-bets">
         <thead>
@@ -89,7 +89,7 @@
 @if (!canUse('bets')) {
   <coming-soon heading="Wallet" detail="Play-money betting is on its way. Check back soon."></coming-soon>
 } @else {
-<div class="wallet-page">
+<div class="wallet-page" [class.only-open]="only === 'open'">
   @if (!account.ready()) {
     <p class="desk-note wallet-note" role="status">Loading…</p>
   } @else if (!account.user()) {

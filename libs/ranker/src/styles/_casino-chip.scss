@@ -188,7 +188,7 @@
 // category color (its own border, so its corners round cleanly), whole cream spots spaced evenly along each
 // straight run, clear of the corners, and a thin inlay line inside it; on hover the spots light up, as a chip's do
 // ($chip-bar: its bar a chip's face too, the Algorithm's panels; the others keep the scoreboard bar)
-@mixin panel($chip-bar: false) {
+@mixin chip-panel($chip-bar: false) {
   --rim: 6px;
   --corner: 14px;
   // (a spot, 10px, in the middle of its 20px stretch of the band: cream and color the same length)
@@ -328,6 +328,92 @@
     &::before,
     &::after {
       transition: none;
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// The card table: a panel on the Bets page, the Algorithm and the wallet as a casino's table, green felt (its
+// nap, a light over the middle, the edges falling into shadow) inside a thin brushed-gold rail; its bar a
+// darker band of the felt with a gold seam under it, the panel's category color only on its icon. (The chip
+// rim, chip-panel above, was too busy on a page of them; panel() is the table now, chip-panel kept to go back)
+// ---------------------------------------------------------------------------
+$felt: #155a3a;
+$felt-gold: linear-gradient(135deg, #7a5a1e, #f1d58c 22%, #b38a3c 45%, #f6e2a4 62%, #9c7630 82%, #6e511b);
+$felt-seam: rgba(222, 186, 106, 0.55);
+$felt-nap: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.1' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.22 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23f)'/%3E%3C/svg%3E");
+
+// (the felt alone: for a surface inside a table, a row or a bar; $box, the box it fills)
+@mixin felt($box: padding-box) {
+  background:
+    radial-gradient(ellipse 90% 70% at 50% 35%, rgba(255, 255, 255, 0.07), transparent 70%) #{$box},
+    radial-gradient(ellipse 120% 100% at 50% 50%, transparent 55%, rgba(0, 0, 0, 0.38)) #{$box},
+    #{$felt-nap} 0 0 / 140px #{$box},
+    linear-gradient(#{$felt}, #{$felt}) #{$box};
+}
+
+@mixin panel($chip-bar: false) {
+  --corner: 12px;
+  border: 2px solid transparent;
+  border-radius: var(--corner);
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.45),
+    inset 0 0 0 1px rgba(0, 0, 0, 0.45),
+    inset 0 0 28px rgba(0, 0, 0, 0.3);
+  outline: 0;
+  overflow: hidden;
+  padding: 0;
+  position: relative;
+
+  // (the felt inside, the gold rail round it: the border's box; over the scoreboard card-panel.scss gives
+  // every panel)
+  &,
+  &:not(.panel-plain) {
+    background:
+      radial-gradient(ellipse 90% 70% at 50% 35%, rgba(255, 255, 255, 0.07), transparent 70%) padding-box,
+      radial-gradient(ellipse 120% 100% at 50% 50%, transparent 55%, rgba(0, 0, 0, 0.38)) padding-box,
+      #{$felt-nap} 0 0 / 140px padding-box,
+      linear-gradient(#{$felt}, #{$felt}) padding-box,
+      #{$felt-gold} border-box;
+  }
+
+  // (no chip's spots)
+  &::before,
+  &::after {
+    content: none;
+  }
+
+  > .rim-corner {
+    display: none;
+  }
+
+  // (the bar: the felt darkened, a gold seam under it, its title cream)
+  > .group-bar {
+    background: rgba(0, 0, 0, 0.26);
+    border-bottom: 1px solid #{$felt-seam};
+    border-radius: 0;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    color: #f4efe3;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+    transition: background 0.15s ease;
+  }
+
+  > .group-bar:has(> .panel-toggle:hover) {
+    background: rgba(0, 0, 0, 0.14);
+  }
+
+  &.closed > .group-bar {
+    border-bottom-color: transparent;
+  }
+
+  > .panel-body {
+    background: none;
+    border-radius: 0;
+    padding-bottom: 0;
+
+    &::before,
+    &::after {
+      content: none;
     }
   }
 }

@@ -2,6 +2,7 @@ import { Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild, inje
 import { BetsView, betsView, chooseBetsView } from './bets-view';
 // ---- wallet (phase 2) ----
 import { LinesService } from '../account/wallet/lines.service';
+import { WalletService } from '../account/wallet/wallet.service';
 // ---- end wallet ----
 import { SPORT_LINKS } from '@ranker/core/sports';
 import { canUse } from '../account/features';
@@ -262,12 +263,15 @@ export class BetsPageComponent implements OnInit, OnDestroy {
   // (the model desk's admin panel: on the dev server only)
   readonly dev = isDevMode();
   readonly canUse = canUse;
+  private readonly wallet = inject(WalletService);
+  // (Open Bets: only with bets of the user's not yet settled; the last one settled, back to Place Bets)
+  readonly hasOpen = (): boolean => canUse('bets') && this.wallet.bets().some((b) => b.status === 'open');
   // (Place Bets first; Open Bets (with the wallet) or the Algorithm (development only) once chosen in this
   // visit: bets-view.ts)
   get view(): BetsView {
     const view = betsView();
     if (view === 'desk') return this.dev ? view : 'bets';
-    if (view === 'open') return this.canUse('bets') ? view : 'bets';
+    if (view === 'open') return this.hasOpen() ? view : 'bets';
     return view;
   }
   set view(view: BetsView) {

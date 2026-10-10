@@ -1,12 +1,12 @@
 <!-- The algorithm's top picks for every sport, one row per bet, the biggest edge first, each with its chance
      to win; a row opens to its reasoning -->
 <div class="bets-page" [class.desk-view]="view === 'desk'">
-  <!-- (the bets to place, the user's open bets (with the wallet), or, dev only, the code-only model desk's
+  <!-- (the bets to place, the user's open bets (when they have some), or, dev only, the code-only model desk's
        play-money betting, its record and its changes to itself; one at a time) -->
-  @if (dev || canUse('bets')) {
+  @if (dev || hasOpen()) {
     <nav class="bets-views" aria-label="View">
       <button type="button" [class.active]="view === 'bets'" (click)="view = 'bets'">Place Bets</button>
-      @if (canUse('bets')) {
+      @if (hasOpen()) {
         <button type="button" [class.active]="view === 'open'" (click)="view = 'open'">Open Bets</button>
       }
       @if (dev) {

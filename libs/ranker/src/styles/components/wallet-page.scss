@@ -29,6 +29,11 @@ $gold: #ffcf4a;
   margin: 0 auto;
   max-width: 1100px;
   padding: 22px 20px 90px;
+
+  // (the Bets page's Open Bets tab: level with the other tabs' panels, no slip to clear at the foot)
+  &.only-open {
+    padding: 0 0 16px;
+  }
 }
 
 // (the desk without a card of its own: the sheet is the page's card; the tiles on a scoreboard strip, as the
