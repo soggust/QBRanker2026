@@ -267,6 +267,8 @@ export class BetsPageComponent implements OnInit, OnDestroy {
   // (Open Bets: only with bets of the user's not yet settled; the last one settled, back to Place Bets)
   readonly hasOpen = (): boolean => canUse('bets') && this.wallet.bets().some((b) => b.status === 'open');
   // (Closed Bets: only with bets of the user's settled)
+  // (already bet and still open: the stake, so the same bet isn't placed twice by mistake)
+  readonly placedOn = (r: BetRow): number => (r.pickId ? (this.wallet.openOnPick().get(r.pickId) ?? 0) : 0);
   readonly hasClosed = (): boolean => canUse('bets') && this.wallet.bets().some((b) => b.status !== 'open');
   // (Place Bets first; Open Bets (with the wallet) or the Algorithm (development only) once chosen in this
   // visit: bets-view.ts)

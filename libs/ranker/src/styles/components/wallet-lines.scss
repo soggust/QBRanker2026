@@ -222,7 +222,18 @@ $lock-gold: #ffcf4a;
     }
   }
 
-  // (on the slip: a gold ring, like a chip set down on the line)
+  // (already bet and still open: a check in its corner, so it isn't bet twice by mistake)
+.price-placed {
+  color: #6fe39a;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.6));
+  // (top left: the bot's chip has the top right)
+  left: 3px;
+  position: absolute;
+  top: 3px;
+  @include v.icon-size(14px);
+}
+
+// (on the slip: a gold ring, like a chip set down on the line)
   &.on {
     --edge: #{$lock-gold};
     --wash: rgba(255, 207, 74, 0.2);

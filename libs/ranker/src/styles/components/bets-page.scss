@@ -492,6 +492,21 @@ $chip-clay: #b0202b;
   font-size: 13px;
 }
 
+// (a pick already bet, still open: its stake in green after the price)
+.bet-placed {
+  align-items: center;
+  color: #6fe39a;
+  display: inline-flex;
+  font-weight: 800;
+  gap: 3px;
+  margin-left: 8px;
+  vertical-align: middle;
+
+  .mat-icon {
+    @include v.icon-size(13px);
+  }
+}
+
 // the bet itself in the headline font (Outfit)
 .bet-main b {
   @include v.headline(17px);

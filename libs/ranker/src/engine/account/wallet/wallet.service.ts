@@ -84,6 +84,18 @@ export class WalletService {
   readonly slip = signal<Selection[]>([]);
   readonly slipOpen = signal(false);
   readonly slipKeys = computed(() => new Set(this.slip().map((s) => s.key)));
+  // (what's already bet and still open, so the same bet isn't placed twice by mistake: the stake on each
+  // selection, by its key, and on each of the bot's picks, by the pick's id)
+  readonly openStakes = computed(() => {
+    const out = new Map<string, number>();
+    for (const b of this.bets()) if (b.status === 'open') out.set(selectionKey(b), (out.get(selectionKey(b)) ?? 0) + b.stake);
+    return out;
+  });
+  readonly openOnPick = computed(() => {
+    const out = new Map<string, number>();
+    for (const b of this.bets()) if (b.status === 'open' && b.ref) out.set(b.ref, (out.get(b.ref) ?? 0) + b.stake);
+    return out;
+  });
   // (the last placing's word: how many went on, and any that didn't)
   readonly placed = signal<PlaceResult | null>(null);
   readonly placing = signal(false);

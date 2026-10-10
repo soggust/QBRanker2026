@@ -13,12 +13,17 @@
       [ngClass]="t ?? ''"
       [class.bot]="!!bot"
       [class.on]="wallet.slipKeys().has(keyOf(price))"
+      [class.placed]="wallet.openStakes().has(keyOf(price))"
       [attr.aria-pressed]="wallet.slipKeys().has(keyOf(price))"
       [attr.aria-label]="label + ' ' + oddsText(price.odds) + (bot ? ', the bot’s pick (' + t + ')' : '')"
       [title]="priceTitle(price, bot)"
       [disabled]="!open"
       (click)="take(price)"
     >
+      @if (wallet.openStakes().get(keyOf(price)); as staked) {
+        <!-- (already bet, still open: so it isn't bet twice by mistake) -->
+        <mat-icon class="price-placed" [title]="'You have ' + staked + 'u on this'" fontIcon="check_circle"></mat-icon>
+      }
       @if (bot) {
         <span class="price-chip" [ngClass]="t ?? ''" aria-hidden="true">@if (t === 'lock') {<mat-icon class="tier-lock" aria-hidden="true" fontIcon="lock"></mat-icon>}{{ t }}</span>
       } @else {
@@ -101,6 +106,7 @@
             class="price bot"
             [ngClass]="t ?? ''"
             [class.on]="wallet.slipKeys().has(propKey(p))"
+            [class.placed]="wallet.openStakes().has(propKey(p))"
             [attr.aria-pressed]="wallet.slipKeys().has(propKey(p))"
             [attr.aria-label]="p.pick + ' ' + oddsText(p.price ?? null) + ', the bot’s pick (' + t + ')'"
             [title]="p.pick + ' ' + oddsText(p.price ?? null) + ' · The bot’s pick: ' + t?.toUpperCase() + ', Kelly ' + kellyText(p)"
@@ -110,6 +116,9 @@
             <span class="price-chip" [ngClass]="t ?? ''" aria-hidden="true">@if (t === 'lock') {<mat-icon class="tier-lock" aria-hidden="true" fontIcon="lock"></mat-icon>}{{ t }}</span>
             <span class="price-odds">{{ oddsText(p.price ?? null) }}</span>
             <small class="price-kelly">K {{ kellyText(p) }}</small>
+            @if (wallet.openStakes().get(propKey(p)); as staked) {
+              <mat-icon class="price-placed" [title]="'You have ' + staked + 'u on this'" fontIcon="check_circle"></mat-icon>
+            }
           </button>
         </div>
       }

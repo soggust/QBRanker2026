@@ -153,7 +153,7 @@
                     <b>@if (r.betType === 'player' && r.player) {{{ r.player }}{{ ' ' }}}{{ parts[0] }}<span class="bet-key" [style.color]="pickColor(r)">{{ parts[1] }}</span>{{ parts[2] }}</b>
                     <!-- (none without a price: an empty line under it would lift the pick off the row's middle) -->
                     @if (r.odds) {
-                      <small>{{ r.odds }}</small>
+                      <small>{{ r.odds }}@if (placedOn(r); as staked) {<span class="bet-placed" [title]="'You have ' + staked + 'u on this, still open'"><mat-icon aria-hidden="true" fontIcon="check_circle"></mat-icon>{{ staked }}u placed</span>}</small>
                     }
                   }
                 </span>
