@@ -20,7 +20,11 @@ export class ActivateDirective {
   }
 }
 
-// A dialog (the player card, the game view): focus moves into it when it opens, Tab and Shift+Tab stay
+// (what Tab can land on inside a dialog)
+export const FOCUSABLE =
+  'button:not([disabled]), a[href], input:not([disabled]):not([type=hidden]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
+// A dialog (the player card, the game view, About): focus moves into it when it opens, Tab and Shift+Tab stay
 // inside it, and focus goes back where it was when it closes
 @Directive({
   selector: '[dialogFocus]',
@@ -45,7 +49,7 @@ export class DialogFocusDirective implements AfterViewInit, OnDestroy {
   trap(event: KeyboardEvent): void {
     if (event.key !== 'Tab') return;
     const focusable = [
-      ...this.el.nativeElement.querySelectorAll<HTMLElement>('button:not([disabled]), a[href], input:not([disabled]), select:not([disabled]), [tabindex="0"]'),
+      ...this.el.nativeElement.querySelectorAll<HTMLElement>(FOCUSABLE),
     ].filter((x) => x.offsetParent !== null);
     if (!focusable.length) return;
     const first = focusable[0];

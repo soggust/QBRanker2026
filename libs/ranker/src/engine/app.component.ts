@@ -193,6 +193,12 @@ export class AppComponent {
     return this.smallScreen.matches && this.positionService.filtersOpen;
   }
 
+  // (the filters out of sight, a phone's menu shut or the sidebar collapsed: inert, so Tab doesn't wander
+  // through its controls off the screen)
+  get filtersShut(): boolean {
+    return !this.positionService.filtersOpen;
+  }
+
   get sidebarCollapsed(): boolean {
     return !this.smallScreen.matches && !this.positionService.filtersOpen;
   }

@@ -239,6 +239,8 @@ section.rankings-wrapper > footer {
 // ---------------------------------------------------------------------------
 section ul {
   align-content: start;
+  // (the header row's height: a focused row scrolled into view clears it)
+  scroll-padding-top: 42px;
   display: grid;
   grid-template-columns: minmax(max-content, 1fr);
   @include list-height(5em);

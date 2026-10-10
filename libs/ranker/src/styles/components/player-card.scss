@@ -41,7 +41,6 @@
 }
 
 .card-backdrop {
-  animation: card-fade 0.15s ease;
   backdrop-filter: blur(2px);
   background: rgba(0, 0, 0, 0.6);
   inset: 0;
@@ -49,11 +48,21 @@
   z-index: 1000;
 }
 
+// (the card rising and its backdrop fading in, as it opens: only with motion allowed)
+@media (prefers-reduced-motion: no-preference) {
+  .card-backdrop {
+    animation: card-fade 0.15s ease;
+  }
+
+  .player-card {
+    animation: card-rise 0.2s ease;
+  }
+}
+
 .player-card {
   --card-r: 22px;
   // What the hero's team color eases into
   --card-base: #313836;
-  animation: card-rise 0.2s ease;
   // (the body scrolls over the board, like the rows)
   background: var(--tex-chalk-plays) -1150px -420px / 2800px 1440px, v.$chalk-dust;
   border: 1px solid #3a4440;

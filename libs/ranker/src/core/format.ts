@@ -12,9 +12,9 @@ export function grade(value: number): string {
 }
 
 // A grade's color: red (0) to green (12), brighter at the red end so low grades stay readable on
-// their dark pill
+// their dark pill (an F still 4.5:1 on it)
 export function gradeColor(value: number): string {
-  return `hsl(${Math.round((value / 12) * 120)}, 100%, ${Math.round(50 + (1 - value / 12) * 16)}%)`;
+  return `hsl(${Math.round((value / 12) * 120)}, 100%, ${Math.round(50 + (1 - value / 12) * 22)}%)`;
 }
 
 // A batting-average style rate: ".287" (1.012 for an OPS over 1)

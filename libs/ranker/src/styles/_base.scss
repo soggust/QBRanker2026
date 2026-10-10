@@ -703,7 +703,24 @@ section footer .mat-mdc-select.season-select {
   }
 }
 
-:where(button, a[href], input, select, summary, [tabindex]:not([tabindex="-1"]), [role="button"], [role="tab"]):focus-visible {
-  outline: 2px solid var(--scoreboard-led);
-  outline-offset: 2px;
+// The focus ring: on every control focused from the keyboard (never on a click), in the page's light, over any
+// component's own outline (a hover-alike color change tells a keyboard user nothing; Material's controls set
+// theirs to none), so a new rule's `outline: none` can't take it away
+:is(
+    button,
+    a[href],
+    input,
+    select,
+    textarea,
+    summary,
+    [tabindex]:not([tabindex="-1"]),
+    [role="button"],
+    [role="tab"],
+    [role="menuitem"],
+    [role="option"],
+    [role="switch"],
+    .mat-mdc-select
+  ):focus-visible {
+  outline: 2px solid var(--scoreboard-led) !important;
+  outline-offset: 2px !important;
 }

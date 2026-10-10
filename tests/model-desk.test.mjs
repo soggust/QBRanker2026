@@ -175,9 +175,18 @@ test('meterColor never gives a green or a red, and never a dark one, whatever th
   }
 });
 
-test("meterColor is the app's one team color (colors.ts), its greens and reds passed over", () => {
-  assert.equal(desk.meterColor({ color: '003594', alternateColor: '869397' }), desk.sharedTeamColor(['003594', '869397']));
-  assert.equal(desk.meterColor({ color: '007a33', alternateColor: 'ba9653' }), desk.sharedTeamColor(['ba9653']));
+test("meterColor is the app's one team color (colors.ts), its greens and reds passed over, lifted to read as text", () => {
+  assert.equal(desk.meterColor({ color: '003594', alternateColor: '869397' }), desk.readableOn(desk.sharedTeamColor(['003594', '869397'])));
+  assert.equal(desk.meterColor({ color: '007a33', alternateColor: 'ba9653' }), desk.readableOn(desk.sharedTeamColor(['ba9653'])));
+  // (4.5:1 at least on the Bets rows' dark, a navy's blue too)
+  assert.ok(desk.contrast(desk.meterColor({ color: '003594', alternateColor: '869397' }), '#1f2824') >= 4.5);
+});
+
+test('readableOn: a color lightened only until it reads, its hue kept; one that reads already, as it is', () => {
+  assert.equal(desk.readableOn('#ffffff'), '#ffffff');
+  const navy = desk.readableOn('#1d4f91');
+  assert.ok(desk.contrast(navy, '#1f2824') >= 4.5);
+  assert.ok(Math.abs(desk.hslOf(navy)[0] - desk.hslOf('#1d4f91')[0]) < 3);
 });
 
 test('pickTeamColor: a side by its abbreviation, a prop by its team id, a total by no one', () => {

@@ -3,7 +3,7 @@
 // play is the one the bet will be graded on. MLB's total bases aren't in ESPN's box score (the grader asks
 // MLB's): no count for them here.
 
-import { teamColor } from '../colors';
+import { teamColor, readableOn } from '../colors';
 
 interface BoxStats {
   name?: string;
@@ -64,6 +64,8 @@ export function athleteColors(athlete: string, body: (SummaryBox & { boxscore?: 
 // (green, or red: burgundy and maroon too; they're the meter's won and lost), a real color before a grey
 // (Vegas's gold over its slate), lifted if it's too dark for the board; null when neither will do (the
 // board's own light then)
+// (light enough to read as the pick's text on the Bets rows: readableOn)
 export function meterColor(colors: { color?: string; alternateColor?: string } | null): string | null {
-  return teamColor([colors?.color, colors?.alternateColor], { noResults: true });
+  const color = teamColor([colors?.color, colors?.alternateColor], { noResults: true });
+  return color ? readableOn(color) : null;
 }

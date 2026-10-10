@@ -34,6 +34,37 @@ async function readTeamList(sport: string): Promise<TeamColors> {
   return colors;
 }
 
+// A color made light enough to read as text on a dark surface: its lightness raised a step at a time until its
+// contrast with the surface is at least the ratio (WCAG's 4.5:1 for text), its hue and saturation kept; one that
+// already reads, as it is. (A Lab lightness lift alone doesn't promise a ratio: a team's blue could still sit at
+// 2.5:1 on the Bets rows.)
+export function readableOn(hex: string, surface = '#1f2824', ratio = 4.5): string {
+  const [h, s, l] = hslOf(hex);
+  let light = l;
+  let out = hex;
+  while (contrast(out, surface) < ratio && light < 0.97) {
+    light = Math.min(0.97, light + 0.02);
+    out = hexOf([h, s, light]);
+  }
+  return out;
+}
+
+// (WCAG's contrast ratio of two colors, 1 to 21)
+export function contrast(a: string, b: string): number {
+  const [x, y] = [luminance(a), luminance(b)].sort((p, q) => q - p);
+  return (x + 0.05) / (y + 0.05);
+}
+
+// (a color's relative luminance, WCAG's)
+function luminance(hex: string): number {
+  const c = hex.replace('#', '');
+  const [r, g, b] = [0, 2, 4].map((i) => {
+    const v = parseInt(c.slice(i, i + 2), 16) / 255;
+    return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
+  });
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+
 // [hue 0-360, saturation 0-1, lightness 0-1]
 type Hsl = [number, number, number];
 
