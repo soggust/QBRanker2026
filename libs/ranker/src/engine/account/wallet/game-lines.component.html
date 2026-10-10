@@ -43,7 +43,8 @@
   }
 </ng-template>
 
-<section class="lines" [class.closed]="!open" [attr.aria-label]="'All lines: ' + matchupText">
+<section class="lines" [class.closed]="!open" [class.only]="!!onlyPick()" [attr.aria-label]="(onlyPick() ? 'This bet: ' : 'All lines: ') + matchupText">
+  @if (!onlyPick()) {
   <header class="lines-head">
     <span class="lines-title"><span class="lines-crown" title="DraftKings"></span>All lines</span>
     @if (board; as b) {
@@ -57,7 +58,28 @@
     }
   </header>
 
-  @if (loading() && !board) {
+  }
+  @if (onlyPick()) {
+    <!-- (one pick alone: its market's two sides; a prop's below, with the props) -->
+    @if (onlyMarket; as m) {
+      @if (board; as b) {
+        <div class="lines-pair">
+          @if (m === 'total') {
+            <ng-container *ngTemplateOutlet="priceCell; context: { $implicit: b.total?.over, label: 'Over ' + (b.total?.over?.line ?? '') }"></ng-container>
+            <ng-container *ngTemplateOutlet="priceCell; context: { $implicit: b.total?.under, label: 'Under ' + (b.total?.under?.line ?? '') }"></ng-container>
+          } @else if (m === 'spread') {
+            <ng-container *ngTemplateOutlet="priceCell; context: { $implicit: b.spread?.away, label: b.away.abbr + ' ' + lineText(b.spread?.away?.line ?? null) }"></ng-container>
+            <ng-container *ngTemplateOutlet="priceCell; context: { $implicit: b.spread?.home, label: b.home.abbr + ' ' + lineText(b.spread?.home?.line ?? null) }"></ng-container>
+          } @else {
+            <ng-container *ngTemplateOutlet="priceCell; context: { $implicit: b.ml?.away, label: b.away.abbr + ' to win' }"></ng-container>
+            <ng-container *ngTemplateOutlet="priceCell; context: { $implicit: b.ml?.home, label: b.home.abbr + ' to win' }"></ng-container>
+          }
+        </div>
+      } @else if (loading()) {
+        <p class="lines-note" role="status">Reading the board…</p>
+      }
+    }
+  } @else if (loading() && !board) {
     <p class="lines-note" role="status">Reading the board…</p>
   } @else if (!board || (!board.spread && !board.total && !board.ml)) {
     <p class="lines-note">No DraftKings lines on ESPN's board for this game yet.</p>

@@ -213,6 +213,9 @@
                 <!-- (the game's every line, to bet this pick or any other; once on top instead when the game's chosen) -->
                 @if (!game && boards.get(gameKey(r)); as gb) {
                   <game-lines [sport]="gb.sport" [event]="gb.event" [start]="gb.start" [matchup]="gb.matchup" [picks]="gb.picks"></game-lines>
+                } @else if (game && boards.get(gameKey(r)); as gb) {
+                  <!-- (the game's every line is on top: this pick's own two sides here, to bet it or go against it) -->
+                  <game-lines [sport]="gb.sport" [event]="gb.event" [start]="gb.start" [matchup]="gb.matchup" [picks]="gb.picks" [only]="r"></game-lines>
                 }
               </div>
             }

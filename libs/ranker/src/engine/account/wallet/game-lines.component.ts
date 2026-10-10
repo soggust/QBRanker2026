@@ -53,7 +53,14 @@ export class GameLinesComponent implements OnInit, OnDestroy {
     this.botPicks.set(list ?? []);
   }
 
+  // (one pick alone: its market's two sides and nothing else, under its row when the game's every line is
+  // already on top)
+  @Input() set only(p: BotPick | null | undefined) {
+    this.onlyPick.set(p ?? null);
+  }
+
   private readonly botPicks = signal<BotPick[]>([]);
+  readonly onlyPick = signal<BotPick | null>(null);
   readonly loading = signal(true);
   private timer: ReturnType<typeof setInterval> | null = null;
   private closed = false;
@@ -72,7 +79,17 @@ export class GameLinesComponent implements OnInit, OnDestroy {
   }
 
   // (the props: the bot's, its side at its price, and the other side's where it's known)
-  readonly props = computed(() => this.botPicks().filter((p) => p.betType === 'player' && Number.isFinite(p.price) && p.line !== null && p.line !== undefined));
+  readonly props = computed(() => {
+    const only = this.onlyPick();
+    const list = only ? (only.betType === 'player' ? [only] : []) : this.botPicks();
+    return list.filter((p) => p.betType === 'player' && Number.isFinite(p.price) && p.line !== null && p.line !== undefined);
+  });
+
+  // (the one pick's game market, when it's one: spread, total or ml)
+  get onlyMarket(): PlayMarket | null {
+    const only = this.onlyPick();
+    return only && only.betType !== 'player' ? (MARKET_OF[only.betType] ?? null) : null;
+  }
 
   async ngOnInit(): Promise<void> {
     await this.lines.game(this.sport, this.event, this.start).catch(() => null);
