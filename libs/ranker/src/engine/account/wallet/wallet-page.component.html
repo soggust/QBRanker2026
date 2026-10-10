@@ -49,7 +49,7 @@
             <th>Sport</th>
             <th class="desk-left">Game</th>
             <th class="desk-left">Pick</th>
-            <th title="The bot's pick too: its band">Bot</th>
+            <th class="w-bot" title="The bot's pick too: its band">Bot</th>
             <th>Odds</th>
             <th>Stake</th>
             <th title="What it pays on top of the stake if it wins; decided in play, what it came to, pending settlement">To win</th>
@@ -107,7 +107,7 @@
             <button type="button" class="desk-sort sorted" (click)="latestFirst.set(!latestFirst())" [title]="latestFirst() ? 'Latest first: the oldest first instead' : 'Oldest first: the latest first instead'">Date<mat-icon aria-hidden="true" [fontIcon]="latestFirst() ? 'arrow_downward' : 'arrow_upward'"></mat-icon></button>
           </th>
           <th class="desk-left">Pick</th>
-          <th title="The bot's pick too: its band">Bot</th>
+          <th class="w-bot" title="The bot's pick too: its band">Bot</th>
           <th>Odds</th>
           <th>Stake</th>
           <th>Result</th>

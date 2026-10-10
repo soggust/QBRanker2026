@@ -311,8 +311,9 @@ $gold: #ffcf4a;
 }
 
 // (the bot's band beside a pick it made: the Bets page's chip, small)
-// (in the Bot column, a cell of its own: a size up from the pick's old tag)
-.w-bot {
+// (in the Bot column, a cell of its own, centered under its header: a size up from the pick's old tag)
+.wallet-bets .w-bot {
+  text-align: center;
   white-space: nowrap;
 }
 
@@ -320,6 +321,7 @@ $gold: #ffcf4a;
   border-radius: 4px;
   color: #111;
   display: inline-block;
+  font-family: v.$font-base;
   flex-shrink: 0;
   font-size: 10px;
   font-weight: 900;
