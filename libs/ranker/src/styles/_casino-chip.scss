@@ -171,8 +171,8 @@
 
 // A chip's face for a bar: its color as clay (deepened), a sheen from the top, a shade at the foot and the
 // clay's speckle, its lettering lifted off it (the Algorithm's panel bars, the Bets page's rows)
-@mixin chip-face($color) {
-  --face-clay: color-mix(in srgb, #{$color} 62%, #161616);
+@mixin chip-face($color, $clay: 62%) {
+  --face-clay: color-mix(in srgb, #{$color} #{$clay}, #161616);
   background:
     radial-gradient(ellipse at 30% 0%, rgba(255, 255, 255, 0.18), transparent 65%),
     linear-gradient(180deg, transparent 40%, rgba(0, 0, 0, 0.22)),
