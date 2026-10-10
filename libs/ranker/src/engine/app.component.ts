@@ -216,6 +216,14 @@ export class AppComponent {
     this.positionService.setFiltersOpen(false);
   }
 
+  // (Escape with the filters open and nothing over them, a menu or a dialog: shut, focus back on their button)
+  @HostListener('document:keydown.escape')
+  closeFiltersOnEscape(): void {
+    if (!this.positionService.filtersOpen || document.querySelector('.cdk-overlay-pane, [role=dialog]')) return;
+    this.closeFilters();
+    document.querySelector<HTMLElement>('.filter-toggle')?.focus();
+  }
+
   selectPosition(position: Position): void {
     this.positionService.setPosition(position);
   }

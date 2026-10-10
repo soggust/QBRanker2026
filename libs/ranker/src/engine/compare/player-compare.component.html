@@ -22,7 +22,7 @@
             <mat-icon fontIcon="share"></mat-icon>
           </button>
         }
-        <!-- tracker (phase 2): (pinned to the Tracker, to follow over the season; signed out, the sign-in first) -->
+        <!-- (pinned to the Tracker, to follow over the season; signed out, the sign-in first) -->
         @if (sides.length) {
           <button
             type="button"
@@ -180,7 +180,7 @@
       </div>
       <!-- (always there, so a screen reader hears it when it's said) -->
       <p class="compare-note" role="status">{{ compare.note }}</p>
-      <!-- tracker (phase 2): (pinned, or why not: under the pin for a moment, the way to the Tracker in it) -->
+      <!-- (pinned, or why not: under the pin for a moment, the way to the Tracker in it) -->
       <p class="cmp-pin-note" role="status">
         @if (pinNote) {
           <span class="cmp-pin-toast" animate.enter="share-in"

@@ -12,7 +12,7 @@
     <span class="account-name">{{ first }}</span>
     <span class="account-pic">
       <account-avatar [photo]="user.profile?.photo" [name]="name" [size]="26"></account-avatar>
-      <!-- friends (phase 2): a dot on the avatar while friend requests wait -->
+      <!-- a dot on the avatar while friend requests wait -->
       <friends-badge dot></friends-badge>
     </span>
   </button>
@@ -32,9 +32,9 @@
       }
     </div>
     @for (item of items; track item.hash) {
-      <a mat-menu-item [href]="item.hash" [class.current]="isOpen(item.hash)">
+      <a mat-menu-item [href]="item.hash" [class.current]="isOpen(item.hash)" [attr.aria-current]="isOpen(item.hash) ? 'page' : null">
         <mat-icon aria-hidden="true" [fontIcon]="item.icon"></mat-icon><span>{{ item.label }}</span>
-        <!-- friends (phase 2): how many requests wait -->
+        <!-- how many requests wait -->
         @if (item.hash === '#friends') {
           <friends-badge></friends-badge>
         }

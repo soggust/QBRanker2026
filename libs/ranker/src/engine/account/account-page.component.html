@@ -185,7 +185,7 @@
               <p class="logo-note">Loading…</p>
             }
             @for (logo of logos; track logo.url) {
-              <button type="button" class="logo-pick" [class.active]="profile.photo?.url === logo.url" [title]="logo.label" [attr.aria-label]="logo.label" (click)="pickLogo(logo.url)">
+              <button type="button" class="logo-pick" [class.active]="profile.photo?.url === logo.url" [attr.aria-pressed]="profile.photo?.url === logo.url" [title]="logo.label" [attr.aria-label]="logo.label" (click)="pickLogo(logo.url)">
                 <img [src]="logo.url" alt="" loading="lazy" />
               </button>
             }

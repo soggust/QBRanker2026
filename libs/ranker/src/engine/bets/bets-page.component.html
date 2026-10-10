@@ -5,15 +5,15 @@
        play-money betting, its record and its changes to itself; one at a time) -->
   @if (dev || hasOpen() || hasClosed()) {
     <nav class="bets-views" aria-label="View">
-      <button type="button" [class.active]="view === 'bets'" (click)="view = 'bets'">Place Bets</button>
+      <button type="button" [class.active]="view === 'bets'" [attr.aria-current]="view === 'bets' ? 'page' : null" (click)="view = 'bets'">Place Bets</button>
       @if (hasOpen()) {
-        <button type="button" [class.active]="view === 'open'" (click)="view = 'open'">Open Bets</button>
+        <button type="button" [class.active]="view === 'open'" [attr.aria-current]="view === 'open' ? 'page' : null" (click)="view = 'open'">Open Bets</button>
       }
       @if (hasClosed()) {
-        <button type="button" [class.active]="view === 'closed'" (click)="view = 'closed'">Closed Bets</button>
+        <button type="button" [class.active]="view === 'closed'" [attr.aria-current]="view === 'closed' ? 'page' : null" (click)="view = 'closed'">Closed Bets</button>
       }
       @if (dev) {
-        <button type="button" [class.active]="view === 'desk'" (click)="view = 'desk'">Algorithm</button>
+        <button type="button" [class.active]="view === 'desk'" [attr.aria-current]="view === 'desk' ? 'page' : null" (click)="view = 'desk'">Algorithm</button>
       }
     </nav>
   }

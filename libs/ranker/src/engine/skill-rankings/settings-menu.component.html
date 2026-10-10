@@ -29,24 +29,37 @@
   @for (setting of settingsAt('formatMid'); track setting.key) {
     <ng-container *ngTemplateOutlet="choice; context: { $implicit: setting }"></ng-container>
   }
-  <div mat-menu-item class="min-games-item" [title]="sport.playingTime.title" (click)="$event.stopPropagation()">
+  <!-- (from the keyboard: left and right, or - and +, step it; its name says the count and how) -->
+  <div
+    mat-menu-item
+    class="min-games-item"
+    [title]="sport.playingTime.title"
+    [attr.aria-label]="'Min ' + sport.playingTime.label + ': ' + minCount + ' (left and right arrows change it)'"
+    (click)="$event.stopPropagation()"
+    (keydown.arrowleft)="$event.preventDefault(); canLowerMin && stepMin(-1)"
+    (keydown.arrowright)="$event.preventDefault(); canRaiseMin && stepMin(1)"
+    (keydown.-)="canLowerMin && stepMin(-1)"
+    (keydown.+)="canRaiseMin && stepMin(1)"
+  >
     <!-- (it steps by share of the season; it shows the count that comes to) -->
     <span class="menu-slot">
       <span class="min-games-stepper" (click)="$event.stopPropagation()">
-        <button type="button" aria-label="Lower" [disabled]="!canLowerMin" (click)="stepMin(-1)">−</button>
+        <button type="button" [attr.aria-label]="'Lower min ' + sport.playingTime.label" tabindex="-1" [disabled]="!canLowerMin" (click)="stepMin(-1)">−</button>
         <span class="min-games-value">{{ minCount }}</span>
-        <button type="button" aria-label="Higher" [disabled]="!canRaiseMin" (click)="stepMin(1)">+</button>
+        <button type="button" [attr.aria-label]="'Raise min ' + sport.playingTime.label" tabindex="-1" [disabled]="!canRaiseMin" (click)="stepMin(1)">+</button>
       </span>
     </span>
     <span>Min {{ sport.playingTime.label }}</span>
   </div>
   <!-- The copy button's list: with the stat columns, or just rank, logo and name -->
-  <div mat-menu-item [title]="copyStatsTitle" (click)="$event.stopPropagation(); flipCopyStats()">
+  <div mat-menu-item role="menuitemcheckbox" [attr.aria-checked]="settings.copyStats" [title]="copyStatsTitle" (click)="$event.stopPropagation(); flipCopyStats()">
     <span class="menu-slot">
       <mat-slide-toggle
         hideIcon
         color="accent"
         class="slide-toggle"
+        aria-hidden="true"
+        tabindex="-1"
         [ngModel]="settings.copyStats"
         (ngModelChange)="flipCopyStats()"
         (click)="$event.stopPropagation()"
@@ -60,11 +73,13 @@
   <!-- Display: what the table shows -->
   <div class="menu-section section-display" (click)="$event.stopPropagation()"><mat-icon fontIcon="visibility"></mat-icon>Display</div>
   @for (item of switches; track item.label) {
-    <div mat-menu-item [title]="item.title" (click)="$event.stopPropagation(); item.flip()">
+    <div mat-menu-item role="menuitemcheckbox" [attr.aria-checked]="item.on()" [title]="item.title" (click)="$event.stopPropagation(); item.flip()">
       <mat-slide-toggle
         hideIcon
         color="accent"
         class="slide-toggle"
+        aria-hidden="true"
+        tabindex="-1"
         [ngModel]="item.on()"
         (ngModelChange)="item.flip()"
         (click)="$event.stopPropagation()"

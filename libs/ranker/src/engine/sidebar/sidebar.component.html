@@ -22,7 +22,7 @@
           @for (option of skillPresetOptions; track option.key) {
             <mat-option [value]="option.key" [title]="option.description">{{ option.label | uppercase }}</mat-option>
           }
-          <!-- lists (phase 2): the user's own presets under the built-in ones, then Save as preset… (signed out: Sign in) -->
+          <!-- the user's own presets under the built-in ones, then Save as preset… (signed out: Sign in) -->
           @if (account.user()) {
             @if (userPresets.length) {
               <!-- (a divider, not a group: the user's presets line up with the built-in ones) -->
@@ -37,7 +37,7 @@
             <mat-option [value]="signInPreset" title="Sign in to save your own presets"><mat-icon fontIcon="login"></mat-icon>SIGN IN TO SAVE PRESETS</mat-option>
           }
         </mat-select>
-        <!-- lists (phase 2): the user preset in use: Rename / Delete beside the dropdown, Update under it
+        <!-- the user preset in use: Rename / Delete beside the dropdown, Update under it
              once the sliders have moved -->
         <preset-bar
           #presetBar

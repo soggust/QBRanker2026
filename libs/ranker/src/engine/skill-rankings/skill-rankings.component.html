@@ -326,7 +326,7 @@
       <mat-icon aria-hidden="true" [fontIcon]="filtersOpen ? 'filter_alt_off' : 'filter_alt'"></mat-icon>
     </button>
 
-    <!-- lists (round 2): Save the list (a floppy disk: the save dialog with the default title filled in;
+    <!-- Save the list (a floppy disk: the save dialog with the default title filled in;
          signed out, the sign-in first), in the copy button's old place and look (its class keeps the order) -->
     <button type="button" (click)="openSaveList()" aria-label="Save this list" title="Save this list to My Lists" class="copy-toggle save-toggle">
       <mat-icon aria-hidden="true" fontIcon="save"></mat-icon>
@@ -448,7 +448,7 @@
     </button>
   </footer>
 
-  <!-- lists (round 2): the Share button's menu -->
+  <!-- the Share button's menu -->
   <mat-menu #shareMenu="matMenu" class="more-menu">
     <button mat-menu-item type="button" (click)="copyList(shareButton)">
       <mat-icon aria-hidden="true" fontIcon="content_copy"></mat-icon><span>Copy to Clipboard</span>
@@ -459,7 +459,7 @@
   </mat-menu>
 
   <mat-menu #moreMenu="matMenu" class="more-menu" xPosition="before">
-    <!-- lists (round 2): the toolbar's Save, then the Share menu's two -->
+    <!-- the toolbar's Save, then the Share menu's two -->
     <button mat-menu-item type="button" (click)="openSaveList()">
       <mat-icon aria-hidden="true" fontIcon="save"></mat-icon><span>Save this list</span>
     </button>
@@ -484,7 +484,7 @@
 <player-card [cards]="cards" [compare]="compareFromCard"></player-card>
 <!-- (a game: from a Recent dot, or a game log's row) -->
 <game-view></game-view>
-<!-- lists (round 2): Save this list (the dialog closes as it saves; then the toast with Open and Rename) -->
+<!-- Save this list (the dialog closes as it saves; then the toast with Open and Rename) -->
 @if (listDraft) {
   <save-list-dialog [draft]="listDraft" [listed]="playerList.length" [suggestedTitle]="listTitle" (closed)="listDraft = null" (saved)="listSaved($event)"></save-list-dialog>
 }

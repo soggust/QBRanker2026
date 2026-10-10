@@ -32,8 +32,8 @@ export function usingEmulators(): boolean {
   }
 }
 
-// ---- lists (phase 2): the emulators' ports, for a dev run that needs its own (localStorage.emulatorPorts =
-// "<auth>,<firestore>", e.g. "9101,8101"); the defaults otherwise ----
+// The emulators' ports, for a dev run that needs its own (localStorage.emulatorPorts =
+// "<auth>,<firestore>", e.g. "9101,8101"); the defaults otherwise
 function emulatorPorts(): { auth: number; firestore: number } {
   try {
     const [auth, firestore] = (localStorage.getItem('emulatorPorts') ?? '').split(',').map(Number);

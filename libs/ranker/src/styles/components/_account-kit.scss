@@ -370,7 +370,7 @@
 }
 
 // ===========================================================================
-// The app's own look (round 2): every account page (Settings, My lists, Community, Player Tracker,
+// The app's own look: every account page (Settings, My Lists, Community, Tracker,
 // Betting Wallet, Friends, a profile, Privacy, Data deletion) sits on it, not on the sport's field. Pewter
 // brown (the Buccaneers' pewter) for the ground, a warm sand tan for the light (it takes over
 // --scoreboard-led on these pages, so every lit control, pill, tab, link and focus ring is sand), and the
@@ -455,7 +455,7 @@ $app-cracks: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' w
 }
 
 // ---------------------------------------------------------------------------
-// The app's buttons (round 2): a filled sand primary with dark-brown lettering, a sand outline, a red
+// The app's buttons: a filled sand primary with dark-brown lettering, a sand outline, a red
 // outline for danger; a sand pill. Mixins to style your own selector, or `@include kit.app-buttons;` for
 // the classes: .app-btn-primary, .app-btn-outline, .app-btn-danger (+ .small), .app-pill (+ .active)
 // ---------------------------------------------------------------------------
@@ -614,7 +614,7 @@ $app-cracks: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' w
 }
 
 // ---------------------------------------------------------------------------
-// Sport-agnostic (round 2): inside the app's shell, the login dialog and the account menu nothing wears a
+// Sport-agnostic: inside the app's shell, the login dialog and the account menu nothing wears a
 // sport. The sport themes are global and !important, so this answers them in kind, scoped to wherever it's
 // included (app.component: `:host ::ng-deep .app-page`): their textures and colors re-pointed to the app's,
 // the theme's pills (.game-filter) drawn as the app's pills, card panels in pewter with sand icons and none
