@@ -6,6 +6,11 @@
 // component draws; scoped to card-panel. The spacing between panels and their content's look stay the
 // page's own (player-card.scss .stat-group).
 card-panel {
+  // (a chip-rimmed panel's corner spots: only the casino's panels show them, _casino-chip.scss panel)
+  > .rim-corner {
+    display: none;
+  }
+
   // The box: a thin border in its category's color, rounded (each sport's own touch: _sport-panel.scss)
   border: 1px solid color-mix(in srgb, var(--group-color) 40%, transparent);
   border-radius: 6px;

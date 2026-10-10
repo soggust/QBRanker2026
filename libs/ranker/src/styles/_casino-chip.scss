@@ -215,6 +215,55 @@
     inset: calc(var(--corner) - var(--rim)) calc(var(--rim) * -1);
   }
 
+  // (a spot on each corner too, as a chip's run all the way round: on the band's middle at the corner's 45°
+  // point, turned along the curve)
+  --rim-mid: calc(var(--corner) - (var(--corner) - var(--rim) / 2) * 0.7071);
+
+  > .rim-corner {
+    background: var(--rim-spot);
+    display: block;
+    height: var(--rim);
+    pointer-events: none;
+    position: absolute;
+    transition: filter 0.3s ease;
+    width: 8px;
+    z-index: 1;
+
+    &.tl,
+    &.tr {
+      top: calc(var(--rim-mid) - var(--rim) * 1.5);
+    }
+
+    &.bl,
+    &.br {
+      bottom: calc(var(--rim-mid) - var(--rim) * 1.5);
+    }
+
+    &.tl,
+    &.bl {
+      left: calc(var(--rim-mid) - 4px - var(--rim));
+    }
+
+    &.tr,
+    &.br {
+      right: calc(var(--rim-mid) - 4px - var(--rim));
+    }
+
+    &.tl,
+    &.br {
+      transform: rotate(-45deg);
+    }
+
+    &.tr,
+    &.bl {
+      transform: rotate(45deg);
+    }
+  }
+
+  &:has(> .group-bar > .panel-toggle:hover) > .rim-corner {
+    filter: brightness(1.3);
+  }
+
   &:has(> .group-bar > .panel-toggle:hover)::before,
   &:has(> .group-bar > .panel-toggle:hover)::after {
     filter: brightness(1.3);
