@@ -23,6 +23,11 @@ $gold: #ffcf4a;
 // (the desk's panels, chip-rimmed as on the Bets page and the Algorithm: card-panel.scss gives them to those two)
 :host ::ng-deep card-panel {
   @include casino.panel;
+
+  // (their bars the felt's green, not each category's color)
+  &[class] {
+    --group-color: #{casino.$felt-light};
+  }
 }
 
 .wallet-page {

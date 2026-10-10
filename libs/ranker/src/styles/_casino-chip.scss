@@ -341,8 +341,11 @@
 $felt: #155a3a;
 $felt-gold: linear-gradient(135deg, #7a5a1e, #f1d58c 22%, #b38a3c 45%, #f6e2a4 62%, #9c7630 82%, #6e511b);
 $felt-seam: rgba(222, 186, 106, 0.55);
+// (the felt's green lit, for a bar's tint and icon where the panels carry no category of their own)
+$felt-light: #3fa36b;
 $felt-nap: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.1' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.22 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23f)'/%3E%3C/svg%3E");
 
+// (--rail: the rail's gold, another for a panel that says less, a Pass)
 // (the felt alone: for a surface inside a table, a row or a bar; $box, the box it fills)
 @mixin felt($box: padding-box) {
   background:
@@ -374,7 +377,7 @@ $felt-nap: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' wid
       radial-gradient(ellipse 120% 100% at 50% 50%, transparent 55%, rgba(0, 0, 0, 0.38)) padding-box,
       #{$felt-nap} 0 0 / 140px padding-box,
       linear-gradient(#{$felt}, #{$felt}) padding-box,
-      #{$felt-gold} border-box;
+      var(--rail, #{$felt-gold}) border-box;
   }
 
   // (no chip's spots)

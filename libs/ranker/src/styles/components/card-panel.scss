@@ -124,9 +124,13 @@ bets-page card-panel {
   @include casino.panel;
 }
 
-// (the Algorithm's: their bars chips' faces too)
+// (the Algorithm's: the same tables, their bars the felt's green, not each category's color)
 model-desk card-panel {
-  @include casino.panel($chip-bar: true);
+  @include casino.panel;
+
+  &[class] {
+    --group-color: #{casino.$felt-light};
+  }
 }
 
 // (on the player card, and the game view: a little more room each side of the bar, the title in the hand;

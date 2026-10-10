@@ -288,6 +288,16 @@ $chip-clay: #b0202b;
     border-bottom: 1px solid chip.$felt-seam;
   }
 
+  // (a Bet's yellow a touch softer on its bar)
+  &.medium .bet-row {
+    --bar-tint: color-mix(in srgb, var(--soft) 11%, transparent);
+  }
+
+  // (a Pass: its rail the gold gone gray and faint, saying less than the bets)
+  &.low {
+    --rail: linear-gradient(135deg, rgba(150, 144, 130, 0.35), rgba(205, 198, 182, 0.42) 30%, rgba(140, 134, 120, 0.35) 60%, rgba(195, 188, 172, 0.42) 80%, rgba(130, 124, 110, 0.35));
+  }
+
   // (a card table, as the Algorithm's panels: felt in a gold rail; its band on its badge and rank)
   --group-color: var(--tint);
   @include chip.panel;
