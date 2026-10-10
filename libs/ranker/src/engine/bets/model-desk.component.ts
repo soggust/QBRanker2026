@@ -141,6 +141,7 @@ export class ModelDeskComponent implements OnInit, OnDestroy {
   // decided, pending the next run's official grading)
   private boards = new Map<string, Board>();
   private scoreTimer?: ReturnType<typeof setInterval>;
+  private closed = false;
 
   // (the tiles' count-up: 0 to 1 as they tick, 1 once they've landed)
   tick = 1;
@@ -161,10 +162,12 @@ export class ModelDeskComponent implements OnInit, OnDestroy {
     this.show();
     this.loading = false;
     this.loadTeams();
-    this.scoreTimer = setInterval(() => this.loadScores(), 60_000);
+    // (not if the desk closed while its files loaded: nothing would stop it)
+    if (!this.closed) this.scoreTimer = setInterval(() => this.loadScores(), 60_000);
   }
 
   ngOnDestroy(): void {
+    this.closed = true;
     clearInterval(this.scoreTimer);
     cancelAnimationFrame(this.tickFrame);
   }

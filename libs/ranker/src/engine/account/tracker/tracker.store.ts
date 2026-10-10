@@ -2,6 +2,7 @@
 // owner's list (and anyone's whose tracker they may see: firestore.rules), renaming, unpinning, the order
 // they're dragged into, re-pinning (a fresh baseline), and the days they've been looked at.
 import { Injectable, inject, signal } from '@angular/core';
+import { signedOut } from '../account-helpers';
 import { firestoreSdk } from '@ranker/core/firebase';
 import { SPORT } from '@sport/sport';
 import { PositionService } from '@ranker/engine/position.service';
@@ -54,7 +55,7 @@ export class TrackerStore {
   // owner's tracker; its snapshot now is the baseline
   async pinCompare(sides: CompareSide[], tab: string): Promise<string> {
     const user = this.account.user();
-    if (!user) throw Object.assign(new Error('signed-out'), { code: 'signed-out' });
+    if (!user) throw signedOut();
     const spec = specOf(this.positions.compareLink(sides, tab));
     const read = await this.reader.read(spec);
     if (!read) throw new Error('Nothing to pin');

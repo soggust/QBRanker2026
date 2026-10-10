@@ -1,4 +1,5 @@
 import { Injectable, computed, effect, signal } from '@angular/core';
+import { signedOut } from '../account-helpers';
 import type { DocumentData, Firestore, Query, QueryDocumentSnapshot, Timestamp } from 'firebase/firestore';
 import { firestoreSdk } from '@ranker/core/firebase';
 import { AccountService } from '../account.service';
@@ -219,7 +220,7 @@ export class WalletService {
   // A new player's wallet: 1,000 units (once; the rules allow nothing else)
   async ensureWallet(): Promise<void> {
     const uid = this.uid;
-    if (!uid) throw Object.assign(new Error('Sign in first'), { code: 'auth/no-current-user' });
+    if (!uid) throw signedOut();
     const [firestore, f] = await firestoreSdk();
     const ref = f.doc(firestore, 'users', uid, 'wallet', 'main');
     if ((await f.getDoc(ref)).exists()) return;
@@ -265,7 +266,7 @@ export class WalletService {
   // stake out of the wallet); the ones placed come off the slip
   async place(now = Date.now()): Promise<PlaceResult> {
     const uid = this.uid;
-    if (!uid) throw Object.assign(new Error('Sign in first'), { code: 'auth/no-current-user' });
+    if (!uid) throw signedOut();
     this.placing.set(true);
     const result: PlaceResult = { placed: 0, failed: [] };
     try {

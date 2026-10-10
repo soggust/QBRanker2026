@@ -128,9 +128,13 @@ export class AccountService {
   // ---------------------------------------------------------------------------
   // Following the sign-in
   // ---------------------------------------------------------------------------
+  // (each sign-in followed: a later one makes an earlier, still loading, stand down)
+  private following = 0;
+
   private async follow(user: User | null): Promise<void> {
     this.stopProfile?.();
     this.stopProfile = null;
+    const following = ++this.following;
     if (!user) {
       this.current.set(null);
       ADMIN.set(false);
@@ -164,6 +168,8 @@ export class AccountService {
       .finally(() => this.adminKnown.set(true));
 
     const [firestore, { doc, onSnapshot }] = await firestoreSdk();
+    // (signed out or someone else since: their listener, not this one)
+    if (following !== this.following) return;
     let checked = false;
     this.stopProfile = onSnapshot(
       doc(firestore, 'users', user.uid),

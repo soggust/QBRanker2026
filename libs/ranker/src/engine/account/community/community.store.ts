@@ -1,4 +1,5 @@
 import { Injectable, inject } from '@angular/core';
+import { signedOut } from '../account-helpers';
 import { firestoreSdk } from '@ranker/core/firebase';
 import { AccountService } from '../account.service';
 import type { Profile } from '../account-helpers';
@@ -69,7 +70,7 @@ export class CommunityStore {
   async vote(key: string, owner: string, value: 1 | -1 | 0, at?: unknown): Promise<void> {
     await this.account.start();
     const uid = this.account.user()?.uid;
-    if (!uid) throw Object.assign(new Error('signed out'), { code: 'permission-denied' });
+    if (!uid) throw signedOut();
     if (value !== 0) this.account.requireVerified();
     const [firestore, f] = await firestoreSdk();
     const entryRef = f.doc(firestore, 'community', key, 'entries', owner);

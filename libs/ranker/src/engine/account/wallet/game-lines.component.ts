@@ -47,6 +47,7 @@ export class GameLinesComponent implements OnInit, OnDestroy {
   private readonly botPicks = signal<BotPick[]>([]);
   readonly loading = signal(true);
   private timer: ReturnType<typeof setInterval> | null = null;
+  private closed = false;
   readonly lineText = lineText;
   readonly oddsText = oddsText;
   readonly hideImage = hideImage;
@@ -67,14 +68,18 @@ export class GameLinesComponent implements OnInit, OnDestroy {
   async ngOnInit(): Promise<void> {
     await this.lines.game(this.sport, this.event, this.start).catch(() => null);
     this.loading.set(false);
-    // (the prices kept fresh while the board's open: once a minute)
+    // (the prices kept fresh while the board's open: once a minute, while the page is in view; not at all if the
+    // board closed while its first prices loaded, the game filter changed: nothing would stop it)
+    if (this.closed) return;
     this.timer = setInterval(() => {
+      if (document.hidden) return;
       this.now.set(Date.now());
       void this.lines.game(this.sport, this.event, this.start);
     }, 60e3);
   }
 
   ngOnDestroy(): void {
+    this.closed = true;
     if (this.timer) clearInterval(this.timer);
   }
 

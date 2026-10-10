@@ -1,4 +1,5 @@
 import { Injectable, computed, effect, inject, signal } from '@angular/core';
+import { signedOut } from '../account-helpers';
 import { firestoreSdk } from '@ranker/core/firebase';
 import { SPORT } from '@sport/sport';
 import { AccountService } from '../account.service';
@@ -47,7 +48,7 @@ export class PresetsStore {
   private async uid(): Promise<string> {
     await this.account.start();
     const uid = this.account.user()?.uid;
-    if (!uid) throw Object.assign(new Error('signed out'), { code: 'permission-denied' });
+    if (!uid) throw signedOut();
     return uid;
   }
 

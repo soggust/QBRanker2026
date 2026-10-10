@@ -1,4 +1,5 @@
 import { Injectable, inject, signal } from '@angular/core';
+import { signedOut } from '../account-helpers';
 import { firestoreSdk } from '@ranker/core/firebase';
 import { AccountService } from '../account.service';
 import { CommunityStore } from '../community/community.store';
@@ -79,7 +80,7 @@ export class ListsStore {
   private async uid(): Promise<string> {
     await this.account.start();
     const uid = this.account.user()?.uid;
-    if (!uid) throw Object.assign(new Error('signed out'), { code: 'permission-denied' });
+    if (!uid) throw signedOut();
     return uid;
   }
 

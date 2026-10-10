@@ -108,14 +108,19 @@ export class ListViewComponent implements OnChanges, OnDestroy {
     this.todayState = 'idle';
     this.mode = 'saved';
     this.ownerProfile = null;
-    void this.community.profile(this.owner).then((p) => (this.ownerProfile = p));
+    // (this list's own: a watch or a profile for a list shown before it, landing late, is dropped)
+    const showing = ++this.showing;
+    const owner = this.owner;
+    void this.community.profile(owner).then((p) => showing === this.showing && (this.ownerProfile = p));
     void this.store
-      .watch(this.owner, this.listId, (list) => this.loaded(list))
-      .then((stop) => (this.stop = stop))
-      .catch(() => (this.state = 'missing'));
+      .watch(owner, this.listId, (list) => showing === this.showing && this.loaded(list))
+      .then((stop) => (showing === this.showing ? (this.stop = stop) : stop()))
+      .catch(() => showing === this.showing && (this.state = 'missing'));
   }
+  private showing = 0;
 
   ngOnDestroy(): void {
+    this.showing++;
     this.stop?.();
     clearTimeout(this.toastTimer);
   }

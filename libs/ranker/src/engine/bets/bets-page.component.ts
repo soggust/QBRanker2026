@@ -434,7 +434,8 @@ export class BetsPageComponent implements OnInit, OnDestroy {
     const locked = (r: BetRow) => (r.confidence === 'lock' ? 0 : 1);
     this.rows = algoRows.sort((a, b) => locked(a) - locked(b) || b.sureness - a.sureness || (a.game?.kickoff ?? '').localeCompare(b.game?.kickoff ?? ''));
     this.dropStarted();
-    this.ticker = setInterval(() => this.dropStarted(), 60_000);
+    // (not if the page closed while its files loaded: nothing would stop it)
+    if (!this.closed) this.ticker = setInterval(() => this.dropStarted(), 60_000);
     // ---- wallet (phase 2) ----
     this.buildBoards();
     // ---- end wallet ----
@@ -489,6 +490,7 @@ export class BetsPageComponent implements OnInit, OnDestroy {
   // (a pick whose game has started can't be bet: off the list, and its game off the dropdown, when the
   // page loads and each minute after; the picks file is only rewritten hourly)
   private ticker: ReturnType<typeof setInterval> | null = null;
+  private closed = false;
   private dropStarted(): void {
     const now = Date.now();
     const open = (this.rows ?? []).filter((r) => !r.game?.kickoff || Date.parse(r.game.kickoff) > now);
@@ -499,6 +501,7 @@ export class BetsPageComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.closed = true;
     if (this.ticker) clearInterval(this.ticker);
   }
 

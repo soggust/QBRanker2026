@@ -2,7 +2,7 @@ import { Injectable, computed, effect, signal, untracked } from '@angular/core';
 import type { DocumentReference, FieldValue, WriteBatch } from 'firebase/firestore';
 import { firestoreSdk } from '@ranker/core/firebase';
 import { AccountService } from '../account.service';
-import { Profile, USERNAME_PATTERN } from '../account-helpers';
+import { Profile, USERNAME_PATTERN, signedOut } from '../account-helpers';
 import { FriendStatus, SEARCH_LIMIT, millis, prefixRange, sortFriends } from './friends-helpers';
 
 // (someone else's profile, with whose it is)
@@ -161,7 +161,7 @@ export class FriendsService {
   // ---------------------------------------------------------------------------
   private async pair(other: string, write: (batch: WriteBatch, mine: DocumentReference, theirs: DocumentReference, now: FieldValue) => void): Promise<void> {
     const me = this.account.user()?.uid;
-    if (!me) throw Object.assign(new Error('signed out'), { code: 'auth/no-current-user' });
+    if (!me) throw signedOut();
     this.busy.set(other);
     try {
       const [firestore, f] = await firestoreSdk();

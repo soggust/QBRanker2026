@@ -183,9 +183,13 @@ const ERRORS: Record<string, string> = {
   'permission-denied': 'You don’t have permission to do that.',
   unavailable: 'Couldn’t reach the server. Check your connection.',
   'username-taken': 'That username is taken.',
+  'auth/no-current-user': 'Sign in first.',
   unverified: 'Confirm your email first: click the link we sent you (Settings can send it again).',
   'avatar-too-big': 'That picture won’t shrink small enough. Try another.',
 };
+
+// (signed out where an account's needed: one code everywhere, with its own words, not a permission error)
+export const signedOut = (): Error & { code: string } => Object.assign(new Error('Sign in first'), { code: 'auth/no-current-user' });
 
 // (what to tell the user for an error: its code's words, or a general line)
 export function errorMessage(error: unknown): string {
