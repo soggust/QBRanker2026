@@ -1,4 +1,4 @@
-import { Component, ElementRef, HostListener, OnInit, ViewChild, inject, isDevMode } from '@angular/core';
+import { Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild, inject, isDevMode } from '@angular/core';
 import { BetsView, betsView, chooseBetsView } from './bets-view';
 // ---- wallet (phase 2) ----
 import { LinesService } from '../account/wallet/lines.service';
@@ -220,7 +220,7 @@ const BET_SPORTS = SPORT_LINKS.filter((sport) => SPORTS.includes(sport.id));
   styleUrls: ['../../styles/components/bets-page.scss'],
   standalone: false,
 })
-export class BetsPageComponent implements OnInit {
+export class BetsPageComponent implements OnInit, OnDestroy {
   // Each sport's teams' colors, once a visit (pick-style.ts)
   private teamColors: TeamColors = new Map();
   private pickColors = new Map<number, string | null>();
@@ -411,7 +411,8 @@ export class BetsPageComponent implements OnInit {
     for (const a of algoRows) a.confidence = confidenceOf(a.sureness, a.p ?? (a.chance != null ? a.chance / 100 : null), a.edge);
     const locked = (r: BetRow) => (r.confidence === 'lock' ? 0 : 1);
     this.rows = algoRows.sort((a, b) => locked(a) - locked(b) || b.sureness - a.sureness || (a.game?.kickoff ?? '').localeCompare(b.game?.kickoff ?? ''));
-    this.gameDays = this.buildGameDays();
+    this.dropStarted();
+    this.ticker = setInterval(() => this.dropStarted(), 60_000);
     // ---- wallet (phase 2) ----
     this.buildBoards();
     // ---- end wallet ----
@@ -462,6 +463,22 @@ export class BetsPageComponent implements OnInit {
     return null;
   }
   // ---- end wallet ----
+
+  // (a pick whose game has started can't be bet: off the list, and its game off the dropdown, when the
+  // page loads and each minute after; the picks file is only rewritten hourly)
+  private ticker: ReturnType<typeof setInterval> | null = null;
+  private dropStarted(): void {
+    const now = Date.now();
+    const open = (this.rows ?? []).filter((r) => !r.game?.kickoff || Date.parse(r.game.kickoff) > now);
+    if (this.rows && open.length === this.rows.length && this.gameDays.length) return;
+    this.rows = open;
+    this.gameDays = this.buildGameDays();
+    if (this.game && !open.some((r) => this.gameKey(r) === this.game)) this.game = '';
+  }
+
+  ngOnDestroy(): void {
+    if (this.ticker) clearInterval(this.ticker);
+  }
 
   // A team logo's address: a path under the sport's own site, or a full address as it is
   logoSrc(r: BetRow, logo: string): string {
