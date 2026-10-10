@@ -12,7 +12,7 @@
 // a total the same toward its side), prob (the closing fair chance of its side at its own line, less the fair
 // chance when it bet: a line move counted through the margins' own chances (margins.mjs atLine: a half point
 // onto the NFL's 3 worth far more than one onto its 8; without them, about 0.4 / sigma a point),
-// ev (its expected return at the closing chance and its own price), beat (whether it got the better of the
+// ev (its expected return at the closing chance and its own price, a push's share out of it), beat (whether it got the better of the
 // close: a better line, or the same line and a better chance). Before the game, each run also notes the
 // line it last saw (seen), which stands in for the close until it's read.
 
@@ -101,7 +101,9 @@ export function clvOf(bet, close, sigma, dist = null) {
     q = Math.min(0.99, Math.max(0.01, carried ?? close.fair + (pts ?? 0) * perPoint));
   }
   const prob = q !== null && bet.fair !== undefined ? round(q - bet.fair, 4) : null;
-  const ev = q !== null && bet.odds ? round(q * decimal(bet.odds) - 1, 4) : null;
+  // (q leaves a push out, margins.mjs cond: a push gives the stake back, so only the rest is won or lost, as
+  // desk.mjs choose prices it; bet.push, the model's push chance at its line, where it kept one)
+  const ev = q !== null && bet.odds ? round((1 - (bet.push ?? 0)) * (q * decimal(bet.odds) - 1), 4) : null;
   const beat = pts !== null && pts !== 0 ? pts > 0 : prob !== null && prob !== 0 ? prob > 0 : null;
   return { pts, prob, ev, q: q === null ? null : round(q, 4), beat };
 }

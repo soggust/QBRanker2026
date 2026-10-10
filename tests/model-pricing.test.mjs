@@ -4,9 +4,10 @@
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { GAP, capGame, choose, decimal, fairPair, fitTrust, gapGuard, guardOf, leanOf, oneSide, price, stakeFor } from '../libs/ranker/scripts/model/desk.mjs';
+import { GAP, capGame, chanceAt, choose, decimal, fairPair, fitTrust, gapGuard, guardOf, leanOf, oneSide, price, stakeFor } from '../libs/ranker/scripts/model/desk.mjs';
 import { atLine, cond, fitMargins, impliedMean, marginDist, mlChances, probit, spreadChances } from '../libs/ranker/scripts/model/margins.mjs';
 import { clvOf } from '../libs/ranker/scripts/model/clv.mjs';
+import { repriced } from '../libs/ranker/scripts/model/backtest.mjs';
 import { phi } from '../libs/ranker/scripts/model/ratings.mjs';
 
 const near = (a, b, eps = 1e-6) => assert.ok(Math.abs(a - b) < eps, `${a} vs ${b}`);
@@ -186,4 +187,60 @@ test("clvOf with the margins: a half point onto the NFL's 3 is worth more than o
   assert.ok(onto3.prob > onto8.prob && onto8.prob > 0, `${onto3.prob} vs ${onto8.prob}`);
   // (the same line: the close's own chance)
   near(atLine('spread', 'away', { line: 3, fair: 0.47 }, 3, dist), 0.47, 1e-6);
+});
+
+test('stakeFor: a heavy favorite held to what its edge in chance stakes at -110', () => {
+  // (at -800 a chance a point over break-even was Kelly's 3 units; now no more than -110's for that edge)
+  assert.ok(stakeFor(0.01, 0.08, -800) <= 1);
+  assert.ok(stakeFor(0.02, 0.08, -400) <= 1.5);
+  // (an underdog still by its Kelly fraction alone)
+  assert.ok(stakeFor(0.08, 0.08, 200) < stakeFor(0.08, 0.08, -110));
+});
+
+test('capGame: the edge bets filled first; action bets only the room left', () => {
+  const b = (id, units, ev, market = 'spread') => ({ id, units, ev, market, intent: ev > 0 ? 'edge' : 'action' });
+  const props = Array.from({ length: 10 }, (_, i) => b(`p${i}`, 0.5, -0.01, 'prop'));
+  let res = capGame([b('s', 3, 0.08), ...props], 0, 5);
+  assert.equal(res.kept.find((x) => x.id === 's').units, 3);
+  assert.equal(res.kept.reduce((t, x) => t + x.units, 0), 5);
+  assert.equal(res.dropped.length, 6);
+  // (edge bets over the room on their own: scaled among themselves, no action bet kept)
+  res = capGame([b('a', 3, 0.08), b('c', 3, 0.06), b('x', 0.5, -0.01)], 0, 4);
+  assert.ok(res.kept.every((x) => x.intent === 'edge'));
+  assert.ok(res.kept.reduce((t, x) => t + x.units, 0) <= 4);
+  // (six 1u edge props in 5u: the rounding's room back to them, none to the action bets)
+  res = capGame([...Array.from({ length: 6 }, (_, i) => b(`e${i}`, 1, 0.09 - i * 0.01, 'prop')), b('ml', 0.5, -0.04), b('t', 0.5, -0.05, 'total')], 0, 5);
+  assert.ok(res.kept.every((x) => x.intent === 'edge'));
+  assert.equal(res.kept.reduce((t, x) => t + x.units, 0), 5);
+  assert.equal(res.kept.length, 6);
+});
+
+test('the trust fit scores each bet at the chance choose bets with; past GAP left out', () => {
+  const market = { market: 'spread', sides: [{ side: 'home', odds: -110, fair: 0.5, model: 0.6 }, { side: 'away', odds: -110, fair: 0.5, model: 0.4 }] };
+  near(choose(market, 0.7, 0.08).p, chanceAt('spread', 0.5, 0.6, 0.7));
+  assert.ok(chanceAt('spread', 0.5, 0.6, 1) < 0.6);
+  // (a model always "right" only past GAP: not evidence, so no fit)
+  const far = Array.from({ length: 60 }, (_, i) => ({ event: String(i), market: 'spread', status: 'won', fair: 0.5, model: 0.7 }));
+  assert.equal(fitTrust(far, 0.5).fitted, false);
+});
+
+test("a moneyline with no spread to anchor it leans nothing; repriced leaves it out", () => {
+  const noSpread = lines({ spread: { home: { line: null, odds: null }, away: { line: null, odds: null } } });
+  const ml = price({}, { margin: 7, total: 44 }, noSpread, params).find((m) => m.market === 'ml');
+  assert.equal(ml.sides[0].anchored, false);
+  const pick = choose(ml, 1, 0.08);
+  near(pick.p, pick.fair);
+  const anchored = price({}, { margin: 7, total: 44 }, lines(), params).find((m) => m.market === 'ml');
+  assert.equal(anchored.sides[0].anchored, true);
+  assert.deepEqual(anchored.sides[0].spreadHome, { line: -3, fair: 0.5 });
+  const bet = { event: 'g', market: 'ml', side: 'home', line: null, odds: -165, fair: 0.6 };
+  assert.equal(repriced([bet], new Map([['g', { margin: 3, total: 44 }]]), params).length, 0);
+  assert.equal(repriced([{ ...bet, spreadHome: { line: -3, fair: 0.5 } }], new Map([['g', { margin: 3, total: 44 }]]), params).length, 1);
+});
+
+test('clvOf: a push gives its stake back, so its share is out of the EV', () => {
+  const bet = { market: 'ml', side: 'home', line: null, odds: 100, fair: 0.5 };
+  const plain = clvOf(bet, { line: null, odds: 100, fair: 0.6 }, 13.5);
+  const pushy = clvOf({ ...bet, push: 0.1 }, { line: null, odds: 100, fair: 0.6 }, 13.5);
+  near(pushy.ev, plain.ev * 0.9, 1e-4);
 });

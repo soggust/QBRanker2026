@@ -8,11 +8,13 @@
 // with the vig taken out) by how much the model has earned trust in that market (w: 0 the book's alone, 1 the
 // model's alone; fit on the desk's own graded bets). The lean is the model's less the book's, but past half
 // of GAP it tapers to nothing at GAP (a disagreement that size is the market knowing something the model
-// doesn't far more often than an edge), and past GAP the market isn't bet at all (gapGuard).
+// doesn't far more often than an edge), and past GAP the market isn't bet at all (gapGuard). The trust fit and
+// the backtest score each bet at that same tapered chance (chanceAt). A moneyline with no spread market to
+// anchor it leans nothing (the plain normal's underdog lean): the book's chance, an action bet.
 // Its stake: by its Kelly fraction, its expected return over what a unit pays (a long shot's edge stakes less
-// than the same edge at -110), 0.5 at no edge up to 3 (stakeFor); a game's whole stake, every market and prop,
-// at most leagues.mjs GAME_CAP (capGame); the spread and the moneyline never on the same side of a game
-// (oneSide).
+// than the same edge at -110; a heavy favorite's held to what its edge in chance would stake at -110), 0.5 at
+// no edge up to 3 (stakeFor); a game's whole stake, every market and prop, at most leagues.mjs GAME_CAP, the
+// edge bets filled first (capGame); the spread and the moneyline never on the same side of a game (oneSide).
 
 import { round } from './ratings.mjs';
 import { cond, mlModel, spreadChances, totalChances } from './margins.mjs';
@@ -42,11 +44,17 @@ export const GAP = { spread: 0.12, total: 0.12, ml: 0.15 };
 
 // Units for a side, by its Kelly fraction (its expected return over what a unit pays at its price): 0.5 at no
 // edge (every game is bet), up to 3 at the desk's edge scale (the return that tops out at -110; a longer price
-// needs a bigger return for the same stake, a shorter one less), by half units
+// needs a bigger return for the same stake, a shorter one less), by half units. A short price's fraction is
+// held to what its edge in chance (p less its break-even, ev / decimal) would stake at -110: Kelly at -800
+// stakes 3 on a chance a point over break-even, and the model's errors are in chance, so a heavy favorite's
+// noise would buy the most (the shorter price stakes no less than -110 for the same return, and no more for the
+// same edge in chance)
 const REF = 100 / 110;
 export function stakeFor(ev, evScale, odds = -110) {
-  const b = decimal(Number.isFinite(odds) && odds ? odds : -110) - 1;
-  const raw = 0.5 + (Math.max(0, ev) / b / (evScale / REF)) * 2.5;
+  const d = decimal(Number.isFinite(odds) && odds ? odds : -110);
+  const e = Math.max(0, ev);
+  const frac = Math.min(e / (d - 1), ((e / d) * (1 + REF)) / REF);
+  const raw = 0.5 + (frac / (evScale / REF)) * 2.5;
   return Math.min(3, Math.max(0.5, Math.round(raw * 2) / 2));
 }
 
@@ -59,6 +67,14 @@ export function leanOf(gap, limit) {
   if (a <= half) return gap;
   return Math.sign(gap) * half * Math.max(0, (limit - a) / (limit - half));
 }
+
+// A side's chance at a trust: the book's fair chance and the model's lean, tapered by its market's GAP (a prop
+// has none yet: its whole lean). The one chance choose bets with and fitTrust and the backtest score, so the
+// trust is fit on the pricing the desk bets with
+export const chanceAt = (market, fair, model, trust) => fair + trust * leanOf(model - fair, GAP[market]);
+
+// (a bet the live desk would never place for its model's distance from the book: gapGuard)
+export const pastGap = (market, model, fair) => !!GAP[market] && Math.abs(model - fair) > GAP[market];
 
 // Why a market isn't bet for its model's distance from the book (skip), or null
 export function gapGuard(market, model, fair) {
@@ -99,20 +115,24 @@ export function price(game, exp, lines, params, shape = null) {
     both('total', { side: 'over', line: total.line, odds: total.over, model: cond(c), push: c.push }, { side: 'under', line: total.line, odds: total.under, model: 1 - cond(c), push: c.push }, fairOf('total', total.over, total.under));
   }
   if (ml.home && ml.away) {
-    // (off the spread market where it has one: margins.mjs mlModel)
+    // (off the spread market where it has one: margins.mjs mlModel. Without one (no spread line or price on
+    // either side) it's the plain normal's, the underdog lean the spread's anchor takes out: anchored false,
+    // and choose leans it nothing (the book's fair chance alone, an action bet at most). The spread it was
+    // anchored to kept beside it, so a graded bet can be priced again the same way: backtest.mjs repriced)
     const f = fairOf('ml', ml.home, ml.away);
     const c = mlModel(exp.margin, params.sigma, shape, f, spreadHome);
-    both('ml', { side: 'home', line: null, odds: ml.home, model: cond(c), push: c.push }, { side: 'away', line: null, odds: ml.away, model: 1 - cond(c), push: c.push }, f);
+    const anchor = c.anchored ? { anchored: true, spreadHome: { line: spreadHome.line, fair: round(spreadHome.fair, 4) } } : { anchored: false };
+    both('ml', { side: 'home', line: null, odds: ml.home, model: cond(c), push: c.push, ...anchor }, { side: 'away', line: null, odds: ml.away, model: 1 - cond(c), push: c.push, ...anchor }, f);
   }
   return out;
 }
 
 // The bet a market gets: the side with the better expected return at the desk's trust in the model (every
-// market gets one; the lean tapered by leanOf), staked by its Kelly fraction; the other side's, scored the
-// same, beside it (other: oneSide)
+// market gets one; the lean tapered by leanOf: chanceAt), staked by its Kelly fraction; the other side's, scored
+// the same, beside it (other: oneSide). A moneyline the spread didn't anchor leans nothing: the book's chance
 export function choose(market, trust, evScale) {
   const scored = market.sides.map((s) => {
-    const p = s.fair + trust * leanOf(s.model - s.fair, GAP[market.market]);
+    const p = s.anchored === false ? s.fair : chanceAt(market.market, s.fair, s.model, trust);
     // (a push gives the stake back: only the rest of the chance is won or lost)
     const ev = (1 - (s.push ?? 0)) * (p * decimal(s.odds) - 1);
     return { ...s, p, ev, units: stakeFor(ev, evScale, s.odds) };
@@ -143,23 +163,49 @@ export function oneSide(picks, placed = []) {
   });
 }
 
-// A game's new bets under its cap: the units already open on it (placed) and the new ones' at most cap; over
-// it, the new ones scaled down alike (by half units, 0.5 the least), then the least worth having dropped (an
-// action bet before an edge one, an action prop before an action game market (the main markets' data teach
-// their trust and CLV), the smaller return first). Each bet: { units, ev, intent, market }; kept (at its
-// units; cappedFrom, what it would have staked) and dropped
+// A game's new bets under its cap: the units already open on it (placed) and the new ones' at most cap. Filled
+// in order of worth: the edge bets first, at their full stakes while they fit (over the room on their own,
+// scaled down alike among themselves, by half units, 0.5 the least, the smaller return dropped first); then
+// what room is left to the action bets at their stakes (a game market's before a prop's: the main markets'
+// data teach their trust and CLV; the bigger return first), the rest dropped. So an action bet, with no edge,
+// never takes room an edge bet would have had. Each bet: { units, ev, intent, market }; kept (at its units;
+// cappedFrom, what it would have staked) and dropped
 export function capGame(bets, placed, cap) {
   const rank = (b) => (b.intent === 'edge' ? 0 : b.market === 'prop' ? 2 : 1);
   const order = [...bets].sort((a, b) => rank(a) - rank(b) || b.ev - a.ev);
   const room = cap - placed;
   const sum = order.reduce((t, b) => t + b.units, 0);
   if (sum <= room + 1e-9) return { kept: order, dropped: [] };
-  const scale = Math.max(0, room) / sum;
+  const edges = order.filter((b) => b.intent === 'edge');
+  const edgeSum = edges.reduce((t, b) => t + b.units, 0);
+  // (the edge bets over the room on their own: each scaled down, by half units, 0.5 the least)
+  let scaled = null;
+  if (edgeSum > room) {
+    const scale = Math.max(0, room) / edgeSum;
+    scaled = new Map(edges.map((b) => [b, Math.max(0.5, Math.floor(b.units * scale * 2) / 2)]));
+    let total = [...scaled.values()].reduce((t, u) => t + u, 0);
+    // (over the room even so: the smaller returns dropped)
+    for (let i = edges.length - 1; i >= 0 && total > room + 1e-9; i--) {
+      total -= scaled.get(edges[i]);
+      scaled.delete(edges[i]);
+    }
+    // (the room the rounding left back to the edge bets, the better first, a half unit at a time up to their
+    // own stakes: not to an action bet)
+    for (let more = true; more; ) {
+      more = false;
+      for (const b of edges) {
+        if (!scaled.has(b) || scaled.get(b) >= b.units || total + 0.5 > room + 1e-9) continue;
+        scaled.set(b, scaled.get(b) + 0.5);
+        total += 0.5;
+        more = true;
+      }
+    }
+  }
   const kept = [];
   const dropped = [];
   let used = 0;
   for (const b of order) {
-    const units = Math.max(0.5, Math.floor(b.units * scale * 2) / 2);
+    const units = scaled && b.intent === 'edge' ? (scaled.get(b) ?? Infinity) : b.units;
     if (used + units <= room + 1e-9) {
       kept.push(units === b.units ? b : { ...b, units, cappedFrom: b.units });
       used += units;
@@ -266,9 +312,13 @@ export function voidOf(bet, game, now) {
 // are in to say so; a void bet, no action, is neither). A bet with both counts once, half each; and a game's
 // n bets count less each, 1 / (1 + (n - 1)·RHO) (the props of one game share its pace and its script: the
 // design effect of bets that correlated, so 10 on one game weigh as about 2.7; eff, the bets' worth all told).
+// Each bet scored at the chance the desk bets with (chanceAt: the lean tapered past half of GAP), and one past
+// GAP, which the desk never places, left out.
 // Until a market has 40 bets with either, the starting trust.
 const RHO = 0.3;
-export function fitTrust(bets, start) {
+export function fitTrust(list, start) {
+  // (a bet past its market's GAP is one the desk would never place (gapGuard): not evidence for its trust)
+  const bets = list.filter((b) => !pastGap(b.market, b.model, b.fair));
   const decided = bets.filter((b) => b.status === 'won' || b.status === 'lost');
   const closed = bets.filter((b) => !b.void && b.clv && b.clv.q !== null && b.clv.q !== undefined && Number.isFinite(b.fair) && Number.isFinite(b.model));
   const isDecided = new Set(decided);
@@ -287,7 +337,8 @@ export function fitTrust(bets, start) {
   let best = { trust: start, loss: Infinity };
   for (let t = 0; t <= 1.0001; t += 0.05) {
     let loss = 0;
-    const pOf = (b) => Math.min(0.995, Math.max(0.005, b.fair + t * (b.model - b.fair)));
+    // (the chance the desk would bet with at this trust: the lean tapered as choose tapers it, chanceAt)
+    const pOf = (b) => Math.min(0.995, Math.max(0.005, chanceAt(b.market, b.fair, b.model, t)));
     for (const b of decided) loss -= wResult(b) * Math.log(b.status === 'won' ? pOf(b) : 1 - pOf(b));
     // (the closing chance as a soft result: best matched by a chance equal to it)
     for (const b of closed) loss -= wClose(b) * (b.clv.q * Math.log(pOf(b)) + (1 - b.clv.q) * Math.log(1 - pOf(b)));

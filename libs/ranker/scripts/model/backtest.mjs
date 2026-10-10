@@ -15,7 +15,10 @@
 //   of the NBA, NHL and MLB a day at a time); each one's response kept under .cache/model/history (never bought
 //   twice) and the bets drawn from them in apps/<sport>/scripts/model/backtest.json (committed: paid for)
 //   the model's chances: its expectation for each game from the replay, each game predicted from the games
-//   before it only (its settings are this run's, fit on the whole history: a small look-ahead, noted). The
+//   before it only (its settings are this run's, fit on the whole history: a small look-ahead, noted; so is
+//   the margins' shape, margins.mjs fitMargins, whose final weights are fit on every final, the backtest's
+//   games among them: shrunk toward the normal by SHRINK, a weight a margin over hundreds of games each, so
+//   it's small, but it has seen the results it helps score). The
 //   saved bets' chances are priced again every run by the desk's pricing as it is now (repriced: each bet's
 //   line, price and fair chance are kept, so no snapshot is needed), so the trust is fit on the chances the
 //   desk bets with, not on an older pricing's
@@ -25,7 +28,7 @@
 import path from 'node:path';
 import { CACHE, DAY, isoSecond as iso, readJson, writeJson } from './sources.mjs';
 import { HISTORY_BUDGET, LINE_BOOKS, SPORT_KEYS, call, canSpend, linesFromEvent, matchNearest } from './oddsapi.mjs';
-import { choose, fitTrust, price, settle, stakeFor } from './desk.mjs';
+import { chanceAt, choose, fitTrust, pastGap, price, settle, stakeFor } from './desk.mjs';
 import { cond, mlModel, spreadChances, totalChances } from './margins.mjs';
 import { clvOf } from './clv.mjs';
 import { idOf } from './teamstats.mjs';
@@ -168,10 +171,13 @@ function closeFrom(b, l) {
 }
 
 // A market's backtest numbers: its bets, return (at the desk's stakes, every market bet; and on the ones with an
-// edge at the trust), closing-line value, how often it beat the close, calibration, and the anchors' log loss
-export function summarize(bets, trust) {
+// edge at the trust), closing-line value, how often it beat the close, calibration, and the anchors' log loss.
+// Each at the chance the desk bets with (desk.mjs chanceAt: the lean tapered), and a bet past its market's GAP,
+// which the desk would never place (gapGuard), left out
+export function summarize(all, trust) {
+  const bets = all.filter((b) => !pastGap(b.market, b.model, b.fair));
   const decided = bets.filter((b) => b.status === 'won' || b.status === 'lost');
-  const pOf = (b) => b.fair + trust * (b.model - b.fair);
+  const pOf = (b) => chanceAt(b.market, b.fair, b.model, trust);
   const ret = (list, stake) => {
     let staked = 0;
     let profit = 0;
@@ -208,15 +214,18 @@ export function summarize(bets, trust) {
 
 // The saved bets' chances priced again by the desk's pricing now (desk.mjs price, margins.mjs): each bet's side,
 // line, price and fair chance as saved, its model's chance (and push) from its game's expectation (expOf: the
-// replay's, each game's before it was played) at that line; a moneyline off the same snapshot's spread (its
-// bet beside it), as the live desk prices it. A bet whose game the replay has no expectation for is left out
-// (its chance from an older pricing would teach the trust that pricing's leans)
+// replay's, each game's before it was played; or a function of the bet: a live bet's own, run.mjs) at that line;
+// a moneyline off the spread it was anchored to (its spreadHome, kept since the anchor; else the same
+// snapshot's spread bet beside it), as the live desk prices it. A bet whose game has no expectation is left out
+// (its chance from an older pricing would teach the trust that pricing's leans), and so is a moneyline with no
+// spread to anchor it (the plain normal's underdog lean, which the desk doesn't bet: desk.mjs choose)
 export function repriced(bets, expOf, params, shape = null) {
+  const expFor = typeof expOf === 'function' ? expOf : (b) => expOf.get(b.event);
   const key = (b) => `${b.event}|${b.when ?? 'early'}|${b.anchor}`;
   const spreads = new Map(bets.filter((b) => b.market === 'spread').map((b) => [key(b), b]));
   const out = [];
   for (const b of bets) {
-    const exp = expOf.get(b.event);
+    const exp = expFor(b);
     if (!exp || !Number.isFinite(b.fair)) continue;
     let c;
     let q;
@@ -228,7 +237,8 @@ export function repriced(bets, expOf, params, shape = null) {
       q = b.side === 'over' ? cond(c) : 1 - cond(c);
     } else {
       const s = spreads.get(key(b));
-      const spreadHome = s ? { line: s.side === 'home' ? s.line : -s.line, fair: s.side === 'home' ? s.fair : 1 - s.fair } : null;
+      const spreadHome = b.spreadHome ?? (s && Number.isFinite(s.line) && Number.isFinite(s.fair) ? { line: s.side === 'home' ? s.line : -s.line, fair: s.side === 'home' ? s.fair : 1 - s.fair } : null);
+      if (!spreadHome) continue;
       c = mlModel(exp.margin, params.sigma, shape, b.side === 'home' ? b.fair : 1 - b.fair, spreadHome);
       q = b.side === 'home' ? cond(c) : 1 - cond(c);
     }

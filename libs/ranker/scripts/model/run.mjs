@@ -492,8 +492,18 @@ function refitTrust(r) {
   // DraftKings' own odds (ESPN's board inside LAST_CALL, or no Pinnacle line) has no sharp price to weigh the
   // model against, and would teach the trust a softer market)
   const sharp = (b) => b.fairFrom === 'pinnacle';
+  // (the live bets' chances priced again by the desk's pricing now, as the backtest's are (backtest.mjs
+  // repriced), each from the expectation it was bet on: one placed under an older pricing (the plain normal's
+  // underdog-leaning moneyline) would teach the trust that pricing's leans. One with no expectation kept, or a
+  // moneyline with no spread to price it off, is left out)
+  const live = repriced(
+    r.ledger.bets.filter((b) => MARKETS.includes(b.market)),
+    (b) => (Number.isFinite(b.expMargin) && Number.isFinite(b.expTotal) ? { margin: b.expMargin, total: b.expTotal } : null),
+    r.params,
+    r.shape,
+  ).filter((b) => sharp(b) && evidence(b));
   for (const market of MARKETS) {
-    refit(market, [...(r.backtestBets ?? []).filter((b) => b.market === market), ...r.ledger.bets.filter((b) => b.market === market && sharp(b) && evidence(b))], { what: `${market} trust in the model`, bets: `${market} bets (backtest and live)` });
+    refit(market, [...(r.backtestBets ?? []).filter((b) => b.market === market), ...live.filter((b) => b.market === market)], { what: `${market} trust in the model`, bets: `${market} bets (backtest and live)` });
     trust[market].backtest = (r.backtestBets ?? []).filter((b) => b.market === market).length;
   }
   // (start 0.5, refit once 40 of its bets are graded)
@@ -648,8 +658,9 @@ function replaceOpen(r) {
 
 // 5. every market of the coming games, bet once: the better side at 0.5 to 3 units, cut or skipped by the
 // guard, skipped when the model is too far from the book (desk.mjs gapGuard); the spread and the moneyline
-// never on the same side of a game (desk.mjs oneSide: the one giving way takes the other side only with an
-// edge there); each bet keeps the context it saw, and waits in r.pending for placeBets (the game's cap). Not
+// never on the same side of a game (desk.mjs oneSide, among the markets the guards didn't skip: the one giving
+// way takes the other side only with an edge there); a moneyline with no spread to price it off at the
+// minimum, for the data; each bet keeps the context it saw, and waits in r.pending for placeBets (the game's cap). Not
 // bet this run (asked again the next): a game whose context or injury report couldn't be read (blindOf: it
 // would be bet as if everyone were healthy), one starting within five minutes by the clock now, and, with The
 // Odds API to hand, one it didn't price this run (no sharp fair chance: it waits for one, and only inside
@@ -688,24 +699,45 @@ function betGames(r) {
       }
       picks.push({ market: market.market, id, pick: choose(market, trust[market.market]?.trust ?? START_TRUST, EV_SCALE) });
     }
+    // (the guards: the model too far from the book skips the market (desk.mjs gapGuard: the market knowing
+    // something it doesn't); a line that's moved a lot against its side since it opened (less what the context
+    // explains), or a key player questionable, cuts the stake to the minimum; a line that's moved twice that
+    // far against it skips the market this run. A moneyline with no spread market to anchor it (margins.mjs
+    // mlModel) is bet at the book's chance alone, the minimum, as an action bet)
+    const guardFor = (key, pick) => {
+      const g = gapGuard(key, pick.model, pick.fair) ?? guardOf(cfg.guard, key, lines.move, f?.info.flags ?? [], { m: adjM, t: adjT }, params.sigma, pick.side);
+      if (g?.skip || pick.anchored !== false) return g;
+      return { why: [g?.why, 'no spread market to price the moneyline off'].filter(Boolean).join('; ') };
+    };
+    const skipped = (key, id, guard) => {
+      rest(r, id, guard.why);
+      if (DRY) console.log(`${sport} (dry) skipped ${game.awayAbbr} @ ${game.homeAbbr} ${key}: ${guard.why}; ${JSON.stringify(seen)}`);
+    };
+    // (the skips first, so a market the guard skips never makes the other give way: oneSide)
+    picks = picks.filter((x) => {
+      x.guard = guardFor(x.market, x.pick);
+      if (x.guard?.skip) skipped(x.market, x.id, x.guard);
+      return !x.guard?.skip;
+    });
     // (the spread and the moneyline never on one side, this run's or against the game's open bets: oneSide)
     const ids = new Set(picks.map((x) => x.id));
     picks = oneSide(picks, r.ledger.bets.filter((b) => b.event === game.id && standing(r, b) && !ids.has(b.id)));
-    for (const { market: key, id, pick, drop, flipped } of picks) {
+    // (a market giving way to another new one this run: if the cap drops that one (placeBets), its rest is
+    // lifted, so a later run can bet it)
+    const gaveWay = picks.find((x) => x.drop || x.flipped);
+    const tookIt = gaveWay && picks.find((x) => x !== gaveWay && ids.has(x.id) && (x.market === 'spread' || x.market === 'ml') && !x.drop);
+    for (const { market: key, id, pick, drop, flipped, guard: was } of picks) {
       const market = { market: key };
       if (drop) {
         rest(r, id, drop);
+        if (tookIt) (r.gaveWay ??= new Map()).set(tookIt.id, id);
         if (DRY) console.log(`${sport} (dry) not bet ${game.awayAbbr} @ ${game.homeAbbr} ${key}: ${drop}`);
         continue;
       }
-      // (the guards: the model too far from the book skips the market (desk.mjs gapGuard: the market knowing
-      // something it doesn't); a line that's moved a lot against its side since it opened (less what the context
-      // explains), or a key player questionable, cuts the stake to the minimum; a line that's moved twice that
-      // far against it skips the market this run)
-      let guard = gapGuard(key, pick.model, pick.fair) ?? guardOf(cfg.guard, key, lines.move, f?.info.flags ?? [], { m: adjM, t: adjT }, params.sigma, pick.side);
+      // (a flipped side's guards its own: the move counted against the new side)
+      let guard = flipped ? guardFor(key, pick) : was;
       if (guard?.skip) {
-        rest(r, id, guard.why);
-        if (DRY) console.log(`${sport} (dry) skipped ${game.awayAbbr} @ ${game.homeAbbr} ${key}: ${guard.why}; ${JSON.stringify(seen)}`);
+        skipped(key, id, guard);
         continue;
       }
       // (on ESPN's board with a key to hand: The Odds API's price never came; for the data only)
@@ -732,6 +764,9 @@ function betGames(r) {
         units,
         // (the model's chance of a push, an integer line landing on the number: its EV counts it)
         ...(pick.push ? { push: round(pick.push, 4) } : {}),
+        // (a moneyline's spread it was priced off: the trust fit prices it again the same way, backtest.mjs
+        // repriced; none, the book's chance alone)
+        ...(key === 'ml' ? (pick.spreadHome ? { spreadHome: pick.spreadHome } : { anchored: false }) : {}),
         expMargin: round(exp.margin, 2),
         expTotal: round(exp.total, 2),
         book: lines.book,
@@ -771,6 +806,9 @@ function placeBets(r) {
       dropped++;
       r.placed.delete(b.id);
       if (b.market !== 'prop') rest(r, b.id, `the game's ${GAME_CAP}u cap`);
+      // (the market that gave way to this one (betGames, oneSide) free again for a later run)
+      const freed = r.gaveWay?.get(b.id);
+      if (freed) delete r.rest[freed];
       if (DRY) console.log(`${sport} (dry) not bet ${b.matchup} ${b.pick}: the game's ${GAME_CAP}u cap (${open}u open on it)`);
     }
     for (const kept of res.kept) {
