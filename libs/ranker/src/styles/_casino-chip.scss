@@ -348,8 +348,8 @@ $lock-gold: #ffcf4a;
 }
 
 // A LOCK tag that wants the eye: a glint sweeping across it every few seconds and a soft glowing pulse round it
-// (none with reduced motion). The keyframes at a stylesheet's root (lock-shine-keyframes), where Angular scopes
-// their names with the rules that use them
+// (none with reduced motion). Its keyframes (lock-shine-keyframes) are global, included once in _base.scss: the
+// animation sits in a media query, whose names Angular doesn't rename to a component's own scoped keyframes
 @mixin lock-shine-keyframes {
   @keyframes lock-glint {
     0%,

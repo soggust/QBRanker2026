@@ -8,6 +8,7 @@
 @use "theme";
 @use "variables" as v;
 @use "sport-kit" as kit;
+@use "casino-chip" as chip;
 @import url("https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Nunito:wght@400;500;600;700;800;900&family=DynaPuff:wght@400;600;700&display=swap");
 
 // LCD / segment-display fonts (open source, DSEG by keshikan)
@@ -723,4 +724,49 @@ section footer .mat-mdc-select.season-select {
   ):focus-visible {
   outline: 2px solid var(--scoreboard-led) !important;
   outline-offset: 2px !important;
+}
+
+// ---------------------------------------------------------------------------
+// Keyframes used from inside a component's @media blocks (reduced motion, a phone's width): defined here, once,
+// globally. Angular renames a component's own keyframes but not the names inside its media queries, so defined in
+// the component they'd be missing in a production build and the animation would never run.
+// ---------------------------------------------------------------------------
+// (the LOCK tag's glint and pulse, _casino-chip.scss lock-shine)
+@include chip.lock-shine-keyframes;
+
+// (the compare count popping in as a pick is added or taken off)
+@keyframes count-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+}
+
+// (the rank popover: in from the tile's side, from below when it opens above, up as a sheet on a phone, its bars
+// filling from the left)
+@keyframes why-drop {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes why-rise {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+
+@keyframes why-sheet {
+  from {
+    transform: translateY(30%);
+    opacity: 0;
+  }
+}
+
+@keyframes why-fill {
+  from {
+    transform: scaleX(0);
+  }
 }

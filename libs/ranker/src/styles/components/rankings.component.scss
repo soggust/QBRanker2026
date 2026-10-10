@@ -1441,12 +1441,6 @@ section.category-colors ul li.player:not(.header-row):not(.cdk-drag-preview) > .
 }
 
 // The compare button's count, new
-@keyframes count-pop {
-  from {
-    opacity: 0;
-    transform: scale(0.4);
-  }
-}
 
 @include awards.trophy-shine;
 
@@ -1926,29 +1920,3 @@ section ul li.player:not(.header-row) .count.rank-tile {
   }
 }
 
-@keyframes why-drop {
-  from {
-    opacity: 0;
-    transform: translateY(-4px);
-  }
-}
-
-@keyframes why-rise {
-  from {
-    opacity: 0;
-    transform: translateY(4px);
-  }
-}
-
-@keyframes why-sheet {
-  from {
-    transform: translateY(30%);
-    opacity: 0;
-  }
-}
-
-@keyframes why-fill {
-  from {
-    transform: scaleX(0);
-  }
-}
