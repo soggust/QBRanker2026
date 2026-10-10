@@ -27,6 +27,7 @@ import {
 } from './desk-math';
 import { Board, CalibrationRow, Change, ContextRow, CurveLine, CurveSpot, GameDay, Meter, ModelBet, ModelState, OddsUsage, PropRow, PropType, Settled, SportTally, Tally, BacktestRow, TestNumbers } from './desk-model';
 import { SummaryBox, athleteColors, liveStat, meterColor } from './live-props';
+import { Confidence, confidenceOf, kellyOf } from './bet-why';
 import { TeamColors, loadTeamColors, pickTeamColor, splitPick } from './pick-style';
 
 // The algorithm's admin panel (the Bets page, dev only): the code-only desk's play-money betting
@@ -36,6 +37,14 @@ import { TeamColors, loadTeamColors, pickTeamColor, splitPick } from './pick-sty
 // every change it's made to itself and why, and the context it weighs beyond the ratings (rest, travel,
 // starters, weather, parks, officials, the ranker's own numbers) with each term's fitted size. The arithmetic
 // is desk-math.ts's, the sorting desk-columns.ts's, the hovers desk-help.ts's.
+
+// (the Bets page's bands as the desk names them, best first)
+const TIERS: [Confidence, string][] = [
+  ['lock', 'LOCK'],
+  ['high', 'LOVE'],
+  ['medium', 'BET'],
+  ['low', 'PASS'],
+];
 
 const SPORT_KEY = 'deskSport';
 const readSport = (): string | null => {
@@ -94,6 +103,9 @@ export class ModelDeskComponent implements OnInit, OnDestroy {
   bySport: SportTally[] = [];
   byMarket: Tally[] = [];
   byStake: Tally[] = [];
+  // (the record by the Bets page's bands, LOCK to PASS, and all of them)
+  byConfidence: Tally[] = [];
+  confidenceTotal: Tally | null = null;
   // (the bets it saw value in, apart from the ones placed for the data: the real record is the edge's)
   byIntent: Tally[] = [];
   byProp: Tally[] = [];
@@ -207,6 +219,10 @@ export class ModelDeskComponent implements OnInit, OnDestroy {
     this.byMarket = Object.keys(MARKET_NAMES).map((m) => tally(MARKET_NAMES[m], where((b) => b.market === m)));
     this.byIntent = [tally('Edge', where((b) => intentOf(b) === 'edge')), tally('Action', where((b) => intentOf(b) === 'action'))];
     this.byStake = STAKES.map((u) => tally(`${u}u`, where((b) => b.units === u))).filter((t) => t.bets || t.open);
+    // (by the Bets page's bands: each bet's Kelly score and chance when placed, bet-why.ts confidenceOf)
+    const band = (b: ModelBet) => confidenceOf(kellyOf(b.p, b.odds) ?? 0, b.p, intentOf(b) === 'edge');
+    this.byConfidence = TIERS.map(([key, label]) => tally(label, where((b) => band(b) === key))).filter((t) => t.bets || t.open);
+    this.confidenceTotal = this.byConfidence.length ? tally('Total', bets) : null;
     this.calibration = calibrationOf(bets);
 
     // (the profit after each graded bet, in grading order, the total's and each sport's)
