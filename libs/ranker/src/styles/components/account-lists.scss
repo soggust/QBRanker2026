@@ -162,16 +162,20 @@ $bar-h: 30px;
     text-decoration: none;
   }
 
-  .bar-link {
+  .bar-link,
+  .bar-back {
     flex: 0 0 auto;
     gap: 6px;
     height: $bar-h;
-    margin-left: auto;
     min-height: $bar-h !important;
 
     .mat-icon {
       @include v.icon-size(16px);
     }
+  }
+
+  .bar-link {
+    margin-left: auto;
   }
 }
 

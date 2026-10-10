@@ -231,6 +231,20 @@ $lock-gold: #ffcf4a;
   margin-top: 4px;
 }
 
+// (the bankroll: a link to the wallet, its amount lit)
+.bets-bankroll {
+  text-decoration: none;
+
+  b {
+    color: var(--scoreboard-led);
+    font-weight: 800;
+  }
+
+  &:hover {
+    color: #fff;
+  }
+}
+
 // The game dropdown a casino chip (as the sports' dropdowns are leather, rubber...): red clay with a
 // speckle and a sheen, the white edge spots around its rim and a cream inlay ring just inside them
 $chip-clay: #b0202b;

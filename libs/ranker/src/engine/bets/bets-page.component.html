@@ -58,11 +58,12 @@
         @if (updated) {
           <span class="bets-updated">
             Updated {{ updated | date: 'EEE MMM d, h:mm a' }} · <span class="bet-crown" title="DraftKings"></span> odds
-            <!-- (the algorithm's record on the picks it has shown: overall, then by its chance to win when shown) -->
-            @if (record?.graded) {
-              <span class="bets-record">
-                Record {{ wl(record!.overall) }}@if (record!.byLevel.lock; as lock) { · Lock {{ wl(lock) }}} · Love {{ wl(record!.byLevel.high) }} · Bet {{ wl(record!.byLevel.medium) }} · Pass {{ wl(record!.byLevel.low) }}
-              </span>
+            <!-- (the user's own bankroll, not the bot's record (that's the Algorithm's): what's on hand, what's out,
+                 the wallet a click away) -->
+            @if (bankroll(); as b) {
+              <a class="bets-record bets-bankroll" href="#wallet" title="Your Betting Wallet">
+                Bankroll <b>{{ b.balance | number: '1.0-2' }}u</b>@if (b.open) { · {{ b.atRisk | number: '1.0-2' }}u on {{ b.open }} open}
+              </a>
             }
           </span>
         }

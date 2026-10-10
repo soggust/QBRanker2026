@@ -16,9 +16,10 @@ import { dateText, listWhere, sportLabel } from './list-view.component';
   template: `
     <div class="lists-page">
       @if (target; as t) {
-        <nav class="page-crumbs" aria-label="Lists">
-          <a class="app-btn-primary small" href="#lists"><mat-icon aria-hidden="true" fontIcon="arrow_back"></mat-icon>{{ account.user() ? 'My Lists' : 'Lists' }}</a>
-          <a class="app-btn-primary small" href="#community"><mat-icon aria-hidden="true" fontIcon="groups"></mat-icon>Community</a>
+        <!-- (the lists' strip, as My Lists' and the Community's: back on the left, the Community in its corner) -->
+        <nav class="lists-bar page-crumbs" aria-label="Lists">
+          <a class="app-btn-primary small bar-back" href="#lists"><mat-icon aria-hidden="true" fontIcon="arrow_back"></mat-icon>{{ account.user() ? 'My Lists' : 'Lists' }}</a>
+          <a class="app-btn-primary small bar-link" href="#community"><mat-icon aria-hidden="true" fontIcon="groups"></mat-icon>Community</a>
         </nav>
         <list-view [owner]="t.owner" [listId]="t.id"></list-view>
       } @else if (!account.ready()) {
