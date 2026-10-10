@@ -30,6 +30,7 @@
   flex-direction: column;
   font-family: v.$font-base;
   height: min(720px, calc(100vh - 48px));
+  height: min(720px, calc(100dvh - 48px));
   left: 50%;
   overflow: hidden;
   position: absolute;
@@ -183,6 +184,7 @@ nav {
 @media (max-width: 719px) {
   .about-panel {
     height: calc(100vh - 24px);
+    height: calc(100dvh - 24px);
     width: calc(100vw - 24px);
   }
 

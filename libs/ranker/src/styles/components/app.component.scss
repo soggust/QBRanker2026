@@ -20,6 +20,9 @@
   padding: 0 calc(1em + 1px);
   position: relative;
   z-index: 5;
+  // (never wider than the screen: on the narrowest phones its links scroll within it, the page doesn't)
+  overflow-x: auto;
+  scrollbar-width: none;
 
   a {
     align-items: center;
@@ -96,14 +99,22 @@
     }
   }
 
-  // (the page's side margin is wider on tablets, narrower on phones)
+  // (the page's side margin is 5% of the width below 1200px: the brand's edge and the avatar's on it, less the
+  // bar's own padding (and the toggle's))
   @media (max-width: 1199px) {
     a.brand {
-      margin-right: 31px;
+      margin-right: calc(5vw - 14px);
     }
 
     account-menu.signed-in {
-      margin-right: 34px;
+      margin-right: calc(5vw - 16px);
+    }
+  }
+
+  // (from a phone up to a small tablet: the podium alone, the sports and Sign in want the room)
+  @media (max-width: 760px) {
+    a.brand .brand-name {
+      display: none;
     }
   }
 
@@ -116,19 +127,23 @@
 
     a.brand {
       gap: 6px;
-      margin-right: 2px;
 
       &::before {
         margin-right: 0;
       }
-
-      .brand-name {
-        display: none;
-      }
     }
 
+    // (a phone's toggle is padded 6px, not 10)
     account-menu.signed-in {
-      margin-right: 7px;
+      margin-right: calc(5vw - 12px);
+    }
+  }
+
+  // (the narrowest phones: the links tighter still)
+  @media (max-width: 400px) {
+    a {
+      letter-spacing: 1px;
+      padding: 0 8px;
     }
   }
 }

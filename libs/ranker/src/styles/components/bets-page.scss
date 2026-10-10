@@ -595,13 +595,52 @@ $lock-gold: chip.$lock-gold;
   }
 }
 
+// (phones and small tablets: the game and its start a second line under the pick, not gone; the chevron, rank and
+// grade down both lines' middle)
 @media (max-width: 700px) {
   .bet-row {
     grid-template-columns: 20px 42px 50px minmax(0, 1fr);
+    row-gap: 6px;
+
+    > .bet-chevron,
+    > .bet-rank-slot,
+    > .bet-grade {
+      align-self: center;
+      grid-row: span 2;
+    }
   }
 
   .bet-game {
-    display: none;
+    align-items: center;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 2px 8px;
+    grid-column: 4;
+    text-align: left;
+
+    small {
+      margin-top: 0;
+    }
+  }
+
+  // (under the pick's words, past its circle)
+  .bet-main.has-circle + .bet-game {
+    padding-left: 46px;
+  }
+}
+
+// (the narrowest phones: the pick's circle gone (its words say whose it is), the pick and its game the room)
+@media (max-width: 420px) {
+  .bet-main.has-circle {
+    grid-template-columns: minmax(0, 1fr);
+
+    .bet-circle {
+      display: none;
+    }
+  }
+
+  .bet-main.has-circle + .bet-game {
+    padding-left: 0;
   }
 
   .bet-reasons {
