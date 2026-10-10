@@ -1,8 +1,8 @@
 import { Component, Input } from '@angular/core';
 
-// TODO(user): the address people write to about their data (a deletion request, a question). Empty: the
-// pages say so, marked, until it's filled in.
-export const LEGAL_CONTACT = '';
+// The address people write to about their data (a deletion request, a question): the owner's own for now, a
+// site address later. Empty: the pages say so, marked.
+export const LEGAL_CONTACT = 'soggust@gmail.com';
 // (when these pages last changed in substance)
 export const LEGAL_UPDATED = 'October 9, 2026';
 
