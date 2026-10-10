@@ -261,34 +261,7 @@ $gold: #ffcf4a;
 
 // (the bot's band on its pick, as the Bets page's rows have it)
 .slip-tier {
-  border-radius: 3px;
-  color: #111;
-  flex-shrink: 0;
-  font-size: 9px;
-  font-weight: 900;
-  letter-spacing: 0.08em;
-  padding: 2px 5px;
-  text-transform: uppercase;
-
-  &.lock {
-    background: #d2691e;
-    color: #fff;
-    position: relative;
-    @include chip.lock-shine;
-  }
-
-  &.love {
-    background: v.$good;
-  }
-
-  &.like {
-    background: v.$caution;
-  }
-
-  &.pass {
-    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.35);
-    color: rgba(255, 255, 255, 0.7);
-  }
+  @include chip.tier-tag(9px, 2px 5px, 0.08em);
 }
 
 .slip-game {
@@ -595,18 +568,3 @@ $gold: #ffcf4a;
 // (the LOCK tag's glint and pulse, _casino-chip.scss)
 @include chip.lock-shine-keyframes;
 
-// (a LOCK tag's padlock before its word, a touch under the letters' size, the two centered together)
-.slip-tier:has(.tier-lock) {
-  align-items: center;
-  display: inline-flex;
-  gap: 2px;
-}
-
-.tier-lock {
-  font-size: 1.05em;
-  height: 1em;
-  line-height: 1;
-  // (the glyph sits high in its box: down to the letters' middle)
-  transform: translateY(1px);
-  width: 1em;
-}

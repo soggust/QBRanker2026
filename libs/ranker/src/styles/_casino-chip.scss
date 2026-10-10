@@ -89,8 +89,8 @@
   }
 }
 
-// A dropdown that's a casino chip (the Bets page's game picker, the Algorithm's): its wrapper draws the rim's
-// spots over the select (<span><select /><svg class="chip-rim"><rect pathLength="220" /></svg></span>)
+// A chip-shaped control's rim (the wallet's chips): its wrapper draws the rim's spots over it
+// (<a class="wallet-chip">…<svg class="chip-rim"><rect pathLength="220" /></svg></a>)
 @mixin dropdown-rim {
   display: inline-flex;
   position: relative;
@@ -124,219 +124,11 @@
   }
 }
 
-// ...and the select itself: the clay (its color given), a speckle and a sheen, a cream inlay ring, a caret
-@mixin dropdown($clay) {
-  appearance: none;
-  background:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24'%3E%3Cpath fill='%23fff' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E") right 16px center / 14px no-repeat padding-box,
-    radial-gradient(ellipse at 30% 0%, rgba(255, 255, 255, 0.22), transparent 65%) padding-box,
-    linear-gradient(180deg, transparent 40%, rgba(0, 0, 0, 0.2)) padding-box,
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='c'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.35 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23c)'/%3E%3C/svg%3E") 0 0 / 120px padding-box,
-    // (the clay under its rim too: the spots are drawn over it, .bets-chip)
-    linear-gradient($clay, $clay) border-box;
-  border: 4px solid transparent;
-  border-radius: 999px;
-  box-shadow:
-    inset 0 0 0 3px $clay,
-    inset 0 0 0 4px rgba(255, 236, 196, 0.55),
-    0 2px 6px rgba(0, 0, 0, 0.45);
-  color: #fff;
-  cursor: pointer;
-  font-family: v.$font-base;
-  font-size: 13px;
-  font-weight: 800;
-  min-width: 220px;
-  padding: 13px 36px 13px 20px;
-  text-shadow: 0 1px 1.5px rgba(0, 0, 0, 0.6);
-  transition: filter 0.15s ease;
-
-  &:hover,
-  &:focus {
-    filter: brightness(1.12);
-    outline: none;
-  }
-
-  option,
-  optgroup {
-    background: #5e1016;
-    color: #fff;
-  }
-
-  // (the day headers in its open list, in gold)
-  optgroup {
-    color: #ffcd00;
-    font-weight: 800;
-  }
-}
-
-// A chip's face for a bar: its color as clay (deepened), a sheen from the top, a shade at the foot and the
-// clay's speckle, its lettering lifted off it (the Algorithm's panel bars, the Bets page's rows)
-@mixin chip-face($color, $clay: 62%) {
-  --face-clay: color-mix(in srgb, #{$color} #{$clay}, #161616);
-  background:
-    radial-gradient(ellipse at 30% 0%, rgba(255, 255, 255, 0.18), transparent 65%),
-    linear-gradient(180deg, transparent 40%, rgba(0, 0, 0, 0.22)),
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='c'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.35 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23c)'/%3E%3C/svg%3E") 0 0 / 120px,
-    var(--face-clay);
-  text-shadow:
-    0 1px 2px rgba(0, 0, 0, 0.85),
-    0 0 8px rgba(0, 0, 0, 0.55);
-}
-
-// A panel on the Bets page or the Algorithm (card-panel.scss): the casino's, whichever sport it's opened from,
-// not the sport's (no sidelines, chalk or painted lines). Its outline is a chip's rim: a band in the panel's
-// category color (its own border, so its corners round cleanly), whole cream spots spaced evenly along each
-// straight run, clear of the corners, and a thin inlay line inside it; on hover the spots light up, as a chip's do
-// ($chip-bar: its bar a chip's face too, the Algorithm's panels; the others keep the scoreboard bar)
-@mixin chip-panel($chip-bar: false) {
-  --rim: 6px;
-  --corner: 14px;
-  // (a spot, 10px, in the middle of its 20px stretch of the band: cream and color the same length)
-  --spot: 20px;
-  --rim-clay: color-mix(in srgb, var(--group-color) 70%, #1a1a1a);
-  --rim-spot: rgba(255, 236, 196, 0.78);
-  border: var(--rim) solid var(--rim-clay);
-  border-radius: var(--corner);
-  box-shadow:
-    0 3px 8px rgba(0, 0, 0, 0.35),
-    inset 0 0 0 1px rgba(255, 236, 196, 0.3);
-  outline: 0;
-  overflow: visible;
-  padding: 0;
-  position: relative;
-
-  // (the spots: top and bottom on one layer, the sides on the other, each run's ends clear of the corners;
-  // `space` lays them out whole and evenly, the same gap at both ends)
-  &::before,
-  &::after {
-    content: '';
-    pointer-events: none;
-    position: absolute;
-    transition: filter 0.3s ease;
-    z-index: 1;
-  }
-
-  &::before {
-    background:
-      linear-gradient(90deg, transparent 5px, var(--rim-spot) 5px 15px, transparent 15px) top / var(--spot) var(--rim) space no-repeat,
-      linear-gradient(90deg, transparent 5px, var(--rim-spot) 5px 15px, transparent 15px) bottom / var(--spot) var(--rim) space no-repeat;
-    inset: calc(var(--rim) * -1) calc(var(--corner) - var(--rim));
-  }
-
-  &::after {
-    background:
-      linear-gradient(180deg, transparent 5px, var(--rim-spot) 5px 15px, transparent 15px) left / var(--rim) var(--spot) no-repeat space,
-      linear-gradient(180deg, transparent 5px, var(--rim-spot) 5px 15px, transparent 15px) right / var(--rim) var(--spot) no-repeat space;
-    inset: calc(var(--corner) - var(--rim)) calc(var(--rim) * -1);
-  }
-
-  // (a spot on each corner too, as a chip's run all the way round: on the band's middle at the corner's 45°
-  // point, turned along the curve)
-  --rim-mid: calc(var(--corner) - (var(--corner) - var(--rim) / 2) * 0.7071);
-
-  > .rim-corner {
-    background: var(--rim-spot);
-    display: block;
-    height: var(--rim);
-    pointer-events: none;
-    position: absolute;
-    transition: filter 0.3s ease;
-    width: 10px;
-    z-index: 1;
-
-    &.tl,
-    &.tr {
-      top: calc(var(--rim-mid) - var(--rim) * 1.5);
-    }
-
-    &.bl,
-    &.br {
-      bottom: calc(var(--rim-mid) - var(--rim) * 1.5);
-    }
-
-    &.tl,
-    &.bl {
-      left: calc(var(--rim-mid) - 5px - var(--rim));
-    }
-
-    &.tr,
-    &.br {
-      right: calc(var(--rim-mid) - 5px - var(--rim));
-    }
-
-    &.tl,
-    &.br {
-      transform: rotate(-45deg);
-    }
-
-    &.tr,
-    &.bl {
-      transform: rotate(45deg);
-    }
-  }
-
-  &:has(> .group-bar > .panel-toggle:hover) > .rim-corner {
-    filter: brightness(1.3);
-  }
-
-  &:has(> .group-bar > .panel-toggle:hover)::before,
-  &:has(> .group-bar > .panel-toggle:hover)::after {
-    filter: brightness(1.3);
-  }
-
-  // (the bar and the body inside the band, rounded to meet it, the inlay line round the bar too)
-  > .group-bar {
-    border-radius: calc(var(--corner) - var(--rim)) calc(var(--corner) - var(--rim)) 0 0;
-    box-shadow: inset 0 0 0 1px rgba(255, 236, 196, 0.3);
-  }
-
-  @if $chip-bar {
-    // (its bar a chip's face, not the scoreboard: the panel's color as clay, a sheen from the top, a shade at the
-    // foot and the clay's speckle, as the dropdown and the wallet's chips; its icon cream on it)
-    > .group-bar {
-      @include chip-face(var(--group-color));
-      border-radius: calc(var(--corner) - var(--rim)) calc(var(--corner) - var(--rim)) 0 0;
-      box-shadow: inset 0 0 0 1px rgba(255, 236, 196, 0.3);
-      transition: filter 0.15s ease;
-
-      .group-bar-icon {
-        color: #f4efe3;
-      }
-    }
-
-    &:has(> .group-bar > .panel-toggle:hover) > .group-bar {
-      filter: brightness(1.12);
-    }
-  }
-
-  &.closed > .group-bar {
-    border-radius: calc(var(--corner) - var(--rim));
-  }
-
-  > .panel-body {
-    background: none;
-    border-radius: 0 0 calc(var(--corner) - var(--rim)) calc(var(--corner) - var(--rim));
-    padding-bottom: 0;
-
-    &::before,
-    &::after {
-      content: none;
-    }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    &::before,
-    &::after {
-      transition: none;
-    }
-  }
-}
-
 // ---------------------------------------------------------------------------
 // The card table: a panel on the Bets page, the Algorithm and the wallet on the scoreboard inside a thin
 // brushed-gold rail; its bar every sport's panel bar (the scoreboard, tinted with its category color). The felt
-// is the controls' (felt-control, felt-dropdown: the buttons and the dropdowns). (The chip rim, chip-panel
-// above, was too busy on a page of them; panel() is the table now, chip-panel kept to go back)
+// is the controls' (felt-control, felt-dropdown: the buttons and the dropdowns). (The chip-rimmed panels they replaced were
+// too busy on a page of them.)
 // ---------------------------------------------------------------------------
 $felt: #155a3a;
 $felt-gold: linear-gradient(135deg, #7a5a1e, #f1d58c 22%, #b38a3c 45%, #f6e2a4 62%, #9c7630 82%, #6e511b);
@@ -357,7 +149,7 @@ $felt-nap: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' wid
     linear-gradient(#{$felt}, #{$felt}) #{$box};
 }
 
-@mixin panel($chip-bar: false) {
+@mixin panel {
   --corner: 12px;
   border: 2px solid transparent;
   border-radius: var(--corner);
@@ -383,10 +175,6 @@ $felt-nap: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' wid
   &::before,
   &::after {
     content: none;
-  }
-
-  > .rim-corner {
-    display: none;
   }
 
   // (the bar: every panel's, card-panel.scss's scoreboard; a gold seam where the panel opens under it)
@@ -474,6 +262,90 @@ $felt-nap: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' wid
   }
 }
 
+// ---------------------------------------------------------------------------
+// The bands' tags: LOCK, LOVE, LIKE, PASS (and the Bets page's FADE), wherever a bet shows its band: the Bets
+// rows, the lines' prices, the wallet's Bot column, the slip. One palette, one tag, each place its own size.
+// ---------------------------------------------------------------------------
+// (a lock's chocolate; lighter for its padlock and lettering on the dark; its price tile's edge; the gold of
+// the slip's ring and the old padlock)
+$lock: #d2691e;
+$lock-light: #f0a060;
+$lock-edge: #e07a30;
+$lock-gold: #ffcf4a;
+
+@mixin tier-tag($size: 10px, $pad: 3px 6px, $tracking: 0.06em, $radius: 4px, $pass-fill: none) {
+  border-radius: $radius;
+  color: #111;
+  flex-shrink: 0;
+  font-family: v.$font-base;
+  font-size: $size;
+  font-weight: 900;
+  letter-spacing: $tracking;
+  line-height: 1;
+  padding: $pad;
+  text-transform: uppercase;
+
+  &.lock {
+    background: $lock;
+    color: #fff;
+    @include lock-shine;
+  }
+
+  &.love {
+    background: v.$good;
+  }
+
+  &.like {
+    background: v.$caution;
+  }
+
+  &.fade {
+    background: v.$bad;
+  }
+
+  // (no edge on the price: outlined, not filled; a fill where it sits over a price tile)
+  &.pass {
+    background: $pass-fill;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.35);
+    color: rgba(255, 255, 255, 0.7);
+  }
+
+  // (a LOCK tag's padlock before its word, a touch under the letters' size, the two centered together)
+  &:has(.tier-lock) {
+    align-items: center;
+    display: inline-flex;
+    gap: 2px;
+  }
+
+  .tier-lock {
+    font-size: 1.05em;
+    height: 1em;
+    line-height: 1;
+    // (the glyph sits high in its box: down to the letters' middle)
+    transform: translateY(1px);
+    width: 1em;
+  }
+}
+
+// (a band's name in its color, as lettering: the Algorithm's By Confidence rows)
+@mixin tier-text {
+  &.lock {
+    color: $lock-light;
+  }
+
+  &.love {
+    color: v.$good;
+  }
+
+  &.like {
+    color: v.$caution;
+  }
+
+  &.pass {
+    color: rgba(255, 255, 255, 0.55);
+  }
+}
+
 // A LOCK tag that wants the eye: a glint sweeping across it every few seconds and a soft glowing pulse round it
 // (none with reduced motion). The keyframes at a stylesheet's root (lock-shine-keyframes), where Angular scopes
 // their names with the rules that use them
@@ -502,6 +374,7 @@ $felt-nap: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' wid
 
 @mixin lock-shine {
   overflow: hidden;
+  position: relative;
 
   @media (prefers-reduced-motion: no-preference) {
     animation: lock-pulse 2.4s ease-in-out infinite;

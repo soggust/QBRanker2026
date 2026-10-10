@@ -503,29 +503,6 @@ $bar-h: 30px;
   margin-left: auto;
 }
 
-.owner-line {
-  align-items: center;
-  @include kit.app-well(10px);
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px 14px;
-  padding: 8px 12px;
-
-  .owner-label {
-    color: rgba(255, 255, 255, 0.7);
-    font-size: 11px;
-    font-weight: 800;
-    letter-spacing: 1.2px;
-    text-transform: uppercase;
-  }
-
-  .owner-hint {
-    color: rgba(255, 255, 255, 0.5);
-    font-size: 12px;
-    margin-left: auto;
-  }
-}
-
 .today-note {
   align-items: center;
   @include kit.app-well(10px);
@@ -1242,11 +1219,6 @@ $bar-h: 30px;
 
   .tool-btn.lit span {
     display: inline;
-  }
-
-  .owner-line .owner-hint {
-    margin-left: 0;
-    width: 100%;
   }
 
   .list-grid {

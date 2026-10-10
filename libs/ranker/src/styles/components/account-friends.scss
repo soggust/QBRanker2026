@@ -234,17 +234,6 @@ card-panel.requests-panel {
   }
 }
 
-.icon-btn {
-  flex: 0 0 auto;
-  margin-left: auto;
-  padding: 0 !important;
-  width: 40px;
-
-  .mat-icon {
-    @include v.icon-size(20px);
-  }
-}
-
 @media (max-width: 640px) {
   .friends-bar .search-field {
     flex: 1 1 auto;

@@ -1102,23 +1102,6 @@
   }
 }
 
-// ---------------------------------------------------------------------------
-// Stats: each group a card like the filter menu's (a border in its category's color, and a header bar,
-// the scoreboard with the category's tint, that folds it shut), its tiles inside on the chalkboard
-// ---------------------------------------------------------------------------
-.card-group {
-  margin-top: 22px;
-
-  &:first-child {
-    margin-top: 0;
-  }
-
-  h3 {
-    @include group-heading;
-    margin: 0;
-  }
-}
-
 // The card's team accent: the team's own color (--team-badge, set on the card), its lightness kept in a
 // range that reads on the dark panels (a navy or a black lifted, its hue kept); the sport's accent
 // without one, or where the browser can't work it out

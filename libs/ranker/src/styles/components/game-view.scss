@@ -511,8 +511,7 @@
   width: 100%;
 }
 
-.game-facts,
-.game-line {
+.game-facts {
   display: grid;
   gap: 12px 20px;
   grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
@@ -545,16 +544,6 @@
     font-size: 12px;
     font-style: normal;
     font-weight: 700;
-  }
-}
-
-.game-line {
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
-  margin-top: 14px;
-  padding-top: 14px;
-
-  i {
-    color: var(--scoreboard-led);
   }
 }
 

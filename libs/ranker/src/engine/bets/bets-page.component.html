@@ -52,7 +52,6 @@
               }
               <!-- end wallet -->
             </select>
-            <svg class="chip-rim" aria-hidden="true"><rect pathLength="220" /></svg>
           </span>
         }
         @if (updated) {
@@ -120,9 +119,6 @@
         <!-- end wallet -->
         @for (r of shown; track r.id; let i = $index, n = $count) {
           <li class="bet" [ngClass]="level(r)" [class.open]="open.has(r.id)" [style.--i]="i">
-            <!-- (its chip rim's corner spots) -->
-            <i class="rim-corner tl" aria-hidden="true"></i><i class="rim-corner tr" aria-hidden="true"></i
-            ><i class="rim-corner bl" aria-hidden="true"></i><i class="rim-corner br" aria-hidden="true"></i>
             <!-- (the row, and its rank tile over the row's rank column: a button of its own, not one inside the row's) -->
             <div class="bet-line">
               <button type="button" class="bet-row" (click)="toggle(r.id)" [attr.aria-expanded]="open.has(r.id)">
@@ -130,7 +126,7 @@
                 <span class="bet-rank-slot" aria-hidden="true"></span>
                 <!-- (a like reads by its band: Lock, Love, Like, or Pass for a small edge or none on its price; a fade
                      "Fade", the side to go against) -->
-                <span class="bet-grade" [ngClass]="'grade-' + grade(r)">{{ grade(r) }}</span>
+                <span class="bet-grade" [ngClass]="grade(r)">{{ grade(r) }}</span>
                 <span class="bet-main" [class.has-circle]="r.strength !== 'fade'">
                   <!-- (a fade says what it fades, and the bet to make instead) -->
                   @if (r.strength === 'fade') {

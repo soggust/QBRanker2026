@@ -7,8 +7,8 @@
 // outline, as the rows' own chips), and the prices on the slip ringed in gold.
 
 // (a lock's colors: the casino's red, and its padlock's gold; bets-page.scss's)
-$lock: #d2691e;
-$lock-gold: #ffcf4a;
+$lock: chip.$lock;
+$lock-gold: chip.$lock-gold;
 
 :host {
   display: block;
@@ -177,7 +177,7 @@ $lock-gold: #ffcf4a;
   }
 
   &.lock {
-    --edge: #e07a30;
+    --edge: #{chip.$lock-edge};
     --wash: rgba(210, 105, 30, 0.06);
     box-shadow: 0 0 10px rgba(224, 122, 48, 0.4);
   }
@@ -275,37 +275,10 @@ $lock-gold: #ffcf4a;
 
 // (the bot's chip on its pick: the rows' Lock / Love / Like / Pass, small, over the tile's corner)
 .price-chip {
-  border-radius: 3px;
-  color: #111;
-  font-size: 8.5px;
-  font-weight: 900;
-  letter-spacing: 0.08em;
-  line-height: 1;
-  padding: 2px 4px;
+  @include chip.tier-tag(8.5px, 2px 4px, 0.08em, $pass-fill: #2a2f34);
   position: absolute;
   right: 5px;
-  text-transform: uppercase;
   top: -7px;
-
-  &.lock {
-    background: $lock;
-    color: #fff;
-    @include chip.lock-shine;
-  }
-
-  &.love {
-    background: v.$good;
-  }
-
-  &.like {
-    background: v.$caution;
-  }
-
-  &.pass {
-    background: #2a2f34;
-    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.35);
-    color: rgba(255, 255, 255, 0.75);
-  }
 }
 
 // The bot's props: a row each, the player's face, the bet, its price
@@ -316,23 +289,6 @@ $lock-gold: #ffcf4a;
   gap: 8px;
   margin-top: 6px;
   padding-top: 10px;
-}
-
-.lines-sub {
-  color: rgba(255, 255, 255, 0.85);
-  font-size: 11px;
-  font-weight: 900;
-  letter-spacing: 0.12em;
-  margin: 0;
-  text-transform: uppercase;
-
-  small {
-    color: rgba(255, 255, 255, 0.45);
-    font-weight: 700;
-    letter-spacing: 0.04em;
-    margin-left: 6px;
-    text-transform: none;
-  }
 }
 
 .prop {
@@ -433,18 +389,3 @@ $lock-gold: #ffcf4a;
 // (the LOCK tag's glint and pulse, _casino-chip.scss)
 @include chip.lock-shine-keyframes;
 
-// (a LOCK tag's padlock before its word, a touch under the letters' size, the two centered together)
-.price-chip:has(.tier-lock) {
-  align-items: center;
-  display: inline-flex;
-  gap: 2px;
-}
-
-.tier-lock {
-  font-size: 1.05em;
-  height: 1em;
-  line-height: 1;
-  // (the glyph sits high in its box: down to the letters' middle)
-  transform: translateY(1px);
-  width: 1em;
-}

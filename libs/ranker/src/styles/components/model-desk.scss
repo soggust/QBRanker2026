@@ -508,11 +508,6 @@ card-panel {
 
 .desk-chip {
   display: inline-flex;
-
-  // (felt now, no chip's spots)
-  .chip-rim {
-    display: none;
-  }
 }
 
 .desk-game-select {
@@ -1084,15 +1079,15 @@ card-panel {
 // (By Confidence: each band's name in its color, the Bets page's; the total under a firmer line)
 .desk-table {
   .desk-tier-lock th {
-    color: #f0a060;
+    color: chip.$lock-light;
   }
 
   .desk-tier-love th {
-    color: #3ecf6e;
+    color: v.$good;
   }
 
-  .desk-tier-bet th {
-    color: #ffcd00;
+  .desk-tier-like th {
+    color: v.$caution;
   }
 
   .desk-tier-pass th {

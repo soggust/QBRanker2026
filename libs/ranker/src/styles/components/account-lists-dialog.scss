@@ -213,25 +213,6 @@ list-modal {
     }
   }
 
-  .saved-note {
-    align-items: center;
-    background: rgba(62, 207, 110, 0.1);
-    border: 1px solid rgba(62, 207, 110, 0.4);
-    border-radius: 8px;
-    color: #c4f2d3;
-    display: flex;
-    font-size: 13.5px;
-    gap: 10px;
-    margin: 0;
-    padding: 10px 12px;
-
-    .mat-icon {
-      color: v.$good;
-      flex: 0 0 auto;
-      @include v.icon-size(20px);
-    }
-  }
-
   a.primary,
   a.secondary {
     text-decoration: none;

@@ -245,8 +245,9 @@ export class WalletService {
     this.slip.update((list) => list.filter((s) => s.key !== key));
   }
 
+  // (in half units, as the chips and the rules have them: a typed 2.7 is 2.5)
   setStake(key: string, stake: number): void {
-    this.slip.update((list) => list.map((s) => (s.key === key ? { ...s, stake: Math.max(0, Math.floor(stake) || 0) } : s)));
+    this.slip.update((list) => list.map((s) => (s.key === key ? { ...s, stake: Math.max(0, Math.floor(stake * 2) / 2 || 0) } : s)));
   }
 
   clearSlip(): void {

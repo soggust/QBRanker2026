@@ -8,8 +8,7 @@
 // and Clear history (an admin's), the confirmations, the leaderboard with each row's reloads, the bot's chips
 // ===========================================================================
 
-$lock: #d2691e;
-$gold: #ffcf4a;
+$gold: casino.$lock-gold;
 
 // (inside the app's sheet (app.component's shell: it scrolls, its pewter look around it); the sport's light
 // lights the controls)
@@ -325,37 +324,8 @@ $gold: #ffcf4a;
 }
 
 .w-tier {
-  border-radius: 4px;
-  color: #111;
+  @include casino.tier-tag(10px, 3px 6px, 0.05em);
   display: inline-block;
-  font-family: v.$font-base;
-  flex-shrink: 0;
-  font-size: 10px;
-  font-weight: 900;
-  letter-spacing: 0.05em;
-  line-height: 1;
-  padding: 3px 6px;
-  text-transform: uppercase;
-
-  &.lock {
-    background: $lock;
-    color: #fff;
-    position: relative;
-    @include casino.lock-shine;
-  }
-
-  &.love {
-    background: v.$good;
-  }
-
-  &.like {
-    background: v.$caution;
-  }
-
-  &.pass {
-    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.35);
-    color: rgba(255, 255, 255, 0.7);
-  }
 }
 
 .wallet-void {
@@ -625,18 +595,3 @@ $gold: #ffcf4a;
 // (the LOCK tag's glint and pulse, _casino-chip.scss)
 @include casino.lock-shine-keyframes;
 
-// (a LOCK tag's padlock before its word, a touch under the letters' size, the two centered together)
-.w-tier:has(.tier-lock) {
-  align-items: center;
-  display: inline-flex;
-  gap: 2px;
-}
-
-.tier-lock {
-  font-size: 1.05em;
-  height: 1em;
-  line-height: 1;
-  // (the glyph sits high in its box: down to the letters' middle)
-  transform: translateY(1px);
-  width: 1em;
-}

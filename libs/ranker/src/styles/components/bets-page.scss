@@ -2,8 +2,8 @@
 @use "../casino-chip" as chip;
 
 // (a lock's colors: chocolate, and its padlock's gold)
-$lock: #d2691e;
-$lock-gold: #ffcf4a;
+$lock: chip.$lock;
+$lock-gold: chip.$lock-gold;
 
 // The Bets page: one scoreboard panel down the middle of the page, a row per call, most
 // confident first; like green, fade red (as on the card's Analysis tab).
@@ -245,19 +245,9 @@ $lock-gold: #ffcf4a;
   }
 }
 
-// The game dropdown a casino chip (as the sports' dropdowns are leather, rubber...): red clay with a
-// speckle and a sheen, the white edge spots around its rim and a cream inlay ring just inside them
-$chip-clay: #b0202b;
-
-// The chip's rim: an outline along the middle of its border, dashed into 22 evenly spaced cream spots
-// (pathLength 220: a spot of 4 in every 10), round ends and all
+// (the game dropdown's wrapper: the felt dropdown itself is .bets-game)
 .bets-chip {
   display: inline-flex;
-
-  // (felt now, no chip's spots)
-  .chip-rim {
-    display: none;
-  }
 }
 
 .bets-game {
@@ -288,9 +278,6 @@ $chip-clay: #b0202b;
   flex-shrink: 0;
   // (its confidence color, the row and its open section washed in it)
   --soft: var(--tint);
-  border: 1px solid color-mix(in srgb, var(--soft) 45%, transparent);
-  border-radius: 6px;
-  overflow: hidden;
 
   // (a lock: chocolate, never the red of a loss)
   &.lock {
@@ -422,7 +409,7 @@ $chip-clay: #b0202b;
 
   // a lock: above the ranks, its padlock a light chocolate, glowing like the digits
   &.lock {
-    color: #f0a060;
+    color: chip.$lock-light;
     padding-top: 0;
     text-shadow: none;
 
@@ -433,47 +420,15 @@ $chip-clay: #b0202b;
   }
 }
 
+// (its band's tag, the row's own size, centered in its column; flat on its color, no shadow under the letters:
+// only Pass, outlined on the row, keeps the row's)
 .bet-grade {
-  border-radius: 4px;
-  color: #111;
-  font-size: 10.5px;
-  font-weight: 900;
-  letter-spacing: 0.8px;
-  // (capitals only: a line box of their height, a hair more above them, so they sit in the badge's middle)
-  line-height: 1;
-  padding: 5px 0 4px;
+  @include chip.tier-tag(10.5px, 5px 0 4px, 0.8px);
   text-align: center;
-  text-transform: uppercase;
-  // (flat on its color, no shadow under the letters: only Pass, outlined on the chip, keeps the row's)
   text-shadow: none;
 
-  // (by its band: Lock, Love, Like; a fade red; Pass outlined. grade-: a bare "bet" would be a bet's card,
-  // its rim and all)
-  &.grade-lock {
-    background: $lock;
-    color: #fff;
-    position: relative;
-    @include chip.lock-shine;
-  }
-
-  &.grade-love {
-    background: v.$good;
-  }
-
-  &.grade-like {
-    background: v.$caution;
-  }
-
-  &.grade-fade {
-    background: v.$bad;
-  }
-
-  // (no edge on the price: a bet the bot made for the data, not one to make; outlined, not filled)
-  &.grade-pass {
-    background: none;
+  &.pass {
     text-shadow: inherit;
-    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.35);
-    color: rgba(255, 255, 255, 0.6);
   }
 }
 
@@ -1347,14 +1302,6 @@ img.bet-face {
   }
 }
 
-// (a row shut: its face round all round, inside the rim)
-.bet:not(.open) .bet-row {
-  border-radius: 8px;
-}
-
-.bet .bet-reasons {
-  border-radius: 0 0 8px 8px;
-}
 
 // (the LOCK tag's glint and pulse, _casino-chip.scss)
 @include chip.lock-shine-keyframes;
