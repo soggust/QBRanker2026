@@ -1,10 +1,12 @@
 // The account module's plain pieces (no Angular, no Firebase): usernames, passwords, the profile's
 // fields, the friendly words for Firebase's error codes, and the avatar's resize math. Tested by
 // tests/accounts.test.mjs; firestore.rules checks the same limits on the server.
+import { isOffensive, isReservedUsername } from './name-filter';
 
 // ---------------------------------------------------------------------------
 // The profile
 // ---------------------------------------------------------------------------
+
 export type Visibility = 'public' | 'friends' | 'private';
 export type VisibilityKind = 'lists' | 'presets' | 'openBets' | 'betHistory' | 'tracker';
 
@@ -80,6 +82,8 @@ export function usernameProblem(typed: string): string | null {
   if (name.length < USERNAME_MIN) return `At least ${USERNAME_MIN} characters.`;
   if (name.length > USERNAME_MAX) return `At most ${USERNAME_MAX} characters.`;
   if (!USERNAME_PATTERN.test(name)) return 'Letters, numbers and underscores only.';
+  if (isReservedUsername(name)) return 'That username is reserved.';
+  if (isOffensive(name)) return 'Pick a different username.';
   return null;
 }
 
@@ -97,7 +101,8 @@ export function usernameFrom(displayName: string | null | undefined, email?: str
       .replace(/_+$/, '');
   for (const source of [displayName, email?.split('@')[0]]) {
     const name = tidy(source ?? '');
-    if (name.length >= USERNAME_MIN) return name;
+    // (not a name the filter turns away: the next source, or "fan")
+    if (name.length >= USERNAME_MIN && !isOffensive(name) && !isReservedUsername(name)) return name;
   }
   return 'fan';
 }
@@ -117,11 +122,13 @@ export function displayNameProblem(name: string): string | null {
   const trimmed = name.trim();
   if (!trimmed) return 'Add a display name.';
   if (trimmed.length > DISPLAY_NAME_MAX) return `At most ${DISPLAY_NAME_MAX} characters.`;
+  if (isOffensive(trimmed)) return 'Pick a different display name.';
   return null;
 }
 
 export function bioProblem(bio: string): string | null {
-  return bio.trim().length > BIO_MAX ? `At most ${BIO_MAX} characters.` : null;
+  if (bio.trim().length > BIO_MAX) return `At most ${BIO_MAX} characters.`;
+  return isOffensive(bio) ? 'Keep it clean: try different words.' : null;
 }
 
 // A new password: 8 or more characters, a letter and a number among them

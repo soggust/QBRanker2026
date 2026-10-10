@@ -75,3 +75,25 @@ test('the avatar: the middle square, 160px at most, never scaled up; under 40 KB
   assert.ok(h.AVATAR_BYTES < h.PHOTO_MAX);
   assert.deepEqual([...h.AVATAR_QUALITIES].sort((a, b) => b - a), h.AVATAR_QUALITIES);
 });
+
+test('the name filter: obscenities past their disguises, short words only whole, the site’s own names reserved', () => {
+  // (anywhere in a name, past case, look-alikes, repeats and padding)
+  for (const name of ['fuck', 'xx_FUCK_xx', 'fuuuck99', 'f_u_c_k', 'FuCk_u']) assert.equal(h.isOffensive(name), true, name);
+  // (short words only as a whole word: on their own, split by case, digits or underscores)
+  for (const name of ['shit', 'Big_Dick', 'BigDick', 'd1ck_69', '$hit', 'ass']) assert.equal(h.isOffensive(name), true, name);
+  // (ordinary names they hide inside)
+  for (const name of ['otter_raccoon', 'Dickson', 'classy', 'Sussex', 'Nazir', 'cocktail_hour', 'passion', 'August Gieseman']) assert.equal(h.isOffensive(name), false, name);
+  assert.equal(h.isReservedUsername('Admin'), true);
+  assert.equal(h.isReservedUsername('admin_1'), true);
+  assert.equal(h.isReservedUsername('SeasonRankerHQ'), true);
+  assert.equal(h.isReservedUsername('badminton'), false);
+  // (the checks the forms use)
+  assert.equal(h.usernameProblem('admin'), 'That username is reserved.');
+  assert.equal(h.usernameProblem('big_dick'), 'Pick a different username.');
+  assert.equal(h.usernameProblem('otter_raccoon'), null);
+  assert.equal(h.displayNameProblem('Shit Head'), 'Pick a different display name.');
+  assert.equal(h.displayNameProblem('Butkus'), null);
+  // (a name made from a sign-in that the filter turns away: the email's name instead, else "fan")
+  assert.equal(h.usernameFrom('Big Dick', 'jo.smith@example.com'), 'jo_smith');
+  assert.equal(h.usernameFrom('Admin', null), 'fan');
+});

@@ -3,6 +3,7 @@
 // columns showing), and the "Today" comparison against the season's data now. Tested by
 // tests/lists.test.mjs; firestore.rules checks the same limits.
 import type { Visibility } from '../account-helpers';
+import { isOffensive } from '../name-filter';
 
 // (the rows a list keeps: the top of the grid as it's ordered, so a list stays far under Firestore's 1 MB
 // a document, about 100 KB at most with every column showing)
@@ -244,11 +245,13 @@ export function titleProblem(title: string): string | null {
   const t = title.trim();
   if (!t) return 'Give it a title.';
   if (t.length > TITLE_MAX) return `At most ${TITLE_MAX} characters.`;
+  if (isOffensive(t)) return 'Pick a different title.';
   return null;
 }
 
 export function noteProblem(note: string): string | null {
-  return note.trim().length > NOTE_MAX ? `At most ${NOTE_MAX} characters.` : null;
+  if (note.trim().length > NOTE_MAX) return `At most ${NOTE_MAX} characters.`;
+  return isOffensive(note) ? 'Keep it clean: try different words.' : null;
 }
 
 // (a team logo's address from anywhere on the site: an app's own path made absolute under its sport)
