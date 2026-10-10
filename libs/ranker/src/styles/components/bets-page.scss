@@ -10,7 +10,9 @@ $lock-gold: #ffcf4a;
 
 // The page on a card-room table: blue speed cloth (a tight crosshatch weave and a fine fiber over a soft
 // mottle, a warm light pooled in the middle, the edges falling off into shadow)
+// (its light the tables' gold, the same from every sport: the tabs, the chips' and the digits' accents)
 :host {
+  --scoreboard-led: #{chip.$gold-led};
   background:
     radial-gradient(ellipse 60% 50% at 50% 30%, rgba(255, 236, 200, 0.1), transparent 70%),
     radial-gradient(ellipse 120% 90% at 50% 40%, transparent 35%, rgba(0, 0, 0, 0.72) 100%),
@@ -288,12 +290,13 @@ $chip-clay: #b0202b;
     border-bottom: 1px solid chip.$felt-seam;
   }
 
-  // (a Bet's yellow a touch softer on its bar, its rail's gold half as strong)
+  // (a Bet: its rail's gold softer than a Love's, a little brighter in its lights; its bar the plain scoreboard,
+  // yellow over it reading brown)
   &.medium {
-    --rail: linear-gradient(135deg, rgba(122, 90, 30, 0.45), rgba(241, 213, 140, 0.5) 22%, rgba(179, 138, 60, 0.45) 45%, rgba(246, 226, 164, 0.5) 62%, rgba(156, 118, 48, 0.45) 82%, rgba(110, 81, 27, 0.45));
+    --rail: linear-gradient(135deg, rgba(150, 114, 40, 0.6), rgba(255, 228, 150, 0.7) 22%, rgba(204, 160, 70, 0.6) 45%, rgba(255, 236, 176, 0.7) 62%, rgba(180, 140, 58, 0.6) 82%, rgba(130, 98, 34, 0.6));
 
     .bet-row {
-      --bar-tint: color-mix(in srgb, var(--soft) 11%, transparent);
+      --bar-tint: transparent;
     }
   }
 
@@ -547,14 +550,11 @@ $chip-clay: #b0202b;
   @include v.icon-size(20px);
 }
 
-// (open: on the scoreboard, as a card panel's body is, a breath of its row's color in it; it unfolds down from its
-// row, as a card panel does)
+// (open: the table's felt, as every panel's body is (the bet's own, _casino-chip.scss: nothing over it); it
+// unfolds down from its row, as a card panel does)
 .bet-reasons {
   animation: bet-unfold 0.24s cubic-bezier(0.2, 0.8, 0.2, 1);
-  background:
-    linear-gradient(color-mix(in srgb, var(--soft) 6%, transparent), color-mix(in srgb, var(--soft) 6%, transparent)),
-    var(--scoreboard-dots),
-    var(--scoreboard);
+  background: none;
   padding: 14px 20px 16px;
 
   p {
