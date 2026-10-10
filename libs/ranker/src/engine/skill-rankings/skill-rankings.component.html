@@ -326,14 +326,15 @@
       <mat-icon aria-hidden="true" [fontIcon]="filtersOpen ? 'filter_alt_off' : 'filter_alt'"></mat-icon>
     </button>
 
-    <!-- Copy the list (text and a table with logos) -->
-    <button type="button" #copyButton (click)="copyList(copyButton)" aria-label="Copy the list" title="Copy to clipboard" class="copy-toggle">
-      <mat-icon aria-hidden="true" fontIcon="content_copy"></mat-icon>
+    <!-- lists (round 2): Save the list (a floppy disk: the save dialog with the default title filled in;
+         signed out, the sign-in first), in the copy button's old place and look (its class keeps the order) -->
+    <button type="button" (click)="openSaveList()" aria-label="Save this list" title="Save this list to My Lists" class="copy-toggle save-toggle">
+      <mat-icon aria-hidden="true" fontIcon="save"></mat-icon>
     </button>
 
-    <!-- Share the list: a link with its tab, season, sliders and settings (share.ts) -->
-    <!-- lists (phase 2): Share opens a menu, a link or Save this list… -->
-    <button type="button" #shareButton [matMenuTriggerFor]="shareMenu" aria-label="Share: a link, or save this list" title="Share a link, or save this list" class="share-toggle">
+    <!-- Share the list: Copy to Clipboard (text and a table with logos), or Copy Link (its tab, season,
+         sliders and settings: share.ts) -->
+    <button type="button" #shareButton [matMenuTriggerFor]="shareMenu" aria-label="Share: copy the list or a link" title="Copy the list or a link" class="share-toggle">
     <!-- end lists -->
       <mat-icon aria-hidden="true" fontIcon="share"></mat-icon>
     </button>
@@ -448,27 +449,27 @@
     </button>
   </footer>
 
-  <!-- lists (phase 2): the Share button's menu -->
+  <!-- lists (round 2): the Share button's menu -->
   <mat-menu #shareMenu="matMenu" class="more-menu">
-    <button mat-menu-item type="button" (click)="shareList(shareButton)">
-      <mat-icon aria-hidden="true" fontIcon="link"></mat-icon><span>Copy a link</span>
+    <button mat-menu-item type="button" (click)="copyList(shareButton)">
+      <mat-icon aria-hidden="true" fontIcon="content_copy"></mat-icon><span>Copy to Clipboard</span>
     </button>
-    <button mat-menu-item type="button" (click)="openSaveList()">
-      <mat-icon aria-hidden="true" fontIcon="playlist_add"></mat-icon><span>Save this list…</span>
+    <button mat-menu-item type="button" (click)="shareList(shareButton)">
+      <mat-icon aria-hidden="true" fontIcon="link"></mat-icon><span>Copy Link</span>
     </button>
   </mat-menu>
   <!-- end lists -->
 
   <mat-menu #moreMenu="matMenu" class="more-menu" xPosition="before">
+    <!-- lists (round 2): the toolbar's Save, then the Share menu's two -->
+    <button mat-menu-item type="button" (click)="openSaveList()">
+      <mat-icon aria-hidden="true" fontIcon="save"></mat-icon><span>Save this list</span>
+    </button>
     <button mat-menu-item type="button" (click)="copyList(moreButton)">
-      <mat-icon aria-hidden="true" fontIcon="content_copy"></mat-icon><span>Copy the list</span>
+      <mat-icon aria-hidden="true" fontIcon="content_copy"></mat-icon><span>Copy to Clipboard</span>
     </button>
     <button mat-menu-item type="button" (click)="shareList(moreButton)">
-      <mat-icon aria-hidden="true" fontIcon="share"></mat-icon><span>Share a link</span>
-    </button>
-    <!-- lists (phase 2) -->
-    <button mat-menu-item type="button" (click)="openSaveList()">
-      <mat-icon aria-hidden="true" fontIcon="playlist_add"></mat-icon><span>Save this list…</span>
+      <mat-icon aria-hidden="true" fontIcon="link"></mat-icon><span>Copy Link</span>
     </button>
     <!-- end lists -->
     <button mat-menu-item type="button" (click)="openAbout()">
@@ -486,8 +487,20 @@
 <player-card [cards]="cards" [compare]="compareFromCard"></player-card>
 <!-- (a game: from a Recent dot, or a game log's row) -->
 <game-view></game-view>
-<!-- lists (phase 2): Save this list… -->
+<!-- lists (round 2): Save this list (the dialog closes as it saves; then the toast with Open and Rename) -->
 @if (listDraft) {
-  <save-list-dialog [draft]="listDraft" [listed]="playerList.length" [suggestedTitle]="listTitle" (closed)="listDraft = null"></save-list-dialog>
+  <save-list-dialog [draft]="listDraft" [listed]="playerList.length" [suggestedTitle]="listTitle" (closed)="listDraft = null" (saved)="listSaved($event)"></save-list-dialog>
 }
+@if (renaming; as r) {
+  <save-list-dialog [renameId]="r.id" [suggestedTitle]="r.title" (closed)="renaming = null" (saved)="listSaved($event, true)"></save-list-dialog>
+}
+<div class="save-toast" [class.show]="!!savedList" role="status" aria-live="polite">
+  @if (savedList; as saved) {
+    <mat-icon class="save-toast-icon" aria-hidden="true" fontIcon="check_circle"></mat-icon>
+    <span class="save-toast-text">{{ saved.renamed ? 'Renamed' : 'Saved to My Lists' }}</span>
+    <a class="save-toast-action" [href]="saved.href">Open</a>
+    <button type="button" class="save-toast-action" (click)="renameSaved()">Rename</button>
+    <button type="button" class="save-toast-close" aria-label="Dismiss" title="Dismiss" (click)="dismissSaved()"><mat-icon aria-hidden="true" fontIcon="close"></mat-icon></button>
+  }
+</div>
 <!-- end lists -->

@@ -1,4 +1,5 @@
 import { Component, ElementRef, HostListener, OnInit, ViewChild, inject, isDevMode } from '@angular/core';
+import { BetsView, betsView, chooseBetsView } from './bets-view';
 // ---- wallet (phase 2) ----
 import { LinesService } from '../account/wallet/lines.service';
 // ---- end wallet ----
@@ -255,8 +256,13 @@ export class BetsPageComponent implements OnInit {
 
   // (the model desk's admin panel: on the dev server only)
   readonly dev = isDevMode();
-  // (development opens on the Algorithm, the live site has only the bets)
-  view: 'bets' | 'desk' = isDevMode() ? 'desk' : 'bets';
+  // (Bets first; the Algorithm (development only) once chosen in this visit: bets-view.ts)
+  get view(): BetsView {
+    return this.dev ? betsView() : 'bets';
+  }
+  set view(view: BetsView) {
+    chooseBetsView(view);
+  }
 
   rows: BetRow[] | null = null;
   updated: string | null = null;

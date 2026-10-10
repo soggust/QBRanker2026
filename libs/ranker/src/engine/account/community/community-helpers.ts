@@ -122,3 +122,11 @@ export function leaderboard(cards: { tally: VoteTally; entry: { owner: string; o
     .sort((a, b) => b.score - a.score || b.lists - a.lists || a.name.localeCompare(b.name))
     .slice(0, top);
 }
+
+// The board to show when none was asked for (#community alone): the guess (the rankings' tab), unless its
+// board is empty and another position's isn't; then the first with lists (in the sport's tab order). The
+// lists counted per tab, in that order; -1 keeps the guess.
+export function boardWithLists(counts: number[], guess: number): number {
+  if (counts[guess] > 0) return -1;
+  return counts.findIndex((n) => n > 0);
+}

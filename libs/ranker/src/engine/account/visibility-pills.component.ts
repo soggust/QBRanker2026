@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, Output, booleanAttribute } from '@angular/core';
 import { VISIBILITY_CHOICES, Visibility } from './account-helpers';
 
-// Who sees something: Public, Friends, Only me, as the sport's small pills (a radio group: the arrow keys
+// Who sees something: Public, Friends, Only me, as the app's sand pills (a radio group: the arrow keys
 // move along it). The Privacy settings, a list's own (saving, editing, its page) and the Tracker's.
 @Component({
   selector: 'visibility-pills',
@@ -10,7 +10,7 @@ import { VISIBILITY_CHOICES, Visibility } from './account-helpers';
       <button
         type="button"
         role="radio"
-        class="game-filter small"
+        class="vis-pill"
         [class.active]="value === choice.value"
         [attr.aria-checked]="value === choice.value"
         [attr.tabindex]="value === choice.value || (!value && i === 0) ? 0 : -1"

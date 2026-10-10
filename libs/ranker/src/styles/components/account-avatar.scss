@@ -15,12 +15,16 @@
 }
 
 img {
+  display: block;
   height: 100%;
   object-fit: cover;
   width: 100%;
 
-  // (a team logo: all of it, on a dark disc)
+  // (a team logo: all of it, on a dark disc, its padding inside the circle so it sits dead center)
   &.logo {
+    box-sizing: border-box;
+    flex: 0 0 100%;
+    min-width: 0;
     object-fit: contain;
     padding: 12%;
   }

@@ -13,7 +13,7 @@ import { Profile, errorMessage } from '../account-helpers';
 import { canUse } from '../features';
 import { logoUrl } from '../lists/lists-helpers';
 import { CommunityStore, EntryCard } from './community.store';
-import { ConsensusRow, Maker, boardKey, byScore, consensus, leaderboard } from './community-helpers';
+import { ConsensusRow, Maker, boardKey, boardWithLists, byScore, consensus, leaderboard } from './community-helpers';
 
 // (#community/<tab>/<season>: the board asked for; the rankings' tab and the current season otherwise)
 export function readCommunityHash(hash: string): { tab: string | null; season: number | null } {
@@ -79,13 +79,19 @@ export class CommunityPageComponent implements OnDestroy {
     this.destroyed = true;
   }
 
+  // (the board was asked for by its address; otherwise it's a guess, and an empty guess moves on to a
+  // position that has lists: see loadMakers)
+  private asked = false;
+
   @HostListener('window:hashchange')
   fromHash(): void {
     const { tab, season } = readCommunityHash(location.hash);
-    // (no tab asked for: the one the rankings were on)
+    this.asked = !!tab && this.tabs.includes(tab);
+    // (nothing asked for: the tab and season the rankings are on, when this page came from them)
     const shown = this.positions.position as string;
-    const nextTab = tab && this.tabs.includes(tab) ? tab : this.tabs.includes(shown) ? shown : this.tabs[0];
-    const nextSeason = season && SEASONS.includes(season) ? season : CURRENT_SEASON;
+    const shownSeason = this.positions.season;
+    const nextTab = this.asked ? tab! : this.tabs.includes(shown) ? shown : this.tabs[0];
+    const nextSeason = season && SEASONS.includes(season) ? season : !tab && SEASONS.includes(shownSeason) ? shownSeason : CURRENT_SEASON;
     if (nextTab === this.tab && nextSeason === this.season && this.state !== 'loading') return;
     this.tab = nextTab;
     this.season = nextSeason;
@@ -103,6 +109,12 @@ export class CommunityPageComponent implements OnDestroy {
 
   seasonName(season: number): string {
     return isLiveSeason(season) ? `${SPORT.seasonText(season)} (current)` : SPORT.seasonText(season);
+  }
+
+  // (how many lists each position's board has this season, once counted)
+  listCount(tab: string): number | null {
+    const i = this.tabs.indexOf(tab);
+    return this.seasonCards.length && i >= 0 ? (this.seasonCards[i]?.length ?? 0) : null;
   }
 
   get boardName(): string {
@@ -130,6 +142,12 @@ export class CommunityPageComponent implements OnDestroy {
       if (load !== this.loadCount || this.destroyed) return;
       this.cards = byScore(cards);
       this.rows = consensus(cards.map((c) => c.entry));
+      if (!this.asked && !cards.length) {
+        // (an empty guess: every position counted first, and on to one that has lists)
+        await this.loadMakers(load);
+        if (load === this.loadCount && !this.destroyed) this.state = 'ready';
+        return;
+      }
       this.state = 'ready';
       for (const card of cards) {
         if (!this.profiles.has(card.entry.owner)) {
@@ -175,6 +193,14 @@ export class CommunityPageComponent implements OnDestroy {
       );
       if (load !== this.loadCount || this.destroyed) return;
       this.seasonCards = boards;
+      // (a guessed board with no lists, when another position has some: that one instead, so a list
+      // submitted on another tab isn't hidden behind an empty board)
+      const withLists = this.asked ? -1 : boardWithLists(boards.map((b) => b.length), this.tabs.indexOf(this.tab));
+      if (withLists >= 0) {
+        history.replaceState(null, '', `${location.pathname}${location.search}#community/${encodeURIComponent(this.tabs[withLists])}/${this.season}`);
+        this.fromHash();
+        return;
+      }
       this.makers = leaderboard(boards.flat(), 5);
       for (const maker of this.makers) {
         if (!this.profiles.has(maker.owner)) void this.store.profile(maker.owner).then((p) => this.profiles.set(maker.owner, p));

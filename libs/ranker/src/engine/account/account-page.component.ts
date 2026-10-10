@@ -1,6 +1,7 @@
-import { Component, OnDestroy, effect } from '@angular/core';
+import { Component, ElementRef, HostListener, OnDestroy, ViewChild, effect } from '@angular/core';
 import { SPORT } from '@sport/sport';
 import { DATA } from '@ranker/engine/data';
+import { SITE_SPORTS } from '@ranker/core/sports';
 import { logoFile } from '@ranker/engine/row-fields';
 import { canUse } from './features';
 import { AccountService, SocialProvider } from './account.service';
@@ -56,8 +57,12 @@ export async function resizeAvatar(file: Blob): Promise<string> {
   }
 }
 
-// The settings page (#account): the profile (name, username, bio, picture), who sees what, and the account
-// itself (email, sign-in methods, password, sign out, delete). Signed out, a prompt to sign in.
+// (#account/privacy: Settings with its Privacy panel open, scrolled to)
+export const PRIVACY_HASH = '#account/privacy';
+
+// The Settings page (#account): the profile (the picture, sign-in methods and password, the email, name,
+// username and bio; deleting the account at its foot) and who sees what (Privacy), each a panel that folds
+// (the profile open). Signed out, a prompt to sign in.
 @Component({
   selector: 'account-page',
   templateUrl: './account-page.component.html',
@@ -96,6 +101,10 @@ export class AccountPageComponent implements OnDestroy {
   visibilitySaved: VisibilityKind | null = null;
   privacyError = '';
 
+  // The panels (the profile open; Privacy shut unless the hash asks for it)
+  profileOpen = true;
+  privacyOpen = location.hash === PRIVACY_HASH;
+
   // The account
   currentPassword = '';
   newPassword = '';
@@ -110,6 +119,7 @@ export class AccountPageComponent implements OnDestroy {
   deletePassword = '';
   deleteBusy = false;
   deleteError = '';
+  @ViewChild('confirmInput') private confirmInput?: ElementRef<HTMLInputElement>;
 
   constructor(readonly account: AccountService) {
     // (the page needs the sign-in known: load it if nothing has)
@@ -126,6 +136,27 @@ export class AccountPageComponent implements OnDestroy {
         this.usernameState = 'same';
       }
     });
+    if (this.privacyOpen) this.showPrivacy();
+  }
+
+  // (#account/privacy while already here: open Privacy and bring it into view)
+  @HostListener('window:hashchange')
+  onHashChange(): void {
+    if (location.hash !== PRIVACY_HASH) return;
+    this.privacyOpen = true;
+    this.showPrivacy();
+  }
+
+  // (once the page has drawn it: the panel scrolled into view, inside the page's scrolling body)
+  private showPrivacy(): void {
+    let tries = 0;
+    const find = () => {
+      const panel = document.getElementById('privacy-settings');
+      const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (panel) panel.scrollIntoView({ block: 'start', behavior: still ? 'auto' : 'smooth' });
+      else if (++tries < 40) setTimeout(find, 100);
+    };
+    setTimeout(find);
   }
 
   ngOnDestroy(): void {
@@ -232,25 +263,31 @@ export class AccountPageComponent implements OnDestroy {
   // ---------------------------------------------------------------------------
   // The picture
   // ---------------------------------------------------------------------------
-  // The current sport's teams' logos, to pick one as the picture (MMA's fighters have flags: none)
+  // The team logos to pick one as the picture: any team sport's, the one this page is on to begin with (MMA's
+  // fighters have flags: none); another sport's read from its own data on this site, once a visit
+  readonly logoSports = SITE_SPORTS.filter((sport) => sport.id !== 'mma');
+  logoSport = this.logoSports.some((sport) => sport.id === SPORT.id) ? SPORT.id : (this.logoSports[0]?.id ?? SPORT.id);
+  logosLoading = false;
+  private logoLists = new Map<string, { url: string; label: string }[]>();
+
   get logos(): { url: string; label: string }[] {
-    if (this.cachedLogos) return this.cachedLogos;
-    const seen = new Map<string, string>();
-    const tabs = (DATA.skillPlayers ?? {}) as Record<string, { teamLogo?: string }[]>;
-    for (const rows of Object.values(tabs)) {
-      if (!Array.isArray(rows)) continue;
-      for (const row of rows) {
-        const logo = row?.teamLogo;
-        if (!logo || /^https?:/.test(logo) || seen.has(logo)) continue;
-        seen.set(logo, logoFile(logo) ?? logo);
-      }
-    }
-    this.cachedLogos = [...seen]
-      .map(([logo, label]) => ({ url: `/${SPORT.id}/${logo}`, label }))
-      .sort((a, b) => a.label.localeCompare(b.label));
-    return this.cachedLogos;
+    if (!this.logoLists.has(SPORT.id)) this.logoLists.set(SPORT.id, teamLogos(DATA.skillPlayers, SPORT.id));
+    return this.logoLists.get(this.logoSport) ?? [];
   }
-  private cachedLogos: { url: string; label: string }[] | null = null;
+
+  async showLogos(sport: string): Promise<void> {
+    this.logoSport = sport;
+    if (this.logoLists.has(sport) || sport === SPORT.id) return;
+    this.logosLoading = true;
+    try {
+      const res = await fetch(`/${sport}/data/skill-players.json`);
+      this.logoLists.set(sport, res.ok ? teamLogos(await res.json(), sport) : []);
+    } catch {
+      this.logoLists.set(sport, []);
+    } finally {
+      this.logosLoading = false;
+    }
+  }
 
   private async setPhoto(photo: Photo | null): Promise<void> {
     this.photoBusy = true;
@@ -373,12 +410,16 @@ export class AccountPageComponent implements OnDestroy {
     }
   }
 
-  async signOut(): Promise<void> {
-    try {
-      await this.account.signOut();
-    } catch (error) {
-      this.accountError = errorMessage(error);
-    }
+  // Deleting the account: its confirmation in place of the Profile panel's content (the panel opened)
+  openDelete(): void {
+    this.deleteOpen = true;
+    this.profileOpen = true;
+    setTimeout(() => this.confirmInput?.nativeElement.focus());
+  }
+
+  cancelDelete(): void {
+    this.deleteOpen = false;
+    this.deleteConfirm = this.deletePassword = this.deleteError = '';
   }
 
   get deleteReady(): boolean {
@@ -406,4 +447,19 @@ export class AccountPageComponent implements OnDestroy {
       this.deleteBusy = false;
     }
   }
+}
+
+// A sport's team logos from its rows (every tab's, once each, its own asset path on this site), by the team's
+// name where the row has one, else the logo's file name
+function teamLogos(tabs: unknown, sport: string): { url: string; label: string }[] {
+  const seen = new Map<string, string>();
+  for (const rows of Object.values((tabs ?? {}) as Record<string, unknown>)) {
+    if (!Array.isArray(rows)) continue;
+    for (const row of rows as { teamLogo?: string; teamName?: string }[]) {
+      const logo = row?.teamLogo;
+      if (!logo || /^https?:/.test(logo) || seen.has(logo)) continue;
+      seen.set(logo, row.teamName ?? logoFile(logo) ?? logo);
+    }
+  }
+  return [...seen].map(([logo, label]) => ({ url: `/${sport}/${logo}`, label })).sort((a, b) => a.label.localeCompare(b.label));
 }

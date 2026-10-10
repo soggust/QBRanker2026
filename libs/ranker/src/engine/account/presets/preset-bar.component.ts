@@ -49,8 +49,8 @@ type Dialog = { mode: 'save' } | { mode: 'rename'; preset: UserPreset } | { mode
           <p class="modal-lede">Delete <strong>{{ d.preset.name }}</strong>? The sliders stay as they are; only the preset goes.</p>
           @if (error) { <p class="form-error" role="alert">{{ error }}</p> }
           <div class="modal-actions">
-            <button type="button" class="link" [disabled]="busy" (click)="dialog = null">Cancel</button>
-            <button type="button" class="danger" [disabled]="busy" (click)="remove(d.preset)">
+            <button type="button" class="app-btn-outline" [disabled]="busy" (click)="dialog = null">Cancel</button>
+            <button type="button" class="app-btn-danger" [disabled]="busy" (click)="remove(d.preset)">
               @if (busy) { <span class="spinner" aria-hidden="true"></span> }
               Delete
             </button>
@@ -67,8 +67,8 @@ type Dialog = { mode: 'save' } | { mode: 'rename'; preset: UserPreset } | { mode
             </label>
             @if (error) { <p class="form-error" role="alert">{{ error }}</p> }
             <div class="modal-actions">
-              <button type="button" class="link" [disabled]="busy" (click)="dialog = null">Cancel</button>
-              <button type="submit" class="primary" [disabled]="busy">
+              <button type="button" class="app-btn-outline" [disabled]="busy" (click)="dialog = null">Cancel</button>
+              <button type="submit" class="app-btn-primary" [disabled]="busy">
                 @if (busy) { <span class="spinner" aria-hidden="true"></span> }
                 {{ d.mode === 'save' ? 'Save preset' : 'Rename' }}
               </button>

@@ -1,9 +1,11 @@
-import { Component, OnDestroy, OnInit, computed, effect, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, computed, effect, isDevMode, signal } from '@angular/core';
 import { ModelBet, Settled } from '../../bets/desk-model';
 import { CURVE_W } from '../../bets/desk-math';
 import { hideImage, leagueLogo, teamLogo, headshot } from '../../bets/bet-format';
 import { AccountService } from '../account.service';
-import { canUse } from '../features';
+import { ADMIN, canUse } from '../features';
+import { chooseBetsView } from '../../bets/bets-view';
+import { PRIVACY_HASH } from '../account-page.component';
 import { LinesService } from './lines.service';
 import { WalletService } from './wallet.service';
 import {
@@ -52,13 +54,22 @@ export class WalletPageComponent implements OnInit, OnDestroy {
   // (each sport's ledger: the bot's bets, for the comparison)
   private readonly ledger = signal<ModelBet[] | null>(null);
 
+  // (the three boards, read once: the panel shows only with someone on one, its periods only those with rows)
   readonly period = signal<Period>('week');
-  readonly board = signal<Leaderboard | null | undefined>(undefined);
-  readonly periods: { id: Period; label: string }[] = [
+  private readonly boards = signal<Partial<Record<Period, Leaderboard | null>> | undefined>(undefined);
+  private readonly allPeriods: { id: Period; label: string }[] = [
     { id: 'week', label: 'This week' },
     { id: 'season', label: 'Season' },
     { id: 'all', label: 'All time' },
   ];
+  readonly periods = computed(() => this.allPeriods.filter((p) => this.boards()?.[p.id]?.rows?.length));
+  readonly board = computed(() => this.boards()?.[this.period()] ?? null);
+  // (Clear history: an admin's (the token's claim), and in development for testing)
+  readonly admin = (): boolean => isDevMode() || ADMIN();
+  // (a link to the Bets page lands on its Bets, not the Algorithm)
+  readonly toBets = (): void => chooseBetsView('bets');
+  // (Settings, its Privacy panel open: where bet history goes public)
+  readonly privacyHash = PRIVACY_HASH;
 
   // The confirmations: Reload's, and Clear history's (typed)
   confirming: 'reload' | 'clear' | null = null;
@@ -116,7 +127,7 @@ export class WalletPageComponent implements OnInit, OnDestroy {
     void this.account.start().catch(() => undefined);
     void this.refresh();
     this.timer = setInterval(() => void this.refresh(), 60e3);
-    void this.loadBoard('week');
+    void this.loadBoards();
     Promise.all(
       SPORTS.map((s) =>
         fetch(`/${s}/data/model/ledger.json`, { cache: 'no-cache' })
@@ -151,15 +162,14 @@ export class WalletPageComponent implements OnInit, OnDestroy {
     this.propNow.set(next);
   }
 
-  async loadBoard(period: Period): Promise<void> {
-    this.period.set(period);
-    this.board.set(undefined);
-    try {
-      const board = await this.wallet.leaderboard(period);
-      if (this.period() === period) this.board.set(board);
-    } catch {
-      if (this.period() === period) this.board.set(null);
-    }
+  private async loadBoards(): Promise<void> {
+    const got = await Promise.all(this.allPeriods.map((p) => this.wallet.leaderboard(p.id).catch(() => null)));
+    const boards: Partial<Record<Period, Leaderboard | null>> = {};
+    this.allPeriods.forEach((p, i) => (boards[p.id] = got[i]));
+    this.boards.set(boards);
+    // (the first period with anyone on it)
+    const first = this.periods()[0];
+    if (first) this.period.set(first.id);
   }
 
   // ---------------------------------------------------------------------------

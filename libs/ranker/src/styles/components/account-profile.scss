@@ -1,4 +1,5 @@
 @use "../variables" as v;
+@use "account-kit" as kit;
 
 // ===========================================================================
 // A public profile (#u/<username>: user-profile.component.ts), on the account pages' column and panels
@@ -485,4 +486,10 @@
   .stat-value {
     font-size: 15px;
   }
+}
+
+// (your own profile's Edit profile: the app's filled sand button)
+.edit-profile {
+  @include kit.primary-button;
+  @include kit.small-button;
 }

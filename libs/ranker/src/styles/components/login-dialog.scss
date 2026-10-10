@@ -2,10 +2,12 @@
 @use "account-kit" as kit;
 
 // ===========================================================================
-// The login dialog: a scoreboard panel over the dimmed page (like About), the site's podium and the title
-// on top, the form on the chalkboard below
+// The login dialog: a scoreboard panel over the dimmed page (like About), the account's badge (the app's
+// pewter, a sand padlock) and the title on top, the form on pewter below
 // ===========================================================================
 :host {
+  @include kit.app-tokens;
+  @include kit.agnostic;
   inset: 0;
   position: fixed;
   z-index: 1000;
@@ -57,12 +59,48 @@ header {
   }
 }
 
-.login-logo {
-  fill: var(--scoreboard-led);
-  filter: drop-shadow(0 0 3px color-mix(in srgb, var(--scoreboard-led) 50%, transparent));
+.login-badge {
+  align-items: center;
+  background:
+    radial-gradient(circle at 35% 28%, rgba(255, 238, 220, 0.22), transparent 60%),
+    linear-gradient(160deg, var(--app-pewter-light), var(--app-pewter-deep));
+  border-radius: 50%;
+  box-shadow:
+    0 0 0 1px var(--app-sheet-edge),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.45),
+    0 2px 6px rgba(0, 0, 0, 0.5);
+  color: #f4ece2;
+  display: flex;
   flex: 0 0 auto;
-  height: 22px;
-  width: 22px;
+  height: 36px;
+  justify-content: center;
+  position: relative;
+  width: 36px;
+
+  > .mat-icon {
+    filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.6));
+    @include v.icon-size(22px);
+  }
+}
+
+// (the padlock: a small sand disc on the badge's lower right)
+.login-lock {
+  align-items: center;
+  background: var(--app-sand);
+  border: 2px solid #141414;
+  border-radius: 50%;
+  bottom: -3px;
+  display: flex;
+  height: 17px;
+  justify-content: center;
+  position: absolute;
+  right: -4px;
+  width: 17px;
+
+  .mat-icon {
+    color: #1b1714;
+    @include v.icon-size(10px);
+  }
 }
 
 .login-close {
@@ -88,11 +126,10 @@ header {
   }
 }
 
-// The body: the chalkboard under a dark wash (About's), scrolling when a short screen needs it
+// The body: the app's warm pewter black (the account's look, the same on every sport), scrolling when a
+// short screen needs it
 .login-body {
-  background:
-    linear-gradient(rgba(0, 0, 0, 0.32), rgba(0, 0, 0, 0.32)),
-    v.$chalk-dust;
+  background: linear-gradient(180deg, var(--app-pewter-deep), var(--app-pewter-ink));
   display: flex;
   flex-direction: column;
   gap: 14px;

@@ -1,0 +1,160 @@
+<article class="legal">
+  <!-- (the two pages, one tab each, and when they last changed) -->
+  <nav class="legal-tabs" aria-label="Policies">
+    <a href="#privacy" [class.active]="page === 'privacy'" [attr.aria-current]="page === 'privacy' ? 'page' : null">Privacy Policy</a>
+    <a href="#data-deletion" [class.active]="page === 'data-deletion'" [attr.aria-current]="page === 'data-deletion' ? 'page' : null">Data Deletion</a>
+  </nav>
+
+  @if (page === 'privacy') {
+    <h2>Privacy Policy</h2>
+    <p class="legal-updated">Last updated {{ updated }}</p>
+
+    <p class="legal-lede">
+      Season Ranker ranks players from public stats. You can use the rankings without an account. An account is
+      optional and lets you save things. This page says what we keep, who can see it, and how to remove it.
+    </p>
+
+    <section>
+      <h3>Without an account</h3>
+      <ul>
+        <li>
+          <strong>Analytics.</strong> Google Analytics (through Firebase) records page views and general device and
+          location information (country, browser) so we can see which pages are used. It isn't tied to your account.
+        </li>
+        <li>
+          <strong>Your browser.</strong> Your sliders, filters and display settings are kept in your browser's local
+          storage, on your device only.
+        </li>
+        <li>
+          <strong>Pictures and odds.</strong> Team logos, headshots and game odds load from ESPN and the leagues'
+          public sites, so your browser contacts them as it would any image.
+        </li>
+      </ul>
+    </section>
+
+    <section>
+      <h3>With an account</h3>
+      <p>Accounts run on Google Firebase (Authentication and Cloud Firestore). We keep:</p>
+      <ul>
+        <li>
+          <strong>Your sign-in.</strong> Your email address and the sign-in methods you use (Google, Facebook, or an
+          email and password; passwords are handled by Firebase and never seen by us). Signing in with Google or
+          Facebook shares your name, email and profile picture with us.
+        </li>
+        <li>
+          <strong>Your profile.</strong> Your username, display name, picture (your provider's, one you upload, or a
+          team logo), and your privacy choices.
+        </li>
+        <li>
+          <strong>What you save.</strong> Presets, saved lists and the lists you submit to the Community with the
+          votes you cast, pinned comparisons in Track Players, your friends and friend requests, and, where
+          it's open, your play-money wallet and bets with their record.
+        </li>
+      </ul>
+      <p>
+        Play money is never real money. Nothing is sold, and nothing is shared with advertisers. A spam check
+        (Google reCAPTCHA, through Firebase App Check) may look at your device and browser to tell people from bots.
+      </p>
+    </section>
+
+    <section>
+      <h3>Who sees what</h3>
+      <ul>
+        <li>Your username, display name and picture are public: anyone can find your profile by username.</li>
+        <li>
+          Your lists, presets, tracker and bets are shown to everyone, to friends only, or to no one, as you choose in
+          Settings → Privacy (and per list).
+        </li>
+        <li>Community submissions and the votes on them are public. Leaderboards show only those whose bet history is public.</li>
+        <li>Your email address is never shown to anyone.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h3>Keeping and deleting</h3>
+      <p>
+        We keep your data while you have an account. Delete the account and it's removed, as the
+        <a href="#data-deletion">Data Deletion</a> page explains.
+      </p>
+    </section>
+
+    <section>
+      <h3>Children</h3>
+      <p>Season Ranker isn't meant for children under 13, and we don't knowingly keep their data.</p>
+    </section>
+
+    <section>
+      <h3>Contact</h3>
+      <p>
+        Questions about your data:
+        @if (contact) {
+          <a [href]="'mailto:' + contact">{{ contact }}</a>.
+        } @else {
+          <span class="legal-todo">TODO: contact email</span>
+        }
+        If this policy changes, the date at the top changes with it.
+      </p>
+    </section>
+  } @else {
+    <h2>Data Deletion</h2>
+    <p class="legal-updated">Last updated {{ updated }}</p>
+
+    <p class="legal-lede">
+      You can delete your Season Ranker account and its data yourself, at any time, whichever way you signed in
+      (Google, Facebook, or email and password).
+    </p>
+
+    <section>
+      <h3>Delete it yourself</h3>
+      <ol>
+        <li>Sign in, open the menu under your name (top right) and choose <strong>Settings</strong>.</li>
+        <li>In <strong>Profile</strong>, choose <strong>Delete account</strong>.</li>
+        <li>Confirm: type your username, and your password (or sign in again with Google or Facebook).</li>
+      </ol>
+      <p>That's it: you're signed out and the account is gone. It can't be undone.</p>
+    </section>
+
+    <section>
+      <h3>What's deleted</h3>
+      <ul>
+        <li>Your sign-in (Firebase Authentication account) and your profile; your username is free for someone else.</li>
+        <li>Your presets, saved lists, Community submissions, the votes on them and the votes you cast.</li>
+        <li>Your pinned comparisons (Track Players) and your friends and friend requests, on both sides.</li>
+        <li>Your play-money wallet and your settled bets, right away.</li>
+        <li>
+          Bets still open when you delete (a game not yet final) and your betting record are removed by the hourly
+          job that settles bets, within about an hour; your row leaves the leaderboards at the same time.
+        </li>
+      </ul>
+      <p>
+        Not deleted: Google Analytics page views, which aren't linked to your account (Google keeps them under its
+        own retention), and settings saved in your browser (clear them with your browser's site data).
+      </p>
+    </section>
+
+    <section>
+      <h3>Can't sign in?</h3>
+      <p>
+        Email
+        @if (contact) {
+          <a [href]="mailto">{{ contact }}</a>
+        } @else {
+          <span class="legal-todo">TODO: contact email</span>
+        }
+        from the address on the account (or with your username) and ask us to delete it. We'll delete everything
+        above within 30 days and reply when it's done.
+      </p>
+    </section>
+
+    <section>
+      <h3>Signed in with Facebook?</h3>
+      <p>
+        Removing Season Ranker from Facebook (Settings &amp; privacy → Settings → Apps and websites) stops it from
+        using your Facebook sign-in, but doesn't delete your Season Ranker data: delete the account as above, or email
+        us.
+      </p>
+    </section>
+  }
+
+  <a class="legal-back" href="#" (click)="back($event)">Back to the rankings</a>
+</article>

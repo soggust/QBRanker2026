@@ -29,8 +29,8 @@
             class="cmp-pin"
             [class.pinned]="pinned"
             [disabled]="pinning"
-            [attr.aria-label]="pinned ? 'Pinned to your Tracker: pin again' : 'Pin to Tracker'"
-            [title]="pinned ? 'Pinned to your Tracker (pin again to start a new one)' : account.signedIn() ? 'Pin to Tracker: follow how they move this season' : 'Pin to Tracker (sign in first)'"
+            [attr.aria-label]="pinned ? 'Pinned to Track Players: pin again' : 'Pin to Track Players'"
+            [title]="pinned ? 'Pinned to Track Players (pin again to start a new one)' : account.signedIn() ? 'Pin to Track Players: follow how they move this season' : 'Pin to Track Players (sign in first)'"
             (click)="pin()"
             animate.enter="share-in"
           >
@@ -186,7 +186,7 @@
         @if (pinNote) {
           <span class="cmp-pin-toast" animate.enter="share-in"
             >{{ pinNote.text }}@if (pinNote.link) {
-              · <a href="#tracker">Open Tracker</a>
+              · <a href="#tracker">Open</a>
             }</span
           >
         }

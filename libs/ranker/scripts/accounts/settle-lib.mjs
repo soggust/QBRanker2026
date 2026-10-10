@@ -243,10 +243,11 @@ export function periodsAt(now) {
 const boardPhoto = (photo) => (photo && typeof photo.url === 'string' && !photo.url.startsWith('data:') ? { kind: photo.kind, url: photo.url } : null);
 
 // A period's leaderboard: the public players (their bet history public) with a settled bet in it, by profit
-// (then the return on their stakes), the top 50
+// (then the return on their stakes), the top 50; each row with its reloads (the wallet's resets: a record
+// built over several bankrolls says so beside it)
 export function leaderboard(entries, from, limit = 50) {
   const rows = [];
-  for (const { uid, profile, tally } of entries) {
+  for (const { uid, profile, tally, wallet } of entries) {
     if (profile?.visibility?.betHistory !== 'public' || !profile.username) continue;
     const t = { won: 0, lost: 0, push: 0, staked: 0, profit: 0 };
     for (const [day, [won, lost, push, staked, profit]] of Object.entries(tally?.days ?? {})) {
@@ -269,6 +270,7 @@ export function leaderboard(entries, from, limit = 50) {
       staked: round2(t.staked),
       profit: round2(t.profit),
       roi: t.staked ? Math.round((t.profit / t.staked) * 1e4) / 1e4 : null,
+      reloads: Math.max(0, Math.floor(Number(wallet?.resets) || 0)),
     });
   }
   return rows.sort((a, b) => b.profit - a.profit || (b.roi ?? 0) - (a.roi ?? 0) || a.username.localeCompare(b.username)).slice(0, limit);

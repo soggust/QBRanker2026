@@ -1320,6 +1320,108 @@ section.category-colors ul li.player:not(.header-row):not(.cdk-drag-preview) > .
   }
 }
 
+// ---- lists (round 2) ----
+// "Saved to My lists": the save toast, at the bottom middle on a scoreboard panel, with Open and Rename
+// in the sport's light (a few seconds, or until dismissed)
+.save-toast {
+  align-items: center;
+  bottom: 24px;
+  @include v.scoreboard-panel(10px, 0 8px 24px rgba(0, 0, 0, 0.55));
+  box-sizing: border-box;
+  color: #fff;
+  display: flex;
+  font-family: v.$font-base;
+  font-size: 14px;
+  gap: 4px;
+  left: 50%;
+  max-width: calc(100vw - 16px);
+  opacity: 0;
+  padding: 6px 6px 6px 14px;
+  pointer-events: none;
+  position: fixed;
+  transform: translate(-50%, 12px);
+  transition:
+    opacity 0.25s ease,
+    transform 0.25s ease,
+    visibility 0.25s;
+  visibility: hidden;
+  white-space: nowrap;
+  z-index: 1002;
+
+  &.show {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translate(-50%, 0);
+    visibility: visible;
+  }
+
+  .save-toast-icon {
+    color: var(--scoreboard-led);
+    @include v.icon-size(18px);
+    margin-right: 4px;
+  }
+
+  .save-toast-text {
+    font-weight: 700;
+    margin-right: 8px;
+  }
+
+  .save-toast-action {
+    background: none;
+    border: 1px solid color-mix(in srgb, var(--scoreboard-led) 45%, transparent);
+    border-radius: 999px;
+    color: var(--scoreboard-led);
+    cursor: pointer;
+    font: inherit;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.6px;
+    padding: 4px 12px;
+    text-decoration: none;
+    text-transform: uppercase;
+
+    &:hover,
+    &:focus-visible {
+      background: color-mix(in srgb, var(--scoreboard-led) 16%, transparent);
+      outline: none;
+    }
+  }
+
+  .save-toast-close {
+    align-items: center;
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.7);
+    cursor: pointer;
+    display: flex;
+    height: 28px;
+    justify-content: center;
+    margin-left: 2px;
+    padding: 0;
+    width: 28px;
+
+    .mat-icon {
+      @include v.icon-size(18px);
+    }
+
+    &:hover,
+    &:focus-visible {
+      color: #fff;
+      outline: none;
+    }
+  }
+
+  @media (max-width: 575px) {
+    bottom: 12px;
+    font-size: 13px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+  }
+}
+// ---- end lists ----
+
 
 // ---------------------------------------------------------------------------
 // Animations

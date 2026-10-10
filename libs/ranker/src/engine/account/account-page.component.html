@@ -4,8 +4,8 @@
   } @else if (!user) {
     <!-- Signed out: what an account is for, and the way in -->
     <div class="soon-panel signed-out">
-      <mat-icon class="soon-icon" aria-hidden="true" fontIcon="account_circle"></mat-icon>
-      <h2>Profile &amp; settings</h2>
+      <mat-icon class="soon-icon" aria-hidden="true" fontIcon="settings"></mat-icon>
+      <h2>Settings</h2>
       <p class="soon-detail">Sign in to set up your profile, choose who sees your lists and bets, and manage your account.</p>
       <button type="button" class="primary" (click)="account.openLogin()">Sign in</button>
     </div>
@@ -25,100 +25,194 @@
         <span class="hero-user">&#64;{{ profile.username }}</span>
       </div>
       <!-- (the profile as others see it, by the Privacy settings below) -->
-      <a class="secondary small-btn hero-link" [href]="'#u/' + profile.username" title="Your profile, as others see it"><mat-icon aria-hidden="true" fontIcon="badge"></mat-icon><span class="hero-link-text">View profile</span></a>
+      <a class="hero-link" [href]="'#u/' + profile.username" title="Your profile, as others see it"><mat-icon aria-hidden="true" fontIcon="badge"></mat-icon><span class="hero-link-text">View profile</span></a>
     </header>
 
-    <!-- The profile: the picture, the names and the bio -->
-    <card-panel class="account-panel" label="Profile" icon="person" [expandable]="false">
-      <div class="panel-pad profile-grid">
-        <div class="photo-col">
-          <account-avatar [photo]="profile.photo" [name]="profile.displayName" [size]="112"></account-avatar>
-          <div class="photo-actions">
-            <label class="secondary small-btn" [class.disabled]="photoBusy">
-              <mat-icon aria-hidden="true" fontIcon="upload"></mat-icon>Upload
-              <input #file type="file" accept="image/*" class="visually-hidden" [disabled]="photoBusy" (change)="upload(file)" />
+    <!-- The profile: the picture, how you sign in, the email and names; deleting the account at its foot -->
+    <card-panel class="account-panel profile-panel" label="Profile" icon="person" [open]="profileOpen" (toggled)="profileOpen = !profileOpen">
+      @if (deleteOpen) {
+        <!-- (deleting the account: in place of the whole panel, the username typed to confirm, and the password
+             for an email account) -->
+        <form class="panel-pad delete-zone" novalidate (ngSubmit)="deleteAccount()">
+          <h3><mat-icon aria-hidden="true" fontIcon="warning"></mat-icon>Delete your account</h3>
+          <p>This removes your profile, your username and everything saved to your account, for good. It can’t be undone.</p>
+          <label class="field">
+            <span class="field-label">Type your username ({{ profile.username }}) to confirm</span>
+            <input #confirmInput name="confirm" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" [(ngModel)]="deleteConfirm" [disabled]="deleteBusy" />
+          </label>
+          @if (hasPassword) {
+            <label class="field">
+              <span class="field-label">Your password</span>
+              <input name="password" type="password" autocomplete="current-password" [(ngModel)]="deletePassword" [disabled]="deleteBusy" />
             </label>
-            @if (user.providerPhoto && profile.photo?.url !== user.providerPhoto) {
-              <button type="button" class="secondary small-btn" [disabled]="photoBusy" (click)="useProviderPhoto()">
-                <mat-icon aria-hidden="true" fontIcon="account_circle"></mat-icon>{{ user.providers.includes('facebook.com') && !user.providers.includes('google.com') ? 'Facebook' : 'Google' }} photo
-              </button>
-            }
-            @if (logos.length) {
-              <button type="button" class="secondary small-btn" [class.open]="logosOpen" [attr.aria-expanded]="logosOpen" [disabled]="photoBusy" (click)="logosOpen = !logosOpen">
-                <mat-icon aria-hidden="true" fontIcon="shield"></mat-icon>Team logo
-              </button>
-            }
-            @if (profile.photo) {
-              <button type="button" class="link" [disabled]="photoBusy" (click)="removePhoto()">Remove picture</button>
-            }
+          } @else {
+            <span class="field-hint">You’ll be asked to sign in with {{ user.providers.includes('google.com') ? 'Google' : 'Facebook' }} once more.</span>
+          }
+          @if (deleteError) { <p class="form-error" role="alert">{{ deleteError }}</p> }
+          <div class="panel-foot">
+            <button type="button" class="danger" [disabled]="deleteBusy" (click)="cancelDelete()">Cancel</button>
+            <button type="submit" class="danger" [disabled]="!deleteReady">
+              @if (deleteBusy) { <span class="spinner" aria-hidden="true"></span> } @else { <mat-icon aria-hidden="true" fontIcon="delete_forever"></mat-icon> }
+              Delete forever
+            </button>
           </div>
-          @if (photoBusy) {
-            <span class="field-hint" role="status"><span class="spinner tiny" aria-hidden="true"></span> Saving picture…</span>
-          }
-          @if (photoError) {
-            <span class="field-error" role="alert">{{ photoError }}</span>
-          }
+        </form>
+      } @else {
+        <div class="panel-pad profile-grid">
+          <div class="photo-col">
+            <account-avatar [photo]="profile.photo" [name]="profile.displayName" [size]="112"></account-avatar>
+            <div class="photo-actions">
+              <label class="tan-btn" [class.disabled]="photoBusy">
+                <mat-icon aria-hidden="true" fontIcon="upload"></mat-icon>Upload
+                <input #file type="file" accept="image/*" class="visually-hidden" [disabled]="photoBusy" (change)="upload(file)" />
+              </label>
+              @if (user.providerPhoto && profile.photo?.url !== user.providerPhoto) {
+                <button type="button" class="tan-btn" [disabled]="photoBusy" (click)="useProviderPhoto()">
+                  <mat-icon aria-hidden="true" fontIcon="account_circle"></mat-icon>{{ user.providers.includes('facebook.com') && !user.providers.includes('google.com') ? 'Facebook' : 'Google' }} photo
+                </button>
+              }
+              @if (logoSports.length) {
+                <button type="button" class="tan-btn" [class.open]="logosOpen" [attr.aria-expanded]="logosOpen" [disabled]="photoBusy" (click)="logosOpen = !logosOpen">
+                  <mat-icon aria-hidden="true" fontIcon="shield"></mat-icon>Team logo
+                </button>
+              }
+              @if (profile.photo) {
+                <button type="button" class="danger small-btn" [disabled]="photoBusy" (click)="removePhoto()">Remove picture</button>
+              }
+            </div>
+            @if (photoBusy) {
+              <span class="field-hint" role="status"><span class="spinner tiny" aria-hidden="true"></span> Saving picture…</span>
+            }
+            @if (photoError) {
+              <span class="field-error" role="alert">{{ photoError }}</span>
+            }
+
+            <!-- (how you sign in: each method linked, or a button to link it; the password's change) -->
+            <div class="sign-in" role="group" aria-labelledby="sign-in-label">
+              <span class="field-label" id="sign-in-label">Sign-in methods</span>
+              <div class="providers">
+                @for (p of providers; track p.id) {
+                  @if (p.linked) {
+                    <span class="provider linked"><mat-icon aria-hidden="true" fontIcon="check_circle"></mat-icon>{{ p.name }}</span>
+                  } @else {
+                    <button type="button" class="tan-btn" [disabled]="!!linkBusy" (click)="link(p.id)">
+                      @if (linkBusy === p.id) { <span class="spinner tiny" aria-hidden="true"></span> } @else { <mat-icon aria-hidden="true" fontIcon="add_link"></mat-icon> }
+                      Link {{ p.name }}
+                    </button>
+                  }
+                }
+              </div>
+              @if (hasPassword) {
+                @if (!passwordOpen) {
+                  <button type="button" class="tan-btn" (click)="passwordOpen = true; passwordMessage = ''">
+                    <mat-icon aria-hidden="true" fontIcon="key"></mat-icon>Change password
+                  </button>
+                  @if (passwordMessage) { <span class="field-ok" role="status">&#10003; {{ passwordMessage }}</span> }
+                } @else {
+                  <form class="password-form" novalidate (ngSubmit)="changePassword()">
+                    <label class="field">
+                      <span class="field-label">Current password</span>
+                      <input name="current" type="password" autocomplete="current-password" [(ngModel)]="currentPassword" [disabled]="passwordBusy" />
+                    </label>
+                    <label class="field">
+                      <span class="field-label">New password</span>
+                      <input name="next" type="password" autocomplete="new-password" [(ngModel)]="newPassword" [disabled]="passwordBusy" [attr.aria-invalid]="!!newPasswordError" />
+                      @if (newPasswordError; as p) { <span class="field-error">{{ p }}</span> } @else { <span class="field-hint">8 or more characters, with a letter and a number.</span> }
+                    </label>
+                    @if (passwordError) { <p class="form-error" role="alert">{{ passwordError }}</p> }
+                    <div class="password-actions">
+                      <button type="button" class="danger small-btn" [disabled]="passwordBusy" (click)="passwordOpen = false; currentPassword = ''; newPassword = ''; passwordError = ''">Cancel</button>
+                      <button type="submit" class="primary small-btn" [disabled]="passwordBusy || !currentPassword || !newPassword || !!newPasswordError">
+                        @if (passwordBusy) { <span class="spinner tiny" aria-hidden="true"></span> }
+                        Update
+                      </button>
+                    </div>
+                  </form>
+                }
+              }
+              @if (accountError) {
+                <p class="form-error" role="alert">{{ accountError }}</p>
+              }
+            </div>
+          </div>
+
+          <form id="profile-form" class="profile-form" novalidate (ngSubmit)="saveProfile()">
+            <div class="field">
+              <span class="field-label">Email</span>
+              <span class="static-value">{{ user.email || 'None on this account' }}</span>
+            </div>
+            <label class="field">
+              <span class="field-label">Display name</span>
+              <input name="displayName" type="text" autocomplete="name" [maxlength]="displayNameMax" [(ngModel)]="displayName" (ngModelChange)="profileMessage = ''" [attr.aria-invalid]="!!displayNameError" />
+              @if (displayNameError; as p) { <span class="field-error">{{ p }}</span> }
+            </label>
+            <label class="field">
+              <span class="field-label">Username</span>
+              <span class="at-input">
+                <span class="at" aria-hidden="true">&#64;</span>
+                <input name="username" type="text" autocomplete="username" autocapitalize="off" spellcheck="false" [maxlength]="usernameMax" [(ngModel)]="username" (ngModelChange)="usernameChanged()" [attr.aria-invalid]="!!usernameError" aria-describedby="username-status" />
+              </span>
+              <span id="username-status" aria-live="polite">
+                @switch (usernameState) {
+                  @case ('checking') { <span class="field-hint">Checking…</span> }
+                  @case ('available') { <span class="field-ok">&#10003; Available</span> }
+                  @case ('error') { <span class="field-error">Couldn’t check it. Try again.</span> }
+                  @case ('same') { <span class="field-hint">Your profile’s address: #u/{{ profile.username }}</span> }
+                  @default { @if (usernameError; as p) { <span class="field-error">{{ p }}</span> } }
+                }
+              </span>
+            </label>
+            <label class="field">
+              <span class="field-label">Bio <span class="count" [class.over]="bio.length > bioMax">{{ bio.length }}/{{ bioMax }}</span></span>
+              <textarea name="bio" rows="3" [(ngModel)]="bio" (ngModelChange)="profileMessage = ''" placeholder="Your teams, your takes…" [attr.aria-invalid]="!!bioError"></textarea>
+              @if (bioError; as p) { <span class="field-error">{{ p }}</span> }
+            </label>
+            @if (profileError) {
+              <p class="form-error" role="alert">{{ profileError }}</p>
+            }
+          </form>
         </div>
 
-        <form class="profile-form" novalidate (ngSubmit)="saveProfile()">
-          <label class="field">
-            <span class="field-label">Display name</span>
-            <input name="displayName" type="text" autocomplete="name" [maxlength]="displayNameMax" [(ngModel)]="displayName" (ngModelChange)="profileMessage = ''" [attr.aria-invalid]="!!displayNameError" />
-            @if (displayNameError; as p) { <span class="field-error">{{ p }}</span> }
-          </label>
-          <label class="field">
-            <span class="field-label">Username</span>
-            <span class="at-input">
-              <span class="at" aria-hidden="true">&#64;</span>
-              <input name="username" type="text" autocomplete="username" autocapitalize="off" spellcheck="false" [maxlength]="usernameMax" [(ngModel)]="username" (ngModelChange)="usernameChanged()" [attr.aria-invalid]="!!usernameError" aria-describedby="username-status" />
-            </span>
-            <span id="username-status" aria-live="polite">
-              @switch (usernameState) {
-                @case ('checking') { <span class="field-hint">Checking…</span> }
-                @case ('available') { <span class="field-ok">&#10003; Available</span> }
-                @case ('error') { <span class="field-error">Couldn’t check it. Try again.</span> }
-                @case ('same') { <span class="field-hint">Your profile’s address: #u/{{ profile.username }}</span> }
-                @default { @if (usernameError; as p) { <span class="field-error">{{ p }}</span> } }
+        <!-- (the team logos to pick from: any team sport's, the page's own to begin with) -->
+        @if (logosOpen) {
+          <div class="logo-picker" role="group" aria-label="Team logos">
+            <div class="logo-sports" role="group" aria-label="Sport">
+              @for (s of logoSports; track s.id) {
+                <button type="button" class="logo-sport" [class.active]="logoSport === s.id" [attr.aria-pressed]="logoSport === s.id" (click)="showLogos(s.id)">{{ s.label }}</button>
               }
-            </span>
-          </label>
-          <label class="field">
-            <span class="field-label">Bio <span class="count" [class.over]="bio.length > bioMax">{{ bio.length }}/{{ bioMax }}</span></span>
-            <textarea name="bio" rows="3" [(ngModel)]="bio" (ngModelChange)="profileMessage = ''" placeholder="Your teams, your takes…" [attr.aria-invalid]="!!bioError"></textarea>
-            @if (bioError; as p) { <span class="field-error">{{ p }}</span> }
-          </label>
-          @if (profileError) {
-            <p class="form-error" role="alert">{{ profileError }}</p>
-          }
-          <div class="form-actions">
+            </div>
+            @if (logosLoading) {
+              <p class="logo-note">Loading…</p>
+            }
+            @for (logo of logos; track logo.url) {
+              <button type="button" class="logo-pick" [class.active]="profile.photo?.url === logo.url" [title]="logo.label" [attr.aria-label]="logo.label" (click)="pickLogo(logo.url)">
+                <img [src]="logo.url" alt="" loading="lazy" />
+              </button>
+            }
+          </div>
+        }
+
+        <!-- (the panel's foot: Delete account on the left, well away from Save on the right) -->
+        <div class="panel-pad panel-foot profile-foot">
+          <button type="button" class="danger small-btn" (click)="openDelete()"><mat-icon aria-hidden="true" fontIcon="delete"></mat-icon>Delete account</button>
+          <span class="foot-save">
             @if (profileMessage) {
               <span class="field-ok" role="status">&#10003; {{ profileMessage }}</span>
             }
             @if (profileDirty) {
-              <button type="button" class="link" [disabled]="saving" (click)="resetProfile()">Cancel</button>
+              <button type="button" class="danger" [disabled]="saving" (click)="resetProfile()">Cancel</button>
             }
-            <button type="submit" class="primary" [disabled]="!canSave">
+            <button type="submit" form="profile-form" class="primary" [disabled]="!canSave">
               @if (saving) { <span class="spinner" aria-hidden="true"></span> }
               Save
             </button>
-          </div>
-        </form>
-      </div>
-
-      <!-- (the team logos to pick from: the current sport's) -->
-      @if (logosOpen) {
-        <div class="logo-picker" role="group" aria-label="Team logos">
-          @for (logo of logos; track logo.url) {
-            <button type="button" class="logo-pick" [class.active]="profile.photo?.url === logo.url" [title]="logo.label" [attr.aria-label]="logo.label" (click)="pickLogo(logo.url)">
-              <img [src]="logo.url" alt="" loading="lazy" />
-            </button>
-          }
+          </span>
         </div>
       }
     </card-panel>
 
-    <!-- Who sees what -->
-    <card-panel class="account-panel" label="Privacy" icon="visibility" [expandable]="false">
+    <!-- Who sees what (#account/privacy opens it: the Friends page's eye) -->
+    <card-panel id="privacy-settings" class="account-panel" label="Privacy" icon="visibility" [open]="privacyOpen" (toggled)="privacyOpen = !privacyOpen">
       <div class="panel-pad">
         <p class="panel-lede">Who can see each of these on your profile. Friends means people you’ve both added.</p>
         <div class="privacy-rows">
@@ -146,104 +240,12 @@
         }
       </div>
     </card-panel>
-
-    <!-- The account itself -->
-    <card-panel class="account-panel" label="Account" icon="shield_person" [expandable]="false">
-      <div class="panel-pad account-rows">
-        <div class="account-row">
-          <span class="row-label">Email</span>
-          <span class="row-value">{{ user.email || 'None on this account' }}</span>
-        </div>
-
-        <div class="account-row">
-          <span class="row-label">Sign-in methods</span>
-          <div class="row-value providers">
-            @for (p of providers; track p.id) {
-              @if (p.linked) {
-                <span class="provider linked"><mat-icon aria-hidden="true" fontIcon="check_circle"></mat-icon>{{ p.name }}</span>
-              } @else {
-                <button type="button" class="secondary small-btn" [disabled]="!!linkBusy" (click)="link(p.id)">
-                  @if (linkBusy === p.id) { <span class="spinner tiny" aria-hidden="true"></span> } @else { <mat-icon aria-hidden="true" fontIcon="add_link"></mat-icon> }
-                  Link {{ p.name }}
-                </button>
-              }
-            }
-          </div>
-        </div>
-
-        @if (hasPassword) {
-          <div class="account-row">
-            <span class="row-label">Password</span>
-            <div class="row-value">
-              @if (!passwordOpen) {
-                <button type="button" class="secondary small-btn" (click)="passwordOpen = true; passwordMessage = ''">
-                  <mat-icon aria-hidden="true" fontIcon="key"></mat-icon>Change password
-                </button>
-                @if (passwordMessage) { <span class="field-ok" role="status">&#10003; {{ passwordMessage }}</span> }
-              } @else {
-                <form class="password-form" novalidate (ngSubmit)="changePassword()">
-                  <label class="field">
-                    <span class="field-label">Current password</span>
-                    <input name="current" type="password" autocomplete="current-password" [(ngModel)]="currentPassword" [disabled]="passwordBusy" />
-                  </label>
-                  <label class="field">
-                    <span class="field-label">New password</span>
-                    <input name="next" type="password" autocomplete="new-password" [(ngModel)]="newPassword" [disabled]="passwordBusy" [attr.aria-invalid]="!!newPasswordError" />
-                    @if (newPasswordError; as p) { <span class="field-error">{{ p }}</span> } @else { <span class="field-hint">8 or more characters, with a letter and a number.</span> }
-                  </label>
-                  @if (passwordError) { <p class="form-error" role="alert">{{ passwordError }}</p> }
-                  <div class="form-actions">
-                    <button type="button" class="link" [disabled]="passwordBusy" (click)="passwordOpen = false; currentPassword = ''; newPassword = ''; passwordError = ''">Cancel</button>
-                    <button type="submit" class="primary" [disabled]="passwordBusy || !currentPassword || !newPassword || !!newPasswordError">
-                      @if (passwordBusy) { <span class="spinner" aria-hidden="true"></span> }
-                      Update password
-                    </button>
-                  </div>
-                </form>
-              }
-            </div>
-          </div>
-        }
-
-        @if (accountError) {
-          <p class="form-error" role="alert">{{ accountError }}</p>
-        }
-
-        <div class="account-row end">
-          <button type="button" class="secondary" (click)="signOut()"><mat-icon aria-hidden="true" fontIcon="logout"></mat-icon>Sign out</button>
-          @if (!deleteOpen) {
-            <button type="button" class="link danger-link" (click)="deleteOpen = true">Delete account…</button>
-          }
-        </div>
-
-        <!-- Deleting the account: the username typed to confirm (and the password, for an email account) -->
-        @if (deleteOpen) {
-          <form class="delete-zone" novalidate (ngSubmit)="deleteAccount()">
-            <h3><mat-icon aria-hidden="true" fontIcon="warning"></mat-icon>Delete your account</h3>
-            <p>This removes your profile, your username and everything saved to your account, for good. It can’t be undone.</p>
-            <label class="field">
-              <span class="field-label">Type your username ({{ profile.username }}) to confirm</span>
-              <input name="confirm" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" [(ngModel)]="deleteConfirm" [disabled]="deleteBusy" />
-            </label>
-            @if (hasPassword) {
-              <label class="field">
-                <span class="field-label">Your password</span>
-                <input name="password" type="password" autocomplete="current-password" [(ngModel)]="deletePassword" [disabled]="deleteBusy" />
-              </label>
-            } @else {
-              <span class="field-hint">You’ll be asked to sign in with {{ user.providers.includes('google.com') ? 'Google' : 'Facebook' }} once more.</span>
-            }
-            @if (deleteError) { <p class="form-error" role="alert">{{ deleteError }}</p> }
-            <div class="form-actions">
-              <button type="button" class="link" [disabled]="deleteBusy" (click)="deleteOpen = false; deleteConfirm = ''; deletePassword = ''; deleteError = ''">Cancel</button>
-              <button type="submit" class="danger" [disabled]="!deleteReady">
-                @if (deleteBusy) { <span class="spinner" aria-hidden="true"></span> }
-                Delete forever
-              </button>
-            </div>
-          </form>
-        }
-      </div>
-    </card-panel>
   }
+
+  <!-- (the site's policies: what's kept, and how to have it deleted) -->
+  <nav class="legal-links" aria-label="Policies">
+    <a href="#privacy">Privacy Policy</a>
+    <span aria-hidden="true">·</span>
+    <a href="#data-deletion">Data Deletion</a>
+  </nav>
 </div>

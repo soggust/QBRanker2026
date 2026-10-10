@@ -16,6 +16,8 @@ list-modal {
   @include kit.pills;
   @include kit.fields;
   @include kit.buttons;
+  // (the lists' dialogs: the app's own buttons, whatever sport they open over)
+  @include kit.app-buttons;
 
   .modal-backdrop {
     animation: list-modal-fade 0.15s ease;
@@ -67,9 +69,9 @@ list-modal {
   }
 
   .modal-icon {
-    color: var(--scoreboard-led);
+    color: var(--app-sand, #d8b98a);
     @include v.icon-size(20px);
-    filter: drop-shadow(0 0 3px color-mix(in srgb, var(--scoreboard-led) 50%, transparent));
+    filter: drop-shadow(0 0 3px color-mix(in srgb, var(--app-sand, #d8b98a) 50%, transparent));
   }
 
   .modal-close {
@@ -90,7 +92,7 @@ list-modal {
 
     &:hover,
     &:focus-visible {
-      color: var(--scoreboard-led);
+      color: var(--app-sand, #d8b98a);
       outline: none;
     }
   }
@@ -181,12 +183,12 @@ list-modal {
     }
 
     .p-rank {
-      color: var(--scoreboard-led);
+      color: var(--app-sand, #d8b98a);
       flex: 0 0 22px;
       font-family: "DSEG7", sans-serif;
       font-size: 12px;
       text-align: right;
-      text-shadow: var(--scoreboard-glow);
+      text-shadow: var(--app-sand-glow, none);
     }
 
     img {

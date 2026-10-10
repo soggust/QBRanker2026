@@ -1,0 +1,164 @@
+@use "../variables" as v;
+
+// ===========================================================================
+// #privacy and #data-deletion (legal-page.component): reading text on the app's sheet, its two pages
+// as tabs on top (the one showing lit), short sections under small lit headings, the links in the sport's
+// light
+// ===========================================================================
+:host {
+  display: block;
+}
+
+.legal {
+  box-sizing: border-box;
+  color: var(--app-text, #eee);
+  font-family: v.$font-base;
+  font-size: 14.5px;
+  line-height: 1.6;
+  // (the sheet gives the side and top room: only room under the last section here)
+  padding: 0 0 36px;
+
+  @media (max-width: 575px) {
+    font-size: 14px;
+    padding-bottom: 24px;
+  }
+
+  a:not(.legal-back, .legal-tabs a) {
+    color: var(--scoreboard-led);
+    text-decoration: underline;
+    text-decoration-color: color-mix(in srgb, var(--scoreboard-led) 50%, transparent);
+    text-underline-offset: 3px;
+
+    &:hover,
+    &:focus-visible {
+      text-decoration-color: var(--scoreboard-led);
+    }
+  }
+}
+
+// (the two pages: a pair of scoreboard tabs, the one showing lit along its bottom like the position tabs)
+.legal-tabs {
+  @include v.scoreboard-panel(10px);
+  display: flex;
+  margin-bottom: 22px;
+  overflow: hidden;
+
+  a {
+    align-items: center;
+    color: #fff;
+    display: flex;
+    flex: 1;
+    font-size: 12px;
+    font-weight: 600;
+    height: 40px;
+    justify-content: center;
+    letter-spacing: 1.5px;
+    position: relative;
+    text-decoration: none;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+    text-transform: uppercase;
+
+    &:hover:not(.active) {
+      background: rgba(0, 0, 0, 0.15);
+      color: var(--scoreboard-led);
+    }
+
+    &.active {
+      @include v.lit-tab;
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--scoreboard-led);
+      outline-offset: -3px;
+    }
+  }
+}
+
+h2 {
+  color: #fff;
+  @include v.headline(26px);
+  letter-spacing: 0.75px;
+  margin: 0;
+  text-transform: uppercase;
+}
+
+.legal-updated {
+  color: var(--app-text-muted, #aaa);
+  font-size: 12px;
+  letter-spacing: 0.5px;
+  margin: 4px 0 16px;
+}
+
+.legal-lede {
+  border-left: 3px solid var(--scoreboard-led);
+  color: #fff;
+  font-size: 15.5px;
+  margin: 0 0 8px;
+  padding: 2px 0 2px 14px;
+}
+
+section {
+  border-top: 1px solid var(--app-line, rgba(255, 255, 255, 0.1));
+  margin-top: 20px;
+  padding-top: 16px;
+}
+
+h3 {
+  color: var(--scoreboard-led);
+  font-size: 12.5px;
+  font-weight: 800;
+  letter-spacing: 1.6px;
+  margin: 0 0 8px;
+  text-shadow: var(--scoreboard-glow);
+  text-transform: uppercase;
+}
+
+p {
+  margin: 0 0 10px;
+}
+
+ul,
+ol {
+  margin: 0 0 10px;
+  padding-left: 22px;
+
+  li {
+    margin-bottom: 6px;
+  }
+
+  li::marker {
+    color: var(--app-text-muted, #aaa);
+  }
+}
+
+strong {
+  color: #fff;
+}
+
+// (the contact address not filled in yet: marked, so it can't be missed)
+.legal-todo {
+  border: 1px dashed var(--app-red-bright, #e0384f);
+  border-radius: 6px;
+  color: var(--app-red-bright, #e0384f);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  padding: 1px 8px;
+  text-transform: uppercase;
+}
+
+.legal-back {
+  color: #fff;
+  display: inline-block;
+  font-size: 13px;
+  font-weight: 700;
+  margin-top: 22px;
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--scoreboard-led) 60%, transparent);
+  text-underline-offset: 3px;
+
+  &:hover,
+  &:focus-visible {
+    color: var(--scoreboard-led);
+  }
+}

@@ -3,12 +3,16 @@
 
 // ===========================================================================
 // The account pages (hash routes in place of the rankings: app.component): a column down the middle of
-// the sport's own field, the panels (card-panel) on the chalkboard under the scoreboard bars. Also the
-// Coming soon page (coming-soon.component.ts).
+// the app's sheet (app.component's .app-sheet-body scrolls, not the page), the panels (card-panel) dark
+// under their scoreboard bars. Also the Coming soon page (coming-soon.component.ts), which sits on the
+// sport's own field and scrolls itself.
 // ===========================================================================
 :host {
   box-sizing: border-box;
   display: block;
+}
+
+:host(coming-soon) {
   height: calc(100% - var(--sport-bar-height));
   overflow-y: auto;
 }
@@ -27,8 +31,8 @@
   font-family: v.$font-base;
   gap: 18px;
   margin: 0 auto;
-  max-width: 780px;
-  padding: 26px 16px 48px;
+  max-width: 800px;
+  padding: 22px 16px 28px;
 }
 
 // ---------------------------------------------------------------------------
@@ -67,13 +71,28 @@
   }
 }
 
+// (View profile: the app's filled sand button, as the pages' corner calls are)
 .hero-link {
+  @include kit.primary-button;
+  @include kit.small-button;
   flex: none;
   margin-left: auto;
 }
 
+// (the picture's and the sign-in methods' buttons: Upload, Team logo, Link Google, Change password: filled sand)
+.tan-btn {
+  @include kit.primary-button;
+  @include kit.small-button;
+
+  &.disabled {
+    opacity: 0.5;
+    pointer-events: none;
+  }
+}
+
+
 // ---------------------------------------------------------------------------
-// The panels: the scoreboard bar in the sport's light, the body on the chalkboard under a dark wash
+// The panels: the scoreboard bar in the sport's light, the body a darker well of the app's pewter sheet
 // ---------------------------------------------------------------------------
 card-panel.account-panel {
   --group-color: var(--scoreboard-led);
@@ -81,8 +100,8 @@ card-panel.account-panel {
 
   ::ng-deep > .panel-body {
     background:
-      linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)),
-      v.$chalk-dust;
+      linear-gradient(rgba(0, 0, 0, 0.22), rgba(0, 0, 0, 0.22)),
+      var(--app-pewter-deep, #24211e);
   }
 }
 
@@ -103,13 +122,6 @@ card-panel.account-panel {
   margin: 0;
 }
 
-.form-actions {
-  align-items: center;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 14px;
-  justify-content: flex-end;
-}
 
 label.secondary {
   position: relative;
@@ -136,7 +148,7 @@ label.secondary {
 .profile-grid {
   display: grid;
   gap: 24px;
-  grid-template-columns: 170px 1fr;
+  grid-template-columns: 196px 1fr;
 }
 
 .photo-col {
@@ -184,6 +196,26 @@ label.secondary {
   max-height: 260px;
   overflow-y: auto;
   padding: 14px 20px 18px;
+}
+
+// (the sports to pick a team from, across the top of the logos: the app's own sand pills, no sport's look)
+.logo-sports {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  grid-column: 1 / -1;
+  margin-bottom: 4px;
+
+  .logo-sport {
+    @include kit.app-pill;
+  }
+}
+
+.logo-note {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 12px;
+  grid-column: 1 / -1;
+  margin: 0;
 }
 
 .logo-pick {
@@ -279,59 +311,56 @@ label.secondary {
 }
 
 // ---------------------------------------------------------------------------
-// Account: a label and its value per row; sign out and delete at the end
+// The profile's left column, under the picture: how you sign in (each method linked, or Link) and the
+// password's change
 // ---------------------------------------------------------------------------
-.account-rows {
+.sign-in {
+  align-items: center;
+  border-top: 1px solid var(--app-line, rgba(255, 255, 255, 0.08));
   display: flex;
   flex-direction: column;
-  gap: 16px;
-}
+  gap: 8px;
+  margin-top: 4px;
+  padding-top: 14px;
+  width: 100%;
 
-.account-row {
-  align-items: flex-start;
-  display: grid;
-  gap: 16px;
-  grid-template-columns: 150px 1fr;
+  .field-label {
+    justify-content: center;
+  }
 
-  &.end {
-    align-items: center;
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
-    display: flex;
-    justify-content: space-between;
-    padding-top: 16px;
+  > .secondary {
+    width: 100%;
   }
 }
 
-.row-label {
-  color: rgba(255, 255, 255, 0.7);
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 1.2px;
-  padding-top: 3px;
-  text-transform: uppercase;
-}
-
-.row-value {
-  align-items: center;
-  color: #fff;
+.providers {
+  align-items: stretch;
   display: flex;
-  flex-wrap: wrap;
-  font-size: 14px;
-  gap: 10px;
-  min-width: 0;
-  overflow-wrap: anywhere;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+
+  .secondary {
+    width: 100%;
+  }
 }
 
 .provider.linked {
   align-items: center;
   background: rgba(62, 207, 110, 0.1);
   border: 1px solid rgba(62, 207, 110, 0.35);
-  border-radius: 999px;
+  border-radius: 10px;
+  box-sizing: border-box;
+  color: #fff;
   display: inline-flex;
-  font-size: 12px;
+  font-size: 11.5px;
   font-weight: 800;
   gap: 6px;
+  justify-content: center;
+  letter-spacing: 1px;
+  min-height: 32px;
   padding: 4px 12px 4px 8px;
+  text-transform: uppercase;
 
   .mat-icon {
     color: v.$good;
@@ -342,23 +371,62 @@ label.secondary {
 .password-form {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  max-width: 360px;
+  gap: 10px;
+  text-align: left;
   width: 100%;
+
+  input[type="password"] {
+    font-size: 14px;
+    padding: 8px 10px;
+  }
 }
 
-.danger-link {
-  color: v.$bad !important;
+.password-actions {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
 }
 
+// (the email: shown, not edited here)
+.static-value {
+  color: #fff;
+  font-size: 15px;
+  overflow-wrap: anywhere;
+  padding: 2px 0;
+}
+
+// ---------------------------------------------------------------------------
+// A panel's foot: Delete account on the left, Save on the right (Cancel and Delete forever, deleting)
+// ---------------------------------------------------------------------------
+.panel-foot {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  justify-content: space-between;
+}
+
+.profile-foot {
+  border-top: 1px solid var(--app-line, rgba(255, 255, 255, 0.08));
+  padding-bottom: 16px;
+  padding-top: 16px;
+}
+
+.foot-save {
+  align-items: center;
+  display: flex;
+  gap: 14px;
+  margin-left: auto;
+}
+
+// Deleting the account: in place of the profile, its edge in the red
 .delete-zone {
-  background: rgba(255, 90, 79, 0.06);
-  border: 1px solid rgba(255, 90, 79, 0.4);
-  border-radius: 10px;
+  border-left: 3px solid v.$bad;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  padding: 16px 18px;
+  gap: 14px;
+  max-width: 560px;
 
   h3 {
     align-items: center;
@@ -367,7 +435,9 @@ label.secondary {
     font-size: 15px;
     font-weight: 800;
     gap: 8px;
+    letter-spacing: 1px;
     margin: 0;
+    text-transform: uppercase;
 
     .mat-icon {
       @include v.icon-size(20px);
@@ -379,6 +449,36 @@ label.secondary {
     font-size: 13px;
     line-height: 1.45;
     margin: 0;
+  }
+
+  .panel-foot {
+    margin-top: 4px;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// The site's policies, small, at the very bottom
+// ---------------------------------------------------------------------------
+.legal-links {
+  align-items: center;
+  color: var(--app-text-muted, rgba(255, 255, 255, 0.5));
+  display: flex;
+  font-size: 12px;
+  gap: 10px;
+  justify-content: center;
+  padding-top: 6px;
+
+  a {
+    color: inherit;
+    text-decoration: underline;
+    text-decoration-color: rgba(255, 255, 255, 0.25);
+    text-underline-offset: 3px;
+
+    &:hover,
+    &:focus-visible {
+      color: var(--scoreboard-led);
+      outline: none;
+    }
   }
 }
 
@@ -427,10 +527,6 @@ label.secondary {
     gap: 8px;
   }
 
-  .account-row {
-    gap: 6px;
-    grid-template-columns: 1fr;
-  }
 
   .panel-pad {
     padding: 16px 14px 18px;

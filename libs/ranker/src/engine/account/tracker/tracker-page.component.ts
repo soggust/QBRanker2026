@@ -22,6 +22,7 @@ import {
   compareHref,
   dayMs,
   keyStats,
+  lastSeen,
   moved,
   pointOf,
   signed,
@@ -67,8 +68,13 @@ interface LogStrip {
 
 interface PinCard {
   pin: Pin;
-  // (the sport's own pins are read now; another sport's show what they kept)
+  // (the sport's own pins are read now; another sport's (the All view) show what they kept: the day its
+  // owner last looked at it in its own sport, `seen`, null: as pinned)
   here: boolean;
+  seen: number | null;
+  sportLabel: string;
+  // (unfolded: the sides' tapes, the chart, the numbers; folded, its strip and the sides at a glance)
+  open: boolean;
   loading: boolean;
   error: string | null;
   now: PinSnapshot | null;
@@ -97,6 +103,16 @@ function uidOf(hash: string): string | null {
 const KEY_STATS = 6;
 const KEY_SKILLS = 8;
 const CHART_HEIGHT = 156;
+// (the All pill's choice, remembered on this browser: every sport's apps share it)
+const ALL_KEY = 'trackerAll';
+const readAll = (): boolean => {
+  try {
+    return localStorage.getItem(ALL_KEY) === '1';
+  } catch {
+    return false;
+  }
+};
+const sportName = (id: string): string => SITE_SPORTS.find((s) => s.id === id)?.label ?? id.toUpperCase();
 
 // The Tracker (#tracker, and #tracker/<uid> for someone else's): every comparison pinned from the compare
 // view, a scoreboard card each: the sides with their faces in their colors, where each stands now against
@@ -136,8 +152,11 @@ export class TrackerPageComponent implements OnDestroy {
   state: 'wait' | 'ready' | 'hidden' | 'missing' | 'error' = 'wait';
   owner: { uid: string; name: string; photo: { kind: string; url: string } | null; username: string } | null = null;
   cards: PinCard[] = [];
-  // Every sport's pins, counted (the pills: the others open their own sport's tracker)
+  // Every sport's pins, counted (the pills: the others open their own sport's tracker), and All: every sport's
+  // here, this sport's measured now, the others as last seen
   sportCounts: { id: string; label: string; count: number }[] = [];
+  all = readAll();
+  private pins: Pin[] = [];
   chartWidth = 640;
   toast = '';
   private toastTimer?: ReturnType<typeof setTimeout>;
@@ -219,9 +238,11 @@ export class TrackerPageComponent implements OnDestroy {
       const counts = new Map<string, number>();
       for (const p of pins) counts.set(p.sport, (counts.get(p.sport) ?? 0) + 1);
       this.sportCounts = SITE_SPORTS.filter((s) => counts.has(s.id) || s.id === SPORT.id).map((s) => ({ id: s.id, label: s.label, count: counts.get(s.id) ?? 0 }));
-      this.cards = pins.filter((p) => p.sport === SPORT.id).map((pin) => this.blankCard(pin));
+      this.pins = pins;
+      this.cards = [];
+      this.showCards();
       this.state = 'ready';
-      await Promise.all(this.cards.map((card) => this.readNow(card)));
+      await Promise.all(this.cards.filter((card) => card.here).map((card) => this.readNow(card)));
     } catch (error) {
       const code = (error as { code?: string }).code ?? '';
       // (not shared with this reader: said on the page, not an error)
@@ -230,15 +251,44 @@ export class TrackerPageComponent implements OnDestroy {
     }
   }
 
+  // The cards shown: this sport's pins, or with All every sport's (a card already built kept as it is)
+  private showCards(): void {
+    const built = new Map(this.cards.map((c) => [c.pin.id, c]));
+    this.cards = this.pins.filter((p) => this.all || p.sport === SPORT.id).map((pin) => built.get(pin.id) ?? this.blankCard(pin));
+  }
+
+  // (the All pill: every sport's pins on this page, or this sport's alone)
+  setAll(on: boolean): void {
+    if (on === this.all) return;
+    this.all = on;
+    try {
+      if (on) localStorage.setItem(ALL_KEY, '1');
+      else localStorage.removeItem(ALL_KEY);
+    } catch {
+      // (storage off: the choice lasts the visit)
+    }
+    this.showCards();
+  }
+
+  get allCount(): number {
+    return this.pins.length;
+  }
+
   private blankCard(pin: Pin): PinCard {
+    const here = pin.sport === SPORT.id;
+    // (another sport's: as its owner last saw it there, else as pinned)
+    const seen = here ? null : lastSeen(pin.baseline, pin.history);
     const card: PinCard = {
       pin,
-      here: pin.sport === SPORT.id,
-      loading: true,
+      here,
+      seen: seen?.at ?? null,
+      sportLabel: sportName(pin.sport),
+      open: false,
+      loading: here,
       error: null,
       now: null,
       sides: [],
-      view: trackView(pin.baseline, null),
+      view: trackView(pin.baseline, here ? null : (seen ?? pin.baseline)),
       chart: null,
       allStats: false,
       logs: 'off',
@@ -355,8 +405,9 @@ export class TrackerPageComponent implements OnDestroy {
     return card.allStats || shown < this.statCount(card) + card.view.skills.filter((r) => r.cells.some((c) => c.text !== '-')).length;
   }
 
-  // "#4 when pinned" and the move since, for a side's tape
-  moveText(side: CardSide): string {
+  // "#4 when pinned" and the move since, for a side's tape (another sport's: since the pin, as last seen)
+  moveText(side: CardSide, card?: PinCard): string {
+    if (card && !card.here && card.seen === null) return 'As pinned';
     const m = side.track.moved;
     if (m === null) return side.track.now ? 'New since the pin' : 'Not found now';
     if (m === 0) return 'No change';
@@ -376,6 +427,21 @@ export class TrackerPageComponent implements OnDestroy {
   // (the full comparison: the sport's page with the pin's link)
   openHref(card: PinCard): string {
     return compareHref(card.pin.sport, card.pin.spec);
+  }
+
+  // (another sport's card: its own sport's tracker, where it's measured now)
+  trackerHref(card: PinCard): string {
+    return `/${card.pin.sport}/#tracker`;
+  }
+
+  seenText(card: PinCard): string {
+    return card.seen === null ? 'Not looked at since it was pinned' : `Last seen ${sinceText(card.seen)}`;
+  }
+
+  awayText(card: PinCard): string {
+    return card.seen === null
+      ? `As pinned: not opened in ${card.sportLabel} since.`
+      : `Ranks as of ${sinceText(card.seen)}, the last time it was opened in ${card.sportLabel}.`;
   }
 
   sportHref(id: string): string {
@@ -458,8 +524,9 @@ export class TrackerPageComponent implements OnDestroy {
     try {
       await this.store.remove(uid, card.pin.id);
       this.cards = this.cards.filter((c) => c !== card);
-      const here = this.sportCounts.find((s) => s.id === SPORT.id);
-      if (here) here.count--;
+      this.pins = this.pins.filter((p) => p !== card.pin);
+      const count = this.sportCounts.find((s) => s.id === card.pin.sport);
+      if (count) count.count--;
       this.say('Unpinned');
     } catch (error) {
       console.error('Tracker', error);
@@ -480,7 +547,10 @@ export class TrackerPageComponent implements OnDestroy {
     this.store.reorder(
       uid,
       this.cards.map((c) => c.pin),
-    ).catch((error) => {
+    ).then(() => {
+      // (every pin in its new order, for the All pill's next turn)
+      this.pins = [...this.pins].sort((a, b) => a.order - b.order);
+    }).catch((error) => {
       console.error('Tracker', error);
       this.say("Couldn't save the order");
     });

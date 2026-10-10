@@ -73,11 +73,11 @@ export class PlayerCompareComponent implements DoCheck, AfterViewChecked, OnDest
     this.pinning = true;
     try {
       await this.tracker.pinCompare(this.compare.sides, this.compare.tab);
-      this.notePin({ text: 'Pinned to your Tracker', link: true });
+      this.notePin({ text: 'Pinned to Track Players', link: true });
     } catch (error) {
       console.error('Pin', error);
       const full = (error as { code?: string }).code === 'full';
-      this.notePin({ text: full ? 'Your Tracker is full: unpin one first' : "Couldn't pin it", link: full });
+      this.notePin({ text: full ? 'Track Players is full: unpin one first' : "Couldn't pin it", link: full });
     } finally {
       this.pinning = false;
     }

@@ -3,9 +3,10 @@ import { AccountService } from './account.service';
 import { errorMessage, firstName } from './account-helpers';
 import { canUse } from './features';
 
-// The sport bar's account entry, just left of the brand: signed out, a small Sign in; signed in, the
-// user's avatar and first name (phones: the avatar alone) opening their menu: the account pages (hash
-// routes in app.component) and Sign out. Nothing shows while a returning user's sign-in is restored.
+// The sport bar's account entry, on the far right: signed out, a small Sign in (the brand after it);
+// signed in, in the brand's place, the user's first name then their avatar (phones: the avatar alone),
+// opening their menu: the account pages (hash routes in app.component), Settings and Sign out. A faint
+// circle while a returning user's sign-in is restored.
 @Component({
   selector: 'account-menu',
   templateUrl: './account-menu.component.html',
@@ -15,15 +16,16 @@ import { canUse } from './features';
 export class AccountMenuComponent {
   constructor(readonly account: AccountService) {}
 
+  // (the pages, Settings last; Sign out alone under the divider)
   private readonly all = [
-    { hash: '#account', icon: 'manage_accounts', label: 'Profile & settings' },
-    { hash: '#lists', icon: 'format_list_numbered', label: 'My lists' },
-    { hash: '#tracker', icon: 'push_pin', label: 'Tracker' },
-    { hash: '#wallet', icon: 'account_balance_wallet', label: 'Wallet' },
+    { hash: '#lists', icon: 'format_list_numbered', label: 'My Lists' },
+    { hash: '#tracker', icon: 'push_pin', label: 'Track Players' },
+    { hash: '#wallet', icon: 'account_balance_wallet', label: 'Betting Wallet' },
     { hash: '#friends', icon: 'group', label: 'Friends' },
+    { hash: '#account', icon: 'settings', label: 'Settings' },
   ];
 
-  // (the Wallet only where play betting is open: development, or an admin, like the Bets link)
+  // (the Betting Wallet only where play betting is open: development, or an admin, like the Bets link)
   get items() {
     return canUse('bets') ? this.all : this.all.filter((item) => item.hash !== '#wallet');
   }
@@ -32,12 +34,13 @@ export class AccountMenuComponent {
     return this.account.profile()?.displayName ?? '';
   }
 
+  // (in the bar: the first name, cleaner in its capitals than an @user_name; the username when there's none)
   get first(): string {
     return firstName(this.name) || this.account.profile()?.username || '';
   }
 
   isOpen(hash: string): boolean {
-    return location.hash === hash;
+    return location.hash === hash || location.hash.startsWith(hash + '/');
   }
 
   async signOut(): Promise<void> {

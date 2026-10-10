@@ -421,3 +421,363 @@
     }
   }
 }
+
+// ===========================================================================
+// The app's own look (round 2): every account page (Settings, My lists, Community, Player Tracker,
+// Betting Wallet, Friends, a profile, Privacy, Data deletion) sits on it, not on the sport's field. Pewter
+// brown (the Buccaneers' pewter) for the ground, a warm sand tan for the light (it takes over
+// --scoreboard-led on these pages, so every lit control, pill, tab, link and focus ring is sand), and the
+// red only for danger and alerts (delete, errors). app.component's shell (.app-page > .app-sheet > .app-sheet-body) sets the
+// tokens, so a page inside just uses them: var(--app-pewter), var(--app-red)...
+// ===========================================================================
+
+// The tokens (custom properties: they reach every page inside the shell; the login dialog sets its own)
+@mixin app-tokens {
+  // (the pewter family, light to darkest: a raised face, the base, the backdrop's ground, the deep shadow)
+  --app-pewter-light: #5a5249;
+  --app-pewter: #4a443d;
+  --app-pewter-dark: #3d3935;
+  --app-pewter-deep: #24211e;
+  --app-pewter-ink: #171513;
+  // (the sheet: a warm scoreboard black, a touch see-through so the backdrop's art shows faintly)
+  --app-sheet: rgba(22, 20, 18, 0.86);
+  --app-sheet-edge: #4f4840;
+  // (an inner section on the sheet that isn't a scoreboard panel: a step darker than the sheet)
+  --app-well: rgba(0, 0, 0, 0.28);
+  // (hairlines and quiet text, warm)
+  --app-line: rgba(255, 238, 220, 0.09);
+  --app-text: #f1ece6;
+  --app-text-muted: #b8ada1;
+  // (the light: sand tan, the pages' --scoreboard-led; a deeper tone for edges, its glow for lit text)
+  --app-sand: #d8b98a;
+  --app-sand-deep: #c9a574;
+  --app-sand-glow: 0 0 6px rgba(216, 185, 138, 0.5);
+  --scoreboard-led: var(--app-sand);
+  --scoreboard-glow: var(--app-sand-glow);
+  // (the red: danger and alerts only; its glow for lit text)
+  --app-red: #c8102e;
+  --app-red-bright: #e0384f;
+  --app-red-glow: 0 0 6px rgba(224, 56, 79, 0.55);
+}
+
+// The backdrop's art, drawn large and faint: a bump chart of ranks crossing (one line in the
+// sand climbing to #1), and a stack of ranking bars, longest first, the top one's badge sand. One static SVG
+// (no fixed attachment, no animation: nothing for the GPU to redo).
+$app-art: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 1000' preserveAspectRatio='xMidYMid slice'%3E%3Cg fill='none' stroke-linecap='round' stroke-linejoin='round' stroke-width='4'%3E%3Cpolyline stroke='%23b5a796' stroke-opacity='0.072' points='860,200 990,280 1120,280 1250,360 1380,440 1510,440'/%3E%3Cpolyline stroke='%23b5a796' stroke-opacity='0.072' points='860,280 990,200 1120,360 1250,280 1380,280 1510,360'/%3E%3Cpolyline stroke='%23b5a796' stroke-opacity='0.072' points='860,360 990,440 1120,440 1250,440 1380,360 1510,280'/%3E%3Cpolyline stroke='%23b5a796' stroke-opacity='0.054' points='860,120 990,120 1120,200 1250,200 1380,200 1510,200'/%3E%3Cpolyline stroke='%23d8b98a' stroke-opacity='0.18' points='860,440 990,360 1120,120 1250,120 1380,120 1510,120'/%3E%3C/g%3E%3Cg fill='%23b5a796' fill-opacity='0.09'%3E%3Ccircle cx='860' cy='200' r='7'/%3E%3Ccircle cx='990' cy='280' r='7'/%3E%3Ccircle cx='1120' cy='280' r='7'/%3E%3Ccircle cx='1250' cy='360' r='7'/%3E%3Ccircle cx='1380' cy='440' r='7'/%3E%3Ccircle cx='1510' cy='440' r='7'/%3E%3Ccircle cx='860' cy='280' r='7'/%3E%3Ccircle cx='990' cy='200' r='7'/%3E%3Ccircle cx='1120' cy='360' r='7'/%3E%3Ccircle cx='1250' cy='280' r='7'/%3E%3Ccircle cx='1380' cy='280' r='7'/%3E%3Ccircle cx='1510' cy='360' r='7'/%3E%3Ccircle cx='860' cy='360' r='7'/%3E%3Ccircle cx='990' cy='440' r='7'/%3E%3Ccircle cx='1120' cy='440' r='7'/%3E%3Ccircle cx='1250' cy='440' r='7'/%3E%3Ccircle cx='1380' cy='360' r='7'/%3E%3Ccircle cx='1510' cy='280' r='7'/%3E%3Ccircle cx='860' cy='120' r='7'/%3E%3Ccircle cx='990' cy='120' r='7'/%3E%3Ccircle cx='1120' cy='200' r='7'/%3E%3Ccircle cx='1250' cy='200' r='7'/%3E%3Ccircle cx='1380' cy='200' r='7'/%3E%3Ccircle cx='1510' cy='200' r='7'/%3E%3C/g%3E%3Cg fill='%23d8b98a' fill-opacity='0.248'%3E%3Ccircle cx='860' cy='440' r='8'/%3E%3Ccircle cx='990' cy='360' r='8'/%3E%3Ccircle cx='1120' cy='120' r='8'/%3E%3Ccircle cx='1250' cy='120' r='8'/%3E%3Ccircle cx='1380' cy='120' r='8'/%3E%3Ccircle cx='1510' cy='120' r='10'/%3E%3C/g%3E%3Cg fill='%23b5a796'%3E%3Crect x='90' y='560' width='600' height='34' rx='17' fill-opacity='0.059'/%3E%3Crect x='90' y='616' width='540' height='34' rx='17' fill-opacity='0.05'/%3E%3Crect x='90' y='672' width='470' height='34' rx='17' fill-opacity='0.045'/%3E%3Crect x='90' y='728' width='400' height='34' rx='17' fill-opacity='0.036'/%3E%3Crect x='90' y='784' width='320' height='34' rx='17' fill-opacity='0.032'/%3E%3Crect x='90' y='840' width='250' height='34' rx='17' fill-opacity='0.027'/%3E%3Crect x='90' y='896' width='180' height='34' rx='17' fill-opacity='0.023'/%3E%3C/g%3E%3Crect x='56' y='566' width='22' height='22' rx='4' fill='%23d8b98a' fill-opacity='0.225'/%3E%3Cg fill='%23b5a796' fill-opacity='0.054'%3E%3Crect x='56' y='622' width='22' height='22' rx='4'/%3E%3Crect x='56' y='678' width='22' height='22' rx='4'/%3E%3Crect x='56' y='734' width='22' height='22' rx='4'/%3E%3Crect x='56' y='790' width='22' height='22' rx='4'/%3E%3Crect x='56' y='846' width='22' height='22' rx='4'/%3E%3Crect x='56' y='902' width='22' height='22' rx='4'/%3E%3C/g%3E%3C/svg%3E");
+
+// The backdrop's grit: a fine warm grain and a few hairline cracks, both barely there (about 5%), each one
+// static tile
+$app-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.92 0 0 0 0 0.9 0 0 0 0 0.88 0 0 0 0.05 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+$app-cracks: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='900' height='900'%3E%3Cg fill='none' stroke='%23f2e6d6' stroke-opacity='0.05' stroke-width='1' stroke-linejoin='bevel'%3E%3Cpath d='M0 212l64 9 41-17 58 26 33-8 47 31 66-4 38 22M196 225l11 48-17 39 8 51M347 280l52-14 61 19 44-6 71 33 39-9 58 27 67-5 61 18'/%3E%3Cpath d='M500 279l-6 57 21 44-9 63 18 41M612 640l57 12 36-21 71 9 49-15 75 22M705 631l-14 58 16 47-11 64 8 100M120 590l46-31 54 6 33-27 68 14 41-12M220 565l-9 61 23 52M0 780l73-8 52 21 88-11'/%3E%3C/g%3E%3C/svg%3E");
+
+// The backdrop under the sheet: pewter, grit, the art (quiet), the edges falling into shadow
+@mixin app-backdrop {
+  background:
+    $app-grain 0 0 / 220px 220px,
+    $app-cracks 0 0 / 900px 900px,
+    radial-gradient(ellipse 120% 90% at 50% 35%, transparent 45%, rgba(0, 0, 0, 0.55) 100%),
+    $app-art center / cover no-repeat,
+    linear-gradient(160deg, #4f4840 0%, #3d3935 45%, #2a2623 100%);
+  background-color: #3d3935;
+}
+
+// The sheet: one scoreboard card in a warm pewter black (the art faint through it), its edge pewter
+@mixin app-sheet($radius: 12px) {
+  background:
+    radial-gradient(rgba(255, 238, 220, 0.045) 1px, transparent 1.3px) 0 0 / 4px 4px,
+    var(--app-sheet);
+  border: 1px solid var(--app-sheet-edge);
+  border-radius: $radius;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 238, 220, 0.06),
+    0 10px 30px rgba(0, 0, 0, 0.45);
+}
+
+// An inner section that's neither a card-panel nor a scoreboard panel (a list's note, an empty row): a
+// darker well on the sheet, hairline-edged
+@mixin app-well($radius: 10px) {
+  background: var(--app-well);
+  border: 1px solid var(--app-line);
+  border-radius: $radius;
+}
+
+// (an alert in the red: an error, a danger; rarely)
+@mixin app-red-lit {
+  color: var(--app-red-bright);
+  text-shadow: var(--app-red-glow);
+}
+
+// ---------------------------------------------------------------------------
+// The app's buttons (round 2): a filled sand primary with dark-brown lettering, a sand outline, a red
+// outline for danger; a sand pill. Mixins to style your own selector, or `@include kit.app-buttons;` for
+// the classes: .app-btn-primary, .app-btn-outline, .app-btn-danger (+ .small), .app-pill (+ .active)
+// ---------------------------------------------------------------------------
+@mixin app-button-base {
+  align-items: center;
+  border-radius: 10px;
+  box-sizing: border-box;
+  cursor: pointer;
+  display: inline-flex;
+  font-family: v.$font-base;
+  font-size: 13px;
+  font-weight: 800;
+  gap: 8px;
+  justify-content: center;
+  letter-spacing: 1px;
+  min-height: 40px;
+  padding: 0 18px;
+  text-decoration: none;
+  text-transform: uppercase;
+  transition:
+    filter 0.12s ease,
+    background 0.12s ease,
+    color 0.12s ease,
+    border-color 0.12s ease;
+
+  &[disabled] {
+    cursor: default;
+    opacity: 0.5;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--app-sand, #d8b98a);
+    outline-offset: 2px;
+  }
+
+  .mat-icon {
+    @include v.icon-size(18px);
+  }
+}
+
+@mixin primary-button {
+  @include app-button-base;
+  background: linear-gradient(180deg, #e6cca2, var(--app-sand, #d8b98a) 55%, var(--app-sand-deep, #c9a574));
+  border: 1px solid #9c7d52;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.4),
+    0 2px 6px rgba(0, 0, 0, 0.45);
+  color: #2a1f14;
+
+  &:hover:not([disabled]) {
+    filter: brightness(1.07);
+  }
+}
+
+@mixin outline-button {
+  @include app-button-base;
+  background: rgba(216, 185, 138, 0.06);
+  border: 1px solid color-mix(in srgb, var(--app-sand, #d8b98a) 70%, transparent);
+  color: var(--app-sand, #d8b98a);
+
+  &:hover:not([disabled]) {
+    background: rgba(216, 185, 138, 0.14);
+    border-color: var(--app-sand, #d8b98a);
+  }
+}
+
+@mixin danger-button {
+  @include app-button-base;
+  background: rgba(200, 16, 46, 0.06);
+  border: 1px solid color-mix(in srgb, var(--app-red-bright, #e0384f) 75%, transparent);
+  color: var(--app-red-bright, #e0384f);
+
+  &:hover:not([disabled]) {
+    background: var(--app-red, #c8102e);
+    border-color: var(--app-red, #c8102e);
+    color: #fff;
+  }
+}
+
+// (a smaller one, in a row of actions)
+@mixin small-button {
+  font-size: 11.5px;
+  min-height: 32px;
+  padding: 0 12px;
+}
+
+@mixin app-pill {
+  background: rgba(255, 238, 220, 0.04);
+  border: 1px solid var(--app-sheet-edge, #4f4840);
+  border-radius: 999px;
+  color: var(--app-text-muted, #b8ada1);
+  cursor: pointer;
+  font-family: v.$font-base;
+  font-size: 11.5px;
+  font-weight: 800;
+  letter-spacing: 0.6px;
+  padding: 5px 14px;
+  text-transform: uppercase;
+
+  &:hover:not([disabled], .active) {
+    border-color: var(--app-sand, #d8b98a);
+    color: var(--app-sand, #d8b98a);
+  }
+
+  &.active,
+  &[aria-pressed="true"],
+  &[aria-checked="true"] {
+    background: var(--app-sand, #d8b98a);
+    border-color: var(--app-sand, #d8b98a);
+    color: #2a1f14;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--app-sand, #d8b98a);
+    outline-offset: 2px;
+  }
+}
+
+@mixin app-buttons {
+  .app-btn-primary {
+    @include primary-button;
+  }
+
+  .app-btn-outline {
+    @include outline-button;
+  }
+
+  .app-btn-danger {
+    @include danger-button;
+  }
+
+  .app-btn-primary,
+  .app-btn-outline,
+  .app-btn-danger {
+    &.small {
+      @include small-button;
+    }
+  }
+
+  .app-pill {
+    @include app-pill;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Sport-agnostic (round 2): inside the app's shell, the login dialog and the account menu nothing wears a
+// sport. The sport themes are global and !important, so this answers them in kind, scoped to wherever it's
+// included (app.component: `:host ::ng-deep .app-page`): their textures and colors re-pointed to the app's,
+// the theme's pills (.game-filter) drawn as the app's pills, card panels in pewter with sand icons and none
+// of the sport's edges (sidelines, chalk, paint), the scrollbars plain
+// ---------------------------------------------------------------------------
+@mixin agnostic {
+  // (the tokens the sport kit draws with: leather, its texture, the chalkboard plays and grain, the
+  // category colors; the switches' and sliders' light)
+  --leather: var(--app-pewter, #4a443d);
+  --tex-leather: linear-gradient(transparent, transparent);
+  --tex-chalk-plays: linear-gradient(transparent, transparent);
+  --tex-chalk-noise: linear-gradient(transparent, transparent);
+  --group-color: var(--app-sand, #d8b98a);
+
+  .group-results,
+  .group-box,
+  .group-advanced,
+  .group-support,
+  card-panel {
+    --group-color: var(--app-sand, #d8b98a) !important;
+  }
+
+  // The theme's pills, as the app's
+  .game-filter,
+  .game-filter:hover,
+  .game-filter.active {
+    background: rgba(255, 238, 220, 0.04) !important;
+    background-image: none !important;
+    border: 1px solid var(--app-sheet-edge, #4f4840) !important;
+    background-blend-mode: normal !important;
+    border-radius: 999px !important;
+    box-shadow: none !important;
+    clip-path: none !important;
+    color: var(--app-text-muted, #b8ada1) !important;
+    filter: none !important;
+    font-weight: 800 !important;
+    opacity: 1 !important;
+    outline: none !important;
+    text-shadow: none !important;
+  }
+
+  .game-filter::before,
+  .game-filter::after {
+    display: none !important;
+  }
+
+  .game-filter:hover:not([disabled], .active) {
+    border-color: var(--app-sand, #d8b98a) !important;
+    color: var(--app-sand, #d8b98a) !important;
+  }
+
+  .game-filter.active,
+  .game-filter[aria-pressed="true"],
+  .game-filter[aria-checked="true"],
+  .game-filter[aria-selected="true"] {
+    background: var(--app-sand, #d8b98a) !important;
+    border-color: var(--app-sand, #d8b98a) !important;
+    color: #2a1f14 !important;
+  }
+
+  .game-filter:focus-visible {
+    outline: 2px solid var(--app-sand, #d8b98a) !important;
+    outline-offset: 2px !important;
+  }
+
+  // Card panels: a pewter box, the bar a warm scoreboard, no sport edges on the body
+  card-panel {
+    border: 1px solid var(--app-sheet-edge, #4f4840) !important;
+    border-radius: 10px !important;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3) !important;
+
+    > .group-bar {
+      --bar-tint: rgba(216, 185, 138, 0.07) !important;
+      background: linear-gradient(var(--bar-tint), var(--bar-tint)), var(--app-pewter-ink, #171513) !important;
+      border-radius: 0 !important;
+      box-shadow: none !important;
+
+      &::before,
+      &::after {
+        display: none !important;
+      }
+    }
+
+    > .group-bar:has(> .panel-toggle:hover) {
+      --bar-tint: rgba(216, 185, 138, 0.12) !important;
+    }
+
+    &:not(.closed) > .group-bar {
+      border-bottom-color: var(--app-sheet-edge, #4f4840) !important;
+    }
+
+    > .panel-body {
+      background: rgba(0, 0, 0, 0.18) !important;
+      border: none !important;
+      box-shadow: none !important;
+      padding-bottom: 0 !important;
+
+      &::before,
+      &::after {
+        display: none !important;
+      }
+    }
+  }
+
+  // (scrollbars: a plain pewter thumb, not a ball's leather or a sport's light)
+  ::-webkit-scrollbar-thumb,
+  ::-webkit-scrollbar-thumb:vertical,
+  ::-webkit-scrollbar-thumb:horizontal {
+    background: var(--app-pewter-light, #5a5249) !important;
+    background-clip: padding-box !important;
+    border: 2px solid transparent !important;
+    border-radius: 999px !important;
+  }
+
+  ::-webkit-scrollbar-thumb:hover,
+  ::-webkit-scrollbar-thumb:vertical:hover,
+  ::-webkit-scrollbar-thumb:horizontal:hover,
+  ::-webkit-scrollbar-thumb:active {
+    background: var(--app-sand-deep, #c9a574) !important;
+    background-clip: padding-box !important;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent !important;
+  }
+}

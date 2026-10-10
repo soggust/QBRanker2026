@@ -201,3 +201,22 @@ test('votes: the score, each kind, the reader\'s own; cards by score; the makers
     ['c', 2, 1],
   ]);
 });
+
+test('the Community\'s board when none was asked for: the guess, unless it\'s empty and another position isn\'t', () => {
+  // (the guess has lists: kept)
+  assert.equal(c.boardWithLists([0, 2, 0], 1), -1);
+  // (the guess is empty: the first position with lists, in the tab order)
+  assert.equal(c.boardWithLists([0, 0, 3, 1], 0), 2);
+  assert.equal(c.boardWithLists([1, 0, 3], 1), 0);
+  // (nothing anywhere: the guess stays, empty)
+  assert.equal(c.boardWithLists([0, 0, 0], 2), -1);
+  // (a guess the tabs don't have: the first with lists)
+  assert.equal(c.boardWithLists([0, 4], -1), 1);
+});
+
+test('a saved list\'s default title: the season, the tab\'s name, the day ("2026 Quarterbacks · Oct 9")', () => {
+  const day = new Date(2026, 9, 9);
+  assert.equal(l.defaultListTitle('2026', 'Quarterbacks', 'regular', day), '2026 Quarterbacks · Oct 9');
+  assert.equal(l.defaultListTitle('2024', 'Teams', 'post', day), '2024 Playoffs Teams · Oct 9');
+  assert.equal(l.defaultListTitle('2025-26', 'Point Guards', 'all', new Date(2026, 0, 31)), '2025-26 Full Season Point Guards · Jan 31');
+});

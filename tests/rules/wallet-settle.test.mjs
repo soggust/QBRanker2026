@@ -193,6 +193,8 @@ describe('the settler', { skip }, () => {
       week.rows.map((r) => [r.username, r.won, r.lost, r.profit]),
       [['ann', 2, 1, 52.59]],
     );
+    // (her reloads beside her row, read from her wallet's resets)
+    assert.equal(week.rows[0].reloads, 0);
     assert.equal((await get('leaderboards/all')).rows.length, 1);
     assert.equal((await db.doc('tallies/ghost').get()).exists, false);
 

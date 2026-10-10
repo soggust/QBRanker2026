@@ -1,3 +1,4 @@
+import { isDevMode } from '@angular/core';
 import type { FirebaseApp } from 'firebase/app';
 import type { Auth } from 'firebase/auth';
 import type { Firestore } from 'firebase/firestore';
@@ -43,6 +44,35 @@ function emulatorPorts(): { auth: number; firestore: number } {
 }
 // ---- end lists ----
 
+// ---- App Check (round 2): proof that a request comes from this site, not a script (reCAPTCHA) ----
+// TODO(user): App Check's site key (Firebase console → App Check → the web app → reCAPTCHA v3, or
+// reCAPTCHA Enterprise). Empty: App Check is off and nothing loads. 'v3' or 'enterprise' for the kind of key.
+export const APP_CHECK_SITE_KEY = '';
+export const APP_CHECK_PROVIDER: 'v3' | 'enterprise' = 'v3';
+
+let appCheckPromise: Promise<void> | null = null;
+
+// Starts App Check once, before sign-in or the database first talks to Firebase (analytics doesn't wait for
+// it, so a signed-out visitor never loads reCAPTCHA). Off with no key, and against the emulators (they
+// don't check tokens). In development against the real project it uses a debug token: the SDK prints it to
+// the console once; add it in the console (App Check → the web app → Manage debug tokens).
+function appCheck(firebase: FirebaseApp): Promise<void> {
+  if (!APP_CHECK_SITE_KEY || usingEmulators()) return Promise.resolve();
+  appCheckPromise ??= import('firebase/app-check')
+    .then((c) => {
+      if (isDevMode()) (self as { FIREBASE_APPCHECK_DEBUG_TOKEN?: boolean | string }).FIREBASE_APPCHECK_DEBUG_TOKEN ??= true;
+      const provider =
+        APP_CHECK_PROVIDER === 'enterprise'
+          ? new c.ReCaptchaEnterpriseProvider(APP_CHECK_SITE_KEY)
+          : new c.ReCaptchaV3Provider(APP_CHECK_SITE_KEY);
+      c.initializeAppCheck(firebase, { provider, isTokenAutoRefreshEnabled: true });
+    })
+    // (blocked or offline: carry on without it; enforcement, once on, is what turns such requests away)
+    .catch(() => undefined);
+  return appCheckPromise;
+}
+// ---- end App Check ----
+
 let app: Promise<FirebaseApp> | null = null;
 let authPromise: Promise<Auth> | null = null;
 let dbPromise: Promise<Firestore> | null = null;
@@ -53,10 +83,15 @@ export function firebaseApp(): Promise<FirebaseApp> {
   return app;
 }
 
+// (the app with App Check started, for sign-in and the database)
+function checkedApp(): Promise<FirebaseApp> {
+  return firebaseApp().then((firebase) => appCheck(firebase).then(() => firebase));
+}
+
 // Sign-in: kept in IndexedDB (local storage where there's none), so one sign-in carries across the
 // sport apps (the same origin) and across visits
 export function auth(): Promise<Auth> {
-  authPromise ??= Promise.all([firebaseApp(), import('firebase/auth')]).then(([firebase, a]) => {
+  authPromise ??= Promise.all([checkedApp(), import('firebase/auth')]).then(([firebase, a]) => {
     const instance = a.initializeAuth(firebase, {
       persistence: [a.indexedDBLocalPersistence, a.browserLocalPersistence],
       popupRedirectResolver: a.browserPopupRedirectResolver,
@@ -70,7 +105,7 @@ export function auth(): Promise<Auth> {
 
 // The database (Cloud Firestore)
 export function db(): Promise<Firestore> {
-  dbPromise ??= Promise.all([firebaseApp(), import('firebase/firestore')]).then(([firebase, f]) => {
+  dbPromise ??= Promise.all([checkedApp(), import('firebase/firestore')]).then(([firebase, f]) => {
     const instance = f.getFirestore(firebase);
     if (usingEmulators()) f.connectFirestoreEmulator(instance, '127.0.0.1', emulatorPorts().firestore);
     return instance;

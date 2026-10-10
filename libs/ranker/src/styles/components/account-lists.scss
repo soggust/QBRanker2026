@@ -2,20 +2,13 @@
 @use "account-kit" as kit;
 
 // ===========================================================================
-// Saved lists and the Community (lists-page, list-view, community-page): a column down the sport's field
-// like the settings page; the lists as scoreboard cards; a list (and the consensus) drawn like the grid:
+// Saved lists and the Community (lists-page, list-view, community-page), on the app's sheet (app.component:
+// it scrolls, not these); the lists as scoreboard cards; a list (and the consensus) drawn like the grid:
 // the chalkboard, the scoreboard header, the rank tiles, the team cards with their headshots, the names
-// in the hand, the numbers under them
+// in the hand, the numbers under them. Sections that aren't scoreboards sit in the sheet's darker well.
 // ===========================================================================
 :host {
   display: block;
-}
-
-:host(lists-page),
-:host(community-page) {
-  box-sizing: border-box;
-  height: calc(100% - var(--sport-bar-height));
-  overflow-y: auto;
 }
 
 :host(list-view) {
@@ -29,6 +22,8 @@
 @include kit.pills;
 @include kit.fields;
 @include kit.buttons;
+// (the app's own controls: these pages wear no sport)
+@include kit.app-buttons;
 @include kit.states;
 
 $board: var(--tex-chalk-plays) -1150px -420px / 2800px 1440px, v.$chalk-dust;
@@ -40,14 +35,8 @@ $board: var(--tex-chalk-plays) -1150px -420px / 2800px 1440px, v.$chalk-dust;
   flex-direction: column;
   font-family: v.$font-base;
   gap: 16px;
-  margin: 0 auto;
-  max-width: 1080px;
-  padding: 22px 16px 56px;
-
-  // (a list itself: room for more of its columns)
-  &.wide {
-    max-width: 1320px;
-  }
+  // (the sheet brings the top and side room)
+  padding: 0 0 28px;
 }
 
 .form-error {
@@ -85,23 +74,20 @@ a.secondary {
 
     &:hover,
     &:focus-visible {
-      color: var(--scoreboard-led);
+      color: var(--app-sand, #d8b98a);
       outline: none;
     }
   }
 }
 
 // ---------------------------------------------------------------------------
-// A page's head: its name and what it is, a button on the right
-// ---------------------------------------------------------------------------
-// ---------------------------------------------------------------------------
 // The little chips: the sport's LED name, who sees a list, on the Community board
 // ---------------------------------------------------------------------------
 .sport-led {
-  color: var(--scoreboard-led);
+  color: var(--app-sand, #d8b98a);
   font-weight: 900;
   letter-spacing: 1px;
-  text-shadow: var(--scoreboard-glow);
+  text-shadow: var(--app-sand-glow, none);
 }
 
 .vis-chip,
@@ -124,22 +110,23 @@ a.secondary {
     @include v.icon-size(14px);
   }
 
-  &.vis-public .mat-icon {
-    color: v.$good;
+  // (who sees it, quietly: public in the page's light (the app's sand), friends and only me muted)
+  .mat-icon {
+    color: var(--app-text-muted, rgba(255, 255, 255, 0.6));
   }
 
-  &.vis-private .mat-icon {
-    color: v.$caution;
+  &.vis-public .mat-icon {
+    color: var(--app-sand, #d8b98a);
   }
 }
 
 .community-chip {
-  border-color: color-mix(in srgb, var(--scoreboard-led) 50%, transparent);
-  color: var(--scoreboard-led);
+  border-color: color-mix(in srgb, var(--app-sand, #d8b98a) 50%, transparent);
+  color: var(--app-sand, #d8b98a);
 
   &:is(a):hover,
   &:is(a):focus-visible {
-    background: color-mix(in srgb, var(--scoreboard-led) 12%, transparent);
+    background: color-mix(in srgb, var(--app-sand, #d8b98a) 12%, transparent);
     outline: none;
   }
 
@@ -158,6 +145,96 @@ a.secondary {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+}
+
+// The top row of #lists and #community, one family: the filters on the left (the sport pills; the
+// Community's position and season dropdowns), all one height, and the page's other half in the top right
+// corner (a filled button in the page's light: Community, My lists)
+$bar-h: 30px;
+
+.lists-bar {
+  align-items: flex-start;
+  display: flex;
+  gap: 10px 14px;
+
+  .bar-filters {
+    align-items: center;
+    display: flex;
+    flex: 1;
+    flex-wrap: wrap;
+    gap: 10px 14px;
+    min-width: 0;
+  }
+
+  .sport-pills {
+    flex: 0 1 auto;
+  }
+
+  .app-pill {
+    align-items: center;
+    box-sizing: border-box;
+    display: inline-flex;
+    height: $bar-h;
+    padding-block: 0;
+    text-decoration: none;
+  }
+
+  .bar-link {
+    flex: 0 0 auto;
+    gap: 6px;
+    height: $bar-h;
+    margin-left: auto;
+    min-height: $bar-h !important;
+
+    .mat-icon {
+      @include v.icon-size(16px);
+    }
+  }
+}
+
+// (a dropdown the pills' height: its name in small caps inside the box, the choice after it)
+.bar-select {
+  align-items: center;
+  background: var(--app-well, rgba(0, 0, 0, 0.3));
+  border: 1px solid var(--app-sheet-edge, #4a4a4a);
+  border-radius: 999px;
+  box-sizing: border-box;
+  display: inline-flex;
+  gap: 8px;
+  height: $bar-h;
+  padding: 0 4px 0 14px;
+
+  &:focus-within {
+    border-color: var(--app-sand, #d8b98a);
+  }
+
+  .bar-select-label {
+    color: var(--app-text-muted, rgba(255, 255, 255, 0.6));
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  select {
+    background: transparent;
+    border: none;
+    color: var(--app-text, #fff);
+    cursor: pointer;
+    font-family: v.$font-base;
+    font-size: 12.5px;
+    font-weight: 800;
+    height: 100%;
+    max-width: 220px;
+    outline: none;
+    padding: 0 6px 0 0;
+
+    option {
+      background: #1e1c1a;
+      color: #fff;
+    }
+  }
 }
 
 .list-cards {
@@ -186,15 +263,15 @@ a.secondary {
 
   &:hover,
   &:focus-visible {
-    border-color: var(--scoreboard-led);
+    border-color: var(--app-sand, #d8b98a);
     box-shadow:
       0 10px 24px rgba(0, 0, 0, 0.5),
-      0 0 0 1px var(--scoreboard-led);
+      0 0 0 1px var(--app-sand, #d8b98a);
     outline: none;
     transform: translateY(-2px);
 
     .card-title {
-      color: var(--scoreboard-led);
+      color: var(--app-sand, #d8b98a);
     }
   }
 
@@ -271,8 +348,8 @@ a.secondary {
     padding-top: 1px;
 
     &.first {
-      color: var(--scoreboard-led);
-      text-shadow: var(--scoreboard-glow);
+      color: var(--app-sand, #d8b98a);
+      text-shadow: var(--app-sand-glow, none);
     }
   }
 
@@ -368,13 +445,13 @@ a.secondary {
 
   a.hero-owner:hover,
   a.hero-owner:focus-visible {
-    color: var(--scoreboard-led);
+    color: var(--app-sand, #d8b98a);
     outline: none;
   }
 }
 
 .hero-note {
-  border-left: 3px solid color-mix(in srgb, var(--scoreboard-led) 70%, transparent);
+  border-left: 3px solid color-mix(in srgb, var(--app-sand, #d8b98a) 70%, transparent);
   color: rgba(255, 255, 255, 0.85);
   font-size: 14px;
   line-height: 1.5;
@@ -399,57 +476,25 @@ a.secondary {
   gap: 6px;
 }
 
+// (a list's actions: the app's small outline buttons with an icon, all one height; Submit the filled one;
+// Delete a red outline, the trash alone)
 .tool-btn {
-  align-items: center;
-  background: rgba(0, 0, 0, 0.35);
-  border: 1px solid #4a4a4a;
-  border-radius: 8px;
-  color: #fff;
-  cursor: pointer;
-  display: inline-flex;
-  font-family: v.$font-base;
-  font-size: 12px;
-  font-weight: 800;
-  gap: 5px;
-  height: 32px;
-  letter-spacing: 0.4px;
-  padding: 0 11px 0 8px;
-  transition:
-    border-color 0.12s ease,
-    color 0.12s ease;
+  gap: 6px;
 
   .mat-icon {
-    @include v.icon-size(17px);
-  }
-
-  &:hover,
-  &:focus-visible {
-    border-color: var(--scoreboard-led);
-    color: var(--scoreboard-led);
-    outline: none;
-  }
-
-  &.lit {
-    border-color: color-mix(in srgb, var(--scoreboard-led) 60%, transparent);
-    color: var(--scoreboard-led);
+    @include v.icon-size(16px);
   }
 
   &.danger-btn {
-    padding: 0 7px;
-
-    &:hover,
-    &:focus-visible {
-      border-color: v.$bad;
-      color: v.$bad;
-    }
+    border-radius: 999px;
+    padding: 0;
+    width: 32px;
   }
 }
 
 .owner-line {
   align-items: center;
-  background: rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  border-radius: 10px;
+  @include kit.app-well(10px);
   display: flex;
   flex-wrap: wrap;
   gap: 10px 14px;
@@ -472,9 +517,7 @@ a.secondary {
 
 .today-note {
   align-items: center;
-  background: rgba(0, 0, 0, 0.45);
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  border-radius: 10px;
+  @include kit.app-well(10px);
   color: rgba(255, 255, 255, 0.78);
   font-size: 12.5px;
   line-height: 1.45;
@@ -498,16 +541,15 @@ a.secondary {
 
 .reorder-bar {
   align-items: center;
-  background: color-mix(in srgb, var(--scoreboard-led) 10%, rgba(0, 0, 0, 0.5));
-  border: 1px solid color-mix(in srgb, var(--scoreboard-led) 55%, transparent);
-  border-radius: 10px;
+  @include v.scoreboard-panel(10px, 0 4px 14px rgba(0, 0, 0, 0.4));
+  border-color: color-mix(in srgb, var(--app-sand, #d8b98a) 55%, transparent);
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
   padding: 8px 12px;
 
   > .mat-icon {
-    color: var(--scoreboard-led);
+    color: var(--app-sand, #d8b98a);
     @include v.icon-size(20px);
   }
 
@@ -694,8 +736,8 @@ a.secondary {
   width: 46px;
 
   &.top-5 {
-    color: var(--scoreboard-led);
-    text-shadow: var(--scoreboard-glow);
+    color: var(--app-sand, #d8b98a);
+    text-shadow: var(--app-sand-glow, none);
   }
 
   &.top-10 {
@@ -858,66 +900,12 @@ a.secondary {
 }
 
 .row.header-row .cell.now-rank {
-  color: var(--scoreboard-led);
+  color: var(--app-sand, #d8b98a);
 }
 
 // ---------------------------------------------------------------------------
 // #community: the board picker, the consensus and the leaderboard side by side, then the lists' cards
 // ---------------------------------------------------------------------------
-.board-picker {
-  @include v.scoreboard-panel(12px, 0 6px 18px rgba(0, 0, 0, 0.45));
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  padding: 14px 18px;
-}
-
-.picker-row {
-  align-items: center;
-  display: flex;
-  gap: 14px;
-}
-
-.picker-label {
-  color: rgba(255, 255, 255, 0.7);
-  flex: 0 0 60px;
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 1.2px;
-  text-transform: uppercase;
-}
-
-.picker-pills {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 7px;
-
-  a.game-filter {
-    text-decoration: none;
-  }
-}
-
-.season-pick {
-  background: rgba(0, 0, 0, 0.42);
-  border: 1px solid #4a4a4a;
-  border-radius: 8px;
-  color: #fff;
-  cursor: pointer;
-  font-family: v.$font-base;
-  font-size: 13px;
-  font-weight: 700;
-  padding: 6px 10px;
-
-  &:focus-visible {
-    border-color: var(--scoreboard-led);
-    outline: none;
-  }
-
-  option {
-    background: #1e1e1e;
-  }
-}
-
 .community-grid {
   align-items: start;
   display: grid;
@@ -939,14 +927,14 @@ a.secondary {
 
   h3 {
     align-items: center;
-    color: var(--scoreboard-led);
+    color: var(--app-sand, #d8b98a);
     display: flex;
     font-size: 13px;
     font-weight: 900;
     gap: 7px;
     letter-spacing: 1.2px;
     margin: 0;
-    text-shadow: var(--scoreboard-glow);
+    text-shadow: var(--app-sand-glow, none);
     text-transform: uppercase;
 
     .mat-icon {
@@ -1033,8 +1021,8 @@ a.secondary {
     height: 22px;
 
     &.first {
-      color: var(--scoreboard-led);
-      text-shadow: var(--scoreboard-glow);
+      color: var(--app-sand, #d8b98a);
+      text-shadow: var(--app-sand-glow, none);
     }
   }
 
@@ -1052,7 +1040,7 @@ a.secondary {
 
       &:hover,
       &:focus-visible {
-        color: var(--scoreboard-led);
+        color: var(--app-sand, #d8b98a);
         outline: none;
       }
     }
@@ -1079,60 +1067,79 @@ a.secondary {
   }
 }
 
-.entry-cards {
-  display: grid;
-  gap: 14px;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
+// A submitted list: a My lists card (not itself a link: its title is), the votes in its bar
 .entry-card {
-  align-items: stretch;
-  border: 1px solid #3a3a3a;
-  border-radius: 12px;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
-  display: flex;
-  overflow: hidden;
+  &:hover,
+  &:focus-within {
+    transform: none;
+  }
 
   &.mine {
-    border-color: color-mix(in srgb, var(--scoreboard-led) 45%, #3a3a3a);
+    border-color: color-mix(in srgb, var(--app-sand, #d8b98a) 45%, #3a3a3a);
+  }
+
+  .card-title {
+    text-decoration: none;
+
+    &:hover,
+    &:focus-visible {
+      color: var(--app-sand, #d8b98a);
+      outline: none;
+    }
+  }
+
+  .card-foot .more-link {
+    margin-left: auto;
   }
 }
 
-// The votes: up, the score on an LED, down, down the card's left on the scoreboard
+.entry-owner {
+  align-items: center;
+  display: flex;
+  gap: 6px;
+
+  a {
+    color: inherit;
+    overflow: hidden;
+    text-decoration: none;
+    text-overflow: ellipsis;
+
+    &:hover,
+    &:focus-visible {
+      color: var(--app-sand, #d8b98a);
+      outline: none;
+    }
+  }
+}
+
+// The votes: down, the score on an LED, up, at the bar's right
 .entry-votes {
   align-items: center;
-  background: var(--scoreboard-dots), var(--scoreboard);
-  border-right: 1px solid #333;
   display: flex;
-  flex: 0 0 52px;
-  flex-direction: column;
+  flex: 0 0 auto;
   gap: 2px;
-  justify-content: flex-start;
-  padding: 10px 0;
+  margin: -4px -6px -4px 0;
 }
 
 .vote {
   align-items: center;
   background: transparent;
   border: 1px solid transparent;
-  border-radius: 8px;
+  border-radius: 6px;
   color: rgba(255, 255, 255, 0.6);
   cursor: pointer;
   display: flex;
-  height: 30px;
+  height: 26px;
   justify-content: center;
   padding: 0;
   transition:
     color 0.12s ease,
     border-color 0.12s ease,
     background 0.12s ease;
-  width: 36px;
+  width: 28px;
 
   .mat-icon {
-    @include v.icon-size(30px);
+    @include v.icon-size(26px);
   }
 
   &:hover:not([disabled]),
@@ -1162,9 +1169,9 @@ a.secondary {
 
 .vote-score {
   @include v.led-tile;
-  font-size: 13px;
-  height: 24px;
-  min-width: 34px;
+  font-size: 12px;
+  height: 22px;
+  min-width: 30px;
   padding: 1px 4px 0;
 
   &.pos {
@@ -1178,79 +1185,11 @@ a.secondary {
   }
 }
 
-.entry-main {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  min-width: 0;
-
-  .card-top {
-    flex: 1;
-  }
-
-  .more-link {
-    align-self: stretch;
-    background: #161a18;
-    border-top: 1px solid rgba(255, 255, 255, 0.06) !important;
-    padding: 8px 12px;
-    text-align: left;
-  }
-}
-
-.entry-head {
-  align-items: center;
-  background: #1a1f1c;
-  display: flex;
-  gap: 10px;
-  padding: 10px 12px;
-}
-
-.entry-who {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-  min-width: 0;
-}
-
-.entry-title {
-  color: #fff;
-  @include v.headline(15.5px);
-  overflow: hidden;
-  text-decoration: none;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-
-  &:hover,
-  &:focus-visible {
-    color: var(--scoreboard-led);
-    outline: none;
-  }
-}
-
-.entry-owner {
-  align-items: center;
-  color: rgba(255, 255, 255, 0.65);
-  display: flex;
-  font-size: 12px;
-  font-weight: 700;
-  gap: 6px;
-
-  a {
-    color: inherit;
-    text-decoration: none;
-
-    &:hover,
-    &:focus-visible {
-      color: var(--scoreboard-led);
-      outline: none;
-    }
-  }
-}
-
 .you-chip {
-  border: 1px solid color-mix(in srgb, var(--scoreboard-led) 55%, transparent);
+  border: 1px solid color-mix(in srgb, var(--app-sand, #d8b98a) 55%, transparent);
   border-radius: 999px;
-  color: var(--scoreboard-led);
+  color: var(--app-sand, #d8b98a);
+  flex: 0 0 auto;
   font-size: 9.5px;
   font-weight: 900;
   letter-spacing: 0.8px;
@@ -1288,10 +1227,6 @@ a.secondary {
 
   .tool-btn span {
     display: none;
-  }
-
-  .tool-btn {
-    padding: 0 8px;
   }
 
   .tool-btn.lit span {
@@ -1343,18 +1278,21 @@ a.secondary {
     font-size: 13px;
   }
 
-  .picker-row {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 6px;
+  .tool-btn:not(.danger-btn) {
+    padding: 0 10px;
   }
 
-  // (stacked: the label its own height, not the 60px it takes across)
-  .picker-label {
-    flex: none;
+  // (the bar's dropdowns: a line each, full width)
+  .bar-select {
+    flex: 1 1 100%;
+    min-width: 0;
+
+    select {
+      min-width: 0;
+      width: 100%;
+    }
   }
 
-  .entry-cards,
   .list-cards {
     grid-template-columns: minmax(0, 1fr);
   }

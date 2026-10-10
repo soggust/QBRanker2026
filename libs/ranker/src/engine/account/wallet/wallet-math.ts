@@ -423,6 +423,8 @@ export interface LeaderRow {
   staked: number;
   profit: number;
   roi: number | null;
+  // (the wallet's reloads (its resets), the settler's: a record over several bankrolls)
+  reloads?: number;
 }
 export interface Leaderboard {
   period: 'week' | 'season' | 'all';

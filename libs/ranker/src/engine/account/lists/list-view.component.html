@@ -12,7 +12,7 @@
     <mat-icon class="soon-icon" aria-hidden="true" fontIcon="format_list_numbered"></mat-icon>
     <h2>{{ list.title }}</h2>
     <p class="soon-detail">This list lives on the {{ sportLabel(list.sport) }} page ({{ listWhere(list) }}).</p>
-    <a class="primary" [href]="elsewhereHref">Open it on the {{ sportLabel(list.sport) }} page</a>
+    <a class="app-btn-primary" [href]="elsewhereHref">Open it on the {{ sportLabel(list.sport) }} page</a>
   </div>
 } @else {
   <!-- The list's name plate: where it's from, who made it, when, and the note -->
@@ -53,19 +53,19 @@
   <!-- As saved or Today, and the owner's actions -->
   <div class="list-toolbar">
     <div class="mode-pills" role="radiogroup" aria-label="Numbers">
-      <button type="button" role="radio" class="game-filter small" [class.active]="mode === 'saved'" [attr.aria-checked]="mode === 'saved'" (click)="setMode('saved')" title="The numbers as they were when the list was saved">As saved</button>
-      <button type="button" role="radio" class="game-filter small" [class.active]="mode === 'today'" [attr.aria-checked]="mode === 'today'" (click)="setMode('today')" title="The same players with their numbers now, and the change since">Today</button>
+      <button type="button" role="radio" class="app-pill" [class.active]="mode === 'saved'" [attr.aria-checked]="mode === 'saved'" (click)="setMode('saved')" title="The numbers as they were when the list was saved">As saved</button>
+      <button type="button" role="radio" class="app-pill" [class.active]="mode === 'today'" [attr.aria-checked]="mode === 'today'" (click)="setMode('today')" title="The same players with their numbers now, and the change since">Today</button>
     </div>
     <div class="list-actions">
-      <button type="button" class="tool-btn" (click)="copyLink()" title="Copy a link to this list"><mat-icon aria-hidden="true" fontIcon="link"></mat-icon><span>Copy link</span></button>
+      <button type="button" class="app-btn-outline small tool-btn" (click)="copyLink()" title="Copy a link to this list" aria-label="Copy link"><mat-icon aria-hidden="true" fontIcon="link"></mat-icon><span>Copy link</span></button>
       @if (mine) {
-        <button type="button" class="tool-btn" (click)="open('edit')" title="Rename it, edit its note, choose who sees it"><mat-icon aria-hidden="true" fontIcon="edit"></mat-icon><span>Edit</span></button>
+        <button type="button" class="app-btn-outline small tool-btn" (click)="open('edit')" title="Rename it, edit its note, choose who sees it" aria-label="Edit"><mat-icon aria-hidden="true" fontIcon="edit"></mat-icon><span>Edit</span></button>
         @if (submittedKey) {
-          <button type="button" class="tool-btn" (click)="open('withdraw')" title="Take it off the Community board"><mat-icon aria-hidden="true" fontIcon="group_remove"></mat-icon><span>Withdraw</span></button>
+          <button type="button" class="app-btn-outline small tool-btn" (click)="open('withdraw')" title="Take it off the Community board" aria-label="Withdraw from Community"><mat-icon aria-hidden="true" fontIcon="group_remove"></mat-icon><span>Withdraw</span></button>
         } @else {
-          <button type="button" class="tool-btn lit" (click)="open('submit')" title="Put this order on the Community board for its tab and season"><mat-icon aria-hidden="true" fontIcon="groups"></mat-icon><span>Submit to Community</span></button>
+          <button type="button" class="app-btn-primary small tool-btn" (click)="open('submit')" title="Put this order on the Community board for its tab and season"><mat-icon aria-hidden="true" fontIcon="groups"></mat-icon><span>Submit to Community</span></button>
         }
-        <button type="button" class="tool-btn danger-btn" (click)="open('delete')" title="Delete this list" aria-label="Delete this list"><mat-icon aria-hidden="true" fontIcon="delete"></mat-icon></button>
+        <button type="button" class="app-btn-danger small tool-btn danger-btn" (click)="open('delete')" title="Delete this list" aria-label="Delete this list"><mat-icon aria-hidden="true" fontIcon="delete"></mat-icon></button>
       }
     </div>
   </div>
@@ -92,9 +92,9 @@
     <div class="reorder-bar" role="group" aria-label="New order">
       <mat-icon aria-hidden="true" fontIcon="swap_vert"></mat-icon>
       <span class="reorder-text">New order, not saved yet</span>
-      <button type="button" class="link" [disabled]="busy" (click)="undoOrder()">Undo</button>
-      <button type="button" class="secondary small-btn" [disabled]="busy" (click)="saveOrder(false)" title="Save the order; the numbers stay as they were saved">Save order</button>
-      <button type="button" class="primary small-btn" [disabled]="busy" (click)="saveOrder(true)" title="Save the order and bring the numbers up to today (the snapshot)">
+      <button type="button" class="app-btn-danger small" [disabled]="busy" (click)="undoOrder()" title="Put the rows back as they were"><mat-icon aria-hidden="true" fontIcon="undo"></mat-icon>Undo</button>
+      <button type="button" class="app-btn-outline small" [disabled]="busy" (click)="saveOrder(false)" title="Save the order; the numbers stay as they were saved">Save order</button>
+      <button type="button" class="app-btn-primary small" [disabled]="busy" (click)="saveOrder(true)" title="Save the order and bring the numbers up to today (the snapshot)">
         @if (busy) { <span class="spinner tiny" aria-hidden="true"></span> }
         Save &amp; update snapshot
       </button>
@@ -182,8 +182,8 @@
         </div>
         @if (error) { <p class="form-error" role="alert">{{ error }}</p> }
         <div class="modal-actions">
-          <button type="button" class="link" [disabled]="busy" (click)="dialog = null">Cancel</button>
-          <button type="submit" class="primary" [disabled]="busy">
+          <button type="button" class="app-btn-outline" [disabled]="busy" (click)="dialog = null">Cancel</button>
+          <button type="submit" class="app-btn-primary" [disabled]="busy">
             @if (busy) { <span class="spinner" aria-hidden="true"></span> }
             Save
           </button>
@@ -195,8 +195,8 @@
       <p class="modal-lede">Delete <strong>{{ list.title }}</strong>? Its link stops working{{ submittedKey ? ', and it comes off the Community board' : '' }}. This can’t be undone.</p>
       @if (error) { <p class="form-error" role="alert">{{ error }}</p> }
       <div class="modal-actions">
-        <button type="button" class="link" [disabled]="busy" (click)="dialog = null">Cancel</button>
-        <button type="button" class="danger" [disabled]="busy" (click)="remove()">
+        <button type="button" class="app-btn-outline" [disabled]="busy" (click)="dialog = null">Cancel</button>
+        <button type="button" class="app-btn-danger" [disabled]="busy" (click)="remove()">
           @if (busy) { <span class="spinner" aria-hidden="true"></span> }
           Delete list
         </button>
@@ -208,8 +208,8 @@
       <p class="modal-lede">One list per board: if you’ve submitted another {{ listWhere(list) }} list, this one takes its place (and starts over on votes).</p>
       @if (error) { <p class="form-error" role="alert">{{ error }}</p> }
       <div class="modal-actions">
-        <button type="button" class="link" [disabled]="busy" (click)="dialog = null">Cancel</button>
-        <button type="button" class="primary" [disabled]="busy" (click)="submit()">
+        <button type="button" class="app-btn-outline" [disabled]="busy" (click)="dialog = null">Cancel</button>
+        <button type="button" class="app-btn-primary" [disabled]="busy" (click)="submit()">
           @if (busy) { <span class="spinner" aria-hidden="true"></span> }
           Submit
         </button>
@@ -220,8 +220,8 @@
       <p class="modal-lede">Take <strong>{{ list.title }}</strong> off the {{ boardName }} board? Its votes go with it. The list itself stays.</p>
       @if (error) { <p class="form-error" role="alert">{{ error }}</p> }
       <div class="modal-actions">
-        <button type="button" class="link" [disabled]="busy" (click)="dialog = null">Cancel</button>
-        <button type="button" class="danger" [disabled]="busy" (click)="withdraw()">
+        <button type="button" class="app-btn-outline" [disabled]="busy" (click)="dialog = null">Cancel</button>
+        <button type="button" class="app-btn-danger" [disabled]="busy" (click)="withdraw()">
           @if (busy) { <span class="spinner" aria-hidden="true"></span> }
           Withdraw
         </button>

@@ -1,6 +1,7 @@
 @use "account-kit" as kit;
 
-// Public / Friends / Only me (visibility-pills.component.ts): the sport's small pills in a row
+// Public / Friends / Only me (visibility-pills.component.ts): the app's sand pills in a row, as the team-logo
+// picker's sports
 :host {
   align-items: center;
   display: flex;
@@ -8,10 +9,12 @@
   gap: 8px;
 }
 
-@include kit.pills;
+.vis-pill {
+  @include kit.app-pill;
+}
 
 // (a change saving: dimmed, not acting)
-.game-filter.busy {
+.vis-pill.busy {
   cursor: progress;
   opacity: 0.5;
 }

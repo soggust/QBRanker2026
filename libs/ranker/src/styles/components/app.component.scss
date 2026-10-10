@@ -1,4 +1,5 @@
 @use "../variables" as v;
+@use "account-kit" as kit;
 
 // ===========================================================================
 // The page: the sport bar across the top, then the filter menu (a drawer beside the rankings on big
@@ -44,27 +45,40 @@
     }
   }
 
-  // The account (Sign in, or the avatar and its menu: account-menu.scss), pushed right, just left of the
-  // brand
+  // The account (Sign in, or the user's name and avatar opening their menu: account-menu.scss), pushed
+  // right; signed in it's the last thing in the bar, the avatar's edge in line with the page's (the
+  // toggle's own padding taken off the side margin)
   account-menu {
     margin-left: auto;
     order: 2;
+
+    &.signed-in {
+      margin-right: 2px;
+    }
   }
 
-  // The site's name: a podium, then "Season Ranker" in the menu logo's lettering, both in the sport's
-  // color, its right edge in line with the page's (the position tabs and the grid). A click reloads the
-  // sport's page.
+  // The site's name (signed out): "Season Ranker" in the menu logo's lettering, then a podium, both in the
+  // sport's color, a small rule between it and Sign in, its right edge in line with the page's (the
+  // position tabs and the grid). A click reloads the sport's page.
   a.brand {
     color: var(--scoreboard-led);
     @include v.headline(11px);
     gap: 8px;
     letter-spacing: 1px;
-    margin-left: 6px;
     // (the bar's own padding plus this: the page's side margin, 26px)
     margin-right: 12px;
     order: 3;
     padding: 0;
     white-space: nowrap;
+
+    &::before {
+      background: rgba(255, 255, 255, 0.28);
+      content: "";
+      flex: 0 0 auto;
+      height: 16px;
+      margin-right: 6px;
+      width: 1px;
+    }
 
     &:hover {
       background: none;
@@ -86,6 +100,10 @@
     a.brand {
       margin-right: 31px;
     }
+
+    account-menu.signed-in {
+      margin-right: 21px;
+    }
   }
 
   // Phones: the names a size down to suit the slimmer bar, and just the podium (the sports fill the bar)
@@ -96,15 +114,123 @@
     }
 
     a.brand {
-      margin-left: 2px;
-      margin-right: 6px;
+      gap: 6px;
+      margin-right: 2px;
+
+      &::before {
+        margin-right: 0;
+      }
 
       .brand-name {
         display: none;
       }
     }
+
+    account-menu.signed-in {
+      margin-right: 0;
+    }
   }
 }
+
+// ---------------------------------------------------------------------------
+// The app's sheet (every account page, Privacy, Data deletion): the pewter backdrop under the sport bar,
+// one scoreboard card filling it (the grid's margins), and inside it the page, the only thing that scrolls.
+// A page component here brings no page background, no viewport height and no scrolling of its own (the
+// guard below sees to it); it centers its own column if it wants one.
+// ---------------------------------------------------------------------------
+.app-page {
+  @include kit.app-tokens;
+  @include kit.app-backdrop;
+  box-sizing: border-box;
+  color: var(--app-text);
+  display: flex;
+  flex-direction: column;
+  font-family: v.$font-base;
+  height: calc(100% - var(--sport-bar-height));
+  padding: 1em 2em;
+
+  @media (max-width: 1199px) {
+    padding: 0.75em 5%;
+  }
+
+  @media (max-width: 575px) {
+    padding: 8px;
+  }
+}
+
+// (centered, never edge to edge on a wide screen: a reading width for Settings, a profile, Friends, the
+// legal pages; wider for the pages with tables and boards (My lists, Community, the Tracker, the Wallet))
+.app-sheet {
+  @include kit.app-sheet(12px);
+  align-self: center;
+  box-sizing: border-box;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  max-width: 880px;
+  min-height: 0;
+  overflow: hidden;
+  width: 100%;
+
+  .wide > & {
+    max-width: 1240px;
+  }
+
+  @media (max-width: 575px) {
+    border-radius: 10px;
+  }
+}
+
+// (its padding the same on top and both sides: the page inside brings none of its own)
+.app-sheet-body {
+  box-sizing: border-box;
+  flex: 1;
+  padding: 22px 22px 0;
+
+  @media (max-width: 575px) {
+    padding: 12px 12px 0;
+  }
+
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+
+  // (its scrollbar in the app's colors: a sand thumb on the pewter, as the grid's is in the sport's)
+  scrollbar-color: color-mix(in srgb, var(--app-sand, #d8b98a) 55%, transparent) transparent;
+  scrollbar-width: thin;
+
+  &::-webkit-scrollbar {
+    width: 10px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: color-mix(in srgb, var(--app-sand, #d8b98a) 45%, var(--app-pewter-deep, #24211e));
+    border: 2px solid transparent;
+    border-radius: 10px;
+    background-clip: padding-box;
+
+    &:hover {
+      background-color: var(--app-sand, #d8b98a);
+    }
+  }
+
+  // (the guard: a page's old full-screen host, its height, scrolling and background, made a plain block)
+  > * {
+    // (and the app's sand light over a page's own accent)
+    --scoreboard-led: var(--app-sand);
+    --scoreboard-glow: var(--app-sand-glow);
+    background: none;
+    display: block;
+    height: auto;
+    min-height: 0;
+    overflow: visible;
+  }
+}
+
 
 // ---------------------------------------------------------------------------
 // The page under the sport bar: the menu's drawer and the rankings
@@ -329,4 +455,18 @@ main {
       }
     }
   }
+}
+
+// (and a page's own outer column: no side padding, no top padding, no centered max-width of its own; its
+// bottom padding stays, room under the last panel)
+:host ::ng-deep .app-sheet-body > * > :is(.account-page, .lists-page, .tracker-page, .wallet-page, .legal) {
+  margin-inline: 0;
+  max-width: none;
+  padding-inline: 0;
+  padding-top: 0;
+}
+
+// (nothing on the sheet wears a sport: the same look on every sport's app; _account-kit.scss agnostic)
+:host ::ng-deep .app-page {
+  @include kit.agnostic;
 }

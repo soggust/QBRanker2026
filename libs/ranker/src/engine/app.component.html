@@ -13,37 +13,64 @@
   @if (canUse('bets')) {
     <a href="#bets" [class.active]="view === 'bets'" [attr.aria-current]="view === 'bets' ? 'page' : null">Bets</a>
   }
-  <!-- The account: Sign in, or the user's avatar and its menu (just left of the brand) -->
-  <account-menu></account-menu>
-  <!-- The site's name on the far right, after a little podium (#1 on the middle step) in the sport's color;
-       a click reloads this sport's page fresh, from the top -->
-  <a class="brand" [href]="'/' + sport + '/'" title="Season Ranker: reload">
-    <svg class="brand-logo" viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M12 1.5l1.3 2.7 3 .4-2.2 2 .6 2.9-2.7-1.4-2.7 1.4.6-2.9-2.2-2 3-.4z" />
-      <rect x="8.5" y="11" width="7" height="11.5" rx="1" />
-      <rect x="1.5" y="15" width="6.5" height="7.5" rx="1" opacity="0.7" />
-      <rect x="16" y="17" width="6.5" height="5.5" rx="1" opacity="0.5" />
-    </svg>
-    <span class="brand-name">Season Ranker</span>
-  </a>
+  <!-- The far right, flush with the page's edge, each name left of its picture: signed out, Sign in | the
+       site's name and its podium; signed in, the user's name and avatar (their menu) in place of the brand -->
+  <account-menu [class.signed-in]="!!account.user()"></account-menu>
+  <!-- The site's name, then a little podium (#1 on the middle step) in the sport's color; a click reloads
+       this sport's page fresh, from the top (signed out only: signed in, the user takes its place) -->
+  @if (account.ready() && !account.user()) {
+    <a class="brand" [href]="'/' + sport + '/'" title="Season Ranker: reload">
+      <span class="brand-name">Season Ranker</span>
+      <svg class="brand-logo" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M12 1.5l1.3 2.7 3 .4-2.2 2 .6 2.9-2.7-1.4-2.7 1.4.6-2.9-2.2-2 3-.4z" />
+        <rect x="8.5" y="11" width="7" height="11.5" rx="1" />
+        <rect x="1.5" y="15" width="6.5" height="7.5" rx="1" opacity="0.7" />
+        <rect x="16" y="17" width="6.5" height="5.5" rx="1" opacity="0.5" />
+      </svg>
+    </a>
+  }
 </nav>
 
 @if (view === 'bets') {
   <bets-page></bets-page>
-} @else if (view === 'account') {
-  <account-page></account-page>
-} @else if (view === 'lists') {
-  <lists-page></lists-page>
-} @else if (view === 'community') {
-  <community-page></community-page>
-} @else if (view === 'tracker') {
-  <tracker-page></tracker-page>
-} @else if (view === 'wallet') {
-  <wallet-page></wallet-page>
-} @else if (view === 'friends') {
-  <friends-page></friends-page>
-} @else if (view === 'user') {
-  <user-profile [username]="viewUser"></user-profile>
+} @else if (onSheet) {
+  <!-- The account pages (and Privacy, Data deletion): the app's own pewter backdrop and one scoreboard sheet
+       filling the screen under the sport bar; the page never scrolls, only the sheet's body (like the grid) -->
+  <div class="app-page" [class.wide]="wideSheet">
+    <div class="app-sheet">
+      <div class="app-sheet-body" #sheetBody>
+        @switch (view) {
+          @case ('account') {
+            <account-page></account-page>
+          }
+          @case ('lists') {
+            <lists-page></lists-page>
+          }
+          @case ('community') {
+            <community-page></community-page>
+          }
+          @case ('tracker') {
+            <tracker-page></tracker-page>
+          }
+          @case ('wallet') {
+            <wallet-page></wallet-page>
+          }
+          @case ('friends') {
+            <friends-page></friends-page>
+          }
+          @case ('user') {
+            <user-profile [username]="viewUser"></user-profile>
+          }
+          @case ('privacy') {
+            <legal-page page="privacy"></legal-page>
+          }
+          @case ('data-deletion') {
+            <legal-page page="data-deletion"></legal-page>
+          }
+        }
+      </div>
+    </div>
+  </div>
 } @else if (gate === 'soon') {
   <!-- (a sport not ready for everyone, on the live site) -->
   <coming-soon [heading]="sportName" detail="This sport is on its way. Check back soon." [backHref]="'/' + sports[0].id + '/'" [backLabel]="'Go to ' + sports[0].label"></coming-soon>

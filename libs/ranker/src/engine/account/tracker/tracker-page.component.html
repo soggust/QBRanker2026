@@ -1,25 +1,15 @@
-<!-- The Tracker: a desk like the Algorithm's (the scoreboard on top, gunmetal under it), a scoreboard card per pin -->
+<!-- Track Players (#tracker): a desk like the Algorithm's (the tiles and the pills on top), a scoreboard card per pin,
+     folded to its strip and the sides at a glance -->
 <div class="tracker-page">
-  <section class="tracker-desk" aria-labelledby="tracker-title">
-    <!-- (the top: whose tracker, the tiles, the sports and who sees it) -->
+  <section class="tracker-desk" [attr.aria-label]="owner ? owner.name + '’s Track Players' : 'Track Players'">
+    <!-- (the top: the tiles, the sports and who sees it; someone else's, whose it is) -->
     <header class="tracker-top">
-      <div class="tracker-head">
-        @if (owner) {
-          <account-avatar [photo]="$any(owner.photo)" [name]="owner.name" [size]="40"></account-avatar>
-        } @else {
-          <span class="tracker-badge" aria-hidden="true"><mat-icon fontIcon="push_pin"></mat-icon></span>
-        }
-        <div class="tracker-heading">
-          <h2 id="tracker-title">{{ owner ? owner.name + '’s Tracker' : 'Tracker' }}</h2>
-          <p class="tracker-sub">
-            @if (owner) {
-              &#64;{{ owner.username }} · comparisons they're following, measured again now
-            } @else {
-              Comparisons you've pinned from Compare, measured again every time you look
-            }
-          </p>
+      @if (owner) {
+        <div class="tracker-owner">
+          <account-avatar [photo]="$any(owner.photo)" [name]="owner.name" [size]="28"></account-avatar>
+          <span><b>{{ owner.name }}</b> &#64;{{ owner.username }} · the comparisons they're following</span>
         </div>
-      </div>
+      }
 
       @if (state === 'ready' && cards.length) {
         <div class="tracker-tiles">
@@ -33,11 +23,17 @@
         <div class="tracker-controls">
           @if (sportCounts.length > 1) {
             <nav class="tracker-sports" aria-label="Sport">
+              <!-- (All: every sport's pins here, this sport's measured now, the others as last seen) -->
+              <button type="button" class="app-pill" [class.active]="all" [attr.aria-pressed]="all" (click)="setAll(true)">All · {{ allCount }}</button>
               @for (s of sportCounts; track s.id) {
                 @if (s.id === sport) {
-                  <span class="game-filter small active" aria-current="page">{{ s.label }} · {{ s.count }}</span>
+                  @if (all) {
+                    <button type="button" class="app-pill" (click)="setAll(false)">{{ s.label }} · {{ s.count }}</button>
+                  } @else {
+                    <span class="app-pill active" aria-current="page">{{ s.label }} · {{ s.count }}</span>
+                  }
                 } @else {
-                  <a class="game-filter small" [href]="sportHref(s.id)">{{ s.label }} · {{ s.count }}</a>
+                  <a class="app-pill" [href]="sportHref(s.id)" (click)="setAll(false)">{{ s.label }} · {{ s.count }}</a>
                 }
               }
             </nav>
@@ -47,7 +43,7 @@
               <span class="tracker-share-label" id="tracker-vis">Who sees it</span>
               <visibility-pills labelledby="tracker-vis" [value]="visibility" (picked)="setVisibility($event)"></visibility-pills>
               @if (visibility !== 'private') {
-                <button type="button" class="tracker-icon" title="Copy the link to your tracker" aria-label="Copy the link to your tracker" (click)="copyLink()">
+                <button type="button" class="tracker-icon" title="Copy the link to your Track Players" aria-label="Copy the link to your Track Players" (click)="copyLink()">
                   <mat-icon fontIcon="link"></mat-icon>
                 </button>
               }
@@ -63,17 +59,17 @@
         <mat-icon class="tracker-empty-icon" fontIcon="push_pin" aria-hidden="true"></mat-icon>
         <h3>Follow a comparison all season</h3>
         <p>Sign in, then pin any comparison from Compare: it lands here with a scoreboard of its own, showing how each side has moved since.</p>
-        <button type="button" class="primary" (click)="account.openLogin()">Sign in</button>
+        <button type="button" class="app-btn-primary" (click)="account.openLogin()">Sign in</button>
       </div>
     } @else if (state === 'wait') {
-      <div class="tracker-empty" role="status"><span class="spinner" aria-hidden="true"></span> Loading the tracker…</div>
+      <div class="tracker-empty" role="status"><span class="spinner" aria-hidden="true"></span> Loading Track Players…</div>
     } @else if (state === 'hidden') {
       <div class="tracker-empty">
         <mat-icon class="tracker-empty-icon" fontIcon="lock" aria-hidden="true"></mat-icon>
-        <h3>This tracker isn't shared with you</h3>
+        <h3>Their Track Players isn't shared with you</h3>
         <p>{{ owner?.name || 'Its owner' }} keeps it to their friends, or to themselves.{{ account.user() ? '' : ' Friends see it once they sign in.' }}</p>
         @if (!account.user()) {
-          <button type="button" class="primary" (click)="account.openLogin()">Sign in</button>
+          <button type="button" class="app-btn-primary" (click)="account.openLogin()">Sign in</button>
         }
       </div>
     } @else if (state === 'missing') {
@@ -85,7 +81,7 @@
     } @else if (state === 'error') {
       <div class="tracker-empty">
         <mat-icon class="tracker-empty-icon" fontIcon="cloud_off" aria-hidden="true"></mat-icon>
-        <h3>Couldn't load the tracker</h3>
+        <h3>Couldn't load Track Players</h3>
         <p>Check the connection and try again.</p>
       </div>
     } @else if (!cards.length) {
@@ -98,7 +94,7 @@
             <mat-icon class="inline-icon" fontIcon="push_pin" aria-hidden="true"></mat-icon> pin at the top. Each pin gets a card here showing where every
             side stands now against where it stood the day you pinned it.
           </p>
-          <a class="primary" [href]="'/' + sport + '/'">Go to the rankings</a>
+          <a class="app-btn-primary" [href]="'/' + sport + '/'">Go to the rankings</a>
         } @else {
           <h3>Nothing pinned in {{ sportLabel }}</h3>
           <p>{{ owner?.name }} hasn't pinned any comparisons here.</p>
@@ -109,12 +105,15 @@
     @if (state === 'ready' && cards.length) {
       <div class="tracker-list" #list cdkDropList [cdkDropListData]="cards" [cdkDropListDisabled]="!mine" (cdkDropListDropped)="drop($event)">
         @for (card of cards; track card.pin.id; let ci = $index) {
-          <article class="pin-card" cdkDrag [cdkDragDisabled]="!mine" [attr.aria-labelledby]="'pin-name-' + card.pin.id" [class.pin-busy]="card.busy">
+          <article class="pin-card" cdkDrag [cdkDragDisabled]="!mine" [attr.aria-labelledby]="'pin-name-' + card.pin.id" [class.pin-busy]="card.busy" [class.pin-shut]="!card.open" [class.pin-away]="!card.here">
             <!-- (the card's top strip: the handle, its name, when it was pinned, its actions) -->
             <header class="pin-head">
               @if (mine) {
                 <span class="pin-handle" cdkDragHandle title="Drag to reorder" aria-hidden="true"><mat-icon fontIcon="drag_indicator"></mat-icon></span>
               }
+              <button type="button" class="pin-fold" [attr.aria-expanded]="card.open" [attr.aria-controls]="'pin-body-' + card.pin.id" [attr.aria-label]="(card.open ? 'Fold ' : 'Unfold ') + card.pin.title" (click)="card.open = !card.open">
+                <mat-icon fontIcon="chevron_right" aria-hidden="true"></mat-icon>
+              </button>
               <div class="pin-title">
                 @if (card.draft !== null) {
                   <input
@@ -131,12 +130,47 @@
                 } @else {
                   <h3 [id]="'pin-name-' + card.pin.id">{{ card.pin.title }}</h3>
                 }
-                <span class="pin-when" [title]="'Pinned ' + pinnedDay(card)"><mat-icon fontIcon="push_pin" aria-hidden="true"></mat-icon>Pinned {{ sinceText(card.pin.baseline.at) }}</span>
+                <span class="pin-when" [title]="'Pinned ' + pinnedDay(card)">
+                  @if (all) {
+                    <span class="pin-sport">{{ card.sportLabel }}</span>
+                  }
+                  <mat-icon fontIcon="push_pin" aria-hidden="true"></mat-icon><span class="pin-when-text">Pinned {{ sinceText(card.pin.baseline.at) }}</span>
+                  @if (!card.here) {
+                    <span class="pin-seen">· {{ seenText(card) }}</span>
+                  }
+                </span>
+                <!-- (folded: each side's rank and its move since the pin, at a glance) -->
+                @if (!card.open) {
+                  <ul class="pin-glance" (click)="card.open = true">
+                    @for (s of card.sides; track s.key) {
+                      <li [style.--side]="s.color">
+                        <i aria-hidden="true"></i>
+                        <span class="pin-glance-name">{{ s.head }}</span>
+                        @if (s.rank !== null) {
+                          <b class="pin-glance-rank" [style.--tone]="s.tone" [title]="'#' + s.rank + ' of ' + s.of + (card.here ? ' now' : ' when last seen')">#{{ s.rank }}</b>
+                        } @else if (card.loading) {
+                          <span class="spinner tiny" aria-label="Loading"></span>
+                        }
+                        @if ((s.track.moved ?? 0) !== 0) {
+                          <em class="pin-glance-move" [class.good]="(s.track.moved ?? 0) > 0" [class.bad]="(s.track.moved ?? 0) < 0" [title]="moveText(s, card) + ' since the pin'"><mat-icon [fontIcon]="(s.track.moved ?? 0) > 0 ? 'arrow_upward' : 'arrow_downward'" aria-hidden="true"></mat-icon>{{ (s.track.moved ?? 0) > 0 ? s.track.moved : -(s.track.moved ?? 0) }}</em>
+                        } @else if (s.track.moved === 0 && (card.here || card.seen !== null)) {
+                          <em class="pin-glance-move even" title="No change since the pin">–</em>
+                        }
+                      </li>
+                    }
+                  </ul>
+                }
               </div>
               <div class="pin-actions">
-                <a class="pin-open" [href]="openHref(card)" title="Open the full comparison" aria-label="Open the full comparison in Compare">
-                  <mat-icon fontIcon="compare_arrows" aria-hidden="true"></mat-icon><span class="pin-open-text">Compare</span>
-                </a>
+                @if (card.here) {
+                  <a class="pin-open" [href]="openHref(card)" title="Open the full comparison" aria-label="Open the full comparison in Compare">
+                    <mat-icon fontIcon="compare_arrows" aria-hidden="true"></mat-icon><span class="pin-open-text">Compare</span>
+                  </a>
+                } @else {
+                  <a class="pin-open" [href]="trackerHref(card)" [title]="'Open ' + card.sportLabel + '’s Track Players, where this pin is measured now'" [attr.aria-label]="'Open in ' + card.sportLabel + ' to measure it now'">
+                    <mat-icon fontIcon="open_in_new" aria-hidden="true"></mat-icon><span class="pin-open-text">Open in {{ card.sportLabel }}</span>
+                  </a>
+                }
                 @if (mine) {
                   <button type="button" class="tracker-icon" [class.confirm]="card.confirm" [attr.aria-label]="card.confirm ? 'Press again to unpin' : 'Unpin'" [title]="card.confirm ? 'Press again to unpin' : 'Unpin'" (click)="unpin(card)">
                     <mat-icon [fontIcon]="card.confirm ? 'delete_forever' : 'delete_outline'"></mat-icon>
@@ -154,6 +188,8 @@
               </div>
             </header>
 
+            @if (card.open) {
+            <div class="pin-body" [id]="'pin-body-' + card.pin.id">
             <!-- (the sides: a tape each in its color, where it stands now and where it stood) -->
             <div class="pin-sides" [style.--sides]="card.sides.length">
               @for (s of card.sides; track s.key) {
@@ -194,7 +230,7 @@
                       @if ((s.track.moved ?? 0) !== 0) {
                         <mat-icon [fontIcon]="(s.track.moved ?? 0) > 0 ? 'arrow_upward' : 'arrow_downward'" aria-hidden="true"></mat-icon>
                       }
-                      {{ moveText(s) }}
+                      {{ moveText(s, card) }}
                     </span>
                   </div>
                   <div class="pin-foot">
@@ -257,9 +293,14 @@
               </div>
             }
 
+            <!-- (another sport's: only its ranks are kept day to day; its numbers are measured in its own sport) -->
+            @if (!card.here) {
+              <p class="pin-note pin-away-note"><mat-icon fontIcon="info" aria-hidden="true"></mat-icon><span>{{ awayText(card) }} <a [href]="trackerHref(card)">Open in {{ card.sportLabel }}</a> to measure it now, every number with it.</span></p>
+            }
+
             <!-- (the numbers: each side's now, its change since, colored better or worse) -->
-            @let skillRows = skills(card);
-            @let groups = statGroups(card);
+            @let skillRows = card.here ? skills(card) : [];
+            @let groups = card.here ? statGroups(card) : [];
             @if (skillRows.length || groups.length) {
               <div class="pin-table-wrap">
                 <table class="pin-table" [style.--sides]="card.sides.length">
@@ -333,6 +374,7 @@
               <p class="pin-note">No game logs for these sides.</p>
             }
 
+            @if (card.here) {
             <footer class="pin-footer">
               @if (hasMore(card)) {
                 <button type="button" class="pin-toggle" [attr.aria-expanded]="card.allStats" (click)="card.allStats = !card.allStats">
@@ -352,6 +394,9 @@
               }
               <span class="pin-footnote">Ranked with the sliders it was pinned with</span>
             </footer>
+            }
+            </div>
+            }
           </article>
         }
       </div>

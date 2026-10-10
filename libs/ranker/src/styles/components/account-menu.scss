@@ -1,11 +1,15 @@
 @use "../variables" as v;
+@use "account-kit" as kit;
 
 // ===========================================================================
-// The sport bar's account entry (just left of the brand, app.component.scss places it): Sign in in the
-// bar's own lettering, or the avatar and first name; the menu it opens is a scoreboard panel like the
-// app's other menus (_base.scss), its rows an icon in the sport's light and a label
+// The sport bar's account entry (on the far right, app.component.scss places it): Sign in in the bar's own
+// lettering (the brand after it), or the first name then the avatar, in the brand's place; the menu it
+// opens is a scoreboard panel like the app's other menus (_base.scss), its rows an icon in the sport's
+// light and a label
 // ===========================================================================
+// (the app's sand light, not the sport's, here and in the menu: the account looks the same on every sport)
 :host {
+  @include kit.app-tokens;
   align-items: center;
   display: flex;
 }
@@ -43,6 +47,12 @@
 .account-toggle {
   padding: 0 10px;
 
+  // (the avatar and the friend-request dot on it)
+  .account-pic {
+    align-items: center;
+    display: flex;
+  }
+
   .account-name {
     max-width: 120px;
     overflow: hidden;
@@ -72,7 +82,7 @@
   .sign-in {
     font-size: 11px;
     letter-spacing: 1px;
-    padding: 0 8px;
+    padding: 0 6px 0 8px;
     white-space: nowrap;
   }
 }
@@ -81,6 +91,8 @@
 // The menu (in Material's overlay, outside this component)
 // ---------------------------------------------------------------------------
 ::ng-deep .mat-mdc-menu-panel.account-menu {
+  @include kit.app-tokens;
+  @include kit.agnostic;
   min-width: 230px;
 
   .account-who {

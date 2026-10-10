@@ -48,12 +48,11 @@
       <div class="wallet-intro-chips" aria-hidden="true"><i class="c100"></i><i class="c25"></i><i class="c5"></i></div>
       <h2>Play along with the bot</h2>
       <p>1,000 play units to start. Bet any game's lines from the Bets page, the bot's picks lit up, and watch them settle from the final score. No real money, ever.</p>
-      <button type="button" class="primary" (click)="account.openLogin()">Sign in</button>
+      <button type="button" class="app-btn-primary" (click)="account.openLogin()">Sign in</button>
     </section>
   } @else {
-  <section class="model-desk" aria-label="Wallet">
+  <section class="model-desk" aria-label="Betting Wallet">
     <div class="desk-top">
-      <page-head bare heading="Wallet" icon="account_balance_wallet" sub="Play money: bet any game's lines from the Bets page; each bet settles from the final score"></page-head>
       <header class="desk-head">
         <div class="desk-tiles">
           <div class="desk-tile" title="Play money on hand, the open bets' stakes out of it">
@@ -83,25 +82,29 @@
         </div>
       </header>
 
-      <!-- (Reload and Clear history, each confirmed first; the way to the Bets page) -->
+      <!-- (casino chips, as the Algorithm's game dropdown: the way to the Bets page in sand, Reload Chips in blue,
+           Clear history in the dropdown's red; Reload and Clear each confirmed first) -->
       <div class="wallet-actions">
-        <a class="wallet-cta" href="#bets"><mat-icon aria-hidden="true" fontIcon="casino"></mat-icon>Place bets</a>
-        <button type="button" class="secondary" [class.open]="confirming === 'reload'" [attr.aria-expanded]="confirming === 'reload'" (click)="confirming = confirming === 'reload' ? null : 'reload'; message = ''">
-          <mat-icon aria-hidden="true" fontIcon="restart_alt"></mat-icon>Reload
+        <a class="wallet-chip sand" href="#bets" (click)="toBets()"><mat-icon aria-hidden="true" fontIcon="casino"></mat-icon>Place bets<svg class="chip-rim" aria-hidden="true"><rect pathLength="220" /></svg></a>
+        <button type="button" class="wallet-chip blue" [class.open]="confirming === 'reload'" [attr.aria-expanded]="confirming === 'reload'" (click)="confirming = confirming === 'reload' ? null : 'reload'; message = ''">
+          <mat-icon aria-hidden="true" fontIcon="restart_alt"></mat-icon>Reload Chips<svg class="chip-rim" aria-hidden="true"><rect pathLength="220" /></svg>
         </button>
-        <button type="button" class="secondary" [class.open]="confirming === 'clear'" [attr.aria-expanded]="confirming === 'clear'" [disabled]="!settled().length" (click)="confirming = confirming === 'clear' ? null : 'clear'; message = ''">
-          <mat-icon aria-hidden="true" fontIcon="delete_sweep"></mat-icon>Clear history
-        </button>
+        <!-- (an admin's only: a record anyone could wipe isn't much of one) -->
+        @if (admin()) {
+          <button type="button" class="wallet-chip red" [class.open]="confirming === 'clear'" [attr.aria-expanded]="confirming === 'clear'" [disabled]="!settled().length" (click)="confirming = confirming === 'clear' ? null : 'clear'; message = ''">
+            <mat-icon aria-hidden="true" fontIcon="delete_sweep"></mat-icon>Clear history<svg class="chip-rim" aria-hidden="true"><rect pathLength="220" /></svg>
+          </button>
+        }
       </div>
       @if (confirming === 'reload') {
         <div class="wallet-confirm" role="group" aria-label="Reload the wallet">
           <p>Back to <b>{{ start | number }}</b> units and a fresh run. Nothing's voided: your history stays, and open bets still settle and count in your record (their payouts stay with the run they were placed in).</p>
           <div class="wallet-confirm-actions">
-            <button type="button" class="link" (click)="confirming = null">Cancel</button>
-            <button type="button" class="primary" [disabled]="busy" (click)="reload()">Reload to {{ start | number }}</button>
+            <button type="button" class="app-btn-outline small" (click)="confirming = null">Cancel</button>
+            <button type="button" class="app-btn-primary small" [disabled]="busy" (click)="reload()">Reload to {{ start | number }}</button>
           </div>
         </div>
-      } @else if (confirming === 'clear') {
+      } @else if (confirming === 'clear' && admin()) {
         <div class="wallet-confirm danger-zone" role="group" aria-label="Clear the history">
           <p>Deletes your {{ settled().length }} settled bet{{ settled().length === 1 ? '' : 's' }} for good (open bets stay). Type <b>CLEAR</b> to confirm.</p>
           <div class="wallet-confirm-actions">
@@ -109,8 +112,8 @@
               <span class="visually-hidden">Type CLEAR to confirm</span>
               <input type="text" autocomplete="off" spellcheck="false" placeholder="CLEAR" [(ngModel)]="typedClear" (keydown.enter)="clear()" />
             </label>
-            <button type="button" class="link" (click)="confirming = null; typedClear = ''">Cancel</button>
-            <button type="button" class="danger" [disabled]="busy || typedClear.trim().toUpperCase() !== 'CLEAR'" (click)="clear()">Clear history</button>
+            <button type="button" class="app-btn-outline small" (click)="confirming = null; typedClear = ''">Cancel</button>
+            <button type="button" class="app-btn-danger small" [disabled]="busy || typedClear.trim().toUpperCase() !== 'CLEAR'" (click)="clear()">Clear history</button>
           </div>
         </div>
       }
@@ -119,10 +122,10 @@
       }
     </div>
 
-    @if (wallet.loaded() && !wallet.wallet() && !wallet.bets().length) {
+    @if (wallet.loaded() && !wallet.bets().length) {
       <div class="wallet-empty">
         <p><b>Your wallet's ready:</b> 1,000 play units. Open any game's lines on the Bets page and tap a price to bet it.</p>
-        <a class="wallet-cta" href="#bets"><mat-icon aria-hidden="true" fontIcon="casino"></mat-icon>Go to the Bets page</a>
+        <a class="wallet-chip sand" href="#bets" (click)="toBets()"><mat-icon aria-hidden="true" fontIcon="casino"></mat-icon>Go to Bets<svg class="chip-rim" aria-hidden="true"><rect pathLength="220" /></svg></a>
       </div>
     }
 
@@ -160,80 +163,85 @@
       </div>
     }
 
-    <div class="desk-grid">
+    <!-- (every panel shut to start, and one with nothing in it not shown at all) -->
+    @let v = versus();
+    @let hasBoard = periods().length > 0;
+    @if (v?.from || hasBoard) {
+    <div class="desk-grid" [class.wallet-one]="!(v?.from && hasBoard)">
       <!-- (you beside the bot: its published picks settled over the same stretch, from your first bet's game on) -->
-      <card-panel class="tab-card group-results" label="You vs the Bot" icon="smart_toy" [startOpen]="true">
+      @if (v?.from) {
+      <card-panel class="tab-card group-results" label="You vs the Bot" icon="smart_toy">
         <div class="group-body">
-          @if (versus(); as v) {
-            @if (v.from) {
-              <table class="desk-table wallet-versus">
-                <thead>
-                  <tr><th></th><th title="Won, lost, pushed">Record</th><th title="Won of those decided">Win %</th><th title="Profit over what was staked: the fair comparison (the bot stakes 0.5 to 3 units a bet)">ROI</th></tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <th>You</th>
-                    <td>{{ recordText(v.you) }}</td>
-                    <td>{{ pct(v.you.winPct) }}</td>
-                    <td [class.up]="(v.you.roi ?? 0) > 0" [class.down]="(v.you.roi ?? 0) < 0">{{ pct(v.you.roi) }}</td>
-                  </tr>
-                  <tr>
-                    <th>The bot</th>
-                    <td>{{ recordText(v.bot) }}</td>
-                    <td>{{ pct(v.bot.winPct) }}</td>
-                    <td [class.up]="(v.bot.roi ?? 0) > 0" [class.down]="(v.bot.roi ?? 0) < 0">{{ pct(v.bot.roi) }}</td>
-                  </tr>
-                </tbody>
-              </table>
-              <p class="wallet-fine">Since {{ v.from | date: 'MMM d' }}: your settled bets, and the bot's published picks (the Bets page's) settled over the same games' days.</p>
-            } @else {
-              <p class="desk-note">Once your first bet settles, your record shows here beside the bot's over the same stretch.</p>
-            }
-          } @else {
-            <p class="desk-note" role="status">Loading the bot's record…</p>
+          @if (v) {
+            <table class="desk-table wallet-versus">
+              <thead>
+                <tr><th></th><th title="Won, lost, pushed">Record</th><th title="Won of those decided">Win %</th><th title="Profit over what was staked: the fair comparison (the bot stakes 0.5 to 3 units a bet)">ROI</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th>You</th>
+                  <td>{{ recordText(v.you) }}</td>
+                  <td>{{ pct(v.you.winPct) }}</td>
+                  <td [class.up]="(v.you.roi ?? 0) > 0" [class.down]="(v.you.roi ?? 0) < 0">{{ pct(v.you.roi) }}</td>
+                </tr>
+                <tr>
+                  <th>The bot</th>
+                  <td>{{ recordText(v.bot) }}</td>
+                  <td>{{ pct(v.bot.winPct) }}</td>
+                  <td [class.up]="(v.bot.roi ?? 0) > 0" [class.down]="(v.bot.roi ?? 0) < 0">{{ pct(v.bot.roi) }}</td>
+                </tr>
+              </tbody>
+            </table>
+            <p class="wallet-fine">Since {{ v.from | date: 'MMM d' }}: your settled bets, and the bot's published picks (the Bets page's) settled over the same games' days.</p>
           }
         </div>
       </card-panel>
+      }
 
-      <!-- (the leaderboards: public players only, by profit) -->
-      <card-panel class="tab-card group-box" label="Leaderboard" icon="emoji_events" [startOpen]="true">
+      <!-- (the leaderboards: public players only, by profit; the periods with anyone on them; each row's
+           reloads beside it) -->
+      @if (hasBoard) {
+      <card-panel class="tab-card group-box" label="Leaderboard" icon="emoji_events">
         <div class="group-body">
-          <div class="wallet-periods" role="group" aria-label="Period">
-            @for (p of periods; track p.id) {
-              <button type="button" [class.active]="period() === p.id" [attr.aria-pressed]="period() === p.id" (click)="loadBoard(p.id)">{{ p.label }}</button>
-            }
-          </div>
-          @if (board() === undefined) {
-            <p class="desk-note" role="status">Loading…</p>
-          } @else if (!board()?.rows?.length) {
-            <p class="desk-note">No one on the board yet{{ period() === 'week' ? ' this week' : '' }}. Players whose bet history is public show here once their bets settle.</p>
-          } @else {
+          @if (periods().length > 1) {
+            <div class="wallet-periods" role="group" aria-label="Period">
+              @for (p of periods(); track p.id) {
+                <button type="button" class="app-pill" [class.active]="period() === p.id" [attr.aria-pressed]="period() === p.id" (click)="period.set(p.id)">{{ p.label }}</button>
+              }
+            </div>
+          }
+          @if (board(); as b) {
             <ol class="wallet-leaders">
-              @for (r of board()!.rows; track r.uid; let i = $index) {
+              @for (r of b.rows; track r.uid; let i = $index) {
                 <li [class.me]="r.uid === account.user()?.uid">
                   <span class="leader-rank" [class.top]="i < 3">{{ i + 1 }}</span>
                   <account-avatar [photo]="r.photo ?? null" [name]="r.displayName || r.username" [size]="26"></account-avatar>
-                  <a class="leader-name" [href]="'#u/' + r.username">&#64;{{ r.username }}</a>
+                  <span class="leader-who">
+                    <a class="leader-name" [href]="'#u/' + r.username">&#64;{{ r.username }}</a>
+                    @if (r.reloads) {
+                      <span class="leader-reloads" [title]="'Reloaded to 1,000 units ' + r.reloads + (r.reloads === 1 ? ' time' : ' times') + ': this record is over ' + (r.reloads + 1) + ' bankrolls'"><mat-icon aria-hidden="true" fontIcon="restart_alt"></mat-icon>{{ r.reloads }}<span class="reloads-word"> {{ r.reloads === 1 ? 'reload' : 'reloads' }}</span></span>
+                    }
+                  </span>
                   <span class="leader-record" title="Won, lost, pushed">{{ recordText(r) }}</span>
                   <span class="leader-roi" title="Return on what was staked" [class.up]="(r.roi ?? 0) > 0" [class.down]="(r.roi ?? 0) < 0">{{ pct(r.roi) }}</span>
                   <b class="leader-profit" [class.up]="r.profit > 0" [class.down]="r.profit < 0">{{ units(r.profit) }}</b>
                 </li>
               }
             </ol>
-            @if (board()!.updatedAt) {
-              <p class="wallet-fine">{{ board()!.label }} · updated {{ board()!.updatedAt | date: 'EEE h:mm a' }} · your bet history's visibility (Profile &amp; settings) puts you on it when it's public</p>
+            @if (b.updatedAt) {
+              <p class="wallet-fine">{{ b.label }} · updated {{ b.updatedAt | date: 'EEE h:mm a' }} · you're on it when your bet history is public (<a [href]="privacyHash">Settings › Privacy</a>)</p>
             }
           }
         </div>
       </card-panel>
+      }
     </div>
+    }
 
     <!-- (the open bets, by game: in play, a result as soon as the score decides it, pending settlement) -->
-    <card-panel class="tab-card group-support" [label]="'Open Bets · ' + tally().atRisk + 'u'" icon="schedule" [startOpen]="true">
+    @if (open().length) {
+    <card-panel class="tab-card group-support" [label]="'Open Bets · ' + tally().atRisk + 'u'" icon="schedule">
       <div class="group-body">
-        @if (!open().length) {
-          <p class="desk-note">No open bets. <a href="#bets">Find a game on the Bets page.</a></p>
-        } @else {
           <table class="desk-table desk-bets wallet-bets">
             <thead>
               <tr>
@@ -276,13 +284,13 @@
               }
             </tbody>
           </table>
-        }
       </div>
     </card-panel>
+    }
 
     <!-- (the settled history, by game, the latest first) -->
     @if (settled().length) {
-      <card-panel class="tab-card group-results" [label]="'Settled · ' + settled().length" icon="fact_check" [startOpen]="true">
+      <card-panel class="tab-card group-results" [label]="'Settled · ' + settled().length" icon="fact_check">
         <div class="group-body">
           <table class="desk-table desk-bets wallet-bets">
             <thead>

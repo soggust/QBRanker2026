@@ -227,6 +227,8 @@ export async function settleOne(db, ref, result, { start = null } = {}) {
 export async function writeLeaderboards(db, { now = Date.now(), dry = false, log = console.log } = {}) {
   const tallies = await db.collection('tallies').get();
   const profiles = tallies.empty ? [] : await db.getAll(...tallies.docs.map((t) => db.doc(`users/${t.id}`)));
+  // (each player's wallet, for the reloads beside their row)
+  const wallets = tallies.empty ? [] : await db.getAll(...tallies.docs.map((t) => db.doc(`users/${t.id}/wallet/main`)));
   const entries = [];
   for (const [i, t] of tallies.docs.entries()) {
     // (a tally whose account is gone: removed, and off the boards)
@@ -234,7 +236,7 @@ export async function writeLeaderboards(db, { now = Date.now(), dry = false, log
       if (!dry) await t.ref.delete();
       continue;
     }
-    entries.push({ uid: t.id, profile: profiles[i].data(), tally: t.data() });
+    entries.push({ uid: t.id, profile: profiles[i].data(), tally: t.data(), wallet: wallets[i].exists ? wallets[i].data() : null });
   }
   const periods = periodsAt(now);
   const boards = {};

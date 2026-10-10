@@ -4,7 +4,7 @@ import type { StatReader } from '@ranker/engine/stat-reader';
 import type { RankerSettings } from '@ranker/engine/position.service';
 import type { SeasonPart } from '@ranker/engine/data';
 import { ListDraft } from './lists.store';
-import { SnapshotColumn, buildSnapshot } from './lists-helpers';
+import { SnapshotColumn, buildSnapshot, defaultListTitle } from './lists-helpers';
 
 // What the grid hands to "Save this list…": its tab, season and settings, its rows as ordered, the
 // groups it shows (and which are collapsed), its reader, and its headshots
@@ -54,9 +54,8 @@ export function gridDraft(grid: GridForDraft): ListDraft {
   };
 }
 
-// (a title to start from: "2026 QB Rankings", "2024 Playoffs Teams Rankings")
-export function draftTitle(grid: Pick<GridForDraft, 'position' | 'season' | 'seasonPart'>): string {
+// (a title to start from: lists-helpers' defaultListTitle with the sport's names for the season and tab)
+export function draftTitle(grid: Pick<GridForDraft, 'position' | 'season' | 'seasonPart'>, today = new Date()): string {
   const tab = (SPORT.tabNames as Record<string, string>)[grid.position] ?? grid.position;
-  const part = grid.seasonPart === 'post' ? ' Playoffs' : grid.seasonPart === 'all' ? ' Full Season' : '';
-  return `${SPORT.seasonText(grid.season)}${part} ${tab} Rankings`;
+  return defaultListTitle(SPORT.seasonText(grid.season), tab, grid.seasonPart, today);
 }

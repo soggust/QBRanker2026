@@ -300,6 +300,20 @@ export function addPoint(history: PinPoint[], baseline: PinSnapshot, point: PinP
   return next.length > max ? next.slice(next.length - max) : next;
 }
 
+// Another sport's pin, in the All view: where its sides stood the last day its owner looked at it there (the
+// latest point kept; that sport's engine isn't in this app to measure it now). Only the ranks and scores are
+// kept in a point, so the skills and columns stay the pin's own (the card shows none of them); null: never
+// looked at since the day it was pinned.
+export function lastSeen(baseline: PinSnapshot, history: PinPoint[]): PinSnapshot | null {
+  const last = history.at(-1);
+  if (!last) return null;
+  const sides = baseline.sides.flatMap((side) => {
+    const p = last.sides.find((x) => x.k === side.key);
+    return p ? [{ ...side, rank: p.r, of: p.o, pct: p.p, score: p.s }] : [];
+  });
+  return { ...baseline, at: dayMs(last.d), sides };
+}
+
 // ---------------------------------------------------------------------------
 // The rank since it was pinned: a step line a side (each rank held until the next day it was looked at),
 // newest on the right, #1 at the top

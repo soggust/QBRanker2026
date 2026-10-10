@@ -1,12 +1,13 @@
 <div class="login-backdrop" (click)="close()"></div>
 <div #panel class="login-panel" role="dialog" aria-modal="true" aria-labelledby="login-title" [attr.aria-busy]="!!busy">
   <header>
-    <svg class="login-logo" viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M12 1.5l1.3 2.7 3 .4-2.2 2 .6 2.9-2.7-1.4-2.7 1.4.6-2.9-2.2-2 3-.4z" />
-      <rect x="8.5" y="11" width="7" height="11.5" rx="1" />
-      <rect x="1.5" y="15" width="6.5" height="7.5" rx="1" opacity="0.7" />
-      <rect x="16" y="17" width="6.5" height="5.5" rx="1" opacity="0.5" />
-    </svg>
+    <!-- (the account's badge: a person on a pewter disc, a sand padlock on it; a key to reset a password) -->
+    <span class="login-badge" aria-hidden="true">
+      <mat-icon [fontIcon]="mode === 'reset' ? 'vpn_key' : mode === 'register' ? 'person_add' : 'person'"></mat-icon>
+      @if (mode === 'signin') {
+        <span class="login-lock"><mat-icon fontIcon="lock"></mat-icon></span>
+      }
+    </span>
     <h2 id="login-title">{{ title }}</h2>
     <button type="button" class="login-close" aria-label="Close" title="Close (Esc)" (click)="close()">
       <mat-icon fontIcon="close"></mat-icon>

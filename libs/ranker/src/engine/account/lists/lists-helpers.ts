@@ -333,3 +333,11 @@ export function samePreset(a: PresetSettings, b: PresetSettings): boolean {
 
 // (a preset's dropdown value, beside the built-in presets' keys)
 export const USER_PRESET = 'user:';
+
+// A new list's title to start from: the season, the part when it isn't the regular season, the tab's
+// name and the day ("2026 Quarterbacks · Oct 9", "2024 Playoffs Teams · Oct 9")
+export function defaultListTitle(season: string, tab: string, part: 'regular' | 'post' | 'all', today: Date): string {
+  const when = part === 'post' ? ' Playoffs' : part === 'all' ? ' Full Season' : '';
+  const day = today.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  return `${season}${when} ${tab} · ${day}`;
+}

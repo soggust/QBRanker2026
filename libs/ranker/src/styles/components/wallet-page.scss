@@ -3,47 +3,53 @@
 @use "account-kit" as kit;
 
 // ===========================================================================
-// #wallet (wallet-page.component): the Bets page's card room (its blue speed cloth, its royal-blue light),
-// the Algorithm desk's panel on it (model-desk.scss, loaded with this: the tiles, the curve, the tables), and
-// the wallet's own: Reload and Clear history, the confirmations, the leaderboard, the bot's chips
+// #wallet (wallet-page.component), the Betting Wallet: on the app's sheet, the Algorithm desk's look
+// (model-desk.scss, loaded with this: the tiles, the curve, the tables) and the wallet's own: Reload Chips
+// and Clear history (an admin's), the confirmations, the leaderboard with each row's reloads, the bot's chips
 // ===========================================================================
 
 $lock: #d8323c;
 $gold: #ffcf4a;
 
+// (inside the app's sheet (app.component's shell: it scrolls, its pewter look around it); the sport's light
+// lights the controls)
 :host {
-  // (the Bets page's accent: the card room's royal blue)
-  --scoreboard-led: #5b9dff;
-  --scoreboard-glow: 0 0 6px rgba(91, 157, 255, 0.6);
-  background:
-    radial-gradient(ellipse 60% 50% at 50% 30%, rgba(255, 236, 200, 0.1), transparent 70%),
-    radial-gradient(ellipse 120% 90% at 50% 40%, transparent 35%, rgba(0, 0, 0, 0.72) 100%),
-    repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.03) 0 1px, transparent 1px 3px),
-    repeating-linear-gradient(-45deg, rgba(0, 0, 0, 0.07) 0 1px, transparent 1px 3px),
-    radial-gradient(ellipse at 50% 30%, #1a63a8, #0e3f70 55%, #072443);
-  background-attachment: fixed;
-  box-sizing: border-box;
   display: block;
-  height: calc(100% - var(--sport-bar-height));
-  overflow-y: auto;
 }
 
 @include kit.buttons;
+@include kit.app-buttons;
 
 // (the desk's panels, chip-rimmed as on the Bets page and the Algorithm: card-panel.scss gives them to those two)
 :host ::ng-deep card-panel {
   @include casino.panel;
 }
 
-// (the page's title strip, on the desk's scoreboard top above the tiles)
-.desk-top page-head {
-  margin-bottom: 16px;
-}
-
 .wallet-page {
   margin: 0 auto;
   max-width: 1100px;
-  padding: 26px 16px 90px;
+  padding: 22px 20px 90px;
+}
+
+// (the desk without a card of its own: the sheet is the page's card; the tiles on a scoreboard strip, as the
+// Track Players's)
+.wallet-page > .model-desk:not(.wallet-intro) {
+  background: none;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+
+  > .desk-top {
+    border: 1px solid var(--app-line, rgba(255, 255, 255, 0.08));
+    border-bottom-color: color-mix(in srgb, var(--scoreboard-led) 55%, transparent);
+    border-radius: 12px;
+    margin: 0 0 18px;
+  }
+}
+
+// (one panel beside the bot's or the board: the whole width)
+.desk-grid.wallet-one {
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .wallet-note {
@@ -112,52 +118,111 @@ $gold: #ffcf4a;
   }
 }
 
-// The actions under the tiles: to the Bets page, Reload, Clear history
+// The actions under the tiles: casino chips, as the Algorithm's game dropdown (casino-chip.scss: its clay, speckle,
+// sheen and cream inlay; the rim's cream spots an SVG rect's dashes, turning two spots on hover and focus),
+// sized as buttons. The way to the Bets page in sand (the account pages' light, dark text), Reload Chips in
+// blue, Clear history in the dropdown's red.
 .wallet-actions {
   align-items: center;
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 12px;
   justify-content: center;
-
-  .secondary.open {
-    border-color: var(--scoreboard-led);
-    color: var(--scoreboard-led);
-  }
 }
 
-// (the way to the Bets page: the game dropdown's red clay chip)
-.wallet-cta {
+.wallet-chip {
+  @include casino.dropdown-rim;
+  // (the spots on the rim itself, its 4px border, as on the dropdown, not inside it on the face)
+  .chip-rim {
+    height: calc(100% + 8px);
+    inset: -4px;
+    width: calc(100% + 8px);
+  }
+
+  rect {
+    // (round ends whatever its height: a radius past half is drawn as half)
+    rx: 999px;
+  }
+
+  --clay: #b0202b;
+  --ink: #fff;
   align-items: center;
   background:
-    radial-gradient(ellipse at 30% 0%, rgba(255, 255, 255, 0.22), transparent 65%),
-    #b0202b;
+    radial-gradient(ellipse at 30% 0%, rgba(255, 255, 255, 0.22), transparent 65%) padding-box,
+    linear-gradient(180deg, transparent 40%, rgba(0, 0, 0, 0.2)) padding-box,
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='c'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.35 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23c)'/%3E%3C/svg%3E") 0 0 / 120px padding-box,
+    linear-gradient(var(--clay), var(--clay)) border-box;
+  border: 4px solid transparent;
   border-radius: 999px;
   box-shadow:
-    inset 0 0 0 2px #b0202b,
-    inset 0 0 0 3px rgba(255, 236, 196, 0.55),
+    inset 0 0 0 3px var(--clay),
+    inset 0 0 0 4px rgba(255, 236, 196, 0.55),
     0 2px 6px rgba(0, 0, 0, 0.45);
-  color: #fff;
-  display: inline-flex;
+  box-sizing: border-box;
+  color: var(--ink);
+  cursor: pointer;
+  font-family: v.$font-base;
   font-size: 13px;
   font-weight: 900;
-  gap: 6px;
+  gap: 7px;
+  justify-content: center;
   letter-spacing: 0.06em;
-  min-height: 40px;
-  outline: 2px dashed rgba(244, 239, 227, 0.75);
-  outline-offset: -5px;
-  padding: 0 18px;
+  min-height: 46px;
+  padding: 0 22px;
   text-decoration: none;
   text-shadow: 0 1px 1.5px rgba(0, 0, 0, 0.6);
   text-transform: uppercase;
+  transition:
+    filter 0.15s ease,
+    transform 0.1s ease;
 
   .mat-icon {
     @include v.icon-size(18px);
   }
 
   &:hover,
-  &:focus-visible {
+  &:focus-visible,
+  &.open {
     filter: brightness(1.12);
+  }
+
+  &:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 3px;
+  }
+
+  &:active:not([disabled]) {
+    filter: brightness(0.95);
+    transform: translateY(1px);
+  }
+
+  // (a confirmation open under it: its spots turned as a picked chip's)
+  &.open rect {
+    stroke-dashoffset: -40;
+  }
+
+  &[disabled] {
+    cursor: default;
+    filter: saturate(0.4) brightness(0.8);
+    opacity: 0.6;
+
+    rect {
+      stroke-dashoffset: 0;
+    }
+  }
+
+  &.sand {
+    --clay: var(--app-sand, #d8b98a);
+    --ink: #2a1f14;
+    text-shadow: 0 1px 0 rgba(255, 245, 230, 0.35);
+  }
+
+  &.blue {
+    --clay: #1f5fae;
+  }
+
+  &.red {
+    --clay: #b0202b;
   }
 }
 
@@ -289,39 +354,12 @@ $gold: #ffcf4a;
   }
 }
 
-// The leaderboard's periods: three small pills
+// The leaderboard's periods: the sport's small pills (the periods with anyone on them)
 .wallet-periods {
   display: flex;
-  gap: 6px;
-  margin-bottom: 10px;
-
-  button {
-    background: rgba(0, 0, 0, 0.35);
-    border: 1px solid #4a525a;
-    border-radius: 999px;
-    color: rgba(255, 255, 255, 0.75);
-    cursor: pointer;
-    font-family: v.$font-base;
-    font-size: 12px;
-    font-weight: 800;
-    padding: 5px 12px;
-
-    &:hover {
-      border-color: var(--scoreboard-led);
-      color: #fff;
-    }
-
-    &:focus-visible {
-      outline: 2px solid #fff;
-      outline-offset: 2px;
-    }
-
-    &.active {
-      background: color-mix(in srgb, var(--scoreboard-led) 22%, transparent);
-      border-color: var(--scoreboard-led);
-      color: #fff;
-    }
-  }
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
 }
 
 .wallet-leaders {
@@ -361,6 +399,33 @@ $gold: #ffcf4a;
   }
 }
 
+// (the name, its reloads chip beside it)
+.leader-who {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+  min-width: 0;
+}
+
+.leader-reloads {
+  align-items: center;
+  display: inline-flex;
+  gap: 3px;
+  border: 1px solid var(--app-line, rgba(255, 255, 255, 0.12));
+  border-radius: 999px;
+  color: var(--app-text-muted, rgba(255, 255, 255, 0.65));
+  flex: 0 0 auto;
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.3px;
+  padding: 1px 8px;
+  white-space: nowrap;
+
+  .mat-icon {
+    @include v.icon-size(12px);
+  }
+}
+
 .leader-name {
   color: #fff;
   font-weight: 800;
@@ -396,7 +461,7 @@ $gold: #ffcf4a;
 
 @media (max-width: 600px) {
   .wallet-page {
-    padding: 14px 8px 90px;
+    padding: 14px 10px 90px;
   }
 
   .wallet-leaders li {
@@ -406,6 +471,16 @@ $gold: #ffcf4a;
 
   .leader-roi {
     display: none;
+  }
+
+  // (the chip just its icon and count; the word kept for screen readers)
+  .reloads-word {
+    clip-path: inset(50%);
+    height: 1px;
+    overflow: hidden;
+    position: absolute;
+    white-space: nowrap;
+    width: 1px;
   }
 }
 

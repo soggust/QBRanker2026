@@ -299,7 +299,10 @@
   </div>
   }
   <!-- wallet (phase 2) -->
-  <!-- (the bet slip: the prices clicked on the games' lines, staked and placed with play money) -->
-  <bet-slip></bet-slip>
+  <!-- (the bet slip: the prices clicked on the games' lines, staked and placed with play money; on the Bets
+       view only: the Algorithm is the bot's alone, nothing of the user's on it) -->
+  @if (view === 'bets') {
+    <bet-slip></bet-slip>
+  }
   <!-- end wallet -->
 </div>

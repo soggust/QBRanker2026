@@ -3,10 +3,11 @@ import { AccountService } from '../account.service';
 import { errorMessage } from '../account-helpers';
 import { FriendsService, PublicProfile } from './friends.service';
 import { SEARCH_MIN, profileHash, searchPrefix } from './friends-helpers';
+import { PRIVACY_HASH } from '../account-page.component';
 
-// The Friends page (#friends): find people by username (a prefix search of the claims), the requests
-// waiting on you (accept or decline), the ones you've sent (cancel), and your friends (their profiles,
-// remove). Signed out, a prompt to sign in.
+// The Friends page (#friends): a bar on top (find people by username, a prefix search of the claims; the
+// eye to Settings' Privacy), then the requests waiting on you (accept or decline), your friends (their
+// profiles, remove) and the ones you've sent (cancel). Signed out, a prompt to sign in.
 @Component({
   selector: 'friends-page',
   templateUrl: './friends-page.component.html',
@@ -17,6 +18,7 @@ import { SEARCH_MIN, profileHash, searchPrefix } from './friends-helpers';
 export class FriendsPageComponent implements OnDestroy {
   readonly searchMin = SEARCH_MIN;
   readonly profileHash = profileHash;
+  readonly privacyHash = PRIVACY_HASH;
 
   query = '';
   results: PublicProfile[] | null = null;

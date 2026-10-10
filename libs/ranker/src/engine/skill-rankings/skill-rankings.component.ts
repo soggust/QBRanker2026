@@ -1,4 +1,4 @@
-import { Component, ElementRef, HostListener, Input, OnChanges, ViewChild } from '@angular/core';
+import { Component, ElementRef, HostListener, Input, OnChanges, ViewChild, inject } from '@angular/core';
 import { MatMenuTrigger } from '@angular/material/menu';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
@@ -32,9 +32,11 @@ import { copyRankingsToClipboard } from '@ranker/core/clipboard';
 import { RowGlide } from './row-glide';
 import { TabRanker } from './tab-ranker';
 import { RankWhy, rankWhy, scoreText, signedScore } from './rank-why';
-// ---- lists (phase 2) ----
+// ---- lists (phase 2, round 2) ----
 import { ListDraft } from '@ranker/engine/account/lists/lists.store';
 import { draftTitle, gridDraft } from '@ranker/engine/account/lists/grid-draft';
+import { listPath } from '@ranker/engine/account/lists/lists-helpers';
+import { AccountService } from '@ranker/engine/account/account.service';
 // ---- end lists ----
 
 // A tab's rankings: the button bar, then the grid (a row per player, best first by the sliders, or as
@@ -689,14 +691,45 @@ export class SkillRankingsComponent implements OnChanges, CardHost {
       .catch((err) => console.error('Failed to copy: ', err));
   }
 
-  // ---- lists (phase 2) ----
-  // "Save this list…" (the Share menu, a phone's More): the grid as it is now, frozen for the dialog
+  // ---- lists (round 2) ----
+  // Save (the toolbar's floppy disk, a phone's More): the grid as it is now, frozen for the save dialog,
+  // its title filled in ("2026 Quarterbacks · Oct 9"); signed out, the sign-in instead. Saving closes the
+  // dialog and the toast says so, with Open and Rename (the same dialog, the title alone).
+  private readonly account = inject(AccountService);
   listDraft: ListDraft | null = null;
   listTitle = '';
+  renaming: { id: string; title: string } | null = null;
+  savedList: { id: string; title: string; href: string; renamed: boolean } | null = null;
+  private savedTimer?: ReturnType<typeof setTimeout>;
 
-  openSaveList(): void {
+  async openSaveList(): Promise<void> {
+    // (a returning user's sign-in may still be on its way)
+    if (!this.account.user()) await this.account.start().catch(() => undefined);
+    if (!this.account.user()) {
+      this.account.openLogin();
+      return;
+    }
     this.listDraft = gridDraft(this);
     this.listTitle = draftTitle(this);
+  }
+
+  listSaved(saved: { id: string; title: string }, renamed = false): void {
+    this.listDraft = null;
+    this.renaming = null;
+    this.savedList = { ...saved, renamed, href: listPath(SPORT.id, this.account.user()?.uid ?? '', saved.id) };
+    clearTimeout(this.savedTimer);
+    this.savedTimer = setTimeout(() => (this.savedList = null), 8000);
+  }
+
+  renameSaved(): void {
+    if (!this.savedList) return;
+    this.renaming = { id: this.savedList.id, title: this.savedList.title };
+    this.dismissSaved();
+  }
+
+  dismissSaved(): void {
+    clearTimeout(this.savedTimer);
+    this.savedList = null;
   }
   // ---- end lists ----
 

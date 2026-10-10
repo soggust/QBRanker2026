@@ -44,7 +44,7 @@
       </div>
       <div class="hero-action">
         @if (isSelf) {
-          <a class="secondary small-btn" href="#account"><mat-icon aria-hidden="true" fontIcon="edit"></mat-icon>Edit profile</a>
+          <a class="edit-profile" href="#account"><mat-icon aria-hidden="true" fontIcon="edit"></mat-icon>Edit profile</a>
         } @else {
           <friend-button [uid]="f.uid" [name]="p.displayName"></friend-button>
         }
@@ -52,7 +52,7 @@
     </header>
 
     @if (isSelf) {
-      <p class="self-note"><mat-icon aria-hidden="true" fontIcon="visibility"></mat-icon><span>This is your profile. Others see each section by your Privacy settings on <a href="#account">Profile &amp; settings</a>.</span></p>
+      <p class="self-note"><mat-icon aria-hidden="true" fontIcon="visibility"></mat-icon><span>This is your profile. Others see each section by your <a href="#account/privacy">Privacy settings</a>.</span></p>
     }
 
     <div class="profile-sections">

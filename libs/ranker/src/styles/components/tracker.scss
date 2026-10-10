@@ -2,23 +2,21 @@
 @use "account-kit" as kit;
 
 // ===========================================================================
-// The Tracker (#tracker: tracker-page.component): a desk like the Algorithm's down the middle of the sport's
-// field (the scoreboard on top with its tiles, dark brushed gunmetal under it), and a scoreboard card per
-// pin: the sides as the compare view's tapes (each in its side's color, the team's logo faint behind), where
-// each stands now against when it was pinned, the rank since on a step chart, the numbers and their moves.
+// Track Players (#tracker: tracker-page.component), on the app's sheet (app.component's shell scrolls
+// it): the tiles and the pills on a scoreboard strip, and a scoreboard card per pin, folded to its strip and
+// the sides at a glance; unfolded, the sides as the compare view's tapes (each in its side's color, the
+// team's logo faint behind), where each stands now against when it was pinned, the rank since on a step
+// chart, the numbers and their moves. Another sport's pin (All) shows its ranks as last seen there.
 // ===========================================================================
 :host {
   box-sizing: border-box;
   display: block;
-  height: calc(100% - var(--sport-bar-height));
-  overflow-y: auto;
   // (a move's colors: better the site's green, worse its red)
   --good: #{v.$good};
   --bad: #{v.$bad};
 }
 
-@include v.scrollbars($corner: false);
-@include kit.pills;
+@include kit.app-buttons;
 @include kit.buttons;
 
 .tracker-page {
@@ -27,13 +25,12 @@
   font-family: v.$font-base;
   margin: 0 auto;
   max-width: 1100px;
-  padding: 26px 16px 48px;
+  padding: 22px 20px 48px;
 }
 
+// (no card of its own: the sheet is the page's card)
 .tracker-desk {
-  @include v.scoreboard-panel(12px, 0 12px 32px rgba(0, 0, 0, 0.5));
-  @include v.gunmetal;
-  padding: 0 18px 18px;
+  display: block;
 }
 
 // ---------------------------------------------------------------------------
@@ -41,59 +38,37 @@
 // ---------------------------------------------------------------------------
 .tracker-top {
   background: var(--scoreboard-dots), var(--scoreboard);
-  border-bottom: 1px solid color-mix(in srgb, var(--scoreboard-led) 55%, transparent);
-  border-radius: 11px 11px 0 0;
+  border: 1px solid var(--app-line, rgba(255, 255, 255, 0.08));
+  border-bottom-color: color-mix(in srgb, var(--scoreboard-led) 55%, transparent);
+  border-radius: 12px;
   display: flex;
   flex-wrap: wrap;
   gap: 14px 24px;
   align-items: center;
   justify-content: space-between;
-  margin: 0 -18px 18px;
-  padding: 18px 20px 16px;
-}
+  margin: 0 0 18px;
+  padding: 16px 18px 14px;
 
-.tracker-head {
-  align-items: center;
-  display: flex;
-  gap: 14px;
-  min-width: 0;
-}
-
-.tracker-badge {
-  align-items: center;
-  background: radial-gradient(circle at 35% 30%, color-mix(in srgb, var(--scoreboard-led) 40%, #222), #151515 70%);
-  border: 1px solid color-mix(in srgb, var(--scoreboard-led) 60%, transparent);
-  border-radius: 50%;
-  box-shadow: 0 0 12px color-mix(in srgb, var(--scoreboard-led) 35%, transparent);
-  color: var(--scoreboard-led);
-  display: flex;
-  flex: none;
-  height: 42px;
-  justify-content: center;
-  width: 42px;
-
-  .mat-icon {
-    @include v.icon-size(22px);
-    transform: rotate(35deg);
+  &:empty {
+    display: none;
   }
 }
 
-.tracker-heading {
+// (someone else's: whose it is)
+.tracker-owner {
+  align-items: center;
+  color: var(--app-text-muted, rgba(255, 255, 255, 0.6));
+  display: flex;
+  flex-basis: 100%;
+  font-size: 13px;
+  gap: 10px;
   min-width: 0;
 
-  h2 {
-    color: #fff;
-    @include v.headline(22px);
-    letter-spacing: 0.75px;
-    margin: 0;
-    text-transform: uppercase;
+  b {
+    color: var(--app-text, #fff);
+    font-weight: 800;
+    margin-right: 4px;
   }
-}
-
-.tracker-sub {
-  color: rgba(255, 255, 255, 0.6);
-  font-size: 12.5px;
-  margin: 2px 0 0;
 }
 
 .tracker-tiles {
@@ -134,13 +109,12 @@
 
 .tracker-controls {
   align-items: center;
-  border-top: 1px solid rgba(255, 255, 255, 0.07);
   display: flex;
   flex-basis: 100%;
   flex-wrap: wrap;
   gap: 10px 18px;
   justify-content: space-between;
-  padding-top: 12px;
+  padding-top: 2px;
 }
 
 .tracker-sports,
@@ -150,7 +124,7 @@
   flex-wrap: wrap;
   gap: 6px;
 
-  a.game-filter {
+  a.app-pill {
     text-decoration: none;
   }
 }
@@ -274,6 +248,20 @@
   &.pin-busy {
     opacity: 0.6;
   }
+
+  &.pin-shut {
+    padding-bottom: 0;
+
+    .pin-head {
+      border-bottom: none;
+    }
+  }
+}
+
+.pin-body {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
 }
 
 // (a card on the move: lifted; its place a dashed slot)
@@ -304,6 +292,150 @@
   gap: 8px;
   margin: 0 -14px;
   padding: 10px 10px 10px 8px;
+}
+
+// (the fold: a chevron, right when shut, down when open; lightens on hover, never the accent)
+.pin-fold {
+  align-items: center;
+  align-self: flex-start;
+  background: none;
+  border: none;
+  border-radius: 8px;
+  color: rgba(255, 255, 255, 0.55);
+  cursor: pointer;
+  display: inline-flex;
+  flex: none;
+  height: 30px;
+  justify-content: center;
+  margin-top: 2px;
+  padding: 0;
+  transition:
+    color 0.12s,
+    background 0.12s;
+  width: 30px;
+
+  .mat-icon {
+    @include v.icon-size(24px);
+    transition: transform 0.15s ease;
+  }
+
+  &[aria-expanded="true"] .mat-icon {
+    transform: rotate(90deg);
+  }
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.06);
+    color: #fff;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--scoreboard-led);
+    outline-offset: 1px;
+  }
+}
+
+// (folded: each side's dot in its color, its name, its rank and its move)
+.pin-glance {
+  cursor: pointer;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  list-style: none;
+  margin: 6px 0 0;
+  padding: 0;
+
+  li {
+    align-items: center;
+    display: inline-flex;
+    font-size: 12.5px;
+    gap: 6px;
+    min-width: 0;
+  }
+
+  i {
+    background: var(--side);
+    border-radius: 50%;
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.25);
+    flex: none;
+    height: 9px;
+    width: 9px;
+  }
+}
+
+.pin-glance-name {
+  color: rgba(255, 255, 255, 0.85);
+  font-weight: 700;
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pin-glance-rank {
+  @include v.led-tile;
+  color: var(--tone, #fff);
+  font-size: 12px;
+  font-weight: 900;
+  height: 22px;
+  min-width: 30px;
+  padding: 0 5px;
+}
+
+.pin-glance-move {
+  align-items: center;
+  display: inline-flex;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 800;
+
+  .mat-icon {
+    @include v.icon-size(14px);
+  }
+
+  &.good {
+    color: var(--good);
+  }
+
+  &.bad {
+    color: var(--bad);
+  }
+
+  &.even {
+    color: rgba(255, 255, 255, 0.4);
+  }
+}
+
+// (All: the pin's sport, a small tag; another sport's: when it was last seen)
+.pin-sport {
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 4px;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 9.5px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  margin-right: 4px;
+  padding: 0 5px;
+}
+
+.pin-when-text,
+.pin-seen {
+  white-space: nowrap;
+}
+
+.pin-seen {
+  color: rgba(255, 255, 255, 0.45);
+  font-weight: 600;
+}
+
+.pin-away-note a {
+  color: var(--scoreboard-led);
+  font-weight: 800;
+  text-decoration: none;
+
+  &:hover,
+  &:focus-visible {
+    text-decoration: underline;
+  }
 }
 
 .pin-handle {
@@ -355,6 +487,7 @@
   align-items: center;
   color: rgba(255, 255, 255, 0.5);
   display: inline-flex;
+  flex-wrap: wrap;
   font-size: 11px;
   font-weight: 700;
   gap: 4px;
@@ -980,20 +1113,16 @@
 
 @media (max-width: 600px) {
   .tracker-page {
-    padding: 14px 8px 32px;
-  }
-
-  .tracker-desk {
-    padding: 0 10px 12px;
+    padding: 14px 10px 32px;
   }
 
   .tracker-top {
-    margin: 0 -10px 14px;
-    padding: 14px 12px 12px;
+    margin: 0 0 14px;
+    padding: 12px 12px 10px;
   }
 
-  .tracker-heading h2 {
-    font-size: 19px;
+  .pin-glance-name {
+    max-width: 120px;
   }
 
   .tracker-tiles {
@@ -1009,8 +1138,21 @@
     padding: 0 10px 10px;
   }
 
+  // (phones: the handle, the fold and the actions on top, the name and the glance the whole width under them)
   .pin-head {
+    flex-wrap: wrap;
     margin: 0 -10px;
+    row-gap: 2px;
+  }
+
+  .pin-title {
+    flex: 1 0 100%;
+    order: 2;
+    padding: 0 4px;
+  }
+
+  .pin-actions {
+    margin-left: auto;
   }
 
   .pin-open-text {

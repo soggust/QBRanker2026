@@ -3,7 +3,7 @@ import { SPORT } from '@sport/sport';
 import { AccountService } from '../account.service';
 import { Visibility, errorMessage } from '../account-helpers';
 import { ListDraft, ListsStore } from './lists.store';
-import { NOTE_MAX, TITLE_MAX, listPath, logoUrl, noteProblem, titleProblem } from './lists-helpers';
+import { NOTE_MAX, TITLE_MAX, logoUrl, noteProblem, titleProblem } from './lists-helpers';
 
 // What each choice means for a list
 export const VISIBILITY_HINTS: Record<Visibility, string> = {
@@ -12,25 +12,38 @@ export const VISIBILITY_HINTS: Record<Visibility, string> = {
   private: 'Only you can see it.',
 };
 
-// "Save this list…" (the grid's Share menu, or a phone's More): a title, a note and who sees it, for the
-// grid as it is now (its top rows in their order, and the numbers in the columns showing, frozen). Signed
-// out, it asks to sign in first and keeps the list for after.
+// "Save this list" (the grid's floppy disk, or a phone's More): a title (the default filled in), a note and
+// who sees it, for the grid as it is now (its top rows in their order, and the numbers in the columns
+// showing, frozen). Saving closes it at once (the grid's toast says so, with Open and Rename); the toast's
+// Rename opens it again on the saved list, its title alone (renameId). Signed out, it asks to sign in first.
 @Component({
   selector: 'save-list-dialog',
   template: `
-    <list-modal heading="Save this list" icon="playlist_add" [busy]="busy" (closed)="closed.emit()">
+    <list-modal [heading]="renameId ? 'Rename list' : 'Save this list'" [icon]="renameId ? 'edit' : 'save'" [busy]="busy" (closed)="closed.emit()">
       @if (!account.user()) {
         <p class="modal-lede">Sign in to save lists: keep this ranking as it is now, watch how it holds up, and share it or submit it to the Community.</p>
         <div class="modal-actions">
-          <button type="button" class="link" (click)="closed.emit()">Not now</button>
-          <button type="button" class="primary" (click)="account.openLogin()">Sign in</button>
+          <button type="button" class="app-btn-outline" (click)="closed.emit()">Not now</button>
+          <button type="button" class="app-btn-primary" (click)="account.openLogin()">Sign in</button>
         </div>
-      } @else if (savedId) {
-        <p class="saved-note" role="status"><mat-icon aria-hidden="true" fontIcon="check_circle"></mat-icon>Saved “{{ title.trim() }}” to your lists.</p>
-        <div class="modal-actions">
-          <button type="button" class="link" (click)="closed.emit()">Done</button>
-          <a class="primary" [href]="savedHref" (click)="closed.emit()">Open it</a>
-        </div>
+      } @else if (renameId) {
+        <form novalidate (ngSubmit)="save()">
+          <label class="field">
+            <span class="field-label">Title <span class="count" [class.over]="title.length > titleMax">{{ title.length }}/{{ titleMax }}</span></span>
+            <input name="title" type="text" [maxlength]="titleMax + 20" [(ngModel)]="title" [attr.aria-invalid]="!!(touched && titleError)" />
+            @if (touched && titleError; as p) { <span class="field-error">{{ p }}</span> }
+          </label>
+          @if (error) {
+            <p class="form-error" role="alert">{{ error }}</p>
+          }
+          <div class="modal-actions">
+            <button type="button" class="app-btn-outline" [disabled]="busy" (click)="closed.emit()">Cancel</button>
+            <button type="submit" class="app-btn-primary" [disabled]="busy">
+              @if (busy) { <span class="spinner" aria-hidden="true"></span> }
+              Rename
+            </button>
+          </div>
+        </form>
       } @else {
         <form novalidate (ngSubmit)="save()">
           <p class="modal-lede">
@@ -68,8 +81,8 @@ export const VISIBILITY_HINTS: Record<Visibility, string> = {
             <p class="form-error" role="alert">{{ error }}</p>
           }
           <div class="modal-actions">
-            <button type="button" class="link" [disabled]="busy" (click)="closed.emit()">Cancel</button>
-            <button type="submit" class="primary" [disabled]="busy || !draft.ids.length">
+            <button type="button" class="app-btn-outline" [disabled]="busy" (click)="closed.emit()">Cancel</button>
+            <button type="submit" class="app-btn-primary" [disabled]="busy || !draft.ids.length">
               @if (busy) { <span class="spinner" aria-hidden="true"></span> }
               Save list
             </button>
@@ -84,11 +97,16 @@ export class SaveListDialogComponent implements OnInit {
   readonly account = inject(AccountService);
   private readonly store = inject(ListsStore);
 
-  @Input({ required: true }) draft!: ListDraft;
+  // (the grid as it is now; none when renaming)
+  @Input() draft!: ListDraft;
   // (the rows the grid had, when there were more than a list keeps)
   @Input() listed = 0;
   @Input() suggestedTitle = '';
+  // (a saved list to rename instead: the toast's Rename)
+  @Input() renameId: string | null = null;
   @Output() closed = new EventEmitter<void>();
+  // (saved or renamed: the list's id and title; the dialog's host closes it)
+  @Output() saved = new EventEmitter<{ id: string; title: string }>();
 
   readonly titleMax = TITLE_MAX;
   readonly noteMax = NOTE_MAX;
@@ -100,7 +118,6 @@ export class SaveListDialogComponent implements OnInit {
   touched = false;
   busy = false;
   error = '';
-  savedId: string | null = null;
 
   ngOnInit(): void {
     this.title = this.suggestedTitle;
@@ -120,21 +137,23 @@ export class SaveListDialogComponent implements OnInit {
     return noteProblem(this.note);
   }
 
-  get savedHref(): string {
-    return this.savedId ? listPath(SPORT.id, this.account.user()?.uid ?? '', this.savedId) : '#lists';
-  }
-
   logo(id: string): string | null {
     return logoUrl(SPORT.id, this.draft.snapshot[id]?.teamLogo);
   }
 
   async save(): Promise<void> {
     this.touched = true;
-    if (this.busy || this.titleError || this.noteError || !this.draft.ids.length) return;
+    if (this.busy || this.titleError) return;
+    if (!this.renameId && (this.noteError || !this.draft?.ids.length)) return;
     this.busy = true;
     this.error = '';
     try {
-      this.savedId = await this.store.create(this.draft, this.title, this.note, this.visibility);
+      const title = this.title.trim();
+      let id = this.renameId;
+      if (id) await this.store.update(id, { title });
+      else id = await this.store.create(this.draft, this.title, this.note, this.visibility);
+      this.busy = false;
+      this.saved.emit({ id, title });
     } catch (error) {
       console.error('Save list', error);
       this.error = errorMessage(error);
@@ -143,4 +162,3 @@ export class SaveListDialogComponent implements OnInit {
     }
   }
 }
-

@@ -169,6 +169,33 @@ test('a point a day it\'s looked at: today\'s again replaces it, an unchanged on
   assert.ok(addPoint(history, base, point('2026-10-06', 2, 1.5)));
 });
 
+test('another sport\'s pin (All): its ranks as last seen there, its numbers the pin\'s; never looked at, none', async () => {
+  const { lastSeen, trackView, snapshotOf, dayMs } = await load();
+  const at = new Date(2026, 9, 1, 15).getTime();
+  const base = snapshotOf([side('QB/2026/a', 3, 0.95), side('QB/2026/b', 12, 0.7)], null, [1, 0.5], at);
+  assert.equal(lastSeen(base, []), null);
+  const history = [
+    { d: '2026-10-03', sides: [{ k: 'QB/2026/a', r: 5, o: 40, p: 0.9, s: 0.8 }, { k: 'QB/2026/b', r: 12, o: 40, p: 0.7, s: 0.5 }] },
+    // (the latest: b gone from it (not found that day), a up to #2)
+    { d: '2026-10-07', sides: [{ k: 'QB/2026/a', r: 2, o: 41, p: 0.97, s: 1.4 }] },
+  ];
+  const seen = lastSeen(base, history);
+  assert.equal(seen.at, dayMs('2026-10-07'));
+  assert.deepEqual(
+    seen.sides.map((s) => [s.key, s.rank, s.of, s.pct, s.score]),
+    [['QB/2026/a', 2, 41, 0.97, 1.4]],
+  );
+  assert.deepEqual(seen.rows, base.rows);
+  const view = trackView(base, seen);
+  assert.deepEqual(
+    view.sides.map((s) => [s.key, s.moved]),
+    [
+      ['QB/2026/a', 1],
+      ['QB/2026/b', null],
+    ],
+  );
+});
+
 test('the rank chart: #1 on top, a step a side from the pin to now, the pin\'s day marked', async () => {
   const { trendChart, snapshotOf, rankTicks, TREND } = await load();
   const at = new Date(2026, 8, 20, 10).getTime();

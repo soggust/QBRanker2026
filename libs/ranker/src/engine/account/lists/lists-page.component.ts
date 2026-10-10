@@ -14,10 +14,10 @@ import { dateText, listWhere, sportLabel } from './list-view.component';
 @Component({
   selector: 'lists-page',
   template: `
-    <div class="lists-page" [class.wide]="!!target">
+    <div class="lists-page">
       @if (target; as t) {
         <nav class="page-crumbs" aria-label="Lists">
-          <a href="#lists"><mat-icon aria-hidden="true" fontIcon="arrow_back"></mat-icon>{{ account.user() ? 'My lists' : 'Lists' }}</a>
+          <a href="#lists"><mat-icon aria-hidden="true" fontIcon="arrow_back"></mat-icon>{{ account.user() ? 'My Lists' : 'Lists' }}</a>
           <a href="#community"><mat-icon aria-hidden="true" fontIcon="groups"></mat-icon>Community</a>
         </nav>
         <list-view [owner]="t.owner" [listId]="t.id"></list-view>
@@ -26,15 +26,28 @@ import { dateText, listWhere, sportLabel } from './list-view.component';
       } @else if (!account.user()) {
         <div class="soon-panel">
           <mat-icon class="soon-icon" aria-hidden="true" fontIcon="format_list_numbered"></mat-icon>
-          <h2>My lists</h2>
+          <h2>My Lists</h2>
           <p class="soon-detail">Sign in to save your rankings as they are, see how they hold up, share them and submit them to the Community.</p>
-          <button type="button" class="primary" (click)="account.openLogin()">Sign in</button>
+          <button type="button" class="app-btn-primary" (click)="account.openLogin()">Sign in</button>
           <a class="soon-back" href="#community">See the Community’s lists</a>
         </div>
       } @else {
-        <page-head heading="My lists" icon="format_list_numbered" sub="Rankings you’ve saved, frozen as they were. Open one to see how its players are doing today.">
-          <a class="secondary small-btn" href="#community"><mat-icon aria-hidden="true" fontIcon="groups"></mat-icon>Community</a>
-        </page-head>
+        <!-- The lists' bar: the sport pills, the Community in its corner (the Community's own top row is the same) -->
+        <div class="lists-bar">
+          <h2 class="visually-hidden">My Lists</h2>
+          <div class="bar-filters">
+          @if (lists && lists.length) {
+            <!-- (All, then each sport the user has lists in, this sport first) -->
+            <div class="sport-pills" role="radiogroup" aria-label="Sport">
+              <button type="button" role="radio" class="app-pill" [class.active]="sport === null" [attr.aria-checked]="sport === null" (click)="sport = null">All · {{ lists.length }}</button>
+              @for (s of sports; track s.id) {
+                <button type="button" role="radio" class="app-pill" [class.active]="sport === s.id" [attr.aria-checked]="sport === s.id" (click)="sport = s.id">{{ s.label }} · {{ s.count }}</button>
+              }
+            </div>
+          }
+          </div>
+          <a class="app-btn-primary small bar-link" href="#community"><mat-icon aria-hidden="true" fontIcon="groups"></mat-icon>Community</a>
+        </div>
 
         @if (lists === null) {
           <div class="page-loading" role="status"><span class="spinner" aria-hidden="true"></span>Loading your lists…</div>
@@ -44,18 +57,10 @@ import { dateText, listWhere, sportLabel } from './list-view.component';
           <div class="soon-panel empty">
             <mat-icon class="soon-icon" aria-hidden="true" fontIcon="playlist_add"></mat-icon>
             <h2>No lists yet</h2>
-            <p class="soon-detail">Rank a tab your way (the sliders, or drag the rows), then use the grid’s Share button: <strong>Save this list…</strong></p>
+            <p class="soon-detail">Rank a tab your way (the sliders, or drag the rows), then use the <strong>Save</strong> button by the grid’s Share.</p>
             <a class="soon-back" href="#" (click)="back($event)">Go to the rankings</a>
           </div>
         } @else {
-          @if (sports.length > 1) {
-            <div class="sport-pills" role="radiogroup" aria-label="Sport">
-              <button type="button" role="radio" class="game-filter small" [class.active]="sport === null" [attr.aria-checked]="sport === null" (click)="sport = null">All · {{ lists.length }}</button>
-              @for (s of sports; track s.id) {
-                <button type="button" role="radio" class="game-filter small" [class.active]="sport === s.id" [attr.aria-checked]="sport === s.id" (click)="sport = s.id">{{ s.label }} · {{ s.count }}</button>
-              }
-            </div>
-          }
           <ul class="list-cards">
             @for (list of shown; track list.id) {
               <li>

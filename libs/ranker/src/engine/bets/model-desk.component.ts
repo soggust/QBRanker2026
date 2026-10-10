@@ -149,6 +149,9 @@ export class ModelDeskComponent implements OnInit, OnDestroy {
     );
     this.allStates = files.map((f) => f.state).filter((s): s is ModelState => !!s);
     this.allBets = files.flatMap((f) => f.ledger?.bets ?? []);
+    // (a remembered sport with no bets (NBA before its season): every sport instead, not an untouched
+    // 1,000u desk that reads like an empty wallet)
+    if (this.sport && !this.allBets.some((b) => b.sport === this.sport)) this.sport = null;
     this.show();
     this.loading = false;
     this.loadTeams();

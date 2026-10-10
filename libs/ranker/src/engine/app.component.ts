@@ -1,4 +1,4 @@
-import { Component, HostListener } from '@angular/core';
+import { Component, ElementRef, HostListener, ViewChild } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { PositionService } from '@ranker/engine/position.service';
 import { POSITIONS, Position } from '@sport/positions';
@@ -9,8 +9,20 @@ import { AccountService } from '@ranker/engine/account/account.service';
 import { canUse } from '@ranker/engine/account/features';
 
 // The page showing, from the address's hash: the rankings (no hash), the Bets page (#bets), or an account
-// page (#account, #lists, #community, #tracker, #wallet, #friends, #u/<username>: a public profile)
-export type View = 'rankings' | 'bets' | 'account' | 'lists' | 'community' | 'tracker' | 'wallet' | 'friends' | 'user';
+// page (#account, #lists, #community, #tracker, #wallet, #friends, #u/<username>: a public profile), or the
+// site's Privacy Policy (#privacy) and Data deletion (#data-deletion) pages, open to anyone
+export type View =
+  | 'rankings'
+  | 'bets'
+  | 'account'
+  | 'lists'
+  | 'community'
+  | 'tracker'
+  | 'wallet'
+  | 'friends'
+  | 'user'
+  | 'privacy'
+  | 'data-deletion';
 const HASH_VIEWS: Record<string, View> = {
   bets: 'bets',
   account: 'account',
@@ -19,6 +31,8 @@ const HASH_VIEWS: Record<string, View> = {
   tracker: 'tracker',
   wallet: 'wallet',
   friends: 'friends',
+  privacy: 'privacy',
+  'data-deletion': 'data-deletion',
 };
 
 // (#u/<username>: a profile; #lists/<uid>/<id>: one saved list; #community/<tab>/<season>: a board;
@@ -29,6 +43,9 @@ export function viewOf(hash: string): View {
   if (key.startsWith('lists/')) return 'lists';
   if (key.startsWith('community/')) return 'community';
   if (key.startsWith('tracker/') && key.length > 8) return 'tracker';
+  // ---- settings (round 2): #account/privacy, Settings with Privacy open ----
+  if (key === 'account/privacy') return 'account';
+  // ---- end settings ----
   return Object.hasOwn(HASH_VIEWS, key) ? HASH_VIEWS[key] : 'rankings';
 }
 
@@ -45,13 +62,15 @@ function userOf(hash: string): string {
 // (each page's name, for the page heading and the tab)
 const VIEW_TITLES: Record<Exclude<View, 'rankings'>, string> = {
   bets: 'Bets',
-  account: 'Profile & settings',
-  lists: 'My lists',
+  account: 'Settings',
+  lists: 'My Lists',
   community: 'Community',
-  tracker: 'Tracker',
-  wallet: 'Wallet',
+  tracker: 'Track Players',
+  wallet: 'Betting Wallet',
   friends: 'Friends',
   user: 'Profile',
+  privacy: 'Privacy Policy',
+  'data-deletion': 'Data Deletion',
 };
 
 // The tabs the sport's settings show (SPORT.tabVisible: MMA's divisions, men's or women's)
@@ -79,11 +98,37 @@ export class AppComponent {
   view: View = viewOf(location.hash);
   readonly canUse = canUse;
 
+  // A link to one of this page's views (href="#lists", "#bets", "#u/name"): only its hash changes. Taken as
+  // written, it resolves against the page's <base href="/<sport>/"> and loads the app again, losing the
+  // address's ?pos and ?season (the grid's tab and season) and the app's state
+  @HostListener('document:click', ['$event'])
+  onHashLink(event: MouseEvent): void {
+    if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    const link = (event.target as Element | null)?.closest?.('a[href^="#"]') as HTMLAnchorElement | null;
+    if (!link || (link.target && link.target !== '_self') || link.hasAttribute('download')) return;
+    event.preventDefault();
+    const hash = link.getAttribute('href')!;
+    if (location.hash !== hash) location.hash = hash;
+  }
+
   @HostListener('window:hashchange')
   onHashChange(): void {
+    const before = this.view + this.viewUser;
     this.view = viewOf(location.hash);
     this.viewUser = userOf(location.hash);
+    // (another page on the sheet: its top, not the last page's scroll)
+    if (this.view + this.viewUser !== before && this.sheetBody) this.sheetBody.nativeElement.scrollTop = 0;
   }
+
+  // Every page but the rankings and the Bets page sits on the app's sheet (its scroll container)
+  get onSheet(): boolean {
+    return this.view !== 'rankings' && this.view !== 'bets';
+  }
+  // (the pages with tables and boards get the grid's width; the rest a reading width, the backdrop around it)
+  get wideSheet(): boolean {
+    return this.view === 'lists' || this.view === 'community' || this.view === 'tracker' || this.view === 'wallet';
+  }
+  @ViewChild('sheetBody') private sheetBody?: ElementRef<HTMLElement>;
 
   get viewTitle(): string {
     return this.view === 'rankings' ? this.sportName + ' Season Ranker' : VIEW_TITLES[this.view];

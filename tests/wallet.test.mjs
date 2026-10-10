@@ -288,7 +288,7 @@ test('the tallies and the leaderboards: public players only, by profit, by perio
   const profile = (username, betHistory = 'public', photo = null) => ({ username, displayName: username, photo, visibility: { betHistory } });
   const entries = [
     { uid: 'a', profile: profile('ace', 'public', { kind: 'upload', url: 'data:image/webp;base64,AAAA' }), tally: t },
-    { uid: 'b', profile: profile('bo', 'public', { kind: 'provider', url: 'https://x/y.jpg' }), tally: { days: { '2026-10-11': [3, 0, 0, 30, 27] } } },
+    { uid: 'b', profile: profile('bo', 'public', { kind: 'provider', url: 'https://x/y.jpg' }), tally: { days: { '2026-10-11': [3, 0, 0, 30, 27] } }, wallet: { balance: 1000, resets: 2 } },
     { uid: 'c', profile: profile('cy', 'friends'), tally: { days: { '2026-10-11': [9, 0, 0, 90, 80] } } },
     { uid: 'd', profile: profile('di'), tally: { days: {} } },
   ];
@@ -303,6 +303,8 @@ test('the tallies and the leaderboards: public players only, by profit, by perio
   // (an upload's data stays off the board; an address stays)
   assert.equal(week[1].photo, null);
   assert.deepEqual(week[0].photo, { kind: 'provider', url: 'https://x/y.jpg' });
+  // (each row's reloads, from its wallet's resets; no wallet, none)
+  assert.deepEqual(week.map((r) => r.reloads), [2, 0]);
   const all = lib.leaderboard(entries, '0000-00-00');
-  assert.deepEqual(all.find((r) => r.username === 'ace'), { uid: 'a', username: 'ace', displayName: 'ace', photo: null, won: 1, lost: 1, push: 0, staked: 30, profit: -10.91, roi: -0.3637 });
+  assert.deepEqual(all.find((r) => r.username === 'ace'), { uid: 'a', username: 'ace', displayName: 'ace', photo: null, won: 1, lost: 1, push: 0, staked: 30, profit: -10.91, roi: -0.3637, reloads: 0 });
 });
