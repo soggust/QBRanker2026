@@ -24,12 +24,24 @@ interface EspnGameLog {
   seasonTypes?: { displayName: string; categories: { events?: { eventId: string; stats: string[] }[] }[] }[];
 }
 
+// (a game log's JSON, read once a visit and shared; a failed read isn't kept, so it's tried again next time)
+const logs = new Map<string, Promise<unknown>>();
+function jsonOnce(url: string): Promise<unknown> {
+  return memo(logs, url, () =>
+    fetch(url).then((res) => {
+      if (!res.ok) throw new Error(`${res.status}`);
+      return res.json();
+    }),
+  ).catch((error) => {
+    logs.delete(url);
+    throw error;
+  });
+}
+
 // An ESPN athlete's game log for a season (sport and league as ESPN names them: "football/nfl"),
 // regular season and playoffs (not the preseason), newest first
 export async function espnGameLog(league: string, id: number | string, season: number, options: EspnLogOptions = {}): Promise<GameLog> {
-  const res = await fetch(`https://site.web.api.espn.com/apis/common/v3/sports/${league}/athletes/${id}/gamelog?season=${season}`);
-  if (!res.ok) throw new Error(`${res.status}`);
-  const data = (await res.json()) as EspnGameLog;
+  const data = (await jsonOnce(`https://site.web.api.espn.com/apis/common/v3/sports/${league}/athletes/${id}/gamelog?season=${season}`)) as EspnGameLog;
   const labels = data.labels ?? [];
   // each label's category ("Passing"), then the sport's say on keeping and naming it
   const groups: string[] = [];
@@ -87,7 +99,12 @@ export async function espnGameLog(league: string, id: number | string, season: n
 
 // An athlete's fumbles lost each game this season, by ESPN event id, from ESPN's per-game box scores
 // (null when they can't be read)
-async function espnFumblesLost(league: string, id: number | string, season: number): Promise<Map<string, string> | null> {
+function espnFumblesLost(league: string, id: number | string, season: number): Promise<Map<string, string> | null> {
+  return memo(fumbles, `${league}/${id}/${season}`, () => readFumblesLost(league, id, season));
+}
+const fumbles = new Map<string, Promise<Map<string, string> | null>>();
+
+async function readFumblesLost(league: string, id: number | string, season: number): Promise<Map<string, string> | null> {
   const [sport, code] = league.split('/');
   const base = `https://sports.core.api.espn.com/v2/sports/${sport}/leagues/${code}`;
   try {
@@ -127,9 +144,7 @@ export async function mlbGameLog(
   columns: [string, string][],
   options: { chart?: GameLogChart } = {},
 ): Promise<GameLog> {
-  const res = await fetch(`https://statsapi.mlb.com/api/v1/people/${id}/stats?stats=gameLog&season=${season}&group=${group}&hydrate=team`);
-  if (!res.ok) throw new Error(`${res.status}`);
-  const data = (await res.json()) as { stats?: { splits?: MlbSplit[] }[] };
+  const data = (await jsonOnce(`https://statsapi.mlb.com/api/v1/people/${id}/stats?stats=gameLog&season=${season}&group=${group}&hydrate=team`)) as { stats?: { splits?: MlbSplit[] }[] };
   const splits = [...(data.stats?.[0]?.splits ?? [])].sort((a, b) => b.date.localeCompare(a.date));
   const cols = columns.map(([label]) => ({ label }));
   return {

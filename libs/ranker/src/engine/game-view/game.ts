@@ -23,10 +23,22 @@ import { loadTeamColors, pickColor, teamShades } from '../colors';
 const INDOORS = /mercedes-benz stadium|ford field|caesars superdome|superdome|u\.s\. bank stadium|allegiant|sofi stadium|tropicana field|edward jones dome|the dome at america's center|georgia dome|metrodome|rca dome|silverdome|kingdome|olympic stadium/i;
 const RETRACTABLE = /at&t stadium|lucas oil|nrg stadium|state farm stadium|university of phoenix stadium|rogers centre|chase field|minute maid|daikin park|loandepot|marlins park|american family field|miller park|t-mobile park|safeco field|globe life field/i;
 
-export async function loadGame(league: string, eventId: string): Promise<GameView> {
+// (finished games' summaries, kept for the visit: reopening one doesn't download its play-by-play again)
+const finals = new Map<string, EspnSummary>();
+
+async function summaryOf(league: string, eventId: string): Promise<EspnSummary> {
+  const key = `${league}/${eventId}`;
+  const kept = finals.get(key);
+  if (kept) return kept;
   const res = await fetch(`${ESPN_API}/${league}/summary?event=${eventId}`);
   if (!res.ok) throw new Error(`game ${eventId}: ${res.status}`);
   const s = (await res.json()) as EspnSummary;
+  if (s.header?.competitions?.[0]?.status?.type?.completed) finals.set(key, s);
+  return s;
+}
+
+export async function loadGame(league: string, eventId: string): Promise<GameView> {
+  const s = await summaryOf(league, eventId);
   const comp = s.header?.competitions?.[0];
   if (!comp?.competitors?.length) throw new Error(`game ${eventId}: no teams`);
 
