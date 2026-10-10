@@ -288,9 +288,13 @@ $chip-clay: #b0202b;
     border-bottom: 1px solid chip.$felt-seam;
   }
 
-  // (a Bet's yellow a touch softer on its bar)
-  &.medium .bet-row {
-    --bar-tint: color-mix(in srgb, var(--soft) 11%, transparent);
+  // (a Bet's yellow a touch softer on its bar, its rail's gold half as strong)
+  &.medium {
+    --rail: linear-gradient(135deg, rgba(122, 90, 30, 0.45), rgba(241, 213, 140, 0.5) 22%, rgba(179, 138, 60, 0.45) 45%, rgba(246, 226, 164, 0.5) 62%, rgba(156, 118, 48, 0.45) 82%, rgba(110, 81, 27, 0.45));
+
+    .bet-row {
+      --bar-tint: color-mix(in srgb, var(--soft) 11%, transparent);
+    }
   }
 
   // (a Pass: its rail the gold gone gray and faint, saying less than the bets)

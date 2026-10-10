@@ -669,11 +669,8 @@ $app-cracks: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' w
   --tex-chalk-noise: linear-gradient(transparent, transparent);
   --group-color: var(--app-sand, #d8b98a);
 
-  .group-results,
-  .group-box,
-  .group-advanced,
-  .group-support,
-  card-panel {
+  // (the wallet's aside: its panels the Bets page's card tables, _casino-chip.scss)
+  :is(.group-results, .group-box, .group-advanced, .group-support, card-panel):not(wallet-page *) {
     --group-color: var(--app-sand, #d8b98a) !important;
   }
 
@@ -720,8 +717,9 @@ $app-cracks: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' w
     outline-offset: 2px !important;
   }
 
-  // Card panels: a pewter box, the bar a warm scoreboard, no sport edges on the body
-  card-panel {
+  // Card panels: a pewter box, the bar a warm scoreboard, no sport edges on the body (not the wallet's: the
+  // Bets page's card tables, the scoreboard bar over the felt)
+  card-panel:not(wallet-page *) {
     border: 1px solid var(--app-sheet-edge, #4f4840) !important;
     border-radius: 10px !important;
     box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3) !important;
