@@ -68,10 +68,11 @@ list-modal {
     }
   }
 
+  // (the page's light: a sport's over its grid, the app's sand over the sheet's pages)
   .modal-icon {
-    color: var(--app-sand, #d8b98a);
+    color: var(--scoreboard-led, #d8b98a);
     @include v.icon-size(20px);
-    filter: drop-shadow(0 0 3px color-mix(in srgb, var(--app-sand, #d8b98a) 50%, transparent));
+    filter: drop-shadow(0 0 3px color-mix(in srgb, var(--scoreboard-led, #d8b98a) 50%, transparent));
   }
 
   .modal-close {

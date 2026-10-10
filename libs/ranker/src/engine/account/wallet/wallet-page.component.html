@@ -41,7 +41,7 @@
 
 <!-- (the open bets, by game: the wallet's panel, and the Bets page's Open Bets tab alone) -->
 <ng-template #openPanel>
-<card-panel class="tab-card group-support" [label]="'Open Bets · ' + tally().atRisk + 'u'" icon="schedule" [expandable]="!only">
+<card-panel class="tab-card group-support" [label]="'Open Bets · ' + tally().atRisk + 'u'" icon="schedule" [expandable]="!only" [startOpen]="true">
   <div class="group-body">
       <table class="desk-table desk-bets wallet-bets">
         <thead>

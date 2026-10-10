@@ -16,6 +16,7 @@ export const VISIBILITY_HINTS: Record<Visibility, string> = {
 // who sees it, for the grid as it is now (its top rows in their order, and the numbers in the columns
 // showing, frozen). Saving closes it at once (the grid's toast says so, with Open and Rename); the toast's
 // Rename opens it again on the saved list, its title alone (renameId). Signed out, it asks to sign in first.
+// Over the sport's own grid, in the sport's look: its buttons and pills, lit in its color.
 @Component({
   selector: 'save-list-dialog',
   template: `
@@ -23,8 +24,8 @@ export const VISIBILITY_HINTS: Record<Visibility, string> = {
       @if (!account.user()) {
         <p class="modal-lede">Sign in to save lists: keep this ranking as it is now, watch how it holds up, and share it or submit it to the Community.</p>
         <div class="modal-actions">
-          <button type="button" class="app-btn-outline" (click)="closed.emit()">Not now</button>
-          <button type="button" class="app-btn-primary" (click)="account.openLogin()">Sign in</button>
+          <button type="button" class="secondary" (click)="closed.emit()">Not now</button>
+          <button type="button" class="primary" (click)="account.openLogin()">Sign in</button>
         </div>
       } @else if (renameId) {
         <form novalidate (ngSubmit)="save()">
@@ -37,8 +38,8 @@ export const VISIBILITY_HINTS: Record<Visibility, string> = {
             <p class="form-error" role="alert">{{ error }}</p>
           }
           <div class="modal-actions">
-            <button type="button" class="app-btn-outline" [disabled]="busy" (click)="closed.emit()">Cancel</button>
-            <button type="submit" class="app-btn-primary" [disabled]="busy">
+            <button type="button" class="secondary" [disabled]="busy" (click)="closed.emit()">Cancel</button>
+            <button type="submit" class="primary" [disabled]="busy">
               @if (busy) { <span class="spinner" aria-hidden="true"></span> }
               Rename
             </button>
@@ -74,15 +75,15 @@ export const VISIBILITY_HINTS: Record<Visibility, string> = {
           </label>
           <div class="vis-row">
             <span class="field-label" id="save-vis">Who can see it</span>
-            <visibility-pills labelledby="save-vis" [value]="visibility" (picked)="visibility = $event"></visibility-pills>
+            <visibility-pills sport labelledby="save-vis" [value]="visibility" (picked)="visibility = $event"></visibility-pills>
             <span class="field-hint">{{ hints[visibility] }}</span>
           </div>
           @if (error) {
             <p class="form-error" role="alert">{{ error }}</p>
           }
           <div class="modal-actions">
-            <button type="button" class="app-btn-outline" [disabled]="busy" (click)="closed.emit()">Cancel</button>
-            <button type="submit" class="app-btn-primary" [disabled]="busy || !draft.ids.length">
+            <button type="button" class="secondary" [disabled]="busy" (click)="closed.emit()">Cancel</button>
+            <button type="submit" class="primary" [disabled]="busy || !draft.ids.length">
               @if (busy) { <span class="spinner" aria-hidden="true"></span> }
               Save list
             </button>

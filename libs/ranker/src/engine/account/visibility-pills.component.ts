@@ -2,7 +2,8 @@ import { Component, EventEmitter, Input, Output, booleanAttribute } from '@angul
 import { VISIBILITY_CHOICES, Visibility } from './account-helpers';
 
 // Who sees something: Public, Friends, Only me, as the app's sand pills (a radio group: the arrow keys
-// move along it). The Privacy settings, a list's own (saving, editing, its page) and the Tracker's.
+// move along it). The Privacy settings, a list's own (saving, editing, its page) and the Tracker's; over a
+// sport's grid (saving a list), `sport`: the sport's own pills.
 @Component({
   selector: 'visibility-pills',
   template: `
@@ -10,7 +11,9 @@ import { VISIBILITY_CHOICES, Visibility } from './account-helpers';
       <button
         type="button"
         role="radio"
-        class="vis-pill"
+        [class.vis-pill]="!sport"
+        [class.game-filter]="sport"
+        [class.small]="sport"
         [class.active]="value === choice.value"
         [attr.aria-checked]="value === choice.value"
         [attr.tabindex]="value === choice.value || (!value && i === 0) ? 0 : -1"
@@ -33,6 +36,7 @@ export class VisibilityPillsComponent {
   @Input() label = '';
   @Input() labelledby = '';
   @Input({ transform: booleanAttribute }) disabled = false;
+  @Input({ transform: booleanAttribute }) sport = false;
   @Output() picked = new EventEmitter<Visibility>();
 
   // (while a change is saving the pills stay focusable, so the keyboard keeps its place, but don't act)
