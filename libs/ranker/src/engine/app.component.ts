@@ -116,8 +116,14 @@ export class AppComponent {
     const before = this.view + this.viewUser;
     this.view = viewOf(location.hash);
     this.viewUser = userOf(location.hash);
+    this.markBetsView();
     // (another page on the sheet: its top, not the last page's scroll)
     if (this.view + this.viewUser !== before && this.sheetBody) this.sheetBody.nativeElement.scrollTop = 0;
+  }
+
+  // (the Bets page's gold light over the whole app, the sport bar and the menus too: _base.scss's bets-view)
+  private markBetsView(): void {
+    document.documentElement.classList.toggle('bets-view', this.view === 'bets');
   }
 
   // Every page but the rankings and the Bets page sits on the app's sheet (its scroll container)
@@ -167,6 +173,7 @@ export class AppComponent {
     private positionService: PositionService,
     readonly account: AccountService,
   ) {
+    this.markBetsView();
     // A setting that shows new tabs (MMA's women's divisions) opens the first of them; one that
     // hides the open tab goes back to the first tab
     let shown = this.positions;

@@ -25,6 +25,13 @@
   src: url("https://cdn.jsdelivr.net/npm/dseg@0.46.0/fonts/DSEG7-Classic/DSEG7Classic-Bold.woff2") format("woff2");
 }
 
+// (on the Bets page (app.component's bets-view, on <html> so the menus' overlays have it too): the card
+// tables' gold for every sport's light, the sport bar, the menus and the page alike)
+html.bets-view {
+  --scoreboard-led: #ebc56c;
+  --scoreboard-glow: 0 0 6px rgba(235, 197, 108, 0.55);
+}
+
 // ---------------------------------------------------------------------------
 // Tokens
 // ---------------------------------------------------------------------------
