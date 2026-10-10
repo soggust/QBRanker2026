@@ -109,7 +109,7 @@ export function kellyOf(p: number | undefined | null, american: number | undefin
 
 // A pick's band, its row's color and its chip (picks.mjs BANDS, the same cuts): by its Kelly score, a lock above
 // them all at 10% or more with a 60% chance to win (a big edge on a likely result: LOCK), then 5% (LOVE), 2%
-// (BET), under that or without an edge low (PASS)
+// (LIKE), under that or without an edge low (PASS)
 export type Confidence = 'lock' | 'high' | 'medium' | 'low';
 export const BANDS = { lock: 0.1, lockChance: 0.6, high: 0.05, medium: 0.02 };
 export function confidenceOf(kelly: number, p: number | null | undefined, edge: boolean | undefined): Confidence {

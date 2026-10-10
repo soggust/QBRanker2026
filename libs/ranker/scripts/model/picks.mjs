@@ -14,7 +14,7 @@
 //            while it's the untested start (a prop type with fewer than 40 graded)
 //   chance   what the page shows beside it: the trusted chance the bet wins, as a whole percent
 //   level    its band, the row's color and chip, by its Kelly score (BANDS): lock (10% or more, and a 60%
-//            chance), high (5%: LOVE), medium (2%: BET), low (PASS)
+//            chance), high (5%: LOVE), medium (2%: LIKE), low (PASS)
 //   N        the 40 best a sport (TOP) by the Kelly score, the page's 40 across all the sports. An edge bet's
 //            band is its score's; one without an edge is low, whatever its score (a favorite at a short price
 //            isn't a strong bet)
@@ -28,7 +28,7 @@ import { round } from './ratings.mjs';
 import { decimal, intentOf, record } from './desk.mjs';
 
 export const TOP = 40;
-// (the confidence bands, by the Kelly score: a bankroll's 5% or more high (the page's LOVE), 2% or more medium (BET),
+// (the confidence bands, by the Kelly score: a bankroll's 5% or more high (the page's LOVE), 2% or more medium (LIKE),
 // under that low (PASS); a lock above them all: 10% or more and a 60% chance to win, a big edge on a likely
 // result. The page reads the same bands: bet-why.ts confidenceOf)
 export const BANDS = { lock: 0.1, lockChance: 0.6, high: 0.05, medium: 0.02 };

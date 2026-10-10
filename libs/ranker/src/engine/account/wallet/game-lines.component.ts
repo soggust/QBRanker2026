@@ -22,11 +22,11 @@ export interface BotPick {
 }
 
 const MARKET_OF: Record<string, PlayMarket> = { spread: 'spread', total: 'total', moneyline: 'ml', player: 'prop' };
-const TIER_OF: Record<string, Tier> = { lock: 'lock', high: 'love', medium: 'bet', low: 'pass' };
+const TIER_OF: Record<string, Tier> = { lock: 'lock', high: 'love', medium: 'like', low: 'pass' };
 
 // A game's every line, both sides (the spread, the total, the moneyline) at DraftKings' prices from ESPN's
 // board, as a sportsbook lays them out: a row a team, a column a market; and the bot's props on the game (its
-// side, its price). The bot's own pick on each market lit in its band's color with its chip (Lock, Love, Bet,
+// side, its price). The bot's own pick on each market lit in its band's color with its chip (Lock, Love, Like,
 // Pass) and its Kelly score. A price clicked goes on the bet slip (again, off it); only before the game starts.
 @Component({
   selector: 'game-lines',

@@ -122,7 +122,7 @@
               <button type="button" class="bet-row" (click)="toggle(r.id)" [attr.aria-expanded]="open.has(r.id)">
                 <mat-icon class="bet-chevron" [fontIcon]="open.has(r.id) ? 'expand_more' : 'chevron_right'"></mat-icon>
                 <span class="bet-rank-slot" aria-hidden="true"></span>
-                <!-- (a like reads by its band: Lock, Love, Bet, or Pass for a small edge or none on its price; a fade
+                <!-- (a like reads by its band: Lock, Love, Like, or Pass for a small edge or none on its price; a fade
                      "Fade", the side to go against) -->
                 <span class="bet-grade" [ngClass]="'grade-' + grade(r)">{{ grade(r) }}</span>
                 <span class="bet-main" [class.has-circle]="r.strength !== 'fade'">

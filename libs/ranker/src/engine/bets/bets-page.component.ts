@@ -421,10 +421,10 @@ export class BetsPageComponent implements OnInit, OnDestroy {
     for (const a of algoRows) a.confidence = confidenceOf(a.sureness, a.p ?? (a.chance != null ? a.chance / 100 : null), a.edge);
     const locked = (r: BetRow) => (r.confidence === 'lock' ? 0 : 1);
     this.rows = algoRows.sort((a, b) => locked(a) - locked(b) || b.sureness - a.sureness || (a.game?.kickoff ?? '').localeCompare(b.game?.kickoff ?? ''));
-    // TODO(styling test, dev server only): the top pick staged as a lock when the sheet has none, to see a lock's
-    // row. Remove once the look's settled
-    if (this.dev && this.rows.length && !this.rows.some((r) => r.confidence === 'lock')) this.rows[0].confidence = 'lock';
     this.dropStarted();
+    // TODO(styling test, dev server only): the top pick still to play staged as a lock when the sheet has none,
+    // to see a lock's row. Remove once the look's settled
+    if (this.dev && this.rows?.length && !this.rows.some((r) => r.confidence === 'lock')) this.rows[0].confidence = 'lock';
     this.ticker = setInterval(() => this.dropStarted(), 60_000);
     // ---- wallet (phase 2) ----
     this.buildBoards();
@@ -572,9 +572,9 @@ export class BetsPageComponent implements OnInit, OnDestroy {
 
   // Its chip, by its band (bet-why.ts confidenceOf): "Lock", "Love", "Bet", or "Pass" (a small edge, or none on
   // its price: a bet the bot made for the data, never one to make); a fade "Fade"
-  grade(r: BetRow): 'lock' | 'love' | 'bet' | 'fade' | 'pass' {
+  grade(r: BetRow): 'lock' | 'love' | 'like' | 'fade' | 'pass' {
     if (r.strength === 'fade') return 'fade';
-    return ({ lock: 'lock', high: 'love', medium: 'bet', low: 'pass' } as const)[this.level(r)];
+    return ({ lock: 'lock', high: 'love', medium: 'like', low: 'pass' } as const)[this.level(r)];
   }
 
   // A bet's band, its row's color: a lock, then its Kelly score 5 or more, 2 or more, or under (picks.mjs)

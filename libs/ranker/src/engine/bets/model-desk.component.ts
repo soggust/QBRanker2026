@@ -42,7 +42,7 @@ import { TeamColors, loadTeamColors, pickTeamColor, splitPick } from './pick-sty
 const TIERS: [Confidence, string][] = [
   ['lock', 'LOCK'],
   ['high', 'LOVE'],
-  ['medium', 'BET'],
+  ['medium', 'LIKE'],
   ['low', 'PASS'],
 ];
 

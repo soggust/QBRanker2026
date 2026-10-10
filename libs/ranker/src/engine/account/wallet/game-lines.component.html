@@ -21,6 +21,9 @@
     >
       @if (bot) {
         <span class="price-chip" [ngClass]="t ?? ''" aria-hidden="true">{{ t }}</span>
+      } @else {
+        <!-- (no pick of the bot's: no edge on it, a pass) -->
+        <span class="price-chip pass" aria-hidden="true">pass</span>
       }
       @if (price.market !== 'ml') {
         <b class="price-line">{{ price.market === 'total' ? (price.side === 'over' ? 'O ' : 'U ') + price.line : lineText(price.line) }}</b>

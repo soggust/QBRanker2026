@@ -49,7 +49,8 @@ export function betFrom(id: string, d: DocumentData): PlayBet {
     stake: d['stake'],
     pick: d['pick'],
     botPick: !!d['botPick'],
-    tier: d['tier'] ?? null,
+    // (a bet placed when the band was called Bet: Like now)
+    tier: d['tier'] === 'bet' ? 'like' : (d['tier'] ?? null),
     kelly: d['kelly'] ?? null,
     ref: d['ref'] ?? null,
     propType: d['propType'] ?? null,

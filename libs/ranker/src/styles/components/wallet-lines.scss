@@ -186,24 +186,32 @@ $lock-gold: #ffcf4a;
 
   &.love {
     --edge: #{v.$good};
-    --wash: rgba(62, 207, 110, 0.16);
+    --wash: rgba(62, 207, 110, 0.06);
     box-shadow: 0 0 10px rgba(62, 207, 110, 0.25);
   }
 
-  &.bet {
+  // (a Like: its yellow round it; a Like and a Love on the felt)
+  &.like {
     --edge: #{v.$caution};
-    --wash: rgba(255, 205, 0, 0.12);
+    --wash: rgba(255, 205, 0, 0.08);
   }
 
-  // (a pass, marked or not: a price the bot has no edge on is one, so it sits back, a quiet felt, the picks
-  // standing out; full on hover, to bet it anyway)
-  &.pass,
-  &:not(.bot, .none) {
-    --edge: rgba(222, 186, 106, 0.22);
+  &.like,
+  &.love {
     background:
+      linear-gradient(var(--wash), var(--wash)),
+      radial-gradient(ellipse 90% 70% at 50% 35%, rgba(255, 255, 255, 0.08), transparent 70%),
       radial-gradient(ellipse 120% 100% at 50% 50%, transparent 55%, rgba(0, 0, 0, 0.35)),
       #{chip.$felt-nap} 0 0 / 140px,
       #{chip.$felt};
+  }
+
+  // (a pass, marked or not: a price the bot has no edge on is one, so it sits back, a quiet gray tile, the
+  // picks standing out; full on hover, to bet it anyway)
+  &.pass,
+  &:not(.bot, .none) {
+    --edge: rgba(255, 255, 255, 0.16);
+    background: linear-gradient(180deg, #3b434b, #2a3036);
     box-shadow: none;
     color: rgba(255, 255, 255, 0.62);
     filter: saturate(0.55) brightness(0.78);
@@ -254,7 +262,7 @@ $lock-gold: #ffcf4a;
   letter-spacing: 0.04em;
 }
 
-// (the bot's chip on its pick: the rows' Lock / Love / Bet / Pass, small, over the tile's corner)
+// (the bot's chip on its pick: the rows' Lock / Love / Like / Pass, small, over the tile's corner)
 .price-chip {
   border-radius: 3px;
   color: #111;
@@ -278,7 +286,7 @@ $lock-gold: #ffcf4a;
     background: v.$good;
   }
 
-  &.bet {
+  &.like {
     background: v.$caution;
   }
 

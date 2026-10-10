@@ -125,7 +125,9 @@ describe('wallet rules', { skip }, () => {
     ];
     for (const [i, b] of bad.entries()) await assertFails(place(db, 'ann', `bad${i}`, b, Number.isFinite(b.stake) ? b.stake : 25));
     // (never under 0: a stake bigger than the balance, however it's written)
-    await assertSucceeds(place(db, 'ann', 'all-in', playBet({ stake: 1000 })));
+    // (the band once called Bet: Like now)
+    await assertSucceeds(place(db, 'ann', 'a-like', playBet({ tier: 'like', stake: 0.5 })));
+    await assertSucceeds(place(db, 'ann', 'all-in', playBet({ stake: 999.5 })));
     await assertFails(place(db, 'ann', 'more', playBet({ stake: 1 })));
   });
 

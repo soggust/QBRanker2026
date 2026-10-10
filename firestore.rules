@@ -362,7 +362,7 @@ service cloud.firestore {
         && d.placedAt == request.time
         && d.status == 'open'
         && (!('botPick' in d) || d.botPick is bool)
-        && (!('tier' in d) || d.tier in ['lock', 'love', 'bet', 'pass'])
+        && (!('tier' in d) || d.tier in ['lock', 'love', 'like', 'bet', 'pass'])
         && (!('kelly' in d) || d.kelly is number)
         && (!('ref' in d) || (d.ref is string && d.ref.size() <= 80))
         && validPlayMarket(d);
