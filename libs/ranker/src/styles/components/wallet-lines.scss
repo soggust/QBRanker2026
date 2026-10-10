@@ -1,4 +1,5 @@
 @use "../variables" as v;
+@use "../casino-chip" as chip;
 
 // A game's every line (the Bets page: a row's open section, or on top when a game's chosen): a sportsbook's
 // board sunk into the felt, a row a team, a column a market, each price a little tile; the bot's pick on each
@@ -113,11 +114,16 @@ $lock-gold: #ffcf4a;
 
 // One price: its line over its odds on a dark tile; lit on hover, gold-ringed on the slip
 .price {
-  --edge: #4b535c;
+  --edge: #{chip.$felt-seam};
   --wash: transparent;
   align-items: center;
-  // (lighter than the scoreboard under it, so the tiles stand off it)
-  background: linear-gradient(var(--wash), var(--wash)), linear-gradient(180deg, #3b434b, #2a3036);
+  // (green felt, the Bets page's controls, under its band's wash)
+  background:
+    linear-gradient(var(--wash), var(--wash)),
+    radial-gradient(ellipse 90% 70% at 50% 35%, rgba(255, 255, 255, 0.08), transparent 70%),
+    radial-gradient(ellipse 120% 100% at 50% 50%, transparent 55%, rgba(0, 0, 0, 0.35)),
+    #{chip.$felt-nap} 0 0 / 140px,
+    #{chip.$felt};
   border: 1px solid var(--edge);
   border-radius: 8px;
   box-shadow:
@@ -164,9 +170,10 @@ $lock-gold: #ffcf4a;
     display: flex;
   }
 
-  // (the bot's pick: its band's color round it and washed in)
+  // (the bot's pick: its band's color round it and washed in, on the dark tile, not the felt)
   &.bot {
     --edge: #{v.$neutral};
+    background: linear-gradient(var(--wash), var(--wash)), linear-gradient(180deg, #3b434b, #2a3036);
   }
 
   &.lock {

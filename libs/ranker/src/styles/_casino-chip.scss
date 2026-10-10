@@ -333,10 +333,10 @@
 }
 
 // ---------------------------------------------------------------------------
-// The card table: a panel on the Bets page, the Algorithm and the wallet as a casino's table, green felt (its
-// nap, a light over the middle, the edges falling into shadow) inside a thin brushed-gold rail; its bar every
-// sport's panel bar (the scoreboard, tinted with its category color), the felt opening under it. (The chip
-// rim, chip-panel above, was too busy on a page of them; panel() is the table now, chip-panel kept to go back)
+// The card table: a panel on the Bets page, the Algorithm and the wallet on the scoreboard inside a thin
+// brushed-gold rail; its bar every sport's panel bar (the scoreboard, tinted with its category color). The felt
+// is the controls' (felt-control, felt-dropdown: the buttons and the dropdowns). (The chip rim, chip-panel
+// above, was too busy on a page of them; panel() is the table now, chip-panel kept to go back)
 // ---------------------------------------------------------------------------
 $felt: #155a3a;
 $felt-gold: linear-gradient(135deg, #7a5a1e, #f1d58c 22%, #b38a3c 45%, #f6e2a4 62%, #9c7630 82%, #6e511b);
@@ -370,15 +370,12 @@ $felt-nap: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' wid
   padding: 0;
   position: relative;
 
-  // (the felt inside, the gold rail round it: the border's box; over the scoreboard card-panel.scss gives
-  // every panel)
+  // (the scoreboard inside, the gold rail round it: the border's box)
   &,
   &:not(.panel-plain) {
     background:
-      radial-gradient(ellipse 90% 70% at 50% 35%, rgba(255, 255, 255, 0.07), transparent 70%) padding-box,
-      radial-gradient(ellipse 120% 100% at 50% 50%, transparent 55%, rgba(0, 0, 0, 0.38)) padding-box,
-      #{$felt-nap} 0 0 / 140px padding-box,
-      linear-gradient(#{$felt}, #{$felt}) padding-box,
+      var(--scoreboard-dots) padding-box,
+      linear-gradient(var(--scoreboard), var(--scoreboard)) padding-box,
       var(--rail, #{$felt-gold}) border-box;
   }
 
@@ -392,7 +389,7 @@ $felt-nap: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' wid
     display: none;
   }
 
-  // (the bar: every panel's, card-panel.scss's scoreboard; a gold seam where the felt opens under it)
+  // (the bar: every panel's, card-panel.scss's scoreboard; a gold seam where the panel opens under it)
   > .group-bar {
     border-bottom: 1px solid #{$felt-seam};
     border-radius: 0;
@@ -411,5 +408,68 @@ $felt-nap: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' wid
     &::after {
       content: none;
     }
+  }
+}
+
+// A control on the felt: a button or a pill of green felt, a thin gold edge; brighter on hover
+@mixin felt-control {
+  @include felt;
+  border: 1px solid #{$felt-seam};
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 1px 3px rgba(0, 0, 0, 0.45);
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.55);
+  transition: filter 0.15s ease;
+
+  &:hover:not([disabled]) {
+    filter: brightness(1.15);
+  }
+}
+
+// ...a dropdown of it (the Bets page's game picker, the Algorithm's): the felt, its caret, a gold edge
+@mixin felt-dropdown {
+  appearance: none;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24'%3E%3Cpath fill='%23fff' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E") right 16px center / 14px no-repeat,
+    radial-gradient(ellipse 90% 70% at 50% 35%, rgba(255, 255, 255, 0.08), transparent 70%),
+    radial-gradient(ellipse 120% 100% at 50% 50%, transparent 55%, rgba(0, 0, 0, 0.35)),
+    #{$felt-nap} 0 0 / 140px,
+    #{$felt};
+  border: 1px solid #{$felt-seam};
+  border-radius: 999px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 2px 6px rgba(0, 0, 0, 0.45);
+  color: #fff;
+  cursor: pointer;
+  font-family: v.$font-base;
+  font-size: 13px;
+  font-weight: 800;
+  min-width: 220px;
+  padding: 11px 36px 11px 18px;
+  text-shadow: 0 1px 1.5px rgba(0, 0, 0, 0.6);
+  transition: filter 0.15s ease;
+
+  &:hover,
+  &:focus {
+    filter: brightness(1.12);
+    outline: none;
+  }
+
+  &:focus-visible {
+    border-color: var(--scoreboard-led);
+  }
+
+  option,
+  optgroup {
+    background: #0f3f29;
+    color: #fff;
+  }
+
+  // (the day headers in its open list, in gold)
+  optgroup {
+    color: #ebc56c;
+    font-weight: 800;
   }
 }

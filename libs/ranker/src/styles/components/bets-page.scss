@@ -238,11 +238,16 @@ $chip-clay: #b0202b;
 // The chip's rim: an outline along the middle of its border, dashed into 22 evenly spaced cream spots
 // (pathLength 220: a spot of 4 in every 10), round ends and all
 .bets-chip {
-  @include chip.dropdown-rim;
+  display: inline-flex;
+
+  // (felt now, no chip's spots)
+  .chip-rim {
+    display: none;
+  }
 }
 
 .bets-game {
-  @include chip.dropdown($chip-clay);
+  @include chip.felt-dropdown;
 }
 
 .bets-note {
@@ -621,9 +626,9 @@ $chip-clay: #b0202b;
 // ---------------------------------------------------------------------------
 // The slot handle (wide screens only: it hangs off the panel's right side)
 // ---------------------------------------------------------------------------
-// A chrome mount bolted to the panel's side, a hub, the arm up from it and a glossy red knob. Pulled, the
+// A gold mount bolted to the panel's side (the tables' rail's gold), a hub, the arm up from it and a glossy gold knob. Pulled, the
 // arm swings down through the hub (as if toward you) and springs back.
-$chrome: linear-gradient(90deg, #6d737a, #e9edf1 35%, #a5abb2 55%, #5b6168);
+$chrome: linear-gradient(90deg, #7a5a1e, #f6e2a4 35%, #c99a45 55%, #6e511b);
 $arm-length: 175px;
 
 .slot-handle {
@@ -653,9 +658,9 @@ $arm-length: 175px;
     }
   }
 
-  // the mount: a chrome block against the panel
+  // the mount: a gold block against the panel
   .slot-mount {
-    background: linear-gradient(180deg, #8a9097, #d9dde2 40%, #7b8188);
+    background: linear-gradient(180deg, #9c7630, #f1d58c 40%, #8a6524);
     border-radius: 0 10px 10px 0;
     box-shadow:
       inset 0 0 0 1px rgba(0, 0, 0, 0.35),
@@ -669,7 +674,7 @@ $arm-length: 175px;
 
   // the hub the arm turns on
   .slot-hub {
-    background: radial-gradient(circle at 35% 30%, #f2f4f6, #9aa0a7 55%, #4f555c);
+    background: radial-gradient(circle at 35% 30%, #fff3cc, #c99a45 55%, #5e4415);
     border-radius: 50%;
     box-shadow: 1px 2px 4px rgba(0, 0, 0, 0.5);
     height: 26px;
@@ -703,8 +708,8 @@ $arm-length: 175px;
   }
 
   .slot-knob {
-    // (the poker chip's red clay)
-    background: radial-gradient(circle at 35% 30%, #f0838a, $chip-clay 48%, #5e1016);
+    // (the tables' gold, polished)
+    background: radial-gradient(circle at 35% 30%, #fff6d6, #ebc56c 45%, #8a6524 85%);
     border-radius: 50%;
     box-shadow:
       inset -2px -3px 6px rgba(0, 0, 0, 0.35),
@@ -872,11 +877,11 @@ $arm-length: 175px;
   gap: 8px;
   margin-bottom: 14px;
 
+  // (felt pills; the open one ringed in the page's gold)
   button {
-    background: rgba(0, 0, 0, 0.35);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    @include chip.felt-control;
     border-radius: 999px;
-    color: rgba(255, 255, 255, 0.75);
+    color: rgba(255, 255, 255, 0.8);
     cursor: pointer;
     font: inherit;
     font-size: 12px;
@@ -893,7 +898,6 @@ $arm-length: 175px;
     }
 
     &.active {
-      background: rgba(0, 0, 0, 0.6);
       color: var(--scoreboard-led);
       outline: 2px solid var(--scoreboard-led);
       outline-offset: 2px;

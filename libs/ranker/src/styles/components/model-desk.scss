@@ -507,11 +507,16 @@ card-panel {
 }
 
 .desk-chip {
-  @include chip.dropdown-rim;
+  display: inline-flex;
+
+  // (felt now, no chip's spots)
+  .chip-rim {
+    display: none;
+  }
 }
 
 .desk-game-select {
-  @include chip.dropdown(#b0202b);
+  @include chip.felt-dropdown;
 }
 
 .desk-sports {
