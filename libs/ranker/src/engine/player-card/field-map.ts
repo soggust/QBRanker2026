@@ -211,8 +211,10 @@ export function zoneName(depth: FieldDepth, side: FieldSide): string {
 }
 
 export const LANES = ['left end', 'left tackle', 'left guard', 'middle', 'right guard', 'right tackle', 'right end'];
-const LANE_SHORT = ['LE', 'LT', 'LG', 'MID', 'RG', 'RT', 'RE'];
-const laneName = (lane: string) => lane[0].toUpperCase() + lane.slice(1);
+// (the lanes named by their gaps, a runner's and a defense's alike, not by the offense's linemen: up the middle
+// the A gaps, off a guard the B gap, off a tackle the C, outside them the edge; left and right as drawn)
+const GAP_SHORT = ['EDGE', 'C', 'B', 'A', 'B', 'C', 'EDGE'];
+const GAP_NAMES = ['Left edge', 'Left C gap', 'Left B gap', 'A gaps', 'Right B gap', 'Right C gap', 'Right edge'];
 
 // (a chart short of the row's own count in the grid: the plays the play-by-play gave no direction, said in its
 // hover)
@@ -499,13 +501,14 @@ function runMap(lanes: FieldLane[], league: FieldLane[], spreads: (number | null
     ]);
     const lgYpc = lg && lg.att ? lg.yds / lg.att : null;
     const carries = allowed ? 'carries against it' : 'carries';
+    const name = GAP_NAMES[k];
     const title = empty
-      ? `${laneName(lane)}: no carries`
-      : `${laneName(lane)}: ${plural(l.att, 'carry', 'carries').replace('carries', carries)} (${pct(l.att, total)} of ${who}), ${l.yds} yds, ${ypc.toFixed(1)} a carry${lgYpc !== null ? ` (league ${lgYpc.toFixed(1)})` : ''}${l.td ? `, ${l.td} TD` : ''}\n${signed(l.epa)} EPA a carry${lg ? ` (league ${signed(lg.epa)})` : ''} · ${Math.round(l.success * 100)}% successful`;
+      ? `${name}: no carries`
+      : `${name}: ${plural(l.att, 'carry', 'carries').replace('carries', carries)} (${pct(l.att, total)} of ${who}), ${l.yds} yds, ${ypc.toFixed(1)} a carry${lgYpc !== null ? ` (league ${lgYpc.toFixed(1)})` : ''}${l.td ? `, ${l.td} TD` : ''}\n${signed(l.epa)} EPA a carry${lg ? ` (league ${signed(lg.epa)})` : ''} · ${Math.round(l.success * 100)}% successful`;
     return {
       key: lane,
-      short: LANE_SHORT[k],
-      name: laneName(lane),
+      short: GAP_SHORT[k],
+      name,
       path,
       head,
       width,
