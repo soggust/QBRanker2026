@@ -236,6 +236,55 @@
         </div>
       </card-panel>
 
+      <!-- (the chance it gave its picks against how often they won: close together is honest; once there are
+           graded bets) -->
+      @if (calibration.length) {
+      <card-panel class="tab-card group-support" label="Calibration" icon="tune">
+        <div class="group-body">
+            <table class="desk-table">
+              <thead>
+                <tr>
+                  <ng-container *ngTemplateOutlet="th; context: { $implicit: 'calib', key: 'label', label: 'Its chance', help: help['calibLabel'] }"></ng-container>
+                  <ng-container *ngTemplateOutlet="th; context: { $implicit: 'calib', key: 'n', label: 'Bets' }"></ng-container>
+                  <ng-container *ngTemplateOutlet="th; context: { $implicit: 'calib', key: 'said', label: 'Said' }"></ng-container>
+                  <ng-container *ngTemplateOutlet="th; context: { $implicit: 'calib', key: 'was', label: 'Won' }"></ng-container>
+                </tr>
+              </thead>
+              <tbody>
+                @for (c of sorted('calib', calibration, calibrationValue); track c.label) {
+                  <tr [title]="'Bets it gave ' + c.label + ': won ' + pct(c.was) + ' of ' + c.n + ' (it said ' + pct(c.said) + ')'">
+                    <th>{{ c.label }}</th>
+                    <td>{{ c.n }}</td>
+                    <td>{{ pct(c.said) }}</td>
+                    <td [class.up]="c.was > c.said + 0.03" [class.down]="c.was < c.said - 0.03">{{ pct(c.was) }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+        </div>
+      </card-panel>
+      }
+
+      <!-- (its record by the Bets page's bands: each bet's Kelly score and chance when it was placed, a lock, LOVE,
+           BET or PASS (no edge, or a small one); and all of them, the total under) -->
+      @if (byConfidence.length) {
+      <card-panel class="tab-card group-results" label="By Confidence" icon="local_fire_department">
+        <div class="group-body">
+          <table class="desk-table">
+            <thead class="desk-tally-head"><ng-container *ngTemplateOutlet="tallyHead; context: { $implicit: 'confidence' }"></ng-container></thead>
+            <tbody>
+              @for (t of sorted('confidence', byConfidence, tallyValue); track t.label) {
+                <tr [ngClass]="'desk-tier-' + t.label.toLowerCase()"><ng-container *ngTemplateOutlet="tallyRow; context: { $implicit: t }"></ng-container></tr>
+              }
+              @if (confidenceTotal; as t) {
+                <tr class="desk-total"><ng-container *ngTemplateOutlet="tallyRow; context: { $implicit: t }"></ng-container></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </card-panel>
+      }
+
       <card-panel class="tab-card group-box" label="By Market" icon="category">
         <div class="group-body">
           <table class="desk-table">
@@ -283,34 +332,6 @@
         </div>
       </card-panel>
 
-      <!-- (the chance it gave its picks against how often they won: close together is honest; once there are
-           graded bets) -->
-      @if (calibration.length) {
-      <card-panel class="tab-card group-support desk-wide" label="Calibration" icon="tune">
-        <div class="group-body">
-            <table class="desk-table">
-              <thead>
-                <tr>
-                  <ng-container *ngTemplateOutlet="th; context: { $implicit: 'calib', key: 'label', label: 'Its chance', help: help['calibLabel'] }"></ng-container>
-                  <ng-container *ngTemplateOutlet="th; context: { $implicit: 'calib', key: 'n', label: 'Bets' }"></ng-container>
-                  <ng-container *ngTemplateOutlet="th; context: { $implicit: 'calib', key: 'said', label: 'Said' }"></ng-container>
-                  <ng-container *ngTemplateOutlet="th; context: { $implicit: 'calib', key: 'was', label: 'Won' }"></ng-container>
-                </tr>
-              </thead>
-              <tbody>
-                @for (c of sorted('calib', calibration, calibrationValue); track c.label) {
-                  <tr [title]="'Bets it gave ' + c.label + ': won ' + pct(c.was) + ' of ' + c.n + ' (it said ' + pct(c.said) + ')'">
-                    <th>{{ c.label }}</th>
-                    <td>{{ c.n }}</td>
-                    <td>{{ pct(c.said) }}</td>
-                    <td [class.up]="c.was > c.said + 0.03" [class.down]="c.was < c.said - 0.03">{{ pct(c.was) }}</td>
-                  </tr>
-                }
-              </tbody>
-            </table>
-        </div>
-      </card-panel>
-      }
     </div>
 
     <!-- (the bets on games under way: the score and clock from ESPN, every minute) -->

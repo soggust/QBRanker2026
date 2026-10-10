@@ -1034,3 +1034,26 @@ card-panel {
 .desk-group + .desk-grouped {
   border-top-color: rgba(255, 255, 255, 0.03);
 }
+
+// (By Confidence: each band's name in its color, the Bets page's; the total under a firmer line)
+.desk-table {
+  .desk-tier-lock th {
+    color: #ff6b74;
+  }
+
+  .desk-tier-love th {
+    color: #3ecf6e;
+  }
+
+  .desk-tier-bet th {
+    color: #ffcd00;
+  }
+
+  .desk-tier-pass th {
+    color: rgba(255, 255, 255, 0.55);
+  }
+
+  .desk-total {
+    border-top: 1px solid rgba(255, 255, 255, 0.22);
+  }
+}
