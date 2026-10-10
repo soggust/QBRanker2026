@@ -13,6 +13,13 @@ on:
     # every game in the next two days it hasn't bet yet (libs/ranker/scripts/model/run.mjs). Code only: free.
     - cron: "17 * * * *"
   workflow_dispatch:
+    inputs:
+      replace:
+        # (the open bets on games not started yet taken back and priced again with what the model knows now:
+        # after a change to the model, its picks brought up to date)
+        description: Re-price the open bets on games not started yet
+        type: boolean
+        default: false
 
 # (one desk run at a time: a run that comes due while one is going waits; a second one due meanwhile
 # replaces the waiting one, which is fine, as each run does all that's due. Its own group, not the data
@@ -56,7 +63,8 @@ jobs:
         env:
           # (The Odds API: real lines and prices, props and history; without it the free ESPN board is used)
           ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
-        run: node libs/ranker/scripts/model/run.mjs
+          REPLACE: ${{ inputs.replace && '--replace' || '' }}
+        run: node libs/ranker/scripts/model/run.mjs $REPLACE
 
       # (the data checked before it's committed: a broken ledger or state stays out of master)
       - name: Install dependencies
