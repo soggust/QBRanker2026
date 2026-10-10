@@ -13,10 +13,9 @@ $lock-gold: #ffcf4a;
   display: block;
 }
 
+// (a scoreboard card on the open bet's felt, as every panel's bar is)
 .lines {
-  background:
-    linear-gradient(180deg, rgba(0, 0, 0, 0.32), rgba(0, 0, 0, 0.22)),
-    repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.02) 0 1px, transparent 1px 3px);
+  background: var(--scoreboard-dots), var(--scoreboard);
   border: 1px solid rgba(255, 236, 196, 0.16);
   border-radius: 10px;
   box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.45);
@@ -114,10 +113,11 @@ $lock-gold: #ffcf4a;
 
 // One price: its line over its odds on a dark tile; lit on hover, gold-ringed on the slip
 .price {
-  --edge: #3a4047;
+  --edge: #4b535c;
   --wash: transparent;
   align-items: center;
-  background: linear-gradient(var(--wash), var(--wash)), linear-gradient(180deg, #2c3238, #1e2226);
+  // (lighter than the scoreboard under it, so the tiles stand off it)
+  background: linear-gradient(var(--wash), var(--wash)), linear-gradient(180deg, #3b434b, #2a3036);
   border: 1px solid var(--edge);
   border-radius: 8px;
   box-shadow:
@@ -136,12 +136,14 @@ $lock-gold: #ffcf4a;
   position: relative;
   transition:
     border-color 0.12s ease,
+    filter 0.12s ease,
     transform 0.12s ease,
     box-shadow 0.12s ease;
   width: 100%;
 
   &:hover:not([disabled]) {
     border-color: var(--scoreboard-led);
+    filter: brightness(1.18);
     transform: translateY(-1px);
   }
 
