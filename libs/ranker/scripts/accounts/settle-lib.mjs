@@ -20,13 +20,14 @@
 // Play money: the check keeps the record honest, it doesn't need to be airtight.
 
 import { outcomeOf, settle as settleGame, voidOf } from '../model/desk.mjs';
-import { settleProp } from '../model/props.mjs';
+import { PROP_WAIT, settleProp } from '../model/props.mjs';
 
 export const START = 1000;
 export const DAY = 864e5;
 export const TOLERANCE = 10;
 export const WINDOW = 3 * 36e5;
-// (a prop the box score never counts, or a game ESPN never finishes: void after this long, its stake back)
+// (a prop the box score never counts, or a game ESPN never finishes: void after this long, its stake back; a
+// final's count not read yet waits longer, PROP_WAIT, as the bettor's own pick does)
 export const GIVE_UP = 3 * DAY;
 
 export const round2 = (v) => Math.round(v * 100) / 100;
@@ -151,7 +152,8 @@ export function settlePlayBet(bet, game, { observations = [], propValue, now = D
   if (!price.ok) return voided(price.why);
   const priced = { ...bet, units: bet.stake };
   if (bet.market === 'prop') {
-    if (propValue === undefined) return now - start > GIVE_UP ? voided('couldn’t read the stat') : null;
+    // (a count not read yet waits as long as the bettor's own pick does (props.mjs PROP_WAIT), so the two end alike)
+    if (propValue === undefined) return now - start > Math.max(GIVE_UP, PROP_WAIT) ? voided('couldn’t read the stat') : null;
     const r = settleProp(priced, propValue);
     if (r.void) return voided(r.final ?? 'did not play');
     return { status: r.status, profit: r.status === 'won' ? toWin(bet.stake, bet.odds) : r.status === 'lost' ? -bet.stake : 0, final: r.final };

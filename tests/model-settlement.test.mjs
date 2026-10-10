@@ -7,10 +7,10 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { nameKey, statInFinal } from '../libs/ranker/scripts/model/props.mjs';
 import { settle } from '../libs/ranker/scripts/model/desk.mjs';
-import { gameOf, shortOf } from '../libs/ranker/scripts/model/espn.mjs';
+import { gameOf, goaliesInOrder, shortOf } from '../libs/ranker/scripts/model/espn.mjs';
 import { matchNearest } from '../libs/ranker/scripts/model/oddsapi.mjs';
 import { etDay } from '../libs/ranker/scripts/model/sources.mjs';
-import { eventsOf, storyHurt } from '../libs/ranker/scripts/model/postmortem.mjs';
+import { eventsOf, propPostmortem, storyHurt } from '../libs/ranker/scripts/model/postmortem.mjs';
 import { settlePlayBet } from '../libs/ranker/scripts/accounts/settle-lib.mjs';
 
 const athlete = (id, stats, extra = {}) => ({ athlete: { id, displayName: `P${id}` }, stats, ...extra });
@@ -122,7 +122,7 @@ test('etDay: the Eastern date, daylight saving and all', () => {
   assert.equal(etDay('2026-10-11T04:30:00Z'), '2026-10-11');
 });
 
-// (a hockey final: the home side's goalie pulled after ga goals)
+// (a hockey final: the home side's goalie pulled after ga goals; ESPN lists the reliever first)
 const hockey = (ga, story = '') => ({
   header: { competitions: [{ competitors: [{ linescores: [{}, {}, {}] }] }] },
   article: { story },
@@ -130,7 +130,7 @@ const hockey = (ga, story = '') => ({
     players: [
       {
         team: { id: '1' },
-        statistics: [{ name: 'goalies', labels: ['GA', 'SA', 'SOS', 'SOSA', 'SV', 'SV%', 'ESSV', 'PPSV', 'SHSV', 'TOI'], athletes: [athlete('21', [String(ga), '20', '0', '0', '15', '.750', '0', '0', '0', '30:00']), athlete('22', ['1', '12', '0', '0', '11', '.917', '0', '0', '0', '29:00'])] }],
+        statistics: [{ name: 'goalies', labels: ['GA', 'SA', 'SOS', 'SOSA', 'SV', 'SV%', 'ESSV', 'PPSV', 'SHSV', 'TOI'], athletes: [athlete('22', ['1', '12', '0', '0', '11', '.917', '0', '0', '0', '29:00']), athlete('21', [String(ga), '20', '0', '0', '15', '.750', '0', '0', '0', '30:00'])] }],
       },
     ],
   },
@@ -142,6 +142,44 @@ test('eventsOf: a goalie pulled after 3 or more goals is noted, not a broken pre
   assert.equal(pulled(hockey(5)).severe, false);
   assert.equal(pulled(hockey(1)).severe, true);
   assert.equal(pulled(hockey(4, 'P21 left the game with an injury in the second period.')).severe, true);
+});
+
+test("goaliesInOrder: ESPN's list read backwards (the reliever listed first), the story deciding when it says", () => {
+  const g = (name, ga, toi) => ({ athlete: { id: name, displayName: name }, stats: [String(ga), '0', '0', '0', '0', '0', '0', '0', '0', toi] });
+  // (nhl-401891829, VAN: Lankinen pulled after 8 goals, Merilainen in relief, listed first)
+  const van = [g('Leevi Merilainen', 1, '30:41'), g('Kevin Lankinen', 8, '28:23')];
+  const story = 'Kevin Lankinen made 13 saves before getting pulled midway through the second period. Leevi Merilainen — claimed off waivers on Friday — stopped 10 of the 11 shots he faced in relief.';
+  assert.deepEqual(goaliesInOrder(van, story).map((a) => a.athlete.id), ['Kevin Lankinen', 'Leevi Merilainen']);
+  assert.deepEqual(goaliesInOrder(van, '').map((a) => a.athlete.id), ['Kevin Lankinen', 'Leevi Merilainen']);
+  // (the story says otherwise: it decides)
+  const flipped = [g('Kevin Lankinen', 8, '28:23'), g('Leevi Merilainen', 1, '30:41')];
+  assert.deepEqual(goaliesInOrder(flipped, story).map((a) => a.athlete.id), ['Kevin Lankinen', 'Leevi Merilainen']);
+  assert.deepEqual(goaliesInOrder([g('Sebastian Cossa', 3, '15:51'), g('Karel Vejmelka', 3, '43:49')].reverse(), 'Karel Vejmelka stopped 11 of 14 shots he faced before he was replaced by Sebastian Cossa , who made five saves.').map((a) => a.athlete.id), ['Karel Vejmelka', 'Sebastian Cossa']);
+  assert.deepEqual(goaliesInOrder([g('Dylan Garand', 1, '29:45'), g('Igor Shesterkin', 1, '28:20')].reverse(), 'Garand made 11 saves after entering midway through the second to replace Shesterkin, who stopped 13 shots.').map((a) => a.athlete.id), ['Igor Shesterkin', 'Dylan Garand']);
+  // (one goalie: as is)
+  assert.equal(goaliesInOrder([g('Jeremy Swayman', 1, '60:00')]).length, 1);
+});
+
+test('eventsOf: the pulled goalie named is the starter, not the reliever ESPN lists first', () => {
+  const e = eventsOf('nhl', game, hockey(8), null).events.find((x) => x.kind === 'goalie');
+  assert.match(e.text, /^P21 pulled \(8 goals/);
+  assert.equal(e.severe, false);
+});
+
+test('propPostmortem: a skater with cut ice time (a benching) is noted; under a third of his usual, or hurt, breaks it', () => {
+  const skater = (toi, story = '') => ({
+    header: { competitions: [{ competitors: [{ linescores: [{}, {}, {}] }] }] },
+    article: { story },
+    boxscore: { players: [{ team: { id: '1' }, statistics: [{ name: 'forwards', labels: ['G', 'A', 'S', 'TOI'], athletes: [athlete('7', ['0', '0', '1', toi])] }] }] },
+  });
+  const rows = [1, 2, 3, 4].map((d) => ({ pid: '7', name: 'P7', season: 2027, date: `2026-10-0${d}`, s: { toi: 18 } }));
+  const bet = { athlete: '7', player: 'Joe Skater', propType: 'sog', status: 'lost', actual: 1, statLabel: 'shots', line: 2.5, projection: { mean: 2.8 } };
+  const g = { ...game, season: 2027, date: '2026-10-09' };
+  const pm = (toi, story) => propPostmortem('nhl', bet, g, skater(toi, story), rows, 0.3);
+  assert.equal(pm('9:00').weight, 1);
+  assert.equal(pm('9:00').disrupted.find((e) => e.kind === 'early').severe, false);
+  assert.equal(pm('4:00').weight, 0.3);
+  assert.equal(pm('9:00', 'Skater left the game with an injury in the second.').weight, 0.3);
 });
 
 test('storyHurt: a sentence naming him by his last name that says he was hurt or thrown out', () => {

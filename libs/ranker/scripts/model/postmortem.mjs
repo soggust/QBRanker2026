@@ -15,15 +15,17 @@
 // bets (DISRUPTED_WEIGHT, in run.mjs): an in-game injury is noise, not evidence against the model. Only an
 // exit that isn't the game's own verdict breaks it: an injury, an ejection. One for how he played is evidence
 // and counts in full (only noted): a goalie pulled after 3 or more goals, a starting pitcher knocked out (4 or
-// more runs), a quarterback replaced after 10 or more throws, an NBA player's minutes cut but not to a third of
-// his usual; unless the story says he was hurt or thrown out.
+// more runs), a quarterback replaced after 10 or more throws, a player's minutes, time on ice, plate
+// appearances or snaps cut but not to a third of his usual (foul trouble, a benching, a pinch hitter); unless
+// the story says he was hurt or thrown out. An NHL side's starting goalie is the first in net (espn.mjs
+// goaliesInOrder: ESPN lists a pulled starter after his reliever).
 //
 // Stat corrections: a final's summary is read once more a day and a half after its start (recheckSummary), and a
 // prop whose count changed is graded again on it (run.mjs).
 
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
-import { summary } from './espn.mjs';
+import { goaliesInOrder, summary } from './espn.mjs';
 import { CACHE, nflverseRows, pool } from './sources.mjs';
 import { intentOf } from './desk.mjs';
 
@@ -142,7 +144,8 @@ export function eventsOf(sport, game, body, usual) {
       const s = p.statistics?.find((x) => x.name === 'goalies');
       const toi = (s?.labels ?? []).indexOf('TOI');
       const col = (k, i) => ((s?.labels ?? []).indexOf(k) >= 0 ? s.labels.indexOf(k) : i);
-      const list = (s?.athletes ?? []).map((a) => ({ name: a.athlete.displayName, min: Number(String(a.stats[toi]).split(':')[0]) || 0, ga: Number(a.stats[col('GA', 0)]) || 0, sa: Number(a.stats[col('SA', 1)]) || 0 }));
+      // (the starter first: ESPN lists a pulled starter after his reliever, espn.mjs goaliesInOrder)
+      const list = goaliesInOrder(s?.athletes, body.article?.story).map((a) => ({ name: a.athlete.displayName, min: Number(String(a.stats[toi]).split(':')[0]) || 0, ga: Number(a.stats[col('GA', 0)]) || 0, sa: Number(a.stats[col('SA', 1)]) || 0 }));
       // (pulled after 3 or more goals: for how he played, noted; with fewer, an injury most likely: broken)
       if (list.length > 1 && list[1].min >= 5) add(list[0].ga < 3 || hurt(list[0].name), 'goalie', `${list[0].name} pulled (${list[0].ga} goal${list[0].ga === 1 ? '' : 's'} on ${list[0].sa} shots, ${team})`);
     }
@@ -169,7 +172,7 @@ export function eventsOf(sport, game, body, usual) {
   // (an NFL regular whose snaps fell far under his usual: a mid-game exit, from nflverse's snap counts)
   // (a quarterback's or skill player's breaks the premise, outside a blowout; a lineman's or defender's is
   // noted: every NFL game loses a few)
-  for (const x of usual?.snaps?.() ?? []) add(!blowout && ['QB', 'RB', 'WR', 'TE'].includes(x.pos), 'snaps', `${x.name} played ${x.snaps} snaps (usual ${x.usual}, ${x.team})`);
+  for (const x of usual?.snaps?.() ?? []) add(!blowout && ['QB', 'RB', 'WR', 'TE'].includes(x.pos) && (x.snaps < 0.35 * x.usual || hurt(x.name)), 'snaps', `${x.name} played ${x.snaps} snaps (usual ${x.usual}, ${x.team})`);
   // (the story's own lines about someone hurt or thrown out: noted; the box score's measures above decide
   // whether the premise broke, the story only says it when it names a quarterback or goalie going out)
   for (const s of recap.sentences.filter((s) => HURT.test(s)).slice(0, 2)) {
@@ -283,6 +286,7 @@ export function propPostmortem(sport, bet, game, body, rows, weight, usual = nul
   if (bet.void) return { ...base, disrupted: [], why: `Void: ${!bet.final || bet.final === 'did not play' ? `${bet.player} didn't play` : bet.final}`, weight: 1 };
   const { events } = eventsOf(sport, game, body, usual);
   const mine = events.filter((e) => e.severe && e.text.includes(bet.player));
+  let short = null;
   // (his time in this game against his usual: minutes, time on ice, plate appearances)
   const key = sport === 'nba' ? 'MIN' : sport === 'nhl' ? 'TOI' : sport === 'mlb' ? 'AB' : null;
   const field = { nba: 'min', nhl: 'toi', mlb: 'pa' }[sport];
@@ -300,14 +304,19 @@ export function propPostmortem(sport, bet, game, body, rows, weight, usual = nul
     const before = rows.filter((r) => (r.pid === String(bet.athlete) || r.name === bet.player) && r.season === game.season && r.date < game.date).map((r) => r.s[field]).filter(Number.isFinite);
     const usual = before.length >= 3 ? before.reduce((s, x) => s + x, 0) / before.length : null;
     const blowout = events.some((e) => e.kind === 'blowout');
-    // (an exit, not a pull for how he played (that's only noted, in events), and in the NBA not foul trouble
-    // or a coach's call: under a third of his usual minutes, or hurt by the story)
-    const pulled = events.some((e) => !e.severe && ['goalie', 'starter', 'qb', 'minutes'].includes(e.kind) && e.text.includes(bet.player));
-    const exit = sport !== 'nba' || (now !== null && usual && (now < 0.35 * usual || storyHurt(recap, bet.player)));
-    if (!mine.length && !pulled && exit && now !== null && usual && now < 0.6 * usual && !(blowout && sport === 'nba')) mine.push({ severe: true, kind: 'early', text: `${bet.player} played ${Math.round(now * 10) / 10} ${sport === 'mlb' ? 'PA' : 'min'} (usual ${Math.round(usual * 10) / 10})` });
+    // (an exit, not a pull for how he played (that's only noted, in events), and not foul trouble, a benching,
+    // a pinch hitter or a coach's call: under a third of his usual, or hurt or thrown out by the story; more
+    // than that, only noted)
+    const pulled = events.some((e) => !e.severe && ['goalie', 'starter', 'qb', 'minutes', 'snaps'].includes(e.kind) && e.text.includes(bet.player));
+    const exit = now !== null && usual && (now < 0.35 * usual || storyHurt(recap, bet.player));
+    if (!mine.length && !pulled && now !== null && usual && now < 0.6 * usual && !(blowout && sport === 'nba')) {
+      const text = `${bet.player} played ${Math.round(now * 10) / 10} ${sport === 'mlb' ? 'PA' : 'min'} (usual ${Math.round(usual * 10) / 10})`;
+      if (exit) mine.push({ severe: true, kind: 'early', text });
+      else short = { severe: false, kind: 'early', text };
+    }
   }
   const notes = events.filter((e) => ['overtime', 'blowout'].includes(e.kind)).map((e) => e.text);
   const status = bet.status === 'won' ? 'Won' : bet.status === 'lost' ? 'Lost' : 'Push';
   const said = [`${bet.player} ${bet.actual} ${bet.statLabel} vs ${bet.line} (projected ${bet.projection?.mean ?? '?'})`, ...mine.map((e) => e.text), ...notes];
-  return { ...base, disrupted: [...mine, ...events.filter((e) => !e.severe)], why: `${status}${actionTag(bet)}: ${said.slice(0, 3).join('; ')}`, weight: mine.length ? weight : 1 };
+  return { ...base, disrupted: [...mine, ...(short ? [short] : []), ...events.filter((e) => !e.severe)], why: `${status}${actionTag(bet)}: ${said.slice(0, 3).join('; ')}`, weight: mine.length ? weight : 1 };
 }

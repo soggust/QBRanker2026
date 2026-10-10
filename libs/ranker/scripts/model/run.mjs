@@ -7,7 +7,8 @@
 //   2b. the context (context.mjs: rest, travel, starters, weather, officials and more) gathered for every game, and the size of
 //      each of its terms fit on the same held-out games (ratings.mjs fitContext: a term that doesn't help is
 //      left out), each size that moves logged the same way
-//   3. each market's trust in the model refit on the desk's own graded bets, logged the same way
+//   3. each market's trust in the model refit on the desk's own graded bets (a game bet's only when its fair
+//      chance was Pinnacle's: none on DraftKings' own prices), logged the same way
 //   4. the open bets graded against their finals (a prop whose count can't be read yet waits, PROP_WAIT at most;
 //      a player who played but isn't in his stat's table counts 0; an MLB game cut short voids its run line and
 //      total; each prop's count read again once a day and a half after the start, for stat corrections)
@@ -43,7 +44,7 @@ import { LINE_BOOKS, SPORT_KEYS, call, canSpend, hasKey, linesFromEvent, matchNe
 import { backtestBets, evaluate, snapshots, trustBets } from './backtest.mjs';
 import { buildPicks } from './picks.mjs';
 import { playerRows } from './playerlogs.mjs';
-import { PER_GAME, STATS, apiProps, board, fitProps, nflTookSnap, priceProps, rowsIndex, settleProp, statInFinal, withApiPrices } from './props.mjs';
+import { PER_GAME, PROP_WAIT, STATS, apiProps, board, fitProps, nflTookSnap, priceProps, rowsIndex, settleProp, statInFinal, withApiPrices } from './props.mjs';
 import { CACHE, DAY, etDay, isoSecond, readJson, writeJson } from './sources.mjs';
 import { BANKROLL, MARKETS, choose, fairPair, fitTrust, pickText, price, record, settle, voidOf } from './desk.mjs';
 
@@ -56,8 +57,10 @@ const START_TRUST = 0.5;
 // hand, not fit: there aren't graded bets enough yet to fit it on)
 const DISRUPTED_WEIGHT = 0.3;
 // (the rule for a broken premise (postmortem.mjs): 2, only an exit that isn't for how he played (an injury, an
-// ejection) breaks it; the graded bets the old rule weighed down are weighed again once when it changes)
-const PM_RULE = 2;
+// ejection) breaks it; 3, the same for every sport's cut minutes, time on ice, plate appearances and snaps, and
+// an NHL goalie pulled read off the one who started; the graded bets the old rule weighed down are weighed again
+// once when it changes)
+const PM_RULE = 3;
 const PROPS_ASKED = path.join(CACHE, 'odds-props.json');
 // (a game market the guard skipped or the book didn't price: not asked about again for REST_FOR, so the hourly
 // runs don't buy The Odds API's lines for it each hour; kept by sport in .cache/model/lines-rest.json)
@@ -66,9 +69,6 @@ const REST_FOR = 3 * 36e5;
 // (with The Odds API to hand, a game it didn't price waits for it; this close to the start, it goes on ESPN's
 // board after all, at the minimum stake, for the data)
 const LAST_CALL = 2 * 36e5;
-// (a prop whose count can't be read yet (the NFL's snap counts not posted, StatsAPI down) waits this long
-// after its start, then is no action)
-const PROP_WAIT = 4 * DAY;
 
 const read = readJson;
 const write = writeJson;
@@ -255,7 +255,12 @@ async function liveLines(r) {
   for (const [u, ev] of pairs) {
     const l = linesFromEvent(ev);
     u.lines.oddsEvent = ev.id;
-    if (!l) continue;
+    // (listed, but not by the book yet: its markets rest too, rather than buying the call again each hour; the
+    // game stays off ESPN's board, betGames holding it till LAST_CALL)
+    if (!l) {
+      for (const m of MARKETS) if (!placed.has(`${u.game.id}:${m}`)) rest(r, `${u.game.id}:${m}`, 'not priced by the book on The Odds API');
+      continue;
+    }
     const odds = { spread: l.spreads, total: l.totals, ml: l.h2h };
     u.lines = {
       book: 'DraftKings',
@@ -449,8 +454,12 @@ function refitTrust(r) {
   // history's real lines and results, so its trust is fitted from the start, the live bets adding to them as
   // they come)
   const evidence = (b) => !b.void && (b.status !== 'open' || b.clv);
+  // (a game bet's fair chance from Pinnacle only, as the backtest's are (backtest.mjs trustBets): one priced off
+  // DraftKings' own odds (ESPN's board inside LAST_CALL, or no Pinnacle line) has no sharp price to weigh the
+  // model against, and would teach the trust a softer market)
+  const sharp = (b) => b.fairFrom === 'pinnacle';
   for (const market of MARKETS) {
-    refit(market, [...(r.backtestBets ?? []).filter((b) => b.market === market), ...r.ledger.bets.filter((b) => b.market === market && evidence(b))], { what: `${market} trust in the model`, bets: `${market} bets (backtest and live)` });
+    refit(market, [...(r.backtestBets ?? []).filter((b) => b.market === market), ...r.ledger.bets.filter((b) => b.market === market && sharp(b) && evidence(b))], { what: `${market} trust in the model`, bets: `${market} bets (backtest and live)` });
     trust[market].backtest = (r.backtestBets ?? []).filter((b) => b.market === market).length;
   }
   // (start 0.5, refit once 40 of its bets are graded)

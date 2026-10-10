@@ -34,6 +34,10 @@ const CORE = 'https://sports.core.api.espn.com/v2/sports';
 // the user wants every bet the data can give; null keeps the name for the state)
 export const PER_GAME = null;
 export const PROP_ODDS = -110;
+// (a prop whose count can't be read yet (the NFL's snap counts not posted, StatsAPI down) waits this long after
+// its start, then is no action: the bettor's (run.mjs) and the play-money settler's (settle-lib.mjs) alike, so
+// the same pick never ends one way on the desk and another on a user's account)
+export const PROP_WAIT = 4 * 864e5;
 
 const stat = (key, label, match, extra = {}) => ({ key, label, match, ...extra });
 const QB = (r) => r.s.passAtt >= 10;

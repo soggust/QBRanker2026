@@ -146,6 +146,38 @@ export async function summary(league, id) {
   return json(`${ESPN}/${league}/summary?event=${id}`);
 }
 
+// An NHL side's goalies (a summary's goalies table: its athletes) in the order they went in, the starter
+// first. ESPN lists the one in net at the end first (a pulled starter after his reliever), so its list read
+// backwards; the game's story, when it says who came on in relief or who was pulled or replaced, decides
+// instead (a story that says both ways, or names neither, leaves ESPN's order)
+export function goaliesInOrder(athletes, story = '') {
+  const list = [...(athletes ?? [])].reverse();
+  if (list.length !== 2) return list;
+  const sentences = String(story ?? '')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/&[a-z]+;/g, ' ')
+    .replace(/\s+/g, ' ')
+    .split(/(?<=[.!?])\s+/);
+  const lastOf = (a) => String(a?.athlete?.displayName ?? '').trim().split(/\s+/).filter((w) => !/^(jr|sr|ii|iii|iv)\.?$/i.test(w)).at(-1) ?? '';
+  const esc = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const says = (a, res) => {
+    const last = lastOf(a);
+    return last.length >= 3 && sentences.some((s) => s.includes(last) && res(esc(last)).some((re) => re.test(s)));
+  };
+  // (the one who came on: "... in relief", "replaced by (first) Last", "Last ... entering/came on/took over")
+  const relieved = (L) => [new RegExp(`${L}[^.]*\\bin relief`), new RegExp(`replaced by (?:[^\\s.]+ )?${L}\\b`), new RegExp(`${L}\\b[^.]*\\b(?:entering|entered|came on|came in|took over)\\b`)];
+  // (the one who went out: "Last ... pulled/replaced/chased", "pulled/replace/relieved (first) Last")
+  const pulled = (L) => [new RegExp(`${L}\\b[^.]*\\b(?:was|getting|being|got) (?:pulled|replaced|chased|yanked)\\b`), new RegExp(`\\b(?:pulled|replace|replaced|relieved|chased|yanked) (?!by\\b)(?:[^\\s.]+ )?${L}\\b`)];
+  const score = (a) => (says(a, pulled) ? 1 : 0) - (says(a, relieved) ? 1 : 0);
+  const [x, y] = list;
+  const sx = score(x);
+  const sy = score(y);
+  if (sy > 0 && sx <= 0) return [y, x];
+  if (sx > 0 && sy <= 0) return list;
+  if (sx < 0 && sy >= 0) return [y, x];
+  return list;
+}
+
 // One game by its id as a scoreboard event (its summary's header): a game bet on that a run's scoreboards no
 // longer show, moved off its day; null when ESPN doesn't say
 export async function eventOf(league, id) {

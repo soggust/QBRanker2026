@@ -14,7 +14,7 @@
 // expected, last change), baseball.mjs (the air, the bullpens, the umpire's zone), teamstats.mjs (the
 // ranker's own numbers); this file gathers and weaves them in with the rest.
 
-import { injuries, summary, teamNames, teamSchedule, gameOf } from './espn.mjs';
+import { goaliesInOrder, injuries, summary, teamNames, teamSchedule, gameOf } from './espn.mjs';
 import { RANKER_TERMS, rankerOf } from './teamstats.mjs';
 import { term } from './terms.mjs';
 import { recordBox } from './playerlogs.mjs';
@@ -268,11 +268,20 @@ async function nflForecasts(upcoming, facts, live) {
 }
 
 // The NBA's and NHL's box scores (ESPN's summaries, new finals only): each side's players and minutes and
-// production (NBA), or its goalies and their shots and goals against, the starter first, and its scorers
+// production (NBA), or its goalies and their shots and goals against, the starter first (gs: 1), and its scorers
 // (NHL); the game's referees (r) and their whistle (w: each side's free throws and fouls in the NBA, power
 // plays and penalty minutes in the NHL). (v: 2, the facts' version: a game kept before officials were is
 // asked again once)
 async function boxFacts(cfg, history, facts, sport) {
+  // (an NHL game kept before the goalies were put in the order they went in (gs) has ESPN's: the one in net at
+  // the end first, a pulled starter after his reliever; turned round once, no summary asked again)
+  if (sport === 'nhl') {
+    for (const f of Object.values(facts.games ?? {})) {
+      if (f?.v !== 2 || f.gs) continue;
+      for (const w of ['h', 'a']) if (Array.isArray(f[w]) && f[w].length > 1) f[w] = [...f[w]].reverse();
+      f.gs = 1;
+    }
+  }
   const todo = history.filter((g) => g.final && g.hs !== null && facts.games[g.id]?.v !== 2);
   if (!todo.length) return;
   const t0 = Date.now();
@@ -282,12 +291,12 @@ async function boxFacts(cfg, history, facts, sport) {
     recordBox(sport, g, body);
     const box = body?.boxscore?.players;
     if (!box?.length) return;
-    const side = { v: 2 };
+    const side = { v: 2, ...(sport === 'nhl' ? { gs: 1 } : {}) };
     const whereOf = (t) => (String(t?.id) === String(g.home) ? 'h' : String(t?.id) === String(g.away) ? 'a' : null);
     for (const p of box) {
       const where = whereOf(p.team);
       if (!where) continue;
-      side[where] = sport === 'nba' ? nbaPlayers(p) : nhlGoalies(p);
+      side[where] = sport === 'nba' ? nbaPlayers(p) : nhlGoalies(p, body.article?.story);
       if (sport === 'nhl') side[`${where}g`] = nhlScorers(p);
     }
     side.r = refereesOf(body);
@@ -327,11 +336,12 @@ function nhlScorers(p) {
     .filter((x) => x[1] > 0);
 }
 
-// (an NHL side's goalies: [ESPN id, shots against, goals against], the starter first)
-function nhlGoalies(p) {
+// (an NHL side's goalies: [ESPN id, shots against, goals against], the starter first: espn.mjs goaliesInOrder,
+// ESPN's own list putting a pulled starter after his reliever)
+function nhlGoalies(p, story) {
   const s = (p.statistics ?? []).find((x) => x.name === 'goalies');
   const labels = s?.labels ?? [];
-  return (s?.athletes ?? []).map((a) => [String(a.athlete.id), Number(a.stats[labels.indexOf('SA')]) || 0, Number(a.stats[labels.indexOf('GA')]) || 0]);
+  return goaliesInOrder(s?.athletes, story).map((a) => [String(a.athlete.id), Number(a.stats[labels.indexOf('SA')]) || 0, Number(a.stats[labels.indexOf('GA')]) || 0]);
 }
 
 // (StatsAPI's team codes that differ from ESPN's)
