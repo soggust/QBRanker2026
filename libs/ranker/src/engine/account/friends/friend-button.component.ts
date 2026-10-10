@@ -22,7 +22,7 @@ import { Relation, relationOf } from './friends-helpers';
       }
       @case ('pending-out') {
         <span class="state-tag"><mat-icon aria-hidden="true" fontIcon="schedule_send"></mat-icon>Requested</span>
-        <button type="button" class="link" [disabled]="busy" (click)="act('remove')" [attr.aria-label]="'Cancel your request to ' + name">Cancel</button>
+        <button type="button" class="app-btn-outline small" [disabled]="busy" (click)="act('remove')" [attr.aria-label]="'Cancel your request to ' + name">Cancel</button>
       }
       @case ('pending-in') {
         <button type="button" class="primary small-btn" [disabled]="busy" (click)="act('accept')" [attr.aria-label]="'Accept ' + name + '’s request'">
@@ -34,11 +34,11 @@ import { Relation, relationOf } from './friends-helpers';
       @case ('friends') {
         @if (confirming) {
           <span class="confirm-text">Remove {{ short }}?</span>
-          <button type="button" class="danger small-btn" [disabled]="busy" (click)="act('remove')">
+          <button type="button" class="app-btn-outline small" [disabled]="busy" (click)="confirming = false">Cancel</button>
+          <button type="button" class="app-btn-danger small" [disabled]="busy" (click)="act('remove')">
             @if (busy) { <span class="spinner tiny" aria-hidden="true"></span> }
             Remove
           </button>
-          <button type="button" class="link" [disabled]="busy" (click)="confirming = false">Keep</button>
         } @else {
           <span class="state-tag friends"><mat-icon aria-hidden="true" fontIcon="check"></mat-icon>Friends</span>
           <button type="button" class="link quiet" (click)="confirming = true" [attr.aria-label]="'Remove ' + name + ' from your friends'">Remove</button>

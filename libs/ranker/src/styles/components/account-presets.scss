@@ -1,125 +1,76 @@
 @use "../variables" as v;
+@use "account-kit" as kit;
 
 // ===========================================================================
-// The filter menu's own presets (preset-bar): under the presets dropdown, the user's preset in use on a
-// small scoreboard strip, its name lit, Edited and Update once the sliders have moved, Rename and Delete
+// The filter menu's own presets (preset-bar): in the presets dropdown's row (the host adds nothing of
+// its own: display: contents), the user's preset picked gets Rename and Delete beside the dropdown (the
+// app's small sand buttons, whatever the sport); once the sliders have moved, a slim line under the row,
+// Changed and Update preset. The row itself: sidebar.component.scss (.preset-row).
 // ===========================================================================
 :host {
-  display: block;
+  display: contents;
 }
 
-.preset-bar {
-  align-items: center;
-  @include v.scoreboard-panel(8px, inset 0 1px 4px rgba(0, 0, 0, 0.5));
-  box-sizing: border-box;
+.preset-actions {
   display: flex;
-  flex-wrap: wrap;
-  font-family: v.$font-base;
-  gap: 2px 6px;
-  margin: -1.35em auto 1.5em;
-  min-height: 34px;
-  padding: 3px 4px 3px 10px;
-  width: 78%;
-}
-
-.preset-mark {
-  color: var(--scoreboard-led);
   flex: 0 0 auto;
-  @include v.icon-size(16px);
+  gap: 6px;
 }
 
-.preset-name {
-  color: var(--scoreboard-led);
-  flex: 1;
-  font-size: 12px;
-  font-weight: 800;
-  letter-spacing: 0.6px;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  text-shadow: var(--scoreboard-glow);
-  text-transform: uppercase;
-  white-space: nowrap;
+// (square: the icon alone)
+.preset-icon {
+  @include kit.primary-button;
+  @include kit.small-button;
+  border-radius: 8px;
+  height: 32px;
+  min-height: 32px;
+  padding: 0;
+  width: 32px;
+
+  .mat-icon {
+    @include v.icon-size(18px);
+  }
 }
 
-// (the sliders moved since: a second line, the change said and Update lit)
-.preset-edit-row {
+// (the sliders moved since: Changed, and Update preset, the one to press)
+.preset-changed {
   align-items: center;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
   display: flex;
   flex: 1 0 100%;
-  gap: 6px;
-  justify-content: space-between;
-  padding: 3px 0 1px 2px;
+  gap: 8px;
+  justify-content: center;
 }
 
 .preset-edited {
   color: rgba(255, 255, 255, 0.6);
+  font-family: v.$font-base;
   font-size: 10.5px;
   font-weight: 800;
   letter-spacing: 0.6px;
   text-transform: uppercase;
 }
 
-.preset-btn {
-  align-items: center;
-  background: transparent;
-  border: 1px solid transparent;
-  border-radius: 6px;
-  color: rgba(255, 255, 255, 0.75);
-  cursor: pointer;
-  display: inline-flex;
-  flex: 0 0 auto;
-  font-family: v.$font-base;
+.preset-update {
+  @include kit.primary-button;
+  @include kit.small-button;
+  border-radius: 8px;
   font-size: 10.5px;
-  font-weight: 800;
-  gap: 3px;
-  height: 26px;
-  justify-content: center;
+  gap: 4px;
   letter-spacing: 0.6px;
-  min-width: 26px;
-  padding: 0 4px;
-  text-transform: uppercase;
-  transition:
-    color 0.12s ease,
-    border-color 0.12s ease;
+  min-height: 26px;
+  padding: 0 9px 0 7px;
 
   .mat-icon {
-    @include v.icon-size(16px);
-  }
-
-  &:hover:not([disabled]),
-  &:focus-visible {
-    border-color: rgba(255, 255, 255, 0.25);
-    color: #fff;
-    outline: none;
-  }
-
-  // (Update: lit in the sport's light, the one to press)
-  &.lit {
-    border-color: color-mix(in srgb, var(--scoreboard-led) 55%, transparent);
-    color: var(--scoreboard-led);
-    padding: 0 7px 0 5px;
-
-    &:hover:not([disabled]),
-    &:focus-visible {
-      background: color-mix(in srgb, var(--scoreboard-led) 14%, transparent);
-      border-color: var(--scoreboard-led);
-      color: var(--scoreboard-led);
-    }
-  }
-
-  &[disabled] {
-    cursor: default;
-    opacity: 0.5;
+    @include v.icon-size(15px);
   }
 }
 
 .preset-message {
   color: v.$good;
+  flex: 1 0 100%;
   font-family: v.$font-base;
   font-size: 11.5px;
   font-weight: 700;
-  margin: -1.1em 0 1.2em;
+  margin: 0;
   text-align: center;
 }

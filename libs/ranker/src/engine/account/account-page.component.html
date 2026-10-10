@@ -50,7 +50,7 @@
           }
           @if (deleteError) { <p class="form-error" role="alert">{{ deleteError }}</p> }
           <div class="panel-foot">
-            <button type="button" class="danger" [disabled]="deleteBusy" (click)="cancelDelete()">Cancel</button>
+            <button type="button" class="outline-btn" [disabled]="deleteBusy" (click)="cancelDelete()">Cancel</button>
             <button type="submit" class="danger" [disabled]="!deleteReady">
               @if (deleteBusy) { <span class="spinner" aria-hidden="true"></span> } @else { <mat-icon aria-hidden="true" fontIcon="delete_forever"></mat-icon> }
               Delete forever
@@ -77,7 +77,7 @@
                 </button>
               }
               @if (profile.photo) {
-                <button type="button" class="danger small-btn" [disabled]="photoBusy" (click)="removePhoto()">Remove picture</button>
+                <button type="button" class="outline-btn small" [disabled]="photoBusy" (click)="removePhoto()">Remove picture</button>
               }
             </div>
             @if (photoBusy) {
@@ -121,7 +121,7 @@
                     </label>
                     @if (passwordError) { <p class="form-error" role="alert">{{ passwordError }}</p> }
                     <div class="password-actions">
-                      <button type="button" class="danger small-btn" [disabled]="passwordBusy" (click)="passwordOpen = false; currentPassword = ''; newPassword = ''; passwordError = ''">Cancel</button>
+                      <button type="button" class="outline-btn small" [disabled]="passwordBusy" (click)="passwordOpen = false; currentPassword = ''; newPassword = ''; passwordError = ''">Cancel</button>
                       <button type="submit" class="primary small-btn" [disabled]="passwordBusy || !currentPassword || !newPassword || !!newPasswordError">
                         @if (passwordBusy) { <span class="spinner tiny" aria-hidden="true"></span> }
                         Update
@@ -200,7 +200,7 @@
               <span class="field-ok" role="status">&#10003; {{ profileMessage }}</span>
             }
             @if (profileDirty) {
-              <button type="button" class="danger" [disabled]="saving" (click)="resetProfile()">Cancel</button>
+              <button type="button" class="outline-btn" [disabled]="saving" (click)="resetProfile()">Cancel</button>
             }
             <button type="submit" form="profile-form" class="primary" [disabled]="!canSave">
               @if (saving) { <span class="spinner" aria-hidden="true"></span> }

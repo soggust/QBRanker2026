@@ -79,6 +79,15 @@
   margin-left: auto;
 }
 
+// (every Cancel, and Remove picture: the app's sand outline, as the dialogs' Cancel; small beside a small one)
+.outline-btn {
+  @include kit.outline-button;
+
+  &.small {
+    @include kit.small-button;
+  }
+}
+
 // (the picture's and the sign-in methods' buttons: Upload, Team logo, Link Google, Change password: filled sand)
 .tan-btn {
   @include kit.primary-button;

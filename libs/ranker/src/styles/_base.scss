@@ -266,6 +266,41 @@ body:has(.card-backdrop) .sport-bar {
   }
 }
 
+// The presets dropdown's list (sidebar.component.html): the user's own presets after a divider, a rule
+// either side of a muted MY PRESETS (not a group heading, so they aren't indented); Save as preset…'s
+// floppy disk in white. (html body and the panel's class: past the sports' option lettering)
+html body .mat-mdc-select-panel.preset-options {
+  .mat-mdc-option.preset-divider {
+    cursor: default;
+    min-height: 30px;
+    pointer-events: none;
+
+    .mdc-list-item__primary-text {
+      align-items: center;
+      color: rgba(255, 255, 255, 0.5) !important;
+      display: flex;
+      font-size: 10px !important;
+      gap: 10px;
+      letter-spacing: 1.5px !important;
+      opacity: 1;
+      text-shadow: none;
+      width: 100%;
+
+      &::before,
+      &::after {
+        background: rgba(255, 255, 255, 0.22);
+        content: "";
+        flex: 1;
+        height: 1px;
+      }
+    }
+  }
+
+  .mat-mdc-option.preset-save .mat-icon {
+    color: #fff !important;
+  }
+}
+
 // Menu items (the settings menu, the dropdowns' lists) press in when hovered, focused or picked: a
 // faint dark shade, as if pushed into the panel, rather than Material's light wash
 html {

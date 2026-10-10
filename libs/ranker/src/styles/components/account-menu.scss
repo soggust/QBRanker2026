@@ -120,7 +120,9 @@
 
   .account-who-name {
     color: #fff !important;
-    @include v.headline(15px);
+    font-family: v.$font-base;
+    font-size: 15px;
+    font-weight: 800;
   }
 
   .account-who-user {
@@ -129,7 +131,10 @@
     font-size: 12px;
   }
 
+  // (the menu in the app's Nunito, not Material's own type)
   .mat-mdc-menu-item {
+    --mat-menu-item-label-text-font: "Nunito", sans-serif;
+    font-family: v.$font-base;
     min-height: 42px;
 
     .mat-icon {

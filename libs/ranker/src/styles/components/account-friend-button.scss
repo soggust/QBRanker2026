@@ -6,6 +6,8 @@
 // Friends / Remove) and the account menu's count of requests waiting (friends-badge.component.ts)
 // ===========================================================================
 @include kit.buttons;
+// (a confirm's Cancel and Remove, a request's Cancel: the app's outline and danger buttons)
+@include kit.app-buttons;
 @include kit.fields;
 
 :host(friend-button) {

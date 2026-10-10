@@ -3,7 +3,11 @@
   @if (position; as skill) {
     <div class="filters">
       <div>
+        <!-- The presets dropdown in a row: a preset of the user's own picked, its Rename and Delete beside it
+             (preset-bar), the dropdown narrower -->
+        <div class="preset-row">
         <mat-select
+          panelClass="preset-options"
           [placeholder]="presetsLabel"
           title="Ready-made slider settings, each built around a style of play (hover an option to see what it weighs)"
           [(ngModel)]="skillPresets[skill]"
@@ -21,19 +25,21 @@
           <!-- lists (phase 2): the user's own presets under the built-in ones, then Save as preset… (signed out: Sign in) -->
           @if (account.user()) {
             @if (userPresets.length) {
-              <mat-optgroup label="MY PRESETS">
-                @for (preset of userPresets; track preset.id) {
-                  <mat-option [value]="userPresetValue(preset)" [title]="preset.name">{{ preset.name | uppercase }}</mat-option>
-                }
-              </mat-optgroup>
+              <!-- (a divider, not a group: the user's presets line up with the built-in ones) -->
+              <mat-option class="preset-divider" disabled="disabled" aria-hidden="true">MY PRESETS</mat-option>
+              @for (preset of userPresets; track preset.id) {
+                <mat-option [value]="userPresetValue(preset)" [title]="preset.name">{{ preset.name | uppercase }}</mat-option>
+              }
             }
-            <mat-option [value]="savePreset" title="Keep this tab's sliders under a name"><mat-icon fontIcon="add"></mat-icon>SAVE AS PRESET…</mat-option>
+            <!-- (a floppy disk, as the grid's Save this list) -->
+            <mat-option class="preset-save" [value]="savePreset" title="Keep this tab's sliders under a name"><mat-icon fontIcon="save"></mat-icon>SAVE AS PRESET…</mat-option>
           } @else {
             <mat-option [value]="signInPreset" title="Sign in to save your own presets"><mat-icon fontIcon="login"></mat-icon>SIGN IN TO SAVE PRESETS</mat-option>
           }
           <!-- end lists -->
         </mat-select>
-        <!-- lists (phase 2): the user preset in use, and its Update / Rename / Delete -->
+        <!-- lists (phase 2): the user preset in use: Rename / Delete beside the dropdown, Update under it
+             once the sliders have moved -->
         <preset-bar
           #presetBar
           [position]="skill"
@@ -44,6 +50,7 @@
           (cleared)="userPresetCleared()"
         ></preset-bar>
         <!-- end lists -->
+        </div>
       </div>
 
       <!-- Stat groups; drag a card's handle to reorder the grid's groups -->

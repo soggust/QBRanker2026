@@ -140,8 +140,10 @@ $gold: #ffcf4a;
   }
 
   rect {
-    // (round ends whatever its height: a radius past half is drawn as half)
-    rx: 999px;
+    // (round ends, as the dropdown's: the 52px chip less its 4px stroke, halved; both radii, or an over-long one
+    // is drawn as half the WIDTH and the ring goes oval)
+    rx: 24px;
+    ry: 24px;
   }
 
   --clay: #b0202b;
@@ -167,7 +169,8 @@ $gold: #ffcf4a;
   gap: 7px;
   justify-content: center;
   letter-spacing: 0.06em;
-  min-height: 46px;
+  // (the dropdown's height, so its rim and spots are the same chip)
+  height: 52px;
   padding: 0 22px;
   text-decoration: none;
   text-shadow: 0 1px 1.5px rgba(0, 0, 0, 0.6);

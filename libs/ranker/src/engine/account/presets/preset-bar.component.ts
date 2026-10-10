@@ -12,32 +12,31 @@ export const SIGN_IN_PRESET = 'action:signin';
 
 type Dialog = { mode: 'save' } | { mode: 'rename'; preset: UserPreset } | { mode: 'delete'; preset: UserPreset };
 
-// The filter menu's own presets (signed in): under the presets dropdown, the one picked, its name, and
-// Update (to the sliders as they are now, once they've moved), Rename and Delete; and the dialogs that
-// name a new one or rename one, and ask before deleting. The dropdown lists them under the built-in
-// presets (sidebar.component.html) with Save as preset… after them.
+// The filter menu's own presets (signed in): beside the presets dropdown (in its row: the host is
+// display: contents), Rename and Delete for the user's preset picked, and under it, once the sliders have
+// moved, Changed and Update preset (to the sliders as they are now); and the dialogs that name a new one or
+// rename one, and ask before deleting. The dropdown lists them under the built-in presets, after a
+// My Presets divider (sidebar.component.html), with Save as preset… after them.
 @Component({
   selector: 'preset-bar',
   template: `
     @if (active; as preset) {
-      <div class="preset-bar" role="group" [attr.aria-label]="'Your preset ' + preset.name">
-        <mat-icon class="preset-mark" aria-hidden="true" fontIcon="tune"></mat-icon>
-        <span class="preset-name" [title]="preset.name">{{ preset.name }}</span>
-        <button type="button" class="preset-btn" [disabled]="busy" title="Rename this preset" aria-label="Rename this preset" (click)="open({ mode: 'rename', preset })">
+      <span class="preset-actions" role="group" [attr.aria-label]="'Your preset ' + preset.name">
+        <button type="button" class="preset-icon" [disabled]="busy" [title]="'Rename ' + preset.name" aria-label="Rename this preset" (click)="open({ mode: 'rename', preset })">
           <mat-icon aria-hidden="true" fontIcon="edit"></mat-icon>
         </button>
-        <button type="button" class="preset-btn" [disabled]="busy" title="Delete this preset" aria-label="Delete this preset" (click)="open({ mode: 'delete', preset })">
+        <button type="button" class="preset-icon" [disabled]="busy" [title]="'Delete ' + preset.name" aria-label="Delete this preset" (click)="open({ mode: 'delete', preset })">
           <mat-icon aria-hidden="true" fontIcon="delete"></mat-icon>
         </button>
-        @if (edited) {
-          <span class="preset-edit-row">
-            <span class="preset-edited" title="The sliders have moved since this preset">Changed</span>
-            <button type="button" class="preset-btn lit" [disabled]="busy" title="Save the sliders as they are now to this preset" (click)="update(preset)">
-              <mat-icon aria-hidden="true" fontIcon="save"></mat-icon><span>Update preset</span>
-            </button>
-          </span>
-        }
-      </div>
+      </span>
+      @if (edited) {
+        <span class="preset-changed">
+          <span class="preset-edited" title="The sliders have moved since this preset">Changed</span>
+          <button type="button" class="preset-update" [disabled]="busy" title="Save the sliders as they are now to this preset" (click)="update(preset)">
+            <mat-icon aria-hidden="true" fontIcon="save"></mat-icon><span>Update preset</span>
+          </button>
+        </span>
+      }
       @if (message) {
         <p class="preset-message" role="status">{{ message }}</p>
       }

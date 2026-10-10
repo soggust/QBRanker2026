@@ -96,19 +96,35 @@
     padding: 0 1em;
   }
 
-  // The presets: centered, not full width, white (yellow on hover)
-  > div > .mat-mdc-select {
+  // The presets: centered, not full width, white (yellow on hover). In a row: a preset of the user's own
+  // picked, its Rename and Delete beside it (account-presets.scss) and the row a little wider, the
+  // dropdown narrower; Changed and Update preset (or a word of thanks) wrap under it
+  .preset-row {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 1.9em auto 2.1em;
+    width: 70%;
+
+    &:has(.preset-actions) {
+      width: 84%;
+    }
+  }
+
+  .preset-row > .mat-mdc-select {
     background: #1e1e1e;
     border: 1px solid #3a3a3a;
     border-radius: 0.175em;
+    box-sizing: border-box;
     color: #fff;
     display: flex;
+    flex: 1 1 0;
     font-size: 0.85em;
     font-weight: bold;
-    margin: 1.9em auto 2.1em;
+    min-width: 0;
     padding: 0.5em 0.75em;
     text-align: center;
-    width: 70%;
 
     &:hover {
       background: #262626;
@@ -417,7 +433,7 @@
     padding: 0.6em 1em;
   }
 
-  .sidebar .filters > div > .mat-mdc-select {
+  .sidebar .filters .preset-row {
     margin-bottom: 1.4em;
     margin-top: 1.2em;
   }
