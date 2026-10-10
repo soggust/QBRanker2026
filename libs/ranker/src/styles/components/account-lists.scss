@@ -19,7 +19,6 @@
 }
 
 @include v.scrollbars($corner: false);
-@include kit.pills;
 @include kit.fields;
 @include kit.buttons;
 // (the app's own controls: these pages wear no sport)

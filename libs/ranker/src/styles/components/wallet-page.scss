@@ -16,7 +16,6 @@ $gold: casino.$lock-gold;
   display: block;
 }
 
-@include kit.buttons;
 @include kit.app-buttons;
 
 // (the desk's panels, chip-rimmed as on the Bets page and the Algorithm: card-panel.scss gives them to those two)
