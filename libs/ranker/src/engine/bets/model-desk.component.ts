@@ -647,10 +647,10 @@ export class ModelDeskComponent implements OnInit, OnDestroy {
   }
 
   // ---------------------------------------------------------------------------
-  // Sorting (desk-columns.ts): each table its own, the bet lists by start and latest graded to begin with
+  // Sorting (desk-columns.ts): each table its own; Open Bets by EV, best first, Latest Results latest graded first
   // ---------------------------------------------------------------------------
 
-  private sorts = new TableSorts({ open: { key: 'start', dir: 1 }, recent: { key: 'graded', dir: -1 }, context: { key: 'gain', dir: -1 } });
+  private sorts = new TableSorts({ open: { key: 'ev', dir: -1 }, recent: { key: 'graded', dir: -1 }, context: { key: 'gain', dir: -1 } });
   sortBy = (table: string, key: string) => this.sorts.sortBy(table, key);
   ariaSort = (table: string, key: string) => this.sorts.ariaSort(table, key);
   sorted = <T>(table: string, rows: T[], value: (row: T, key: string) => unknown): T[] => this.sorts.sorted(table, rows, value);

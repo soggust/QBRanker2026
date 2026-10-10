@@ -287,14 +287,18 @@ $chip-clay: #b0202b;
   &.open .bet-row {
     border-bottom: 1px solid color-mix(in srgb, var(--soft) 45%, transparent);
   }
+
+  // (a chip, as the Algorithm's panels: the rim in its band's color, cream spots round it, corners and all)
+  --group-color: var(--tint);
+  @include chip.panel;
 }
 
 .bet-row {
   --bar-tint: color-mix(in srgb, var(--soft) 18%, transparent);
   align-items: center;
-  // (a lighter slate washed in its softened confidence color; no dot matrix, on the gunmetal rather than
-  // the scoreboard)
-  background: linear-gradient(var(--bar-tint), var(--bar-tint)), #24282d;
+  // (the chip's face in its band's color, rounded to meet the rim; shut, round all round)
+  @include chip.chip-face(var(--tint));
+  border-radius: 8px 8px 0 0;
   border: none;
   color: #fff;
   cursor: pointer;
@@ -306,8 +310,10 @@ $chip-clay: #b0202b;
   text-align: left;
   width: 100%;
 
+  transition: filter 0.15s ease;
+
   &:hover {
-    --bar-tint: color-mix(in srgb, var(--soft) 26%, transparent);
+    filter: brightness(1.12);
 
     .bet-chevron {
       color: rgba(255, 255, 255, 0.85);
@@ -1261,4 +1267,13 @@ img.bet-face {
   from {
     transform: scaleX(0);
   }
+}
+
+// (a row shut: its face round all round, inside the rim)
+.bet:not(.open) .bet-row {
+  border-radius: 8px;
+}
+
+.bet .bet-reasons {
+  border-radius: 0 0 8px 8px;
 }
