@@ -996,6 +996,47 @@ card-panel {
   gap: 2px 6px;
 }
 
+// (a game's row and a sport's, over their bets: taller, their type a size up, so the lists read by them)
+.desk-table {
+  .desk-group,
+  .desk-sport-group {
+    font-size: 14px;
+    font-weight: 700;
+
+    > td,
+    > th {
+      padding-bottom: 11px;
+      padding-top: 11px;
+    }
+
+    .desk-game img {
+      height: 24px;
+      width: 24px;
+    }
+
+    .desk-group-count {
+      font-size: 13px;
+    }
+
+    .desk-group-toggle mat-icon {
+      font-size: 22px;
+      height: 22px;
+      width: 22px;
+    }
+  }
+
+  .desk-sport-group {
+    .desk-league {
+      height: 26px;
+      width: 26px;
+    }
+
+    .desk-sport-name {
+      font-size: 15px;
+    }
+  }
+}
+
 .desk-group-toggle {
   background: none;
   border: 0;

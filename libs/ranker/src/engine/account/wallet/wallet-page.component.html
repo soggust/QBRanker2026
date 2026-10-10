@@ -18,8 +18,7 @@
 
 <!-- (a bet's pick, led by its circle: a prop's player, a total's arrow, a side's team; the bot's pick its chip) -->
 <ng-template #pickCell let-b>
-  @let lost = b.status === 'lost' || decided().get(b.id)?.status === 'lost';
-  <span class="desk-pick" [class.desk-lost]="lost">
+  <span class="desk-pick">
     @if (b.market === 'prop') {
       <img class="desk-face" [src]="face(b)" alt="" (error)="hideImage($event)" />
     } @else if (b.market === 'total') {

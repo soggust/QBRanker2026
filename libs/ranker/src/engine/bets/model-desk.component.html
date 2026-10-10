@@ -32,28 +32,26 @@
 </ng-template>
 
 <!-- (a bet's pick, led by a circle: a prop's player (his headshot and name linking to his ESPN page in a new
-     tab), a total's arrow (up for the over, down for the under), a side's team; a lost one muted, in italics,
-     struck through, once it's graded or decided in play) -->
+     tab), a total's arrow (up for the over, down for the under), a side's team) -->
 <ng-template #pickCell let-b>
-  @let lost = b.status === 'lost' || provisional(b)?.status === 'lost';
   @if (b.market === 'prop' && b.athlete !== undefined && b.player) {
-    <span class="desk-pick" [class.desk-lost]="lost">
+    <span class="desk-pick">
       <a class="desk-player" [href]="playerLink(b)" title="Open {{ b.player }}'s card" tabindex="-1" aria-hidden="true"><img class="desk-face" [src]="headshot(b)" alt="" (error)="hide($event)" /></a>
       @let parts = pickParts(b);
-      <b><a class="desk-player" [href]="playerLink(b)" title="Open {{ b.player }}'s card">{{ b.player }}</a>{{ " " }}<span class="desk-key" [style.color]="lost ? null : pickColor(b)">{{ parts[1] }}</span>{{ parts[2] }}</b>
+      <b><a class="desk-player" [href]="playerLink(b)" title="Open {{ b.player }}'s card">{{ b.player }}</a>{{ " " }}<span class="desk-key" [style.color]="pickColor(b)">{{ parts[1] }}</span>{{ parts[2] }}</b>
     </span>
   } @else if (b.market === 'total') {
-    <span class="desk-pick" [class.desk-lost]="lost">
+    <span class="desk-pick">
       <span class="desk-badge" [class.over]="b.side === 'over'" [class.under]="b.side === 'under'" aria-hidden="true"><mat-icon [fontIcon]="b.side === 'over' ? 'arrow_upward' : 'arrow_downward'"></mat-icon></span>
       @let parts = pickParts(b);
-      <b><span class="desk-key" [style.color]="lost ? null : pickColor(b)">{{ parts[1] }}</span>{{ parts[2] }}</b>
+      <b><span class="desk-key" [style.color]="pickColor(b)">{{ parts[1] }}</span>{{ parts[2] }}</b>
     </span>
   } @else {
     @let team = teamsOf(b)[b.side === 'home' ? 1 : 0];
-    <span class="desk-pick" [class.desk-lost]="lost">
+    <span class="desk-pick">
       <span class="desk-badge" aria-hidden="true"><img [src]="teamLogo(b.sport, team)" alt="" (error)="hide($event)" /></span>
       @let parts = pickParts(b);
-      <b>{{ parts[0] }}<span class="desk-key" [style.color]="lost ? null : pickColor(b)">{{ parts[1] }}</span></b>
+      <b>{{ parts[0] }}<span class="desk-key" [style.color]="pickColor(b)">{{ parts[1] }}</span></b>
     </span>
   }
 </ng-template>
