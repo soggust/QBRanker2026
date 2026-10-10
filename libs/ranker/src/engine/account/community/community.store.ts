@@ -47,6 +47,7 @@ export class CommunityStore {
     await this.account.start();
     const uid = this.account.user()?.uid;
     if (!uid) throw Object.assign(new Error('signed out'), { code: 'permission-denied' });
+    if (value !== 0) this.account.requireVerified();
     const [firestore, f] = await Promise.all([db(), import('firebase/firestore')]);
     const entryRef = f.doc(firestore, 'community', key, 'entries', owner);
     const ref = f.doc(entryRef, 'votes', uid);

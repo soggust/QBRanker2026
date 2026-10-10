@@ -39,6 +39,8 @@
   <div class="app-page" [class.wide]="wideSheet">
     <div class="app-sheet">
       <div class="app-sheet-body" #sheetBody>
+        <!-- (an email account not yet confirmed: where the link went, and the way to have it again) -->
+        <verify-banner></verify-banner>
         @switch (view) {
           @case ('account') {
             <account-page></account-page>

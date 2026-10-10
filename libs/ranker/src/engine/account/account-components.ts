@@ -12,10 +12,11 @@ import { LISTS_COMPONENTS } from './lists/lists-components';
 import { TrackerPageComponent } from './tracker/tracker-page.component';
 import { WALLET_COMPONENTS } from './wallet/wallet-components';
 import { LegalPageComponent } from './legal/legal-page.component';
+import { VerifyBannerComponent } from './verify-banner.component';
 
 // The account module's components, declared in app.module.ts: the sign-in, the menu and the settings; the
 // shared pieces (the avatar, who-sees-it pills, Coming soon); friends and profiles; presets, lists and the
-// Community; the Tracker; the wallet; the Privacy and Data deletion pages
+// Community; the Tracker; the wallet; the Privacy and Data deletion pages; the confirm-your-email strip
 export const ACCOUNT_COMPONENTS = [
   AccountAvatarComponent,
   AccountMenuComponent,
@@ -31,4 +32,5 @@ export const ACCOUNT_COMPONENTS = [
   TrackerPageComponent,
   ...WALLET_COMPONENTS,
   LegalPageComponent,
+  VerifyBannerComponent,
 ];

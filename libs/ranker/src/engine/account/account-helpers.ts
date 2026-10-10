@@ -183,6 +183,7 @@ const ERRORS: Record<string, string> = {
   'permission-denied': 'You don’t have permission to do that.',
   unavailable: 'Couldn’t reach the server. Check your connection.',
   'username-taken': 'That username is taken.',
+  unverified: 'Confirm your email first: click the link we sent you (Settings can send it again).',
   'avatar-too-big': 'That picture won’t shrink small enough. Try another.',
 };
 

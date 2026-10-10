@@ -115,6 +115,15 @@ describe('friends rules', { skip }, () => {
     await assertFails(request(as('bob'), 'bob', 'alice'));
   });
 
+  test('an email-and-password account asks someone only once its email is confirmed', async () => {
+    await seedUsers({ alice: 'friends', bob: 'friends' });
+    const login = (uid, ok) => env.authenticatedContext(uid, { email_verified: ok, firebase: { sign_in_provider: 'password' } }).firestore();
+    await assertFails(request(login('alice', false), 'alice', 'bob'));
+    await assertSucceeds(request(login('alice', true), 'alice', 'bob'));
+    // (answering one needs nothing more)
+    await assertSucceeds(accept(login('bob', false), 'bob', 'alice'));
+  });
+
   test('accepting turns both to friends; only the one asked can', async () => {
     await seedUsers({ alice: 'friends', bob: 'friends', carol: 'friends' });
     await request(as('alice'), 'alice', 'bob');

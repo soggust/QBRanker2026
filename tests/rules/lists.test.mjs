@@ -235,6 +235,22 @@ describe('community rules', { skip }, () => {
     await assertSucceeds(deleteDoc(doc(alice, 'community', KEY, 'entries', 'alice')));
   });
 
+  test('an email-and-password account posts and votes only once its email is confirmed', async () => {
+    await submitted();
+    const unconfirmed = (uid) => env.authenticatedContext(uid, { email_verified: false, firebase: { sign_in_provider: 'password' } }).firestore();
+    const confirmed = (uid) => env.authenticatedContext(uid, { email_verified: true, firebase: { sign_in_provider: 'password' } }).firestore();
+    const google = (uid) => env.authenticatedContext(uid, { email_verified: true, firebase: { sign_in_provider: 'google.com' } }).firestore();
+    await assertFails(setDoc(doc(unconfirmed('alice'), 'community', KEY, 'entries', 'alice'), entry({ title: 'Again' })));
+    await assertSucceeds(setDoc(doc(confirmed('alice'), 'community', KEY, 'entries', 'alice'), entry({ title: 'Again' })));
+    const at = (await getDoc(doc(as('alice'), 'community', KEY, 'entries', 'alice'))).data().submittedAt;
+    const vote = { value: 1, voter: 'bob', at };
+    await assertFails(setDoc(doc(unconfirmed('bob'), 'community', KEY, 'entries', 'alice', 'votes', 'bob'), vote));
+    await assertSucceeds(setDoc(doc(google('bob'), 'community', KEY, 'entries', 'alice', 'votes', 'bob'), vote));
+    // (taking a vote back or an entry down needs nothing more)
+    await assertSucceeds(deleteDoc(doc(unconfirmed('bob'), 'community', KEY, 'entries', 'alice', 'votes', 'bob')));
+    await assertSucceeds(deleteDoc(doc(unconfirmed('alice'), 'community', KEY, 'entries', 'alice')));
+  });
+
   test('votes: one per person per entry, +1 or -1, never on your own; the voter removes it, the entry\'s owner a stale one', async () => {
     await submitted();
     // (a vote names the submission it's for: the entry's submittedAt)

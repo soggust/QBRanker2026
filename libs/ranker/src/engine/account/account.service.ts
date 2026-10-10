@@ -24,6 +24,9 @@ export interface AccountUser {
   providers: string[];
   providerPhoto: string | null;
   admin: boolean;
+  // (its email confirmed from the link we send: always for Google or Facebook; an email-and-password account
+  // until it's clicked can't post to the Community, vote or ask a friend: firestore.rules' verified())
+  verified: boolean;
 }
 
 export type SocialProvider = 'google.com' | 'facebook.com';
@@ -51,6 +54,9 @@ const setHint = (on: boolean) => {
 };
 
 const fail = (code: string) => Object.assign(new Error(code), { code });
+
+// (confirmed: its email clicked through, or signed in with Google or Facebook, which vouch for theirs)
+const verifiedUser = (user: User) => user.emailVerified || user.providerData.some((p) => p.providerId !== 'password');
 
 // Accounts: signing in (Google, Facebook, or email and password with a username), the profile in
 // Firestore (users/{uid}, its username claimed in usernames/{lower}), and the account's settings. The
@@ -141,6 +147,7 @@ export class AccountService {
       providers: user.providerData.map((p) => p.providerId),
       providerPhoto: user.providerData.find((p) => p.photoURL)?.photoURL ?? user.photoURL ?? null,
       admin: false,
+      verified: verifiedUser(user),
     };
     this.current.set(base);
     this.known.set(true);
@@ -228,9 +235,37 @@ export class AccountService {
         throw error;
       }
       await updateProfile(user, { displayName: displayName.trim() }).catch(() => undefined);
+      // (the link that confirms the address: until it's clicked, nothing public)
+      await this.sendVerification().catch(() => undefined);
     } finally {
       this.registering = false;
     }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Confirming an email-and-password account's address
+  // ---------------------------------------------------------------------------
+  // (the link again, back to the page it was asked from)
+  async sendVerification(): Promise<void> {
+    const user = await this.me();
+    const { sendEmailVerification } = await import('firebase/auth');
+    await sendEmailVerification(user, { url: location.href });
+  }
+
+  // (after the link's been clicked, in this tab or another: the account read again, and a fresh token so the
+  // rules see it too)
+  async refreshVerified(): Promise<boolean> {
+    const user = await this.me();
+    await user.reload();
+    if (!user.emailVerified) return false;
+    await user.getIdToken(true);
+    this.patch(user.uid, { verified: true });
+    return true;
+  }
+
+  // (before something public: a clear word, not the rules' bare refusal)
+  requireVerified(): void {
+    if (this.current() && !this.current()!.verified) throw fail('unverified');
   }
 
   async resetPassword(email: string): Promise<void> {

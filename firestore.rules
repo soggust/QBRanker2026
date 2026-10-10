@@ -17,6 +17,14 @@ service cloud.firestore {
       return signedIn() && request.auth.uid == uid;
     }
 
+    // (its email confirmed: an email-and-password sign-in once its link's been clicked; Google and Facebook vouch
+    // for theirs. Asked of what other people see or get: Community entries, votes, friend requests)
+    function verified() {
+      return signedIn()
+        && (request.auth.token.get('email_verified', false) == true
+          || request.auth.token.firebase.sign_in_provider != 'password');
+    }
+
     // (a custom claim on the sign-in token, set only with the Admin SDK: set-admin.mjs)
     function isAdmin() {
       return signedIn() && request.auth.token.admin == true;
@@ -196,6 +204,7 @@ service cloud.firestore {
 
       // (the counterpart is users/{other}/friends/{uid} in every case: new in this write, and saying the other half)
       allow create: if uid != other
+        && verified()
         && !exists(friendDoc(other, uid))
         && existsAfter(friendDoc(other, uid))
         && (
@@ -480,6 +489,7 @@ service cloud.firestore {
       match /entries/{owner} {
         allow read: if true;
         allow create, update: if isOwner(owner)
+          && verified()
           && key.matches('^[a-z]{2,8}_[A-Za-z0-9]{1,12}_[0-9]{4}$')
           && request.resource.data.keys().hasAll(['listId', 'title', 'ownerName', 'ids', 'submittedAt'])
           && request.resource.data.keys().hasOnly(['listId', 'title', 'ownerName', 'ids', 'names', 'logos', 'submittedAt'])
@@ -505,6 +515,7 @@ service cloud.firestore {
         match /votes/{voter} {
           allow read: if true;
           allow create, update: if isOwner(voter)
+            && verified()
             && voter != owner
             && exists(entryPath())
             && request.resource.data.keys().hasOnly(['value', 'voter', 'at'])

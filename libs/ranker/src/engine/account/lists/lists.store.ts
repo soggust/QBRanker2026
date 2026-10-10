@@ -135,6 +135,7 @@ export class ListsStore {
   // votes don't carry over to this one), the list marked
   async submit(list: SavedList): Promise<void> {
     const uid = await this.uid();
+    this.account.requireVerified();
     const [firestore, f] = await Promise.all([db(), import('firebase/firestore')]);
     const key = boardKey(list.sport, list.tab, list.season);
     const entryRef = f.doc(firestore, 'community', key, 'entries', uid);

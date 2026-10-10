@@ -165,6 +165,11 @@ export class FriendsService {
 
   // (asking: mine pending-out, theirs pending-in)
   request(other: string): Promise<void> {
+    try {
+      this.account.requireVerified();
+    } catch (error) {
+      return Promise.reject(error);
+    }
     return this.pair(other, (batch, mine, theirs, now) => {
       batch.set(mine, { status: 'pending-out', since: now });
       batch.set(theirs, { status: 'pending-in', since: now });
