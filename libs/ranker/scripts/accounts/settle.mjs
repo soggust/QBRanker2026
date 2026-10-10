@@ -248,8 +248,19 @@ export async function writeLeaderboards(db, { now = Date.now(), dry = false, log
   return boards;
 }
 
-// The whole run: settle, then the boards, then the lines' snapshots (each part on its own: one failing doesn't
-// stop the others)
+// Whether the boards need writing again: something settled this run (or settling failed, so it can't be told),
+// the week moved on since they were written, or they're a day old (a name, picture or privacy setting changed,
+// an account gone, a reload); else they stand, and every tally, profile and wallet isn't read again each hour
+export async function boardsDue(db, counts, now = Date.now()) {
+  if (!counts || counts.settled + counts.void > 0) return true;
+  const week = await db.doc('leaderboards/week').get();
+  if (!week.exists) return true;
+  const written = week.get('updatedAt')?.toMillis?.() ?? 0;
+  return week.get('from') !== periodsAt(now).week.from || now - written >= 864e5;
+}
+
+// The whole run: settle, then the boards (when they're due), then the lines' snapshots (each part on its own: one
+// failing doesn't stop the others)
 export async function run({ db = getFirestore(adminApp()), fetchJson = get, now = Date.now(), ledgers, dry = false, log = console.log } = {}) {
   let failed = false;
   const step = async (name, fn) => {
@@ -262,7 +273,7 @@ export async function run({ db = getFirestore(adminApp()), fetchJson = get, now 
     }
   };
   const counts = await step('Settling', () => settleOpen(db, { fetchJson, now, ledgers: ledgers ?? readLedgers(), dry, log }));
-  const boards = await step('Leaderboards', () => writeLeaderboards(db, { now, dry, log }));
+  const boards = await step('Leaderboards', async () => ((await boardsDue(db, counts, now)) ? writeLeaderboards(db, { now, dry, log }) : null));
   const lines = await step('Lines', () => snapshotLines(db, { fetchJson, now, dry, log }));
   return { counts, boards, lines, failed };
 }

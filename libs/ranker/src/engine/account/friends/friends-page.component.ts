@@ -33,6 +33,7 @@ export class FriendsPageComponent implements OnDestroy {
     readonly friends: FriendsService,
   ) {
     void account.start().catch(() => undefined);
+    friends.showProfiles();
   }
 
   ngOnDestroy(): void {

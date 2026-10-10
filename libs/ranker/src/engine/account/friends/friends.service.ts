@@ -57,6 +57,16 @@ export class FriendsService {
     });
   }
 
+  // The friends' profiles (their names and pictures), read only for a page that shows them (the Friends page):
+  // the sport bar's badge, on every page, needs only the friend docs themselves
+  private profilesWanted = false;
+
+  showProfiles(): void {
+    if (this.profilesWanted) return;
+    this.profilesWanted = true;
+    void this.loadProfiles((this.docs() ?? []).map((d) => d.uid));
+  }
+
   statusOf(uid: string): FriendStatus | null {
     return this.statuses().get(uid) ?? null;
   }
@@ -79,7 +89,7 @@ export class FriendsService {
         const docs = snap.docs.map((d) => ({ uid: d.id, status: d.data()['status'] as FriendStatus, since: millis(d.data()['since']) }));
         this.docs.set(docs);
         this.error.set('');
-        void this.loadProfiles(docs.map((d) => d.uid));
+        if (this.profilesWanted) void this.loadProfiles(docs.map((d) => d.uid));
       },
       (error) => {
         console.error('Friends', error);
