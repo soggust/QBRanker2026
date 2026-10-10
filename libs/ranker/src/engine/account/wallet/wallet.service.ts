@@ -221,6 +221,8 @@ export class WalletService {
   async ensureWallet(): Promise<void> {
     const uid = this.uid;
     if (!uid) throw signedOut();
+    // (the listener has it already: no read to find out)
+    if (this.wallet()) return;
     const [firestore, f] = await firestoreSdk();
     const ref = f.doc(firestore, 'users', uid, 'wallet', 'main');
     if ((await f.getDoc(ref)).exists()) return;
@@ -273,7 +275,8 @@ export class WalletService {
       await this.ensureWallet();
       const [firestore, f] = await firestoreSdk();
       const walletRef = f.doc(firestore, 'users', uid, 'wallet', 'main');
-      const run = (await f.getDoc(walletRef)).data()?.['resets'] ?? 0;
+      // (the run the bet belongs to: the wallet's resets, as its listener has it, else read)
+      const run = this.wallet()?.resets ?? (await f.getDoc(walletRef)).data()?.['resets'] ?? 0;
       for (const s of this.slip().filter((x) => x.stake > 0)) {
         if (Date.parse(s.start) <= now) {
           result.failed.push({ key: s.key, why: 'The game has started' });

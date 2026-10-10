@@ -131,6 +131,9 @@ export class FriendsService {
     const found = await Promise.all(
       claims.docs.map(async (claim) => {
         const uid = claim.data()['uid'] as string;
+        // (a profile already read this visit, a friend's or an earlier search's: not read again)
+        const known = this.profiles()[uid];
+        if (known) return { uid, profile: known };
         const snap = await f.getDoc(f.doc(firestore, 'users', uid)).catch(() => null);
         return snap?.exists() ? { uid, profile: snap.data() as Profile } : null;
       }),

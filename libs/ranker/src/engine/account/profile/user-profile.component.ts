@@ -66,6 +66,10 @@ export class UserProfileComponent {
     effect(() => {
       const person = this.person();
       if (person.state !== 'found') return;
+      // (someone else's, signed in: not until the friends list is in, which can make them a friend and change
+      // what's shown; read once, not once as a stranger and again as a friend)
+      const me = this.account.user()?.uid;
+      if (me && me !== person.uid && !this.friends.loaded()) return;
       const access = this.access;
       const key = person.uid + '|' + this.relation + '|' + JSON.stringify(access) + '|' + canUse('bets');
       untracked(() => {

@@ -316,12 +316,15 @@ export class BetsPageComponent implements OnInit, OnDestroy {
         .catch(() => null);
     // every sport's algorithm picks, and the AI desk's sheet where the sport has AI analyses (sports.json)
     const files = await Promise.all(
-      BET_SPORTS.map(async (s) => ({
-        sport: s.id,
-        picks: (await get(`/${s.id}/data/model/picks.json`)) as Picks | null,
-        bets: s.analysis ? await get(`/${s.id}/data/analysis/bets.json`) : null,
-        sheet: s.analysis ? ((await get(`/${s.id}/data/analysis/bet-sheet.json`)) as Sheet | null) : null,
-      })),
+      // (each sport's files together, not one after another)
+      BET_SPORTS.map(async (s) => {
+        const [picks, bets, sheet] = await Promise.all([
+          get(`/${s.id}/data/model/picks.json`),
+          s.analysis ? get(`/${s.id}/data/analysis/bets.json`) : null,
+          s.analysis ? get(`/${s.id}/data/analysis/bet-sheet.json`) : null,
+        ]);
+        return { sport: s.id, picks: picks as Picks | null, bets, sheet: sheet as Sheet | null };
+      }),
     );
     const algoRows: BetRow[] = [];
     const sheetRows: SheetCall[] = [];
