@@ -173,6 +173,24 @@ test('the wallet’s record: won, lost, pushed and void; staked, profit, return;
   );
 });
 
+test('the settled history by sport, as the Algorithm lists it: one sport, no heading; more, each in its latest game’s order', () => {
+  const one = w.playBySport(w.byGame([bet({ id: 'a', status: 'won', profit: 9.09 }), bet({ id: 'b', status: 'lost', profit: -10 })], true));
+  assert.deepEqual(one.map((s) => [s.sport, s.header, s.games.length, s.bets, s.profit]), [['nfl', false, 1, 2, -0.91]]);
+  const games = w.byGame(
+    [
+      bet({ id: 'a', status: 'won', profit: 9.09 }),
+      bet({ id: 'b', sport: 'nba', event: '9', start: '2026-10-12T00:00Z', status: 'lost', profit: -10 }),
+      bet({ id: 'c', event: '5', start: '2026-10-09T00:00Z', status: 'won', profit: 5 }),
+    ],
+    true,
+  );
+  const many = w.playBySport(games);
+  assert.deepEqual(many.map((s) => [s.sport, s.header, s.games.map((g) => g.event), s.bets, s.profit]), [
+    ['nba', true, ['9'], 1, -10],
+    ['nfl', true, ['401', '5'], 2, 14.09],
+  ]);
+});
+
 test('you vs the bot: the bot’s published picks settled over the same stretch, by return on stakes', () => {
   const mine = [bet({ status: 'won', profit: 9.09, start: '2026-10-11T17:00Z' }), bet({ status: 'lost', profit: -10, start: '2026-10-12T17:00Z' })];
   const ledger = [

@@ -547,6 +547,19 @@ $gold: #ffcf4a;
   }
 }
 
+// (the settled history's date: the game's day, the column that orders it)
+.wallet-settled .w-date {
+  color: rgba(255, 255, 255, 0.7);
+  white-space: nowrap;
+}
+
+// (phones: a sport's row over its games keeps its one cell, the columns' hiding aside)
+@media (max-width: 600px) {
+  .wallet-bets .desk-sport-group > td:first-child {
+    display: table-cell;
+  }
+}
+
 // (the game under a pick: phones only, where the game's column goes)
 .w-phone-game {
   display: none;

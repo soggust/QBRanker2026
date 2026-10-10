@@ -3,11 +3,14 @@
 <div class="bets-page" [class.desk-view]="view === 'desk'">
   <!-- (the bets to place, the user's open bets (when they have some), or, dev only, the code-only model desk's
        play-money betting, its record and its changes to itself; one at a time) -->
-  @if (dev || hasOpen()) {
+  @if (dev || hasOpen() || hasClosed()) {
     <nav class="bets-views" aria-label="View">
       <button type="button" [class.active]="view === 'bets'" (click)="view = 'bets'">Place Bets</button>
       @if (hasOpen()) {
         <button type="button" [class.active]="view === 'open'" (click)="view = 'open'">Open Bets</button>
+      }
+      @if (hasClosed()) {
+        <button type="button" [class.active]="view === 'closed'" (click)="view = 'closed'">Closed Bets</button>
       }
       @if (dev) {
         <button type="button" [class.active]="view === 'desk'" (click)="view = 'desk'">Algorithm</button>
@@ -18,6 +21,8 @@
     <model-desk></model-desk>
   } @else if (view === 'open') {
     <wallet-page only="open"></wallet-page>
+  } @else if (view === 'closed') {
+    <wallet-page only="closed"></wallet-page>
   } @else {
   <div class="bets-panel">
     <!-- The game dropdown on the left (when it was updated under it), the filter chips on the right -->

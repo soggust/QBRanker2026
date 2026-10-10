@@ -381,6 +381,30 @@ export function byGame(bets: PlayBet[], latestFirst = false): { key: string; spo
   return list.sort((a, b) => (latestFirst ? b.start.localeCompare(a.start) : a.start.localeCompare(b.start)) || a.matchup.localeCompare(b.matchup));
 }
 
+// The games by sport, as the Algorithm's lists (desk-columns.ts gamesBySport): with more than one sport, each
+// sport once in the order its first game comes, its games under it, their bets and profit counted; else one
+// group without a heading
+export type PlayGame = ReturnType<typeof byGame>[number];
+export interface PlaySport {
+  sport: string;
+  header: boolean;
+  games: PlayGame[];
+  bets: number;
+  profit: number;
+}
+export function playBySport(games: PlayGame[]): PlaySport[] {
+  const count = (gs: PlayGame[]) => ({
+    bets: gs.reduce((n, g) => n + g.bets.length, 0),
+    profit: round2(gs.reduce((n, g) => n + g.bets.reduce((p, b) => p + (b.profit ?? 0), 0), 0)),
+  });
+  const sports = [...new Set(games.map((g) => g.sport))];
+  if (sports.length < 2) return [{ sport: sports[0] ?? '', header: false, games, ...count(games) }];
+  return sports.map((sport) => {
+    const gs = games.filter((g) => g.sport === sport);
+    return { sport, header: true, games: gs, ...count(gs) };
+  });
+}
+
 // ---------------------------------------------------------------------------
 // You vs the bot: the user's record beside the bot's published picks (the Bets page's) settled over the same
 // stretch, from the user's first bet's game on. Units differ (the bot stakes 0.5 to 3, a user anything), so

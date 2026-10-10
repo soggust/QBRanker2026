@@ -266,12 +266,15 @@ export class BetsPageComponent implements OnInit, OnDestroy {
   private readonly wallet = inject(WalletService);
   // (Open Bets: only with bets of the user's not yet settled; the last one settled, back to Place Bets)
   readonly hasOpen = (): boolean => canUse('bets') && this.wallet.bets().some((b) => b.status === 'open');
+  // (Closed Bets: only with bets of the user's settled)
+  readonly hasClosed = (): boolean => canUse('bets') && this.wallet.bets().some((b) => b.status !== 'open');
   // (Place Bets first; Open Bets (with the wallet) or the Algorithm (development only) once chosen in this
   // visit: bets-view.ts)
   get view(): BetsView {
     const view = betsView();
     if (view === 'desk') return this.dev ? view : 'bets';
     if (view === 'open') return this.hasOpen() ? view : 'bets';
+    if (view === 'closed') return this.hasClosed() ? view : 'bets';
     return view;
   }
   set view(view: BetsView) {

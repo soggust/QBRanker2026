@@ -16,6 +16,7 @@ import {
   Versus,
   byGame,
   oddsText,
+  playBySport,
   playCurve,
   playTally,
   provisionalOf,
@@ -66,8 +67,8 @@ export class WalletPageComponent implements OnInit, OnDestroy {
   readonly board = computed(() => this.boards()?.[this.period()] ?? null);
   // (Clear history: an admin's (the token's claim), and in development for testing)
   readonly admin = (): boolean => isDevMode() || ADMIN();
-  // (the Bets page's Open Bets tab: the open bets alone, no tiles, history or slip)
-  @Input() only: 'open' | null = null;
+  // (the Bets page's Open Bets or Closed Bets tab: those bets alone, no tiles, the rest or the slip)
+  @Input() only: 'open' | 'closed' | null = null;
   // (a link to the Bets page lands on its Place Bets, not the Algorithm or Open Bets)
   readonly toBets = (): void => chooseBetsView('bets');
   // (Settings, its Privacy panel open: where bet history goes public)
@@ -100,7 +101,21 @@ export class WalletPageComponent implements OnInit, OnDestroy {
   readonly tally = computed(() => playTally(this.wallet.bets()));
   readonly curve = computed(() => playCurve(this.wallet.bets()));
   readonly openGames = computed(() => byGame(this.open()));
-  readonly settledGames = computed(() => byGame(this.settled(), true));
+  // (the settled bets by sport and game, the latest game first unless the Date column's turned it round)
+  readonly latestFirst = signal(true);
+  readonly settledSports = computed(() => playBySport(byGame(this.settled(), this.latestFirst())));
+  // (folded, as the Algorithm's: a sport's games, and a game's bets, until opened)
+  private readonly unfolded = signal(new Set<string>());
+
+  isOpen(key: string): boolean {
+    return this.unfolded().has(key);
+  }
+
+  toggleOpen(key: string): void {
+    const next = new Set(this.unfolded());
+    if (!next.delete(key)) next.add(key);
+    this.unfolded.set(next);
+  }
   readonly versus = computed<Versus | null>(() => {
     const ledger = this.ledger();
     return ledger ? versusBot(this.wallet.bets(), ledger) : null;
@@ -218,6 +233,11 @@ export class WalletPageComponent implements OnInit, OnDestroy {
 
   stakeOf(list: PlayBet[]): number {
     return list.reduce((t, b) => t + b.stake, 0);
+  }
+
+  // (a game's bets' profit together)
+  stakeProfit(list: PlayBet[]): number {
+    return Math.round(list.reduce((t, b) => t + (b.profit ?? 0), 0) * 100) / 100;
   }
 
   // ---------------------------------------------------------------------------
