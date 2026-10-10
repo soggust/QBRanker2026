@@ -19,6 +19,7 @@ export class AccountMenuComponent {
   // (the pages, Settings last; Sign out alone under the divider)
   private readonly all = [
     { hash: '#lists', icon: 'format_list_numbered', label: 'My Lists' },
+    { hash: '#community', icon: 'leaderboard', label: 'Community' },
     { hash: '#tracker', icon: 'push_pin', label: 'Track Players' },
     { hash: '#wallet', icon: 'account_balance_wallet', label: 'Betting Wallet' },
     { hash: '#friends', icon: 'group', label: 'Friends' },
