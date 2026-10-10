@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, computed, effect, isDevMode, signal } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit, computed, effect, isDevMode, signal } from '@angular/core';
 import { ModelBet, Settled } from '../../bets/desk-model';
 import { CURVE_W } from '../../bets/desk-math';
 import { hideImage, leagueLogo, teamLogo, headshot } from '../../bets/bet-format';
@@ -66,7 +66,9 @@ export class WalletPageComponent implements OnInit, OnDestroy {
   readonly board = computed(() => this.boards()?.[this.period()] ?? null);
   // (Clear history: an admin's (the token's claim), and in development for testing)
   readonly admin = (): boolean => isDevMode() || ADMIN();
-  // (a link to the Bets page lands on its Bets, not the Algorithm)
+  // (the Bets page's Open Bets tab: the open bets alone, no tiles, history or slip)
+  @Input() only: 'open' | null = null;
+  // (a link to the Bets page lands on its Place Bets, not the Algorithm or Open Bets)
   readonly toBets = (): void => chooseBetsView('bets');
   // (Settings, its Privacy panel open: where bet history goes public)
   readonly privacyHash = PRIVACY_HASH;

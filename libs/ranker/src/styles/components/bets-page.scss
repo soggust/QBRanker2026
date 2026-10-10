@@ -877,6 +877,14 @@ $arm-length: 175px;
   }
 }
 
+// (Open Bets: the wallet's open-bets panel, scrolling inside the page)
+.bets-page wallet-page {
+  display: block;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
 .bets-page.desk-view {
   max-width: 1240px;
 

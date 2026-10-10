@@ -4,6 +4,7 @@ import { BetsView, betsView, chooseBetsView } from './bets-view';
 import { LinesService } from '../account/wallet/lines.service';
 // ---- end wallet ----
 import { SPORT_LINKS } from '@ranker/core/sports';
+import { canUse } from '../account/features';
 import { SPORTS } from './desk-math';
 import { insteadText } from '../player-card/analysis';
 import { americanOdds, headshot } from './bet-format';
@@ -260,9 +261,14 @@ export class BetsPageComponent implements OnInit, OnDestroy {
 
   // (the model desk's admin panel: on the dev server only)
   readonly dev = isDevMode();
-  // (Bets first; the Algorithm (development only) once chosen in this visit: bets-view.ts)
+  readonly canUse = canUse;
+  // (Place Bets first; Open Bets (with the wallet) or the Algorithm (development only) once chosen in this
+  // visit: bets-view.ts)
   get view(): BetsView {
-    return this.dev ? betsView() : 'bets';
+    const view = betsView();
+    if (view === 'desk') return this.dev ? view : 'bets';
+    if (view === 'open') return this.canUse('bets') ? view : 'bets';
+    return view;
   }
   set view(view: BetsView) {
     chooseBetsView(view);
