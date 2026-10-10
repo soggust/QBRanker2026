@@ -296,10 +296,9 @@ $chip-clay: #b0202b;
 .bet-row {
   --bar-tint: color-mix(in srgb, var(--soft) 18%, transparent);
   align-items: center;
-  // (on the table's felt, a shade darker: its band on its badge)
-  background: rgba(0, 0, 0, 0.18);
+  // (a panel's bar, every sport's: the scoreboard tinted with its band's color; the felt opens under it)
+  background: linear-gradient(var(--bar-tint), var(--bar-tint)), var(--scoreboard-dots), var(--scoreboard);
   border-radius: 0;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
   border: none;
   color: #fff;
   cursor: pointer;
