@@ -17,8 +17,8 @@ import { dateText, listWhere, sportLabel } from './list-view.component';
     <div class="lists-page">
       @if (target; as t) {
         <nav class="page-crumbs" aria-label="Lists">
-          <a href="#lists"><mat-icon aria-hidden="true" fontIcon="arrow_back"></mat-icon>{{ account.user() ? 'My Lists' : 'Lists' }}</a>
-          <a href="#community"><mat-icon aria-hidden="true" fontIcon="groups"></mat-icon>Community</a>
+          <a class="app-btn-primary small" href="#lists"><mat-icon aria-hidden="true" fontIcon="arrow_back"></mat-icon>{{ account.user() ? 'My Lists' : 'Lists' }}</a>
+          <a class="app-btn-primary small" href="#community"><mat-icon aria-hidden="true" fontIcon="groups"></mat-icon>Community</a>
         </nav>
         <list-view [owner]="t.owner" [listId]="t.id"></list-view>
       } @else if (!account.ready()) {

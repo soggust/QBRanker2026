@@ -20,12 +20,8 @@
     <div class="hero-chips">
       <span class="where-chip"><span class="sport-led">{{ sportLabel(list.sport) }}</span>{{ listWhere(list) }}</span>
       @if (mine) {
-        <span class="vis-chip" [ngClass]="'vis-' + list.visibility">
-          <mat-icon aria-hidden="true" [fontIcon]="list.visibility === 'public' ? 'public' : list.visibility === 'friends' ? 'group' : 'lock'"></mat-icon>{{ list.visibility === 'private' ? 'Only me' : list.visibility === 'friends' ? 'Friends' : 'Public' }}
-        </span>
-      }
-      @if (submittedKey) {
-        <a class="community-chip" [href]="boardHref" title="On the Community board: see the consensus and the votes"><mat-icon aria-hidden="true" fontIcon="groups"></mat-icon>Community</a>
+        <!-- (who sees it: the owner's choice, in the plate's top right) -->
+        <visibility-pills class="hero-vis" aria-label="Who can see it" [value]="list.visibility" [disabled]="busy" (picked)="setVisibility($event)"></visibility-pills>
       }
     </div>
     <h2>{{ list.title }}</h2>
@@ -44,6 +40,9 @@
         <span class="dot" aria-hidden="true">·</span><span>Updated {{ dateText(list.updatedAt) }}</span>
       }
       <span class="dot" aria-hidden="true">·</span><span>{{ order.length }} {{ order.length === 1 ? 'player' : 'players' }}</span>
+      @if (mine) {
+        <span class="dot" aria-hidden="true">·</span><span>Drag the rows to reorder</span>
+      }
     </div>
     @if (list.note) {
       <p class="hero-note">{{ list.note }}</p>
@@ -57,26 +56,19 @@
       <button type="button" role="radio" class="app-pill" [class.active]="mode === 'today'" [attr.aria-checked]="mode === 'today'" (click)="setMode('today')" title="The same players with their numbers now, and the change since">Today</button>
     </div>
     <div class="list-actions">
-      <button type="button" class="app-btn-outline small tool-btn" (click)="copyLink()" title="Copy a link to this list" aria-label="Copy link"><mat-icon aria-hidden="true" fontIcon="link"></mat-icon><span>Copy link</span></button>
+      <button type="button" class="app-btn-primary small tool-btn icon-only" (click)="copyLink()" title="Copy a link to this list" aria-label="Copy link"><mat-icon aria-hidden="true" fontIcon="link"></mat-icon></button>
       @if (mine) {
-        <button type="button" class="app-btn-outline small tool-btn" (click)="open('edit')" title="Rename it, edit its note, choose who sees it" aria-label="Edit"><mat-icon aria-hidden="true" fontIcon="edit"></mat-icon><span>Edit</span></button>
+        <button type="button" class="app-btn-primary small tool-btn icon-only" (click)="open('edit')" title="Rename it, edit its note, choose who sees it" aria-label="Edit"><mat-icon aria-hidden="true" fontIcon="edit"></mat-icon></button>
         @if (submittedKey) {
-          <button type="button" class="app-btn-outline small tool-btn" (click)="open('withdraw')" title="Take it off the Community board" aria-label="Withdraw from Community"><mat-icon aria-hidden="true" fontIcon="group_remove"></mat-icon><span>Withdraw</span></button>
+          <button type="button" class="app-btn-primary small tool-btn icon-only" (click)="open('withdraw')" title="Take it off the Community board" aria-label="Withdraw from Community"><mat-icon aria-hidden="true" fontIcon="group_remove"></mat-icon></button>
         } @else {
           <button type="button" class="app-btn-primary small tool-btn" (click)="open('submit')" title="Put this order on the Community board for its tab and season"><mat-icon aria-hidden="true" fontIcon="groups"></mat-icon><span>Submit to Community</span></button>
         }
-        <button type="button" class="app-btn-danger small tool-btn danger-btn" (click)="open('delete')" title="Delete this list" aria-label="Delete this list"><mat-icon aria-hidden="true" fontIcon="delete"></mat-icon></button>
+        <button type="button" class="tool-btn danger-btn" (click)="open('delete')" title="Delete this list" aria-label="Delete this list"><mat-icon aria-hidden="true" fontIcon="delete"></mat-icon></button>
       }
     </div>
   </div>
 
-  @if (mine) {
-    <div class="owner-line">
-      <span class="owner-label" id="list-vis">Who can see it</span>
-      <visibility-pills labelledby="list-vis" [value]="list.visibility" [disabled]="busy" (picked)="setVisibility($event)"></visibility-pills>
-      <span class="owner-hint">Drag the rows to reorder.</span>
-    </div>
-  }
 
   @if (mode === 'today') {
     @if (todayState === 'loading') {
