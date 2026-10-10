@@ -117,13 +117,8 @@
     </div>
   }
 
-  @if (board) {
-    <p class="lines-foot">
-      @if (open) {
-        Tap a price to add it to your slip · the bot's picks lit in their band's color
-      } @else {
-        The game has started: these were the last prices
-      }
-    </p>
+  <!-- (a game begun: its prices the last ones) -->
+  @if (board && !open) {
+    <p class="lines-foot">The game has started: these were the last prices</p>
   }
 </section>
