@@ -87,7 +87,7 @@ async function gameAndBox(fetchJson, sport, event) {
   const body = await fetchJson(`${SITE}/${LEAGUES[sport]}/summary?event=${event}`);
   const h = body?.header;
   const c = h?.competitions?.[0];
-  return { game: c ? gameOf({ ...h, date: c.date, status: c.status }) : null, body };
+  return { game: c ? gameOf({ ...h, date: c.date, status: c.status }, { innings: sport === 'mlb' }) : null, body };
 }
 
 // ---------------------------------------------------------------------------

@@ -14,6 +14,9 @@ const HEADERS = { 'User-Agent': 'Mozilla/5.0 (sports-ranker model desk)' };
 // (a day in milliseconds; a time as UTC to the second, as The Odds API takes it: "2026-10-09T17:00:00Z")
 export const DAY = 864e5;
 export const isoSecond = (t) => new Date(t).toISOString().slice(0, 19) + 'Z';
+// (the US Eastern date a time falls on, daylight saving and all: "2026-10-11")
+const ET = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/New_York', year: 'numeric', month: '2-digit', day: '2-digit' });
+export const etDay = (t) => ET.format(new Date(t));
 
 // A URL's body (JSON unless text), four tries, a pause after each refusal; null when it never comes
 export async function get(url, { text = false } = {}) {

@@ -178,7 +178,8 @@ export const OPTIONAL = {
 
 // The facts for every game the history has and the coming ones: the kept ones brought up to date, plus each
 // coming game's live ones (injury reports, probable starters, the forecast). Never throws: a source that
-// fails just adds nothing. want(source): whether to ask an optional one. Each step's time and whether it
+// fails just adds nothing, except the injury report, whose failure marks every coming game (injuriesFailed:
+// none of them bet this run). want(source): whether to ask an optional one. Each step's time and whether it
 // worked land in times.
 export async function gather(sport, cfg, history, upcoming, facts, want = () => true, times = {}) {
   facts.places ??= {};
@@ -208,9 +209,13 @@ export async function gather(sport, cfg, history, upcoming, facts, want = () => 
   if (sport === 'mlb') for (const part of ['air', 'bullpens']) if (want(part)) await step(part, () => gatherBaseball(history, upcoming, facts, live, part));
   if ((sport === 'nba' || sport === 'nhl') && want('officials')) await step('officials', () => gatherOfficials(sport, cfg, upcoming, live));
   if (sport !== 'mlb') {
+    // (no report, or an empty one (there's always someone hurt in season): every coming game marked, and
+    // run.mjs bets none of them this run, rather than as if everyone were healthy)
+    for (const l of live.values()) l.injuriesFailed = true;
     await step('injuries', async () => {
       const report = await injuries(cfg.league);
-      if (report) for (const l of live.values()) l.injuries = report;
+      if (!report || (!report.size && live.size)) throw new Error('no injury report');
+      for (const l of live.values()) (l.injuries = report), delete l.injuriesFailed;
     });
   }
   if (sport === 'nhl') {
@@ -546,7 +551,7 @@ export function featurize(sport, cfg, games, facts, live) {
     };
     const h = side(g.home);
     const a = side(g.away);
-    const s = starters(g);
+    const s = starters(g, { b2b: [h.b2b, a.b2b] });
     const w = weather(g);
     const r = ranker(g);
     const lu = lineups?.of(g);
@@ -808,7 +813,9 @@ const STARTERS = {
 
   // The NHL: each starting goalie's save rate to date (last season's at half weight, pulled toward the league's
   // by 500 shots of it) as goals a game saved over an average goalie's 30 shots, against the team's usual (its
-  // last 10 starters' average, which its rating already carries): a backup's start is what moves it
+  // last 10 starters' average, which its rating already carries): a backup's start is what moves it. A coming
+  // game with no probable goalie listed: the last starter, but on the second night of a back-to-back his backup
+  // (flagged either way: the stake cut to the minimum)
   nhl: (cfg, facts, live) => {
     const goalies = new Map();
     let lgSa = 30000;
@@ -823,7 +830,13 @@ const STARTERS = {
       const sv = (w * (s.sa - s.ga) + 500 * lg) / (w * s.sa + 500);
       return Math.round((sv - lg) * 30 * 1000) / 1000;
     };
-    return (g) => {
+    // (a team's backup: the goalie who started most of its last 10 other than its last starter; null with none)
+    const backupOf = (team) => {
+      const tally = new Map();
+      for (const x of recent.get(team) ?? []) if (x !== lastStarter.get(team)) tally.set(x, (tally.get(x) ?? 0) + 1);
+      return [...tally].sort((x, y) => y[1] - x[1])[0]?.[0] ?? null;
+    };
+    return (g, sched = {}) => {
       const box = facts.games?.[g.id];
       const l = live.get(g.id);
       const flags = [];
@@ -833,10 +846,16 @@ const STARTERS = {
         if (box && g.final) id = box[where][0]?.[0] ?? null;
         else if (l) {
           const p = l[where === 'h' ? 'home' : 'away'];
+          const abbr = where === 'h' ? g.homeAbbr : g.awayAbbr;
           if (p && statusOf(l.injuries, team, { id: p.id }) !== 'out') ({ id, name } = p);
-          else {
+          // (none named on the second night of a back-to-back: last night's starter rarely goes again, so his
+          // backup (or, with none seen, an average goalie: no id); otherwise the last starter)
+          else if (sched.b2b?.[where === 'h' ? 0 : 1]) {
+            id = backupOf(team);
+            flags.push(`no probable goalie on a back-to-back (${abbr}): ${id ? 'his backup' : 'an average goalie'} assumed`);
+          } else {
             id = lastStarter.get(team) ?? null;
-            flags.push(`no probable goalie (${where === 'h' ? g.homeAbbr : g.awayAbbr})`);
+            flags.push(`no probable goalie (${abbr})`);
           }
         }
         const q = id ? quality(id, g.season) : 0;

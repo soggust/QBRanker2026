@@ -157,6 +157,8 @@ export function settlePlayBet(bet, game, { observations = [], propValue, now = D
     return { status: r.status, profit: r.status === 'won' ? toWin(bet.stake, bet.odds) : r.status === 'lost' ? -bet.stake : 0, final: r.final };
   }
   const r = settleGame(priced, game);
+  // (a run line or total on an MLB game cut short: void, the bettor's own rule)
+  if (r.void) return voided(r.why.replace(/^Void: /, ''), r.final);
   return { status: r.status, profit: r.status === 'won' ? toWin(bet.stake, bet.odds) : r.status === 'lost' ? -bet.stake : 0, final: r.final };
 }
 

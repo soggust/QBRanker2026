@@ -164,6 +164,20 @@ export function usageSummary() {
 // Reading what comes back: an event's books' prices, the best US price and the fair chance for each market
 // ---------------------------------------------------------------------------
 
+// Pairs matched one to one, nearest first: of every candidate pair ([a, b, distance]), the closest taken, then
+// the closest of what's left, each a and each b used once (an MLB doubleheader's two games, the same two
+// teams hours apart, each get their own event, never both the first). A Map from a to b
+export function matchNearest(candidates) {
+  const out = new Map();
+  const used = new Set();
+  for (const [a, b] of [...candidates].sort((x, y) => x[2] - y[2])) {
+    if (out.has(a) || used.has(b)) continue;
+    out.set(a, b);
+    used.add(b);
+  }
+  return out;
+}
+
 // American odds from decimal
 export const american = (dec) => (dec >= 2 ? Math.round((dec - 1) * 100) : Math.round(-100 / (dec - 1)));
 const implied = (american_) => (american_ > 0 ? 100 / (american_ + 100) : -american_ / (-american_ + 100));

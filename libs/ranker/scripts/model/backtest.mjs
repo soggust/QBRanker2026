@@ -21,7 +21,7 @@
 
 import path from 'node:path';
 import { CACHE, DAY, isoSecond as iso, readJson, writeJson } from './sources.mjs';
-import { HISTORY_BUDGET, LINE_BOOKS, SPORT_KEYS, call, canSpend, linesFromEvent } from './oddsapi.mjs';
+import { HISTORY_BUDGET, LINE_BOOKS, SPORT_KEYS, call, canSpend, linesFromEvent, matchNearest } from './oddsapi.mjs';
 import { choose, fitTrust, price, settle, stakeFor } from './desk.mjs';
 import { clvOf } from './clv.mjs';
 import { idOf } from './teamstats.mjs';
@@ -78,12 +78,16 @@ export async function snapshots(sport, { buy = true } = {}) {
 export function backtestBets(sport, snaps, games, expect, params, teams, trust = 0.5, evScale = 0.08) {
   const byGame = new Map();
   for (const { at, data } of snaps) {
+    // (each event its game, one to one and nearest start first: a doubleheader's two games their own events)
+    const candidates = [];
     for (const ev of data) {
       const home = idOf(teams, ev.home_team);
       const away = idOf(teams, ev.away_team);
       const start = Date.parse(ev.commence_time);
       if (!home || !away || start <= Date.parse(at)) continue;
-      const g = games.find((x) => x.home === home && x.away === away && Math.abs(Date.parse(x.date) - start) < 12 * 36e5);
+      for (const x of games) if (x.home === home && x.away === away && Math.abs(Date.parse(x.date) - start) < 12 * 36e5) candidates.push([ev, x, Math.abs(Date.parse(x.date) - start)]);
+    }
+    for (const [ev, g] of matchNearest(candidates)) {
       if (!g?.final || g.hs === null) continue;
       const lines = linesFromEvent(ev);
       if (!lines) continue;
@@ -111,6 +115,8 @@ export function backtestBets(sport, snaps, games, expect, params, teams, trust =
         const pick = choose(market, trust, evScale);
         const b = { id: `${id}:${market.market}`, event: id, when, market: market.market, side: pick.side, line: pick.line, odds: pick.odds, model: round(pick.model, 4), fair: round(pick.fair, 4), anchor, sharp: l.sharp[market.market], ev: round(pick.ev, 4), units: pick.units, at: bet.at, start: g.date };
         Object.assign(b, settle(b, g));
+        // (a run line or total on an MLB game cut short: void, no action, no evidence)
+        if (b.void) continue;
         // (an early bet's close: the same side at the last snapshot, the anchor's fair chance there)
         if (when === 'early' && close.at !== bet.at) {
           const c = closeFrom(b, deskLines(close.lines, anchor));

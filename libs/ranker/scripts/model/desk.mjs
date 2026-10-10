@@ -94,8 +94,14 @@ export function pickText(bet, game) {
   return `${abbr} ML`;
 }
 
-// A bet against its game's final: won, lost or a push, and what it paid
+// A bet against its game's final: won, lost or a push, and what it paid. An MLB game shortened (rain: called
+// before 9 innings, or 8 and a half with the home side ahead; espn.mjs gameOf's short) is official, so its
+// moneyline stands, but DraftKings voids its run line and total: no action, stake back
 export function settle(bet, game) {
+  if (game.short && (bet.market === 'spread' || bet.market === 'total')) {
+    const final = `${game.awayAbbr} ${game.as} @ ${game.homeAbbr} ${game.hs} (${game.short} innings)`;
+    return { status: 'push', profit: 0, void: true, final, why: `Void: game shortened to ${game.short} innings` };
+  }
   const margin = game.hs - game.as;
   let edge;
   if (bet.market === 'spread') edge = (bet.side === 'home' ? margin : -margin) + bet.line;

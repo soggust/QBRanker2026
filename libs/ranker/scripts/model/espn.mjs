@@ -35,8 +35,10 @@ export async function scoreboard(league, day) {
 
 // A schedule's or scoreboard's event as the desk keeps it: its id, when, which season and part of it (2 the
 // regular season, 3 the playoffs), the two teams, a neutral site, where ("city|state|country", and whether
-// it's indoors when ESPN says), and the final score once it's final
-export function gameOf(e) {
+// it's indoors when ESPN says), and the final score once it's final. innings (MLB's): a final shortened, called
+// before 9 innings (8 and a half with the home side ahead), is marked short (the innings it went: 6.5 is six
+// and a half), its run line and total void (desk.mjs settle)
+export function gameOf(e, { innings = false } = {}) {
   const c = e.competitions?.[0];
   const side = (where) => c?.competitors?.find((t) => t.homeAway === where);
   const home = side('home');
@@ -51,6 +53,7 @@ export function gameOf(e) {
   const called = (c.status?.type?.name ?? '').match(/postponed|cancel|suspended|forfeit/i)?.[0].toLowerCase();
   const off = called === 'cancel' ? 'canceled' : (called ?? null);
   const final = !!c.status?.type?.completed && !off;
+  const short = innings && final ? shortOf(home, away, c.status?.period) : null;
   return {
     id: e.id,
     date: e.date,
@@ -67,7 +70,22 @@ export function gameOf(e) {
     ...(off ? { off } : {}),
     hs: final ? score(home) : null,
     as: final ? score(away) : null,
+    ...(short ? { short } : {}),
   };
+}
+
+// (an MLB final's innings when it was cut short, else null: by the two sides' line scores (the away side's
+// count the innings begun, the home side's one fewer when it didn't bat in the last), else ESPN's period)
+export function shortOf(home, away, period) {
+  const a = away?.linescores?.length ?? 0;
+  const h = home?.linescores?.length ?? 0;
+  const hs = Number(home?.score?.value ?? home?.score);
+  const as = Number(away?.score?.value ?? away?.score);
+  if (a) {
+    if (a >= 9 && (h >= 9 || hs > as)) return null;
+    return h >= a ? a : a - 0.5;
+  }
+  return Number.isFinite(period) && period > 0 && period < 9 ? period : null;
 }
 
 // A scoreboard event's DraftKings lines as prices: each side's moneyline, spread (its line and price) and the

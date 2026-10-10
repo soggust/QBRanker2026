@@ -8,10 +8,14 @@
 //      each of its terms fit on the same held-out games (ratings.mjs fitContext: a term that doesn't help is
 //      left out), each size that moves logged the same way
 //   3. each market's trust in the model refit on the desk's own graded bets, logged the same way
-//   4. the open bets graded against their finals
+//   4. the open bets graded against their finals (a prop whose count can't be read yet waits, PROP_WAIT at most;
+//      a player who played but isn't in his stat's table counts 0; an MLB game cut short voids its run line and
+//      total; each prop's count read again once a day and a half after the start, for stat corrections)
 //   5. every market (spread, total, moneyline) of every game starting in the next two days bet once, the
 //      better side at 0.5 to 3 units (desk.mjs), cut to 0.5 (or skipped) when its line has moved a lot since it
-//      opened or a key player is questionable (the guard); each bet keeps the context it saw
+//      opened or a key player is questionable (the guard); each bet keeps the context it saw. Held for a later
+//      run (fail safe): a game whose injury report or context couldn't be read, one starting within five
+//      minutes, one called off, and with The Odds API to hand one it didn't price (till LAST_CALL)
 //
 // What it writes (apps/<sport>/src/StaticData/model/): state.json (the settings, their test numbers, the
 // changelog, the teams' ratings, the context's sizes) and ledger.json (every bet, open or graded), each only
@@ -33,14 +37,14 @@ import { BOOK, LEAGUES, PROP_CAPS } from './leagues.mjs';
 import { eventOf, gameOf, json, linesOf, scoreboard, teamIds, teamSchedule, ymd } from './espn.mjs';
 import { adjust, expect, fit, fitContext, gateOf, replay, round } from './ratings.mjs';
 import { OPTIONAL, enrich, featurize, gather } from './context.mjs';
-import { finalSummary, postmortems, propPostmortem, usualRoles } from './postmortem.mjs';
+import { RECHECK, finalSummary, postmortems, propPostmortem, recheckSummary, usualRoles } from './postmortem.mjs';
 import { closeOf, closingLines, clvOf, clvSummary, propCloseOf } from './clv.mjs';
-import { LINE_BOOKS, SPORT_KEYS, call, canSpend, hasKey, linesFromEvent, usageSummary } from './oddsapi.mjs';
+import { LINE_BOOKS, SPORT_KEYS, call, canSpend, hasKey, linesFromEvent, matchNearest, usageSummary } from './oddsapi.mjs';
 import { backtestBets, evaluate, snapshots, trustBets } from './backtest.mjs';
 import { buildPicks } from './picks.mjs';
 import { playerRows } from './playerlogs.mjs';
-import { PER_GAME, STATS, apiProps, board, fitProps, priceProps, rowsIndex, settleProp, statInFinal, withApiPrices } from './props.mjs';
-import { CACHE, DAY, isoSecond, readJson, writeJson } from './sources.mjs';
+import { PER_GAME, STATS, apiProps, board, fitProps, nflTookSnap, priceProps, rowsIndex, settleProp, statInFinal, withApiPrices } from './props.mjs';
+import { CACHE, DAY, etDay, isoSecond, readJson, writeJson } from './sources.mjs';
 import { BANKROLL, MARKETS, choose, fairPair, fitTrust, pickText, price, record, settle, voidOf } from './desk.mjs';
 
 const ROOT = path.resolve(import.meta.dirname, '../../../..');
@@ -51,7 +55,20 @@ const START_TRUST = 0.5;
 // (what a graded bet whose premise broke in the game counts for in the trust fit and the calibration: set by
 // hand, not fit: there aren't graded bets enough yet to fit it on)
 const DISRUPTED_WEIGHT = 0.3;
+// (the rule for a broken premise (postmortem.mjs): 2, only an exit that isn't for how he played (an injury, an
+// ejection) breaks it; the graded bets the old rule weighed down are weighed again once when it changes)
+const PM_RULE = 2;
 const PROPS_ASKED = path.join(CACHE, 'odds-props.json');
+// (a game market the guard skipped or the book didn't price: not asked about again for REST_FOR, so the hourly
+// runs don't buy The Odds API's lines for it each hour; kept by sport in .cache/model/lines-rest.json)
+const LINES_REST = path.join(CACHE, 'lines-rest.json');
+const REST_FOR = 3 * 36e5;
+// (with The Odds API to hand, a game it didn't price waits for it; this close to the start, it goes on ESPN's
+// board after all, at the minimum stake, for the data)
+const LAST_CALL = 2 * 36e5;
+// (a prop whose count can't be read yet (the NFL's snap counts not posted, StatsAPI down) waits this long
+// after its start, then is no action)
+const PROP_WAIT = 4 * DAY;
 
 const read = readJson;
 const write = writeJson;
@@ -158,7 +175,7 @@ async function loadHistory(r) {
       for (const id of ids) {
         for (const type of [2, 3]) {
           for (const e of await teamSchedule(cfg.league, id, season, type)) {
-            const g = gameOf(e);
+            const g = gameOf(e, { innings: sport === 'mlb' });
             if (g && !games.has(g.id)) games.set(g.id, { ...g, season: g.season ?? season, type: g.type ?? type });
           }
         }
@@ -183,11 +200,12 @@ async function loadHistory(r) {
   };
   for (const day of days) {
     for (const e of await scoreboard(cfg.league, day)) {
-      const g = gameOf(e);
+      const g = gameOf(e, { innings: sport === 'mlb' });
       if (!g || (g.type !== 2 && g.type !== 3)) continue;
       keep(g);
       const lines = linesOf(e);
-      if (!g.final && lines && Date.parse(g.date) > now.getTime() + 5 * 60e3) upcoming.push({ game: g, lines, event: e });
+      // (not one called off: postponed, suspended or canceled, its lines are stale and its bets would be void)
+      if (!g.final && !g.off && lines && Date.parse(g.date) > now.getTime() + 5 * 60e3) upcoming.push({ game: g, lines, event: e });
     }
   }
   // (a game bet on, past its start, that none of those days showed: moved off its day, postponed; asked by its
@@ -195,7 +213,7 @@ async function loadHistory(r) {
   for (const id of new Set(open.filter((b) => Date.parse(b.start) < now.getTime() && !seen.has(b.event)).map((b) => b.event))) {
     try {
       const e = await eventOf(cfg.league, id);
-      const g = e && gameOf(e);
+      const g = e && gameOf(e, { innings: sport === 'mlb' });
       if (g) keep({ ...g, season: g.season ?? games.get(id)?.season ?? null, type: g.type ?? games.get(id)?.type ?? null });
     } catch (err) {
       console.warn(`${sport}: game ${id} not read (${err.message})`);
@@ -209,30 +227,34 @@ async function loadHistory(r) {
 }
 
 // 1b. the coming games' lines from The Odds API (oddsapi.mjs): the desk's book's prices, Pinnacle's fair
-// chance; one call for the sport (its three markets: 3 credits), only with a game not bet yet (a game already
+// chance; one call for the sport (its three markets: 3 credits), only with a market still to bet (a game already
 // bet only notes the line it sees, which ESPN's board, the same book's, gives free: asked hourly, these used
-// up the day's allowance overnight) and today's lines allowance left. Otherwise ESPN's board, and The Odds
-// API's free event list for the ids its props are asked by
+// up the day's allowance overnight; a market the guard skipped or the book didn't price rests REST_FOR before
+// it's asked about again, so it doesn't buy the call every hour) and today's lines allowance left. Otherwise
+// ESPN's board, and The Odds API's free event list for the ids its props are asked by. The range covers every
+// day ESPN's board is read for (the next two, Eastern, and their late games), so no coming game falls outside
+// it; with a key, a game The Odds API didn't price this run isn't bet off ESPN's board (betGames)
 async function liveLines(r) {
   r.linesSource = 'espn';
+  r.rest = DRY ? {} : (read(LINES_REST, {})[r.sport] ?? {});
   if (!r.upcoming.length || !hasKey()) return;
-  const range = { commenceTimeFrom: isoSecond(r.now), commenceTimeTo: isoSecond(r.now.getTime() + 3 * DAY) };
+  const range = { commenceTimeFrom: isoSecond(r.now), commenceTimeTo: isoSecond(r.now.getTime() + 4 * DAY) };
   const placed = new Set(readKept(r.files.ledger, { bets: [] }).bets.map((b) => b.id));
-  const unbet = DRY || REPLACE || r.upcoming.some((u) => !MARKETS.some((m) => placed.has(`${u.game.id}:${m}`)));
+  const unbet = DRY || REPLACE || r.upcoming.some((u) => MARKETS.some((m) => !placed.has(`${u.game.id}:${m}`) && !resting(r, `${u.game.id}:${m}`)));
   if (!unbet || !canSpend('lines', 3)) {
     const list = await call('events', `/sports/${SPORT_KEYS[r.sport]}/events`, range);
-    for (const u of Array.isArray(list) ? r.upcoming : []) {
-      const ev = list.find((x) => sameGame(x, u));
-      if (ev) u.lines.oddsEvent = ev.id;
-    }
+    if (Array.isArray(list)) for (const [u, ev] of matchGames(list, r.upcoming)) u.lines.oddsEvent = ev.id;
     return;
   }
   const events = await call('lines', `/sports/${SPORT_KEYS[r.sport]}/odds`, { markets: 'h2h,spreads,totals', bookmakers: LINE_BOOKS.join(','), ...range });
   if (!Array.isArray(events)) return;
   let matched = 0;
-  for (const u of r.upcoming) {
-    const ev = events.find((x) => sameGame(x, u));
-    const l = ev && linesFromEvent(ev);
+  const pairs = matchGames(events, r.upcoming);
+  // (a coming game The Odds API doesn't list: its markets rest, rather than buying the call again each hour)
+  for (const u of r.upcoming) if (!pairs.has(u)) for (const m of MARKETS) if (!placed.has(`${u.game.id}:${m}`)) rest(r, `${u.game.id}:${m}`, 'not on The Odds API');
+  for (const [u, ev] of pairs) {
+    const l = linesFromEvent(ev);
+    u.lines.oddsEvent = ev.id;
     if (!l) continue;
     const odds = { spread: l.spreads, total: l.totals, ml: l.h2h };
     u.lines = {
@@ -252,12 +274,34 @@ async function liveLines(r) {
   console.log(`${r.sport}: lines from The Odds API for ${matched} of ${r.upcoming.length} coming games`);
 }
 
-// (an Odds API event is a coming ESPN game: the same two teams, by nickname, within six hours)
-function sameGame(ev, u) {
-  const sides = u.event?.competitions?.[0]?.competitors ?? [];
-  const nick = (where) => sides.find((c) => c.homeAway === where)?.team?.name ?? null;
-  const is = (full, n) => !!n && (full === n || full.endsWith(` ${n}`));
-  return is(ev.home_team, nick('home')) && is(ev.away_team, nick('away')) && Math.abs(Date.parse(ev.commence_time) - Date.parse(u.game.date)) < 6 * 36e5;
+// (The Odds API's events matched to the coming ESPN games: the same two teams, by nickname, within six hours,
+// one to one, nearest start first: a doubleheader's second game never takes the first's lines)
+function matchGames(events, upcoming) {
+  const candidates = [];
+  for (const u of upcoming) {
+    const sides = u.event?.competitions?.[0]?.competitors ?? [];
+    const nick = (where) => sides.find((c) => c.homeAway === where)?.team?.name ?? null;
+    const is = (full, n) => !!n && (full === n || full.endsWith(` ${n}`));
+    for (const ev of events) {
+      const apart = Math.abs(Date.parse(ev.commence_time) - Date.parse(u.game.date));
+      if (is(ev.home_team, nick('home')) && is(ev.away_team, nick('away')) && apart < 6 * 36e5) candidates.push([u, ev, apart]);
+    }
+  }
+  return matchNearest(candidates);
+}
+
+// (a market resting: skipped by the guard or not priced by the book a run ago, not asked about again until
+// its time is up)
+const resting = (r, id) => Date.parse(r.rest?.[id]?.until ?? '') > r.now.getTime();
+function rest(r, id, why) {
+  r.rest[id] = { until: new Date(r.now.getTime() + REST_FOR).toISOString(), why };
+}
+// (the rests kept, each sport's, the ones run out dropped; never on a dry run)
+function saveRest(r) {
+  if (DRY) return;
+  const all = read(LINES_REST, {});
+  all[r.sport] = Object.fromEntries(Object.entries(r.rest ?? {}).filter(([, v]) => Date.parse(v.until) > r.now.getTime()));
+  write(LINES_REST, all);
 }
 
 // 2. the ratings, refit (each setting that moves logged with why)
@@ -481,20 +525,68 @@ async function gradeBets(r) {
     try {
       const body = await finalSummary(sport, cfg.league, g.id);
       if (!body) continue;
-      Object.assign(bet, settleProp(bet, await statInFinal(sport, bet, body, r.facts.games?.[g.id]?.pk)), { gradedAt: at });
+      const value = await statInFinal(sport, bet, body, r.facts.games?.[g.id]?.pk, { played: (b) => nflTookSnap(r.facts, g.id, b.player) });
+      // (a count that can't be read yet waits: the NFL's snap counts a day or so after the game, StatsAPI's box
+      // score; past PROP_WAIT, no action)
+      if (value === undefined && r.now.getTime() - Date.parse(bet.start) < PROP_WAIT) continue;
+      Object.assign(bet, value === undefined ? { status: 'push', profit: 0, void: true, actual: null, final: 'stat not read' } : settleProp(bet, value), { gradedAt: at });
       Object.assign(bet, propPostmortem(sport, bet, g, body, r.rows, DISRUPTED_WEIGHT, await usualRoles(sport, g, r.facts, r.history).catch(() => null)));
       r.graded++;
     } catch (err) {
       console.warn(`${sport}: prop ${bet.id} not graded (${err.message})`);
     }
   }
-  // (the ones just graded, and any graded before there were post-mortems)
+  await statCorrections(r);
+  // (the ones just graded, and any graded before there were post-mortems; once, when the rule for a broken
+  // premise changes (PM_RULE), the ones it weighed down, again)
+  const redo = r.state.postmortemRule !== PM_RULE ? r.ledger.bets.filter((b) => b.status !== 'open' && !b.void && b.why && (b.weight ?? 1) < 1) : [];
   try {
-    const todo = r.ledger.bets.filter((b) => b.status !== 'open' && !b.why && b.market !== 'prop');
+    const todo = r.ledger.bets.filter((b) => b.status !== 'open' && b.market !== 'prop' && (!b.why || redo.includes(b)));
     if (todo.length) console.log(`${sport}: post-mortems for ${await postmortems(sport, cfg.league, todo, games, r.facts, r.history, DISRUPTED_WEIGHT)} of ${todo.length} graded bets`);
+    for (const bet of redo.filter((b) => b.market === 'prop')) {
+      const g = games.get(bet.event);
+      const body = g?.final ? await finalSummary(sport, cfg.league, g.id) : null;
+      if (body) Object.assign(bet, propPostmortem(sport, bet, g, body, r.rows, DISRUPTED_WEIGHT, await usualRoles(sport, g, r.facts, r.history).catch(() => null)));
+    }
+    if (redo.length) console.log(`${sport}: ${redo.length} post-mortems weighed again by the new rule (${redo.filter((b) => (b.weight ?? 1) === 1).length} now count in full)`);
+    r.state.postmortemRule = PM_RULE;
   } catch (err) {
     console.warn(`${sport}: post-mortems skipped (${err.message})`);
   }
+}
+
+// 4b. stat corrections: a prop graded on a final's first box score has the summary read once more, a day and a
+// half after the start (postmortem.mjs recheckSummary: the leagues' corrections are in by then), and a count
+// that changed grades it again (corrected: what it was, and when). Only the last five days' props; one whose
+// summary was first read that late is done
+async function statCorrections(r) {
+  const { sport, cfg, games, at } = r;
+  const now = r.now.getTime();
+  const due = r.ledger.bets.filter((b) => b.market === 'prop' && b.status !== 'open' && !b.void && !b.rechecked && now - Date.parse(b.start) >= RECHECK && now - Date.parse(b.start) < 5 * DAY);
+  let changed = 0;
+  for (const id of new Set(due.map((b) => b.event))) {
+    const g = games.get(id);
+    if (!g?.final) continue;
+    try {
+      const got = await recheckSummary(sport, cfg.league, id, g.date, now);
+      if (!got) continue;
+      for (const bet of due.filter((b) => b.event === id)) {
+        if (got.body) {
+          const value = await statInFinal(sport, bet, got.body, r.facts.games?.[g.id]?.pk, { played: (b) => nflTookSnap(r.facts, g.id, b.player) });
+          if (value === undefined) continue;
+          if (value !== bet.actual) {
+            Object.assign(bet, settleProp(bet, value), { corrected: { from: bet.actual, at }, gradedAt: at });
+            Object.assign(bet, propPostmortem(sport, bet, g, got.body, r.rows, DISRUPTED_WEIGHT, await usualRoles(sport, g, r.facts, r.history).catch(() => null)));
+            changed++;
+          }
+        }
+        bet.rechecked = at;
+      }
+    } catch (err) {
+      console.warn(`${sport}: stat corrections for ${id} not read (${err.message})`);
+    }
+  }
+  if (changed) console.log(`${sport}: ${changed} props graded again on a corrected box score`);
 }
 
 // (--replace: the open bets on games not started yet taken back, to be priced again with what the model
@@ -512,15 +604,27 @@ function replaceOpen(r) {
 }
 
 // 5. every market of the coming games, bet once: the better side at 0.5 to 3 units, cut or skipped by the
-// guard; each bet keeps the context it saw
+// guard; each bet keeps the context it saw. Not bet this run (asked again the next): a game whose context or
+// injury report couldn't be read (blindOf: it would be bet as if everyone were healthy), one starting within
+// five minutes by the clock now, and, with The Odds API to hand, one it didn't price this run (no sharp fair
+// chance: it waits for one, and only inside LAST_CALL of its start goes on ESPN's board, at the minimum stake
+// as an action bet). A market the guard skips, or the book doesn't price, rests (liveLines)
 function betGames(r) {
   const { sport, cfg, params, trust, at } = r;
+  const held = new Map();
   for (const { game, lines } of r.upcoming) {
     const { exp, f, adjM, adjT } = expectFor(r, game);
     const fairFrom = lines.fairSource ?? {};
     r.snapshot.exp[game.id] = [round(exp.margin, 4), round(exp.total, 4)];
     const seen = f ? { ...f.info, adj: { margin: round(adjM, 2), total: round(adjT, 2) }, move: lines.move ?? null } : { move: lines.move ?? null };
-    for (const market of price(game, exp, lines, params)) {
+    const blind = blindOf(r, game);
+    const until = Date.parse(game.date) - Date.now();
+    const apiLines = lines.source === 'the odds api';
+    const waiting = hasKey() && !apiLines && until >= LAST_CALL;
+    const priced = price(game, exp, lines, params);
+    // (a market the book didn't price, by The Odds API's word: rests)
+    if (apiLines) for (const m of MARKETS) if (!priced.some((x) => x.market === m) && !r.placed.has(`${game.id}:${m}`)) rest(r, `${game.id}:${m}`, 'not priced by the book');
+    for (const market of priced) {
       const id = `${game.id}:${market.market}`;
       if (r.placed.has(id) && !DRY) {
         // (a bet already placed: the line this run saw for its side, the stand-in for its close)
@@ -529,21 +633,30 @@ function betGames(r) {
         if (bet && s) bet.seen = { at, line: s.line ?? null, odds: s.odds, fair: round(s.fair, 4) };
         continue;
       }
+      const hold = blind ?? (until < 5 * 60e3 ? 'starting' : waiting ? 'no Odds API price yet' : null);
+      if (hold) {
+        held.set(hold, (held.get(hold) ?? 0) + 1);
+        continue;
+      }
       const pick = choose(market, trust[market.market]?.trust ?? START_TRUST, EV_SCALE);
       // (the guard: a line that's moved a lot since it opened (less what the context explains), or a key player
       // questionable, cuts the stake to the minimum; a line that's moved twice that far skips the market this run)
-      const guard = guardOf(cfg.guard, market.market, lines.move, f?.info.flags ?? [], { m: adjM, t: adjT }, params.sigma);
+      let guard = guardOf(cfg.guard, market.market, lines.move, f?.info.flags ?? [], { m: adjM, t: adjT }, params.sigma);
       if (guard?.skip) {
+        rest(r, id, guard.why);
         if (DRY) console.log(`${sport} (dry) skipped ${game.awayAbbr} @ ${game.homeAbbr} ${market.market}: ${guard.why}; ${JSON.stringify(seen)}`);
         continue;
       }
+      // (on ESPN's board with a key to hand: The Odds API's price never came; for the data only)
+      if (hasKey() && !apiLines) guard = { why: [guard?.why, "no Odds API price (ESPN's board)"].filter(Boolean).join('; ') };
       if (guard) pick.units = 0.5;
       const bet = {
         id,
         event: game.id,
         sport,
         start: game.date,
-        placedAt: at,
+        // (when it was placed: now, not the run's start; a run can take minutes)
+        placedAt: new Date().toISOString(),
         matchup: `${game.awayAbbr} @ ${game.homeAbbr}`,
         market: market.market,
         side: pick.side,
@@ -571,6 +684,17 @@ function betGames(r) {
       r.newBets++;
     }
   }
+  if (held.size) console.log(`${sport}: game markets held for a later run: ${[...held].map(([why, n]) => `${n} (${why})`).join(', ')}`);
+  saveRest(r);
+}
+
+// (why a coming game can't be bet this run, or null: its context wasn't gathered (context.mjs threw), or its
+// injury report couldn't be read; either way it would be bet as if everyone were healthy)
+function blindOf(r, game) {
+  const l = r.live?.get(game.id);
+  if (!l || !r.feats) return 'its context not gathered';
+  if (l.injuriesFailed) return 'the injury report not read';
+  return null;
 }
 
 // 6. the props of the coming games: each main line projected and priced; the ones with an edge bet, the
@@ -582,8 +706,9 @@ async function betProps(r) {
   if (!r.props || !Object.keys(r.props).length) return;
   const idx = rowsIndex(sport, r.rows);
   const candidates = [];
-  // (the caps: a prop type not yet tested (its trust unfit) stakes little; the day is the game's US date)
-  const dayOf = (iso) => new Date(Date.parse(iso) - 5 * 36e5).toISOString().slice(0, 10);
+  // (the caps: a prop type not yet tested (its trust unfit) stakes little; the day is the game's US Eastern date,
+  // daylight saving and all)
+  const dayOf = etDay;
   const capsOf = (key) => (trust[`prop:${key}`]?.fitted ? PROP_CAPS.tested : PROP_CAPS.untested);
   const untestedUnits = (day) => ledger.bets.filter((b) => b.market === 'prop' && !b.tested && dayOf(b.start) === day).reduce((t, b) => t + b.units, 0);
   if (JSON.stringify(state.propCaps ?? null) !== JSON.stringify(PROP_CAPS)) {
@@ -597,6 +722,13 @@ async function betProps(r) {
   for (const u of r.upcoming) {
     const game = u.game;
     try {
+      // (not this run: a game whose context or injury report couldn't be read (blindOf), or, with The Odds API to
+      // hand, one it doesn't list (outside its range or not matched): its props wait for a run that can see it)
+      const hold = blindOf(r, game) ?? (hasKey() && !u.lines.oddsEvent ? 'not on The Odds API' : null);
+      if (hold) {
+        run.held = { ...(run.held ?? {}), [hold]: (run.held?.[hold] ?? 0) + 1 };
+        continue;
+      }
       let board_ = await board(sport, cfg.league, game);
       if (!board_.length) continue;
       const until = Date.parse(game.date) - r.now.getTime();
@@ -630,7 +762,8 @@ async function betProps(r) {
       run.evenUnder += even.filter((x) => x.side === 'under').length;
       // (with The Odds API to hand, a prop waits for its real price (asked within 30 hours of the start)
       // rather than going at the assumed -110: that's only the fallback when the API can't be had)
-      for (const x of bets) if (x.priced || !hasKey()) candidates.push({ game, x, exp });
+      // (and none on a game starting within five minutes by the clock now)
+      if (Date.parse(game.date) - Date.now() >= 5 * 60e3) for (const x of bets) if (x.priced || !hasKey()) candidates.push({ game, x, exp });
       for (const x of priced) r.snapshot.projections[`${game.id}:${x.prop.stat.key}:${x.prop.athlete.id}`] = [x.projection.mean, x.prop.line, x.projection.pOver];
     } catch (err) {
       console.warn(`${sport}: props for ${game.id} skipped (${err.message})`);
@@ -651,13 +784,15 @@ async function betProps(r) {
       event: game.id,
       sport,
       start: game.date,
-      placedAt: at,
+      placedAt: new Date().toISOString(),
       matchup: `${game.awayAbbr} @ ${game.homeAbbr}`,
       market: 'prop',
       propType: x.prop.stat.key,
       statLabel: x.prop.stat.label,
       player: x.prop.athlete.name,
       athlete: x.prop.athlete.id,
+      // (MLB: his StatsAPI id too, which grades his total bases by id rather than by name)
+      ...(sport === 'mlb' && String(x.pid).startsWith('mlb:') ? { mlbId: String(x.pid).slice(4) } : {}),
       // (his team, ESPN's id: the desk colors the bet by it)
       team: x.prop.athlete.team ?? null,
       side: x.side,
@@ -688,6 +823,7 @@ async function betProps(r) {
     run.units += bet.units;
     r.newBets++;
   }
+  if (run.held) console.log(`${sport}: props held for a later run: ${Object.entries(run.held).map(([why, n]) => `${n} games (${why})`).join(', ')}`);
   if (run.priced) console.log(`${sport}: props priced ${run.priced} in ${run.games} games (${Math.round((100 * run.under) / run.priced)}% under; at even lines ${run.even}, ${Math.round((100 * run.evenUnder) / Math.max(1, run.even))}% under), bet ${run.bet} for ${run.units}u`);
 }
 

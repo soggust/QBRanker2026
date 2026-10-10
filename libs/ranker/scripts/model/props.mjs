@@ -23,7 +23,7 @@ import path from 'node:path';
 import { decimal, fairPair, outcomeOf, stakeFor } from './desk.mjs';
 import { fitStat, makeModel, nbOver, recal } from './project.mjs';
 import { nbaMatchups, nflMatchups } from './matchups.mjs';
-import { CACHE, get, pool } from './sources.mjs';
+import { CACHE, get, nflverseRows, pool } from './sources.mjs';
 import { PROP_BOOKS, SPORT_KEYS, american, call, canSpend, hasKey } from './oddsapi.mjs';
 import { round } from './ratings.mjs';
 import { ESPN_PROVIDER } from './espn.mjs';
@@ -436,14 +436,24 @@ function statusOf(sport, prop, live, home, game) {
 // Grading
 // ---------------------------------------------------------------------------
 
-// A player's stat in a final, from its summary (and for MLB total bases, StatsAPI's box score); null when he
-// didn't play
-export async function statInFinal(sport, bet, body, pk) {
+// A player's stat in a final, from its summary (and for MLB total bases, StatsAPI's box score): the number;
+// null when he didn't play (no action); undefined when it can't be told yet (StatsAPI down, the NFL's snap
+// counts not posted): the bet waits rather than being voided or graded on a guess. One who played but isn't in
+// the stat's own table counts 0, not void (an NFL receiver with no targets, a back with no carries: listed in
+// the box score's other tables, or on the field by nflverse's snap counts; only one who never took the field
+// is no action, DraftKings' rule). opts.played(bet): for an NFL player in none of the box score's tables,
+// whether he took a snap (true, false, or null: not known yet)
+export async function statInFinal(sport, bet, body, pk, opts = {}) {
   const id = String(bet.athlete);
+  // (whether the box score lists him anywhere as having played; and in a batting table, for MLB)
+  let listed = false;
+  let batted = false;
   for (const p of body?.boxscore?.players ?? []) {
     for (const s of p.statistics ?? []) {
       const a = (s.athletes ?? []).find((x) => String(x.athlete?.id) === id);
       if (!a || !a.stats?.length || a.didNotPlay) continue;
+      listed = true;
+      if (s.type === 'batting' || s.name === 'batting') batted = true;
       const at = (k) => (s.labels ?? []).indexOf(k);
       const num = (k, part = 0) => Number(String(a.stats[at(k)] ?? '').split(/[-/]/)[part]) || 0;
       const k = bet.propType;
@@ -464,21 +474,65 @@ export async function statInFinal(sport, bet, body, pk) {
       }
     }
   }
-  // (NFL rushing plus receiving: both tables; MLB total bases: StatsAPI's box score)
+  // (NFL rushing plus receiving: both tables, either one waiting holding the bet)
   if (sport === 'nfl' && bet.propType === 'rushRecYds') {
-    const one = (k) => statInFinal(sport, { ...bet, propType: k }, body, pk);
+    const one = (k) => statInFinal(sport, { ...bet, propType: k }, body, pk, opts);
     const [r, c] = [await one('rushYds'), await one('recYds')];
+    if (r === undefined || c === undefined) return undefined;
     return r === null && c === null ? null : (r ?? 0) + (c ?? 0);
   }
-  if (sport === 'mlb' && bet.propType === 'tb' && pk) {
-    const box = await get(`https://statsapi.mlb.com/api/v1/game/${pk}/boxscore`);
-    for (const side of ['home', 'away']) {
-      for (const pl of Object.values(box?.teams?.[side]?.players ?? {})) {
-        if (pl.person?.fullName === bet.player && pl.stats?.batting?.plateAppearances) return pl.stats.batting.totalBases ?? 0;
-      }
-    }
+  // (MLB total bases: StatsAPI's box score; one ESPN shows batting whom StatsAPI's can't be matched to waits)
+  if (sport === 'mlb' && bet.propType === 'tb') {
+    const tb = await mlbTotalBases(bet, pk);
+    return tb === null && batted ? undefined : tb;
+  }
+  // (an NFL player in the box score's other tables played: 0 of this stat; in none, his snaps decide)
+  if (sport === 'nfl') {
+    if (listed) return 0;
+    const played = opts.played ? await opts.played(bet) : null;
+    return played === true ? 0 : played === false ? null : undefined;
   }
   return null;
+}
+
+// (a name as a key: accents, punctuation and suffixes off, "José Ramírez Jr." and "Jose Ramirez" the same)
+export const nameKey = (s) =>
+  String(s ?? '')
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .toLowerCase()
+    .replace(/\b(jr|sr|ii|iii|iv|v)\b\.?/g, '')
+    .replace(/[^a-z]/g, '');
+
+// (a batter's total bases from StatsAPI's box score: by his MLB id where the bet kept it (mlbId), else by his
+// name, which must be one player's; null when he didn't bat, undefined when the box score can't be had)
+async function mlbTotalBases(bet, pk) {
+  if (!pk) return undefined;
+  const box = await get(`https://statsapi.mlb.com/api/v1/game/${pk}/boxscore`);
+  if (!box?.teams) return undefined;
+  const all = ['home', 'away'].flatMap((side) => Object.values(box.teams[side]?.players ?? {}));
+  let me = bet.mlbId ? all.find((pl) => String(pl.person?.id) === String(bet.mlbId)) : null;
+  if (!me) {
+    const named = all.filter((pl) => nameKey(pl.person?.fullName) === nameKey(bet.player));
+    if (named.length > 1) return undefined;
+    me = named[0] ?? null;
+  }
+  if (!me) return null;
+  return me.stats?.batting?.plateAppearances ? (me.stats.batting.totalBases ?? 0) : null;
+}
+
+// Whether an NFL player took a snap in a game, by nflverse's snap counts (offense, defense or special teams):
+// true or false once the game's counts are posted (a day or so after it), null before then or without the
+// game's nflverse row (facts.nfl: ESPN game id to it). Each season's counts read once a run
+const snapCounts = new Map();
+export async function nflTookSnap(facts, gameId, player) {
+  const row = facts?.nfl?.get?.(gameId);
+  if (!row?.game_id || !row.season) return null;
+  if (!snapCounts.has(row.season)) snapCounts.set(row.season, nflverseRows('snap_counts', `snap_counts_${row.season}.csv.gz`, ['game_id', 'player', 'offense_snaps', 'defense_snaps', 'st_snaps'], 6).catch(() => null));
+  const rows = ((await snapCounts.get(row.season)) ?? []).filter((s) => s.game_id === row.game_id);
+  if (!rows.length) return null;
+  const me = rows.filter((s) => nameKey(s.player) === nameKey(player));
+  return me.some((s) => (Number(s.offense_snaps) || 0) + (Number(s.defense_snaps) || 0) + (Number(s.st_snaps) || 0) > 0);
 }
 
 // A prop bet graded: won, lost, pushed (on the line), or void (he didn't play: no action)
