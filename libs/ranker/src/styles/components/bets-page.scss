@@ -293,7 +293,7 @@ $chip-clay: #b0202b;
   // (a Bet: its rail's gold softer than a Love's, a little brighter in its lights; its bar lit gold, a sheen
   // from the top, not a flat yellow (on the dark, that reads brown))
   &.medium {
-    --rail: linear-gradient(135deg, rgba(150, 114, 40, 0.38), rgba(255, 228, 150, 0.46) 22%, rgba(204, 160, 70, 0.38) 45%, rgba(255, 236, 176, 0.46) 62%, rgba(180, 140, 58, 0.38) 82%, rgba(130, 98, 34, 0.38));
+    --rail: linear-gradient(135deg, rgba(150, 114, 40, 0.6), rgba(255, 228, 150, 0.7) 22%, rgba(204, 160, 70, 0.6) 45%, rgba(255, 236, 176, 0.7) 62%, rgba(180, 140, 58, 0.6) 82%, rgba(130, 98, 34, 0.6));
 
     .bet-row {
       background:
@@ -315,10 +315,14 @@ $chip-clay: #b0202b;
 }
 
 .bet-row {
-  --bar-tint: color-mix(in srgb, var(--soft) 18%, transparent);
   align-items: center;
-  // (a panel's bar, every sport's: the scoreboard tinted with its band's color; the felt opens under it)
-  background: linear-gradient(var(--bar-tint), var(--bar-tint)), var(--scoreboard-dots), var(--scoreboard);
+  // (a panel's bar, every sport's: the scoreboard lit in its band's color, a sheen from the top fading down it, as a
+  // Bet's gold; the felt opens under it)
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--soft) 28%, transparent), color-mix(in srgb, var(--soft) 12%, transparent) 55%, color-mix(in srgb, var(--soft) 8%, transparent)),
+    radial-gradient(ellipse 70% 120% at 20% 0%, rgba(255, 255, 255, 0.08), transparent 70%),
+    var(--scoreboard-dots),
+    var(--scoreboard);
   border-radius: 0;
   border: none;
   color: #fff;

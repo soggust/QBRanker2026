@@ -421,6 +421,9 @@ export class BetsPageComponent implements OnInit, OnDestroy {
     for (const a of algoRows) a.confidence = confidenceOf(a.sureness, a.p ?? (a.chance != null ? a.chance / 100 : null), a.edge);
     const locked = (r: BetRow) => (r.confidence === 'lock' ? 0 : 1);
     this.rows = algoRows.sort((a, b) => locked(a) - locked(b) || b.sureness - a.sureness || (a.game?.kickoff ?? '').localeCompare(b.game?.kickoff ?? ''));
+    // TODO(styling test, dev server only): the top pick staged as a lock when the sheet has none, to see a lock's
+    // row. Remove once the look's settled
+    if (this.dev && this.rows.length && !this.rows.some((r) => r.confidence === 'lock')) this.rows[0].confidence = 'lock';
     this.dropStarted();
     this.ticker = setInterval(() => this.dropStarted(), 60_000);
     // ---- wallet (phase 2) ----
