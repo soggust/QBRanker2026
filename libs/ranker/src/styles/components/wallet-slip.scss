@@ -273,6 +273,8 @@ $gold: #ffcf4a;
   &.lock {
     background: #d8323c;
     color: #111;
+    position: relative;
+    @include chip.lock-shine;
   }
 
   &.love {
@@ -589,3 +591,6 @@ $gold: #ffcf4a;
     }
   }
 }
+
+// (the LOCK tag's glint and pulse, _casino-chip.scss)
+@include chip.lock-shine-keyframes;

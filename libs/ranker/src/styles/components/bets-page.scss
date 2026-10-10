@@ -438,6 +438,8 @@ $chip-clay: #b0202b;
   &.grade-lock {
     background: $lock;
     color: #111;
+    position: relative;
+    @include chip.lock-shine;
   }
 
   &.grade-love {
@@ -1324,3 +1326,6 @@ img.bet-face {
 .bet .bet-reasons {
   border-radius: 0 0 8px 8px;
 }
+
+// (the LOCK tag's glint and pulse, _casino-chip.scss)
+@include chip.lock-shine-keyframes;
