@@ -290,12 +290,17 @@ $chip-clay: #b0202b;
     border-bottom: 1px solid chip.$felt-seam;
   }
 
-  // (a Bet: no rail, the felt to its edge; its bar the plain scoreboard, yellow over it reading brown)
+  // (a Bet: its rail's gold softer than a Love's, a little brighter in its lights; its bar lit gold, a sheen
+  // from the top, not a flat yellow (on the dark, that reads brown))
   &.medium {
-    border-width: 0;
+    --rail: linear-gradient(135deg, rgba(150, 114, 40, 0.6), rgba(255, 228, 150, 0.7) 22%, rgba(204, 160, 70, 0.6) 45%, rgba(255, 236, 176, 0.7) 62%, rgba(180, 140, 58, 0.6) 82%, rgba(130, 98, 34, 0.6));
 
     .bet-row {
-      --bar-tint: transparent;
+      background:
+        linear-gradient(180deg, rgba(255, 226, 120, 0.3), rgba(255, 205, 0, 0.12) 55%, rgba(255, 205, 0, 0.08)),
+        radial-gradient(ellipse 70% 120% at 20% 0%, rgba(255, 240, 190, 0.16), transparent 70%),
+        var(--scoreboard-dots),
+        var(--scoreboard);
     }
   }
 
