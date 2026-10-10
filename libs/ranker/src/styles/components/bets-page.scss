@@ -293,7 +293,7 @@ $chip-clay: #b0202b;
   // (a Bet: its rail's gold softer than a Love's, a little brighter in its lights; its bar lit gold, a sheen
   // from the top, not a flat yellow (on the dark, that reads brown))
   &.medium {
-    --rail: linear-gradient(135deg, rgba(150, 114, 40, 0.6), rgba(255, 228, 150, 0.7) 22%, rgba(204, 160, 70, 0.6) 45%, rgba(255, 236, 176, 0.7) 62%, rgba(180, 140, 58, 0.6) 82%, rgba(130, 98, 34, 0.6));
+    --rail: linear-gradient(135deg, rgba(150, 114, 40, 0.38), rgba(255, 228, 150, 0.46) 22%, rgba(204, 160, 70, 0.38) 45%, rgba(255, 236, 176, 0.46) 62%, rgba(180, 140, 58, 0.38) 82%, rgba(130, 98, 34, 0.38));
 
     .bet-row {
       background:
