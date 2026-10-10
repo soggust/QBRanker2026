@@ -1,0 +1,41 @@
+# Makes an account an admin (or not): set-admin.mjs with the Admin key already in the repo's secrets, so no
+# key file has to come back to anyone's computer. Run it from Actions → Set admin → Run workflow (the account
+# must have signed in on the site once); the user sees it on their next visit.
+name: Set admin
+
+on:
+  workflow_dispatch:
+    inputs:
+      email:
+        description: The account's email
+        required: true
+      remove:
+        description: Take admin away instead
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  set-admin:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Install
+        run: npm ci
+
+      - name: Set the claim
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          EMAIL: ${{ inputs.email }}
+          REMOVE: ${{ inputs.remove && '--remove' || '' }}
+        run: node libs/ranker/scripts/accounts/set-admin.mjs "$EMAIL" $REMOVE
