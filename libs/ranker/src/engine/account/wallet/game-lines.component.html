@@ -93,33 +93,47 @@
     </table>
   }
 
-  <!-- (the bot's props on the game: its side, at its price) -->
+  <!-- (the bot's props on the game: both sides where the other's price was kept, over then under, the bot's lit
+       in its band's color with its chip and the other a pass, to bet against it; else its side alone) -->
   @if (props().length) {
     <div class="lines-props" role="list" aria-label="The bot's props">
       @for (p of props(); track p.pickId ?? p.pick) {
         @let t = tier(p);
-        <div class="prop" role="listitem">
+        @let sides = propSides(p);
+        <div class="prop" [class.two]="sides.length === 2" role="listitem">
           <img class="prop-face" [src]="face(p)" alt="" (error)="hideImage($event)" />
-          <span class="prop-words"><b>{{ p.player }}</b><small>{{ propWords(p) }}</small></span>
-          <button
-            type="button"
-            class="price bot"
-            [ngClass]="t ?? ''"
-            [class.on]="wallet.slipKeys().has(propKey(p))"
-            [class.placed]="wallet.openStakes().has(propKey(p))"
-            [attr.aria-pressed]="wallet.slipKeys().has(propKey(p))"
-            [attr.aria-label]="p.pick + ' ' + oddsText(p.price ?? null) + ', the bot’s pick (' + t + ')'"
-            [title]="p.pick + ' ' + oddsText(p.price ?? null) + ' · The bot’s pick: ' + t?.toUpperCase() + ', Kelly ' + kellyText(p)"
-            [disabled]="!open"
-            (click)="takeProp(p)"
-          >
-            <span class="price-chip" [ngClass]="t ?? ''" aria-hidden="true">@if (t === 'lock') {<mat-icon class="tier-lock" aria-hidden="true" fontIcon="lock"></mat-icon>}{{ t }}</span>
-            <span class="price-odds">{{ oddsText(p.price ?? null) }}</span>
-            <small class="price-kelly">K {{ kellyText(p) }}</small>
-            @if (wallet.openStakes().get(propKey(p)); as staked) {
-              <mat-icon class="price-placed" [title]="'You have ' + staked + 'u on this'" fontIcon="check_circle"></mat-icon>
-            }
-          </button>
+          <span class="prop-words"><b>{{ p.player }}</b><small>{{ sides.length === 2 ? p.line + ' ' + p.market : propWords(p) }}</small></span>
+          @for (s of sides; track s.side) {
+            <button
+              type="button"
+              class="price"
+              [ngClass]="s.bot ? (t ?? '') : ''"
+              [class.bot]="s.bot"
+              [class.on]="wallet.slipKeys().has(propKey(p, s.side))"
+              [class.placed]="wallet.openStakes().has(propKey(p, s.side))"
+              [attr.aria-pressed]="wallet.slipKeys().has(propKey(p, s.side))"
+              [attr.aria-label]="sideWords(p, s) + ' ' + oddsText(s.odds) + (s.bot ? ', the bot’s pick (' + t + ')' : '')"
+              [title]="sideWords(p, s) + ' ' + oddsText(s.odds) + (s.bot ? ' · The bot’s pick: ' + t?.toUpperCase() + ', Kelly ' + kellyText(p) : ' · Against the bot’s pick')"
+              [disabled]="!open"
+              (click)="takeProp(p, s)"
+            >
+              @if (wallet.openStakes().get(propKey(p, s.side)); as staked) {
+                <mat-icon class="price-placed" [title]="'You have ' + staked + 'u on this'" fontIcon="check_circle"></mat-icon>
+              }
+              @if (s.bot) {
+                <span class="price-chip" [ngClass]="t ?? ''" aria-hidden="true">@if (t === 'lock') {<mat-icon class="tier-lock" aria-hidden="true" fontIcon="lock"></mat-icon>}{{ t }}</span>
+              } @else {
+                <span class="price-chip pass" aria-hidden="true">pass</span>
+              }
+              @if (sides.length === 2) {
+                <b class="price-line">{{ s.side === 'over' ? 'O ' : 'U ' }}{{ p.line }}</b>
+              }
+              <span class="price-odds">{{ oddsText(s.odds) }}</span>
+              @if (s.bot) {
+                <small class="price-kelly">K {{ kellyText(p) }}</small>
+              }
+            </button>
+          }
         </div>
       }
     </div>

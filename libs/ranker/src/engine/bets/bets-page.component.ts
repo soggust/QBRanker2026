@@ -70,6 +70,8 @@ export interface BetRow {
   ev?: number;
   units?: number;
   price?: number;
+  // (a prop's other side's price, where the bettor kept it)
+  otherPrice?: number | null;
   book?: string;
   why?: PickWhy | null;
   // (its line, and its id in the bettor's ledger: "<ESPN event>:<market>", a prop "<event>:prop:<type>:<athlete>")
@@ -160,6 +162,8 @@ interface Pick {
   pick: string;
   line: number | null;
   odds: number;
+  // (a prop's other side's price: picks written before carry none)
+  otherOdds?: number | null;
   book: string;
   start: string;
   matchup: string;
@@ -362,6 +366,7 @@ export class BetsPageComponent implements OnInit, OnDestroy {
             ev: p.ev,
             units: p.units,
             price: p.odds,
+            otherPrice: p.otherOdds ?? null,
             book: p.book,
             why: p.why ?? null,
             line: p.line,

@@ -12,6 +12,8 @@ export interface BotPick {
   side?: string | null;
   line?: number | null;
   price?: number;
+  // (a prop's other side's price, where the bettor kept it: to take the side the bot didn't)
+  otherPrice?: number | null;
   confidence: Confidence | null;
   sureness: number;
   pickId?: string;
@@ -20,6 +22,13 @@ export interface BotPick {
   market: string;
   pick: string;
   chance?: number;
+}
+
+// (one side of a prop on the board)
+interface PropSide {
+  side: string;
+  odds: number;
+  bot: boolean;
 }
 
 const MARKET_OF: Record<string, PlayMarket> = { spread: 'spread', total: 'total', moneyline: 'ml', player: 'prop' };
@@ -62,7 +71,7 @@ export class GameLinesComponent implements OnInit, OnDestroy {
     return this.lines.board(this.sport, this.event);
   }
 
-  // (the props: the bot's, its side at its price)
+  // (the props: the bot's, its side at its price, and the other side's where it's known)
   readonly props = computed(() => this.botPicks().filter((p) => p.betType === 'player' && Number.isFinite(p.price) && p.line !== null && p.line !== undefined));
 
   async ngOnInit(): Promise<void> {
@@ -127,8 +136,22 @@ export class GameLinesComponent implements OnInit, OnDestroy {
     return selectionKey({ sport: this.sport, event: this.event, market: price.market, side: price.side });
   }
 
-  propKey(p: BotPick): string {
-    return selectionKey({ sport: this.sport, event: this.event, market: 'prop', side: p.side ?? '', propType: this.propType(p), athlete: String(p.athleteId ?? '') });
+  propKey(p: BotPick, side = p.side ?? ''): string {
+    return selectionKey({ sport: this.sport, event: this.event, market: 'prop', side, propType: this.propType(p), athlete: String(p.athleteId ?? '') });
+  }
+
+  // A prop's sides as the board lays them out, over then under: the bot's at its price, the other at its own
+  // (only the bot's where the other side's price wasn't kept)
+  propSides(p: BotPick): PropSide[] {
+    const mine = { side: p.side ?? 'over', odds: p.price as number, bot: true };
+    if (!Number.isFinite(p.otherPrice)) return [mine];
+    const other = { side: mine.side === 'over' ? 'under' : 'over', odds: p.otherPrice as number, bot: false };
+    return mine.side === 'over' ? [mine, other] : [other, mine];
+  }
+
+  // (a side's words: "Connor McDavid Under 3.5 Shots")
+  sideWords(p: BotPick, s: PropSide): string {
+    return `${p.player ? p.player + ' ' : ''}${s.side === 'over' ? 'Over' : 'Under'} ${p.line} ${p.market}`;
   }
 
   private propType(p: BotPick): string {
@@ -160,8 +183,8 @@ export class GameLinesComponent implements OnInit, OnDestroy {
     });
   }
 
-  takeProp(p: BotPick): void {
-    if (!this.open || !Number.isFinite(p.price)) return;
+  takeProp(p: BotPick, s: PropSide = this.propSides(p)[0]): void {
+    if (!this.open || !Number.isFinite(s.odds)) return;
     const line = p.line as number;
     this.wallet.toggle({
       sport: this.sport,
@@ -169,14 +192,14 @@ export class GameLinesComponent implements OnInit, OnDestroy {
       matchup: this.matchupText,
       start: this.board?.start ?? this.start,
       market: 'prop',
-      side: p.side ?? 'over',
+      side: s.side,
       line,
-      odds: p.price as number,
-      pick: p.pick,
-      botPick: true,
-      tier: this.tier(p),
-      kelly: Math.round(p.sureness * 1e4) / 100,
-      ref: p.pickId ?? null,
+      odds: s.odds,
+      pick: s.bot ? p.pick : this.sideWords(p, s),
+      botPick: s.bot,
+      tier: s.bot ? this.tier(p) : null,
+      kelly: s.bot ? Math.round(p.sureness * 1e4) / 100 : null,
+      ref: s.bot ? (p.pickId ?? null) : null,
       propType: this.propType(p),
       athlete: String(p.athleteId ?? ''),
       player: p.player ?? null,

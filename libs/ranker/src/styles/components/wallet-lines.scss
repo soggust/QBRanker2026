@@ -297,6 +297,11 @@ $lock-gold: chip.$lock-gold;
   gap: 10px;
   grid-template-columns: 34px minmax(0, 1fr) 92px;
 
+  // (both sides: over then under, a column each)
+  &.two {
+    grid-template-columns: 34px minmax(0, 1fr) 92px 92px;
+  }
+
   .price {
     min-height: 42px;
   }
