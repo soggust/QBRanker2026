@@ -278,7 +278,7 @@ $lock-gold: #ffcf4a;
 
   &.lock {
     background: $lock;
-    color: #111;
+    color: #fff;
     @include chip.lock-shine;
   }
 

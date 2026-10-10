@@ -324,7 +324,7 @@ $gold: #ffcf4a;
 
   &.lock {
     background: $lock;
-    color: #111;
+    color: #fff;
     position: relative;
     @include casino.lock-shine;
   }
