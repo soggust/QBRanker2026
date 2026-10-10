@@ -414,7 +414,9 @@ $chip-clay: #b0202b;
   font-size: 10.5px;
   font-weight: 900;
   letter-spacing: 0.8px;
-  padding: 3px 0;
+  // (capitals only: a line box of their height, a hair more above them, so they sit in the badge's middle)
+  line-height: 1;
+  padding: 5px 0 4px;
   text-align: center;
   text-transform: uppercase;
   // (flat on its color, no shadow under the letters: only Pass, outlined on the chip, keeps the row's)
@@ -923,12 +925,18 @@ $arm-length: 175px;
 // the pick, its one word that says what the bet is in its team's color (the board's light without one), and its
 // price under it
 .bet-main.has-circle {
+  align-content: center;
   align-items: center;
   column-gap: 12px;
   display: grid;
   grid-template-columns: auto 1fr;
 
   .bet-circle {
+    grid-row: span 2;
+  }
+
+  // (a pick alone, no price under it: down its circle's middle)
+  > b:last-child {
     grid-row: span 2;
   }
 }
