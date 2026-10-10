@@ -14,7 +14,9 @@
 //   a bet: only with an expected return over 0 at the trusted chance, 0.5 to 3 units by it as a game market's;
 //   at most PER_GAME a game (the best first); cut to 0.5 when the line has moved a lot since it opened or the
 //   player's questionable, skipped at twice the move or when he's out (or not in a posted lineup, or not the
-//   probable starting pitcher or goalie)
+//   probable starting pitcher or goalie), when teammates at his position are out and the projection can't size
+//   the work they leave (an NFL back's or pass-catcher's role changing), or when its chance is more than 30
+//   points from the book's (the market knowing something it doesn't)
 
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
@@ -47,11 +49,11 @@ export const STATS = {
     stat('passCmp', 'Completions', /^Total Pass Completions/, { played: QB, ctx: 'wind', volume: 'pass' }),
     stat('passTd', 'Pass TDs', /^Total Passing Touchdowns/, { played: QB, ctx: 'wind' }),
     stat('passInt', 'INTs', /^Total Passing Interceptions/, { played: QB, ctx: 'wind' }),
-    stat('rushYds', 'Rush Yds', /^Total Rushing Yards \(/, { played: RUSH, roles: true, volume: 'rush' }),
-    stat('rushAtt', 'Carries', /^Total Carries/, { played: RUSH, roles: true, volume: 'rush' }),
-    stat('recYds', 'Rec Yds', /^Total Receiving Yards \(/, { played: CATCH, ctx: 'backupQb', roles: true, volume: 'pass', targets: true }),
-    stat('rec', 'Receptions', /^Total Receptions/, { played: CATCH, ctx: 'backupQb', roles: true, volume: 'pass', targets: true }),
-    stat('rushRecYds', 'Rush+Rec Yds', /^Total Rushing Plus Receiving Yards/, { played: (r) => RUSH(r) || CATCH(r), ctx: 'backupQb', roles: true, targets: true }),
+    stat('rushYds', 'Rush Yds', /^Total Rushing Yards \(/, { played: RUSH, ctx: 'backupQb', roles: true, volume: 'rush', vacated: true }),
+    stat('rushAtt', 'Carries', /^Total Carries/, { played: RUSH, ctx: 'backupQb', roles: true, volume: 'rush', vacated: true }),
+    stat('recYds', 'Rec Yds', /^Total Receiving Yards \(/, { played: CATCH, ctx: 'backupQb', roles: true, volume: 'pass', targets: true, vacated: true }),
+    stat('rec', 'Receptions', /^Total Receptions/, { played: CATCH, ctx: 'backupQb', roles: true, volume: 'pass', targets: true, vacated: true }),
+    stat('rushRecYds', 'Rush+Rec Yds', /^Total Rushing Plus Receiving Yards/, { played: (r) => RUSH(r) || CATCH(r), ctx: 'backupQb', roles: true, targets: true, vacated: true }),
   ],
   nba: [
     stat('pts', 'Points', /^Total Points( \(|$)/, { played: (r) => r.s.min >= 10, ctx: 'usage', posGroup: () => 'all', roles: true }),
@@ -305,8 +307,10 @@ export function priceProps(sport, game, props, fitted, idx, exp, info, live, tru
     const home = String(a.team) === String(game.home) ? true : String(a.team) === String(game.away) ? false : null;
     if (home === null) continue;
     const row = { pid, name: a.name, pos: idx.pos(pid) ?? a.pos, date: game.date, season: game.season, team: home ? game.home : game.away, opp: home ? game.away : game.home, game: game.id, home, s: {} };
-    // (his role and the defense's funnel, pace and target split, as of now)
-    if (f.matchups) Object.assign(row, f.matchups.live(pid, row.team, row.opp, row.pos, game.season));
+    // (his role and the defense's funnel, pace and target split, as of now; and the work his position group's
+    // regulars out for this game leave (out, doubtful or on IR on the injury report))
+    const out = outOf(live, row.team, row.pos);
+    if (f.matchups) Object.assign(row, f.matchups.live(pid, row.team, row.opp, row.pos, game.season, out.ids));
     const p = f.model.project(row);
     if (!p) continue;
     // (the game script and the context: this game's, from the game model's expectation and its terms)
@@ -314,7 +318,7 @@ export function priceProps(sport, game, props, fitted, idx, exp, info, live, tru
     const opp = home ? exp.awayPts : exp.homePts;
     const scriptV = (f.stat.script === 'opp' ? opp : own) / (f.env.avg || own || 1);
     const ctxV = ctxNow(f.stat.ctx, info, home);
-    const mu = Math.max(0.05, (f.params.scale ?? 1) * p.base * Math.pow(p.opp, f.params.a) * Math.pow(scriptV, f.params.b) * Math.exp(f.params.c * ctxV) * p.funnelF * p.paceF * p.tgtF);
+    const mu = Math.max(0.05, (f.params.scale ?? 1) * p.base * Math.pow(p.opp, f.params.a) * Math.pow(scriptV, f.params.b) * Math.exp(f.params.c * ctxV) * p.funnelF * p.paceF * p.tgtF * (p.vacF ?? 1));
     // (the defense against his role this season, whether or not the projection weighs it: its allowed over
     // those players' usual, and its rank in the league, 1 the stingiest)
     let roleRank = null;
@@ -352,7 +356,15 @@ export function priceProps(sport, game, props, fitted, idx, exp, info, live, tru
     const moved = prop.open !== null ? prop.line - prop.open : 0;
     const limit = Math.max(1, 0.12 * prop.line);
     let guard = null;
+    // (teammates out at his position, whose work the projection can't share out (the stat's fit left the term
+    // out, or has none): his role is changing in a way it can't size)
+    const vacUnsized = (row.vac ?? 0) >= 0.25 && !(prop.stat.vacated && f.params.vc);
+    // (the model's chance far from the book's: a gap that size is the market knowing something the model doesn't,
+    // an injury, a role, a lineup, far more often than an edge)
+    const gap = Math.abs(model - fair);
     if (status.skip) guard = { skip: true, why: status.why };
+    else if (vacUnsized) guard = { skip: true, why: `teammates out (${out.names.join(', ')}): a role change the model can't size` };
+    else if (gap > 0.3) guard = { skip: true, why: `the model's ${Math.round(model * 100)}% against the book's ${Math.round(fair * 100)}%: too far from the market to trust` };
     // (a long shot at the book's own price: where a projection's errors are biggest and the book is most
     // likely right)
     else if (prop.prices && fair < 0.25) guard = { skip: true, why: `a long shot (the book's fair chance ${Math.round(fair * 100)}%)` };
@@ -372,12 +384,20 @@ export function priceProps(sport, game, props, fitted, idx, exp, info, live, tru
       ev,
       units: guard ? 0.5 : stakeFor(ev, evScale),
       guard,
-      projection: { mean: round(mu, 2), r: f.params.r, rate: round(p.rate, 2), recent: round(p.recent, 2), opp: round(p.opp, 3), posOpp: round(p.posOpp, 3), role: p.role, roleOpp: p.roleOpp === null ? null : round(p.roleOpp, 3), roleFactor: roleFactor === null ? null : round(roleFactor, 3), roleRank, roleUsed: Number.isFinite(f.params.roleK), funnel: p.funnel === null ? null : round(p.funnel, 3), funnelUsed: !!f.params.fun, funnelF: round(p.funnelF, 3), paceF: round(p.paceF, 3), tgtF: round(p.tgtF, 3), script: round(scriptV, 3), ctx: round(ctxV, 2), games: p.games, lastSeason: p.prevGames, pOver: round(pOver, 4), fairOver: round(fairOver, 4), record: round(n, 1) },
+      projection: { mean: round(mu, 2), r: f.params.r, rate: round(p.rate, 2), recent: round(p.recent, 2), opp: round(p.opp, 3), posOpp: round(p.posOpp, 3), role: p.role, roleOpp: p.roleOpp === null ? null : round(p.roleOpp, 3), roleFactor: roleFactor === null ? null : round(roleFactor, 3), roleRank, roleUsed: Number.isFinite(f.params.roleK), funnel: p.funnel === null ? null : round(p.funnel, 3), funnelUsed: !!f.params.fun, funnelF: round(p.funnelF, 3), paceF: round(p.paceF, 3), tgtF: round(p.tgtF, 3), vac: round(p.vac ?? 0, 3), vacF: round(p.vacF ?? 1, 3), out: out.names.length ? out.names : undefined, script: round(scriptV, 3), ctx: round(ctxV, 2), games: p.games, lastSeason: p.prevGames, pOver: round(pOver, 4), fairOver: round(fairOver, 4), record: round(n, 1) },
       move: prop.open !== null ? { open: prop.open, now: prop.line } : null,
     });
   }
   const bets = priced.filter((x) => !x.guard?.skip).sort((a, b) => b.ev - a.ev);
   return { priced, bets };
+}
+
+// (a team's players out for a coming game, by the injury report: out, doubtful, on IR or suspended)
+const OUT_STATUS = /^out|doubtful|injured reserve|suspension/i;
+// (names: the ones at his position)
+function outOf(live, team, pos) {
+  const list = (live?.injuries?.get(String(team)) ?? []).filter((p) => OUT_STATUS.test(p.status) && p.id);
+  return { ids: new Set(list.map((p) => String(p.id))), names: list.filter((p) => !pos || !p.pos || p.pos === pos).map((p) => p.name) };
 }
 
 // (a context term's value for a coming game, from its info)

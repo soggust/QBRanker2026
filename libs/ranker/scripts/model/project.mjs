@@ -19,6 +19,11 @@
 //            volume term, exp(fun x funnel) for a passing or receiving stat, exp(-fun x funnel) for a rushing one;
 //            its pace (its opponents' plays over their usual) to the power pc; the share of targets it allows to
 //            his position over the league's, to the power tg (a receiving stat)
+//   vacated  the NFL backs' and pass-catchers': his cut of the work his position group is missing (its
+//            regulars not playing, matchups.mjs vacs) over his own, to the power vc: (1 + cut)^vc, a starter's
+//            work shared out; how it's shared (vs: in proportion to each one's work, or flatter, to equally, the
+//            next man up's cut as big as anyone's) fit with it (vc 0: left out, kept only if the held-out games
+//            are better with it)
 //   context  one term per stat where the model has it: wind on NFL passing, a backup quarterback throwing to
 //            NFL receivers, teammates out (production missing) for an NBA player's usage; size c
 //   scale    the eligible players' total over their total projection on the fit window: what's left of a lean
@@ -123,8 +128,9 @@ export function makeModel(stat, params, env) {
     const funnelF = dir && params.fun ? Math.exp(params.fun * dir * (row.funnel ?? 0)) : 1;
     const paceF = stat.volume && params.pc ? Math.pow(row.pace ?? 1, params.pc) : 1;
     const tgtF = stat.targets && params.tg ? Math.pow(row.tgt ?? 1, params.tg) : 1;
-    const mu = Math.max(0.05, (params.scale ?? 1) * base * Math.pow(opp, params.a) * Math.pow(script, params.b) * Math.exp(params.c * ctx) * funnelF * paceF * tgtF);
-    return { mu, rate, recent, base, opp, posOpp, roleOpp, role: row.role ?? null, funnel: row.funnel ?? null, funnelF, paceF, tgtF, script, ctx, prior, games: cur.n, prevGames: prev.n };
+    const vacF = stat.vacated && params.vc ? Math.pow(1 + (row.vacs?.[params.vs ?? 0] ?? 0), params.vc) : 1;
+    const mu = Math.max(0.05, (params.scale ?? 1) * base * Math.pow(opp, params.a) * Math.pow(script, params.b) * Math.exp(params.c * ctx) * funnelF * paceF * tgtF * vacF);
+    return { mu, rate, recent, base, opp, posOpp, roleOpp, role: row.role ?? null, funnel: row.funnel ?? null, funnelF, paceF, tgtF, vac: row.vacs?.[params.vs ?? 0] ?? 0, vacF, script, ctx, prior, games: cur.n, prevGames: prev.n };
   };
   return {
     project: parts,
@@ -225,10 +231,12 @@ function scoreOf(out, win) {
   return { ...best, n: list.length };
 }
 
-const GRID = { K: [2, 4, 8, 16, 32], w: [0, 0.2, 0.4, 0.6], a: [0, 0.5, 1], b: [-0.5, 0, 0.5, 1, 1.5], c: [-0.3, -0.15, 0, 0.15, 0.3], roleK: [Infinity, 32, 16, 8, 4, 2], fun: [0, 1, 2, 4, 8], pc: [0, 0.5, 1, 1.5], tg: [0, 0.5, 1] };
+const GRID = { K: [2, 4, 8, 16, 32], w: [0, 0.2, 0.4, 0.6], a: [0, 0.5, 1], b: [-0.5, 0, 0.5, 1, 1.5], c: [-0.3, -0.15, 0, 0.15, 0.3], roleK: [Infinity, 32, 16, 8, 4, 2], fun: [0, 1, 2, 4, 8], pc: [0, 0.5, 1, 1.5], tg: [0, 0.5, 1], vc: [0, 0.25, 0.5, 0.75, 1, 1.25] };
+// (the vacated work's split, by index into matchups.mjs's: in proportion, flatter, equally; searched with vc)
+const SPLIT = [0, 1, 2];
 // (each matchup term's off setting, and which stats have it)
-const OPTIONAL = { roleK: Infinity, fun: 0, pc: 0, tg: 0 };
-const has = (stat, key) => (key === 'roleK' ? !!stat.roles : key === 'tg' ? !!stat.targets : !!stat.volume);
+const OPTIONAL = { roleK: Infinity, fun: 0, pc: 0, tg: 0, vc: 0 };
+const has = (stat, key) => (key === 'roleK' ? !!stat.roles : key === 'tg' ? !!stat.targets : key === 'vc' ? !!stat.vacated : !!stat.volume);
 
 // (a window's chances of going over a line at each player's median so far, and what happened)
 function linePairs(list, r) {
@@ -276,15 +284,17 @@ export function fitStat(stat, rows, env) {
   if (sorted.length < 300) return null;
   const at = (q) => sorted[Math.floor(sorted.length * q)].date.slice(0, 10);
   const cuts = [at(0.3), at(0.7)];
-  let params = { K: 4, w: 0.2, a: 0.5, b: 0.5, c: 0, ...OPTIONAL };
+  let params = { K: 4, w: 0.2, a: 0.5, b: 0.5, c: 0, ...OPTIONAL, ...(stat.vacated ? { vs: 0 } : {}) };
   const optional = Object.keys(OPTIONAL).filter((k) => has(stat, k));
   const keys = [...(env.ctx ? ['K', 'w', 'a', 'b', 'c'] : ['K', 'w', 'a', 'b']), ...optional];
   let best = scoreOf(replayStat(stat, sorted, params, env, cuts).out, 1);
   for (let pass = 0; pass < 2; pass++) {
     for (const key of keys) {
-      for (const v of GRID[key]) {
-        if (v === params[key]) continue;
-        const tryP = { ...params, [key]: v };
+      // (the vacated work's strength and its split together: the split means nothing without the strength)
+      const tries = key === 'vc' ? GRID.vc.flatMap((v) => SPLIT.map((vs) => ({ vc: v, vs }))) : GRID[key].map((v) => ({ [key]: v }));
+      for (const t of tries) {
+        if (Object.keys(t).every((k) => t[k] === params[k])) continue;
+        const tryP = { ...params, ...t };
         const s = scoreOf(replayStat(stat, sorted, tryP, env, cuts).out, 1);
         if (s.ll > best.ll) (best = s), (params = tryP);
       }

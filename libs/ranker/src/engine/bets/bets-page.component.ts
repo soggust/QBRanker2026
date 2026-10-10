@@ -1,4 +1,4 @@
-import { Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild, inject, isDevMode } from '@angular/core';
+import { Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
 import { tierOf } from './tiers';
 import { BetsView, betsView, chooseBetsView } from './bets-view';
 import { LinesService } from '../account/wallet/lines.service';
@@ -243,8 +243,8 @@ export class BetsPageComponent implements OnInit, OnDestroy {
     (event.target as HTMLElement).style.visibility = 'hidden';
   }
 
-  // (the model desk's admin panel: on the dev server only)
-  readonly dev = isDevMode();
+  // (the model desk, the Algorithm: an admin's, and on the dev server)
+  readonly desk = (): boolean => canUse('experimental');
   readonly canUse = canUse;
   private readonly wallet = inject(WalletService);
   // (Open Bets: only with bets of the user's not yet settled; the last one settled, back to Place Bets)
@@ -263,7 +263,7 @@ export class BetsPageComponent implements OnInit, OnDestroy {
   // visit: bets-view.ts)
   get view(): BetsView {
     const view = betsView();
-    if (view === 'desk') return this.dev ? view : 'bets';
+    if (view === 'desk') return this.desk() ? view : 'bets';
     if (view === 'open') return this.hasOpen() ? view : 'bets';
     if (view === 'closed') return this.hasClosed() ? view : 'bets';
     return view;

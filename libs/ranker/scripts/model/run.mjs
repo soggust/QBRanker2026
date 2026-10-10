@@ -350,6 +350,11 @@ async function fitTheProps(r) {
     const info = new Map([...(r.feats?.feats ?? new Map())].map(([id, f]) => [id, f.info]));
     r.props = fitProps(sport, r.rows, r.expPts, info, r.facts);
     console.log(`${sport}: props' projections fit on ${r.rows.length} player games in ${Math.round((Date.now() - t0) / 1000)}s`);
+    // (each stat's matchup terms kept, and what each did for the held-out games' log loss)
+    for (const [key, f] of Object.entries(r.props ?? {})) {
+      const kept = Object.entries(f.gains ?? {}).map(([k, g]) => `${k} ${f.params[k]}${k === 'vc' ? `/${f.params.vs}` : ''} (${g === null ? 'not taken' : g > 0 ? `+${g}` : `${g}, left out`})`);
+      if (kept.length) console.log(`${sport}:   ${key}: ${kept.join(', ')}`);
+    }
   } catch (err) {
     console.warn(`${sport}: props left out (${err.stack ?? err})`);
   }

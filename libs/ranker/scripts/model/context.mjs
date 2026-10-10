@@ -42,8 +42,8 @@ export const TERMS = {
   nfl: [
     REST,
     TRAVEL,
-    term('qb', 'starters', 'm', 'Backup QB', 'when the other side starts a backup quarterback'),
-    term('qbT', 'starters', 't', 'Backup QBs (total)', 'to the total per backup quarterback starting'),
+    term('qb', 'starters', 'm', 'Backup QB', 'when the other side starts a backup quarterback, by how much worse he is'),
+    term('qbT', 'starters', 't', 'Backup QBs (total)', 'to the total per backup quarterback starting, by how much worse he is'),
     term('cold', 'weather', 't', 'Cold', 'to the total per 10°F below 50°F (outdoors)'),
     term('wind', 'weather', 't', 'Wind', 'to the total per 10 mph of wind over 5 (outdoors)'),
   ],
@@ -673,9 +673,19 @@ function statusOf(report, teamId, { id, name }) {
 // Starters, per sport: a function of a game that gives its starter terms, what they came from and any
 // worries (flags: a key player questionable, a starter unknown), and learns from it once it's final
 const STARTERS = {
-  // The NFL: whether each side starts its usual quarterback (the one with most of its last 4 starts this season)
+  // The NFL: whether each side starts its usual quarterback (the one with most of its last 4 starts this season),
+  // and if not, how much worse the one starting is: each quarterback's offense's EPA a play on neutral downs in
+  // his starts (recent seasons counting most), pulled toward a backup's by 6 starts; the usual one's less the
+  // starter's, over 0.15 (a typical starter against a typical backup), from -1 (better) to 3 (far worse); a
+  // starter not known yet (the usual one out, no one named): a typical backup
   nfl: (cfg, facts, live) => {
     const starts = new Map();
+    const quality = new Map();
+    const BACKUP = -0.08;
+    const qOf = (qb) => {
+      const x = quality.get(qb);
+      return x ? (x.sum + BACKUP * 6) / (x.n + 6) : BACKUP;
+    };
     let pending = null;
     return (g) => {
       const row = facts.nfl?.get(g.id);
@@ -695,6 +705,8 @@ const STARTERS = {
           if (st === 'out') backup = 1;
           if (st === 'questionable') flags.push(`QB ${usualName} questionable`);
         }
+        const starter = backup && qb && qb !== usual ? qb : null;
+        if (backup) backup = Math.round(Math.max(-1, Math.min(3, (qOf(usual) - (starter ? qOf(starter) : BACKUP)) / 0.15)) * 100) / 100;
         return { backup, name: backup && !qb ? null : name, usual: usualName };
       };
       const h = one(g.home, 'home');
@@ -712,6 +724,14 @@ const STARTERS = {
           ]) {
             const qb = pending.row[`${where}_qb_id`];
             if (qb) starts.set(team, [...(starts.get(team) ?? []).slice(-20), { season: pending.g.season, qb, name: pending.row[`${where}_qb_name`] }]);
+            // (his start's EPA a play, a season back counting 0.7)
+            const plays = facts.plays?.[pending.g.id];
+            const at = where === 'home' ? 0 : 2;
+            if (qb && plays && plays[at + 1] >= 15) {
+              const x = quality.get(qb) ?? { sum: 0, n: 0, season: pending.g.season };
+              const fade = Math.pow(0.7, pending.g.season - x.season);
+              quality.set(qb, { sum: x.sum * fade + plays[at] / plays[at + 1], n: x.n * fade + 1, season: pending.g.season });
+            }
           }
         },
       };

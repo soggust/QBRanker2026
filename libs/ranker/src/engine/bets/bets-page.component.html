@@ -1,9 +1,9 @@
 <!-- The algorithm's top picks for every sport, one row per bet, the biggest edge first, each with its chance
      to win; a row opens to its reasoning -->
 <div class="bets-page" [class.desk-view]="view === 'desk'">
-  <!-- (the bets to place, the user's open bets (when they have some), or, dev only, the code-only model desk's
+  <!-- (the bets to place, the user's open bets (when they have some), or, an admin's, the code-only model desk's
        play-money betting, its record and its changes to itself; one at a time) -->
-  @if (dev || hasOpen() || hasClosed()) {
+  @if (desk() || hasOpen() || hasClosed()) {
     <nav class="bets-views" aria-label="View">
       <button type="button" [class.active]="view === 'bets'" [attr.aria-current]="view === 'bets' ? 'page' : null" (click)="view = 'bets'">Place Bets</button>
       @if (hasOpen()) {
@@ -12,7 +12,7 @@
       @if (hasClosed()) {
         <button type="button" [class.active]="view === 'closed'" [attr.aria-current]="view === 'closed' ? 'page' : null" (click)="view = 'closed'">Closed Bets</button>
       }
-      @if (dev) {
+      @if (desk()) {
         <button type="button" [class.active]="view === 'desk'" [attr.aria-current]="view === 'desk' ? 'page' : null" (click)="view = 'desk'">Algorithm</button>
       }
     </nav>
