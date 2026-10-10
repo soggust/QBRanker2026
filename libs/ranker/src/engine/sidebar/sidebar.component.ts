@@ -20,12 +20,10 @@ import {
   SkillWeights,
   presetWeights,
 } from '@sport/positions';
-// ---- lists (phase 2) ----
 import { AccountService } from '@ranker/engine/account/account.service';
 import { PresetsStore } from '@ranker/engine/account/presets/presets.store';
 import { PresetBarComponent, SAVE_PRESET, SIGN_IN_PRESET } from '@ranker/engine/account/presets/preset-bar.component';
 import { USER_PRESET, UserPreset } from '@ranker/engine/account/lists/lists-helpers';
-// ---- end lists ----
 
 // A sidebar row: one stat, or a pair (e.g. rushing + receiving yards) shown as a parent slider with
 // the two as its expandable breakdown
@@ -67,7 +65,6 @@ export class SidebarComponent implements OnInit {
     SkillPreset | 'custom' | null
   >;
 
-  // ---- lists (phase 2) ----
   // The user's own presets for this tab, under the built-in ones (signed in), and the dropdown's actions
   readonly account = inject(AccountService);
   private readonly presetsStore = inject(PresetsStore);
@@ -94,7 +91,6 @@ export class SidebarComponent implements OnInit {
   userPresetCleared(): void {
     this.skillPresets[this.position] = 'custom';
   }
-  // ---- end lists ----
 
   private readonly destroyRef = inject(DestroyRef);
 
@@ -202,7 +198,7 @@ export class SidebarComponent implements OnInit {
 
   onSkillPresetChange(bar?: PresetBarComponent): void {
     const preset = this.skillPresets[this.position];
-    // ---- lists (phase 2): Save as preset… (or Sign in), then the dropdown as it was; a user preset ----
+    // Save as preset… (or Sign in), then the dropdown as it was; a user preset
     if (preset === SAVE_PRESET || preset === SIGN_IN_PRESET) {
       this.skillPresets[this.position] = this.presetShown;
       bar?.saveNew();
@@ -212,7 +208,6 @@ export class SidebarComponent implements OnInit {
       bar?.apply(preset.slice(USER_PRESET.length));
       return;
     }
-    // ---- end lists ----
     if (!preset || preset === 'custom') return;
     this.skillWeights = presetWeights(this.position, preset);
     this.saveSkillWeights();

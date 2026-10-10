@@ -36,7 +36,6 @@
           } @else {
             <mat-option [value]="signInPreset" title="Sign in to save your own presets"><mat-icon fontIcon="login"></mat-icon>SIGN IN TO SAVE PRESETS</mat-option>
           }
-          <!-- end lists -->
         </mat-select>
         <!-- lists (phase 2): the user preset in use: Rename / Delete beside the dropdown, Update under it
              once the sliders have moved -->
@@ -49,7 +48,6 @@
           (picked)="skillPresets[skill] = $event"
           (cleared)="userPresetCleared()"
         ></preset-bar>
-        <!-- end lists -->
         </div>
       </div>
 

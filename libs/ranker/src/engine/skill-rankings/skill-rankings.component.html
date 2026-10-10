@@ -335,7 +335,6 @@
     <!-- Share the list: Copy to Clipboard (text and a table with logos), or Copy Link (its tab, season,
          sliders and settings: share.ts) -->
     <button type="button" #shareButton [matMenuTriggerFor]="shareMenu" aria-label="Share: copy the list or a link" title="Copy the list or a link" class="share-toggle">
-    <!-- end lists -->
       <mat-icon aria-hidden="true" fontIcon="share"></mat-icon>
     </button>
 
@@ -458,7 +457,6 @@
       <mat-icon aria-hidden="true" fontIcon="link"></mat-icon><span>Copy Link</span>
     </button>
   </mat-menu>
-  <!-- end lists -->
 
   <mat-menu #moreMenu="matMenu" class="more-menu" xPosition="before">
     <!-- lists (round 2): the toolbar's Save, then the Share menu's two -->
@@ -471,7 +469,6 @@
     <button mat-menu-item type="button" (click)="shareList(moreButton)">
       <mat-icon aria-hidden="true" fontIcon="link"></mat-icon><span>Copy Link</span>
     </button>
-    <!-- end lists -->
     <button mat-menu-item type="button" (click)="openAbout()">
       <mat-icon aria-hidden="true" fontIcon="info"></mat-icon><span>About &amp; FAQ</span>
     </button>
@@ -503,4 +500,3 @@
     <button type="button" class="save-toast-close" aria-label="Dismiss" title="Dismiss" (click)="dismissSaved()"><mat-icon aria-hidden="true" fontIcon="close"></mat-icon></button>
   }
 </div>
-<!-- end lists -->

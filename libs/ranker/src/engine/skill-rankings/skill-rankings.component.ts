@@ -32,12 +32,10 @@ import { copyRankingsToClipboard } from '@ranker/core/clipboard';
 import { RowGlide } from './row-glide';
 import { TabRanker } from './tab-ranker';
 import { RankWhy, rankWhy, scoreText, signedScore } from './rank-why';
-// ---- lists (phase 2, round 2) ----
 import { ListDraft } from '@ranker/engine/account/lists/lists.store';
 import { draftTitle, gridDraft } from '@ranker/engine/account/lists/grid-draft';
 import { listPath } from '@ranker/engine/account/lists/lists-helpers';
 import { AccountService } from '@ranker/engine/account/account.service';
-// ---- end lists ----
 
 // A tab's rankings: the button bar, then the grid (a row per player, best first by the sliders, or as
 // dragged by hand), and the player card for a name clicked
@@ -691,7 +689,6 @@ export class SkillRankingsComponent implements OnChanges, CardHost {
       .catch((err) => console.error('Failed to copy: ', err));
   }
 
-  // ---- lists (round 2) ----
   // Save (the toolbar's floppy disk, a phone's More): the grid as it is now, frozen for the save dialog,
   // its title filled in ("2026 Quarterbacks · Oct 9"); signed out, the sign-in instead. Saving closes the
   // dialog and the toast says so, with Open and Rename (the same dialog, the title alone).
@@ -731,7 +728,6 @@ export class SkillRankingsComponent implements OnChanges, CardHost {
     clearTimeout(this.savedTimer);
     this.savedList = null;
   }
-  // ---- end lists ----
 
   // The list's link (its tab, season, sliders, eyes and settings: share.ts)
   shareList(button: HTMLElement): void {

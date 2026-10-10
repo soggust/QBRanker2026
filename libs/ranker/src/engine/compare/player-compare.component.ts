@@ -5,10 +5,8 @@ import { percentileText } from '@ranker/engine/player-card/hover-text';
 import { COMPARE_MAX, CompareHit, CompareTab, PlayerCompare } from './player-compare';
 import { GameViewService } from '../game-view/game-view.service';
 import { ARC_DRAW_MS, arcDraw } from './arc-draw';
-// ---- tracker (phase 2) ----
 import { AccountService } from '../account/account.service';
 import { TrackerStore } from '../account/tracker/tracker.store';
-// ---- end tracker ----
 
 // The compare view: the player card's board with a tape per side across the top (team card, season, rank,
 // archetype; the season switchable, the side removable) and a slot to add one by name; then its tabs:
@@ -46,13 +44,10 @@ export class PlayerCompareComponent implements DoCheck, AfterViewChecked, OnDest
     private readonly el: ElementRef<HTMLElement>,
     private readonly zone: NgZone,
     private readonly cdr: ChangeDetectorRef,
-    // ---- tracker (phase 2) ----
     readonly account: AccountService,
     private readonly tracker: TrackerStore,
-    // ---- end tracker ----
   ) {}
 
-  // ---- tracker (phase 2) ----
   // Pinned to the Tracker (signed in: the comparison as it is, its snapshot the baseline; signed out: the
   // sign-in first), a note under the hero for a moment, with the way to the Tracker
   pinning = false;
@@ -88,7 +83,6 @@ export class PlayerCompareComponent implements DoCheck, AfterViewChecked, OnDest
     clearTimeout(this.pinTimer);
     this.pinTimer = setTimeout(() => (this.pinNote = null), 4200);
   }
-  // ---- end tracker ----
 
   ngOnDestroy(): void {
     clearTimeout(this.pinTimer);

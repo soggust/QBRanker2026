@@ -42,9 +42,8 @@ function emulatorPorts(): { auth: number; firestore: number } {
     return { auth: 9099, firestore: 8080 };
   }
 }
-// ---- end lists ----
 
-// ---- App Check (round 2): proof that a request comes from this site, not a script (reCAPTCHA) ----
+// App Check: proof that a request comes from this site, not a script (reCAPTCHA)
 // App Check's site key (Firebase console → App Check → the web app: Fraud Defense, formerly reCAPTCHA
 // Enterprise; the classic v3 is retired). A site key is public: it ships in the page. Empty: App Check is off and
 // nothing loads. 'v3' or 'enterprise' for the kind of key.

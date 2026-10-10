@@ -41,7 +41,6 @@
                   }
                 </optgroup>
               }
-              <!-- wallet (phase 2) -->
               <!-- (the games the bot has no pick on: their lines only, to bet them) -->
               @if (moreGames.length) {
                 <optgroup label="More games · lines only">
@@ -50,7 +49,6 @@
                   }
                 </optgroup>
               }
-              <!-- end wallet -->
             </select>
           </span>
         }
@@ -106,7 +104,6 @@
     } @else {
       @let locks = lockCount(shown);
       <ol class="bets-list" [class.spinning]="spinning" (scroll)="closeWhy()">
-        <!-- wallet (phase 2) -->
         <!-- (a game chosen: its every line on top, to bet any of them) -->
         @if (game && boardFor(game); as gb) {
           <li class="bet-board">
@@ -116,7 +113,6 @@
             }
           </li>
         }
-        <!-- end wallet -->
         @for (r of shown; track r.id; let i = $index, n = $count) {
           <li class="bet" [ngClass]="level(r)" [class.open]="open.has(r.id)" [style.--i]="i">
             <!-- (the row, and its rank tile over the row's rank column: a button of its own, not one inside the row's) -->
@@ -214,12 +210,10 @@
                     <small class="bet-where" [class.windy]="w.windy"><mat-icon [fontIcon]="w.icon"></mat-icon>{{ w.text }}</small>
                   }
                 </div>
-                <!-- wallet (phase 2) -->
                 <!-- (the game's every line, to bet this pick or any other; once on top instead when the game's chosen) -->
                 @if (!game && boards.get(gameKey(r)); as gb) {
                   <game-lines [sport]="gb.sport" [event]="gb.event" [start]="gb.start" [matchup]="gb.matchup" [picks]="gb.picks"></game-lines>
                 }
-                <!-- end wallet -->
               </div>
             }
           </li>
@@ -313,11 +307,9 @@
     }
   </div>
   }
-  <!-- wallet (phase 2) -->
   <!-- (the bet slip: the prices clicked on the games' lines, staked and placed with play money; on the Bets
        view only: the Algorithm is the bot's alone, nothing of the user's on it) -->
   @if (view === 'bets') {
     <bet-slip></bet-slip>
   }
-  <!-- end wallet -->
 </div>

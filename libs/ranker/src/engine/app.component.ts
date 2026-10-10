@@ -43,9 +43,8 @@ export function viewOf(hash: string): View {
   if (key.startsWith('lists/')) return 'lists';
   if (key.startsWith('community/')) return 'community';
   if (key.startsWith('tracker/') && key.length > 8) return 'tracker';
-  // ---- settings (round 2): #account/privacy, Settings with Privacy open ----
+  // #account/privacy, Settings with Privacy open
   if (key === 'account/privacy') return 'account';
-  // ---- end settings ----
   return Object.hasOwn(HASH_VIEWS, key) ? HASH_VIEWS[key] : 'rankings';
 }
 

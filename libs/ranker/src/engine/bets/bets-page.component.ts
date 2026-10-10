@@ -1,10 +1,8 @@
 import { Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild, inject, isDevMode } from '@angular/core';
 import { tierOf } from './tiers';
 import { BetsView, betsView, chooseBetsView } from './bets-view';
-// ---- wallet (phase 2) ----
 import { LinesService } from '../account/wallet/lines.service';
 import { WalletService } from '../account/wallet/wallet.service';
-// ---- end wallet ----
 import { SPORT_LINKS } from '@ranker/core/sports';
 import { canUse } from '../account/features';
 import { SPORTS } from './desk-math';
@@ -74,11 +72,9 @@ export interface BetRow {
   price?: number;
   book?: string;
   why?: PickWhy | null;
-  // ---- wallet (phase 2) ----
   // (its line, and its id in the bettor's ledger: "<ESPN event>:<market>", a prop "<event>:prop:<type>:<athlete>")
   line?: number | null;
   pickId?: string;
-  // ---- end wallet ----
 }
 
 // (an analyst's pick, as far as the page uses it: the call, its side, its case and its risk)
@@ -137,19 +133,6 @@ function kindOf(graded: BetKind | null | undefined, label: string, bet: string, 
   return team && game?.teams?.some((t) => t.abbr === team) ? 'team_stat' : 'player';
 }
 
-// The desk's record, its picks graded after their games (scripts/analysis/grade.mjs)
-interface Tally {
-  wins: number;
-  losses: number;
-  pushes: number;
-  winPct: number | null;
-}
-interface BetRecord {
-  graded: number;
-  overall: Tally;
-  // (a lock's only once a file has any)
-  byLevel: { lock?: Tally; high: Tally; medium: Tally; low: Tally };
-}
 interface Sheet {
   at: string;
   week: number;
@@ -194,7 +177,6 @@ interface Pick {
 }
 interface Picks {
   at: string;
-  record: BetRecord | null;
   picks: Pick[];
 }
 
@@ -300,14 +282,6 @@ export class BetsPageComponent implements OnInit, OnDestroy {
   readonly insteadText = insteadText;
   // each game's venue and kickoff weather, from the bet desk's sheet ("nfl|CHI @ GB")
   places = new Map<string, GameInfo>();
-  // how the algorithm's published picks did (each sport's picks.json, added up), overall and by chance band
-  record: BetRecord | null = null;
-
-  // A record as "14-9" ("14-9-1" with a push)
-  wl(t: Tally): string {
-    return `${t.wins}–${t.losses}${t.pushes ? `–${t.pushes}` : ''}`;
-  }
-
   // Under a matchup: the kickoff weather and where it's played ("57° · 8 mph · Lambeau Field"); windy (15+ mph,
   // or gusts of 25+) when the wind could matter
   where(r: BetRow): { icon: string; text: string; windy: boolean } | null {
@@ -351,11 +325,9 @@ export class BetsPageComponent implements OnInit, OnDestroy {
     );
     const algoRows: BetRow[] = [];
     const sheetRows: SheetCall[] = [];
-    const records: BetRecord[] = [];
     for (const { sport, picks, bets: file, sheet } of files) {
       // The algorithm's picks
-      if (picks?.picks?.length || picks?.record) {
-        if (picks.record) records.push(picks.record);
+      if (picks?.picks?.length) {
         if (!this.updated || picks.at > this.updated) this.updated = picks.at;
         for (const p of picks.picks ?? []) {
           if (p.where) this.places.set(`${sport}|${p.matchup}`, p.where);
@@ -389,10 +361,8 @@ export class BetsPageComponent implements OnInit, OnDestroy {
             price: p.odds,
             book: p.book,
             why: p.why ?? null,
-            // ---- wallet (phase 2) ----
             line: p.line,
             pickId: p.id,
-            // ---- end wallet ----
           });
         }
       }
@@ -414,8 +384,6 @@ export class BetsPageComponent implements OnInit, OnDestroy {
         }
       }
     }
-    // The algorithm's record on its published picks, all its sports together
-    if (records.length) this.record = sumRecords(records);
     // Where the analyst's sheet makes the same call as an algorithm pick: marked as both's, its reasons added,
     // and its score counted a quarter higher in the order where it has an edge (two independent reads agreeing;
     // never a negative one made worse); the sheet's other picks aren't shown
@@ -436,12 +404,9 @@ export class BetsPageComponent implements OnInit, OnDestroy {
     this.dropStarted();
     // (not if the page closed while its files loaded: nothing would stop it)
     if (!this.closed) this.ticker = setInterval(() => this.dropStarted(), 60_000);
-    // ---- wallet (phase 2) ----
     this.buildBoards();
-    // ---- end wallet ----
   }
 
-  // ---- wallet (phase 2) ----
   // Play betting: each game's every line (<game-lines>, ESPN's DraftKings board, the bot's picks lit), its
   // ESPN id, start and the bot's picks on it, by the game filter's key; and the games on the boards the bot
   // has no pick on, for the dropdown (their lines only). The slip (<bet-slip>) and #wallet do the rest.
@@ -485,7 +450,6 @@ export class BetsPageComponent implements OnInit, OnDestroy {
     }
     return null;
   }
-  // ---- end wallet ----
 
   // (a pick whose game has started can't be bet: off the list, and its game off the dropdown, when the
   // page loads and each minute after; the picks file is only rewritten hourly)
@@ -683,24 +647,3 @@ export class BetsPageComponent implements OnInit, OnDestroy {
   }
 }
 
-// Records added up: the algorithm's sports' published picks together (wins, losses, pushes; the share won)
-function sumRecords(list: BetRecord[]): BetRecord {
-  const add = (pick: (r: BetRecord) => Tally | undefined): Tally => {
-    const t = { wins: 0, losses: 0, pushes: 0, winPct: null as number | null };
-    for (const r of list) {
-      const x = pick(r);
-      if (!x) continue;
-      t.wins += x.wins;
-      t.losses += x.losses;
-      t.pushes += x.pushes;
-    }
-    t.winPct = t.wins + t.losses ? t.wins / (t.wins + t.losses) : null;
-    return t;
-  };
-  const locks = add((r) => r.byLevel.lock);
-  return {
-    graded: list.reduce((n, r) => n + r.graded, 0),
-    overall: add((r) => r.overall),
-    byLevel: { ...(locks.wins + locks.losses + locks.pushes ? { lock: locks } : {}), high: add((r) => r.byLevel.high), medium: add((r) => r.byLevel.medium), low: add((r) => r.byLevel.low) },
-  };
-}
