@@ -4,6 +4,7 @@ import { BetsView, betsView, chooseBetsView } from './bets-view';
 import { LinesService } from '../account/wallet/lines.service';
 // ---- end wallet ----
 import { SPORT_LINKS } from '@ranker/core/sports';
+import { SPORTS } from './desk-math';
 import { insteadText } from '../player-card/analysis';
 import { americanOdds, headshot } from './bet-format';
 import { BetWhy, Confidence, PickWhy, betScoreText, betWhy, confidenceOf, kellyOf, signedPoints, withAnalyst } from './bet-why';
@@ -208,6 +209,9 @@ function pickKey(sport: string, matchup: string, kind: BetKind, pick: string): s
   return `${game}|${kind}|${pick.toLowerCase()}`;
 }
 
+// (the sports the bettor covers, as the site names them: MMA has no picks or team colors to ask for)
+const BET_SPORTS = SPORT_LINKS.filter((sport) => SPORTS.includes(sport.id));
+
 @Component({
   selector: 'bets-page',
   // (the page's main content: the Bets page has no <main> of its own around it)
@@ -306,7 +310,7 @@ export class BetsPageComponent implements OnInit {
 
   async ngOnInit(): Promise<void> {
     // (the teams' colors for the picks' words, alongside the picks)
-    loadTeamColors(SPORT_LINKS.map((s) => s.id)).then((colors) => {
+    loadTeamColors(BET_SPORTS.map((s) => s.id)).then((colors) => {
       this.teamColors = colors;
       this.pickColors.clear();
     });
@@ -316,7 +320,7 @@ export class BetsPageComponent implements OnInit {
         .catch(() => null);
     // every sport's algorithm picks, and the AI desk's sheet where the sport has AI analyses (sports.json)
     const files = await Promise.all(
-      SPORT_LINKS.map(async (s) => ({
+      BET_SPORTS.map(async (s) => ({
         sport: s.id,
         picks: (await get(`/${s.id}/data/model/picks.json`)) as Picks | null,
         bets: s.analysis ? await get(`/${s.id}/data/analysis/bets.json`) : null,
