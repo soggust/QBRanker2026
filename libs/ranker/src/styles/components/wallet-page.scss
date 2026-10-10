@@ -547,9 +547,8 @@ $gold: #ffcf4a;
   }
 }
 
-// (the settled history's date: the game's day, the column that orders it)
+// (the settled history's date: the game's day, the column that orders it, in the game's type)
 .wallet-settled .w-date {
-  color: rgba(255, 255, 255, 0.7);
   white-space: nowrap;
 }
 
@@ -560,8 +559,8 @@ $gold: #ffcf4a;
   }
 }
 
-// (the game under a pick: phones only, where the game's column goes)
-.w-phone-game {
+// (the game under a pick: phones only, where the game's column goes; over the tables' block smalls)
+.wallet-bets .w-phone-game {
   display: none;
 }
 
