@@ -186,7 +186,7 @@
 </ng-template>
 
 @if (!canUse('bets')) {
-  <coming-soon heading="Wallet" detail="Play-money betting is on its way. Check back soon."></coming-soon>
+  <coming-soon heading="Betting Wallet" detail="Play-money betting is on its way. Check back soon."></coming-soon>
 } @else {
 <div class="wallet-page" [class.only-open]="!!only">
   @if (!account.ready()) {
@@ -196,7 +196,7 @@
     <section class="model-desk wallet-intro">
       <div class="wallet-intro-chips" aria-hidden="true"><i class="c100"></i><i class="c25"></i><i class="c5"></i></div>
       <h2>Play along with the bot</h2>
-      <p>1,000 play units to start. Bet any game's lines from the Bets page, the bot's picks lit up, and watch them settle from the final score. No real money, ever.</p>
+      <p>{{ start | number }} play units to start. Bet any game's lines from the Bets page, the bot's picks lit up, and watch them settle from the final score. No real money, ever.</p>
       <button type="button" class="app-btn-primary" (click)="account.openLogin()">Sign in</button>
     </section>
   } @else if (only === 'closed') {
@@ -298,7 +298,7 @@
 
     @if (wallet.loaded() && !wallet.openBets().length && !wallet.hasSettled()) {
       <div class="wallet-empty">
-        <p><b>Your wallet's ready:</b> 1,000 play units. Open any game's lines on the Bets page and tap a price to bet it.</p>
+        <p><b>Your wallet's ready:</b> {{ start | number }} play units. Open any game's lines on the Bets page and tap a price to bet it.</p>
         <a class="wallet-chip sand" href="#bets" (click)="toBets()"><mat-icon aria-hidden="true" fontIcon="casino"></mat-icon>Go to Bets<svg class="chip-rim" aria-hidden="true"><rect pathLength="220" /></svg></a>
       </div>
     }
@@ -393,7 +393,7 @@
                   <span class="leader-who">
                     <a class="leader-name" [href]="'#u/' + r.username">&#64;{{ r.username }}</a>
                     @if (r.reloads) {
-                      <span class="leader-reloads" [title]="'Reloaded to 1,000 units ' + r.reloads + (r.reloads === 1 ? ' time' : ' times') + ': this record is over ' + (r.reloads + 1) + ' bankrolls'"><mat-icon aria-hidden="true" fontIcon="restart_alt"></mat-icon>{{ r.reloads }}<span class="reloads-word"> {{ r.reloads === 1 ? 'reload' : 'reloads' }}</span></span>
+                      <span class="leader-reloads" [title]="'Reloaded to ' + (start | number) + ' units ' + r.reloads + (r.reloads === 1 ? ' time' : ' times') + ': this record is over ' + (r.reloads + 1) + ' bankrolls'"><mat-icon aria-hidden="true" fontIcon="restart_alt"></mat-icon>{{ r.reloads }}<span class="reloads-word"> {{ r.reloads === 1 ? 'reload' : 'reloads' }}</span></span>
                     }
                   </span>
                   <span class="leader-record" title="Won, lost, pushed">{{ recordText(r) }}</span>

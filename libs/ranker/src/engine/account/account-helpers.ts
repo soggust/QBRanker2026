@@ -12,11 +12,11 @@ export type VisibilityKind = 'lists' | 'presets' | 'openBets' | 'betHistory' | '
 
 // (what each setting covers, in the settings page's order, and who sees it to start)
 export const VISIBILITY_KINDS: { kind: VisibilityKind; label: string; hint: string }[] = [
-  { kind: 'lists', label: 'Saved lists', hint: 'Where a new list starts (each list has its own, on My lists)' },
+  { kind: 'lists', label: 'Saved lists', hint: 'Where a new list starts (each list has its own, on My Lists)' },
   { kind: 'presets', label: 'Presets', hint: 'Your saved filter and weight presets' },
   { kind: 'openBets', label: 'Open bets', hint: 'Play-money bets still in play' },
   { kind: 'betHistory', label: 'Bet history', hint: 'Settled bets and your record' },
-  { kind: 'tracker', label: 'Tracker', hint: 'The comparisons you pin' },
+  { kind: 'tracker', label: 'Track Players', hint: 'The comparisons you pin' },
 ];
 export const VISIBILITY_CHOICES: { value: Visibility; label: string }[] = [
   { value: 'public', label: 'Public' },

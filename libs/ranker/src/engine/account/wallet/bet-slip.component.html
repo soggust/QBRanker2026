@@ -22,7 +22,7 @@
 
     @if (!account.signedIn()) {
       <div class="slip-signin">
-        <p>Play along with the bot: <b>1,000 play units</b> to start, no real money. Sign in to place these.</p>
+        <p>Play along with the bot: <b>{{ start | number }} play units</b> to start, no real money. Sign in to place these.</p>
         <button type="button" class="primary" (click)="account.openLogin()">Sign in</button>
       </div>
     }

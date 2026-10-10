@@ -1,7 +1,7 @@
 import { Component, ElementRef, HostListener, ViewChild, effect } from '@angular/core';
 import { AccountService } from '../account.service';
 import { WalletService } from './wallet.service';
-import { CHIPS, Selection, addChip, oddsText, payout, slipTotals, toWin } from './wallet-math';
+import { CHIPS, START, Selection, addChip, oddsText, payout, slipTotals, toWin } from './wallet-math';
 
 // The bet slip: the prices clicked on the Bets page, each with its stake (a casino's chips, a half, 1, 5, 10
 // and 25 units, stacked on with each click, or a number typed), what it'd win and pay back, then Place. A
@@ -14,6 +14,8 @@ import { CHIPS, Selection, addChip, oddsText, payout, slipTotals, toWin } from '
   standalone: false,
 })
 export class BetSlipComponent {
+  // (the bankroll a new player starts with)
+  readonly start = START;
   readonly chips = CHIPS;
   readonly oddsText = oddsText;
   readonly toWin = toWin;

@@ -196,8 +196,8 @@
         </div>
       </card-panel>
 
-      <!-- Tracker -->
-      <card-panel class="account-panel tracker-panel" label="Tracker" icon="push_pin" [expandable]="false">
+      <!-- Track Players -->
+      <card-panel class="account-panel tracker-panel" label="Track Players" icon="push_pin" [expandable]="false">
         <div class="panel-pad">
           @if (access.tracker !== 'shown') {
             <ng-container *ngTemplateOutlet="hiddenTpl; context: { kind: 'tracker' }"></ng-container>

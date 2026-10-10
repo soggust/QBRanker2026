@@ -135,18 +135,6 @@ strong {
   color: #fff;
 }
 
-// (the contact address not filled in yet: marked, so it can't be missed)
-.legal-todo {
-  border: 1px dashed var(--app-red-bright, #e0384f);
-  border-radius: 6px;
-  color: var(--app-red-bright, #e0384f);
-  font-size: 12px;
-  font-weight: 800;
-  letter-spacing: 1px;
-  padding: 1px 8px;
-  text-transform: uppercase;
-}
-
 .legal-back {
   color: #fff;
   display: inline-block;

@@ -62,7 +62,7 @@
       <ul>
         <li>Your username, display name and picture are public: anyone can find your profile by username.</li>
         <li>
-          Your lists, presets, tracker and bets are shown to everyone, to friends only, or to no one, as you choose in
+          Your lists, presets, Track Players and bets are shown to everyone, to friends only, or to no one, as you choose in
           Settings → Privacy (and per list).
         </li>
         <li>Community submissions and the votes on them are public. Leaderboards show only those whose bet history is public.</li>
@@ -86,12 +86,7 @@
     <section>
       <h3>Contact</h3>
       <p>
-        Questions about your data:
-        @if (contact) {
-          <a [href]="'mailto:' + contact">{{ contact }}</a>.
-        } @else {
-          <span class="legal-todo">TODO: contact email</span>
-        }
+        Questions about your data: <a [href]="'mailto:' + contact">{{ contact }}</a>.
         If this policy changes, the date at the top changes with it.
       </p>
     </section>
@@ -135,12 +130,7 @@
     <section>
       <h3>Can't sign in?</h3>
       <p>
-        Email
-        @if (contact) {
-          <a [href]="mailto">{{ contact }}</a>
-        } @else {
-          <span class="legal-todo">TODO: contact email</span>
-        }
+        Email <a [href]="mailto">{{ contact }}</a>
         from the address on the account (or with your username) and ask us to delete it. We'll delete everything
         above within 30 days and reply when it's done.
       </p>
