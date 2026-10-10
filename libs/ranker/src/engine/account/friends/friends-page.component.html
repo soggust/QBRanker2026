@@ -90,7 +90,7 @@
       <!-- Your friends -->
       <card-panel class="account-panel" [label]="groups.friends.length ? 'Your friends · ' + groups.friends.length : 'Your friends'" icon="group" [expandable]="false">
         <!-- (who sees your friends and the rest: the Privacy settings, on the panel's bar) -->
-        <a panel-actions class="privacy-link" [href]="privacyHash" title="Privacy settings" aria-label="Privacy settings"><mat-icon aria-hidden="true" fontIcon="visibility"></mat-icon></a>
+        <span panel-actions class="privacy-slot"><a class="privacy-link" [href]="privacyHash" title="Privacy settings" aria-label="Privacy settings"><mat-icon aria-hidden="true" fontIcon="visibility"></mat-icon></a></span>
         @if (groups.friends.length) {
           <ul class="people panel-pad" aria-label="Your friends">
             @for (entry of groups.friends; track entry.uid) {

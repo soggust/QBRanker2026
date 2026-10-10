@@ -252,10 +252,21 @@ card-panel.requests-panel {
 }
 
 // (the eye to the Privacy settings, on Your friends' bar: the app's filled sand button, square, sized for a bar)
+.privacy-slot {
+  // (clear of the bar's right edge)
+  padding-right: 12px !important;
+}
+
 .privacy-link {
   @include kit.primary-button;
   flex: none;
+  height: 30px;
   min-height: 30px;
   padding: 0;
   width: 30px;
+
+  // (the eye dead center)
+  .mat-icon {
+    margin: 0;
+  }
 }
