@@ -184,7 +184,8 @@ $lock-gold: #ffcf4a;
 
   &.love {
     --edge: #{v.$good};
-    --wash: rgba(62, 207, 110, 0.06);
+    // (no green over the green felt: it washed it out)
+    --wash: transparent;
     box-shadow: 0 0 10px rgba(62, 207, 110, 0.25);
   }
 

@@ -406,14 +406,14 @@ $chip-clay: #b0202b;
     text-shadow: 0 0 8px rgba(62, 224, 122, 0.6);
   }
 
-  // a lock: above the ranks, its padlock in gold, glowing like the digits
+  // a lock: above the ranks, its padlock a bright soft red, glowing like the digits
   &.lock {
-    color: $lock-gold;
+    color: #ff6b74;
     padding-top: 0;
     text-shadow: none;
 
     .mat-icon {
-      filter: drop-shadow(0 0 6px rgba(255, 207, 74, 0.65));
+      filter: drop-shadow(0 0 6px rgba(255, 107, 116, 0.6));
       @include v.icon-size(19px);
     }
   }
