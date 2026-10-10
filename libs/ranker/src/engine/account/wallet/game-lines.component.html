@@ -91,7 +91,6 @@
   <!-- (the bot's props on the game: its side, at its price) -->
   @if (props().length) {
     <div class="lines-props" role="list" aria-label="The bot's props">
-      <p class="lines-sub">The bot's props <small>its side, its price</small></p>
       @for (p of props(); track p.pickId ?? p.pick) {
         @let t = tier(p);
         <div class="prop" role="listitem">
