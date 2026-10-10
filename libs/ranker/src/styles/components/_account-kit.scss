@@ -195,78 +195,25 @@
 
 // The main button: lit in the sport's accent, dark lettering; a plain one: an outline that lights up
 @mixin buttons {
-  .primary,
-  .secondary,
-  .danger {
-    align-items: center;
-    border-radius: 10px;
-    box-sizing: border-box;
-    cursor: pointer;
-    display: inline-flex;
-    font-family: v.$font-base;
-    font-size: 13px;
-    font-weight: 800;
-    gap: 8px;
-    justify-content: center;
-    letter-spacing: 1px;
-    min-height: 40px;
-    padding: 0 18px;
-    // (a link that's a button: no underline)
-    text-decoration: none;
-    text-transform: uppercase;
-    transition:
-      filter 0.12s ease,
-      background 0.12s ease,
-      color 0.12s ease,
-      border-color 0.12s ease;
-
-    &[disabled] {
-      cursor: default;
-      opacity: 0.5;
-    }
-
-    &:focus-visible {
-      outline: 2px solid #fff;
-      outline-offset: 2px;
-    }
-
-    .mat-icon {
-      @include v.icon-size(18px);
-    }
-  }
-
+  // (the account pages' and the dialogs' buttons: the app's own (app-buttons below), in the page's light: the
+  // app's sand on the sheet, a sport's over its grid)
   .primary {
-    background: linear-gradient(180deg, color-mix(in srgb, var(--scoreboard-led) 88%, #fff), var(--scoreboard-led));
-    border: 1px solid color-mix(in srgb, var(--scoreboard-led) 60%, #000);
-    box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.35),
-      0 2px 6px rgba(0, 0, 0, 0.4);
-    color: #141414;
-
-    &:hover:not([disabled]) {
-      filter: brightness(1.08);
-    }
+    @include primary-button(var(--scoreboard-led));
   }
 
   .secondary {
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid #4a4a4a;
-    color: #fff;
-
-    &:hover:not([disabled]) {
-      border-color: var(--scoreboard-led);
-      color: var(--scoreboard-led);
-    }
+    @include outline-button(var(--scoreboard-led));
   }
 
   .danger {
-    background: rgba(255, 90, 79, 0.08);
-    border: 1px solid color-mix(in srgb, #{v.$bad} 70%, transparent);
-    color: v.$bad;
+    @include danger-button;
+  }
 
-    &:hover:not([disabled]) {
-      background: v.$bad;
-      color: #fff;
+  .primary,
+  .secondary,
+  .danger {
+    .mat-icon {
+      @include v.icon-size(18px);
     }
   }
 
@@ -539,20 +486,17 @@ $app-cracks: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' w
     opacity: 0.5;
   }
 
-  &:focus-visible {
-    outline: 2px solid var(--app-sand, #d8b98a);
-    outline-offset: 2px;
-  }
 
   .mat-icon {
     @include v.icon-size(18px);
   }
 }
 
-@mixin primary-button {
+// (each in an accent: the app's sand by default; kit.buttons passes the page's light)
+@mixin primary-button($accent: var(--app-sand, #d8b98a)) {
   @include app-button-base;
-  background: linear-gradient(180deg, #e6cca2, var(--app-sand, #d8b98a) 55%, var(--app-sand-deep, #c9a574));
-  border: 1px solid #9c7d52;
+  background: linear-gradient(180deg, color-mix(in srgb, #{$accent} 75%, #fff), #{$accent} 55%, color-mix(in srgb, #{$accent} 92%, #000));
+  border: 1px solid color-mix(in srgb, #{$accent} 70%, #000);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.4),
     0 2px 6px rgba(0, 0, 0, 0.45);
@@ -563,15 +507,15 @@ $app-cracks: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' w
   }
 }
 
-@mixin outline-button {
+@mixin outline-button($accent: var(--app-sand, #d8b98a)) {
   @include app-button-base;
-  background: rgba(216, 185, 138, 0.06);
-  border: 1px solid color-mix(in srgb, var(--app-sand, #d8b98a) 70%, transparent);
-  color: var(--app-sand, #d8b98a);
+  background: color-mix(in srgb, #{$accent} 6%, transparent);
+  border: 1px solid color-mix(in srgb, #{$accent} 70%, transparent);
+  color: #{$accent};
 
   &:hover:not([disabled]) {
-    background: rgba(216, 185, 138, 0.14);
-    border-color: var(--app-sand, #d8b98a);
+    background: color-mix(in srgb, #{$accent} 14%, transparent);
+    border-color: #{$accent};
   }
 }
 
