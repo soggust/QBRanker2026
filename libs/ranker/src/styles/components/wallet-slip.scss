@@ -606,5 +606,7 @@ $gold: #ffcf4a;
   font-size: 1.05em;
   height: 1em;
   line-height: 1;
+  // (the glyph sits high in its box: down to the letters' middle)
+  transform: translateY(1px);
   width: 1em;
 }
