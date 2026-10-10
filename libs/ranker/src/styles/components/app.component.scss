@@ -52,8 +52,9 @@
     margin-left: auto;
     order: 2;
 
+    // (the toggle's 10px padding and this: the avatar's edge on the grid's, 26px in)
     &.signed-in {
-      margin-right: 2px;
+      margin-right: 10px;
     }
   }
 
@@ -102,7 +103,7 @@
     }
 
     account-menu.signed-in {
-      margin-right: 21px;
+      margin-right: 34px;
     }
   }
 
@@ -127,7 +128,7 @@
     }
 
     account-menu.signed-in {
-      margin-right: 0;
+      margin-right: 7px;
     }
   }
 }

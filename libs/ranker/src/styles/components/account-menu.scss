@@ -53,11 +53,20 @@
     display: flex;
   }
 
+  // (cut short only where the bar's short of room: a laptop's 120px, far more on a wide screen)
   .account-name {
     max-width: 120px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+
+    @media (min-width: 1500px) {
+      max-width: 220px;
+    }
+
+    @media (min-width: 2200px) {
+      max-width: 360px;
+    }
   }
 }
 
