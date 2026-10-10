@@ -13,23 +13,29 @@
 // context (context.mjs: the terms beyond the ratings, their sizes fit by the replay, not set here):
 //   restCap  days of rest past which more counts no more (a season's first game counts as this)
 // guard (the desk's caution, not fit yet: the ledger keeps what each bet saw so it can be): a line that's
-// moved this far since it opened (spread or total in points, moneyline in the home side's fair chance) cuts
-// the bet to the 0.5-unit minimum, twice as far skips it
+// moved this far against the bet's side since it opened (spread or total in points, moneyline in the home
+// side's fair chance: the market's money on the other side) cuts the bet to the 0.5-unit minimum, twice as far
+// skips it; a move toward its side (the market agreeing) isn't held against it
 // deepen   the season the history reaches back to (the NFL's older ones from nflverse)
 //
 // PROP_CAPS (props.mjs, run.mjs): how much the props may stake. untested: a prop type whose trust isn't fit
 // yet (fewer than 40 graded): at most maxUnits a prop, perGame of them a game, perDay units of them a day in
-// the sport. tested: once its trust is fit (perDay null: no daily cap)
+// the sport, perPlayer of them a player a game (his best return: a player's props rise and fall together).
+// tested: once its trust is fit (perDay null: no daily cap)
+// GAME_CAP (run.mjs placeBets, desk.mjs capGame): the most units open on one game, its markets and props
+// together (they rise and fall with the same game: a few bets on it are one big one); over it, the new bets
+// scaled down alike, the least worth having dropped
 // BOOK: the one sportsbook the desk bets, for every market and prop: its lines and prices are the ones
 // priced and placed (The Odds API's key for it; ESPN's free board, the fallback, is DraftKings' too)
 export const BOOK = 'draftkings';
 
-// (no count caps: the user wants all the exposure the data can give, the money's play money; an untested type
-// still stakes at most 1 unit a prop)
+// (no count caps a game or a day: the user wants all the exposure the data can give, the money's play money;
+// but one prop a player a game, and an untested type still stakes at most 1 unit a prop)
 export const PROP_CAPS = {
-  untested: { maxUnits: 1, perGame: null, perDay: null },
-  tested: { maxUnits: 3, perGame: null, perDay: null },
+  untested: { maxUnits: 1, perGame: null, perDay: null, perPlayer: 1 },
+  tested: { maxUnits: 3, perGame: null, perDay: null, perPlayer: 1 },
 };
+export const GAME_CAP = 5;
 
 export const LEAGUES = {
   nfl: {

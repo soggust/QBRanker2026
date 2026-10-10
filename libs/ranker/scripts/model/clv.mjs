@@ -10,13 +10,15 @@
 //
 // Each bet's clv: pts (its line against the close's for its side: a spread or a prop the points it got better,
 // a total the same toward its side), prob (the closing fair chance of its side at its own line, less the fair
-// chance when it bet: a line move counted through the margin's or total's spread, about 0.4 / sigma a point),
+// chance when it bet: a line move counted through the margins' own chances (margins.mjs atLine: a half point
+// onto the NFL's 3 worth far more than one onto its 8; without them, about 0.4 / sigma a point),
 // ev (its expected return at the closing chance and its own price), beat (whether it got the better of the
 // close: a better line, or the same line and a better chance). Before the game, each run also notes the
 // line it last saw (seen), which stands in for the close until it's read.
 
 import { get } from './sources.mjs';
 import { decimal, fairPair } from './desk.mjs';
+import { atLine } from './margins.mjs';
 import { round } from './ratings.mjs';
 import { ESPN_PROVIDER } from './espn.mjs';
 import { BOOK } from './leagues.mjs';
@@ -79,8 +81,9 @@ export function propCloseOf(bet, board) {
   return { line: p.line, odds, fair };
 }
 
-// A bet's CLV against its close (spread: the margin's spread; for a total, the total's)
-export function clvOf(bet, close, sigma) {
+// A bet's CLV against its close (spread: the margin's spread; for a total, the total's; dist: the margins'
+// chances, { sigma, sigmaT, shape }, which carry a moved line's chance point by point)
+export function clvOf(bet, close, sigma, dist = null) {
   if (!close) return null;
   // (the points it got better than the close, its own side's way)
   let pts = null;
@@ -94,7 +97,8 @@ export function clvOf(bet, close, sigma) {
   // (a prop whose line moved has no spread to carry its chance to the bet's line: its points say it alone)
   if (close.fair !== null && close.fair !== undefined && !(bet.market === 'prop' && pts)) {
     const perPoint = bet.market === 'prop' ? 0 : sigma ? 0.4 / sigma : 0;
-    q = Math.min(0.99, Math.max(0.01, close.fair + (pts ?? 0) * perPoint));
+    const carried = dist && pts && (bet.market === 'spread' || bet.market === 'total') ? atLine(bet.market, bet.side, close, bet.line, dist) : null;
+    q = Math.min(0.99, Math.max(0.01, carried ?? close.fair + (pts ?? 0) * perPoint));
   }
   const prob = q !== null && bet.fair !== undefined ? round(q - bet.fair, 4) : null;
   const ev = q !== null && bet.odds ? round(q * decimal(bet.odds) - 1, 4) : null;

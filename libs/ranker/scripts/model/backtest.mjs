@@ -15,7 +15,10 @@
 //   of the NBA, NHL and MLB a day at a time); each one's response kept under .cache/model/history (never bought
 //   twice) and the bets drawn from them in apps/<sport>/scripts/model/backtest.json (committed: paid for)
 //   the model's chances: its expectation for each game from the replay, each game predicted from the games
-//   before it only (its settings are this run's, fit on the whole history: a small look-ahead, noted)
+//   before it only (its settings are this run's, fit on the whole history: a small look-ahead, noted). The
+//   saved bets' chances are priced again every run by the desk's pricing as it is now (repriced: each bet's
+//   line, price and fair chance are kept, so no snapshot is needed), so the trust is fit on the chances the
+//   desk bets with, not on an older pricing's
 //
 // Only asked for with run.mjs --backtest, and only within history's budget (HISTORY_BUDGET).
 
@@ -23,6 +26,7 @@ import path from 'node:path';
 import { CACHE, DAY, isoSecond as iso, readJson, writeJson } from './sources.mjs';
 import { HISTORY_BUDGET, LINE_BOOKS, SPORT_KEYS, call, canSpend, linesFromEvent, matchNearest } from './oddsapi.mjs';
 import { choose, fitTrust, price, settle, stakeFor } from './desk.mjs';
+import { cond, mlModel, spreadChances, totalChances } from './margins.mjs';
 import { clvOf } from './clv.mjs';
 import { idOf } from './teamstats.mjs';
 import { round } from './ratings.mjs';
@@ -75,7 +79,7 @@ export async function snapshots(sport, { buy = true } = {}) {
 // The bets the history gives: each game of the snapshots that's in the desk's history and final, bet at its
 // first snapshot two hours or more before it starts and closed at its last before it (expect: game id to the
 // model's expectation; teams: ESPN's teams for the names)
-export function backtestBets(sport, snaps, games, expect, params, teams, trust = 0.5, evScale = 0.08) {
+export function backtestBets(sport, snaps, games, expect, params, teams, trust = 0.5, evScale = 0.08, shape = null) {
   const byGame = new Map();
   for (const { at, data } of snaps) {
     // (each event its game, one to one and nearest start first: a doubleheader's two games their own events)
@@ -111,9 +115,9 @@ export function backtestBets(sport, snaps, games, expect, params, teams, trust =
     if (!bet) continue;
     for (const anchor of ['pinnacle', 'own']) {
       const l = deskLines(bet.lines, anchor);
-      for (const market of price(g, exp, l, params)) {
+      for (const market of price(g, exp, l, params, shape)) {
         const pick = choose(market, trust, evScale);
-        const b = { id: `${id}:${market.market}`, event: id, when, market: market.market, side: pick.side, line: pick.line, odds: pick.odds, model: round(pick.model, 4), fair: round(pick.fair, 4), anchor, sharp: l.sharp[market.market], ev: round(pick.ev, 4), units: pick.units, at: bet.at, start: g.date };
+        const b = { id: `${id}:${market.market}`, event: id, when, market: market.market, side: pick.side, line: pick.line, odds: pick.odds, model: round(pick.model, 4), push: round(pick.push ?? 0, 4), fair: round(pick.fair, 4), anchor, sharp: l.sharp[market.market], ev: round(pick.ev, 4), units: pick.units, at: bet.at, start: g.date };
         Object.assign(b, settle(b, g));
         // (a run line or total on an MLB game cut short: void, no action, no evidence)
         if (b.void) continue;
@@ -122,7 +126,7 @@ export function backtestBets(sport, snaps, games, expect, params, teams, trust =
           const c = closeFrom(b, deskLines(close.lines, anchor));
           if (c) {
             b.close = c;
-            b.clv = clvOf(b, c, market.market === 'total' ? params.sigmaT : params.sigma);
+            b.clv = clvOf(b, c, market.market === 'total' ? params.sigmaT : params.sigma, { sigma: params.sigma, sigmaT: params.sigmaT, shape });
           }
         }
         bets.push(b);
@@ -178,7 +182,7 @@ export function summarize(bets, trust) {
     }
     return { n: list.length, staked: round(staked, 2), profit: round(profit, 2), roi: staked ? round(profit / staked, 4) : null };
   };
-  const evAt = (b) => pOf(b) * (b.odds > 0 ? 1 + b.odds / 100 : 1 + 100 / -b.odds) - 1;
+  const evAt = (b) => (1 - (b.push ?? 0)) * (pOf(b) * (b.odds > 0 ? 1 + b.odds / 100 : 1 + 100 / -b.odds) - 1);
   const withClv = bets.filter((b) => b.clv);
   const beats = withClv.filter((b) => b.clv.beat !== null);
   const ll = (list, f) => (list.length ? round(list.reduce((s, b) => s - Math.log(b.status === 'won' ? f(b) : 1 - f(b)), 0) / list.length, 4) : null);
@@ -193,13 +197,44 @@ export function summarize(bets, trust) {
   }
   return {
     bets: bets.length,
-    every: ret(bets, (b) => stakeFor(evAt(b), 0.08)),
+    every: ret(bets, (b) => stakeFor(evAt(b), 0.08, b.odds)),
     flat: ret(bets, () => 1),
-    edge: ret(bets.filter((b) => evAt(b) > 0), (b) => stakeFor(evAt(b), 0.08)),
+    edge: ret(bets.filter((b) => evAt(b) > 0), (b) => stakeFor(evAt(b), 0.08, b.odds)),
     clv: { n: withClv.length, beat: beats.length ? round(beats.filter((b) => b.clv.beat).length / beats.length, 4) : null, ev: withClv.length ? round(withClv.reduce((s, b) => s + (b.clv.ev ?? 0), 0) / withClv.length, 4) : null },
     logLoss: { model: ll(decided, (b) => Math.min(0.99, Math.max(0.01, b.model))), market: ll(decided, (b) => b.fair), trusted: ll(decided, (b) => Math.min(0.99, Math.max(0.01, pOf(b)))) },
     calibration: [...bands.entries()].sort((a, b) => a[0] - b[0]).map(([band, x]) => ({ band, n: x.n, said: round(x.said / x.n, 4), was: round(x.was / x.n, 4) })),
   };
+}
+
+// The saved bets' chances priced again by the desk's pricing now (desk.mjs price, margins.mjs): each bet's side,
+// line, price and fair chance as saved, its model's chance (and push) from its game's expectation (expOf: the
+// replay's, each game's before it was played) at that line; a moneyline off the same snapshot's spread (its
+// bet beside it), as the live desk prices it. A bet whose game the replay has no expectation for is left out
+// (its chance from an older pricing would teach the trust that pricing's leans)
+export function repriced(bets, expOf, params, shape = null) {
+  const key = (b) => `${b.event}|${b.when ?? 'early'}|${b.anchor}`;
+  const spreads = new Map(bets.filter((b) => b.market === 'spread').map((b) => [key(b), b]));
+  const out = [];
+  for (const b of bets) {
+    const exp = expOf.get(b.event);
+    if (!exp || !Number.isFinite(b.fair)) continue;
+    let c;
+    let q;
+    if (b.market === 'spread') {
+      c = spreadChances(b.side === 'home' ? exp.margin : -exp.margin, b.line, params.sigma, shape);
+      q = cond(c);
+    } else if (b.market === 'total') {
+      c = totalChances(exp.total, b.line, params.sigmaT);
+      q = b.side === 'over' ? cond(c) : 1 - cond(c);
+    } else {
+      const s = spreads.get(key(b));
+      const spreadHome = s ? { line: s.side === 'home' ? s.line : -s.line, fair: s.side === 'home' ? s.fair : 1 - s.fair } : null;
+      c = mlModel(exp.margin, params.sigma, shape, b.side === 'home' ? b.fair : 1 - b.fair, spreadHome);
+      q = b.side === 'home' ? cond(c) : 1 - cond(c);
+    }
+    out.push({ ...b, model: round(q, 4), push: round(c.push, 4) });
+  }
+  return out;
 }
 
 // The bets the trust is fitted on: the close's, with the Pinnacle anchor (its fair chance where it had the line)

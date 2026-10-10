@@ -8,7 +8,9 @@
 //            price, (b·p − (1 − p)) / b with b what a unit pays and p its trusted chance (the book's fair chance
 //            pulled toward the model's by the market's trust). Value and likelihood together: a heavy favorite
 //            at a price with no edge scores 0 or under and sorts last, whatever its chance. Only the page's
-//            order: the bettor's own staking (desk.mjs stakeFor, by EV) is untouched. Its edge score (scoreOf,
+//            order: the bettor's own staking (desk.mjs stakeFor, by the same Kelly fraction) is apart. A big
+//            disagreement with the book can't reach the top bands: the bet's trusted chance leans the model's
+//            way less past half the market's GAP (desk.mjs leanOf), and past GAP it isn't bet. Its edge score (scoreOf,
 //            the tie-break) its expected return per unit at the trusted chance, times how far the trust can be
 //            leaned on: 1 once the market's is fitted (the backtest's closing lines and the graded bets), 0.5
 //            while it's the untested start (a prop type with fewer than 40 graded)

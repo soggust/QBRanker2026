@@ -386,7 +386,7 @@ export function priceProps(sport, game, props, fitted, idx, exp, info, live, tru
       priced: !!prop.prices,
       p: pTrusted,
       ev,
-      units: guard ? 0.5 : stakeFor(ev, evScale),
+      units: guard ? 0.5 : stakeFor(ev, evScale, odds),
       guard,
       projection: { mean: round(mu, 2), r: f.params.r, rate: round(p.rate, 2), recent: round(p.recent, 2), opp: round(p.opp, 3), posOpp: round(p.posOpp, 3), role: p.role, roleOpp: p.roleOpp === null ? null : round(p.roleOpp, 3), roleFactor: roleFactor === null ? null : round(roleFactor, 3), roleRank, roleUsed: Number.isFinite(f.params.roleK), funnel: p.funnel === null ? null : round(p.funnel, 3), funnelUsed: !!f.params.fun, funnelF: round(p.funnelF, 3), paceF: round(p.paceF, 3), tgtF: round(p.tgtF, 3), vac: round(p.vac ?? 0, 3), vacF: round(p.vacF ?? 1, 3), out: out.names.length ? out.names : undefined, script: round(scriptV, 3), ctx: round(ctxV, 2), games: p.games, lastSeason: p.prevGames, pOver: round(pOver, 4), fairOver: round(fairOver, 4), record: round(n, 1) },
       move: prop.open !== null ? { open: prop.open, now: prop.line } : null,

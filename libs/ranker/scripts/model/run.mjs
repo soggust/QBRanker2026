@@ -13,10 +13,15 @@
 //      a player who played but isn't in his stat's table counts 0; an MLB game cut short voids its run line and
 //      total; each prop's count read again once a day and a half after the start, for stat corrections)
 //   5. every market (spread, total, moneyline) of every game starting in the next two days bet once, the
-//      better side at 0.5 to 3 units (desk.mjs), cut to 0.5 (or skipped) when its line has moved a lot since it
-//      opened or a key player is questionable (the guard); each bet keeps the context it saw. Held for a later
-//      run (fail safe): a game whose injury report or context couldn't be read, one starting within five
-//      minutes, one called off, and with The Odds API to hand one it didn't price (till LAST_CALL)
+//      better side at 0.5 to 3 units by its Kelly fraction (desk.mjs; priced off the margins' own chances,
+//      margins.mjs, their shape fit on the history in 2b), cut to 0.5 (or skipped) when its line has moved a
+//      lot against it since it opened or a key player is questionable (the guard), skipped when the model's
+//      chance is too far from the book's (desk.mjs GAP); the spread and the moneyline never on one side of a
+//      game; each bet keeps the context it saw. Held for a later run (fail safe): a game whose injury report
+//      or context couldn't be read, one starting within five minutes, one called off, and with The Odds API to
+//      hand one it didn't price (till LAST_CALL)
+//   6. the props (below), then every new bet placed, each game's open stake, markets and props together, at
+//      most GAME_CAP (leagues.mjs; desk.mjs capGame)
 //
 // What it writes (apps/<sport>/src/StaticData/model/): state.json (the settings, their test numbers, the
 // changelog, the teams' ratings, the context's sizes) and ledger.json (every bet, open or graded), each only
@@ -34,19 +39,20 @@ import '../env.mjs';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { BOOK, LEAGUES, PROP_CAPS } from './leagues.mjs';
+import { BOOK, GAME_CAP, LEAGUES, PROP_CAPS } from './leagues.mjs';
+import { fitMargins } from './margins.mjs';
 import { eventOf, gameOf, json, linesOf, scoreboard, teamIds, teamSchedule, ymd } from './espn.mjs';
 import { adjust, expect, fit, fitContext, gateOf, replay, round } from './ratings.mjs';
 import { OPTIONAL, enrich, featurize, gather } from './context.mjs';
 import { RECHECK, finalSummary, postmortems, propPostmortem, recheckSummary, usualRoles } from './postmortem.mjs';
 import { closeOf, closingLines, clvOf, clvSummary, propCloseOf } from './clv.mjs';
 import { LINE_BOOKS, SPORT_KEYS, call, canSpend, hasKey, linesFromEvent, matchNearest, usageSummary } from './oddsapi.mjs';
-import { backtestBets, evaluate, snapshots, trustBets } from './backtest.mjs';
+import { backtestBets, evaluate, repriced, snapshots, trustBets } from './backtest.mjs';
 import { buildPicks } from './picks.mjs';
 import { playerRows } from './playerlogs.mjs';
 import { PER_GAME, PROP_WAIT, STATS, apiProps, board, fitProps, nflTookSnap, priceProps, rowsIndex, settleProp, statInFinal, withApiPrices } from './props.mjs';
 import { CACHE, DAY, etDay, isoSecond, readJson, writeJson } from './sources.mjs';
-import { BANKROLL, MARKETS, choose, fairPair, fitTrust, pickText, price, record, settle, voidOf } from './desk.mjs';
+import { BANKROLL, MARKETS, capGame, choose, fairPair, fitTrust, gapGuard, guardOf, oneSide, pickText, price, record, settle, voidOf } from './desk.mjs';
 
 const ROOT = path.resolve(import.meta.dirname, '../../../..');
 // (the return a side has to show to get the 3-unit top stake; a smaller one scales down to 0.5)
@@ -124,6 +130,7 @@ async function runSport(sport) {
   replaceOpen(r);
   betGames(r);
   await betProps(r);
+  placeBets(r);
   writePicks(r);
   saveState(r);
 }
@@ -354,6 +361,30 @@ async function fitTheContext(r) {
     r.expAll.set(g.id, e);
   }).state;
   r.weights = r.teams.weights ?? null;
+  fitTheMargins(r);
+}
+
+// 2b'. the margins' shape (margins.mjs fitMargins): how often each margin comes against the normal's say, fit
+// on the finals' expectations from the replay just run (each made before its game), kept only if it predicts
+// the held-out finals better; logged when it joins or leaves. Without it (a throw, too few games), the plain
+// normal cut into whole numbers, ties or none by the sport
+function fitTheMargins(r) {
+  const { sport, state, at } = r;
+  try {
+    r.margins = fitMargins(sport, r.history, r.expAll, r.params.sigma);
+  } catch (err) {
+    console.warn(`${sport}: margins' shape left out (${err.message})`);
+    r.margins = fitMargins(sport, [], new Map(), r.params.sigma);
+  }
+  r.shape = { ties: r.margins.ties, ot: r.margins.ot, w: r.margins.kept ? r.margins.w : null };
+  const w = r.margins.w ?? {};
+  const top = Object.entries(w)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 4)
+    .map(([k, v]) => `${k} x${v}`);
+  console.log(`${sport}: margins' shape ${r.margins.kept ? 'kept' : 'left out'} on ${r.margins.n} finals (held-out log likelihood ${r.margins.gain === null ? 'not tested' : `${r.margins.gain > 0 ? '+' : ''}${r.margins.gain} a game`})${r.margins.kept ? `; most over the normal: ${top.join(', ')}` : ''}`);
+  const was = state.margins?.kept ?? null;
+  if (was !== null && was !== r.margins.kept) state.changelog.push({ at, what: `margins' shape${r.margins.kept ? '' : ' (left out)'}`, from: was, to: r.margins.kept, why: `held-out log likelihood ${r.margins.gain} a game on ${r.margins.n} finals` });
 }
 
 // Whether to ask an optional source this run (context.mjs OPTIONAL): while any term it feeds has earned its
@@ -417,13 +448,16 @@ async function runBacktest(r) {
   if (BACKTEST && hasKey()) {
     const t0 = Date.now();
     const { snaps, bought, planned } = await snapshots(sport);
-    const bets = backtestBets(sport, snaps, history, r.expAll, params, r.facts.teams ?? []);
+    const bets = backtestBets(sport, snaps, history, r.expAll, params, r.facts.teams ?? [], START_TRUST, EV_SCALE, r.shape);
     writeIfChanged(r.files.backtest, { at: r.at, planned, snapshots: snaps.length, bets });
     console.log(`${sport}: backtest on ${snaps.length} of ${planned} snapshots (${bought} bought), ${bets.length / 2} bets a side, in ${Math.round((Date.now() - t0) / 1000)}s`);
   }
   const saved = read(r.files.backtest, null);
-  r.backtestBets = trustBets(saved?.bets ?? []);
-  r.backtest = saved ? { at: saved.at, snapshots: saved.snapshots, planned: saved.planned, markets: evaluate(saved.bets) } : null;
+  // (their chances priced again by the desk's pricing now: backtest.mjs repriced)
+  const bets = repriced(saved?.bets ?? [], r.expAll ?? new Map(), params, r.shape);
+  if (saved?.bets?.length && bets.length < saved.bets.length) console.log(`${sport}: backtest bets priced again: ${bets.length} of ${saved.bets.length} (the rest's games not in the replay)`);
+  r.backtestBets = trustBets(bets);
+  r.backtest = saved ? { at: saved.at, snapshots: saved.snapshots, planned: saved.planned, markets: evaluate(bets) } : null;
 }
 
 // The context as the state shows it; logged: a term joining or leaving, or its size moving a tenth or more
@@ -447,7 +481,7 @@ function refitTrust(r) {
   const trust = { ...(state.trust ?? {}) };
   const refit = (key, bets, words) => {
     const t = fitTrust(bets, START_TRUST);
-    if (trust[key] && trust[key].trust !== t.trust) state.changelog.push({ at, what: words.what, from: trust[key].trust, to: t.trust, why: `best fit to ${t.n} graded ${words.bets} and ${t.clvN} closing lines (log loss ${t.logLoss})` });
+    if (trust[key] && trust[key].trust !== t.trust) state.changelog.push({ at, what: words.what, from: trust[key].trust, to: t.trust, why: `best fit to ${t.n} graded ${words.bets} and ${t.clvN} closing lines, ${t.eff} games' worth (log loss ${t.logLoss})` });
     trust[key] = t;
   };
   // (each one's bets with a result or a close, a void one's neither: clv.mjs; and a market's backtest bets, the
@@ -496,7 +530,7 @@ async function captureClose(r) {
         else if (!close && bet.seen && r.now.getTime() - Date.parse(bet.start) > 3 * DAY) close = { ...bet.seen, source: 'last seen' };
         if (!close) continue;
         bet.close = close;
-        bet.clv = clvOf(bet, close, bet.market === 'total' ? params.sigmaT : params.sigma);
+        bet.clv = clvOf(bet, close, bet.market === 'total' ? params.sigmaT : params.sigma, bet.market === 'prop' ? null : { sigma: params.sigma, sigmaT: params.sigmaT, shape: r.shape });
         got++;
       }
     } catch (err) {
@@ -613,14 +647,18 @@ function replaceOpen(r) {
 }
 
 // 5. every market of the coming games, bet once: the better side at 0.5 to 3 units, cut or skipped by the
-// guard; each bet keeps the context it saw. Not bet this run (asked again the next): a game whose context or
-// injury report couldn't be read (blindOf: it would be bet as if everyone were healthy), one starting within
-// five minutes by the clock now, and, with The Odds API to hand, one it didn't price this run (no sharp fair
-// chance: it waits for one, and only inside LAST_CALL of its start goes on ESPN's board, at the minimum stake
-// as an action bet). A market the guard skips, or the book doesn't price, rests (liveLines)
+// guard, skipped when the model is too far from the book (desk.mjs gapGuard); the spread and the moneyline
+// never on the same side of a game (desk.mjs oneSide: the one giving way takes the other side only with an
+// edge there); each bet keeps the context it saw, and waits in r.pending for placeBets (the game's cap). Not
+// bet this run (asked again the next): a game whose context or injury report couldn't be read (blindOf: it
+// would be bet as if everyone were healthy), one starting within five minutes by the clock now, and, with The
+// Odds API to hand, one it didn't price this run (no sharp fair chance: it waits for one, and only inside
+// LAST_CALL of its start goes on ESPN's board, at the minimum stake as an action bet). A market the guard
+// skips, or the book doesn't price, rests (liveLines)
 function betGames(r) {
   const { sport, cfg, params, trust, at } = r;
   const held = new Map();
+  r.pending = [];
   for (const { game, lines } of r.upcoming) {
     const { exp, f, adjM, adjT } = expectFor(r, game);
     const fairFrom = lines.fairSource ?? {};
@@ -630,9 +668,10 @@ function betGames(r) {
     const until = Date.parse(game.date) - Date.now();
     const apiLines = lines.source === 'the odds api';
     const waiting = hasKey() && !apiLines && until >= LAST_CALL;
-    const priced = price(game, exp, lines, params);
+    const priced = price(game, exp, lines, params, r.shape);
     // (a market the book didn't price, by The Odds API's word: rests)
     if (apiLines) for (const m of MARKETS) if (!priced.some((x) => x.market === m) && !r.placed.has(`${game.id}:${m}`)) rest(r, `${game.id}:${m}`, 'not priced by the book');
+    let picks = [];
     for (const market of priced) {
       const id = `${game.id}:${market.market}`;
       if (r.placed.has(id) && !DRY) {
@@ -647,18 +686,31 @@ function betGames(r) {
         held.set(hold, (held.get(hold) ?? 0) + 1);
         continue;
       }
-      const pick = choose(market, trust[market.market]?.trust ?? START_TRUST, EV_SCALE);
-      // (the guard: a line that's moved a lot since it opened (less what the context explains), or a key player
-      // questionable, cuts the stake to the minimum; a line that's moved twice that far skips the market this run)
-      let guard = guardOf(cfg.guard, market.market, lines.move, f?.info.flags ?? [], { m: adjM, t: adjT }, params.sigma);
+      picks.push({ market: market.market, id, pick: choose(market, trust[market.market]?.trust ?? START_TRUST, EV_SCALE) });
+    }
+    // (the spread and the moneyline never on one side, this run's or against the game's open bets: oneSide)
+    const ids = new Set(picks.map((x) => x.id));
+    picks = oneSide(picks, r.ledger.bets.filter((b) => b.event === game.id && standing(r, b) && !ids.has(b.id)));
+    for (const { market: key, id, pick, drop, flipped } of picks) {
+      const market = { market: key };
+      if (drop) {
+        rest(r, id, drop);
+        if (DRY) console.log(`${sport} (dry) not bet ${game.awayAbbr} @ ${game.homeAbbr} ${key}: ${drop}`);
+        continue;
+      }
+      // (the guards: the model too far from the book skips the market (desk.mjs gapGuard: the market knowing
+      // something it doesn't); a line that's moved a lot against its side since it opened (less what the context
+      // explains), or a key player questionable, cuts the stake to the minimum; a line that's moved twice that
+      // far against it skips the market this run)
+      let guard = gapGuard(key, pick.model, pick.fair) ?? guardOf(cfg.guard, key, lines.move, f?.info.flags ?? [], { m: adjM, t: adjT }, params.sigma, pick.side);
       if (guard?.skip) {
         rest(r, id, guard.why);
-        if (DRY) console.log(`${sport} (dry) skipped ${game.awayAbbr} @ ${game.homeAbbr} ${market.market}: ${guard.why}; ${JSON.stringify(seen)}`);
+        if (DRY) console.log(`${sport} (dry) skipped ${game.awayAbbr} @ ${game.homeAbbr} ${key}: ${guard.why}; ${JSON.stringify(seen)}`);
         continue;
       }
       // (on ESPN's board with a key to hand: The Odds API's price never came; for the data only)
       if (hasKey() && !apiLines) guard = { why: [guard?.why, "no Odds API price (ESPN's board)"].filter(Boolean).join('; ') };
-      if (guard) pick.units = 0.5;
+      const units = guard ? 0.5 : pick.units;
       const bet = {
         id,
         event: game.id,
@@ -677,23 +729,67 @@ function betGames(r) {
         ev: round(pick.ev, 4),
         // (edge: it sees value; action: no edge, bet for the data; the desk keeps their records apart)
         intent: pick.ev > 0 && !guard ? 'edge' : 'action',
-        units: pick.units,
+        units,
+        // (the model's chance of a push, an integer line landing on the number: its EV counts it)
+        ...(pick.push ? { push: round(pick.push, 4) } : {}),
         expMargin: round(exp.margin, 2),
         expTotal: round(exp.total, 2),
         book: lines.book,
         fairFrom: fairFrom[market.market] ?? 'its own prices',
-        context: { ...seen, ...(guard ? { guard: guard.why } : {}) },
+        context: { ...seen, ...(guard ? { guard: guard.why } : {}), ...(flipped ? { oneSide: `the other side of its ${key === 'ml' ? 'spread' : 'moneyline'}'s, which took this one` } : {}) },
         status: 'open',
         profit: 0,
       };
       bet.pick = pickText(bet, game);
-      if (DRY && market.market === 'spread') console.log(`${sport} (dry) ${bet.matchup} ${bet.pick} ${bet.units}u: ${JSON.stringify(bet.context)}`);
-      r.ledger.bets.push(bet);
+      r.pending.push({ bet, game });
       r.placed.add(id);
-      r.newBets++;
     }
   }
   if (held.size) console.log(`${sport}: game markets held for a later run: ${[...held].map(([why, n]) => `${n} (${why})`).join(', ')}`);
+}
+
+// (an open bet that stands against a game's new ones: a dry run prices again every open bet on a game not
+// started, as a --replace run does, so only the ones on games under way count there)
+const standing = (r, b) => b.status === 'open' && !(DRY && Date.parse(b.start) > r.now.getTime());
+
+// 6b. this run's new bets placed (r.pending: the game markets' and the props'), each game's under GAME_CAP: the
+// units already open on it and the new ones' together; over it the new ones scaled down alike, the least worth
+// having dropped (desk.mjs capGame; a game market dropped rests, as a skipped one does). The rests kept
+function placeBets(r) {
+  const { sport } = r;
+  const pending = r.pending ?? [];
+  const ids = new Set(pending.map((x) => x.bet.id));
+  const byGame = new Map();
+  for (const x of pending) byGame.set(x.bet.event, [...(byGame.get(x.bet.event) ?? []), x.bet]);
+  let capped = 0;
+  let dropped = 0;
+  const run = r.propRun;
+  for (const [event, bets] of byGame) {
+    const open = r.ledger.bets.filter((b) => b.event === event && standing(r, b) && !ids.has(b.id)).reduce((t, b) => t + b.units, 0);
+    const res = capGame(bets, open, GAME_CAP);
+    for (const b of res.dropped) {
+      dropped++;
+      r.placed.delete(b.id);
+      if (b.market !== 'prop') rest(r, b.id, `the game's ${GAME_CAP}u cap`);
+      if (DRY) console.log(`${sport} (dry) not bet ${b.matchup} ${b.pick}: the game's ${GAME_CAP}u cap (${open}u open on it)`);
+    }
+    for (const kept of res.kept) {
+      const { cappedFrom, ...b } = kept;
+      if (cappedFrom) {
+        capped++;
+        b.context = { ...b.context, cap: `${cappedFrom}u cut to ${b.units}u: the game's ${GAME_CAP}u cap` };
+      }
+      if (DRY) console.log(`${sport} (dry) ${b.market === 'prop' ? 'prop ' : ''}${b.matchup} ${b.pick} ${b.units}u p ${b.p} ev ${b.ev}${b.market === 'prop' ? `: ${JSON.stringify(b.projection)}` : ''}${b.context?.guard ? ` [${b.context.guard}]` : ''}${b.context?.cap ? ` [${b.context.cap}]` : ''}${b.context?.oneSide ? ' [flipped: one side]' : ''}`);
+      r.ledger.bets.push(b);
+      r.newBets++;
+      if (b.market === 'prop' && run) {
+        run.bet++;
+        run.units += b.units;
+      }
+    }
+  }
+  if (capped || dropped) console.log(`${sport}: the games' ${GAME_CAP}u cap: ${capped} bets cut, ${dropped} not bet`);
+  if (run?.priced) console.log(`${sport}: props bet ${run.bet} for ${run.units}u`);
   saveRest(r);
 }
 
@@ -721,7 +817,7 @@ async function betProps(r) {
   const capsOf = (key) => (trust[`prop:${key}`]?.fitted ? PROP_CAPS.tested : PROP_CAPS.untested);
   const untestedUnits = (day) => ledger.bets.filter((b) => b.market === 'prop' && !b.tested && dayOf(b.start) === day).reduce((t, b) => t + b.units, 0);
   if (JSON.stringify(state.propCaps ?? null) !== JSON.stringify(PROP_CAPS)) {
-    state.changelog.push({ at, what: 'Prop caps', from: state.propCaps ? 'before' : 'none', to: `${PROP_CAPS.untested.maxUnits}u a prop untested, ${PROP_CAPS.tested.maxUnits}u tested, ${PROP_CAPS.untested.perGame ?? 'every'} a game`, why: 'Every main-line prop with a real price is bet (0.5u at no edge), as the game markets are: as much data as the props can give, the money being play money; an untested type stakes at most 1 unit' });
+    state.changelog.push({ at, what: 'Prop caps', from: state.propCaps ? 'before' : 'none', to: `${PROP_CAPS.untested.maxUnits}u a prop untested, ${PROP_CAPS.tested.maxUnits}u tested, ${PROP_CAPS.untested.perGame ?? 'every'} a game, ${PROP_CAPS.untested.perPlayer ?? 'every'} a player, ${GAME_CAP}u a game with its markets`, why: "Every main-line prop with a real price is bet (0.5u at no edge), as the game markets are, but one a player a game (his props rise and fall together) and a game's stake, markets and props, at most the game's cap; an untested type stakes at most 1 unit" });
     state.propCaps = PROP_CAPS;
   }
   // (The Odds API's props for a game, the desk's book's: asked twice at most, once to bet (within 30 hours of
@@ -778,16 +874,20 @@ async function betProps(r) {
       console.warn(`${sport}: props for ${game.id} skipped (${err.message})`);
     }
   }
+  const pendingProps = (event) => (r.pending ?? []).map((p) => p.bet).filter((b) => b.event === event && b.market === 'prop');
   for (const { game, x, exp } of candidates.sort((a, b) => b.x.ev - a.x.ev)) {
-    const mine = ledger.bets.filter((b) => b.event === game.id && b.market === 'prop');
     const id = `${game.id}:prop:${x.prop.stat.key}:${x.prop.athlete.id}`;
+    // (the game's props: placed before (a dry run prices those again, so only this run's count) and this run's)
+    const mine = [...(DRY ? [] : ledger.bets.filter((b) => b.event === game.id && b.market === 'prop' && !b.void && b.id !== id)), ...pendingProps(game.id)];
     if (r.placed.has(id) && !DRY) continue;
     const caps = capsOf(x.prop.stat.key);
     const tested = caps === PROP_CAPS.tested;
     const inGame = mine.filter((b) => (tested ? true : !b.tested)).length;
     if ((caps.perGame !== null && inGame >= caps.perGame) || (PER_GAME !== null && mine.length >= PER_GAME)) continue;
+    // (one a player a game, his best return (the candidates come best first): his props rise and fall together)
+    if (caps.perPlayer !== null && caps.perPlayer !== undefined && mine.filter((b) => String(b.athlete) === String(x.prop.athlete.id)).length >= caps.perPlayer) continue;
     x.units = Math.min(x.units, caps.maxUnits);
-    if (!tested && caps.perDay !== null && untestedUnits(dayOf(game.date)) + x.units > caps.perDay) continue;
+    if (!tested && caps.perDay !== null && untestedUnits(dayOf(game.date)) + pendingProps(game.id).filter((b) => !b.tested).reduce((t, b) => t + b.units, 0) + x.units > caps.perDay) continue;
     const bet = {
       id,
       event: game.id,
@@ -825,15 +925,12 @@ async function betProps(r) {
       profit: 0,
     };
     bet.pick = `${bet.player} ${bet.side === 'over' ? 'Over' : 'Under'} ${bet.line} ${bet.statLabel}`;
-    if (DRY) console.log(`${sport} (dry) prop ${bet.matchup} ${bet.pick} ${bet.units}u p ${bet.p} ev ${bet.ev}: ${JSON.stringify(bet.projection)}${x.guard ? ` [${x.guard.why}]` : ''}`);
-    ledger.bets.push(bet);
+    // (placed with the game markets, under the game's cap: placeBets)
+    r.pending.push({ bet, game });
     r.placed.add(id);
-    run.bet++;
-    run.units += bet.units;
-    r.newBets++;
   }
   if (run.held) console.log(`${sport}: props held for a later run: ${Object.entries(run.held).map(([why, n]) => `${n} games (${why})`).join(', ')}`);
-  if (run.priced) console.log(`${sport}: props priced ${run.priced} in ${run.games} games (${Math.round((100 * run.under) / run.priced)}% under; at even lines ${run.even}, ${Math.round((100 * run.evenUnder) / Math.max(1, run.even))}% under), bet ${run.bet} for ${run.units}u`);
+  if (run.priced) console.log(`${sport}: props priced ${run.priced} in ${run.games} games (${Math.round((100 * run.under) / run.priced)}% under; at even lines ${run.even}, ${Math.round((100 * run.evenUnder) / Math.max(1, run.even))}% under), ${(r.pending ?? []).filter((p) => p.bet.market === 'prop').length} to place`);
 }
 
 // The state: the settings and how they test, the trust, the context, the props, the changelog, the teams by
@@ -856,6 +953,9 @@ function saveState(r) {
     test: ctxFit ? testOf(ctxFit.after) : best ? testOf(best.test) : null,
     trust,
     evScale: EV_SCALE,
+    gameCap: GAME_CAP,
+    // (the margins' shape, margins.mjs: kept or not, what it did for the held-out finals, its weights)
+    margins: r.margins ? { ties: r.margins.ties, ot: r.margins.ot, kept: r.margins.kept, gain: r.margins.gain, n: r.margins.n, w: r.margins.w } : (state.margins ?? null),
     context: r.context,
     // (each source's time this run and whether it was asked: needed, a re-test, or skipped)
     sources: Object.fromEntries([...new Set([...Object.keys(r.times ?? {}), ...Object.keys(r.asked ?? {})])].map((k) => [k, { ...(r.times?.[k] ?? {}), asked: r.asked?.[k] ?? 'always', feeds: OPTIONAL[sport]?.[k] ?? null }])),
@@ -899,32 +999,6 @@ function saveState(r) {
     console.log(`${sport} (dry): snapshot in .cache/model/dry-${sport}.json`);
   }
   console.log(`${sport}: ${history.length} games kept; ${r.graded} bets graded, ${r.newBets} placed; record ${state.record.won}-${state.record.lost}-${state.record.push}, ${state.record.profit >= 0 ? '+' : ''}${state.record.profit}u`);
-}
-
-// The guard for a market: why to cut its stake (or skip it), or null
-// A move the model's own context explains (it saw the backup QB the line moved for, and moved its number
-// the same way) doesn't count against the bet: only what's left of the move once the context's shift is
-// taken off it does. A context shift the other way explains nothing. Each in the line's own units: the
-// home side's points (a home spread moving down is the market moving toward home), the total's points,
-// the moneyline's home chance (its points through the margin spread: a chance near even moves about
-// 0.4 / sigma a point).
-function guardOf(limits, market, move, flags, adj = { m: 0, t: 0 }, sigma = null) {
-  const limit = limits?.[market];
-  const moved = move?.[market];
-  if (limit && moved !== null && moved !== undefined) {
-    const toPoints = market === 'ml' ? (sigma ? sigma / 0.4 : null) : 1;
-    // (the market's move and the context's shift, both as points toward home / onto the total)
-    const market_ = market === 'spread' ? -moved : market === 'total' ? moved : toPoints ? moved * toPoints : null;
-    const shift = market === 'total' ? adj.t : adj.m;
-    const explained = market_ !== null && Math.sign(shift) === Math.sign(market_) ? Math.min(Math.abs(shift), Math.abs(market_)) : 0;
-    const left = market_ === null ? Math.abs(moved) : (Math.abs(market_) - explained) / (toPoints ?? 1);
-    if (left >= limit) {
-      const why = `line moved ${moved > 0 ? '+' : ''}${moved} since it opened${explained ? ` (${round(explained, 1)} of it explained by the context)` : ''}`;
-      return left >= 2 * limit ? { skip: true, why } : { why };
-    }
-  }
-  if (flags.length) return { why: flags.join('; ') };
-  return null;
 }
 
 // The context as the state shows it: each term's fitted size (in the sport's unit, per unit of the term),
