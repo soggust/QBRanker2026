@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { americanOdds, headshot, hideImage, leagueLogo, num, pct, signed, teamLogo, units } from './bet-format';
-import { BetGroup, TableSorts, backtestValue, betValue, byGame, calibrationValue, contextValue, modelVsMarket, pinnacleEdge, propValue, sportValue, stateValue, tallyValue } from './desk-columns';
+import { BetGroup, SportGroup, TableSorts, backtestValue, betValue, byGame, gamesBySport, calibrationValue, contextValue, modelVsMarket, pinnacleEdge, propValue, sportValue, stateValue, tallyValue } from './desk-columns';
 import { DESK_HELP } from './desk-help';
 import {
   BANKROLL,
@@ -609,6 +609,17 @@ export class ModelDeskComponent implements OnInit, OnDestroy {
   // ---------------------------------------------------------------------------
 
   readonly byGame = byGame;
+  readonly gamesBySport = gamesBySport;
+  // (with every sport listed, each sport a row of its own over its games, folded but for the games in play)
+  private sportsOpen = new Map<string, boolean>();
+
+  sportOpen(table: string, s: SportGroup): boolean {
+    return !s.header || (this.sportsOpen.get(`${table}|${s.sport}`) ?? table === 'live');
+  }
+
+  toggleSport(table: string, s: SportGroup): void {
+    this.sportsOpen.set(`${table}|${s.sport}`, !this.sportOpen(table, s));
+  }
   private groupsOpen = new Map<string, boolean>();
 
   groupOpen(table: string, g: BetGroup): boolean {

@@ -351,13 +351,29 @@
               </tr>
             </thead>
             <tbody>
-              @for (g of byGame(sorted('live', live, betValue)); track g.key) {
+              @for (sg of gamesBySport(byGame(sorted('live', live, betValue)), !sport); track sg.sport) {
+              @if (sg.header) {
+                <!-- (every sport listed: each sport once, its games under it, folded or not) -->
+                @let sportShut = !sportOpen('live', sg);
+                <tr class="desk-sport-group" [class.shut]="sportShut" (click)="toggleSport('live', sg)">
+                  <td class="desk-left" colspan="7">
+                    <span class="desk-group-game">
+                      <button type="button" class="desk-group-toggle" [attr.aria-expanded]="!sportShut" [attr.aria-label]="(sportShut ? 'Show ' : 'Hide ') + sg.sport.toUpperCase() + ' bets'"><mat-icon aria-hidden="true" fontIcon="chevron_right"></mat-icon></button>
+                      <img class="desk-league" [src]="leagueLogo(sg.sport)" alt="" />
+                      <b class="desk-sport-name">{{ sg.sport.toUpperCase() }}</b>
+                      <span class="desk-group-count">{{ sg.groups.length }} {{ sg.groups.length === 1 ? 'game' : 'games' }} · {{ sg.picks }} {{ sg.picks === 1 ? 'pick' : 'picks' }} · {{ sg.units }}u</span>
+                    </span>
+                  </td>
+                </tr>
+              }
+              @if (sportOpen('live', sg)) {
+              @for (g of sg.groups; track g.key) {
                 @let many = g.bets.length > 1;
                 @let shut = !groupOpen('live', g);
                 @if (many) {
                   <!-- (a game with more than one bet: once, its picks under it, folded or not) -->
                   <tr class="desk-group" [class.shut]="shut" (click)="toggleGroup('live', g)">
-                    @if (!sport) {<th><img class="desk-league" [src]="leagueLogo(g.bets[0].sport)" [alt]="g.bets[0].sport.toUpperCase()" [title]="g.bets[0].sport.toUpperCase()" /></th>}
+                    @if (!sport) {<th>@if (!sg.header) {<img class="desk-league" [src]="leagueLogo(g.bets[0].sport)" [alt]="g.bets[0].sport.toUpperCase()" [title]="g.bets[0].sport.toUpperCase()" />}</th>}
                     <td class="desk-left"><span class="desk-group-game">
                       <button type="button" class="desk-group-toggle" [attr.aria-expanded]="!shut" [attr.aria-label]="(shut ? 'Show ' : 'Hide ') + g.bets.length + ' picks on ' + g.bets[0].matchup"><mat-icon aria-hidden="true" fontIcon="chevron_right"></mat-icon></button>
                       <ng-container *ngTemplateOutlet="gameCell; context: { $implicit: g.bets[0], when: 'live' }"></ng-container>
@@ -372,7 +388,7 @@
                 @if (!shut) {
                 @for (b of g.bets; track b.id) {
                 <tr [class.desk-grouped]="many">
-                  @if (!sport) {<th>@if (!many) {<img class="desk-league" [src]="leagueLogo(b.sport)" [alt]="b.sport.toUpperCase()" [title]="b.sport.toUpperCase()" />}</th>}
+                  @if (!sport) {<th>@if (!many && !sg.header) {<img class="desk-league" [src]="leagueLogo(b.sport)" [alt]="b.sport.toUpperCase()" [title]="b.sport.toUpperCase()" />}</th>}
                   <td class="desk-left">@if (!many) {<ng-container *ngTemplateOutlet="gameCell; context: { $implicit: b, when: 'live' }"></ng-container>}</td>
                   <td class="desk-left"><ng-container *ngTemplateOutlet="pickCell; context: { $implicit: b }"></ng-container></td>
                   <td>{{ odds(b.odds) }}</td>
@@ -416,6 +432,8 @@
               }
                 }
               }
+              }
+              }
             </tbody>
           </table>
         </div>
@@ -439,13 +457,29 @@
               </tr>
             </thead>
             <tbody>
-              @for (g of byGame(sorted('open', open, betValue)); track g.key) {
+              @for (sg of gamesBySport(byGame(sorted('open', open, betValue)), !sport); track sg.sport) {
+              @if (sg.header) {
+                <!-- (every sport listed: each sport once, its games under it, folded or not) -->
+                @let sportShut = !sportOpen('open', sg);
+                <tr class="desk-sport-group" [class.shut]="sportShut" (click)="toggleSport('open', sg)">
+                  <td class="desk-left" colspan="8">
+                    <span class="desk-group-game">
+                      <button type="button" class="desk-group-toggle" [attr.aria-expanded]="!sportShut" [attr.aria-label]="(sportShut ? 'Show ' : 'Hide ') + sg.sport.toUpperCase() + ' bets'"><mat-icon aria-hidden="true" fontIcon="chevron_right"></mat-icon></button>
+                      <img class="desk-league" [src]="leagueLogo(sg.sport)" alt="" />
+                      <b class="desk-sport-name">{{ sg.sport.toUpperCase() }}</b>
+                      <span class="desk-group-count">{{ sg.groups.length }} {{ sg.groups.length === 1 ? 'game' : 'games' }} · {{ sg.picks }} {{ sg.picks === 1 ? 'pick' : 'picks' }} · {{ sg.units }}u</span>
+                    </span>
+                  </td>
+                </tr>
+              }
+              @if (sportOpen('open', sg)) {
+              @for (g of sg.groups; track g.key) {
                 @let many = g.bets.length > 1;
                 @let shut = !groupOpen('open', g);
                 @if (many) {
                   <!-- (a game with more than one bet: once, its picks under it, folded or not) -->
                   <tr class="desk-group" [class.shut]="shut" (click)="toggleGroup('open', g)">
-                    @if (!sport) {<th><img class="desk-league" [src]="leagueLogo(g.bets[0].sport)" [alt]="g.bets[0].sport.toUpperCase()" [title]="g.bets[0].sport.toUpperCase()" /></th>}
+                    @if (!sport) {<th>@if (!sg.header) {<img class="desk-league" [src]="leagueLogo(g.bets[0].sport)" [alt]="g.bets[0].sport.toUpperCase()" [title]="g.bets[0].sport.toUpperCase()" />}</th>}
                     <td class="desk-left"><span class="desk-group-game">
                       <button type="button" class="desk-group-toggle" [attr.aria-expanded]="!shut" [attr.aria-label]="(shut ? 'Show ' : 'Hide ') + g.bets.length + ' picks on ' + g.bets[0].matchup"><mat-icon aria-hidden="true" fontIcon="chevron_right"></mat-icon></button>
                       <ng-container *ngTemplateOutlet="gameCell; context: { $implicit: g.bets[0], when: 'EEE h:mm a' }"></ng-container>
@@ -461,7 +495,7 @@
                 @if (!shut) {
                 @for (b of g.bets; track b.id) {
                 <tr [class.desk-grouped]="many">
-                  @if (!sport) {<th>@if (!many) {<img class="desk-league" [src]="leagueLogo(b.sport)" [alt]="b.sport.toUpperCase()" [title]="b.sport.toUpperCase()" />}</th>}
+                  @if (!sport) {<th>@if (!many && !sg.header) {<img class="desk-league" [src]="leagueLogo(b.sport)" [alt]="b.sport.toUpperCase()" [title]="b.sport.toUpperCase()" />}</th>}
                   <td class="desk-left">@if (!many) {<ng-container *ngTemplateOutlet="gameCell; context: { $implicit: b, when: 'EEE h:mm a' }"></ng-container>}</td>
                   <td class="desk-left" [title]="help['intent']"><ng-container *ngTemplateOutlet="pickCell; context: { $implicit: b }"></ng-container></td>
                   <td [title]="help['betBook']">{{ odds(b.odds) }}</td>
@@ -472,6 +506,8 @@
                 </tr>
               }
                 }
+              }
+              }
               }
             </tbody>
           </table>
@@ -498,13 +534,29 @@
               </tr>
             </thead>
             <tbody>
-              @for (g of byGame(sorted('recent', recent, betValue)); track g.key) {
+              @for (sg of gamesBySport(byGame(sorted('recent', recent, betValue)), !sport); track sg.sport) {
+              @if (sg.header) {
+                <!-- (every sport listed: each sport once, its games under it, folded or not) -->
+                @let sportShut = !sportOpen('recent', sg);
+                <tr class="desk-sport-group" [class.shut]="sportShut" (click)="toggleSport('recent', sg)">
+                  <td class="desk-left" colspan="10">
+                    <span class="desk-group-game">
+                      <button type="button" class="desk-group-toggle" [attr.aria-expanded]="!sportShut" [attr.aria-label]="(sportShut ? 'Show ' : 'Hide ') + sg.sport.toUpperCase() + ' bets'"><mat-icon aria-hidden="true" fontIcon="chevron_right"></mat-icon></button>
+                      <img class="desk-league" [src]="leagueLogo(sg.sport)" alt="" />
+                      <b class="desk-sport-name">{{ sg.sport.toUpperCase() }}</b>
+                      <span class="desk-group-count">{{ sg.groups.length }} {{ sg.groups.length === 1 ? 'game' : 'games' }} · {{ sg.picks }} {{ sg.picks === 1 ? 'pick' : 'picks' }} · {{ sg.units }}u</span>
+                    </span>
+                  </td>
+                </tr>
+              }
+              @if (sportOpen('recent', sg)) {
+              @for (g of sg.groups; track g.key) {
                 @let many = g.bets.length > 1;
                 @let shut = !groupOpen('recent', g);
                 @if (many) {
                   <!-- (a game with more than one bet: once, its picks under it, folded or not) -->
                   <tr class="desk-group" [class.shut]="shut" (click)="toggleGroup('recent', g)">
-                    @if (!sport) {<th><img class="desk-league" [src]="leagueLogo(g.bets[0].sport)" [alt]="g.bets[0].sport.toUpperCase()" [title]="g.bets[0].sport.toUpperCase()" /></th>}
+                    @if (!sport) {<th>@if (!sg.header) {<img class="desk-league" [src]="leagueLogo(g.bets[0].sport)" [alt]="g.bets[0].sport.toUpperCase()" [title]="g.bets[0].sport.toUpperCase()" />}</th>}
                     <td class="desk-left"><span class="desk-group-game">
                       <button type="button" class="desk-group-toggle" [attr.aria-expanded]="!shut" [attr.aria-label]="(shut ? 'Show ' : 'Hide ') + g.bets.length + ' picks on ' + g.bets[0].matchup"><mat-icon aria-hidden="true" fontIcon="chevron_right"></mat-icon></button>
                       <ng-container *ngTemplateOutlet="gameCell; context: { $implicit: g.bets[0], when: 'MMM d' }"></ng-container>
@@ -523,7 +575,7 @@
                 @if (!shut) {
                 @for (b of g.bets; track b.id) {
                 <tr [class.desk-grouped]="many">
-                  @if (!sport) {<th>@if (!many) {<img class="desk-league" [src]="leagueLogo(b.sport)" [alt]="b.sport.toUpperCase()" [title]="b.sport.toUpperCase()" />}</th>}
+                  @if (!sport) {<th>@if (!many && !sg.header) {<img class="desk-league" [src]="leagueLogo(b.sport)" [alt]="b.sport.toUpperCase()" [title]="b.sport.toUpperCase()" />}</th>}
                   <td class="desk-left">@if (!many) {<ng-container *ngTemplateOutlet="gameCell; context: { $implicit: b, when: 'MMM d' }"></ng-container>}</td>
                   <td class="desk-left"><ng-container *ngTemplateOutlet="pickCell; context: { $implicit: b }"></ng-container></td>
                   <td [title]="help['betBook']">{{ odds(b.odds) }}</td>
@@ -545,6 +597,8 @@
                 </tr>
               }
                 }
+              }
+              }
               }
             </tbody>
           </table>

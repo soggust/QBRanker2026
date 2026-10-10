@@ -594,3 +594,12 @@ test('byGame: each game once, its bets under it, in the order the sort put its f
   assert.deepEqual(desk.byGame([]), []);
 });
 
+
+test('gamesBySport: every sport listed, each sport once over its games in their order, counted; one sport, or a single sport chosen, no heading', () => {
+  const bet = (id, sport, event, units = 1) => ({ id, sport, event, matchup: 'A @ B', start: '2026-10-11T17:00:00Z', units });
+  const games = desk.byGame([bet('1', 'nhl', 'e1'), bet('2', 'nfl', 'e2', 0.5), bet('3', 'nhl', 'e1'), bet('4', 'nhl', 'e3')]);
+  const all = desk.gamesBySport(games, true);
+  assert.deepEqual(all.map((s) => [s.sport, s.header, s.groups.length, s.picks, s.units]), [['nhl', true, 2, 3, 3], ['nfl', true, 1, 1, 0.5]]);
+  assert.deepEqual(desk.gamesBySport(games, false).map((s) => [s.header, s.groups.length]), [[false, 3]]);
+  assert.equal(desk.gamesBySport(desk.byGame([bet('1', 'nhl', 'e1')]), true)[0].header, false);
+});

@@ -152,3 +152,25 @@ export function byGame(bets: ModelBet[]): BetGroup[] {
   }
   return [...groups.values()];
 }
+
+// The games by sport, when every sport's bets are listed together and more than one is there: each sport once,
+// its games under it in their order, its picks and stakes counted; else one group without a heading
+export interface SportGroup {
+  sport: string;
+  header: boolean;
+  groups: BetGroup[];
+  picks: number;
+  units: number;
+}
+export function gamesBySport(groups: BetGroup[], allSports: boolean): SportGroup[] {
+  const sports = [...new Set(groups.map((g) => g.bets[0]?.sport ?? ''))];
+  const count = (gs: BetGroup[]) => ({
+    picks: gs.reduce((n, g) => n + g.bets.length, 0),
+    units: Math.round(gs.reduce((n, g) => n + g.bets.reduce((u, b) => u + b.units, 0), 0) * 100) / 100,
+  });
+  if (!allSports || sports.length < 2) return [{ sport: '', header: false, groups, ...count(groups) }];
+  return sports.map((sport) => {
+    const gs = groups.filter((g) => (g.bets[0]?.sport ?? '') === sport);
+    return { sport, header: true, groups: gs, ...count(gs) };
+  });
+}

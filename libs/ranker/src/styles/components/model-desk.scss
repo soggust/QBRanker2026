@@ -1057,3 +1057,27 @@ card-panel {
     border-top: 1px solid rgba(255, 255, 255, 0.22);
   }
 }
+
+// (every sport listed: a sport's row over its games, its league and counts, a chevron to fold them away)
+.desk-sport-group {
+  cursor: pointer;
+
+  td {
+    background: rgba(255, 255, 255, 0.05);
+    border-top: 1px solid rgba(255, 255, 255, 0.14);
+  }
+
+  &:hover td {
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  .desk-league {
+    height: 22px;
+    width: 22px;
+  }
+
+  .desk-sport-name {
+    font-size: 13px;
+    letter-spacing: 0.06em;
+  }
+}
