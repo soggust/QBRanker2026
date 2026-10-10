@@ -15,6 +15,9 @@ import { Component, EventEmitter, Input, Output, ViewEncapsulation } from '@angu
 @Component({
   selector: 'card-panel',
   template: `
+    <!-- (a chip-rimmed panel's corner spots, the Bets page's and the Algorithm's: hidden on every other panel) -->
+    <i class="rim-corner tl" aria-hidden="true"></i><i class="rim-corner tr" aria-hidden="true"></i
+    ><i class="rim-corner bl" aria-hidden="true"></i><i class="rim-corner br" aria-hidden="true"></i>
     <div class="group-bar">
       @if (expandable) {
         <button type="button" class="panel-toggle" [attr.aria-expanded]="isOpen" (click)="toggle()">
