@@ -1,4 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
+import { TIERS } from './tiers';
 import { americanOdds, headshot, hideImage, leagueLogo, num, pct, signed, teamLogo, units } from './bet-format';
 import { BetGroup, SportGroup, TableSorts, backtestValue, betValue, byGame, gamesBySport, calibrationValue, contextValue, modelVsMarket, pinnacleEdge, propValue, sportValue, stateValue, tallyValue } from './desk-columns';
 import { DESK_HELP } from './desk-help';
@@ -38,13 +39,6 @@ import { TeamColors, loadTeamColors, pickTeamColor, splitPick } from './pick-sty
 // starters, weather, parks, officials, the ranker's own numbers) with each term's fitted size. The arithmetic
 // is desk-math.ts's, the sorting desk-columns.ts's, the hovers desk-help.ts's.
 
-// (the Bets page's bands as the desk names them, best first)
-const TIERS: [Confidence, string][] = [
-  ['lock', 'LOCK'],
-  ['high', 'LOVE'],
-  ['medium', 'LIKE'],
-  ['low', 'PASS'],
-];
 
 const SPORT_KEY = 'deskSport';
 const readSport = (): string | null => {
@@ -221,7 +215,8 @@ export class ModelDeskComponent implements OnInit, OnDestroy {
     this.byStake = STAKES.map((u) => tally(`${u}u`, where((b) => b.units === u))).filter((t) => t.bets || t.open);
     // (by the Bets page's bands: each bet's Kelly score and chance when placed, bet-why.ts confidenceOf)
     const band = (b: ModelBet) => confidenceOf(kellyOf(b.p, b.odds) ?? 0, b.p, intentOf(b) === 'edge');
-    this.byConfidence = TIERS.map(([key, label]) => tally(label, where((b) => band(b) === key))).filter((t) => t.bets || t.open);
+    // (the Bets page's bands as the desk names them, best first: tiers.ts)
+    this.byConfidence = TIERS.map((t) => tally(t.label.toUpperCase(), where((b) => band(b) === t.confidence))).filter((t) => t.bets || t.open);
     this.confidenceTotal = this.byConfidence.length ? tally('Total', bets) : null;
     this.calibration = calibrationOf(bets);
 

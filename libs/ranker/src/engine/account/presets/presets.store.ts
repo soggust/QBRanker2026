@@ -1,5 +1,5 @@
 import { Injectable, computed, effect, inject, signal } from '@angular/core';
-import { db } from '@ranker/core/firebase';
+import { firestoreSdk } from '@ranker/core/firebase';
 import { SPORT } from '@sport/sport';
 import { AccountService } from '../account.service';
 import { PresetSettings, UserPreset } from '../lists/lists-helpers';
@@ -35,7 +35,7 @@ export class PresetsStore {
     this.following = uid;
     this.all.set([]);
     if (!uid) return;
-    const [firestore, f] = await Promise.all([db(), import('firebase/firestore')]);
+    const [firestore, f] = await firestoreSdk();
     if (this.following !== uid) return;
     this.stop = f.onSnapshot(
       f.query(f.collection(firestore, 'users', uid, 'presets'), f.where('sport', '==', SPORT.id)),
@@ -53,7 +53,7 @@ export class PresetsStore {
 
   async create(tab: string, name: string, settings: PresetSettings): Promise<string> {
     const uid = await this.uid();
-    const [firestore, f] = await Promise.all([db(), import('firebase/firestore')]);
+    const [firestore, f] = await firestoreSdk();
     const ref = f.doc(f.collection(firestore, 'users', uid, 'presets'));
     await f.setDoc(ref, { sport: SPORT.id, tab, name: name.trim(), settings, createdAt: f.serverTimestamp(), updatedAt: f.serverTimestamp() });
     return ref.id;
@@ -61,14 +61,14 @@ export class PresetsStore {
 
   async update(id: string, change: { name?: string; settings?: PresetSettings }): Promise<void> {
     const uid = await this.uid();
-    const [firestore, f] = await Promise.all([db(), import('firebase/firestore')]);
+    const [firestore, f] = await firestoreSdk();
     const fields = { ...change, ...(change.name !== undefined && { name: change.name.trim() }) };
     await f.updateDoc(f.doc(firestore, 'users', uid, 'presets', id), { ...fields, updatedAt: f.serverTimestamp() });
   }
 
   async remove(id: string): Promise<void> {
     const uid = await this.uid();
-    const [firestore, f] = await Promise.all([db(), import('firebase/firestore')]);
+    const [firestore, f] = await firestoreSdk();
     await f.deleteDoc(f.doc(firestore, 'users', uid, 'presets', id));
   }
 }

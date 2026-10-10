@@ -1,6 +1,6 @@
 import { Injectable, computed, effect, signal, untracked } from '@angular/core';
 import type { DocumentReference, FieldValue, WriteBatch } from 'firebase/firestore';
-import { db } from '@ranker/core/firebase';
+import { firestoreSdk } from '@ranker/core/firebase';
 import { AccountService } from '../account.service';
 import { Profile, USERNAME_PATTERN } from '../account-helpers';
 import { FriendStatus, SEARCH_LIMIT, millis, prefixRange, sortFriends } from './friends-helpers';
@@ -81,7 +81,7 @@ export class FriendsService {
     this.stop = null;
     this.docs.set(null);
     if (!uid) return;
-    const [firestore, { collection, onSnapshot }] = await Promise.all([db(), import('firebase/firestore')]);
+    const [firestore, { collection, onSnapshot }] = await firestoreSdk();
     if (this.following !== uid) return;
     this.stop = onSnapshot(
       collection(firestore, 'users', uid, 'friends'),
@@ -103,7 +103,7 @@ export class FriendsService {
   private async loadProfiles(uids: string[]): Promise<void> {
     const missing = uids.filter((uid) => !(uid in this.profiles()));
     if (!missing.length) return;
-    const [firestore, { doc, getDoc }] = await Promise.all([db(), import('firebase/firestore')]);
+    const [firestore, { doc, getDoc }] = await firestoreSdk();
     const found = await Promise.all(
       missing.map((uid) =>
         getDoc(doc(firestore, 'users', uid))
@@ -123,7 +123,7 @@ export class FriendsService {
   // ---------------------------------------------------------------------------
   // (usernames starting with a prefix, already cleaned: searchPrefix)
   async search(prefix: string): Promise<PublicProfile[]> {
-    const [firestore, f] = await Promise.all([db(), import('firebase/firestore')]);
+    const [firestore, f] = await firestoreSdk();
     const [start, end] = prefixRange(prefix);
     const claims = await f.getDocs(
       f.query(f.collection(firestore, 'usernames'), f.where(f.documentId(), '>=', start), f.where(f.documentId(), '<', end), f.limit(SEARCH_LIMIT)),
@@ -145,7 +145,7 @@ export class FriendsService {
     // (not a username at all, e.g. #u/a/b: no one, without asking)
     const name = username.trim().replace(/^@+/, '');
     if (!USERNAME_PATTERN.test(name)) return null;
-    const [firestore, { doc, getDoc }] = await Promise.all([db(), import('firebase/firestore')]);
+    const [firestore, { doc, getDoc }] = await firestoreSdk();
     const claim = await getDoc(doc(firestore, 'usernames', name.toLowerCase()));
     if (!claim.exists()) return null;
     const uid = claim.data()['uid'] as string;
@@ -164,7 +164,7 @@ export class FriendsService {
     if (!me) throw Object.assign(new Error('signed out'), { code: 'auth/no-current-user' });
     this.busy.set(other);
     try {
-      const [firestore, f] = await Promise.all([db(), import('firebase/firestore')]);
+      const [firestore, f] = await firestoreSdk();
       const batch = f.writeBatch(firestore);
       write(batch, f.doc(firestore, 'users', me, 'friends', other), f.doc(firestore, 'users', other, 'friends', me), f.serverTimestamp());
       await batch.commit();

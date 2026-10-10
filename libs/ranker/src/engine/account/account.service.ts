@@ -1,7 +1,7 @@
 import { Injectable, computed, signal } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import type { AuthProvider, User } from 'firebase/auth';
-import { auth, db } from '@ranker/core/firebase';
+import { auth, firestoreSdk, authSdk } from '@ranker/core/firebase';
 import { ADMIN } from './features';
 import {
   DEFAULT_VISIBILITY,
@@ -100,7 +100,7 @@ export class AccountService {
   // Loads the SDK and follows the sign-in (once)
   start(): Promise<void> {
     this.started ??= (async () => {
-      const [a, { onAuthStateChanged }] = await Promise.all([auth(), import('firebase/auth')]);
+      const [a, { onAuthStateChanged }] = await authSdk();
       onAuthStateChanged(a, (user) => void this.follow(user));
     })().catch((error) => {
       this.started = null;
@@ -163,7 +163,7 @@ export class AccountService {
       .catch(() => undefined)
       .finally(() => this.adminKnown.set(true));
 
-    const [firestore, { doc, onSnapshot }] = await Promise.all([db(), import('firebase/firestore')]);
+    const [firestore, { doc, onSnapshot }] = await firestoreSdk();
     let checked = false;
     this.stopProfile = onSnapshot(
       doc(firestore, 'users', user.uid),
@@ -207,13 +207,13 @@ export class AccountService {
   }
 
   async signInWith(id: SocialProvider): Promise<void> {
-    const [a, { signInWithPopup }] = await Promise.all([auth(), import('firebase/auth')]);
+    const [a, { signInWithPopup }] = await authSdk();
     await this.start();
     await signInWithPopup(a, await this.provider(id));
   }
 
   async signInWithEmail(email: string, password: string): Promise<void> {
-    const [a, { signInWithEmailAndPassword }] = await Promise.all([auth(), import('firebase/auth')]);
+    const [a, { signInWithEmailAndPassword }] = await authSdk();
     await this.start();
     await signInWithEmailAndPassword(a, email.trim(), password);
   }
@@ -223,7 +223,7 @@ export class AccountService {
   async register(email: string, password: string, username: string, displayName: string): Promise<void> {
     const name = cleanUsername(username);
     if (!(await this.usernameAvailable(name))) throw fail('username-taken');
-    const [a, { createUserWithEmailAndPassword, updateProfile }] = await Promise.all([auth(), import('firebase/auth')]);
+    const [a, { createUserWithEmailAndPassword, updateProfile }] = await authSdk();
     await this.start();
     this.registering = true;
     try {
@@ -269,12 +269,12 @@ export class AccountService {
   }
 
   async resetPassword(email: string): Promise<void> {
-    const [a, { sendPasswordResetEmail }] = await Promise.all([auth(), import('firebase/auth')]);
+    const [a, { sendPasswordResetEmail }] = await authSdk();
     await sendPasswordResetEmail(a, email.trim());
   }
 
   async signOut(): Promise<void> {
-    const [a, { signOut }] = await Promise.all([auth(), import('firebase/auth')]);
+    const [a, { signOut }] = await authSdk();
     await signOut(a);
   }
 
@@ -299,7 +299,7 @@ export class AccountService {
 
   // The username's claim, the profile and the private settings, in one transaction
   private async writeNewProfile(user: User, username: string, displayName: string, photo: Photo | null): Promise<void> {
-    const [firestore, f] = await Promise.all([db(), import('firebase/firestore')]);
+    const [firestore, f] = await firestoreSdk();
     const lower = usernameKey(username);
     await f.runTransaction(firestore, async (tx) => {
       // (already made, by another tab or a late duplicate: leave it)
@@ -324,7 +324,7 @@ export class AccountService {
 
   // (is a username free: not claimed, or claimed by this user)
   async usernameAvailable(username: string): Promise<boolean> {
-    const [firestore, { doc, getDoc }] = await Promise.all([db(), import('firebase/firestore')]);
+    const [firestore, { doc, getDoc }] = await firestoreSdk();
     const claim = await getDoc(doc(firestore, 'usernames', usernameKey(username)));
     return !claim.exists() || claim.data()['uid'] === this.current()?.uid;
   }
@@ -332,13 +332,13 @@ export class AccountService {
   // The profile's own fields (display name, photo, bio, favorite team)
   async updateProfile(change: Partial<Pick<Profile, 'displayName' | 'photo' | 'bio' | 'favoriteTeam'>>): Promise<void> {
     const user = await this.me();
-    const [firestore, { doc, serverTimestamp, updateDoc }] = await Promise.all([db(), import('firebase/firestore')]);
+    const [firestore, { doc, serverTimestamp, updateDoc }] = await firestoreSdk();
     await updateDoc(doc(firestore, 'users', user.uid), { ...change, updatedAt: serverTimestamp() });
   }
 
   async setVisibility(kind: VisibilityKind, value: Visibility): Promise<void> {
     const user = await this.me();
-    const [firestore, { doc, serverTimestamp, updateDoc }] = await Promise.all([db(), import('firebase/firestore')]);
+    const [firestore, { doc, serverTimestamp, updateDoc }] = await firestoreSdk();
     await updateDoc(doc(firestore, 'users', user.uid), { [`visibility.${kind}`]: value, updatedAt: serverTimestamp() });
   }
 
@@ -347,7 +347,7 @@ export class AccountService {
     const user = await this.me();
     const name = cleanUsername(username);
     const lower = usernameKey(name);
-    const [firestore, f] = await Promise.all([db(), import('firebase/firestore')]);
+    const [firestore, f] = await firestoreSdk();
     await f.runTransaction(firestore, async (tx) => {
       const mine = await tx.get(f.doc(firestore, 'users', user.uid));
       const old = (mine.data()?.['usernameLower'] as string | undefined) ?? null;
@@ -398,7 +398,7 @@ export class AccountService {
       if (social) await a.reauthenticateWithPopup(user, await this.provider(social));
     }
     for (const cleanup of this.cleanups) await cleanup(user.uid);
-    const [firestore, f] = await Promise.all([db(), import('firebase/firestore')]);
+    const [firestore, f] = await firestoreSdk();
     this.stopProfile?.();
     this.stopProfile = null;
     const profile = await f.getDoc(f.doc(firestore, 'users', user.uid));

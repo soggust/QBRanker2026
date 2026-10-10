@@ -1,6 +1,6 @@
 import { Injectable, computed, effect, signal } from '@angular/core';
 import type { DocumentData, Firestore, Query, QueryDocumentSnapshot, Timestamp } from 'firebase/firestore';
-import { db } from '@ranker/core/firebase';
+import { firestoreSdk } from '@ranker/core/firebase';
 import { AccountService } from '../account.service';
 import { Leaderboard, PlayBet, START, Selection, selectionKey, stakeProblem } from './wallet-math';
 
@@ -146,7 +146,7 @@ export class WalletService {
     this.tally.set(null);
     this.loaded.set(false);
     if (!uid) return;
-    const [firestore, f] = await Promise.all([db(), import('firebase/firestore')]);
+    const [firestore, f] = await firestoreSdk();
     if (this.uid !== uid) return;
     this.stop.push(
       f.onSnapshot(
@@ -188,7 +188,7 @@ export class WalletService {
     const uid = this.uid;
     const state = this.settledState();
     if (!uid || state === 'loading' || (!fresh && state === 'all')) return;
-    const [firestore, f] = await Promise.all([db(), import('firebase/firestore')]);
+    const [firestore, f] = await firestoreSdk();
     if (this.uid !== uid) return;
     const have = fresh ? [] : this.settledBets();
     const size = fresh ? Math.max(SETTLED_PAGE, this.settledBets().length) : SETTLED_PAGE;
@@ -220,7 +220,7 @@ export class WalletService {
   async ensureWallet(): Promise<void> {
     const uid = this.uid;
     if (!uid) throw Object.assign(new Error('Sign in first'), { code: 'auth/no-current-user' });
-    const [firestore, f] = await Promise.all([db(), import('firebase/firestore')]);
+    const [firestore, f] = await firestoreSdk();
     const ref = f.doc(firestore, 'users', uid, 'wallet', 'main');
     if ((await f.getDoc(ref)).exists()) return;
     await f.setDoc(ref, { balance: START, start: START, resets: 0, createdAt: f.serverTimestamp(), updatedAt: f.serverTimestamp() });
@@ -270,7 +270,7 @@ export class WalletService {
     const result: PlaceResult = { placed: 0, failed: [] };
     try {
       await this.ensureWallet();
-      const [firestore, f] = await Promise.all([db(), import('firebase/firestore')]);
+      const [firestore, f] = await firestoreSdk();
       const walletRef = f.doc(firestore, 'users', uid, 'wallet', 'main');
       const run = (await f.getDoc(walletRef)).data()?.['resets'] ?? 0;
       for (const s of this.slip().filter((x) => x.stake > 0)) {
@@ -327,7 +327,7 @@ export class WalletService {
     const uid = this.uid;
     if (!uid) return;
     await this.ensureWallet();
-    const [firestore, f] = await Promise.all([db(), import('firebase/firestore')]);
+    const [firestore, f] = await firestoreSdk();
     await f.updateDoc(f.doc(firestore, 'users', uid, 'wallet', 'main'), {
       balance: START,
       resets: f.increment(1),
@@ -341,7 +341,7 @@ export class WalletService {
   async clearHistory(): Promise<number> {
     const uid = this.uid;
     if (!uid) return 0;
-    const [firestore, f] = await Promise.all([db(), import('firebase/firestore')]);
+    const [firestore, f] = await firestoreSdk();
     // (the history read from the server a batch at a time, not what's on show: that may be only its first page)
     let cleared = 0;
     for (;;) {
@@ -361,7 +361,7 @@ export class WalletService {
 
   // A leaderboard (the settler's, public users only)
   async leaderboard(period: Leaderboard['period']): Promise<Leaderboard | null> {
-    const [firestore, f] = await Promise.all([db(), import('firebase/firestore')]);
+    const [firestore, f] = await firestoreSdk();
     const snap = await f.getDoc(f.doc(firestore, 'leaderboards', period));
     if (!snap.exists()) return null;
     const d = snap.data();

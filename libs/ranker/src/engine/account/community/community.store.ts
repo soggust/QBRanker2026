@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { db } from '@ranker/core/firebase';
+import { firestoreSdk } from '@ranker/core/firebase';
 import { AccountService } from '../account.service';
 import type { Profile } from '../account-helpers';
 import { CommunityEntry, VoteTally, tally } from './community-helpers';
@@ -40,7 +40,7 @@ export class CommunityStore {
   }
 
   private async read(key: string): Promise<EntryCard[]> {
-    const [firestore, f] = await Promise.all([db(), import('firebase/firestore')]);
+    const [firestore, f] = await firestoreSdk();
     const entries = await f.getDocs(f.collection(firestore, 'community', key, 'entries'));
     const me = this.account.user()?.uid ?? null;
     return Promise.all(
@@ -71,7 +71,7 @@ export class CommunityStore {
     const uid = this.account.user()?.uid;
     if (!uid) throw Object.assign(new Error('signed out'), { code: 'permission-denied' });
     if (value !== 0) this.account.requireVerified();
-    const [firestore, f] = await Promise.all([db(), import('firebase/firestore')]);
+    const [firestore, f] = await firestoreSdk();
     const entryRef = f.doc(firestore, 'community', key, 'entries', owner);
     const ref = f.doc(entryRef, 'votes', uid);
     this.forget(key);
@@ -91,7 +91,7 @@ export class CommunityStore {
     let profile = this.profiles.get(uid);
     if (!profile) {
       profile = (async () => {
-        const [firestore, f] = await Promise.all([db(), import('firebase/firestore')]);
+        const [firestore, f] = await firestoreSdk();
         const snap = await f.getDoc(f.doc(firestore, 'users', uid));
         return snap.exists() ? (snap.data() as Profile) : null;
       })().catch(() => null);

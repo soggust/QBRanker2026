@@ -1,4 +1,4 @@
-import { db } from '@ranker/core/firebase';
+import { firestoreSdk } from '@ranker/core/firebase';
 import { BetLike, millis } from '../friends/friends-helpers';
 
 // What a public profile shows of someone's saved things, read straight from their subcollections (the
@@ -49,7 +49,7 @@ const num = (value: unknown): number | null => (typeof value === 'number' && Num
 // for the kind (the page asks only when it lets this viewer see them); lists each by their own visibility,
 // so someone else asks only for the ones they may see, as the rules require)
 async function read(uid: string, name: 'lists' | 'presets' | 'pins', owner: boolean, friend: boolean) {
-  const [firestore, f] = await Promise.all([db(), import('firebase/firestore')]);
+  const [firestore, f] = await firestoreSdk();
   const ref = f.collection(firestore, 'users', uid, name);
   if (owner || name !== 'lists') return (await f.getDocs(ref)).docs;
   const shown = friend ? ['public', 'friends'] : ['public'];
@@ -112,7 +112,7 @@ function bet(d: { id: string; data: () => Record<string, unknown> }): BetSummary
 
 // (bets still in play: open; or settled ones, newest first)
 export async function loadBets(uid: string, which: 'open' | 'settled'): Promise<BetSummary[]> {
-  const [firestore, f] = await Promise.all([db(), import('firebase/firestore')]);
+  const [firestore, f] = await firestoreSdk();
   const ref = f.collection(firestore, 'users', uid, 'bets');
   const statuses = which === 'open' ? ['open'] : ['won', 'lost', 'push', 'void'];
   const snap = await f.getDocs(f.query(ref, f.where('status', 'in', statuses)));
@@ -122,7 +122,7 @@ export async function loadBets(uid: string, which: 'open' | 'settled'): Promise<
 
 // (the play-money bankroll: null when there's none yet)
 export async function loadBalance(uid: string): Promise<number | null> {
-  const [firestore, { doc, getDoc }] = await Promise.all([db(), import('firebase/firestore')]);
+  const [firestore, { doc, getDoc }] = await firestoreSdk();
   const snap = await getDoc(doc(firestore, 'users', uid, 'wallet', 'main'));
   return snap.exists() ? num(snap.data()['balance']) : null;
 }

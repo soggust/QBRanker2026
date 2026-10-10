@@ -1,3 +1,4 @@
+import { Confidence, tierLabel } from './tiers';
 // Why a bet ranks where it does on the Bets page (its rank tile clicked): its score split into what makes it,
 // and what separates it from the bets beside it. The score is its Kelly score (picks.mjs scoreParts): how much
 // of a bankroll its edge is worth at its price, (b·p − (1 − p)) / b, b what a unit pays and p its trusted
@@ -110,7 +111,7 @@ export function kellyOf(p: number | undefined | null, american: number | undefin
 // A pick's band, its row's color and its chip (picks.mjs BANDS, the same cuts): by its Kelly score, a lock above
 // them all at 10% or more with a 60% chance to win (a big edge on a likely result: LOCK), then 5% (LOVE), 2%
 // (LIKE), under that or without an edge low (PASS)
-export type Confidence = 'lock' | 'high' | 'medium' | 'low';
+export type { Confidence } from './tiers';
 export const BANDS = { lock: 0.1, lockChance: 0.6, high: 0.05, medium: 0.02 };
 export function confidenceOf(kelly: number, p: number | null | undefined, edge: boolean | undefined): Confidence {
   if (edge === false || !(kelly > 0)) return 'low';
@@ -136,7 +137,6 @@ export function signedPoints(amount: number): string {
 
 const pct = (v: number, digits = 1) => `${(v * 100).toFixed(digits)}%`;
 const odds = (a: number) => (a > 0 ? `+${a}` : `${a}`.replace('-', '−'));
-const LEVEL: Record<Confidence, string> = { lock: 'Lock', high: 'High', medium: 'Medium', low: 'Low' };
 // (a book's: DraftKings', FanDuel's)
 const owner = (book: string) => (book.endsWith('s') ? `${book}'` : `${book}'s`);
 
@@ -259,7 +259,7 @@ export function betWhy(list: BetWhyRow[], index: number): BetWhy {
   // Its band: its Kelly score's with an edge on the price; low without one, whatever its chance
   const level = row.confidence ?? 'low';
   const noEdge = row.edge === false || (!partial && score <= 0);
-  const levelText = noEdge ? `${LEVEL[level]}: no edge on the price` : LEVEL[level];
+  const levelText = noEdge ? `${tierLabel(level)}: no edge on the price` : tierLabel(level);
   const levelTitle = noEdge
     ? "Its confidence: low, whatever its chance, without an edge on the price (a bet the bot made for the data, not one it likes: a favorite at a short price isn't a strong bet)"
     : 'Its confidence, by its Kelly score (value and likelihood together, as the picks are ranked): 10 or more with a 60% chance a lock, 5 or more high, 2 or more medium, under that low';

@@ -8,7 +8,8 @@ import { profitCurves, provisional } from '../../bets/desk-math';
 export type PlayMarket = 'spread' | 'total' | 'ml' | 'prop';
 export type PlayStatus = 'open' | 'won' | 'lost' | 'push' | 'void';
 // (the bot's bands as the Bets page names them: bet-why.ts confidenceOf's lock, high, medium, low)
-export type Tier = 'lock' | 'love' | 'like' | 'pass';
+import type { Tier } from '../../bets/tiers';
+export type { Tier };
 
 // (play money: 1,000 units to start, and again on a reload)
 export const START = 1000;

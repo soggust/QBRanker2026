@@ -1,4 +1,5 @@
 import { Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild, inject, isDevMode } from '@angular/core';
+import { tierOf } from './tiers';
 import { BetsView, betsView, chooseBetsView } from './bets-view';
 // ---- wallet (phase 2) ----
 import { LinesService } from '../account/wallet/lines.service';
@@ -582,7 +583,7 @@ export class BetsPageComponent implements OnInit, OnDestroy {
   // its price: a bet the bot made for the data, never one to make); a fade "Fade"
   grade(r: BetRow): 'lock' | 'love' | 'like' | 'fade' | 'pass' {
     if (r.strength === 'fade') return 'fade';
-    return ({ lock: 'lock', high: 'love', medium: 'like', low: 'pass' } as const)[this.level(r)];
+    return tierOf(this.level(r)) ?? 'pass';
   }
 
   // A bet's band, its row's color: a lock, then its Kelly score 5 or more, 2 or more, or under (picks.mjs)

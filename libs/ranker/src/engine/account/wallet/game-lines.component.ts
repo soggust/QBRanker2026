@@ -1,4 +1,5 @@
 import { Component, Input, OnDestroy, OnInit, computed, signal } from '@angular/core';
+import { Confidence, tierOf } from '../../bets/tiers';
 import { betScoreText } from '../../bets/bet-why';
 import { headshot, hideImage, teamLogo } from '../../bets/bet-format';
 import { LinesService } from './lines.service';
@@ -11,7 +12,7 @@ export interface BotPick {
   side?: string | null;
   line?: number | null;
   price?: number;
-  confidence: 'lock' | 'high' | 'medium' | 'low' | null;
+  confidence: Confidence | null;
   sureness: number;
   pickId?: string;
   player?: string | null;
@@ -22,7 +23,6 @@ export interface BotPick {
 }
 
 const MARKET_OF: Record<string, PlayMarket> = { spread: 'spread', total: 'total', moneyline: 'ml', player: 'prop' };
-const TIER_OF: Record<string, Tier> = { lock: 'lock', high: 'love', medium: 'like', low: 'pass' };
 
 // A game's every line, both sides (the spread, the total, the moneyline) at DraftKings' prices from ESPN's
 // board, as a sportsbook lays them out: a row a team, a column a market; and the bot's props on the game (its
@@ -100,7 +100,7 @@ export class GameLinesComponent implements OnInit, OnDestroy {
   }
 
   tier(p: BotPick | null): Tier | null {
-    return p?.confidence ? TIER_OF[p.confidence] : null;
+    return p?.confidence ? tierOf(p.confidence) : null;
   }
 
   kellyText(p: BotPick): string {

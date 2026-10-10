@@ -122,3 +122,14 @@ export function db(): Promise<Firestore> {
   dbPromise.catch(() => (dbPromise = null));
   return dbPromise;
 }
+
+// The database and the Firestore SDK's functions together, as nearly every read and write wants them:
+// const [firestore, f] = await firestoreSdk(); (the SDK itself loads only when it's first asked for)
+export function firestoreSdk(): Promise<[Firestore, typeof import('firebase/firestore')]> {
+  return Promise.all([db(), import('firebase/firestore')]);
+}
+
+// ...and the sign-in and the Auth SDK's: const [a, { signOut }] = await authSdk();
+export function authSdk(): Promise<[Auth, typeof import('firebase/auth')]> {
+  return Promise.all([auth(), import('firebase/auth')]);
+}

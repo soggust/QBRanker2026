@@ -2,7 +2,7 @@
 // owner's list (and anyone's whose tracker they may see: firestore.rules), renaming, unpinning, the order
 // they're dragged into, re-pinning (a fresh baseline), and the days they've been looked at.
 import { Injectable, inject, signal } from '@angular/core';
-import { db } from '@ranker/core/firebase';
+import { firestoreSdk } from '@ranker/core/firebase';
 import { SPORT } from '@sport/sport';
 import { PositionService } from '@ranker/engine/position.service';
 import { SeasonDataService } from '@ranker/engine/season-data.service';
@@ -27,7 +27,7 @@ export class TrackerStore {
   readonly pinnedSpecs = signal<ReadonlySet<string>>(new Set());
 
   private async pinsRef(uid: string) {
-    const [firestore, f] = await Promise.all([db(), import('firebase/firestore')]);
+    const [firestore, f] = await firestoreSdk();
     return { firestore, f, ref: f.collection(firestore, 'users', uid, 'pins') };
   }
 
@@ -122,7 +122,7 @@ export class TrackerStore {
 
   // Someone's public profile (the page's name and picture for #tracker/<uid>)
   async profileOf(uid: string): Promise<{ displayName: string; username: string; photo: { kind: string; url: string } | null; tracker: string } | null> {
-    const [firestore, f] = await Promise.all([db(), import('firebase/firestore')]);
+    const [firestore, f] = await firestoreSdk();
     const snap = await f.getDoc(f.doc(firestore, 'users', uid));
     if (!snap.exists()) return null;
     const data = snap.data();

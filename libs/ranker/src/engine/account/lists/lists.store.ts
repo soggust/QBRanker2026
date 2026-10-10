@@ -1,5 +1,5 @@
 import { Injectable, inject, signal } from '@angular/core';
-import { db } from '@ranker/core/firebase';
+import { firestoreSdk } from '@ranker/core/firebase';
 import { AccountService } from '../account.service';
 import { CommunityStore } from '../community/community.store';
 import type { Visibility } from '../account-helpers';
@@ -50,7 +50,7 @@ export class ListsStore {
     this.following = uid;
     this.mine.set(null);
     if (!uid) return;
-    const [firestore, f] = await Promise.all([db(), import('firebase/firestore')]);
+    const [firestore, f] = await firestoreSdk();
     if (this.following !== uid) return;
     this.stop = f.onSnapshot(
       f.query(f.collection(firestore, 'users', uid, 'lists'), f.orderBy('updatedAt', 'desc')),
@@ -68,7 +68,7 @@ export class ListsStore {
 
   // One list, followed live (its owner's edits show as they're made); null when it's gone or hidden
   async watch(owner: string, id: string, next: (list: SavedList | null, error?: unknown) => void): Promise<() => void> {
-    const [firestore, f] = await Promise.all([db(), import('firebase/firestore')]);
+    const [firestore, f] = await firestoreSdk();
     return f.onSnapshot(
       f.doc(firestore, 'users', owner, 'lists', id),
       (snap) => next(snap.exists() ? fromDoc(owner, id, snap.data()) : null),
@@ -85,7 +85,7 @@ export class ListsStore {
 
   async create(draft: ListDraft, title: string, note: string, visibility: Visibility): Promise<string> {
     const uid = await this.uid();
-    const [firestore, f] = await Promise.all([db(), import('firebase/firestore')]);
+    const [firestore, f] = await firestoreSdk();
     const ref = f.doc(f.collection(firestore, 'users', uid, 'lists'));
     await f.setDoc(ref, {
       sport: draft.sport,
@@ -111,14 +111,14 @@ export class ListsStore {
   // A list's own fields changed (title, note, visibility, a new order or snapshot)
   async update(id: string, change: Partial<Pick<SavedList, 'title' | 'note' | 'visibility' | 'ids' | 'snapshot'>>): Promise<void> {
     const uid = await this.uid();
-    const [firestore, f] = await Promise.all([db(), import('firebase/firestore')]);
+    const [firestore, f] = await firestoreSdk();
     await f.updateDoc(f.doc(firestore, 'users', uid, 'lists', id), { ...change, updatedAt: f.serverTimestamp() });
   }
 
   // Deleted, and its community entry with it
   async remove(list: SavedList): Promise<void> {
     const uid = await this.uid();
-    const [firestore, f] = await Promise.all([db(), import('firebase/firestore')]);
+    const [firestore, f] = await firestoreSdk();
     if (list.community?.key) await this.withdraw(list).catch(() => undefined);
     await f.deleteDoc(f.doc(firestore, 'users', uid, 'lists', list.id));
   }
@@ -129,7 +129,7 @@ export class ListsStore {
   // The user's entry on a board, if any
   async entry(key: string): Promise<CommunityEntry | null> {
     const uid = await this.uid();
-    const [firestore, f] = await Promise.all([db(), import('firebase/firestore')]);
+    const [firestore, f] = await firestoreSdk();
     const snap = await f.getDoc(f.doc(firestore, 'community', key, 'entries', uid));
     return snap.exists() ? ({ ...(snap.data() as CommunityEntry), owner: uid }) : null;
   }
@@ -139,7 +139,7 @@ export class ListsStore {
   async submit(list: SavedList): Promise<void> {
     const uid = await this.uid();
     this.account.requireVerified();
-    const [firestore, f] = await Promise.all([db(), import('firebase/firestore')]);
+    const [firestore, f] = await firestoreSdk();
     const key = boardKey(list.sport, list.tab, list.season);
     const entryRef = f.doc(firestore, 'community', key, 'entries', uid);
     const before = await f.getDoc(entryRef);
@@ -171,7 +171,7 @@ export class ListsStore {
   async withdraw(list: SavedList): Promise<void> {
     const uid = await this.uid();
     const key = list.community?.key ?? boardKey(list.sport, list.tab, list.season);
-    const [firestore, f] = await Promise.all([db(), import('firebase/firestore')]);
+    const [firestore, f] = await firestoreSdk();
     const entryRef = f.doc(firestore, 'community', key, 'entries', uid);
     const snap = await f.getDoc(entryRef);
     if (snap.exists() && snap.data()['listId'] === list.id) {
@@ -186,7 +186,7 @@ export class ListsStore {
   // (the votes on the user's entry: its owner may clear them once they're stale, the entry gone or submitted
   // again; firestore.rules)
   private async clearVotes(key: string, uid: string): Promise<void> {
-    const [firestore, f] = await Promise.all([db(), import('firebase/firestore')]);
+    const [firestore, f] = await firestoreSdk();
     const votes = await f.getDocs(f.collection(firestore, 'community', key, 'entries', uid, 'votes'));
     for (let i = 0; i < votes.docs.length; i += 400) {
       const batch = f.writeBatch(firestore);

@@ -1,11 +1,11 @@
-import { db } from '@ranker/core/firebase';
+import { firestoreSdk } from '@ranker/core/firebase';
 import { deleteRefs } from '../account-cleanup';
 
 // A deleted account's presets, lists and community entries (their votes with them), and the votes it
 // cast on others' entries: AccountService.deleteAccount runs this (onDelete) after signing in again,
 // before the profile goes. Loaded only then.
 export async function deleteListsData(uid: string): Promise<void> {
-  const [firestore, f] = await Promise.all([db(), import('firebase/firestore')]);
+  const [firestore, f] = await firestoreSdk();
   type Ref = ReturnType<typeof f.doc>;
   const refs: Ref[] = [];
 
