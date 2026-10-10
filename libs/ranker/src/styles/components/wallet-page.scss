@@ -311,15 +311,21 @@ $gold: #ffcf4a;
 }
 
 // (the bot's band beside a pick it made: the Bets page's chip, small)
+// (in the Bot column, a cell of its own: a size up from the pick's old tag)
+.w-bot {
+  white-space: nowrap;
+}
+
 .w-tier {
-  border-radius: 3px;
+  border-radius: 4px;
   color: #111;
+  display: inline-block;
   flex-shrink: 0;
-  font-size: 8.5px;
+  font-size: 10px;
   font-weight: 900;
   letter-spacing: 0.08em;
-  margin-left: 6px;
-  padding: 2px 4px;
+  line-height: 1;
+  padding: 3px 6px;
   text-transform: uppercase;
 
   &.lock {
