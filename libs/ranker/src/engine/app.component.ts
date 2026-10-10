@@ -121,9 +121,11 @@ export class AppComponent {
     if (this.view + this.viewUser !== before && this.sheetBody) this.sheetBody.nativeElement.scrollTop = 0;
   }
 
-  // (the Bets page's gold light over the whole app, the sport bar and the menus too: _base.scss's bets-view)
+  // (the Bets page's gold light over the whole app, the sport bar and the menus too: _base.scss's bets-view; the
+  // account menu in the app's sand only over the sheet's pages: sheet-view)
   private markBetsView(): void {
     document.documentElement.classList.toggle('bets-view', this.view === 'bets');
+    document.documentElement.classList.toggle('sheet-view', this.onSheet);
   }
 
   // Every page but the rankings and the Bets page sits on the app's sheet (its scroll container)

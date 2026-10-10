@@ -32,6 +32,18 @@ html.bets-view {
   --scoreboard-glow: 0 0 6px rgba(235, 197, 108, 0.55);
 }
 
+// (the page's own light, kept: the account menu takes the app's sand only over the sheet's pages (sheet-view,
+// app.component), the page's light everywhere else, a sport's or the Bets page's gold)
+:root {
+  --page-led: var(--scoreboard-led);
+  --page-glow: var(--scoreboard-glow);
+}
+
+html:not(.sheet-view) .mat-mdc-menu-panel.account-menu {
+  --scoreboard-led: var(--page-led);
+  --scoreboard-glow: var(--page-glow);
+}
+
 // ---------------------------------------------------------------------------
 // Tokens
 // ---------------------------------------------------------------------------
@@ -179,12 +191,6 @@ about-panel ::-webkit-scrollbar-track {
   background-color: #2e2e2e !important;
 }
 
-// On the Bets page the accent is the card room's: a bright royal blue that goes with its felt (bluer and
-// deeper than the NHL's ice blue), in the sport bar, the logo and the lit dots
-:root:has(bets-page) {
-  --scoreboard-led: #5b9dff;
-  --scoreboard-glow: 0 0 6px rgba(91, 157, 255, 0.6);
-}
 
 // The Bets page's list scrolls in its panel on a felt-blue thumb; the Algorithm desk (and its panels' wide
 // tables, sideways) on the page's own: the primary's thumb on the scoreboard track, 10px
