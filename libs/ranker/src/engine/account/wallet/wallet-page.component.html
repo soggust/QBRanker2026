@@ -173,6 +173,14 @@
         }
       </tbody>
     </table>
+    <!-- (the history a page at a time: the next one on asking) -->
+    @if (wallet.settledState() === 'more' || wallet.settledState() === 'loading') {
+      <div class="wallet-more">
+        <button type="button" class="app-btn-outline small" [disabled]="wallet.settledState() === 'loading'" (click)="wallet.loadSettled()">
+          {{ wallet.settledState() === 'loading' ? 'Loading…' : 'Show more' }}
+        </button>
+      </div>
+    }
   </div>
 </card-panel>
 </ng-template>
@@ -196,6 +204,8 @@
   <section class="model-desk wallet-open-only" aria-label="Closed Bets">
     @if (settled().length) {
       <ng-container *ngTemplateOutlet="settledPanel"></ng-container>
+    } @else if (wallet.settledState() === 'all') {
+      <p class="desk-note wallet-note" role="status">No settled bets yet.</p>
     } @else {
       <p class="desk-note wallet-note" role="status">Loading…</p>
     }
@@ -286,7 +296,7 @@
       }
     </div>
 
-    @if (wallet.loaded() && !wallet.bets().length) {
+    @if (wallet.loaded() && !wallet.openBets().length && !wallet.hasSettled()) {
       <div class="wallet-empty">
         <p><b>Your wallet's ready:</b> 1,000 play units. Open any game's lines on the Bets page and tap a price to bet it.</p>
         <a class="wallet-chip sand" href="#bets" (click)="toBets()"><mat-icon aria-hidden="true" fontIcon="casino"></mat-icon>Go to Bets<svg class="chip-rim" aria-hidden="true"><rect pathLength="220" /></svg></a>

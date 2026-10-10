@@ -289,7 +289,7 @@ export class CommunityPageComponent implements OnDestroy {
     this.voting = card.entry.owner;
     this.voteError = '';
     try {
-      await this.store.vote(boardKey(SPORT.id, this.tab, this.season), card.entry.owner, next);
+      await this.store.vote(boardKey(SPORT.id, this.tab, this.season), card.entry.owner, next, (card.entry as { submittedAt?: unknown }).submittedAt);
       // (the leaderboard counts it too)
       if (this.seasonCards.length) this.makers = leaderboard(this.seasonCards.flat(), 5);
     } catch (error) {

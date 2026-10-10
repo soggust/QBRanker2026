@@ -32,6 +32,23 @@ type Period = Leaderboard['period'];
 // decides it, pending settlement: the settler pays it after the game), the settled history by game, the
 // user's record beside the bot's over the same stretch, and the leaderboards. Reload (back to 1,000, a new
 // run) and Clear history (typed to confirm) at the top.
+// (the bot's ledgers, every sport's, for You vs the Bot: fetched once a visit, however often the wallet opens)
+let ledgerPromise: Promise<ModelBet[]> | null = null;
+function botLedger(): Promise<ModelBet[]> {
+  ledgerPromise ??= Promise.all(
+    SPORTS.map((s) =>
+      fetch(`/${s}/data/model/ledger.json`, { cache: 'no-cache' })
+        .then((r) => (r.ok ? r.json() : null))
+        .then((body: { bets?: ModelBet[] } | null) => body?.bets ?? [])
+        .catch(() => [] as ModelBet[]),
+    ),
+  ).then((all) => all.flat());
+  return ledgerPromise;
+}
+
+// (a game this close to its start, or under way, has its score looked up each minute)
+const NEAR = 15 * 60e3;
+
 @Component({
   selector: 'wallet-page',
   host: { role: 'main' },
@@ -94,7 +111,19 @@ export class WalletPageComponent implements OnInit, OnDestroy {
         void this.refresh();
       }
     });
+    // (once someone's signed in: the settled history where it shows (the wallet, Closed Bets), and the
+    // leaderboards and the bot's ledgers on the wallet itself only: Open and Closed Bets show neither)
+    effect(() => {
+      if (!this.account.user()) return;
+      if (this.only !== 'open') void this.wallet.loadSettled();
+      if (!this.only && !this.extrasAsked) {
+        this.extrasAsked = true;
+        void this.loadBoards();
+        void botLedger().then((bets) => this.ledger.set(bets));
+      }
+    });
   }
+  private extrasAsked = false;
 
   readonly open = computed(() => this.wallet.bets().filter((b) => b.status === 'open'));
   readonly settled = computed(() => this.wallet.bets().filter((b) => b.status !== 'open'));
@@ -142,17 +171,13 @@ export class WalletPageComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     void this.account.start().catch(() => undefined);
-    void this.refresh();
-    this.timer = setInterval(() => void this.refresh(), 60e3);
-    void this.loadBoards();
-    Promise.all(
-      SPORTS.map((s) =>
-        fetch(`/${s}/data/model/ledger.json`, { cache: 'no-cache' })
-          .then((r) => (r.ok ? r.json() : null))
-          .then((body: { bets?: ModelBet[] } | null) => body?.bets ?? [])
-          .catch(() => [] as ModelBet[]),
-      ),
-    ).then((all) => this.ledger.set(all.flat()));
+    // (the open bets' games each minute: only while the page is in view, and only once one's near its start)
+    if (this.only !== 'closed') {
+      void this.refresh();
+      this.timer = setInterval(() => {
+        if (!document.hidden && this.open().some((b) => Date.parse(b.start) - NEAR <= Date.now())) void this.refresh();
+      }, 60e3);
+    }
   }
 
   ngOnDestroy(): void {

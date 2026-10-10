@@ -1,8 +1,13 @@
 import { Injectable, computed, effect, signal } from '@angular/core';
-import type { DocumentData, Timestamp } from 'firebase/firestore';
+import type { DocumentData, Firestore, Query, QueryDocumentSnapshot, Timestamp } from 'firebase/firestore';
 import { db } from '@ranker/core/firebase';
 import { AccountService } from '../account.service';
 import { Leaderboard, PlayBet, START, Selection, selectionKey, stakeProblem } from './wallet-math';
+
+// (the open bets listened to: far more than anyone holds at once; the settled history a page at a time)
+const OPEN_MAX = 200;
+const SETTLED_PAGE = 200;
+const SETTLED_STATUSES = ['won', 'lost', 'push', 'void'];
 
 // The wallet (users/{uid}/wallet/main): play money, 1,000 units to start
 export interface Wallet {
@@ -76,7 +81,17 @@ export class WalletService {
   readonly wallet = signal<Wallet | null>(null);
   // (whether the wallet's been looked for yet: none yet means a new player, not one still loading)
   readonly loaded = signal(false);
-  readonly bets = signal<PlayBet[]>([]);
+  // The bets: the open ones live (what the Bets page, the slip and the header need: few, and listened to from
+  // every sport's page), the settled history only once a page asks for it (the wallet, Closed Bets), a page at
+  // a time, the latest first; together, the latest placed first. (A listener on the whole history read every
+  // bet ever placed on every Bets page load.)
+  readonly openBets = signal<PlayBet[]>([]);
+  readonly settledBets = signal<PlayBet[]>([]);
+  // (whether there's any settled history, from one document: the Bets page's Closed Bets tab)
+  readonly hasSettled = signal(false);
+  // (the history's paging: not asked for yet, loading, more to load, or all of it here)
+  readonly settledState = signal<'idle' | 'loading' | 'more' | 'all'>('idle');
+  readonly bets = computed(() => [...this.openBets(), ...this.settledBets()].sort((a, b) => b.placedAt.localeCompare(a.placedAt)));
   readonly tally = signal<LifetimeTally | null>(null);
   readonly balance = computed(() => this.wallet()?.balance ?? START);
 
@@ -88,12 +103,12 @@ export class WalletService {
   // selection, by its key, and on each of the bot's picks, by the pick's id)
   readonly openStakes = computed(() => {
     const out = new Map<string, number>();
-    for (const b of this.bets()) if (b.status === 'open') out.set(selectionKey(b), (out.get(selectionKey(b)) ?? 0) + b.stake);
+    for (const b of this.openBets()) out.set(selectionKey(b), (out.get(selectionKey(b)) ?? 0) + b.stake);
     return out;
   });
   readonly openOnPick = computed(() => {
     const out = new Map<string, number>();
-    for (const b of this.bets()) if (b.status === 'open' && b.ref) out.set(b.ref, (out.get(b.ref) ?? 0) + b.stake);
+    for (const b of this.openBets()) if (b.ref) out.set(b.ref, (out.get(b.ref) ?? 0) + b.stake);
     return out;
   });
   // (the last placing's word: how many went on, and any that didn't)
@@ -123,7 +138,11 @@ export class WalletService {
       this.slipOpen.set(false);
     }
     this.wallet.set(null);
-    this.bets.set([]);
+    this.openBets.set([]);
+    this.settledBets.set([]);
+    this.settledCursors.clear();
+    this.hasSettled.set(false);
+    this.settledState.set('idle');
     this.tally.set(null);
     this.loaded.set(false);
     if (!uid) return;
@@ -134,20 +153,68 @@ export class WalletService {
         f.doc(firestore, 'users', uid, 'wallet', 'main'),
         (snap) => {
           this.wallet.set(snap.exists() ? (snap.data() as Wallet) : null);
-          this.loaded.set(true);
+          // (a wallet the cache doesn't have isn't one the server hasn't: none yet only once it's said so)
+          if (snap.exists() || !snap.metadata.fromCache) this.loaded.set(true);
         },
         (error) => console.error('Wallet', error),
       ),
       f.onSnapshot(
-        f.query(f.collection(firestore, 'users', uid, 'bets'), f.orderBy('placedAt', 'desc'), f.limit(1000)),
-        (snap) => this.bets.set(snap.docs.map((d) => betFrom(d.id, d.data()))),
+        f.query(f.collection(firestore, 'users', uid, 'bets'), f.where('status', '==', 'open'), f.limit(OPEN_MAX)),
+        (snap) => {
+          const before = this.openBets();
+          this.openBets.set(snap.docs.map((d) => betFrom(d.id, d.data())));
+          // (one settled since: there's history now, and the history on show takes it in, its first page again)
+          const settled = before.some((b) => !snap.docs.some((d) => d.id === b.id));
+          if (settled && !snap.metadata.fromCache) {
+            this.hasSettled.set(true);
+            if (this.settledState() !== 'idle') void this.loadSettled(true);
+          }
+        },
         (error) => console.error('Bets', error),
       ),
     );
+    // (any history at all: one document)
+    f.getDocs(f.query(this.settledQuery(f, firestore, uid), f.limit(1)))
+      .then((snap) => this.uid === uid && !snap.empty && this.hasSettled.set(true))
+      .catch(() => undefined);
     f.getDoc(f.doc(firestore, 'tallies', uid))
       .then((snap) => this.uid === uid && this.tally.set(snap.exists() ? ((snap.data()['all'] as LifetimeTally) ?? null) : null))
       .catch(() => undefined);
   }
+
+  // The settled history, the latest settled first: its next page (the first, the first time), or with `fresh` its
+  // first again, as many as were showing; nothing while a page is loading or once it's all here
+  async loadSettled(fresh = false): Promise<void> {
+    const uid = this.uid;
+    const state = this.settledState();
+    if (!uid || state === 'loading' || (!fresh && state === 'all')) return;
+    const [firestore, f] = await Promise.all([db(), import('firebase/firestore')]);
+    if (this.uid !== uid) return;
+    const have = fresh ? [] : this.settledBets();
+    const size = fresh ? Math.max(SETTLED_PAGE, this.settledBets().length) : SETTLED_PAGE;
+    const last = have.length ? this.settledCursors.get(have[have.length - 1].id) : undefined;
+    this.settledState.set('loading');
+    try {
+      const snap = await f.getDocs(f.query(this.settledQuery(f, firestore, uid), ...(last ? [f.startAfter(last)] : []), f.limit(size)));
+      if (this.uid !== uid) return;
+      if (fresh) this.settledCursors.clear();
+      for (const d of snap.docs) this.settledCursors.set(d.id, d);
+      const page = snap.docs.map((d) => betFrom(d.id, d.data()));
+      this.settledBets.set([...have, ...page]);
+      if (page.length) this.hasSettled.set(true);
+      this.settledState.set(snap.size < size ? 'all' : 'more');
+    } catch (error) {
+      console.error('Settled bets', error);
+      this.settledState.set(have.length ? 'more' : 'idle');
+    }
+  }
+
+  // (the settled bets, the latest settled first: firestore.indexes.json has its index)
+  private settledQuery(f: typeof import('firebase/firestore'), firestore: Firestore, uid: string): Query {
+    return f.query(f.collection(firestore, 'users', uid, 'bets'), f.where('status', 'in', SETTLED_STATUSES), f.orderBy('settledAt', 'desc'));
+  }
+  // (each loaded settled bet's document, to page on from)
+  private readonly settledCursors = new Map<string, QueryDocumentSnapshot>();
 
   // A new player's wallet: 1,000 units (once; the rules allow nothing else)
   async ensureWallet(): Promise<void> {
@@ -274,13 +341,21 @@ export class WalletService {
     const uid = this.uid;
     if (!uid) return 0;
     const [firestore, f] = await Promise.all([db(), import('firebase/firestore')]);
-    const settled = this.bets().filter((b) => b.status !== 'open');
-    for (let i = 0; i < settled.length; i += 400) {
+    // (the history read from the server a batch at a time, not what's on show: that may be only its first page)
+    let cleared = 0;
+    for (;;) {
+      const snap = await f.getDocs(f.query(this.settledQuery(f, firestore, uid), f.limit(400)));
+      if (snap.empty) break;
       const batch = f.writeBatch(firestore);
-      for (const b of settled.slice(i, i + 400)) batch.delete(f.doc(firestore, 'users', uid, 'bets', b.id));
+      for (const d of snap.docs) batch.delete(d.ref);
       await batch.commit();
+      cleared += snap.size;
     }
-    return settled.length;
+    this.settledBets.set([]);
+    this.settledCursors.clear();
+    this.hasSettled.set(false);
+    this.settledState.set('all');
+    return cleared;
   }
 
   // A leaderboard (the settler's, public users only)

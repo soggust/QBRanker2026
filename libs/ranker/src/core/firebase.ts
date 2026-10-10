@@ -104,10 +104,18 @@ export function auth(): Promise<Auth> {
   return authPromise;
 }
 
-// The database (Cloud Firestore)
+// The database (Cloud Firestore), its cache kept in the browser (IndexedDB, shared by the tabs): each sport is
+// its own page, so a memory cache started over on every switch and every listener paid for its whole result
+// again; kept, a listener picked up again within half an hour pays only for what changed. (Where the browser
+// won't keep it, a private window, the memory cache as before.)
 export function db(): Promise<Firestore> {
   dbPromise ??= Promise.all([checkedApp(), import('firebase/firestore')]).then(([firebase, f]) => {
-    const instance = f.getFirestore(firebase);
+    let instance: Firestore;
+    try {
+      instance = f.initializeFirestore(firebase, { localCache: f.persistentLocalCache({ tabManager: f.persistentMultipleTabManager() }) });
+    } catch {
+      instance = f.getFirestore(firebase);
+    }
     if (usingEmulators()) f.connectFirestoreEmulator(instance, '127.0.0.1', emulatorPorts().firestore);
     return instance;
   });

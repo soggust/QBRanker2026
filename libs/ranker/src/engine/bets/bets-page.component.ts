@@ -265,17 +265,17 @@ export class BetsPageComponent implements OnInit, OnDestroy {
   readonly canUse = canUse;
   private readonly wallet = inject(WalletService);
   // (Open Bets: only with bets of the user's not yet settled; the last one settled, back to Place Bets)
-  readonly hasOpen = (): boolean => canUse('bets') && this.wallet.bets().some((b) => b.status === 'open');
+  readonly hasOpen = (): boolean => canUse('bets') && this.wallet.openBets().length > 0;
   // (Closed Bets: only with bets of the user's settled)
   // (already bet and still open: the stake, so the same bet isn't placed twice by mistake)
   readonly placedOn = (r: BetRow): number => (r.pickId ? (this.wallet.openOnPick().get(r.pickId) ?? 0) : 0);
   // (the signed-in user's play money: on hand, and what's out on open bets; none signed out or before it loads)
   readonly bankroll = (): { balance: number; atRisk: number; open: number } | null => {
     if (!canUse('bets') || !this.wallet.loaded() || !this.wallet.wallet()) return null;
-    const open = this.wallet.bets().filter((b) => b.status === 'open');
+    const open = this.wallet.openBets();
     return { balance: this.wallet.balance(), atRisk: open.reduce((t, b) => t + b.stake, 0), open: open.length };
   };
-  readonly hasClosed = (): boolean => canUse('bets') && this.wallet.bets().some((b) => b.status !== 'open');
+  readonly hasClosed = (): boolean => canUse('bets') && this.wallet.hasSettled();
   // (Place Bets first; Open Bets (with the wallet) or the Algorithm (development only) once chosen in this
   // visit: bets-view.ts)
   get view(): BetsView {

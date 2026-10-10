@@ -1,6 +1,7 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { db } from '@ranker/core/firebase';
 import { AccountService } from '../account.service';
+import { CommunityStore } from '../community/community.store';
 import type { Visibility } from '../account-helpers';
 import { CommunityEntry, boardKey } from '../community/community-helpers';
 import { LIST_MAX, SavedList, Snapshot } from './lists-helpers';
@@ -32,6 +33,8 @@ export const millis = (stamp: unknown): number => (stamp as { toMillis?: () => n
 @Injectable({ providedIn: 'root' })
 export class ListsStore {
   private readonly account = inject(AccountService);
+  // (the board a submission changes, read again next time it's shown)
+  private readonly community = inject(CommunityStore);
 
   // The user's lists, newest change first (null: not loaded yet)
   readonly mine = signal<SavedList[] | null>(null);
@@ -159,6 +162,7 @@ export class ListsStore {
     });
     batch.update(f.doc(firestore, 'users', uid, 'lists', list.id), { community: { submitted: true, key }, updatedAt: f.serverTimestamp() });
     await batch.commit();
+    this.community.forget(key);
     // (the earlier submission's votes, stale now: the rules let the owner clear only stale ones)
     if (before.exists()) await this.clearVotes(key, uid).catch(() => undefined);
   }
@@ -173,6 +177,7 @@ export class ListsStore {
     if (snap.exists() && snap.data()['listId'] === list.id) {
       // (the entry first: its votes are stale once it's gone, and only then the owner's to clear)
       await f.deleteDoc(entryRef);
+      this.community.forget(key);
       await this.clearVotes(key, uid).catch(() => undefined);
     }
     await f.updateDoc(f.doc(firestore, 'users', uid, 'lists', list.id), { community: null, updatedAt: f.serverTimestamp() }).catch(() => undefined);

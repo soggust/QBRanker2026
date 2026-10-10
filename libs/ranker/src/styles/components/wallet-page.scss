@@ -57,6 +57,13 @@ $gold: #ffcf4a;
   }
 }
 
+// (the settled history's next page, under its table)
+.wallet-more {
+  display: flex;
+  justify-content: center;
+  padding: 12px 0 4px;
+}
+
 // (one panel beside the bot's or the board: the whole width)
 .desk-grid.wallet-one {
   grid-template-columns: minmax(0, 1fr);
