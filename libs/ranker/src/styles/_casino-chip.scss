@@ -191,8 +191,8 @@
 @mixin panel($chip-bar: false) {
   --rim: 6px;
   --corner: 14px;
-  // (a spot, 8px, in the middle of its 26px stretch of the band)
-  --spot: 26px;
+  // (a spot, 10px, in the middle of its 20px stretch of the band: cream and color the same length)
+  --spot: 20px;
   --rim-clay: color-mix(in srgb, var(--group-color) 70%, #1a1a1a);
   --rim-spot: rgba(255, 236, 196, 0.78);
   border: var(--rim) solid var(--rim-clay);
@@ -218,15 +218,15 @@
 
   &::before {
     background:
-      linear-gradient(90deg, transparent 9px, var(--rim-spot) 9px 17px, transparent 17px) top / var(--spot) var(--rim) space no-repeat,
-      linear-gradient(90deg, transparent 9px, var(--rim-spot) 9px 17px, transparent 17px) bottom / var(--spot) var(--rim) space no-repeat;
+      linear-gradient(90deg, transparent 5px, var(--rim-spot) 5px 15px, transparent 15px) top / var(--spot) var(--rim) space no-repeat,
+      linear-gradient(90deg, transparent 5px, var(--rim-spot) 5px 15px, transparent 15px) bottom / var(--spot) var(--rim) space no-repeat;
     inset: calc(var(--rim) * -1) calc(var(--corner) - var(--rim));
   }
 
   &::after {
     background:
-      linear-gradient(180deg, transparent 9px, var(--rim-spot) 9px 17px, transparent 17px) left / var(--rim) var(--spot) no-repeat space,
-      linear-gradient(180deg, transparent 9px, var(--rim-spot) 9px 17px, transparent 17px) right / var(--rim) var(--spot) no-repeat space;
+      linear-gradient(180deg, transparent 5px, var(--rim-spot) 5px 15px, transparent 15px) left / var(--rim) var(--spot) no-repeat space,
+      linear-gradient(180deg, transparent 5px, var(--rim-spot) 5px 15px, transparent 15px) right / var(--rim) var(--spot) no-repeat space;
     inset: calc(var(--corner) - var(--rim)) calc(var(--rim) * -1);
   }
 
@@ -241,7 +241,7 @@
     pointer-events: none;
     position: absolute;
     transition: filter 0.3s ease;
-    width: 8px;
+    width: 10px;
     z-index: 1;
 
     &.tl,
@@ -256,12 +256,12 @@
 
     &.tl,
     &.bl {
-      left: calc(var(--rim-mid) - 4px - var(--rim));
+      left: calc(var(--rim-mid) - 5px - var(--rim));
     }
 
     &.tr,
     &.br {
-      right: calc(var(--rim-mid) - 4px - var(--rim));
+      right: calc(var(--rim-mid) - 5px - var(--rim));
     }
 
     &.tl,
