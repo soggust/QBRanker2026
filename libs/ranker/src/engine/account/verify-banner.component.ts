@@ -17,8 +17,8 @@ import { errorMessage } from './account-helpers';
           {{ user.email }}.
         </span>
         <span class="verify-actions">
-          <button type="button" class="app-btn-outline app-btn-small" [disabled]="busy" (click)="resend()">Send it again</button>
-          <button type="button" class="app-btn-primary app-btn-small" [disabled]="busy" (click)="check()">I've confirmed it</button>
+          <button type="button" class="app-btn-outline small" [disabled]="busy" (click)="resend()">Send it again</button>
+          <button type="button" class="app-btn-primary small" [disabled]="busy" (click)="check()">I've confirmed it</button>
         </span>
         @if (note) {
           <span class="verify-note">{{ note }}</span>
@@ -26,40 +26,7 @@ import { errorMessage } from './account-helpers';
       </div>
     }
   `,
-  styles: `
-    .verify {
-      align-items: center;
-      background: color-mix(in srgb, var(--app-sand, #d8b98a) 12%, rgba(0, 0, 0, 0.3));
-      border: 1px solid color-mix(in srgb, var(--app-sand, #d8b98a) 45%, transparent);
-      border-radius: 10px;
-      color: var(--app-text, #f1ece6);
-      display: flex;
-      flex-wrap: wrap;
-      font-family: 'Nunito', sans-serif;
-      font-size: 13.5px;
-      gap: 8px 14px;
-      justify-content: space-between;
-      margin: 0 0 16px;
-      padding: 10px 14px;
-    }
-
-    .verify-text {
-      flex: 1 1 260px;
-      line-height: 1.45;
-    }
-
-    .verify-actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-
-    .verify-note {
-      color: var(--app-text-muted, #b8ada1);
-      flex-basis: 100%;
-      font-size: 12.5px;
-    }
-  `,
+  styleUrls: ['../../styles/components/verify-banner.scss'],
   standalone: false,
 })
 export class VerifyBannerComponent {

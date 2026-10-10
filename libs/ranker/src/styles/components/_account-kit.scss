@@ -595,6 +595,22 @@ $app-cracks: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' w
   padding: 0 12px;
 }
 
+// A page's top strip on the scoreboard (Track Players' tiles and pills, My Lists' and the Community's pills and
+// links): a lit edge under it, its contents down its middle
+@mixin scoreboard-strip {
+  align-items: center;
+  background: var(--scoreboard-dots), var(--scoreboard);
+  border: 1px solid var(--app-line, rgba(255, 255, 255, 0.08));
+  border-bottom-color: color-mix(in srgb, var(--scoreboard-led) 55%, transparent);
+  border-radius: 12px;
+  box-sizing: border-box;
+  padding: 14px 18px;
+
+  @media (max-width: 600px) {
+    padding: 12px;
+  }
+}
+
 @mixin app-pill {
   background: rgba(255, 238, 220, 0.04);
   border: 1px solid var(--app-sheet-edge, #4f4840);

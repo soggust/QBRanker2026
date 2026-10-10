@@ -135,7 +135,8 @@ a.secondary {
 $bar-h: 30px;
 
 .lists-bar {
-  align-items: flex-start;
+  // (on the scoreboard, as Track Players' top)
+  @include kit.scoreboard-strip;
   display: flex;
   gap: 10px 14px;
 

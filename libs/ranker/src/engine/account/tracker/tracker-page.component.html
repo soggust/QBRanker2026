@@ -42,9 +42,10 @@
             <div class="tracker-share">
               <!-- (who sees it: the pills alone, their label for screen readers) -->
               <visibility-pills aria-label="Who sees your Track Players" [value]="visibility" (picked)="setVisibility($event)"></visibility-pills>
-              @if (visibility !== 'private') {
-                <button type="button" class="tracker-icon" title="Copy the link to your Track Players" aria-label="Copy the link to your Track Players" (click)="copyLink()">
-                  <mat-icon fontIcon="link"></mat-icon>
+              <!-- (a link to share: once there's something in it to see) -->
+              @if (visibility !== 'private' && cards.length) {
+                <button type="button" class="app-btn-primary small tracker-copy" title="Copy the link to your Track Players" aria-label="Copy the link to your Track Players" (click)="copyLink()">
+                  <mat-icon aria-hidden="true" fontIcon="link"></mat-icon>
                 </button>
               }
             </div>
