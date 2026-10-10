@@ -20,7 +20,7 @@
       (click)="take(price)"
     >
       @if (bot) {
-        <span class="price-chip" [ngClass]="t ?? ''" aria-hidden="true">{{ t }}</span>
+        <span class="price-chip" [ngClass]="t ?? ''" aria-hidden="true">@if (t === 'lock') {<mat-icon class="tier-lock" aria-hidden="true" fontIcon="lock"></mat-icon>}{{ t }}</span>
       } @else {
         <!-- (no pick of the bot's: no edge on it, a pass) -->
         <span class="price-chip pass" aria-hidden="true">pass</span>
@@ -107,7 +107,7 @@
             [disabled]="!open"
             (click)="takeProp(p)"
           >
-            <span class="price-chip" [ngClass]="t ?? ''" aria-hidden="true">{{ t }}</span>
+            <span class="price-chip" [ngClass]="t ?? ''" aria-hidden="true">@if (t === 'lock') {<mat-icon class="tier-lock" aria-hidden="true" fontIcon="lock"></mat-icon>}{{ t }}</span>
             <span class="price-odds">{{ oddsText(p.price ?? null) }}</span>
             <small class="price-kelly">K {{ kellyText(p) }}</small>
           </button>

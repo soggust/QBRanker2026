@@ -34,7 +34,7 @@
           <li class="slip-item" [class.bot]="s.botPick">
             <div class="slip-pick">
               @if (s.tier) {
-                <span class="slip-tier" [ngClass]="s.tier" [title]="'The bot’s pick: ' + s.tier + (s.kelly !== null ? ', Kelly ' + s.kelly : '')">{{ s.tier }}</span>
+                <span class="slip-tier" [ngClass]="s.tier" [title]="'The bot’s pick: ' + s.tier + (s.kelly !== null ? ', Kelly ' + s.kelly : '')">@if (s.tier === 'lock') {<mat-icon class="tier-lock" aria-hidden="true" fontIcon="lock"></mat-icon>}{{ s.tier }}</span>
               }
               <b class="slip-words">{{ s.pick }}</b>
               <span class="slip-odds">{{ oddsText(s.odds) }}</span>

@@ -28,7 +28,7 @@
     }
     <b>{{ b.pick }}</b>
     @if (b.tier) {
-      <span class="w-tier" [ngClass]="b.tier" [title]="'The bot’s pick: ' + b.tier + (b.kelly !== null && b.kelly !== undefined ? ', Kelly ' + b.kelly : '')">{{ b.tier }}</span>
+      <span class="w-tier" [ngClass]="b.tier" [title]="'The bot’s pick: ' + b.tier + (b.kelly !== null && b.kelly !== undefined ? ', Kelly ' + b.kelly : '')">@if (b.tier === 'lock') {<mat-icon class="tier-lock" aria-hidden="true" fontIcon="lock"></mat-icon>}{{ b.tier }}</span>
     }
   </span>
   <!-- (phones: the game under the pick, its own column gone) -->

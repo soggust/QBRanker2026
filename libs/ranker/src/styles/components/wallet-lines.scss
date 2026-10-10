@@ -421,3 +421,17 @@ $lock-gold: #ffcf4a;
 
 // (the LOCK tag's glint and pulse, _casino-chip.scss)
 @include chip.lock-shine-keyframes;
+
+// (a LOCK tag's padlock before its word, a touch under the letters' size, the two centered together)
+.price-chip:has(.tier-lock) {
+  align-items: center;
+  display: inline-flex;
+  gap: 2px;
+}
+
+.tier-lock {
+  font-size: 1.05em;
+  height: 1em;
+  line-height: 1;
+  width: 1em;
+}
