@@ -44,13 +44,13 @@
             <div class="slip-stake">
               <label class="slip-amount">
                 <span class="visually-hidden">Stake on {{ s.pick }}, in units</span>
-                <input type="number" inputmode="numeric" min="1" step="1" placeholder="Stake" [value]="s.stake || ''" (input)="typed(s, $any($event.target).value)" />
+                <input type="number" inputmode="decimal" min="0.5" step="0.5" placeholder="Stake" [value]="s.stake || ''" (input)="typed(s, $any($event.target).value)" />
                 <span aria-hidden="true">u</span>
               </label>
               <div class="slip-chips" role="group" [attr.aria-label]="'Add chips to the stake on ' + s.pick">
                 @for (c of chips; track c) {
-                  <button type="button" class="stake-chip" [ngClass]="'c' + c" [attr.aria-label]="'Add ' + c" [disabled]="room(s) - s.stake < 1" (click)="chip(s, c)">
-                    {{ c }}
+                  <button type="button" class="stake-chip" [ngClass]="c < 1 ? 'c-half' : 'c' + c" [attr.aria-label]="'Add ' + c" [disabled]="room(s) - s.stake < c" (click)="chip(s, c)">
+                    {{ c < 1 ? '½' : c }}
                     <svg class="chip-rim" aria-hidden="true"><rect pathLength="48" /></svg>
                   </button>
                 }
@@ -84,7 +84,7 @@
           <p class="slip-problem" role="alert">{{ error }}</p>
         }
         <div class="slip-actions">
-          <button type="button" class="link" (click)="wallet.clearSlip()">Clear</button>
+          <button type="button" class="slip-clear" (click)="wallet.clearSlip()">Clear</button>
           @if (account.signedIn()) {
             <button type="button" class="primary slip-place" [disabled]="!totals.count || problems || wallet.placing()" (click)="place()">
               @if (wallet.placing()) {

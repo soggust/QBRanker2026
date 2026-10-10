@@ -296,8 +296,8 @@ $chip-clay: #b0202b;
 .bet-row {
   --bar-tint: color-mix(in srgb, var(--soft) 18%, transparent);
   align-items: center;
-  // (the chip's face in its band's color, rounded to meet the rim; shut, round all round)
-  @include chip.chip-face(var(--tint));
+  // (a dark chip with a breath of its band's color: the rim says the band, its badge and text read on it)
+  @include chip.chip-face(var(--tint), $clay: 18%);
   border-radius: 8px 8px 0 0;
   border: none;
   color: #fff;

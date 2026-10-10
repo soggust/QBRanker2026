@@ -226,7 +226,8 @@ $gold: #ffcf4a;
 }
 
 .slip-item {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+  // (each bet on the scoreboard)
+  background: var(--scoreboard-dots), var(--scoreboard);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 10px;
   flex-shrink: 0;
@@ -423,12 +424,9 @@ $gold: #ffcf4a;
     --clay: #1d8a4e;
   }
 
-  &.c100 {
-    --clay: #1c1c1c;
-
-    rect {
-      stroke: $gold;
-    }
+  // (the half: the casino's pink)
+  &.c-half {
+    --clay: #d94f86;
   }
 }
 
@@ -481,11 +479,9 @@ $gold: #ffcf4a;
 
 // The chip tray: a dark wooden rail, a felt groove along it holding the totals, then Place
 .slip-tray {
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent 3px),
-    repeating-linear-gradient(90deg, rgba(0, 0, 0, 0.12) 0 2px, transparent 2px 7px),
-    linear-gradient(180deg, #4a2a17, #2e180c);
-  border-top: 1px solid #6b4126;
+  // (the tray on the scoreboard, as the slip's cards)
+  background: var(--scoreboard-dots), var(--scoreboard);
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
   box-shadow: inset 0 3px 6px rgba(0, 0, 0, 0.5);
   flex-shrink: 0;
   padding: 10px 12px 10px;
@@ -535,9 +531,13 @@ $gold: #ffcf4a;
   justify-content: space-between;
   margin-top: 10px;
 
-  .link {
-    color: rgba(255, 255, 255, 0.7);
-  }
+}
+
+// (Clear: the app's outline, as tall as Place)
+.slip-clear {
+  @include kit.outline-button;
+  flex: none;
+  min-width: 96px;
 }
 
 .slip-place {

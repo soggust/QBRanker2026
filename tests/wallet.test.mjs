@@ -96,11 +96,15 @@ test('the slip: what a stake wins and pays, the totals, the chips, the stake rul
   assert.equal(w.addChip(0, 25, 1000), 25);
   assert.equal(w.addChip(25, 100, 1000), 125);
   assert.equal(w.addChip(90, 25, 100), 100);
-  assert.equal(w.addChip(5, 5, 7.5), 7);
+  assert.equal(w.addChip(5, 5, 7.5), 7.5);
+  assert.equal(w.addChip(0, 0.5, 1000), 0.5, 'the half chip');
+  assert.equal(w.addChip(5, 5, 7.75), 7.5, 'never past what is left, in halves');
   assert.equal(w.stakeProblem(0, 1000), 'Set a stake');
-  assert.equal(w.stakeProblem(2.5, 1000), 'Whole units only');
+  assert.equal(w.stakeProblem(2.5, 1000), null, 'a half unit is fine');
+  assert.equal(w.stakeProblem(2.25, 1000), 'Half units only');
   assert.equal(w.stakeProblem(600, 1000, 500), 'Only 500 units left');
-  assert.equal(w.stakeProblem(1, 0.5), 'Not enough in the wallet');
+  assert.equal(w.stakeProblem(1, 0.5), 'Only 0.5 units left');
+  assert.equal(w.stakeProblem(1, 0.25), 'Not enough in the wallet');
   assert.equal(w.stakeProblem(500, 1000, 500), null);
   // (a game can be bet only before it begins)
   const now = Date.parse('2026-10-11T16:00Z');

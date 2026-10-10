@@ -328,7 +328,7 @@ service cloud.firestore {
     }
 
     // A play bet as placed: open, on a game not started (the settler checks the real start, and the price
-    // against the board), a whole stake of at least 1 unit; a spread or moneyline a side, a total over or under,
+    // against the board), a stake in half units, at least a half; a spread or moneyline a side, a total over or under,
     // a prop the bot's (its pick's id in ref) with its player and stat
     function noPropFields(d) {
       return !('propType' in d) && !('athlete' in d) && !('player' in d) && !('statLabel' in d);
@@ -356,7 +356,7 @@ service cloud.firestore {
         && d.matchup is string && d.matchup.matches('^[A-Z0-9]{2,5} @ [A-Z0-9]{2,5}$')
         && d.start is timestamp && d.start > request.time && d.start < request.time + duration.value(15, 'd')
         && d.odds is int && ((d.odds >= 100 && d.odds <= 50000) || (d.odds <= -100 && d.odds >= -50000))
-        && d.stake is int && d.stake >= 1
+        && d.stake is number && d.stake >= 0.5 && math.floor(d.stake * 2) == d.stake * 2
         && d.pick is string && d.pick.size() > 0 && d.pick.size() <= 80
         && d.run is int && d.run >= 0
         && d.placedAt == request.time

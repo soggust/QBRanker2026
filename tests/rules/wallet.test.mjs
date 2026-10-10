@@ -98,13 +98,13 @@ describe('wallet rules', { skip }, () => {
     await assertFails(place(db, 'ann', 'b1'));
   });
 
-  test('a bet: open, on a game not begun, a whole stake no bigger than the balance, its fields as they should be', async () => {
+  test('a bet: open, on a game not begun, a stake in half units no bigger than the balance, its fields as they should be', async () => {
     const db = as('ann');
     await assertSucceeds(setDoc(doc(db, 'users', 'ann', 'wallet', 'main'), newWallet()));
     const bad = [
       playBet({ stake: 1001 }),
       playBet({ stake: 0 }),
-      playBet({ stake: 2.5 }),
+      playBet({ stake: 2.25 }),
       playBet({ start: later(-1) }),
       playBet({ start: later(24 * 20) }),
       playBet({ status: 'won' }),

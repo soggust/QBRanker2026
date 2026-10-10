@@ -12,8 +12,8 @@ export type Tier = 'lock' | 'love' | 'bet' | 'pass';
 
 // (play money: 1,000 units to start, and again on a reload)
 export const START = 1000;
-// (the slip's chips, in units; a custom stake is any whole number up to the balance)
-export const CHIPS = [1, 5, 10, 25, 100];
+// (the slip's chips, in units; a custom stake is any number of half units up to the balance)
+export const CHIPS = [0.5, 1, 5, 10, 25];
 export const SPORTS = ['nfl', 'nba', 'nhl', 'mlb'];
 
 // A bet as users/{uid}/bets/{id} keeps it (its times as ISO strings here)
@@ -255,12 +255,12 @@ export const toWin = (stake: number, odds: number): number => round2(odds > 0 ? 
 // (what comes back if it wins: the stake and the winnings)
 export const payout = (stake: number, odds: number): number => round2(stake + toWin(stake, odds));
 
-// A stake's problem, if any: a whole number of units, at least 1, no more than what's left of the balance
+// A stake's problem, if any: in half units, at least a half, no more than what's left of the balance
 // after the slip's other stakes
 export function stakeProblem(stake: number, balance: number, others = 0): string | null {
   if (!Number.isFinite(stake) || stake <= 0) return 'Set a stake';
-  if (!Number.isInteger(stake)) return 'Whole units only';
-  if (stake > balance - others + 1e-9) return balance - others >= 1 ? `Only ${Math.floor(balance - others)} units left` : 'Not enough in the wallet';
+  if (!Number.isInteger(stake * 2)) return 'Half units only';
+  if (stake > balance - others + 1e-9) return balance - others >= 0.5 ? `Only ${Math.floor((balance - others) * 2) / 2} units left` : 'Not enough in the wallet';
   return null;
 }
 
@@ -273,7 +273,7 @@ export function slipTotals(list: Pick<Selection, 'stake' | 'odds'>[]): { count: 
 }
 
 // A chip on a stake: added to it (a casino's chips stack), never past the balance
-export const addChip = (stake: number, chip: number, room: number): number => Math.max(0, Math.min(Math.floor(room), (stake > 0 ? stake : 0) + chip));
+export const addChip = (stake: number, chip: number, room: number): number => Math.max(0, Math.min(Math.floor(room * 2) / 2, (stake > 0 ? stake : 0) + chip));
 
 // (whether a game can still be bet: not begun, and its start not passed)
 export const bettable = (start: string, state: GameBoard['state'] | undefined, now: number): boolean => (state === undefined || state === 'pre') && Date.parse(start) > now;
