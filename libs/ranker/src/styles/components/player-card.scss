@@ -112,6 +112,14 @@
   position: relative;
 }
 
+// (past a phone: the whole hero 15% smaller, everything in it in proportion, the card's own sections the room;
+// the game view's hero is one too. A phone's is already one compact row)
+@media (min-width: 641px) {
+  .card-hero {
+    zoom: 0.85;
+  }
+}
+
 // ...the team logo on it, overscaled, in faint white: a texture on the gradient
 .hero-texture {
   inset: 0;
