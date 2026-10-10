@@ -33,6 +33,7 @@
           }
           <span>Continue with Google</span>
         </button>
+        @if (facebook) {
         <button type="button" class="social facebook" [disabled]="!!busy" (click)="social('facebook.com')">
           @if (busy === 'facebook.com') {
             <span class="spinner" aria-hidden="true"></span>
@@ -44,6 +45,7 @@
           }
           <span>Continue with Facebook</span>
         </button>
+        }
       </div>
 
       <div class="login-or" role="separator"><span>or with email</span></div>

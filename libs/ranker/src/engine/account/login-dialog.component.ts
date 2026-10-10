@@ -1,5 +1,6 @@
 import { AfterViewInit, Component, ElementRef, HostListener, OnDestroy, ViewChild, effect } from '@angular/core';
 import { AccountService, SocialProvider } from './account.service';
+import { FACEBOOK_LOGIN } from './features';
 import {
   DISPLAY_NAME_MAX,
   USERNAME_MAX,
@@ -25,6 +26,8 @@ type Mode = 'signin' | 'register' | 'reset';
   standalone: false,
 })
 export class LoginDialogComponent implements AfterViewInit, OnDestroy {
+  // (Continue with Facebook: only once it's switched on, features.ts)
+  readonly facebook = FACEBOOK_LOGIN;
   @ViewChild('panel') panel!: ElementRef<HTMLElement>;
   @ViewChild('first') first!: ElementRef<HTMLButtonElement>;
 

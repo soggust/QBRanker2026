@@ -3,7 +3,7 @@ import { SPORT } from '@sport/sport';
 import { DATA } from '@ranker/engine/data';
 import { SITE_SPORTS } from '@ranker/core/sports';
 import { logoFile } from '@ranker/engine/row-fields';
-import { canUse } from './features';
+import { canUse, FACEBOOK_LOGIN } from './features';
 import { AccountService, SocialProvider } from './account.service';
 import {
   AVATAR_QUALITIES,
@@ -365,8 +365,10 @@ export class AccountPageComponent implements OnDestroy {
   // ---------------------------------------------------------------------------
   get providers(): { id: string; name: string; linked: boolean }[] {
     const linked = this.account.user()?.providers ?? [];
+    // (a password only once one's set; Facebook only while it's offered, features.ts, or already linked)
     return ['google.com', 'facebook.com', 'password']
       .filter((id) => id !== 'password' || linked.includes('password'))
+      .filter((id) => id !== 'facebook.com' || FACEBOOK_LOGIN || linked.includes(id))
       .map((id) => ({ id, name: PROVIDER_NAMES[id], linked: linked.includes(id) }));
   }
 
