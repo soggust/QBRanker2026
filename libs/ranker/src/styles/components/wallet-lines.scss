@@ -195,14 +195,31 @@ $lock-gold: #ffcf4a;
     --wash: rgba(255, 205, 0, 0.12);
   }
 
-  &.pass {
-    --edge: rgba(255, 255, 255, 0.35);
+  // (a pass, marked or not: a price the bot has no edge on is one, so it sits back, a quiet felt, the picks
+  // standing out; full on hover, to bet it anyway)
+  &.pass,
+  &:not(.bot, .none) {
+    --edge: rgba(222, 186, 106, 0.22);
+    background:
+      radial-gradient(ellipse 120% 100% at 50% 50%, transparent 55%, rgba(0, 0, 0, 0.35)),
+      #{chip.$felt-nap} 0 0 / 140px,
+      #{chip.$felt};
+    box-shadow: none;
+    color: rgba(255, 255, 255, 0.62);
+    filter: saturate(0.55) brightness(0.78);
+
+    &:hover:not([disabled]) {
+      color: #fff;
+      filter: none;
+    }
   }
 
   // (on the slip: a gold ring, like a chip set down on the line)
   &.on {
     --edge: #{$lock-gold};
     --wash: rgba(255, 207, 74, 0.2);
+    color: #fff;
+    filter: none;
     box-shadow:
       0 0 0 2px $lock-gold,
       0 0 14px rgba(255, 207, 74, 0.45);
