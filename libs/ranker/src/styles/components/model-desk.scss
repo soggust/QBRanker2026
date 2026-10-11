@@ -498,12 +498,12 @@ card-panel {
 // The sport chips under the header (the Bets page's view pills, each with its league's logo): the desk shows
 // one sport, or all
 // (the game dropdown on the left, the sports' chips pushed right, as the Bets page's header)
+// (the date range and the game on the left, side by side; the sports' chips pushed right)
 .desk-filters {
   align-items: center;
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
-  justify-content: space-between;
 }
 
 .desk-chip {
@@ -519,6 +519,7 @@ card-panel {
   flex-wrap: wrap;
   gap: 10px;
   justify-content: flex-end;
+  margin-left: auto;
 }
 
 .desk-sport {

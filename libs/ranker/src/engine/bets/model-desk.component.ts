@@ -68,6 +68,15 @@ const reducedMotion = (): boolean => {
   }
 };
 
+// The Algorithm's date ranges: the bets placed today, this month, this year, or ever
+type DeskRange = 'today' | 'month' | 'year' | 'all';
+const DESK_RANGES: { value: DeskRange; label: string }[] = [
+  { value: 'today', label: 'Today' },
+  { value: 'month', label: 'This Month' },
+  { value: 'year', label: 'This Year' },
+  { value: 'all', label: 'All Time' },
+];
+
 @Component({
   selector: 'model-desk',
   templateUrl: './model-desk.component.html',
@@ -88,6 +97,11 @@ export class ModelDeskComponent implements OnInit, OnDestroy {
   sport: string | null = readSport();
   private allBets: ModelBet[] = [];
   private allStates: ModelState[] = [];
+
+  // (the bets by when the bot placed them, the dropdown left of the game's: the algorithm changes, so today's
+  // bets are today's logic; Today on every visit)
+  readonly ranges = DESK_RANGES;
+  range: DeskRange = 'today';
 
   // (one game on show, the dropdown left of the chips: its ESPN id; '' every game. A new sport clears it)
   game = '';
@@ -177,6 +191,25 @@ export class ModelDeskComponent implements OnInit, OnDestroy {
     this.show();
   }
 
+  setRange(range: DeskRange): void {
+    this.range = range;
+    this.game = '';
+    this.show();
+  }
+
+  // (a bet placed in the range on show, by this browser's calendar: a bet from before placedAt was kept, by its
+  // game's start)
+  private inRange(b: ModelBet): boolean {
+    if (this.range === 'all') return true;
+    const at = new Date(b.placedAt ?? b.start);
+    const now = new Date();
+    if (Number.isNaN(at.getTime())) return false;
+    if (at.getFullYear() !== now.getFullYear()) return false;
+    if (this.range === 'year') return true;
+    if (at.getMonth() !== now.getMonth()) return false;
+    return this.range === 'month' || at.getDate() === now.getDate();
+  }
+
   setSport(sport: string | null): void {
     this.sport = sport;
     this.game = '';
@@ -192,7 +225,7 @@ export class ModelDeskComponent implements OnInit, OnDestroy {
   // (what's on show changed: its bets and states picked, everything built from them, the scores asked, the
   // tiles counting up to their new numbers)
   private show(): void {
-    const sport = this.sport ? this.allBets.filter((b) => b.sport === this.sport) : this.allBets;
+    const sport = (this.sport ? this.allBets.filter((b) => b.sport === this.sport) : this.allBets).filter((b) => this.inRange(b));
     this.bets = this.game ? sport.filter((b) => b.event === this.game) : sport;
     this.states = this.sport ? this.allStates.filter((s) => s.sport === this.sport) : this.allStates;
     this.build();
@@ -238,7 +271,7 @@ export class ModelDeskComponent implements OnInit, OnDestroy {
 
     this.graded = graded.slice(-40).reverse();
     this.splitOpen(now);
-    this.gameDays = gameDaysOf(this.allBets, this.sport, now);
+    this.gameDays = gameDaysOf(this.allBets.filter((b) => this.inRange(b)), this.sport, now);
     this.changes = this.states
       .flatMap((s) => s.changelog.map((c) => ({ ...c, sport: s.label })))
       .sort((a, b) => b.at.localeCompare(a.at))
