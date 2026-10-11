@@ -122,8 +122,11 @@ export async function mlbHands(ids) {
   return new Map((await mlbPeople(ids, 100)).people.map((p) => [String(p.id), `${p.batSide?.code ?? 'R'}${p.pitchHand?.code ?? 'R'}`]));
 }
 
-// A pitching line as the desk keeps it: outs, runs, earned runs, strikeouts, walks, hit batters, home runs
-export const pitchLine = (s) => [s.outs ?? 0, s.runs ?? 0, s.earnedRuns ?? 0, s.strikeOuts ?? 0, s.baseOnBalls ?? 0, s.hitByPitch ?? 0, s.homeRuns ?? 0];
+// A pitching line as the desk keeps it: outs, runs, earned runs, strikeouts, walks, hit batters, home runs,
+// and (PITCH_COLS on: a line kept before them lacks them) pitches, batters faced, games started (null unknown)
+export const pitchLine = (s) => [s.outs ?? 0, s.runs ?? 0, s.earnedRuns ?? 0, s.strikeOuts ?? 0, s.baseOnBalls ?? 0, s.hitByPitch ?? 0, s.homeRuns ?? 0, s.numberOfPitches ?? null, s.battersFaced ?? null, s.gamesStarted ?? null];
+// (a game log's row: its date first, then the line: 11 long with the pitches, batters faced and starts)
+export const PITCH_COLS = 11;
 
 // (US states and Canadian provinces by their abbreviations, for matching a place's name to the right one)
 const REGIONS = {

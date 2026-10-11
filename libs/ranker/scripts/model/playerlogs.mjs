@@ -9,10 +9,16 @@
 //        players' stats would read as 0s). A game the stats have and the snap counts don't (they lag, or the
 //        season's file couldn't be read) holds only the players who got the ball: the rows' snapGap says how
 //        many (props.mjs flags the NFL's props, or skips them when it's a season's quarter or more)
-//   NBA  ESPN's box scores: minutes, points, rebounds, assists, threes
-//   NHL  ESPN's box scores: skaters' time on ice, shots on goal, goals and assists; goalies' saves
+//   NBA  ESPN's box scores: minutes, points, rebounds, assists, threes, field goals and free throws tried (the
+//        usage the work a teammate leaves is shared by: matchups.mjs)
+//   NHL  ESPN's box scores: skaters' time on ice, power-play time on ice, shots on goal, goals and assists;
+//        goalies' saves
 //   MLB  StatsAPI: the probable starters' game logs (strikeouts, outs: kept in the context's facts already) and the
 //        lineups' batters' game logs (hits, total bases, home runs, plate appearances)
+//
+// (an NBA or NHL final's lines kept before the usage and the power-play time were (LINES_V) are asked again
+// once; one whose summary can't be had keeps its old lines, those fields missing: matchups.mjs reads them as
+// unknown)
 //
 // A row: { pid, name, pos, date, season, team (ESPN id), opp (ESPN id), game (ESPN id or null), home, s: {stat: value} }
 // Every row is a game he played in (took the field: a snap, a minute, a shift, a plate appearance), whatever he
@@ -20,7 +26,7 @@
 
 import path from 'node:path';
 import { summary } from './espn.mjs';
-import { CACHE, mlbPeople, nflverseRows, pool, readJson, writeJson } from './sources.mjs';
+import { CACHE, etDay, mlbPeople, nflverseRows, pool, readJson, writeJson } from './sources.mjs';
 
 const fileOf = (sport) => path.join(CACHE, `players-${sport}.json`);
 // (each sport's kept lines, read once a run; dirty: changed since)
@@ -34,6 +40,9 @@ const save = (sport) => {
   kept.get(sport).dirty = false;
 };
 
+// (the kept lines' version: 2, the NBA's with field goals and free throws tried, the NHL's with power-play time)
+const LINES_V = 2;
+
 // An NBA or NHL final's player lines from its summary, kept: context.mjs reads each new final's summary for
 // its own facts and hands it here too, so a final's summary is asked for once
 export function recordBox(sport, g, body) {
@@ -45,7 +54,7 @@ export function recordBox(sport, g, body) {
     if (where) sides[where] = sport === 'nba' ? nbaLines(p) : nhlLines(p);
   }
   if (sides.h && sides.a) {
-    load(sport)[g.id] = sides;
+    load(sport)[g.id] = { ...sides, v: LINES_V };
     kept.get(sport).dirty = true;
   }
 }
@@ -168,12 +177,14 @@ async function nflRows(cfg, history, facts) {
 // ---------------------------------------------------------------------------
 async function boxRows(sport, cfg, history) {
   const lines = load(sport);
-  // (finals still without lines: the summaries context.mjs didn't read this run, all of them on a cold cache)
-  const todo = history.filter((g) => g.final && g.hs !== null && !(g.id in lines));
+  // (finals still without lines: the summaries context.mjs didn't read this run, all of them on a cold cache;
+  // and the ones kept before LINES_V, asked again once: one whose summary can't be had keeps its old lines)
+  const todo = history.filter((g) => g.final && g.hs !== null && (!(g.id in lines) || (lines[g.id]?.v ?? 1) < LINES_V));
   if (todo.length) {
     const t0 = Date.now();
     await pool(todo, 6, async (g) => recordBox(sport, g, await summary(cfg.league, g.id)));
-    console.log(`${sport}: player lines for ${todo.length} new finals (${Math.round((Date.now() - t0) / 1000)}s)`);
+    for (const g of todo) if (lines[g.id] && (lines[g.id].v ?? 1) < LINES_V) (lines[g.id].v = LINES_V), (kept.get(sport).dirty = true);
+    console.log(`${sport}: player lines for ${todo.length} finals new or kept before (${Math.round((Date.now() - t0) / 1000)}s)`);
   }
   if (kept.get(sport).dirty) save(sport);
   const out = [];
@@ -186,12 +197,13 @@ async function boxRows(sport, cfg, history) {
     ]) {
       for (const line of k[where] ?? []) {
         const [pid, name, pos, ...v] = line;
+        // (a field a line kept before it was, undefined: unknown)
         const s =
           sport === 'nba'
-            ? { min: v[0], pts: v[1], reb: v[2], ast: v[3], fg3: v[4], pra: v[1] + v[2] + v[3] }
+            ? { min: v[0], pts: v[1], reb: v[2], ast: v[3], fg3: v[4], pra: v[1] + v[2] + v[3], fga: v[5] ?? undefined, fta: v[6] ?? undefined }
             : pos === 'G'
               ? { toi: v[0], saves: v[1] }
-              : { toi: v[0], sog: v[1], pts: v[2] + v[3], goals: v[2] };
+              : { toi: v[0], sog: v[1], pts: v[2] + v[3], goals: v[2], pptoi: v[4] ?? undefined };
         out.push({ pid, name, pos, date: g.date, season: g.season, team, opp, game: g.id, home: where === 'h', s });
       }
     }
@@ -199,22 +211,23 @@ async function boxRows(sport, cfg, history) {
   return out;
 }
 
-// (an NBA side's players who played: [id, name, position, minutes, points, rebounds, assists, threes])
-function nbaLines(p) {
+// (an NBA side's players who played: [id, name, position, minutes, points, rebounds, assists, threes, field
+// goals tried, free throws tried])
+export function nbaLines(p) {
   const s = p.statistics?.[0];
   const at = (k) => (s?.labels ?? []).indexOf(k);
   return (s?.athletes ?? [])
     .filter((a) => !a.didNotPlay && a.stats?.length && Number(a.stats[at('MIN')]) > 0)
     .map((a) => {
-      const n = (k) => Number(String(a.stats[at(k)]).split('-')[0]) || 0;
-      return [String(a.athlete.id), a.athlete.displayName, a.athlete.position?.abbreviation ?? '', n('MIN'), n('PTS'), n('REB'), n('AST'), n('3PT')];
+      const n = (k, part = 0) => Number(String(a.stats[at(k)]).split('-')[part]) || 0;
+      return [String(a.athlete.id), a.athlete.displayName, a.athlete.position?.abbreviation ?? '', n('MIN'), n('PTS'), n('REB'), n('AST'), n('3PT'), n('FG', 1), n('FT', 1)];
     });
 }
 
 // (an NHL side's skaters and goalies: [id, name, position, minutes, shots on goal (ESPN's S: its SOG is
-// shootout goals), goals, assists] or
+// shootout goals), goals, assists, power-play minutes] or
 // [id, name, 'G', minutes, saves])
-function nhlLines(p) {
+export function nhlLines(p) {
   const out = [];
   const minutes = (v) => {
     const [m, s] = String(v ?? '0:0').split(':').map(Number);
@@ -227,7 +240,7 @@ function nhlLines(p) {
       if (s.name === 'goalies') out.push([String(a.athlete.id), a.athlete.displayName, 'G', minutes(a.stats[at('TOI')]), Number(a.stats[at('SV')]) || 0]);
       else if (s.name === 'forwards' || s.name === 'defenses') {
         const toi = minutes(a.stats[at('TOI')]);
-        if (toi > 0) out.push([String(a.athlete.id), a.athlete.displayName, s.name === 'forwards' ? 'F' : 'D', toi, Number(a.stats[at('S')]) || 0, Number(a.stats[at('G')]) || 0, Number(a.stats[at('A')]) || 0]);
+        if (toi > 0) out.push([String(a.athlete.id), a.athlete.displayName, s.name === 'forwards' ? 'F' : 'D', toi, Number(a.stats[at('S')]) || 0, Number(a.stats[at('G')]) || 0, Number(a.stats[at('A')]) || 0, at('PPTOI') >= 0 ? minutes(a.stats[at('PPTOI')]) : null]);
       }
     }
   }
@@ -250,7 +263,9 @@ async function mlbRows(history, facts) {
     const f = facts.games?.[g.id];
     if (!g.final || !f?.pk) continue;
     byPk.set(f.pk, g);
-    const day = Number(g.date.slice(0, 10).replace(/-/g, ''));
+    // (the game's own day as StatsAPI dates it, the US Eastern one: a night game out west is the next day by
+    // ESPN's UTC time, and its line would be missed)
+    const day = Number(etDay(Date.parse(g.date)).replace(/-/g, ''));
     for (const [id, team, opp, home] of [
       [f.hp, g.home, g.away, true],
       [f.ap, g.away, g.home, false],

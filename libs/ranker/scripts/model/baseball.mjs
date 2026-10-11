@@ -8,7 +8,7 @@
 // relievers' appearances by team: [month and day, pitches, saves and holds]).
 
 import { term } from './terms.mjs';
-import { airDensity, forecastAir, get, isoDay, mlbPitching, pool, weatherHistory } from './sources.mjs';
+import { airDensity, etDay, forecastAir, get, isoDay, mlbPitching, pool, weatherHistory } from './sources.mjs';
 
 
 export const BASEBALL_TERMS = [
@@ -79,7 +79,9 @@ export async function gatherBaseball(history, upcoming, facts, live, part) {
 
 // MLB's second-round terms for each game, and what officials.mjs needs of the starters (their strikeouts)
 export function baseballOf(facts, live) {
-  const day = (g) => Number(g.date.slice(5, 10).replace('-', ''));
+  // (a game's day as StatsAPI's logs date them, the US Eastern one: by ESPN's UTC date a night game out west
+  // falls on the next day, and its own relievers' pitches and its starters' own lines would count as before it)
+  const day = (g) => Number(etDay(Date.parse(g.date)).slice(5).replace('-', ''));
   // (a team's top three relievers by saves and holds before the day, and their pitches in the three before it)
   const tired = (abbr, season, d) => {
     const team = facts.pen?.[season]?.[abbr];
@@ -110,7 +112,7 @@ export function baseballOf(facts, live) {
     return (k + 120 * lgK) / (outs + 120);
   };
   const onDay = (id, season, d8) => (facts.pitchers?.[id]?.logs?.[season] ?? []).find((r) => r[0] === d8) ?? null;
-  const d8 = (g) => Number(g.date.slice(0, 10).replace(/-/g, ''));
+  const d8 = (g) => Number(etDay(Date.parse(g.date)).replace(/-/g, ''));
   const starters = (g) => (g.final ? facts.games?.[g.id] : live.get(g.id)) ?? {};
   const extra = {
     // (the starters' strikeouts a 9 innings over average, both)

@@ -18,10 +18,12 @@
 //   comes back in the return (project.mjs lineChances). Cut to 0.5 when the line has moved a lot since it opened,
 //   the player's questionable, a questionable teammate's being in or out moves his share of his group's work,
 //   an outdoor game's forecast failed (or a retractable roof isn't yet said open or closed) where his
-//   projection weighs the weather (wind, cold, rain), the forecast moves his projection 10% or more, or (the
+//   projection weighs the weather (wind, cold, rain), the forecast moves his projection 10% or more, the other
+//   side's starter his projection weighs isn't listed yet (an NHL goalie, an MLB pitcher), or (the
 //   NFL) his team's roster can't be read or the snap counts are missing for some games of the
 //   history; skipped at twice the move or when he's out (or not in a posted lineup, or not the probable
-//   starting pitcher or goalie), when the work his group is missing now differs from what it was in the games
+//   starting pitcher or goalie), an MLB starter's first start in LAYOFF days or more (or his first of the
+//   season from May on: back from injury, his pitch count held down), when the work his group is missing now differs from what it was in the games
 //   his numbers come from and the projection can't size it (teammates out: his role up; teammates back from an
 //   absence that fed his numbers: his role down), or when its chance is more than GAP.prop from the book's
 //   (the market knowing something it doesn't); the NFL's also when its roster can't be read and his numbers
@@ -31,13 +33,14 @@
 // The history it's fit on (fitProps): every game a player took the field at the stat's positions, whatever he
 // did in it, as DraftKings grades him (STATS played), and of those the ones a book would have posted his prop
 // for by what was known before the game (markEligible: his usage in his games before it), never by the
-// game's own box score
+// game's own box score. An MLB batter's are his starts (his place in the posted lineup: the book only posts a
+// starter's, and the desk bets only one in the lineup), not a pinch hitter's one trip
 
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { chanceAt, decimal, fairPair, gapGuard, outcomeOf, stakeFor } from './desk.mjs';
 import { ctxFactor, ctxKeys, fitStat, lineChances, makeModel, rAt } from './project.mjs';
-import { nbaMatchups, nflMatchups } from './matchups.mjs';
+import { mlbMatchups, nbaMatchups, nflMatchups, nhlMatchups } from './matchups.mjs';
 import { CACHE, get, nflverseRows, pool } from './sources.mjs';
 import { PROP_BOOKS, SPORT_KEYS, american, call, canSpend, hasKey } from './oddsapi.mjs';
 import { round } from './ratings.mjs';
@@ -53,6 +56,8 @@ export const PROP_ODDS = -110;
 // its start, then is no action: the bettor's (run.mjs) and the play-money settler's (settle-lib.mjs) alike, so
 // the same pick never ends one way on the desk and another on a user's account)
 export const PROP_WAIT = 4 * 864e5;
+// (an MLB starter's days since he last pitched at which his start is skipped: a layoff, an injury most likely)
+export const LAYOFF = 20;
 
 const stat = (key, label, match, extra = {}) => ({ key, label, match, ...extra });
 // (which rows count as a game he played the prop in: every game he took the field at the stat's positions,
@@ -72,6 +77,15 @@ const SKATER = (r) => r.pos !== 'G' && r.s.toi > 0;
 const PASSING = ['wind', 'cold', 'precip'];
 const CARRYING = ['backupQb', 'wind', 'precip'];
 const NBA_CTX = ['usage', 'b2b', 'blowout'];
+// (the NBA's and NHL's work missing in two measures (matchups.mjs: minutes or usage; time on ice or power-play
+// time), three splits each)
+const NBA_VAC = { vacated: true, vacSplits: 6 };
+// (an MLB batter's start: his place in the game's lineup (matchups.mjs mlbMatchups: start), DraftKings' book
+// only posts a starter's, and a pinch hitter's one trip would drag a starter's rate down; a game without its
+// lineup, two plate appearances or more)
+const BATTED = (r) => r.pos === 'B' && (r.start === true || ((r.start === null || r.start === undefined) && r.s.pa >= 2));
+const BATTER_CTX = ['slot', 'platoon', 'oppSp'];
+const PITCHER_CTX = ['leash', 'restSp', 'ump'];
 export const STATS = {
   nfl: [
     stat('passYds', 'Pass Yds', /^Total Passing Yards \(/, { played: QB, ctx: PASSING, volume: 'pass' }),
@@ -86,22 +100,22 @@ export const STATS = {
     stat('rushRecYds', 'Rush+Rec Yds', /^Total Rushing Plus Receiving Yards/, { played: (r) => (RUSH(r) && r.pos !== 'QB') || CATCH(r), ctx: CARRYING, roles: true, targets: true, vacated: true }),
   ],
   nba: [
-    stat('pts', 'Points', /^Total Points( \(|$)/, { played: MIN, ctx: NBA_CTX, posGroup: () => 'all', roles: true }),
-    stat('reb', 'Rebounds', /^Total Rebounds/, { played: MIN, ctx: NBA_CTX, posGroup: () => 'all', roles: true }),
-    stat('ast', 'Assists', /^Total Assists/, { played: MIN, ctx: NBA_CTX, posGroup: () => 'all', roles: true }),
-    stat('fg3', 'Threes', /^Total (3-Point|Three|Made 3)/i, { played: MIN, ctx: NBA_CTX, posGroup: () => 'all', roles: true }),
-    stat('pra', 'Pts+Reb+Ast', /Points.*Rebounds.*Assists/i, { played: MIN, ctx: NBA_CTX, posGroup: () => 'all', roles: true }),
+    stat('pts', 'Points', /^Total Points( \(|$)/, { played: MIN, ctx: NBA_CTX, posGroup: () => 'all', roles: true, ...NBA_VAC }),
+    stat('reb', 'Rebounds', /^Total Rebounds/, { played: MIN, ctx: NBA_CTX, posGroup: () => 'all', roles: true, ...NBA_VAC }),
+    stat('ast', 'Assists', /^Total Assists/, { played: MIN, ctx: NBA_CTX, posGroup: () => 'all', roles: true, ...NBA_VAC }),
+    stat('fg3', 'Threes', /^Total (3-Point|Three|Made 3)/i, { played: MIN, ctx: NBA_CTX, posGroup: () => 'all', roles: true, ...NBA_VAC }),
+    stat('pra', 'Pts+Reb+Ast', /Points.*Rebounds.*Assists/i, { played: MIN, ctx: NBA_CTX, posGroup: () => 'all', roles: true, ...NBA_VAC }),
   ],
   nhl: [
-    stat('sog', 'Shots', /^Total Shots on Goal/, { played: SKATER }),
-    stat('pts', 'Points', /^Total Points$/, { played: SKATER }),
+    stat('sog', 'Shots', /^Total Shots on Goal/, { played: SKATER, ctx: ['pp'], ...NBA_VAC }),
+    stat('pts', 'Points', /^Total Points$/, { played: SKATER, ctx: ['pp', 'oppGoalie'], ...NBA_VAC }),
     stat('saves', 'Saves', /^Total Saves/, { played: (r) => r.pos === 'G' && r.started, script: 'opp', ctx: ['oppShots'], goalie: true }),
   ],
   mlb: [
-    stat('k', 'Strikeouts', /^Total Strikeouts$/, { played: (r) => r.pos === 'SP', script: 'opp', pitcher: true }),
-    stat('outs', 'Outs', /^Total Outs Recorded/, { played: (r) => r.pos === 'SP', script: 'opp', pitcher: true }),
-    stat('hits', 'Hits', /^Total Hits$/, { played: (r) => r.pos === 'B' && r.s.pa >= 1 }),
-    stat('tb', 'Total Bases', /^Total Bases$/, { played: (r) => r.pos === 'B' && r.s.pa >= 1 }),
+    stat('k', 'Strikeouts', /^Total Strikeouts$/, { played: (r) => r.pos === 'SP', script: 'opp', ctx: PITCHER_CTX, pitcher: true }),
+    stat('outs', 'Outs', /^Total Outs Recorded/, { played: (r) => r.pos === 'SP', script: 'opp', ctx: PITCHER_CTX, pitcher: true }),
+    stat('hits', 'Hits', /^Total Hits$/, { played: BATTED, ctx: BATTER_CTX }),
+    stat('tb', 'Total Bases', /^Total Bases$/, { played: BATTED, ctx: BATTER_CTX }),
   ],
 };
 
@@ -117,7 +131,7 @@ export function envFor(sport, st, expPts, info, rows) {
   const env = { mean, avg };
   const keys = ctxKeys(st);
   env.script = (row) => scriptValue(st, env, info.get(row.game), expPts.get(row.game), row.home);
-  env.ctx = keys.length ? (row) => ctxValues(keys, info.get(row.game), row.home, expPts.get(row.game)) : null;
+  env.ctx = keys.length ? (row) => ctxValues(keys, info.get(row.game), row.home, expPts.get(row.game), row) : null;
   return env;
 }
 
@@ -128,8 +142,9 @@ export function scriptValue(st, env, info, pts, home) {
   return Number.isFinite(v) && v > 0 && env.avg ? v / env.avg : 1;
 }
 
-// A context term's value for a game, from its info (context.mjs featurize: the weather, starters, schedule)
-// and its expected [home, away] points; 0 where it's unknown (no effect)
+// A context term's value for a game, from its info (context.mjs featurize: the weather, starters, schedule),
+// its expected [home, away] points and the player's row (its matchups, matchups.mjs: each from before the game,
+// a coming game's from its live facts); 0 where it's unknown (no effect)
 export const CTX = {
   // (wind over 10 mph, per 10 mph, outdoors)
   wind: (info) => (Number.isFinite(info?.weather?.wind) ? Math.max(0, info.weather.wind - 10) / 10 : 0),
@@ -152,9 +167,32 @@ export const CTX = {
     return Number.isFinite(v) && v > 0 && avg > 0 ? Math.log(v / avg) : 0;
   },
   blowout: (info, home, pts) => (pts && Number.isFinite(pts[0]) && Number.isFinite(pts[1]) ? Math.abs(pts[0] - pts[1]) / 10 : 0),
+  // (an NHL skater's power play: his power-play minutes a game (recent games counting most) by the power plays
+  // his team can expect over the league's per team (the other side's penalties, and half the referees' lean:
+  // officials.mjs, power plays a game both sides), as a share of the league's)
+  pp: (info, home, pts, row) => {
+    const t = row?.ppTime;
+    if (!Number.isFinite(t) || t <= 0 || !(row.ppAvg > 0)) return 0;
+    const refs = Number.isFinite(info?.officials?.whistle) ? info.officials.whistle / 2 : 0;
+    return (t * ((row.ppOpp ?? 0) + refs)) / row.ppAvg;
+  },
+  // (the other side's starting goalie (NHL) or pitcher (MLB): goals or runs a game he saves over average,
+  // context.mjs's starters, from before the game)
+  oppGoalie: (info, home) => (Number.isFinite(info?.starters?.saved?.[home ? 1 : 0]) ? info.starters.saved[home ? 1 : 0] : 0),
+  oppSp: (info, home) => (Number.isFinite(info?.starters?.saved?.[home ? 1 : 0]) ? info.starters.saved[home ? 1 : 0] : 0),
+  // (an MLB batter's place in the order against his usual, as the log of their plate appearances; his platoon
+  // edge on the other side's starter against how often he's had it: matchups.mjs mlbMatchups)
+  slot: (info, home, pts, row) => (Number.isFinite(row?.slotShift) ? row.slotShift : 0),
+  platoon: (info, home, pts, row) => (Number.isFinite(row?.platoonShift) ? row.platoonShift : 0),
+  // (an MLB starter's leash (his last two starts' pitches over his usual, a log), his rest ((days - 5) / 5), and
+  // the plate umpire's zone (strikeouts a 9 innings his zone has given starters over their rates: officials.mjs;
+  // 0 with no umpire posted))
+  leash: (info, home, pts, row) => (Number.isFinite(row?.leash) ? row.leash : 0),
+  restSp: (info, home, pts, row) => (Number.isFinite(row?.rest) ? row.rest : 0),
+  ump: (info) => (Number.isFinite(info?.officials?.whistle) ? info.officials.whistle : 0),
 };
-export function ctxValues(keys, info, home, pts) {
-  return keys.map((k) => CTX[k]?.(info, home, pts) ?? 0);
+export function ctxValues(keys, info, home, pts, row = null) {
+  return keys.map((k) => CTX[k]?.(info, home, pts, row) ?? 0);
 }
 // (the terms that read the weather: a coming game whose forecast failed has them unseen)
 const WEATHER_CTX = new Set(['wind', 'cold', 'precip']);
@@ -235,7 +273,9 @@ export function markStarters(rows, facts) {
 export function fitProps(sport, rows, expPts, info, facts = null) {
   const out = {};
   // (each row's role and its defense's funnel, pace and target split, from the games before it: matchups.mjs)
-  const matchups = sport === 'nfl' ? nflMatchups(rows, facts?.plays) : sport === 'nba' ? nbaMatchups(rows) : null;
+  // (MLB's: each batter's start, slot and platoon edge, each starter's leash and rest, the batters' history's
+  // start (STATS played) among them, so they're marked before the rows are picked)
+  const matchups = sport === 'nfl' ? nflMatchups(rows, facts?.plays) : sport === 'nba' ? nbaMatchups(rows) : sport === 'nhl' ? nhlMatchups(rows, facts) : sport === 'mlb' ? mlbMatchups(rows, facts) : null;
   if (sport === 'nhl') markStarters(rows, facts);
   for (const st of STATS[sport]) {
     const mine = markEligible(
@@ -406,15 +446,18 @@ export function priceProps(sport, game, props, fitted, idx, exp, info, live, tru
     if (!pid) continue;
     const home = String(a.team) === String(game.home) ? true : String(a.team) === String(game.away) ? false : null;
     if (home === null) continue;
-    const row = { pid, name: a.name, pos: idx.pos(pid) ?? a.pos, date: game.date, season: game.season, team: home ? game.home : game.away, opp: home ? game.away : game.home, game: game.id, home, s: {} };
+    // (MLB: his position by the prop, a two-way player's rows being both a batter's and a starter's)
+    const pos = sport === 'mlb' ? (prop.stat.pitcher ? 'SP' : 'B') : (idx.pos(pid) ?? a.pos);
+    const row = { pid, name: a.name, pos, date: game.date, season: game.season, team: home ? game.home : game.away, opp: home ? game.away : game.home, game: game.id, home, s: {} };
     // (his role and the defense's funnel, pace and target split, as of now; and the work his position group's
     // regulars missing this game leave: out, doubtful or on IR on the injury report, or no longer on the team's
     // roster (traded, released: the history counts them missing from its games, so the price does too), a
-    // questionable one at half)
-    const out = outOf(live, row.team, row.pos);
+    // questionable one at half; MLB's, his place in the posted lineup and the probable starters (extra))
+    const out = outOf(sport, live, row.team, row.pos);
     const roster = live?.rosters?.get?.(String(row.team)) ?? null;
     const missOf = (q) => (id) => (out.ids.has(String(id)) || (roster && !roster.has(String(id))) ? 1 : out.questionable.has(String(id)) ? q : 0);
-    if (f.matchups) Object.assign(row, f.matchups.live(pid, row.team, row.opp, row.pos, game.season, missOf(0.5)));
+    const extra = { live, game, home, pitcher: !!prop.stat.pitcher };
+    if (f.matchups) Object.assign(row, f.matchups.live(pid, row.team, row.opp, row.pos, game.season, missOf(0.5), extra));
     const p = f.model.project(row);
     if (!p) continue;
     // (the game script and the context: this game's, from the game model's expectation and its terms)
@@ -422,7 +465,7 @@ export function priceProps(sport, game, props, fitted, idx, exp, info, live, tru
     const pts = [exp.homePts, exp.awayPts];
     const scriptV = scriptValue(f.stat, f.env, info, pts, home);
     const ctxKeysOf = ctxKeys(f.stat);
-    const ctxV = ctxValues(ctxKeysOf, info, home, pts);
+    const ctxV = ctxValues(ctxKeysOf, info, home, pts, row);
     const ctxF = ctxFactor(f.stat, f.params, ctxV);
     const mu = Math.max(0.05, (f.params.scale ?? 1) * p.base * Math.pow(p.opp, f.params.a) * Math.pow(scriptV, f.params.b) * ctxF * p.funnelF * p.paceF * p.tgtF * (p.vacF ?? 1));
     // (a weather term the fit kept, at an outdoor game whose forecast failed: the projection can't see it)
@@ -484,7 +527,7 @@ export function priceProps(sport, game, props, fitted, idx, exp, info, live, tru
     const vacUnsized = !sized && Math.abs(vacNow - vacThen) >= 0.25;
     // (a questionable teammate whose being in or out moves his share: the price takes him at half, flagged)
     const vs = f.params.vs ?? 0;
-    const shareAt = (q) => f.matchups.live(pid, row.team, row.opp, row.pos, game.season, missOf(q)).vacs?.[vs] ?? 0;
+    const shareAt = (q) => f.matchups.live(pid, row.team, row.opp, row.pos, game.season, missOf(q), extra).vacs?.[vs] ?? 0;
     const qShift = f.matchups && prop.stat.vacated && out.questionable.size ? Math.abs(shareAt(1) - shareAt(0)) : 0;
     // (the NFL's roster: without it a teammate who's left counts as here, the work he leaves unseen)
     // A roster unread can only hide a teammate who's gone, so the work missing now reads low: where his
@@ -497,7 +540,17 @@ export function priceProps(sport, game, props, fitted, idx, exp, info, live, tru
     // the players who got the ball, the fit leaning over; a season's quarter or more of them, skipped)
     const snapGap = sport === 'nfl' ? f.snapGap : null;
     const gapped = gapGuard('prop', model, fair);
+    // (an MLB starter back from a long layoff (his first start in LAYOFF days or more this season, or his first
+    // of the season from May on): off the injured list most likely, his pitch count held down in a way his
+    // numbers can't show)
+    const layoff = sport === 'mlb' && prop.stat.pitcher && ((row.restDays ?? 0) >= LAYOFF || (row.debut && Number(String(game.date).slice(5, 7)) >= 5));
+    // (the other side's starter the projection weighs (the fit kept the term), not named yet: the NHL's goalie
+    // (one expected counts: ESPN's usual word till the morning skate), MLB's pitcher; the context assumes one)
+    const oppUnknown =
+      (sport === 'nhl' && !!f.params.c_oppGoalie && !live?.[home ? 'away' : 'home']?.id) ||
+      (sport === 'mlb' && !!f.params.c_oppSp && !live?.[home ? 'ap' : 'hp']);
     if (status.skip) guard = { skip: true, why: status.why };
+    else if (layoff) guard = { skip: true, why: row.restDays >= LAYOFF ? `${a.name}'s first start in ${row.restDays} days: back from a layoff, his pitch count likely held down` : `${a.name}'s first start of the season: back from injury most likely, his pitch count likely held down` };
     else if (snapGap?.share >= 0.25) guard = { skip: true, why: `the snap counts missing for ${snapGap.games} games: the history holds only the players who got the ball` };
     else if (rosterBlind) guard = { skip: true, why: "his team's roster not read, and his numbers were made with teammates missing: whether they're back or gone can't be told" };
     else if (vacUnsized && vacNow > vacThen) guard = { skip: true, why: `teammates out (${out.names.join(', ') || 'off the roster'}): a role change the model can't size` };
@@ -515,6 +568,7 @@ export function priceProps(sport, game, props, fitted, idx, exp, info, live, tru
     else if (weatherBlind) guard = { why: 'no forecast for an outdoor game: the weather its projection weighs unseen' };
     else if (weatherBig) guard = { why: `the forecast moves his projection ${weatherF > 1 ? '+' : ''}${Math.round((weatherF - 1) * 100)}%: priced off a forecast` };
     else if (qShift >= 0.15) guard = { why: `teammate questionable (${out.qNames.join(', ') || 'at his position'}): his share depends on it` };
+    else if (oppUnknown) guard = { why: sport === 'nhl' ? "no probable goalie listed for the other side: his projection weighs one assumed" : "the other side's starting pitcher not named: his projection weighs him" };
     else if (snapGap?.games) guard = { why: `the snap counts missing for ${snapGap.games} games: the history holds only the players who got the ball there` };
     else if (noRoster) guard = { why: "his team's roster not read: a teammate who's left can't be told from one who's here" };
     priced.push({
@@ -529,7 +583,7 @@ export function priceProps(sport, game, props, fitted, idx, exp, info, live, tru
       ev,
       units: guard ? 0.5 : stakeFor(ev, evScale, odds),
       guard,
-      projection: { mean: round(mu, 2), r: round(rAt(f.params, mu), 3), rate: round(p.rate, 2), recent: round(p.recent, 2), opp: round(p.opp, 3), posOpp: round(p.posOpp, 3), role: p.role, roleOpp: p.roleOpp === null ? null : round(p.roleOpp, 3), roleFactor: roleFactor === null ? null : round(roleFactor, 3), roleRank, roleUsed: Number.isFinite(f.params.roleK), funnel: p.funnel === null ? null : round(p.funnel, 3), funnelUsed: !!f.params.fun, funnelF: round(p.funnelF, 3), paceF: round(p.paceF, 3), tgtF: round(p.tgtF, 3), vac: round(vacNow, 3), vacHist: round(vacThen, 3), vacF: round(p.vacF ?? 1, 3), out: out.names.length ? out.names : undefined, questionable: out.qNames.length ? out.qNames : undefined, script: round(scriptV, 3), ctx: Object.fromEntries(ctxKeysOf.map((k, i) => [k, round(ctxV[i], 2)])), ctxF: round(ctxF, 3), games: p.games, lastSeason: p.prevGames, pOver: round(pOver, 4), push: chances.push ? round(chances.push, 4) : undefined, fairOver: round(fairOver, 4), record: round(n, 1) },
+      projection: { mean: round(mu, 2), r: round(rAt(f.params, mu), 3), rate: round(p.rate, 2), recent: round(p.recent, 2), opp: round(p.opp, 3), posOpp: round(p.posOpp, 3), role: p.role, roleOpp: p.roleOpp === null ? null : round(p.roleOpp, 3), roleFactor: roleFactor === null ? null : round(roleFactor, 3), roleRank, roleUsed: Number.isFinite(f.params.roleK), funnel: p.funnel === null ? null : round(p.funnel, 3), funnelUsed: !!f.params.fun, funnelF: round(p.funnelF, 3), paceF: round(p.paceF, 3), tgtF: round(p.tgtF, 3), vac: round(vacNow, 3), vacHist: round(vacThen, 3), vacF: round(p.vacF ?? 1, 3), out: out.names.length ? out.names : undefined, questionable: out.qNames.length ? out.qNames : undefined, script: round(scriptV, 3), ctx: Object.fromEntries(ctxKeysOf.map((k, i) => [k, round(ctxV[i], 2)])), ctxF: round(ctxF, 3), games: p.games, lastSeason: p.prevGames, ...(sport === 'mlb' ? (prop.stat.pitcher ? { restDays: row.restDays ?? null, pitches: row.pitches?.length ? row.pitches : undefined } : { slot: row.slot ?? null }) : {}), ...(sport === 'nhl' && Number.isFinite(row.ppTime) ? { ppTime: round(row.ppTime, 2) } : {}), pOver: round(pOver, 4), push: chances.push ? round(chances.push, 4) : undefined, fairOver: round(fairOver, 4), record: round(n, 1) },
       move: prop.open !== null ? { open: prop.open, now: prop.line } : null,
     });
   }
@@ -541,12 +595,13 @@ export function priceProps(sport, game, props, fitted, idx, exp, info, live, tru
 // questionable ones, counted at half in the work his group is missing)
 const OUT_STATUS = /^out|doubtful|injured reserve|suspension/i;
 const Q_STATUS = /questionable|game-time/i;
-// (names: the ones at his position)
-function outOf(live, team, pos) {
+// (names: the ones in his group: the NFL's his position, the NHL's forwards or defensemen, the NBA's anyone)
+const groupOf = (sport, pos) => (sport === 'nba' ? 'all' : sport === 'nhl' ? (/^(C|LW|RW|F|W)$/.test(pos) ? 'F' : pos) : pos);
+function outOf(sport, live, team, pos) {
   const report = (live?.injuries?.get(String(team)) ?? []).filter((p) => p.id);
   const list = report.filter((p) => OUT_STATUS.test(p.status));
   const q = report.filter((p) => !OUT_STATUS.test(p.status) && Q_STATUS.test(p.status));
-  const at = (p) => !pos || !p.pos || p.pos === pos;
+  const at = (p) => !pos || !p.pos || groupOf(sport, p.pos) === groupOf(sport, pos);
   return { ids: new Set(list.map((p) => String(p.id))), names: list.filter(at).map((p) => p.name), questionable: new Set(q.map((p) => String(p.id))), qNames: q.filter(at).map((p) => p.name) };
 }
 

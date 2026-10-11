@@ -187,12 +187,16 @@ export async function eventOf(league, id) {
 }
 
 // A team's roster now: its players' ESPN ids (every group ESPN lists: offense, defense, special teams, injured
-// reserve); null when it can't be had or looks cut short (under min players): the props then don't count a
-// teammate gone (props.mjs priceProps) and flag it
+// reserve; the NHL's by position; the NBA's one flat list); null when it can't be had or looks cut short
+// (under min players: ROSTER_MIN): the props then don't count a teammate gone (props.mjs priceProps) and flag it
+export const ROSTER_MIN = { nfl: 40, nba: 12, nhl: 18 };
 export async function roster(league, id, min = 40) {
   const body = await json(`${ESPN}/${league}/teams/${id}/roster`);
   const ids = new Set();
-  for (const g of body?.athletes ?? []) for (const a of g.items ?? []) if (a?.id) ids.add(String(a.id));
+  for (const g of body?.athletes ?? []) {
+    if (Array.isArray(g?.items)) for (const a of g.items) a?.id && ids.add(String(a.id));
+    else if (g?.id) ids.add(String(g.id));
+  }
   return ids.size >= min ? ids : null;
 }
 

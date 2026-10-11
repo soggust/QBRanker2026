@@ -41,7 +41,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { BOOK, GAME_CAP, LEAGUES, PROP_CAPS } from './leagues.mjs';
 import { fitMargins } from './margins.mjs';
-import { eventOf, gameOf, json, linesOf, roster, scoreboard, teamIds, teamSchedule, ymd } from './espn.mjs';
+import { ROSTER_MIN, eventOf, gameOf, json, linesOf, roster, scoreboard, teamIds, teamSchedule, ymd } from './espn.mjs';
 import { adjust, expect, fit, fitContext, gateOf, replay, round } from './ratings.mjs';
 import { OPTIONAL, enrich, featurize, gather } from './context.mjs';
 import { RECHECK, finalSummary, postmortems, propPostmortem, recheckSummary, usualRoles } from './postmortem.mjs';
@@ -868,11 +868,12 @@ async function betProps(r) {
   // the start) and once near it (within 2.5 hours, if it has prop bets open: their last line and price before
   // the close, the NFL's CLV); the count kept in .cache/model/odds-props.json)
   const asked = read(PROPS_ASKED, {});
-  // (the NFL's rosters now, each team's once a run: a teammate no longer on it (traded, released) counts as
-  // missing in the work his group leaves, as the history counts him (props.mjs priceProps); one not read, null)
+  // (the NFL's, NBA's and NHL's rosters now, each team's once a run: a teammate no longer on it (traded,
+  // released) counts as missing in the work his group leaves, as the history counts him (props.mjs
+  // priceProps); one not read, null)
   const rosters = new Map();
   const rosterOf = async (team) => {
-    if (!rosters.has(String(team))) rosters.set(String(team), await roster(cfg.league, team).catch(() => null));
+    if (!rosters.has(String(team))) rosters.set(String(team), await roster(cfg.league, team, ROSTER_MIN[sport] ?? 40).catch(() => null));
     return rosters.get(String(team));
   };
   for (const u of r.upcoming) {
@@ -909,7 +910,7 @@ async function betProps(r) {
       }
       run.games++;
       const { exp, f } = expectFor(r, game);
-      const live = sport === 'nfl' ? { ...(r.live.get(game.id) ?? {}), rosters: new Map([[String(game.home), await rosterOf(game.home)], [String(game.away), await rosterOf(game.away)]]) } : r.live.get(game.id);
+      const live = ROSTER_MIN[sport] ? { ...(r.live.get(game.id) ?? {}), rosters: new Map([[String(game.home), await rosterOf(game.home)], [String(game.away), await rosterOf(game.away)]]) } : r.live.get(game.id);
       const { priced, bets } = priceProps(sport, game, board_, r.props, idx, exp, f?.info ?? null, live, trust, EV_SCALE);
       run.priced += priced.length;
       // (the skips by kind: the market-gap guard's counted on its own)

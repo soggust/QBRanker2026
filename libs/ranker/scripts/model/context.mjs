@@ -22,7 +22,7 @@ import { OFFICIAL_TERMS, gatherOfficials, officialsOf, refereesOf } from './offi
 import { FOOTBALL_TERMS, WX_COVER, footballOf, gatherFootball } from './football.mjs';
 import { HOCKEY_TERMS, gatherHockey, hockeyOf } from './hockey.mjs';
 import { BASEBALL_TERMS, baseballOf, gatherBaseball } from './baseball.mjs';
-import { DAY, elevations, forecast, geocode, isoDay, miles, mlbHands, mlbPitching, mlbSchedule, nflverseGames, pitchLine, pool } from './sources.mjs';
+import { DAY, PITCH_COLS, elevations, etDay, forecast, geocode, isoDay, miles, mlbHands, mlbPitching, mlbSchedule, nflverseGames, pitchLine, pool } from './sources.mjs';
 
 
 // A term: its key, its group (rest, travel, starters, weather), whether it moves the margin (m, the home side's
@@ -369,8 +369,10 @@ async function mlbFacts(history, upcoming, facts, live) {
   facts.umps ??= {};
   facts.mlbTeams ??= {};
   // (a game kept before its umpire was is asked again once: u, null when StatsAPI hasn't one; and one kept
-  // before its weather said whether it rained (w's fourth): its weather read again once)
-  const stale = (f) => !f?.v || !('u' in f) || (Array.isArray(f.w) && f.w.length < 4);
+  // before its weather said whether it rained (w's fourth): its weather read again once; and one kept before
+  // its lineups' order was (lo: each side's starting nine in batting order, null when StatsAPI hasn't them),
+  // for the batters' props (matchups.mjs mlbMatchups))
+  const stale = (f) => !f?.v || !('u' in f) || (Array.isArray(f.w) && f.w.length < 4) || !('lo' in f);
   const todo = history.filter((g) => g.final && stale(facts.games[g.id]) && !facts.games[g.id]?.tried);
   const wanted = [...todo.map((g) => g.date), ...upcoming.map(({ game }) => game.date)].sort();
   const rows = [];
@@ -434,9 +436,12 @@ async function mlbFacts(history, upcoming, facts, live) {
   const found = matched.map(([g, r]) => [g, factsOf(r)]);
   await handsFor(found.map(([, f]) => f));
   const hit = new Set(matched.map(([g]) => g.id));
-  if (rows.length) for (const g of todo) if (!hit.has(g.id)) facts.games[g.id] = { ...(facts.games[g.id] ?? {}), tried: 1 };
+  // (one matched before (pk) and not now is a failed ask, asked again next run; one never matched, tried)
+  if (rows.length) for (const g of todo) if (!hit.has(g.id) && !facts.games[g.id]?.pk) facts.games[g.id] = { ...(facts.games[g.id] ?? {}), tried: 1 };
   for (const [g, f] of found) {
-    facts.games[g.id] = { ...(facts.games[g.id] ?? {}), pk: f.pk, hp: f.hp, ap: f.ap, w: f.w, at: f.at, v: f.v, u: f.u, lu: f.lineups ? f.lineups.map(counts) : null };
+    // (asked again for what it lacked: what it had kept where the new ask has none)
+    const was = facts.games[g.id] ?? {};
+    facts.games[g.id] = { ...was, pk: f.pk, hp: f.hp ?? was.hp ?? null, ap: f.ap ?? was.ap ?? null, w: f.w ?? was.w ?? null, at: f.at ?? was.at ?? null, v: f.v ?? was.v ?? null, u: f.u ?? was.u ?? null, lu: f.lineups ? f.lineups.map(counts) : (was.lu ?? null), lo: f.lineups ?? was.lo ?? null };
     if (f.v) facts.venues[f.v] = f.vn;
     for (const [id, name] of [
       [f.hp, f.names[0]],
@@ -500,7 +505,9 @@ async function pitcherLines(history, upcoming, facts, live, today) {
     const key = `${season}`;
     const p = facts.pitchers[id];
     if (!p) return;
-    const stale = !p.logs[key] || (p.at[key] < today && date >= p.at[key]);
+    // (and a log kept before its pitch counts were (sources.mjs PITCH_COLS): asked again once, for the props'
+    // leash and rest (matchups.mjs mlbMatchups))
+    const stale = !p.logs[key] || (p.at[key] < today && date >= p.at[key]) || (p.logs[key].length > 0 && p.logs[key][0].length < PITCH_COLS);
     if (stale) need.set(`${id}|${season}`, { id, season });
     if (!p.logs[season - 1] && !p.totals[season - 1]) need.set(`${id}|${season - 1}|t`, { id, season: season - 1, totals: true });
   };
@@ -949,7 +956,9 @@ const STARTERS = {
       const f = g.final ? facts.games?.[g.id] : live.get(g.id);
       const flags = [];
       if (!f?.pk) return null;
-      const day = Number(g.date.slice(0, 10).replace(/-/g, ''));
+      // (the game's day as StatsAPI's logs date it, the US Eastern one: by ESPN's UTC date a night game out
+      // west falls on the next day, and its own line would count as before it)
+      const day = Number(etDay(Date.parse(g.date)).replace(/-/g, ''));
       const hq = f.hp ? quality(f.hp, g.season, day) : 0;
       const aq = f.ap ? quality(f.ap, g.season, day) : 0;
       if (!g.final && (!f.hp || !f.ap)) flags.push('a starting pitcher not announced');

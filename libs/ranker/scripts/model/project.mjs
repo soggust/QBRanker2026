@@ -19,22 +19,27 @@
 //            volume term, exp(fun x funnel) for a passing or receiving stat, exp(-fun x funnel) for a rushing one;
 //            its pace (its opponents' plays over their usual) to the power pc; the share of targets it allows to
 //            his position over the league's, to the power tg (a receiving stat)
-//   vacated  the NFL backs' and pass-catchers': his cut of the work his position group is missing (its
-//            regulars not playing, matchups.mjs vacs) over his own, against the cut he had in the games his
+//   vacated  the NFL backs' and pass-catchers', every NBA player's (his team's minutes or usage), the NHL
+//            skaters' (their position's time on ice or power-play time): his cut of the work his group is
+//            missing (its regulars not playing, matchups.mjs vacs) over his own, against the cut he had in the games his
 //            numbers come from (weighed as they are: his season's against the K-game prior, last season's cut
 //            in it where the prior is his own; his last five by w),
 //            to the power vc: ((1 + cut now) / (1 + cut then))^vc. Signed: a starter's work shared out lifts
 //            him, and a starter back from injury takes it back (a fill-in whose last games were the starter's
 //            comes down). How it's shared (vs: in proportion to each one's work, or flatter, to equally, the
-//            next man up's cut as big as anyone's) fit with it (vc 0: left out, kept only if the held-out games
-//            are better with it)
+//            next man up's cut as big as anyone's; and where the stat has two measures of work (vacSplits 6:
+//            the NBA's minutes or usage, the NHL's time on ice or power-play time), which) fit with it (vc 0:
+//            left out, kept only if the held-out games are better with it)
 //   context  the stat's context terms (props.mjs STATS ctx, one or several), each exp(c x its value) with its
 //            own size c (c_<term>; the old single size c is the first term's): the NFL's wind, cold and rain
 //            or snow (passing; receiving and rushing take wind and rain too), a backup quarterback throwing
 //            to its receivers and handing off to its backs; the NBA's teammates out (production missing), a
 //            back-to-back and the expected blowout (the game model's margin either way: a starter sits the
-//            fourth quarter). Each is fit like a matchup term and kept only if the held-out games are better
-//            with it (0: left out)
+//            fourth quarter); the NHL's power play (his power-play time by the power plays his team can expect)
+//            and the other side's goalie; MLB batters' place in the order against their usual and platoon
+//            edge against their usual, and the other side's starter; MLB starters' leash (their recent pitch
+//            counts against their usual), rest, and the plate umpire's zone. Each is fit like a matchup term
+//            and kept only if the held-out games are better with it (0: left out)
 //   scale    the eligible players' total over their total projection on the fit window: what's left of a lean
 //            once the rest is fit, taken out
 //
@@ -244,8 +249,9 @@ export function makeModel(stat, params, env) {
         p.cur.sum += v;
         p.cur.recent = [...p.cur.recent, v].slice(-5);
         // (the work his group was missing in each of his games: what his numbers were made with)
+        // (as long as the stat's splits: three a measure of work, matchups.mjs)
         const vacs = row.vacs ?? [0, 0, 0];
-        p.cur.vac = p.cur.vac.map((x, k) => x + (vacs[k] ?? 0));
+        p.cur.vac = Array.from({ length: Math.max(p.cur.vac.length, vacs.length) }, (_, k) => (p.cur.vac[k] ?? 0) + (vacs[k] ?? 0));
         p.cur.recentVac = [...p.cur.recentVac, vacs].slice(-5);
         players.set(row.pid, p);
         if (row.eligible !== false) {
@@ -304,11 +310,15 @@ function scoreOf(out, win, shape = { rk: 0, rm: 1 }) {
   return { ...best, n: list.length };
 }
 
-// (a context term's sizes tried: GRID.c, or its own where it's a power (c_oppShots: a ratio's log) or runs
-// over a wide range (c_precip: 0 to 5, per 0.1 inch: GRID.c's smallest step would be 30% at half an inch))
-const GRID = { K: [2, 4, 8, 16, 32], w: [0, 0.2, 0.4, 0.6], a: [0, 0.5, 1], b: [-0.5, 0, 0.5, 1, 1.5], c: [-0.3, -0.15, -0.07, 0, 0.07, 0.15, 0.3], roleK: [Infinity, 32, 16, 8, 4, 2], fun: [0, 1, 2, 4, 8], pc: [0, 0.5, 1, 1.5], tg: [0, 0.5, 1], vc: [0, 0.25, 0.5, 0.75, 1, 1.25], c_oppShots: [-0.5, 0, 0.25, 0.5, 0.75, 1, 1.25], c_precip: [-0.04, -0.02, -0.01, 0, 0.01, 0.02] };
-// (the vacated work's split, by index into matchups.mjs's: in proportion, flatter, equally; searched with vc)
-const SPLIT = [0, 1, 2];
+// (a context term's sizes tried: GRID.c, or its own where it's a power (c_oppShots, c_slot, c_leash: a
+// ratio's log) or runs over a wide range (c_precip: 0 to 5, per 0.1 inch: GRID.c's smallest step would be 30%
+// at half an inch; c_oppGoalie: per goal a game the other side's goalie saves over average, a big effect a
+// goal))
+const POWER = [-0.5, 0, 0.25, 0.5, 0.75, 1, 1.25];
+const GRID = { K: [2, 4, 8, 16, 32], w: [0, 0.2, 0.4, 0.6], a: [0, 0.5, 1], b: [-0.5, 0, 0.5, 1, 1.5], c: [-0.3, -0.15, -0.07, 0, 0.07, 0.15, 0.3], roleK: [Infinity, 32, 16, 8, 4, 2], fun: [0, 1, 2, 4, 8], pc: [0, 0.5, 1, 1.5], tg: [0, 0.5, 1], vc: [0, 0.25, 0.5, 0.75, 1, 1.25], c_oppShots: POWER, c_slot: POWER, c_leash: POWER, c_precip: [-0.04, -0.02, -0.01, 0, 0.01, 0.02], c_oppGoalie: [-0.6, -0.4, -0.2, -0.1, 0, 0.1, 0.2] };
+// (the vacated work's split, by index into matchups.mjs's: in proportion, flatter, equally, for each measure
+// of work the stat has (vacSplits: 3 a measure); searched with vc)
+const splitsOf = (stat) => Array.from({ length: stat.vacSplits ?? 3 }, (_, i) => i);
 // (each matchup term's off setting, and which stats have it; each context term's size (c_<name>) is off at 0)
 const OPTIONAL = { roleK: Infinity, fun: 0, pc: 0, tg: 0, vc: 0 };
 const offOf = (key) => (key.startsWith('c_') ? 0 : OPTIONAL[key]);
@@ -369,7 +379,7 @@ export function fitStat(stat, rows, env) {
   for (let pass = 0; pass < 2; pass++) {
     for (const key of keys) {
       // (the vacated work's strength and its split together: the split means nothing without the strength)
-      const tries = key === 'vc' ? GRID.vc.flatMap((v) => SPLIT.map((vs) => ({ vc: v, vs }))) : (GRID[key] ?? GRID.c).map((v) => ({ [key]: v }));
+      const tries = key === 'vc' ? GRID.vc.flatMap((v) => splitsOf(stat).map((vs) => ({ vc: v, vs }))) : (GRID[key] ?? GRID.c).map((v) => ({ [key]: v }));
       for (const t of tries) {
         if (Object.keys(t).every((k) => t[k] === params[k])) continue;
         const tryP = { ...params, ...t };

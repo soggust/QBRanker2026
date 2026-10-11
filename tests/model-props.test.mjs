@@ -103,3 +103,77 @@ test("a prop's lean tapers past half its GAP, nothing at it", () => {
   assert.ok(chanceAt('prop', 0.5, 0.62, 1) < chanceAt('prop', 0.5, 0.57, 1));
   assert.ok(Math.abs(chanceAt('prop', 0.5, 0.65, 1) - 0.5) < 1e-9);
 });
+
+test("nbaMatchups: a starter out, the next man up starts (S), and his teammates' cut of the work he leaves", async () => {
+  const { nbaMatchups } = await import('../libs/ranker/scripts/model/matchups.mjs');
+  const rows = [];
+  const mins = { a: 36, b: 34, c: 32, d: 30, e: 28, f: 20, g: 12 };
+  for (let d = 1; d <= 4; d++) for (const [pid, min] of Object.entries(mins)) rows.push({ pid, name: pid, pos: 'G', date: `2025-11-0${d}T00:00Z`, season: 2026, team: '1', opp: '2', game: `g${d}`, home: true, s: { min, pts: min / 2, ast: 2, reb: 3, fga: min / 3, fta: 2 } });
+  const m = nbaMatchups(rows);
+  assert.equal(m.live('f', '1', '2', 'G', 2026, () => 0).role, 'B');
+  const out = m.live('f', '1', '2', 'G', 2026, new Set(['a']));
+  assert.equal(out.role, 'S');
+  assert.equal(out.vacs.length, 6);
+  assert.ok(out.vacs[0] > 0 && out.vacs[3] > 0, String(out.vacs));
+  // (a questionable star at half: in between)
+  const half = m.live('f', '1', '2', 'G', 2026, (id) => (id === 'a' ? 0.5 : 0)).vacs[0];
+  assert.ok(half > 0 && half < out.vacs[0]);
+  // (the history: a game the star missed gives the rest his work, the next man up the start)
+  const missed = [...rows, ...Object.entries(mins).filter(([pid]) => pid !== 'a').map(([pid, min]) => ({ pid, name: pid, pos: 'G', date: '2025-11-06T00:00Z', season: 2026, team: '1', opp: '2', game: 'g6', home: true, s: { min, pts: 1, ast: 1, reb: 1 } }))];
+  nbaMatchups(missed);
+  const f6 = missed.find((r) => r.pid === 'f' && r.game === 'g6');
+  assert.equal(f6.role, 'S');
+  assert.ok(f6.vac > 0);
+});
+
+test('mlbMatchups: a batter starts by the lineup, his slot against his usual, his platoon edge; a starter\'s leash and rest', async () => {
+  const { mlbMatchups, pitcherBefore, paAt } = await import('../libs/ranker/scripts/model/matchups.mjs');
+  const facts = { games: {}, hands: { 9: 'LR', p1: 'RR', p2: 'RL' }, pitchers: {} };
+  const rows = [];
+  for (let d = 1; d <= 5; d++) {
+    const g = `g${d}`;
+    // (he leads off the first four, bats ninth in the fifth; the fifth's starter throws left)
+    facts.games[g] = { lo: [[d === 5 ? '1' : '9', '2', '3', '4', '5', '6', '7', '8', d === 5 ? '9' : '1'], []], ap: d === 5 ? 'p2' : 'p1' };
+    rows.push({ pid: 'mlb:9', pos: 'B', date: `2025-06-0${d}T23:00Z`, season: 2025, team: '1', opp: '2', game: g, home: true, s: { pa: 4, hits: 1 } });
+  }
+  // (a pinch hitter's game: not a start)
+  facts.games.g6 = { lo: [['1', '2', '3', '4', '5', '6', '7', '8', '10'], []], ap: 'p1' };
+  rows.push({ pid: 'mlb:9', pos: 'B', date: '2025-06-07T23:00Z', season: 2025, team: '1', opp: '2', game: 'g6', home: true, s: { pa: 1, hits: 0 } });
+  mlbMatchups(rows, facts);
+  assert.equal(rows[0].start, true);
+  assert.equal(rows[5].start, false);
+  assert.equal(rows[4].slot, 9);
+  assert.ok(Math.abs(rows[4].slotShift - Math.log(paAt(9) / paAt(1))) < 1e-3);
+  assert.equal(rows[3].slotShift, 0);
+  // (a lefty against a righty has the edge; against the lefty in the fifth, none: below his usual)
+  assert.ok(rows[0].platoonShift > 0);
+  assert.ok(rows[4].platoonShift < 0);
+  // (a starter: 100 then 60 pitches in his last two, rest from his last day)
+  const logs = { 2025: [[20250501, 18, 0, 0, 6, 1, 0, 0, 100, 25, 1], [20250506, 18, 0, 0, 6, 1, 0, 0, 100, 25, 1], [20250511, 9, 0, 0, 3, 1, 0, 0, 60, 15, 1]] };
+  const p = pitcherBefore(logs, 2025, 20250517);
+  assert.equal(p.restDays, 6);
+  assert.ok(p.leash < 0);
+  // (one start before it: no leash yet)
+  assert.equal(pitcherBefore(logs, 2025, 20250506).leash, 0);
+  // (a day's own line never counts as before it)
+  assert.equal(pitcherBefore(logs, 2025, 20250511).restDays, 5);
+  assert.equal(pitcherBefore({ 2025: [] }, 2025, 20250511).debut, true);
+});
+
+test("nhlMatchups: a skater's power-play time and his opponent's penalties, from the games before", async () => {
+  const { nhlMatchups } = await import('../libs/ranker/scripts/model/matchups.mjs');
+  const { CTX } = await import('../libs/ranker/scripts/model/props.mjs');
+  const facts = { games: {} };
+  const rows = [];
+  for (let d = 1; d <= 3; d++) {
+    facts.games[`g${d}`] = { w: [6, 2, 12, 4] };
+    rows.push({ pid: 'x', pos: 'F', date: `2025-11-0${d}T00:00Z`, season: 2026, team: '1', opp: '2', game: `g${d}`, home: true, s: { toi: 20, sog: 3, pts: 1, pptoi: 3 } });
+  }
+  const m = nhlMatchups(rows, facts);
+  assert.equal(rows[0].ppTime, null);
+  assert.equal(rows[1].ppTime, 3);
+  const live = m.live('x', '1', '2', 'F', 2026);
+  assert.ok(live.ppOpp > 0, String(live.ppOpp));
+  assert.ok(CTX.pp({}, true, null, live) > 0);
+  assert.equal(CTX.pp({}, true, null, { ...live, ppTime: 0 }), 0);
+});
