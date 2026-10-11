@@ -802,7 +802,9 @@ function facesOf(sides: CompareSide[], lines: CompareArcs['lines'], width: numbe
   for (const face of [...ends].sort((a, b) => a.y - b.y || a.x - b.x)) {
     const want = Math.min(bottom, Math.max(top, face.y));
     let y = want;
-    for (let step = 1; !clear(face.x, y) && step < 60; step++) {
+    // (as far as the board's height takes it: four faces ending at the top stack three deep below it)
+    const steps = 2 * Math.ceil(bottom - top);
+    for (let step = 1; !clear(face.x, y) && step < steps; step++) {
       const at = want + Math.ceil(step / 2) * 2 * (step % 2 ? 1 : -1);
       if (at >= top && at <= bottom) y = at;
     }
