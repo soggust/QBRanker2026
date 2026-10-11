@@ -18,7 +18,9 @@
 //   4b. the open bets priced again whose inputs changed (timing.mjs inputsOf: each side's injury report, the
 //      starters, the goalies, the lineups, as the bet saw them against what the run sees now) on games more than
 //      REPRICE_BY from the start: taken back and placed again below with what the model knows now, logged in
-//      the changelog (at most MAX_REPRICES a bet; a part unread this run, its source failed, isn't a change)
+//      the changelog (at most MAX_REPRICES a bet, counted across runs; a part unread this run, its source
+//      failed, isn't a change; a bet the Bets page published stays, here and under --replace: its record is
+//      the public one, and a follower's bet can't be taken back)
 //   5. every market (spread, total, moneyline) of every coming game bet once, when it's due (leagues.mjs TIMING:
 //      inside its sport's window, once the news it waits for is in, or inside the last chance with what's
 //      known, flagged at the minimum; before the window nothing's priced: the bets wait for the news rather
@@ -50,7 +52,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { BOOK, GAME_CAP, LEAGUES, PROP_CAPS, TIMING } from './leagues.mjs';
-import { inputChanges, inputsOf, newsMissing, phaseOf, reach } from './timing.mjs';
+import { inputChanges, inputsOf, newsMissing, phaseOf, propAsk, reach } from './timing.mjs';
 import { fitMargins } from './margins.mjs';
 import { ROSTER_MIN, eventOf, gameOf, json, linesOf, roster, scoreboard, teamIds, teamSchedule, ymd } from './espn.mjs';
 import { adjust, expect, fit, fitContext, gateOf, replay, round } from './ratings.mjs';
@@ -91,6 +93,10 @@ const LAST_CALL = 2 * 36e5;
 // report that keeps flipping doesn't keep it moving)
 const REPRICE_BY = 20 * 60e3;
 const MAX_REPRICES = 6;
+// (the open bets taken back on news but not yet placed again, kept across runs (a bet held a run, its price
+// not in yet or its market resting, keeps its count toward MAX_REPRICES and what it was when it's placed
+// later): .cache/model/taken-back-<sport>.json, each dropped once its game starts or it's placed again)
+const TAKEN_BACK = (sport) => path.join(CACHE, `taken-back-${sport}.json`);
 // (the inputs each coming game was last seen with, kept so a re-price can say who joined or left a list:
 // .cache/model/inputs-<sport>.json, a convenience; the bets keep their own inputs' hashes)
 const INPUTS = (sport) => path.join(CACHE, `inputs-${sport}.json`);
@@ -692,13 +698,22 @@ async function statCorrections(r) {
 
 // (--replace: the open bets on games not started yet (more than REPRICE_BY off: one taken back closer might
 // not be placed again in time) taken back, to be priced again with what the model knows now; logged once the
-// new ones are placed. A game not yet in its window (leagues.mjs TIMING) is bet again once it is)
+// new ones are placed. A game not yet in its window (leagues.mjs TIMING) is bet again once it is. A bet the
+// Bets page published stays (its record is the public one, and a follower's bet at the book can't be taken
+// back). The games whose props it took back are owed an ask of The Odds API (betProps: the NFL's board has no
+// prices of its own, so without one they'd never be bet again)
 function replaceOpen(r) {
   r.replaced = 0;
+  r.replacedProps = new Set();
   if (REPLACE && !DRY) {
     const before = r.ledger.bets.length;
-    r.ledger.bets = r.ledger.bets.filter((b) => !(b.status === 'open' && Date.parse(b.start) - Date.now() > REPRICE_BY));
+    const due = (b) => b.status === 'open' && Date.parse(b.start) - Date.now() > REPRICE_BY;
+    const gone = (b) => due(b) && !b.published;
+    for (const b of r.ledger.bets) if (gone(b) && b.market === 'prop') r.replacedProps.add(b.event);
+    const kept = r.ledger.bets.filter((b) => due(b) && b.published).length;
+    r.ledger.bets = r.ledger.bets.filter((b) => !gone(b));
     r.replaced = before - r.ledger.bets.length;
+    if (kept) console.log(`${r.sport}: ${kept} open bets the Bets page published left as they are (their record is the public one)`);
   }
   r.placed = new Set(r.ledger.bets.map((b) => b.id));
   // (--dry: what the model made of each coming game, to compare one version of the code with another)
@@ -710,8 +725,11 @@ function replaceOpen(r) {
 // with (bet.inputs); a bet whose inputs changed, its game more than REPRICE_BY off, is taken back (r.takenBack)
 // and priced again by betGames and betProps with what the model knows now, the new bet keeping what it was
 // and why (repriced), the changelog the count (saveState). A bet from before the inputs were kept (none on
-// it) stays as it is (--replace prices those again); one priced again MAX_REPRICES times already stays too.
-// --dry: the ones it would price again, logged (a dry run prices every open bet again anyway)
+// it) stays as it is (--replace prices those again); one priced again MAX_REPRICES times already stays too, and
+// so does one the Bets page published (its record is the public one: a follower's bet at the book can't be
+// taken back). One taken back but not placed again this run is kept across runs (TAKEN_BACK), so its count and
+// what it was reach the bet placed later. --dry: the ones it would price again, logged (a dry run prices
+// every open bet again anyway)
 function repriceOpen(r) {
   const { sport, at } = r;
   r.inputs = new Map();
@@ -732,6 +750,7 @@ function repriceOpen(r) {
     console.log(`${sport} (dry): inputs read for ${r.inputs.size} of ${r.upcoming.length} coming games${unread.length ? `, unread: ${unread.join(', ')}` : ''}; the first: ${JSON.stringify(one).slice(0, 300)}`);
   }
   let capped = 0;
+  let published = 0;
   for (const b of r.ledger.bets) {
     if (b.status !== 'open' || b.void || !b.inputs) continue;
     if (Date.parse(b.start) - Date.now() < REPRICE_BY) continue;
@@ -740,6 +759,10 @@ function repriceOpen(r) {
     const prev = before[b.event];
     const changes = inputChanges(b.inputs, now, { game: games.get(b.event), before: prev?.parts, names: { ...(prev?.names ?? {}), ...now.names } });
     if (!changes.length) continue;
+    if (b.published) {
+      published++;
+      continue;
+    }
     if ((b.repriced?.n ?? 0) >= MAX_REPRICES) {
       capped++;
       continue;
@@ -747,6 +770,10 @@ function repriceOpen(r) {
     r.takenBack.set(b.id, { bet: b, why: changes.map((c) => c.words) });
   }
   if (capped) console.log(`${sport}: ${capped} open bets' inputs changed, left as they are (priced again ${MAX_REPRICES} times already)`);
+  if (published) console.log(`${sport}: ${published} open bets' inputs changed, left as they are (published on the Bets page: their record is the public one)`);
+  // (the ones taken back in earlier runs and not placed again since: still to come, and not on the ledger now)
+  r.backKept = new Map(Object.entries(read(TAKEN_BACK(sport), {})).filter(([id, x]) => Date.parse(x.start) > Date.now() && !r.placed.has(id)));
+  for (const [id, x] of r.takenBack) r.backKept.set(id, backOf(x.bet, x.why));
   if (r.takenBack.size) {
     const word = DRY ? 'would be priced again' : 'taken back to price again';
     console.log(`${sport}: ${r.takenBack.size} open bets ${word} on news: ${[...new Set([...r.takenBack.values()].map((x) => `${x.bet.matchup} (${x.why.join('; ')})`))].join(' | ')}`);
@@ -754,18 +781,25 @@ function repriceOpen(r) {
   if (!DRY) {
     r.ledger.bets = r.ledger.bets.filter((b) => !r.takenBack.has(b.id));
     for (const id of r.takenBack.keys()) r.placed.delete(id);
+    write(TAKEN_BACK(sport), Object.fromEntries(r.backKept));
     // (each coming game's inputs as seen now, for the next run's words on who joined or left a list)
     write(INPUTS(sport), Object.fromEntries([...r.inputs].map(([id, x]) => [id, { at, parts: x.parts, names: x.names }])));
   }
 }
 
-// (what a new bet keeps of its game's inputs and, priced again on news, of the bet it replaces)
+// (a bet taken back, as kept till it's placed again: its count so far, why, what it was)
+function backOf(bet, why) {
+  return { n: bet.repriced?.n ?? 0, why, from: { side: bet.side, line: bet.line, odds: bet.odds, units: bet.units, placedAt: bet.placedAt }, event: bet.event, market: bet.market, start: bet.start };
+}
+
+// (what a new bet keeps of its game's inputs and, priced again on news, of the bet it replaces: taken back
+// this run or an earlier one (r.backKept), so a bet held a run still counts toward MAX_REPRICES)
 function stampOf(r, id, gameId) {
   const inputs = r.inputs?.get(gameId)?.hash;
-  const back = r.takenBack?.get(id);
+  const back = r.backKept?.get(id);
   return {
     ...(inputs ? { inputs } : {}),
-    ...(back && !DRY ? { repriced: { n: (back.bet.repriced?.n ?? 0) + 1, why: back.why, from: { side: back.bet.side, line: back.bet.line, odds: back.bet.odds, units: back.bet.units, placedAt: back.bet.placedAt } } } : {}),
+    ...(back && !DRY ? { repriced: { n: back.n + 1, why: back.why, from: back.from } } : {}),
   };
 }
 
@@ -989,10 +1023,18 @@ async function betProps(r) {
     state.propCaps = PROP_CAPS;
   }
   // (The Odds API's props for a game, the desk's book's: asked once to bet (once its props are due: inside
-  // their window, leagues.mjs TIMING), once near the start (within 2.5 hours, if it has prop bets open: their
-  // last line and price before the close, the NFL's CLV), and again when its props were taken back to price
-  // again on news; PROP_ASKS at most; the count kept in .cache/model/odds-props.json)
+  // their window, leagues.mjs TIMING), once near the start (within 2.5 hours, if it has prop bets open or owed:
+  // their last line and price before the close, the NFL's CLV), and again when its props were taken back (on
+  // news, or by --replace) and its board has no prices of its own (the NFL's: owed, kept till an ask succeeds,
+  // so one whose ask failed or waited on the allowance isn't left with nothing to bet on); timing.mjs propAsk.
+  // PROP_ASKS at most; the counts kept in .cache/model/odds-props.json. The games never asked go first, so the
+  // re-asks don't spend the allowance their first asks need)
   const asked = read(PROPS_ASKED, {});
+  if (!DRY) {
+    const owe = new Set([...(r.replacedProps ?? []), ...[...(r.takenBack?.values() ?? [])].filter((x) => x.bet.market === 'prop').map((x) => x.bet.event)]);
+    for (const id of owe) asked[`${id}:owed`] = 1;
+    if (owe.size) write(PROPS_ASKED, asked);
+  }
   // (the NFL's, NBA's and NHL's rosters now, each team's once a run: a teammate no longer on it (traded,
   // released) counts as missing in the work his group leaves, as the history counts him (props.mjs
   // priceProps); one not read, null)
@@ -1001,7 +1043,8 @@ async function betProps(r) {
     if (!rosters.has(String(team))) rosters.set(String(team), await roster(cfg.league, team, ROSTER_MIN[sport] ?? 40).catch(() => null));
     return rosters.get(String(team));
   };
-  for (const u of r.upcoming) {
+  const firstAsks = [...r.upcoming].sort((a, b) => Number((asked[a.game.id] ?? 0) > 0) - Number((asked[b.game.id] ?? 0) > 0));
+  for (const u of firstAsks) {
     const game = u.game;
     try {
       // (not this run: a game whose context or injury report couldn't be read (blindOf), or, with The Odds API to
@@ -1019,16 +1062,18 @@ async function betProps(r) {
       const times = asked[game.id] ?? 0;
       const open = ledger.bets.filter((b) => b.event === game.id && b.market === 'prop' && b.status === 'open');
       // (asked once its props are due, once more near the start for the open ones' last line (the NFL's
-      // close), and again when its props were taken back to price again on news (their new prices), at most
-      // PROP_ASKS times a game)
-      const reprice = [...(r.takenBack?.values() ?? [])].some((x) => x.bet.event === game.id && x.bet.market === 'prop');
-      const near = times >= 1 && !asked[`${game.id}:near`] && until < 2.5 * 36e5 && open.length > 0;
-      const wanted = u.lines.oddsEvent && !DRY && times < PROP_ASKS && (times === 0 || reprice || near);
-      if (wanted) {
+      // close), and again when its props were taken back and its board has no prices (owed), at most
+      // PROP_ASKS times a game: timing.mjs propAsk)
+      const owed = !!asked[`${game.id}:owed`];
+      const boardPriced = board_.some((p) => p.prices);
+      const why = propAsk({ times, max: PROP_ASKS, owed, boardPriced, nearAsked: !!asked[`${game.id}:near`], until, open: open.length });
+      if (owed && times >= PROP_ASKS && !boardPriced) run.owedOut = (run.owedOut ?? 0) + 1;
+      if (why && u.lines.oddsEvent && !DRY) {
         const api = await apiProps(sport, u.lines.oddsEvent);
         if (api) {
           asked[game.id] = times + 1;
-          if (near) asked[`${game.id}:near`] = 1;
+          if (why === 'near') asked[`${game.id}:near`] = 1;
+          delete asked[`${game.id}:owed`];
           write(PROPS_ASKED, asked);
           board_ = withApiPrices(board_, api);
           run.api = (run.api ?? 0) + 1;
@@ -1131,6 +1176,7 @@ async function betProps(r) {
     r.pending.push({ bet, game });
     r.placed.add(id);
   }
+  if (run.owedOut) console.log(`${sport}: props taken back in ${run.owedOut} games not bet again (The Odds API asked ${PROP_ASKS} times for them already, and their board has no prices)`);
   if (run.waiting) console.log(`${sport}: props waiting for the news (a lineup, a starter, a goalie): ${run.waiting}`);
   if (run.held) console.log(`${sport}: props held for a later run: ${Object.entries(run.held).map(([why, n]) => `${n} games (${why})`).join(', ')}`);
   if (run.skipped) console.log(`${sport}: props skipped: ${Object.entries(run.skipped).map(([k, n]) => `${n} ${k === 'gap' ? 'past the market gap' : 'by the other guards'}`).join(', ')}`);

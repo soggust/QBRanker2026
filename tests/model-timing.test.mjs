@@ -3,7 +3,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { TIMING, LEAGUES } from '../libs/ranker/scripts/model/leagues.mjs';
-import { inputChanges, inputsOf, newsMissing, phaseOf } from '../libs/ranker/scripts/model/timing.mjs';
+import { inputChanges, inputsOf, newsMissing, phaseOf, propAsk } from '../libs/ranker/scripts/model/timing.mjs';
 import { fitTrust } from '../libs/ranker/scripts/model/desk.mjs';
 
 const H = 36e5;
@@ -112,4 +112,19 @@ test('fitTrust: a bet placed under other timing (tw) weighs less', () => {
   assert.ok(full.fitted && half.fitted);
   // (the same results at half weight: the trust's cost counts for more, so it can't be higher)
   assert.ok(half.trust <= full.trust);
+});
+
+test('propAsk: first, owed only on an unpriced board, near once with props open or owed, never past the cap', () => {
+  const h = 36e5;
+  assert.equal(propAsk({ times: 0, max: 4, until: 20 * h }), 'first');
+  assert.equal(propAsk({ times: 4, max: 4, owed: true, until: h }), null);
+  // (the NFL's props taken back by --replace, asked once already: asked again, inside or outside 2.5 hours)
+  assert.equal(propAsk({ times: 1, max: 4, owed: true, until: 20 * h }), 'owed');
+  assert.equal(propAsk({ times: 1, max: 4, owed: true, until: h, nearAsked: true }), 'owed');
+  // (a board with its own prices: owed props go on them; only the near ask, once)
+  assert.equal(propAsk({ times: 1, max: 4, owed: true, boardPriced: true, until: 20 * h }), null);
+  assert.equal(propAsk({ times: 1, max: 4, owed: true, boardPriced: true, until: h }), 'near');
+  assert.equal(propAsk({ times: 1, max: 4, open: 2, until: h }), 'near');
+  assert.equal(propAsk({ times: 2, max: 4, open: 2, until: h, nearAsked: true }), null);
+  assert.equal(propAsk({ times: 1, max: 4, open: 0, until: h }), null);
 });

@@ -13,6 +13,8 @@
 //                probable goalies (and whether confirmed), MLB's probable starters and lineups. Each part's
 //                text, and a short hash of it a bet keeps (ledger: inputs); a part that couldn't be read this run
 //                (its source failed) is null, never taken for a change
+//   propAsk      why The Odds API is asked for a game's props this run: its first ask, owed (its props taken
+//                back and its board unpriced: the NFL's), near the start; or not at all
 //   inputChanges what changed between a bet's inputs and the game's now: a part that's moved to a new value
 //                (or read now where it was unread when the bet was placed: news it was priced without), not one
 //                that's gone blank (a goalie, a starter, a lineup dropped from a source doesn't un-name him: more
@@ -41,6 +43,20 @@ export function phaseOf(sport, kind, until) {
 
 // (the widest window, hours: how far ahead The Odds API is asked about)
 export const reach = (sport) => Math.max(TIMING[sport]?.lines ?? 96, TIMING[sport]?.props ?? 96);
+
+// Why The Odds API is asked for a game's props this run, or null: 'first' (never asked: its props are due),
+// 'owed' (its props were taken back, on news or by --replace, and its board has no prices of its own (the
+// NFL's): without a new ask they'd never be bet again; kept across runs till an ask succeeds), 'near' (within
+// 2.5 hours of the start, once, with prop bets open or owed: their last line before the close). times: the
+// asks so far; max: PROP_ASKS; until: ms to the start. A board with its own prices (NBA, NHL, MLB) prices its
+// owed props on them, so its re-asks don't spend the allowance the NFL's first asks need
+export function propAsk({ times, max, owed = false, boardPriced = false, nearAsked = false, until, open = 0 }) {
+  if (times >= max) return null;
+  if (times === 0) return 'first';
+  if (owed && !boardPriced) return 'owed';
+  if (!nearAsked && until < 2.5 * HOUR && (open > 0 || owed)) return 'near';
+  return null;
+}
 
 // The news a game's bets still wait for: a list of what's missing ([] when it's in). kind: 'lines' or
 // 'props'; for a prop, home (his side) and pitcher (an MLB pitcher's)
