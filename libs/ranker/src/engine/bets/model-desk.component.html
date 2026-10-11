@@ -391,7 +391,20 @@
                   </tr>
                 }
                 @if (!shut) {
-                @for (b of g.bets; track b.id) {
+                @for (sec of sectionsOf(g); track sec.key) {
+                @if (sec.props && many) {
+                  <!-- (a team's player props: a row of their own, folded till it's opened) -->
+                  <tr class="desk-subgroup" [class.shut]="!propsShown('live', sec)" (click)="toggleProps('live', sec)">
+                    @if (!sport) {<th></th>}
+                    <td class="desk-left" colspan="6"><span class="desk-group-game">
+                      <button type="button" class="desk-group-toggle" [attr.aria-expanded]="propsShown('live', sec)" [attr.aria-label]="(propsShown('live', sec) ? 'Hide ' : 'Show ') + sec.team + ' player props'"><mat-icon aria-hidden="true" fontIcon="chevron_right"></mat-icon></button>
+                      <b>{{ sec.team }} Player Props</b>
+                      <span class="desk-group-count">{{ sec.bets.length }} {{ sec.bets.length === 1 ? 'pick' : 'picks' }} · {{ sectionUnits(sec) }}u</span>
+                    </span></td>
+                  </tr>
+                }
+                @if (!sec.props || !many || propsShown('live', sec)) {
+                @for (b of sec.bets; track b.id) {
                 <tr [class.desk-grouped]="many">
                   @if (!sport) {<th>@if (!many && !sg.header) {<img class="desk-league" [src]="leagueLogo(b.sport)" [alt]="b.sport.toUpperCase()" [title]="b.sport.toUpperCase()" />}</th>}
                   <td class="desk-left">@if (!many) {<ng-container *ngTemplateOutlet="gameCell; context: { $implicit: b, when: 'live' }"></ng-container>}</td>
@@ -435,6 +448,8 @@
                   }
                 </tr>
               }
+                }
+                }
                 }
               }
               }
@@ -498,7 +513,20 @@
                   </tr>
                 }
                 @if (!shut) {
-                @for (b of g.bets; track b.id) {
+                @for (sec of sectionsOf(g); track sec.key) {
+                @if (sec.props && many) {
+                  <!-- (a team's player props: a row of their own, folded till it's opened) -->
+                  <tr class="desk-subgroup" [class.shut]="!propsShown('open', sec)" (click)="toggleProps('open', sec)">
+                    @if (!sport) {<th></th>}
+                    <td class="desk-left" colspan="7"><span class="desk-group-game">
+                      <button type="button" class="desk-group-toggle" [attr.aria-expanded]="propsShown('open', sec)" [attr.aria-label]="(propsShown('open', sec) ? 'Hide ' : 'Show ') + sec.team + ' player props'"><mat-icon aria-hidden="true" fontIcon="chevron_right"></mat-icon></button>
+                      <b>{{ sec.team }} Player Props</b>
+                      <span class="desk-group-count">{{ sec.bets.length }} {{ sec.bets.length === 1 ? 'pick' : 'picks' }} · {{ sectionUnits(sec) }}u</span>
+                    </span></td>
+                  </tr>
+                }
+                @if (!sec.props || !many || propsShown('open', sec)) {
+                @for (b of sec.bets; track b.id) {
                 <tr [class.desk-grouped]="many">
                   @if (!sport) {<th>@if (!many && !sg.header) {<img class="desk-league" [src]="leagueLogo(b.sport)" [alt]="b.sport.toUpperCase()" [title]="b.sport.toUpperCase()" />}</th>}
                   <td class="desk-left">@if (!many) {<ng-container *ngTemplateOutlet="gameCell; context: { $implicit: b, when: 'EEE h:mm a' }"></ng-container>}</td>
@@ -510,6 +538,8 @@
                   <td [class.up]="b.ev > 0" [class.down]="b.ev < 0">{{ pct(b.ev) }}</td>
                 </tr>
               }
+                }
+                }
                 }
               }
               }
@@ -578,7 +608,20 @@
                   </tr>
                 }
                 @if (!shut) {
-                @for (b of g.bets; track b.id) {
+                @for (sec of sectionsOf(g); track sec.key) {
+                @if (sec.props && many) {
+                  <!-- (a team's player props: a row of their own, folded till it's opened) -->
+                  <tr class="desk-subgroup" [class.shut]="!propsShown('recent', sec)" (click)="toggleProps('recent', sec)">
+                    @if (!sport) {<th></th>}
+                    <td class="desk-left" colspan="9"><span class="desk-group-game">
+                      <button type="button" class="desk-group-toggle" [attr.aria-expanded]="propsShown('recent', sec)" [attr.aria-label]="(propsShown('recent', sec) ? 'Hide ' : 'Show ') + sec.team + ' player props'"><mat-icon aria-hidden="true" fontIcon="chevron_right"></mat-icon></button>
+                      <b>{{ sec.team }} Player Props</b>
+                      <span class="desk-group-count">{{ sec.bets.length }} {{ sec.bets.length === 1 ? 'pick' : 'picks' }} · {{ sectionUnits(sec) }}u</span>
+                    </span></td>
+                  </tr>
+                }
+                @if (!sec.props || !many || propsShown('recent', sec)) {
+                @for (b of sec.bets; track b.id) {
                 <tr [class.desk-grouped]="many">
                   @if (!sport) {<th>@if (!many && !sg.header) {<img class="desk-league" [src]="leagueLogo(b.sport)" [alt]="b.sport.toUpperCase()" [title]="b.sport.toUpperCase()" />}</th>}
                   <td class="desk-left">@if (!many) {<ng-container *ngTemplateOutlet="gameCell; context: { $implicit: b, when: 'MMM d' }"></ng-container>}</td>
@@ -601,6 +644,8 @@
                   </td>
                 </tr>
               }
+                }
+                }
                 }
               }
               }

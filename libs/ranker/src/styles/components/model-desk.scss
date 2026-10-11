@@ -1071,6 +1071,41 @@ card-panel {
   font-size: 11.5px;
 }
 
+// (a team's player props under its game: a row of their own, a step in, a size down from the game's)
+.desk-subgroup {
+  cursor: pointer;
+
+  td,
+  th {
+    background: rgba(255, 255, 255, 0.015);
+  }
+
+  &:hover td,
+  &:hover th {
+    background: rgba(255, 255, 255, 0.04);
+  }
+
+  .desk-group-game {
+    padding-left: 18px;
+  }
+
+  b {
+    font-size: 13px;
+    font-weight: 800;
+  }
+
+  .desk-group-count {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 11.5px;
+  }
+
+  .desk-group-toggle {
+    .desk-subgroup:hover & {
+      color: #fff;
+    }
+  }
+}
+
 // (a game's picks under it: a fainter line between them and their game)
 .desk-grouped + .desk-grouped,
 .desk-group + .desk-grouped {

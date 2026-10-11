@@ -77,6 +77,16 @@ const DESK_RANGES: { value: DeskRange; label: string }[] = [
   { value: 'all', label: 'All Time' },
 ];
 
+// A section of a game's bets on the Algorithm's lists: its game bets, or one team's player props
+interface DeskSection {
+  key: string;
+  props: boolean;
+  team: string;
+  bets: ModelBet[];
+}
+// (the game bets' order: the total, the moneyline, the spread)
+const MARKET_ORDER: Record<string, number> = { total: 0, ml: 1, spread: 2 };
+
 @Component({
   selector: 'model-desk',
   templateUrl: './model-desk.component.html',
@@ -519,7 +529,15 @@ export class ModelDeskComponent implements OnInit, OnDestroy {
   private async loadTeams(): Promise<void> {
     this.teamColors = await loadTeamColors(this.allBets.map((b) => b.sport));
     this.pickColors.clear();
+    // (each team's abbreviation by its ESPN id, from the same teams.json: a prop's player's side)
+    for (const sport of new Set(this.allBets.map((b) => b.sport))) {
+      const file = await getJson<{ teams?: Record<string, { id: string }> }>(`/${sport}/data/model/teams.json`);
+      for (const [abbr, t] of Object.entries(file?.teams ?? {})) this.teamAbbr.set(`${sport}#${t.id}`, abbr);
+    }
   }
+
+  // (a team's abbreviation by "<sport>#<ESPN id>")
+  private teamAbbr = new Map<string, string>();
 
   // A bet's own color, its team's (never one that reads as a result: live-props.ts meterColor): a prop its
   // player's team (the one it was placed with, or the box score's once he's playing), a side the team it took;
@@ -674,6 +692,39 @@ export class ModelDeskComponent implements OnInit, OnDestroy {
 
   toggleGroup(table: string, g: BetGroup): void {
     this.groupsOpen.set(`${table}|${g.key}`, !this.groupOpen(table, g));
+  }
+
+  // A game's bets in their sections: its game bets (the total, the moneyline, the spread, in that order), then
+  // each team's player props (the away side's, the home side's, any whose team isn't known last), each props
+  // section folded till it's opened
+  sectionsOf(g: BetGroup): DeskSection[] {
+    const game = g.bets.filter((b) => b.market !== 'prop').sort((a, b) => (MARKET_ORDER[a.market] ?? 9) - (MARKET_ORDER[b.market] ?? 9));
+    const props = g.bets.filter((b) => b.market === 'prop');
+    const out: DeskSection[] = game.length ? [{ key: `${g.key}|game`, props: false, team: '', bets: game }] : [];
+    if (!props.length) return out;
+    const [away, home] = this.teamsOf(g.bets[0]);
+    const teamOf = (b: ModelBet) => (b.team ? (this.teamAbbr.get(`${b.sport}#${b.team}`) ?? '') : '');
+    const teams = [away, home, ''];
+    for (const t of props.map(teamOf)) if (!teams.includes(t)) teams.splice(teams.length - 1, 0, t);
+    for (const team of teams) {
+      const bets = props.filter((b) => teamOf(b) === team);
+      if (bets.length) out.push({ key: `${g.key}|props|${team}`, props: true, team: team || 'Other', bets });
+    }
+    return out;
+  }
+
+  private propsOpen = new Map<string, boolean>();
+
+  propsShown(table: string, s: DeskSection): boolean {
+    return this.propsOpen.get(`${table}|${s.key}`) ?? false;
+  }
+
+  toggleProps(table: string, s: DeskSection): void {
+    this.propsOpen.set(`${table}|${s.key}`, !this.propsShown(table, s));
+  }
+
+  sectionUnits(s: DeskSection): number {
+    return Math.round(s.bets.reduce((sum, b) => sum + b.units, 0) * 100) / 100;
   }
 
   // (a game's stakes, and what its bets came to so far: null with none decided)
