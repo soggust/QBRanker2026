@@ -99,7 +99,8 @@ export class ModelDeskComponent implements OnInit, OnDestroy {
   private allStates: ModelState[] = [];
 
   // (the bets by when the bot placed them, the dropdown left of the game's: the algorithm changes, so today's
-  // bets are today's logic; Today on every visit)
+  // bets are today's logic; Today on every visit. The record, tiles, chart and results follow it; the bets
+  // still open (Open Bets, In Play) are always all there: they're what's happening now)
   readonly ranges = DESK_RANGES;
   range: DeskRange = 'today';
 
@@ -225,7 +226,7 @@ export class ModelDeskComponent implements OnInit, OnDestroy {
   // (what's on show changed: its bets and states picked, everything built from them, the scores asked, the
   // tiles counting up to their new numbers)
   private show(): void {
-    const sport = (this.sport ? this.allBets.filter((b) => b.sport === this.sport) : this.allBets).filter((b) => this.inRange(b));
+    const sport = (this.sport ? this.allBets.filter((b) => b.sport === this.sport) : this.allBets).filter((b) => b.status === 'open' || this.inRange(b));
     this.bets = this.game ? sport.filter((b) => b.event === this.game) : sport;
     this.states = this.sport ? this.allStates.filter((s) => s.sport === this.sport) : this.allStates;
     this.build();
@@ -271,7 +272,7 @@ export class ModelDeskComponent implements OnInit, OnDestroy {
 
     this.graded = graded.slice(-40).reverse();
     this.splitOpen(now);
-    this.gameDays = gameDaysOf(this.allBets.filter((b) => this.inRange(b)), this.sport, now);
+    this.gameDays = gameDaysOf(this.allBets.filter((b) => b.status === 'open' || this.inRange(b)), this.sport, now);
     this.changes = this.states
       .flatMap((s) => s.changelog.map((c) => ({ ...c, sport: s.label })))
       .sort((a, b) => b.at.localeCompare(a.at))
