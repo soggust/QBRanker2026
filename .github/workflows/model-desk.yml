@@ -52,8 +52,10 @@ jobs:
       # (the context's facts (context-<sport>.json), the players' lines, the summaries and anything else slow:
       # kept between runs; none of it is needed: a cold cache only makes the run slower, about 6 minutes, as it
       # asks for everything again)
+      # (restored here, saved right after the bettor even when a later step fails: the re-price counts, the
+      # lines resting and the Odds API's usage live in it, and a failed run mustn't lose them)
       - name: Restore the desk's cache
-        uses: actions/cache@v6
+        uses: actions/cache/restore@v6
         with:
           path: .cache/model
           key: model-desk-${{ github.run_id }}
@@ -65,6 +67,13 @@ jobs:
           ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
           REPLACE: ${{ inputs.replace && '--replace' || '' }}
         run: node libs/ranker/scripts/model/run.mjs $REPLACE
+
+      - name: Save the desk's cache
+        if: always()
+        uses: actions/cache/save@v6
+        with:
+          path: .cache/model
+          key: model-desk-${{ github.run_id }}
 
       # (the data checked before it's committed: a broken ledger or state stays out of master)
       - name: Install dependencies
