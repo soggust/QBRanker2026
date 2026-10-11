@@ -504,6 +504,52 @@ async function buildSeason(season, players) {
       Object.assign(p, { off: round(u.off / u.games), def: round(u.def / u.games), st: round(u.st / u.games), games: u.games, pos: u.pos ?? p.pos });
       p.unit = UNIT[u.pos] ?? p.unit;
     }
+    // (the season being played: a spot's chart behind who actually plays it when he's healthy, a star traded in,
+    // or back from an injury, still listed deep, the chart's maintainers not caught up. Each one's typical game:
+    // his median share of his side's snaps in the games he played (a game he left hurt, or one he filled in on,
+    // doesn't move it). Anyone listed at a spot whose typical game is half the snaps or more, a quarter over its
+    // listed starter's, starts there (the Starters view: who starts when healthy; Current still benches him
+    // while he's hurt); a listed starter with no games yet (back from injured reserve, a rookie) keeps the spot
+    // the chart gives him. The ones behind in their order, each one's place on the chart read again.)
+    const perGame = new Map();
+    for (const r of teamSnaps) {
+      const id = byPfr.get(r.pfr_player_id)?.gsis_id || `pfr:${r.pfr_player_id}`;
+      const g = perGame.get(id) ?? { off: [], def: [] };
+      if ((num(r.offense_pct) ?? 0) > 0) g.off.push(num(r.offense_pct));
+      if ((num(r.defense_pct) ?? 0) > 0) g.def.push(num(r.defense_pct));
+      perGame.set(id, g);
+    }
+    const median = (list) => {
+      if (!list?.length) return null;
+      const v = [...list].sort((x, y) => x - y);
+      return v.length % 2 ? v[(v.length - 1) / 2] : (v[v.length / 2 - 1] + v[v.length / 2]) / 2;
+    };
+    if (current && perGame.size) {
+      let moved = false;
+      // (not one starting at another spot already: he'd be on the field twice)
+      const starting = new Set([...now.slots.values()].filter((s) => s.side !== 'special').map((s) => s.depth[0]));
+      for (const s of now.slots.values()) {
+        if (s.side === 'special' || s.depth.length < 2) continue;
+        const typical = (id) => median(perGame.get(id)?.[s.side === 'offense' ? 'off' : 'def']);
+        const share = (id) => typical(id) ?? 0;
+        if (typical(s.depth[0]) === null) continue;
+        const behind = s.depth.slice(1).filter((id) => !starting.has(id));
+        if (!behind.length) continue;
+        const top = behind.reduce((best, id) => (share(id) > share(best) ? id : best), behind[0]);
+        if (share(top) >= 0.5 && share(top) - share(s.depth[0]) >= 0.25) {
+          s.depth = [top, ...s.depth.filter((id) => id !== top)];
+          starting.add(top);
+          moved = true;
+        }
+      }
+      if (moved) {
+        for (const p of people.values()) p.chart = null;
+        for (const s of now.slots.values()) s.depth.forEach((id, i) => {
+          const p = people.get(id);
+          if (p && (!p.chart || i === 0)) p.chart = { key: s.key, depth: i + 1 };
+        });
+      }
+    }
     // (no snap counts, 2012 and earlier: the team's weekly rosters say who was on it, ESPN's season stats how
     // many games each played; their share of the snaps isn't known: null, not 0)
     if (!teamSnaps.length) {
