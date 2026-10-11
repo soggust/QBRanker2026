@@ -75,8 +75,14 @@
             @for (l of s.lanes; track l.key; let i = $index) {
               <span class="fm-cell" [class.empty]="l.empty" [style.--fill]="l.fill" [style.--i]="i" [title]="l.title">
                 <small>{{ l.short }}</small>
-                <b>{{ l.main }}</b>
-                <em>{{ l.sub ? l.sub + ' car' : '' }}</em>
+                <!-- (by efficiency its yards a carry big, its carries under; by volume the other way round) -->
+                @if (mode === 'volume') {
+                  <b>{{ l.sub }}</b>
+                  <em>{{ l.main ? l.main + ' ypc' : '' }}</em>
+                } @else {
+                  <b>{{ l.main }}</b>
+                  <em>{{ l.sub ? l.sub + ' car' : '' }}</em>
+                }
               </span>
             }
           </div>
@@ -256,8 +262,9 @@
             <path class="fm-shaft-hit" [attr.d]="l.path" />
             <path class="fm-shaft" [attr.d]="l.path" pathLength="1" [attr.stroke]="l.color" [attr.stroke-width]="l.width" />
             <polygon class="fm-head-arrow" [attr.points]="l.head" [attr.fill]="l.color" />
-            <text class="fm-main" [attr.x]="l.lx" [attr.y]="l.ly - 1">{{ l.main }}</text>
-            <text class="fm-sub" [attr.x]="l.lx" [attr.y]="l.ly - 13">{{ l.sub }}</text>
+            <!-- (by efficiency its yards a carry the big number, its carries the eyebrow; by volume the other way round) -->
+            <text class="fm-main" [attr.x]="l.lx" [attr.y]="l.ly - 1">{{ mode === 'volume' ? l.sub : l.main }}</text>
+            <text class="fm-sub" [attr.x]="l.lx" [attr.y]="l.ly - 13">{{ mode === 'volume' ? (l.main ? l.main + ' ypc' : '') : l.sub }}</text>
           </g>
         }
       </svg>
