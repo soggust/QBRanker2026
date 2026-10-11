@@ -4,18 +4,23 @@
 // season's at half weight; each game's flags (for the officials); its offensive line's continuity (how many of
 // the five who started its last game don't start this one: snap counts, and for a coming game the injury
 // report); and the wind across the field (which way each field runs, from OpenStreetMap, and where the wind
-// blew from at kickoff, Open-Meteo's archive; the forecast for a coming game).
+// blew from at kickoff, Open-Meteo's archive; the forecast for a coming game); the rain and snow over each
+// outdoor final's window (Open-Meteo's archive: context.mjs's weather terms and the props' context); and the
+// schedule's own facts, all nflverse's: a division game, the kickoff by each team's own clock (a West Coast
+// team's 1 p.m. Eastern start is 10 a.m. to it), a field of the other kind (grass or turf) from a team's own,
+// and a team's first games under a new head coach.
 //
 // Kept in the context's facts (.cache/model/context-<sport>.json): plays (each game's [home EPA, home plays, away
 // EPA, away plays, flags, home passes, home runs, away passes, away runs, home over, home xn, away over, away xn]:
 // over and xn the pass funnel's, matchups.mjs passFunnel: in neutral situations (win chance 20-80%, outside the
 // last two minutes of a half) where nflverse has xpass, the side's passes less xpass summed, and how many), ol (each
 // game's [home, away] starters changed), olLast (each team's last five), fields (each stadium's bearing and
-// place), wdir (each outdoor game's wind direction).
+// place), wdir (each outdoor game's wind direction), wx (each outdoor final's [precip, snow], inches over its
+// window: sources.mjs gameWindow; null where the archive had none).
 
 import { term } from './terms.mjs';
 import { passFunnel, sideOfPlays } from './matchups.mjs';
-import { fieldBearing, nflverseRows, pool, weatherHistory } from './sources.mjs';
+import { DAY, fieldBearing, isoDay, nflverseRows, pool, precipHistory, weatherHistory } from './sources.mjs';
 
 
 export const FOOTBALL_TERMS = [
@@ -25,7 +30,40 @@ export const FOOTBALL_TERMS = [
   term('crosswind', 'weather', 't', 'Crosswind', 'to the total per 10 mph of wind across the field over 10 (outdoors)'),
   term('funnelT', 'matchups', 't', 'Pass funnels (total)', "to the total per 10 points of both defenses' pass funnel (their opponents' pass rate over expected against them, in neutral situations, over their own)"),
   term('paceT', 'matchups', 't', 'Defenses\' pace (total)', "to the total per 10% more plays both defenses' opponents run against them than they usually do"),
+  term('divHome', 'matchups', 'm', 'Division game', 'to the home edge in a division game (the teams know each other)'),
+  term('divT', 'matchups', 't', 'Division game (total)', 'to the total in a division game'),
+  term('bodyClock', 'travel', 'm', 'Body clock', 'when the other side kicks off before 11 a.m. by its own home clock, less its own'),
+  term('surface', 'travel', 'm', 'Surface', "when the other side plays on a field of the other kind (grass or turf) from its home field's, less its own"),
+  term('newCoach', 'starters', 'm', 'New head coach', 'when the other side is in its first four games under a new head coach, less its own'),
 ];
+
+// (each team's home clock, by nflverse's team codes, old ones too (Arizona keeps standard time all year); the
+// rest Eastern)
+const CLOCK = {
+  SEA: 'America/Los_Angeles', SF: 'America/Los_Angeles', LA: 'America/Los_Angeles', LAC: 'America/Los_Angeles', LV: 'America/Los_Angeles', OAK: 'America/Los_Angeles', SD: 'America/Los_Angeles',
+  ARI: 'America/Phoenix', DEN: 'America/Denver',
+  CHI: 'America/Chicago', DAL: 'America/Chicago', HOU: 'America/Chicago', KC: 'America/Chicago', MIN: 'America/Chicago', NO: 'America/Chicago', GB: 'America/Chicago', TEN: 'America/Chicago', STL: 'America/Chicago',
+};
+const clocks = new Map();
+// (the hour a time falls on by a team's home clock)
+export function hourAt(team, when) {
+  const zone = CLOCK[team] ?? 'America/New_York';
+  if (!clocks.has(zone)) clocks.set(zone, new Intl.DateTimeFormat('en-US', { timeZone: zone, hour: 'numeric', hourCycle: 'h23' }));
+  return Number(clocks.get(zone).format(new Date(when)));
+}
+// (a field's kind: grass, or turf (every artificial one); null when nflverse hasn't it)
+export function fieldKind(surface) {
+  const s = String(surface ?? '').trim().toLowerCase();
+  return !s ? null : /grass/.test(s) ? 'grass' : 'turf';
+}
+
+// (where each outdoor stadium is, for the archive's rain and snow: OpenStreetMap's field where the crosswind
+// found it (facts.fields), else a game's place there, else these: the ones neither has)
+const STADIUMS = {
+  KAN00: [39.0489, -94.4839], IND00: [39.7601, -86.1639], SFO01: [37.403, -121.97], OAK00: [37.7516, -122.2005], SDG00: [32.7831, -117.1196],
+  LON01: [51.456, -0.3415], LAX97: [33.8644, -118.2611], ATL97: [33.7554, -84.4008], HOU00: [29.6847, -95.4107], GER00: [48.2188, 11.6247],
+  FRA00: [50.0686, 8.6455], SAO00: [-23.5453, -46.4742], RIO00: [-22.9122, -43.2302], MAD01: [40.4531, -3.6883],
+};
 
 const NEUTRAL = (p) => (p.play_type === 'pass' || p.play_type === 'run') && p.epa !== '' && p.epa !== 'NA' && Number(p.wp) >= 0.1 && Number(p.wp) <= 0.9 && Number(p.half_seconds_remaining) > 120;
 // (the funnel's neutral plays: win chance 20-80%, outside the last two minutes of a half, with nflverse's xpass)
@@ -33,13 +71,14 @@ const FUNNEL = (p) => (p.play_type === 'pass' || p.play_type === 'run') && p.xpa
 const OL = new Set(['T', 'G', 'C', 'OL', 'OT', 'OG']);
 
 // The facts above, for every final that doesn't have them yet (the seasons it needs, read once)
-// (part: plays, snaps or fields)
+// (part: plays, snaps, fields or precip)
 export async function gatherFootball(cfg, history, upcoming, facts, live, part) {
   facts.plays ??= {};
   facts.ol ??= {};
   facts.olLast ??= {};
   facts.fields ??= {};
   facts.wdir ??= {};
+  facts.wx ??= {};
   const rows = facts.nfl;
   if (!rows?.size) return;
   const espnOf = new Map([...rows.values()].map((r) => [r.game_id, r.espn]));
@@ -156,6 +195,43 @@ export async function gatherFootball(cfg, history, upcoming, facts, live, part) 
     const r = rows.get(game.id);
     if (r && facts.fields[r.stadium_id]) live.get(game.id).field = facts.fields[r.stadium_id];
   }
+
+  // (the rain and snow over each outdoor final's window: one ask of the archive per stadium and season, for
+  // its finals not asked yet, the newest seasons first. The archive runs a few days behind, so a final is
+  // asked once it's 6 days old (till then its rain is unknown: 0, no effect). The archive counts a long range
+  // as many calls: 40 asks and a minute a run at most, the rest next run, so the first fill takes a few runs.
+  // A final the archive answered without its hours is null, not asked again)
+  if (part === 'precip') {
+    const placeOf = new Map(Object.entries(STADIUMS));
+    for (const g of history) {
+      const r = rows.get(g.id);
+      if (r?.stadium_id && g.venue && facts.places?.[g.venue] && !g.neutral) placeOf.set(r.stadium_id, facts.places[g.venue]);
+    }
+    for (const [id, f] of Object.entries(facts.fields)) if (f?.at) placeOf.set(id, f.at);
+    const ripe = Date.now() - 6 * DAY;
+    const wet = new Map();
+    for (const g of finals) {
+      const r = rows.get(g.id);
+      if (g.id in facts.wx || !['outdoors', 'open'].includes(r.roof) || Date.parse(g.date) > ripe || !placeOf.has(r.stadium_id)) continue;
+      const key = `${r.stadium_id}|${g.season}`;
+      wet.set(key, [...(wet.get(key) ?? []), g]);
+    }
+    const asks = [...wet].sort((a, b) => b[1][0].season - a[1][0].season).slice(0, 40);
+    const stop = Date.now() + 60e3;
+    let n = 0;
+    await pool(asks, 2, async ([key, games]) => {
+      if (Date.now() > stop) return;
+      const days = games.map((g) => g.date.slice(0, 10)).sort();
+      const at = await precipHistory(placeOf.get(key.split('|')[0]), days[0], isoDay(Date.parse(days.at(-1)) + DAY));
+      if (!at) return;
+      for (const g of games) {
+        const w = at(g.date);
+        facts.wx[g.id] = w ? [w.precip, w.snow] : null;
+        if (w) n++;
+      }
+    });
+    if (asks.length) console.log(`nfl: rain and snow for ${n} finals (${asks.length} of ${wet.size} stadium seasons asked)`);
+  }
 }
 
 // The NFL's second-round terms for each game, in date order
@@ -171,6 +247,18 @@ export function footballOf(facts, live) {
   const defense = (id, season) => {
     const d = decay(def.get(id), season);
     return { funnel: funnel.of(id, season), pace: d ? d.pace / (d.n + 4) : 0 };
+  };
+  // (each team's home field's kind (its home finals so far), and its head coaches: the one now, the one
+  // before him, and his games so far; by nflverse's team codes)
+  const homeField = new Map();
+  const coaches = new Map();
+  // (a team's first four games under a new head coach (a hire or an interim's, not its first season in the
+  // history): this game's coach by the schedule, else the one now)
+  const newCoach = (code, named) => {
+    const c = coaches.get(code);
+    if (!c) return 0;
+    if (named && named !== c.coach) return 1;
+    return c.before && c.games < 4 ? 1 : 0;
   };
   const value = (team, season) => {
     const e = eff.get(team);
@@ -205,6 +293,17 @@ export function footballOf(facts, live) {
       cross = Math.abs(speed * Math.sin(((dir[0] - field.bearing) * Math.PI) / 180));
     }
     const r3 = (v) => Math.round(v * 1000) / 1000;
+    // (the schedule's facts, known before the game: a division game; each side's kickoff by its own home
+    // clock, early before 11; a field of the other kind from its home's (a side whose home field isn't known
+    // yet, none); its first games under a new coach)
+    const div = r?.div_game === '1' ? 1 : 0;
+    const homeGame = !g.neutral && r?.location !== 'Neutral';
+    const early = (code) => (code && hourAt(code, g.date) < 11 ? 1 : 0);
+    const kind = fieldKind(r?.surface);
+    const foreign = (code) => (kind && homeField.get(code) && homeField.get(code) !== kind ? 1 : 0);
+    const clock = r ? [early(r.home_team), early(r.away_team)] : [0, 0];
+    const other = r ? [foreign(r.home_team), foreign(r.away_team)] : [0, 0];
+    const coach = r ? [newCoach(r.home_team, r.home_coach), newCoach(r.away_team, r.away_coach)] : [0, 0];
     return {
       terms: {
         nsEpa: (h.net - a.net) * 10,
@@ -213,10 +312,29 @@ export function footballOf(facts, live) {
         crosswind: Math.max(0, cross - 10) / 10,
         funnelT: (dh.funnel + da.funnel) * 10,
         paceT: (dh.pace + da.pace) * 10,
+        divHome: div && homeGame ? 1 : 0,
+        divT: div,
+        bodyClock: clock[1] - clock[0],
+        surface: other[1] - other[0],
+        newCoach: coach[1] - coach[0],
       },
-      info: { epa: [r3(h.net), r3(a.net)], olChanged: ol ?? null, crosswind: r3(cross), funnel: [r3(dh.funnel), r3(da.funnel)], pace: [r3(dh.pace), r3(da.pace)] },
+      info: { epa: [r3(h.net), r3(a.net)], olChanged: ol ?? null, crosswind: r3(cross), funnel: [r3(dh.funnel), r3(da.funnel)], pace: [r3(dh.pace), r3(da.pace)], division: !!div, earlyClock: clock, otherField: other, newCoach: coach },
       flags,
       learn: () => {
+        // (the home field's kind and the coaches, from the schedule's row)
+        if (r) {
+          if (homeGame && kind) homeField.set(r.home_team, kind);
+          for (const [code, name] of [
+            [r.home_team, r.home_coach],
+            [r.away_team, r.away_coach],
+          ]) {
+            if (!code || !name) continue;
+            const c = coaches.get(code);
+            if (!c) coaches.set(code, { coach: name, before: null, games: 1 });
+            else if (c.coach !== name) coaches.set(code, { coach: name, before: c.coach, games: 1 });
+            else c.games++;
+          }
+        }
         const p = facts.plays?.[g.id];
         if (!p) return;
         if (p.length >= 9) {

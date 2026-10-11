@@ -123,6 +123,9 @@ export function reasonOf(bet, game) {
   if (Number.isFinite(w.wind) && w.wind >= 12) notes.push(`${w.wind} mph wind`);
   if (Number.isFinite(w.temp) && w.temp <= 35) notes.push(`${w.temp}°`);
   if (Number.isFinite(w.windOut) && Math.abs(w.windOut) >= 8) notes.push(`wind blowing ${w.windOut > 0 ? 'out' : 'in'} at ${Math.abs(w.windOut)} mph`);
+  if (Number.isFinite(w.snow) && w.snow >= 0.5) notes.push(`snow in the forecast (${w.snow} in)`);
+  else if (Number.isFinite(w.precip) && w.precip >= 0.1) notes.push(`rain in the forecast (${w.precip} in)`);
+  if (w.rain === true) notes.push('rain at the park');
   if (notes.length) out.push(`${notes.slice(0, 3).join('; ').replace(/^./, (x) => x.toUpperCase())}.`);
   // (a line that's moved its way since it was bet: the market agreeing)
   const seen = bet.seen;

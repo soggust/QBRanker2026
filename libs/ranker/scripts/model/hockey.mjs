@@ -3,7 +3,10 @@
 // goaltending (goals saved above expected, the starter's own against his team's usual, his share of each
 // game's by the shots he faced); and last change (the home coach matches lines: how much each team leans on
 // its top three scorers for its goals, season to date, which the home side gets to shelter and the road
-// side gets exposed).
+// side gets exposed). And each game's expected shots on goal, each side's (its shots a game for, against the
+// other's shots a game allowed, over the league's: season to date, last season's at half weight, pulled toward
+// the league's by 10 games; from the box scores' goalies, the shots they faced): not a game-line term, the saves
+// props' context (props.mjs oppShots, kept only where it helps).
 //
 // Kept in the context's facts (.cache/model/context-<sport>.json): each game's xg ([home expected for, home expected against]).
 
@@ -53,6 +56,15 @@ export function hockeyOf(facts, live) {
   const recent = new Map();
   const scorers = new Map();
   let lg = { xg: 2.9, share: 0.4, n: 0 };
+  const shots = new Map();
+  const lgShots = { avg: 30, n: 0 };
+  // (a team's shots on goal a game, for and against)
+  const shotRate = (id, season) => {
+    const t = shots.get(id);
+    const w = !t ? 0 : t.season === season ? 1 : 0.5;
+    const n = w * (t?.n ?? 0) + 10;
+    return { sf: (w * (t?.sf ?? 0) + 10 * lgShots.avg) / n, sa: (w * (t?.sa ?? 0) + 10 * lgShots.avg) / n };
+  };
   const team = (id, season) => {
     const t = teams.get(id);
     if (!t) return { edge: 0, sum: 0 };
@@ -89,11 +101,30 @@ export function hockeyOf(facts, live) {
     const sh = share(g.home, g.season);
     const sa = share(g.away, g.season);
     const r3 = (v) => Math.round(v * 1000) / 1000;
+    // (each side's expected shots: its rate for against the other's allowed, over the league's)
+    const shH = shotRate(g.home, g.season);
+    const shA = shotRate(g.away, g.season);
+    const expShots = [(shH.sf * shA.sa) / lgShots.avg, (shA.sf * shH.sa) / lgShots.avg];
     return {
       terms: { xgEdge: h.edge - a.edge, xgT: h.sum + a.sum, goalieX: gh - ga, lastChange: (sh + sa - 2 * lg.share) * 10 },
-      info: { xg: [r3(h.edge), r3(a.edge)], gsaxVsUsual: [r3(gh), r3(ga)], topThree: [r3(sh), r3(sa)] },
+      info: { xg: [r3(h.edge), r3(a.edge)], gsaxVsUsual: [r3(gh), r3(ga)], topThree: [r3(sh), r3(sa)], shots: expShots.map((x) => Math.round(x * 10) / 10), shotsAvg: Math.round(lgShots.avg * 10) / 10 },
       learn: () => {
         if (!f) return;
+        // (the shots each side took: the other side's goalies faced them)
+        const faced = (where) => (Array.isArray(f[where]) ? f[where].reduce((s, x) => s + (Number(x[1]) || 0), 0) : 0);
+        const [byHome, byAway] = [faced('a'), faced('h')];
+        if (byHome > 0 && byAway > 0) {
+          for (const [id, sf, sa] of [
+            [g.home, byHome, byAway],
+            [g.away, byAway, byHome],
+          ]) {
+            const t = shots.get(id);
+            const keep = !t ? 0 : t.season === g.season ? 1 : 0.5;
+            shots.set(id, { season: g.season, n: (t?.n ?? 0) * keep + 1, sf: (t?.sf ?? 0) * keep + sf, sa: (t?.sa ?? 0) * keep + sa });
+            lgShots.n++;
+            lgShots.avg += (sf - lgShots.avg) / Math.min(lgShots.n, 2000);
+          }
+        }
         if (f.xg) {
           const [xgf, xga] = f.xg;
           for (const [id, xf, xa, ga, where] of [

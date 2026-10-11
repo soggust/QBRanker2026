@@ -46,6 +46,9 @@ export const TERMS = {
     term('qbT', 'starters', 't', 'Backup QBs (total)', 'to the total per backup quarterback starting, by how much worse he is'),
     term('cold', 'weather', 't', 'Cold', 'to the total per 10°F below 50°F (outdoors)'),
     term('wind', 'weather', 't', 'Wind', 'to the total per 10 mph of wind over 5 (outdoors)'),
+    term('precip', 'weather', 't', 'Rain or snow', 'to the total per 0.1 inch of rain and melted snow from the hour before kickoff through the third after (outdoors)'),
+    term('snow', 'weather', 't', 'Snow', 'to the total per inch of snowfall over the same hours (outdoors)'),
+    term('altitudeHome', 'travel', 'm', 'Altitude', "per 1,000 meters the home field sits above the visitors' own (Denver)"),
   ],
   nba: [
     REST,
@@ -77,6 +80,7 @@ export const TERMS = {
     term('pitcherT', 'starters', 't', 'Pitchers (total)', 'to the total per run a 9 innings both starters allow under average'),
     term('temp', 'weather', 't', 'Temperature', 'to the total per 10°F over 70°F (outdoors)'),
     term('windOut', 'weather', 't', 'Wind out', 'to the total per 10 mph blowing out toward center (in: negative)'),
+    term('rain', 'weather', 't', 'Rain', "to the total when it's raining at first pitch (StatsAPI's report; a coming game without one, a tenth of an inch or more forecast over its first hours)"),
   ],
 };
 
@@ -168,9 +172,11 @@ function easternToUtc(day, time) {
 // The sources a run can do without: each one's terms. One is only asked while a term it feeds has earned its
 // place (or is new), and otherwise again once a week or once the history has 30% more games, so a term left
 // out can earn its way back in (run.mjs decides: want). The rest (each sport's schedule, box scores or
-// StatsAPI, the injury report, places) feed kept terms in every sport, and the props.
+// StatsAPI, the injury report, places) feed kept terms in every sport, and the props; so do the NFL's
+// forecasts and its finals' rain and snow (the props' weather context is fit apart from the game lines', so
+// they're asked every run: the rain and snow only for finals not asked yet)
 export const OPTIONAL = {
-  nfl: { plays: ['nsEpa', 'nsEpaT', 'refWhistle', 'funnelT', 'paceT'], snaps: ['olChanges'], fields: ['crosswind'], forecasts: ['cold', 'wind', 'crosswind'] },
+  nfl: { plays: ['nsEpa', 'nsEpaT', 'refWhistle', 'funnelT', 'paceT'], snaps: ['olChanges'], fields: ['crosswind'] },
   nba: { officials: ['refTotal', 'refHome', 'refWhistle'] },
   nhl: { officials: ['refTotal', 'refHome', 'refWhistle'], xg: ['xgEdge', 'xgT', 'goalieX'] },
   mlb: { air: ['airThin'], bullpens: ['penTired', 'penTiredT'] },
@@ -205,6 +211,7 @@ export async function gather(sport, cfg, history, upcoming, facts, want = () => 
   if (sport === 'nhl') await step('box scores', () => boxFacts(cfg, history, facts, 'nhl'));
   if (sport === 'mlb') await step('StatsAPI', () => mlbFacts(history, upcoming, facts, live));
   if (sport === 'nfl') for (const part of ['plays', 'snaps', 'fields']) if (want(part)) await step(part, () => gatherFootball(cfg, history, upcoming, facts, live, part));
+  if (sport === 'nfl') await step('precip', () => gatherFootball(cfg, history, upcoming, facts, live, 'precip'));
   if (sport === 'nhl' && want('xg')) await step('xg', () => gatherHockey(history, facts));
   if (sport === 'mlb') for (const part of ['air', 'bullpens']) if (want(part)) await step(part, () => gatherBaseball(history, upcoming, facts, live, part));
   if ((sport === 'nba' || sport === 'nhl') && want('officials')) await step('officials', () => gatherOfficials(sport, cfg, upcoming, live));
@@ -228,7 +235,7 @@ export async function gather(sport, cfg, history, upcoming, facts, want = () => 
       }
     }
   }
-  if (sport === 'nfl' && want('forecasts')) await step('forecasts', () => nflForecasts(upcoming, facts, live));
+  if (sport === 'nfl') await step('forecasts', () => nflForecasts(upcoming, facts, live));
   return live;
 }
 
@@ -256,14 +263,17 @@ async function nflFacts(cfg, upcoming, facts, live) {
   for (const { game } of upcoming) if (facts.nfl.has(game.id)) live.get(game.id).row = facts.nfl.get(game.id);
 }
 
-// The forecast at each coming outdoor NFL game (its roof per nflverse: outdoors or open)
+// The forecast at each coming outdoor NFL game (its roof per nflverse: outdoors or open); one that can't be
+// had (no place for it, the forecast failed or has no rain in it) marked (weatherMissing: its weather terms
+// at 0 and the game flagged, its markets and weather-touched props at the least stake)
 async function nflForecasts(upcoming, facts, live) {
   await pool(upcoming, 3, async ({ game }) => {
     const l = live.get(game.id);
     const roof = l.row?.roof ?? '';
+    if (!['outdoors', 'open'].includes(roof)) return;
     const at = facts.places[game.venue];
-    if (!at || !['outdoors', 'open'].includes(roof)) return;
-    l.weather = await forecast(at, game.date);
+    l.weather = at ? await forecast(at, game.date) : null;
+    if (!l.weather || !Number.isFinite(l.weather.precip)) l.weatherMissing = true;
   });
 }
 
@@ -358,8 +368,10 @@ async function mlbFacts(history, upcoming, facts, live) {
   // (a final StatsAPI has no match for is tried once, then left neutral)
   facts.umps ??= {};
   facts.mlbTeams ??= {};
-  // (a game kept before its umpire was is asked again once: u, null when StatsAPI hasn't one)
-  const todo = history.filter((g) => g.final && (!facts.games[g.id]?.v || !('u' in facts.games[g.id])) && !facts.games[g.id]?.tried);
+  // (a game kept before its umpire was is asked again once: u, null when StatsAPI hasn't one; and one kept
+  // before its weather said whether it rained (w's fourth): its weather read again once)
+  const stale = (f) => !f?.v || !('u' in f) || (Array.isArray(f.w) && f.w.length < 4);
+  const todo = history.filter((g) => g.final && stale(facts.games[g.id]) && !facts.games[g.id]?.tried);
   const wanted = [...todo.map((g) => g.date), ...upcoming.map(({ game }) => game.date)].sort();
   const rows = [];
   if (wanted.length) {
@@ -454,7 +466,8 @@ async function mlbFacts(history, upcoming, facts, live) {
       if (fc) {
         const toward = ((fc.from ?? 0) + 180) % 360;
         const out = f.az === null || fc.from === null ? 0 : fc.wind * Math.cos(((toward - f.az) * Math.PI) / 180);
-        l.w = [fc.temp, Math.round(out * 10) / 10, 0];
+        // (rain: a tenth of an inch or more forecast over its first hours; none forecast or unknown, none)
+        l.w = [fc.temp, Math.round(out * 10) / 10, 0, Number.isFinite(fc.precip) && fc.precip >= 0.1 ? 1 : 0];
         l.forecast = fc;
       }
     }
@@ -462,14 +475,16 @@ async function mlbFacts(history, upcoming, facts, live) {
   await pitcherLines(history, upcoming, facts, live, today);
 }
 
-// (a StatsAPI weather report as [temperature, wind toward center (mph; in from it, negative), indoors 1/0])
-function weatherOf(w) {
+// (a StatsAPI weather report as [temperature, wind toward center (mph; in from it, negative), indoors 1/0,
+// raining 1/0 (its condition: rain, drizzle, showers, a storm)])
+export function weatherOf(w) {
   if (!w || w.temp === undefined || w.temp === '') return null;
   const indoor = /dome|roof closed/i.test(w.condition ?? '') ? 1 : 0;
   const mph = Number((w.wind ?? '').match(/(\d+)\s*mph/)?.[1] ?? 0);
   const dir = w.wind ?? '';
   const push = /out to cf/i.test(dir) ? 1 : /out to (lf|rf)/i.test(dir) ? 0.7 : /in from cf/i.test(dir) ? -1 : /in from (lf|rf)/i.test(dir) ? -0.7 : 0;
-  return [Number(w.temp), mph * push, indoor];
+  const rain = !indoor && /rain|drizzle|shower|storm/i.test(w.condition ?? '') ? 1 : 0;
+  return [Number(w.temp), mph * push, indoor, rain];
 }
 
 // Each starter's lines for the seasons he starts in: the season's game log (asked again once he's started
@@ -580,13 +595,15 @@ export function featurize(sport, cfg, games, facts, live) {
       b2b: a.b2b - h.b2b,
       b2bT: a.b2b + h.b2b,
       travel: (a.miles - h.miles) / 1000,
+      // (the NFL's home field above the visitors' own: its elevation less theirs (their home's), per 1,000 m)
+      ...(sport === 'nfl' ? { altitudeHome: g.neutral || elev === null ? 0 : Math.max(0, elev - (facts.elev?.[home.get(g.away)] ?? elev)) / 1000 } : {}),
       ...(s?.terms ?? {}),
       ...(w?.terms ?? {}),
     };
     out.set(g.id, {
       m: mTerms.map((x) => v[x.key] ?? 0),
       t: tTerms.map((x) => v[x.key] ?? 0),
-      info: { rest: [h.rest, a.rest], b2b: [h.b2b, a.b2b], miles: [h.miles, a.miles], ...(s?.info ? { starters: s.info } : {}), ...(w?.info ? { weather: w.info } : {}), ...(r ? { ranker: r.info } : {}), ...(lu?.info ? { lineups: lu.info } : {}), ...(x2?.info ? { more: x2.info } : {}), ...(o?.info ? { officials: o.info } : {}), schedule: { dense: [h.dense3 + h.dense4, a.dense3 + a.dense4], east: [h.east, a.east], climb: [h.climb, a.climb] }, flags: [...(s?.flags ?? []), ...(x2?.flags ?? [])] },
+      info: { rest: [h.rest, a.rest], b2b: [h.b2b, a.b2b], miles: [h.miles, a.miles], ...(s?.info ? { starters: s.info } : {}), ...(w?.info ? { weather: w.info } : {}), ...(r ? { ranker: r.info } : {}), ...(lu?.info ? { lineups: lu.info } : {}), ...(x2?.info ? { more: x2.info } : {}), ...(o?.info ? { officials: o.info } : {}), schedule: { dense: [h.dense3 + h.dense4, a.dense3 + a.dense4], east: [h.east, a.east], climb: [h.climb, a.climb] }, flags: [...(s?.flags ?? []), ...(x2?.flags ?? []), ...(w?.flags ?? [])] },
     });
     for (const [id, x] of [
       [g.home, h],
@@ -950,15 +967,25 @@ const WEATHER = {
     if (!['outdoors', 'open'].includes(roof)) return row ? { info: { roof: roof || 'unknown' } } : null;
     const temp = l?.weather ? l.weather.temp : row.temp === '' || row.temp === 'NA' ? null : Number(row.temp);
     const wind = l?.weather ? l.weather.wind : row.wind === '' || row.wind === 'NA' ? null : Number(row.wind);
+    // (the rain and snow over its window: a final's from the archive (football.mjs facts.wx), a coming game's
+    // from the forecast; unknown, null: no effect, and a coming game's flagged (its forecast failed))
+    const wx = g.final ? facts.wx?.[g.id] : null;
+    const precip = g.final ? (wx?.[0] ?? null) : Number.isFinite(l?.weather?.precip) ? l.weather.precip : null;
+    const snow = g.final ? (wx?.[1] ?? null) : Number.isFinite(l?.weather?.snow) ? l.weather.snow : null;
+    const missing = !g.final && !!l && (!l.weather || !!l.weatherMissing);
     return {
-      terms: { cold: temp === null ? 0 : Math.max(0, 50 - temp) / 10, wind: wind === null ? 0 : Math.max(0, wind - 5) / 10 },
-      info: { roof, temp, wind, forecast: !!l?.weather },
+      // (rain capped at half an inch and snow at four over the window: past that it's all one storm)
+      terms: { cold: temp === null ? 0 : Math.max(0, 50 - temp) / 10, wind: wind === null ? 0 : Math.max(0, wind - 5) / 10, precip: precip === null ? 0 : Math.min(0.5, precip) * 10, snow: snow === null ? 0 : Math.min(4, snow) },
+      info: { roof, temp, wind, precip, snow, forecast: !!l?.weather, ...(missing ? { missing: true } : {}) },
+      flags: missing ? ['no forecast for an outdoor game: its weather unseen'] : [],
     };
   },
   mlb: (facts, live) => (g) => {
     const f = g.final ? facts.games?.[g.id] : live.get(g.id);
     const w = f?.w;
     if (!w || w[2]) return w ? { info: { roof: 'closed' } } : null;
-    return { terms: { temp: (w[0] - 70) / 10, windOut: w[1] / 10 }, info: { temp: w[0], windOut: w[1], forecast: !!f.forecast } };
+    // (rain: w[3], 1 or 0; a game kept before it was, unknown: none)
+    const rain = w[3] === 1 ? 1 : 0;
+    return { terms: { temp: (w[0] - 70) / 10, windOut: w[1] / 10, rain }, info: { temp: w[0], windOut: w[1], rain: w.length > 3 ? !!rain : null, forecast: !!f.forecast } };
   },
 };

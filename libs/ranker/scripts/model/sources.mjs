@@ -1,6 +1,7 @@
 // The model desk's outside sources beyond ESPN's scoreboards: nflverse's schedule (quarterbacks, roofs,
 // weather), MLB's StatsAPI (probable pitchers, their game logs, ballpark weather and coordinates), Open-Meteo
-// (a place's coordinates, and the forecast there at a game's start). All free, no keys. Asked a few at a time,
+// (a place's coordinates, the forecast there at a game's start, and the rain and snow over a past game's
+// window from its archive). All free, no keys. Asked a few at a time,
 // again after a refusal; anything slow kept under .cache/model (gitignored). A source that fails gives null,
 // and whatever it fed is left neutral for that game.
 
@@ -153,19 +154,51 @@ export async function geocode(place) {
   return [Math.round(hit.latitude * 1e4) / 1e4, Math.round(hit.longitude * 1e4) / 1e4];
 }
 
-// The forecast at a place at a time: temperature (F), wind speed (mph) and where it blows from (degrees);
-// null past the forecast's reach or when it fails
+// The forecast at a place at a time: temperature (F), wind speed (mph) and where it blows from (degrees), and
+// the rain and snow around it (precip: inches of water, rain and melted snow; snow: inches of snowfall; each
+// summed over the game's window, gameWindow); null past the forecast's reach or when it fails
 export async function forecast([lat, lon], when) {
   const day = when.slice(0, 10);
+  // (the next day too: a night game's window runs past midnight UTC)
+  const next = isoDay(Date.parse(day) + DAY);
   const body = await get(
-    `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=temperature_2m,wind_speed_10m,wind_direction_10m&temperature_unit=fahrenheit&wind_speed_unit=mph&timezone=GMT&start_date=${day}&end_date=${day}`,
+    `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=temperature_2m,wind_speed_10m,wind_direction_10m,precipitation,snowfall&temperature_unit=fahrenheit&wind_speed_unit=mph&precipitation_unit=inch&timezone=GMT&start_date=${day}&end_date=${next}`,
   );
   const h = body?.hourly;
   if (!h?.time?.length) return null;
-  const at = Math.min(23, new Date(when).getUTCHours());
+  const at = Math.min(h.time.length - 1, new Date(when).getUTCHours());
   const temp = h.temperature_2m?.[at];
   const wind = h.wind_speed_10m?.[at];
-  return Number.isFinite(temp) && Number.isFinite(wind) ? { temp: Math.round(temp), wind: Math.round(wind), from: h.wind_direction_10m?.[at] ?? null } : null;
+  if (!Number.isFinite(temp) || !Number.isFinite(wind)) return null;
+  const wet = gameWindow(h, at);
+  return { temp: Math.round(temp), wind: Math.round(wind), from: h.wind_direction_10m?.[at] ?? null, precip: wet?.precip ?? null, snow: wet?.snow ?? null };
+}
+
+// The rain and snow over a game's window from an hourly series (Open-Meteo's: each hour's value the sum over
+// the hour before it), from the hour that ends at kickoff's hour through the three after (the wet field and
+// most of the game): { precip, snow } in inches, to the hundredth; null where the series has a gap there
+export function gameWindow(h, at) {
+  const p = h.precipitation?.slice(at, at + 4) ?? [];
+  const s = h.snowfall?.slice(at, at + 4) ?? [];
+  if (p.length < 4 || !p.every(Number.isFinite)) return null;
+  const sum = (xs) => Math.round(xs.reduce((t, x) => t + (Number.isFinite(x) ? x : 0), 0) * 100) / 100;
+  return { precip: sum(p), snow: sum(s) };
+}
+
+// The rain and snow over each game's window at a place, from the weather's history (the archive, a few days
+// behind), between two days: a function of a game's start ({ precip, snow }, or null where the archive has
+// none); null when the archive can't be had
+export async function precipHistory([lat, lon], from, to) {
+  const body = await get(
+    `https://archive-api.open-meteo.com/v1/archive?latitude=${lat}&longitude=${lon}&start_date=${from}&end_date=${to}&hourly=precipitation,snowfall&precipitation_unit=inch&timezone=GMT`,
+  );
+  const h = body?.hourly;
+  if (!h?.time?.length) return null;
+  const start = Date.parse(h.time[0] + 'Z');
+  return (when) => {
+    const i = Math.floor((Date.parse(when) - start) / 36e5);
+    return i < 0 || i >= h.time.length ? null : gameWindow(h, i);
+  };
 }
 
 // Miles between two [latitude, longitude] points (great circle)

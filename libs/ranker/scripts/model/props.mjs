@@ -17,7 +17,8 @@
 //   player a game (leagues.mjs PROP_CAPS). A whole-number line's push is out of both sides' chances and its stake
 //   comes back in the return (project.mjs lineChances). Cut to 0.5 when the line has moved a lot since it opened,
 //   the player's questionable, a questionable teammate's being in or out moves his share of his group's work,
-//   or (the NFL) his team's roster can't be read or the snap counts are missing for some games of the
+//   an outdoor game's forecast failed where his projection weighs the weather (wind, cold, rain), or (the
+//   NFL) his team's roster can't be read or the snap counts are missing for some games of the
 //   history; skipped at twice the move or when he's out (or not in a posted lineup, or not the probable
 //   starting pitcher or goalie), when the work his group is missing now differs from what it was in the games
 //   his numbers come from and the projection can't size it (teammates out: his role up; teammates back from an
@@ -34,7 +35,7 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { chanceAt, decimal, fairPair, gapGuard, outcomeOf, stakeFor } from './desk.mjs';
-import { fitStat, lineChances, makeModel, rAt } from './project.mjs';
+import { ctxFactor, ctxKeys, fitStat, lineChances, makeModel, rAt } from './project.mjs';
 import { nbaMatchups, nflMatchups } from './matchups.mjs';
 import { CACHE, get, nflverseRows, pool } from './sources.mjs';
 import { PROP_BOOKS, SPORT_KEYS, american, call, canSpend, hasKey } from './oddsapi.mjs';
@@ -64,31 +65,36 @@ const MIN = (r) => r.s.min > 0;
 const SKATER = (r) => r.pos !== 'G' && r.s.toi > 0;
 
 // Each sport's props: the stat (its key in the player rows), its words, the board's name for it, which rows
-// count as having played it, which side's expected score is its game script, its context term
+// count as having played it, which side's expected score is its game script (opp: the other side's), its
+// context terms (ctxValue; each fit on its own and kept only if the held-out games are better with it:
+// project.mjs; an NHL goalie's saves also by the other side's expected shots on goal, hockey.mjs)
+const PASSING = ['wind', 'cold', 'precip'];
+const CARRYING = ['backupQb', 'wind', 'precip'];
+const NBA_CTX = ['usage', 'b2b', 'blowout'];
 export const STATS = {
   nfl: [
-    stat('passYds', 'Pass Yds', /^Total Passing Yards \(/, { played: QB, ctx: 'wind', volume: 'pass' }),
-    stat('passAtt', 'Pass Att', /^Total Passing Attempts/, { played: QB, ctx: 'wind', volume: 'pass' }),
-    stat('passCmp', 'Completions', /^Total Pass Completions/, { played: QB, ctx: 'wind', volume: 'pass' }),
-    stat('passTd', 'Pass TDs', /^Total Passing Touchdowns/, { played: QB, ctx: 'wind' }),
-    stat('passInt', 'INTs', /^Total Passing Interceptions/, { played: QB, ctx: 'wind' }),
-    stat('rushYds', 'Rush Yds', /^Total Rushing Yards \(/, { played: RUSH, ctx: 'backupQb', roles: true, volume: 'rush', vacated: true }),
-    stat('rushAtt', 'Carries', /^Total Carries/, { played: RUSH, ctx: 'backupQb', roles: true, volume: 'rush', vacated: true }),
-    stat('recYds', 'Rec Yds', /^Total Receiving Yards \(/, { played: CATCH, ctx: 'backupQb', roles: true, volume: 'pass', targets: true, vacated: true }),
-    stat('rec', 'Receptions', /^Total Receptions/, { played: CATCH, ctx: 'backupQb', roles: true, volume: 'pass', targets: true, vacated: true }),
-    stat('rushRecYds', 'Rush+Rec Yds', /^Total Rushing Plus Receiving Yards/, { played: (r) => (RUSH(r) && r.pos !== 'QB') || CATCH(r), ctx: 'backupQb', roles: true, targets: true, vacated: true }),
+    stat('passYds', 'Pass Yds', /^Total Passing Yards \(/, { played: QB, ctx: PASSING, volume: 'pass' }),
+    stat('passAtt', 'Pass Att', /^Total Passing Attempts/, { played: QB, ctx: PASSING, volume: 'pass' }),
+    stat('passCmp', 'Completions', /^Total Pass Completions/, { played: QB, ctx: PASSING, volume: 'pass' }),
+    stat('passTd', 'Pass TDs', /^Total Passing Touchdowns/, { played: QB, ctx: PASSING }),
+    stat('passInt', 'INTs', /^Total Passing Interceptions/, { played: QB, ctx: PASSING }),
+    stat('rushYds', 'Rush Yds', /^Total Rushing Yards \(/, { played: RUSH, ctx: CARRYING, roles: true, volume: 'rush', vacated: true }),
+    stat('rushAtt', 'Carries', /^Total Carries/, { played: RUSH, ctx: CARRYING, roles: true, volume: 'rush', vacated: true }),
+    stat('recYds', 'Rec Yds', /^Total Receiving Yards \(/, { played: CATCH, ctx: CARRYING, roles: true, volume: 'pass', targets: true, vacated: true }),
+    stat('rec', 'Receptions', /^Total Receptions/, { played: CATCH, ctx: CARRYING, roles: true, volume: 'pass', targets: true, vacated: true }),
+    stat('rushRecYds', 'Rush+Rec Yds', /^Total Rushing Plus Receiving Yards/, { played: (r) => (RUSH(r) && r.pos !== 'QB') || CATCH(r), ctx: CARRYING, roles: true, targets: true, vacated: true }),
   ],
   nba: [
-    stat('pts', 'Points', /^Total Points( \(|$)/, { played: MIN, ctx: 'usage', posGroup: () => 'all', roles: true }),
-    stat('reb', 'Rebounds', /^Total Rebounds/, { played: MIN, ctx: 'usage', posGroup: () => 'all', roles: true }),
-    stat('ast', 'Assists', /^Total Assists/, { played: MIN, ctx: 'usage', posGroup: () => 'all', roles: true }),
-    stat('fg3', 'Threes', /^Total (3-Point|Three|Made 3)/i, { played: MIN, ctx: 'usage', posGroup: () => 'all', roles: true }),
-    stat('pra', 'Pts+Reb+Ast', /Points.*Rebounds.*Assists/i, { played: MIN, ctx: 'usage', posGroup: () => 'all', roles: true }),
+    stat('pts', 'Points', /^Total Points( \(|$)/, { played: MIN, ctx: NBA_CTX, posGroup: () => 'all', roles: true }),
+    stat('reb', 'Rebounds', /^Total Rebounds/, { played: MIN, ctx: NBA_CTX, posGroup: () => 'all', roles: true }),
+    stat('ast', 'Assists', /^Total Assists/, { played: MIN, ctx: NBA_CTX, posGroup: () => 'all', roles: true }),
+    stat('fg3', 'Threes', /^Total (3-Point|Three|Made 3)/i, { played: MIN, ctx: NBA_CTX, posGroup: () => 'all', roles: true }),
+    stat('pra', 'Pts+Reb+Ast', /Points.*Rebounds.*Assists/i, { played: MIN, ctx: NBA_CTX, posGroup: () => 'all', roles: true }),
   ],
   nhl: [
     stat('sog', 'Shots', /^Total Shots on Goal/, { played: SKATER }),
     stat('pts', 'Points', /^Total Points$/, { played: SKATER }),
-    stat('saves', 'Saves', /^Total Saves/, { played: (r) => r.pos === 'G' && r.started, script: 'opp', goalie: true }),
+    stat('saves', 'Saves', /^Total Saves/, { played: (r) => r.pos === 'G' && r.started, script: 'opp', ctx: ['oppShots'], goalie: true }),
   ],
   mlb: [
     stat('k', 'Strikeouts', /^Total Strikeouts$/, { played: (r) => r.pos === 'SP', script: 'opp', pitcher: true }),
@@ -99,33 +105,58 @@ export const STATS = {
 };
 
 // The settings that let a stat's model see the game: its side's expected score over the average (script),
-// and its context term, from each game's expectation and terms (expPts: game id to [home, away]; info: game
-// id to the context's info)
+// and its context terms, from each game's expectation and terms (expPts: game id to [home, away], each made
+// before the game; info: game id to the context's info, from what was known before it). The same functions
+// price a coming game (priceProps: its expectation and its info), so the history and the bet see one thing
 export function envFor(sport, st, expPts, info, rows) {
   const all = [...expPts.values()].flat().filter(Number.isFinite);
   const avg = all.length ? all.reduce((s, x) => s + x, 0) / all.length : 1;
   const vals = rows.filter(st.played).map((r) => r.s[st.key]);
   const mean = vals.length ? vals.reduce((s, x) => s + x, 0) / vals.length : 1;
-  const side = (row, own) => (row.home === own ? 0 : 1);
-  const script = (row) => {
-    const e = expPts.get(row.game);
-    if (!e) return 1;
-    const v = e[side(row, st.script !== 'opp')];
-    return Number.isFinite(v) && v > 0 ? v / avg : 1;
-  };
-  const ctx = {
-    // (wind over 10 mph, per 10 mph: a passer's numbers)
-    wind: (row) => {
-      const w = info.get(row.game)?.weather?.wind;
-      return Number.isFinite(w) ? Math.max(0, w - 10) / 10 : 0;
-    },
-    // (his own side starting a backup quarterback: a receiver's numbers)
-    backupQb: (row) => info.get(row.game)?.starters?.backup?.[row.home ? 0 : 1] ?? 0,
-    // (his teammates' production missing, per 10: an NBA player's usage)
-    usage: (row) => (info.get(row.game)?.starters?.missing?.[row.home ? 0 : 1] ?? 0) / 10,
-  }[st.ctx];
-  return { script, ctx, mean, avg };
+  const env = { mean, avg };
+  const keys = ctxKeys(st);
+  env.script = (row) => scriptValue(st, env, info.get(row.game), expPts.get(row.game), row.home);
+  env.ctx = keys.length ? (row) => ctxValues(keys, info.get(row.game), row.home, expPts.get(row.game)) : null;
+  return env;
 }
+
+// A stat's game script for a game: its side's expected score (opp: the other side's) over the league's
+// average; 1 where the game model has none. pts: the game's expected [home, away] points
+export function scriptValue(st, env, info, pts, home) {
+  const v = pts?.[(home === (st.script !== 'opp')) ? 0 : 1];
+  return Number.isFinite(v) && v > 0 && env.avg ? v / env.avg : 1;
+}
+
+// A context term's value for a game, from its info (context.mjs featurize: the weather, starters, schedule)
+// and its expected [home, away] points; 0 where it's unknown (no effect)
+export const CTX = {
+  // (wind over 10 mph, per 10 mph, outdoors)
+  wind: (info) => (Number.isFinite(info?.weather?.wind) ? Math.max(0, info.weather.wind - 10) / 10 : 0),
+  // (cold under 50°F, per 10°F, outdoors)
+  cold: (info) => (Number.isFinite(info?.weather?.temp) ? Math.max(0, 50 - info.weather.temp) / 10 : 0),
+  // (rain and melted snow over the game's window, per 0.1 inch, to half an inch: outdoors)
+  precip: (info) => (Number.isFinite(info?.weather?.precip) ? Math.min(0.5, info.weather.precip) * 10 : 0),
+  // (his own side starting a backup quarterback, by how much worse he is: a receiver's and a back's numbers)
+  backupQb: (info, home) => info?.starters?.backup?.[home ? 0 : 1] ?? 0,
+  // (his teammates' production missing, per 10: an NBA player's usage)
+  usage: (info, home) => (info?.starters?.missing?.[home ? 0 : 1] ?? 0) / 10,
+  // (his side on the second night of a back-to-back)
+  b2b: (info, home) => info?.b2b?.[home ? 0 : 1] ?? 0,
+  // (the blowout the game model expects, either way: its margin, per 10 points; a starter sits the end of it)
+  // (the shots on goal the other side is expected to take over the league's, as a log: a goalie's saves, its
+  // size the power of the ratio; hockey.mjs's from the games before)
+  oppShots: (info, home) => {
+    const v = info?.more?.shots?.[home ? 1 : 0];
+    const avg = info?.more?.shotsAvg;
+    return Number.isFinite(v) && v > 0 && avg > 0 ? Math.log(v / avg) : 0;
+  },
+  blowout: (info, home, pts) => (pts && Number.isFinite(pts[0]) && Number.isFinite(pts[1]) ? Math.abs(pts[0] - pts[1]) / 10 : 0),
+};
+export function ctxValues(keys, info, home, pts) {
+  return keys.map((k) => CTX[k]?.(info, home, pts) ?? 0);
+}
+// (the terms that read the weather: a coming game whose forecast failed has them unseen)
+const WEATHER_CTX = new Set(['wind', 'cold', 'precip']);
 
 // Which of a game's players a book would have posted this prop for (eligible), from what was known before the
 // game: each team's top few among the players who took the field, ranked by their usage in their games before
@@ -386,11 +417,15 @@ export function priceProps(sport, game, props, fitted, idx, exp, info, live, tru
     const p = f.model.project(row);
     if (!p) continue;
     // (the game script and the context: this game's, from the game model's expectation and its terms)
-    const own = home ? exp.homePts : exp.awayPts;
-    const opp = home ? exp.awayPts : exp.homePts;
-    const scriptV = (f.stat.script === 'opp' ? opp : own) / (f.env.avg || own || 1);
-    const ctxV = ctxNow(f.stat.ctx, info, home);
-    const mu = Math.max(0.05, (f.params.scale ?? 1) * p.base * Math.pow(p.opp, f.params.a) * Math.pow(scriptV, f.params.b) * Math.exp(f.params.c * ctxV) * p.funnelF * p.paceF * p.tgtF * (p.vacF ?? 1));
+    // (the same functions the history was fit with: envFor's)
+    const pts = [exp.homePts, exp.awayPts];
+    const scriptV = scriptValue(f.stat, f.env, info, pts, home);
+    const ctxKeysOf = ctxKeys(f.stat);
+    const ctxV = ctxValues(ctxKeysOf, info, home, pts);
+    const ctxF = ctxFactor(f.stat, f.params, ctxV);
+    const mu = Math.max(0.05, (f.params.scale ?? 1) * p.base * Math.pow(p.opp, f.params.a) * Math.pow(scriptV, f.params.b) * ctxF * p.funnelF * p.paceF * p.tgtF * (p.vacF ?? 1));
+    // (a weather term the fit kept, at an outdoor game whose forecast failed: the projection can't see it)
+    const weatherBlind = !!info?.weather?.missing && ctxKeysOf.some((k) => WEATHER_CTX.has(k) && f.params[`c_${k}`]);
     // (the defense against his role this season, whether or not the projection weighs it: its allowed over
     // those players' usual, and its rank in the league, 1 the stingiest)
     let roleRank = null;
@@ -472,6 +507,7 @@ export function priceProps(sport, game, props, fitted, idx, exp, info, live, tru
     else if (Math.abs(moved) >= 2 * limit) guard = { skip: true, why: `line moved ${moved > 0 ? '+' : ''}${round(moved, 1)} since it opened` };
     else if (Math.abs(moved) >= limit) guard = { why: `line moved ${moved > 0 ? '+' : ''}${round(moved, 1)} since it opened` };
     else if (status.why) guard = { why: status.why };
+    else if (weatherBlind) guard = { why: 'no forecast for an outdoor game: the weather its projection weighs unseen' };
     else if (qShift >= 0.15) guard = { why: `teammate questionable (${out.qNames.join(', ') || 'at his position'}): his share depends on it` };
     else if (snapGap?.games) guard = { why: `the snap counts missing for ${snapGap.games} games: the history holds only the players who got the ball there` };
     else if (noRoster) guard = { why: "his team's roster not read: a teammate who's left can't be told from one who's here" };
@@ -487,7 +523,7 @@ export function priceProps(sport, game, props, fitted, idx, exp, info, live, tru
       ev,
       units: guard ? 0.5 : stakeFor(ev, evScale, odds),
       guard,
-      projection: { mean: round(mu, 2), r: round(rAt(f.params, mu), 3), rate: round(p.rate, 2), recent: round(p.recent, 2), opp: round(p.opp, 3), posOpp: round(p.posOpp, 3), role: p.role, roleOpp: p.roleOpp === null ? null : round(p.roleOpp, 3), roleFactor: roleFactor === null ? null : round(roleFactor, 3), roleRank, roleUsed: Number.isFinite(f.params.roleK), funnel: p.funnel === null ? null : round(p.funnel, 3), funnelUsed: !!f.params.fun, funnelF: round(p.funnelF, 3), paceF: round(p.paceF, 3), tgtF: round(p.tgtF, 3), vac: round(vacNow, 3), vacHist: round(vacThen, 3), vacF: round(p.vacF ?? 1, 3), out: out.names.length ? out.names : undefined, questionable: out.qNames.length ? out.qNames : undefined, script: round(scriptV, 3), ctx: round(ctxV, 2), games: p.games, lastSeason: p.prevGames, pOver: round(pOver, 4), push: chances.push ? round(chances.push, 4) : undefined, fairOver: round(fairOver, 4), record: round(n, 1) },
+      projection: { mean: round(mu, 2), r: round(rAt(f.params, mu), 3), rate: round(p.rate, 2), recent: round(p.recent, 2), opp: round(p.opp, 3), posOpp: round(p.posOpp, 3), role: p.role, roleOpp: p.roleOpp === null ? null : round(p.roleOpp, 3), roleFactor: roleFactor === null ? null : round(roleFactor, 3), roleRank, roleUsed: Number.isFinite(f.params.roleK), funnel: p.funnel === null ? null : round(p.funnel, 3), funnelUsed: !!f.params.fun, funnelF: round(p.funnelF, 3), paceF: round(p.paceF, 3), tgtF: round(p.tgtF, 3), vac: round(vacNow, 3), vacHist: round(vacThen, 3), vacF: round(p.vacF ?? 1, 3), out: out.names.length ? out.names : undefined, questionable: out.qNames.length ? out.qNames : undefined, script: round(scriptV, 3), ctx: Object.fromEntries(ctxKeysOf.map((k, i) => [k, round(ctxV[i], 2)])), ctxF: round(ctxF, 3), games: p.games, lastSeason: p.prevGames, pOver: round(pOver, 4), push: chances.push ? round(chances.push, 4) : undefined, fairOver: round(fairOver, 4), record: round(n, 1) },
       move: prop.open !== null ? { open: prop.open, now: prop.line } : null,
     });
   }
@@ -506,15 +542,6 @@ function outOf(live, team, pos) {
   const q = report.filter((p) => !OUT_STATUS.test(p.status) && Q_STATUS.test(p.status));
   const at = (p) => !pos || !p.pos || p.pos === pos;
   return { ids: new Set(list.map((p) => String(p.id))), names: list.filter(at).map((p) => p.name), questionable: new Set(q.map((p) => String(p.id))), qNames: q.filter(at).map((p) => p.name) };
-}
-
-// (a context term's value for a coming game, from its info)
-function ctxNow(kind, info, home) {
-  if (!kind || !info) return 0;
-  if (kind === 'wind') return Number.isFinite(info.weather?.wind) ? Math.max(0, info.weather.wind - 10) / 10 : 0;
-  if (kind === 'backupQb') return info.starters?.backup?.[home ? 0 : 1] ?? 0;
-  if (kind === 'usage') return (info.starters?.missing?.[home ? 0 : 1] ?? 0) / 10;
-  return 0;
 }
 
 // (a player's status for a coming game: out, questionable, not in a posted lineup, not the probable starter)

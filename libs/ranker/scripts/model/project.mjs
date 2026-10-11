@@ -28,8 +28,13 @@
 //            comes down). How it's shared (vs: in proportion to each one's work, or flatter, to equally, the
 //            next man up's cut as big as anyone's) fit with it (vc 0: left out, kept only if the held-out games
 //            are better with it)
-//   context  one term per stat where the model has it: wind on NFL passing, a backup quarterback throwing to
-//            NFL receivers, teammates out (production missing) for an NBA player's usage; size c
+//   context  the stat's context terms (props.mjs STATS ctx, one or several), each exp(c x its value) with its
+//            own size c (c_<term>; the old single size c is the first term's): the NFL's wind, cold and rain
+//            or snow (passing; receiving and rushing take wind and rain too), a backup quarterback throwing
+//            to its receivers and handing off to its backs; the NBA's teammates out (production missing), a
+//            back-to-back and the expected blowout (the game model's margin either way: a starter sits the
+//            fourth quarter). Each is fit like a matchup term and kept only if the held-out games are better
+//            with it (0: left out)
 //   scale    the eligible players' total over their total projection on the fit window: what's left of a lean
 //            once the rest is fit, taken out
 //
@@ -92,6 +97,20 @@ export function lineChances(line, mu, params) {
   return { over, under: 1 - over, push };
 }
 
+// A stat's context terms' names (props.mjs STATS ctx: one name or a list), and their factor on a projection at
+// their values (vals, in that order): exp(sum of c x value), each term's size c_<name> (an old state's single
+// c is the first term's)
+export const ctxKeys = (stat) => (Array.isArray(stat?.ctx) ? stat.ctx : stat?.ctx ? [stat.ctx] : []);
+export function ctxFactor(stat, params, vals) {
+  let s = 0;
+  ctxKeys(stat).forEach((k, i) => {
+    const c = params[`c_${k}`] ?? (i === 0 ? params.c : 0) ?? 0;
+    const v = vals?.[i];
+    if (c && Number.isFinite(v)) s += c * v;
+  });
+  return Math.exp(s);
+}
+
 // A stat's model under one set of settings: project a row from what's been learned, learn a day's rows
 export function makeModel(stat, params, env) {
   const players = new Map();
@@ -150,7 +169,8 @@ export function makeModel(stat, params, env) {
       }
     }
     const script = env.script?.(row) ?? 1;
-    const ctx = env.ctx?.(row) ?? 0;
+    const ctx = env.ctx?.(row) ?? null;
+    const ctxF = ctxFactor(stat, params, ctx);
     // (the defense's funnel, pace and target split: 1 where the stat or the row has none)
     const dir = stat.volume === 'rush' ? -1 : stat.volume ? 1 : 0;
     const funnelF = dir && params.fun ? Math.exp(params.fun * dir * (row.funnel ?? 0)) : 1;
@@ -168,8 +188,8 @@ export function makeModel(stat, params, env) {
     const recentVac = cur.recentVac?.length >= 3 ? cur.recentVac.reduce((t, x) => t + (x[vs] ?? 0), 0) / cur.recentVac.length : rateVac;
     const vacHist = (1 - params.w) * rateVac + params.w * recentVac;
     const vacF = stat.vacated && params.vc ? Math.pow((1 + vacNow) / (1 + vacHist), params.vc) : 1;
-    const mu = Math.max(0.05, (params.scale ?? 1) * base * Math.pow(opp, params.a) * Math.pow(script, params.b) * Math.exp(params.c * ctx) * funnelF * paceF * tgtF * vacF);
-    return { mu, rate, recent, base, opp, posOpp, roleOpp, role: row.role ?? null, funnel: row.funnel ?? null, funnelF, paceF, tgtF, vac: vacNow, vacHist, vacF, script, ctx, prior, games: cur.n, prevGames: prev.n };
+    const mu = Math.max(0.05, (params.scale ?? 1) * base * Math.pow(opp, params.a) * Math.pow(script, params.b) * ctxF * funnelF * paceF * tgtF * vacF);
+    return { mu, rate, recent, base, opp, posOpp, roleOpp, role: row.role ?? null, funnel: row.funnel ?? null, funnelF, paceF, tgtF, vac: vacNow, vacHist, vacF, script, ctx, ctxF, prior, games: cur.n, prevGames: prev.n };
   };
   return {
     project: parts,
@@ -284,11 +304,13 @@ function scoreOf(out, win, shape = { rk: 0, rm: 1 }) {
   return { ...best, n: list.length };
 }
 
-const GRID = { K: [2, 4, 8, 16, 32], w: [0, 0.2, 0.4, 0.6], a: [0, 0.5, 1], b: [-0.5, 0, 0.5, 1, 1.5], c: [-0.3, -0.15, 0, 0.15, 0.3], roleK: [Infinity, 32, 16, 8, 4, 2], fun: [0, 1, 2, 4, 8], pc: [0, 0.5, 1, 1.5], tg: [0, 0.5, 1], vc: [0, 0.25, 0.5, 0.75, 1, 1.25] };
+// (a context term's sizes tried: GRID.c, or its own where it's a power (c_oppShots: a ratio's log))
+const GRID = { K: [2, 4, 8, 16, 32], w: [0, 0.2, 0.4, 0.6], a: [0, 0.5, 1], b: [-0.5, 0, 0.5, 1, 1.5], c: [-0.3, -0.15, -0.07, 0, 0.07, 0.15, 0.3], roleK: [Infinity, 32, 16, 8, 4, 2], fun: [0, 1, 2, 4, 8], pc: [0, 0.5, 1, 1.5], tg: [0, 0.5, 1], vc: [0, 0.25, 0.5, 0.75, 1, 1.25], c_oppShots: [-0.5, 0, 0.25, 0.5, 0.75, 1, 1.25] };
 // (the vacated work's split, by index into matchups.mjs's: in proportion, flatter, equally; searched with vc)
 const SPLIT = [0, 1, 2];
-// (each matchup term's off setting, and which stats have it)
+// (each matchup term's off setting, and which stats have it; each context term's size (c_<name>) is off at 0)
 const OPTIONAL = { roleK: Infinity, fun: 0, pc: 0, tg: 0, vc: 0 };
+const offOf = (key) => (key.startsWith('c_') ? 0 : OPTIONAL[key]);
 const has = (stat, key) => (key === 'roleK' ? !!stat.roles : key === 'tg' ? !!stat.targets : key === 'vc' ? !!stat.vacated : !!stat.volume);
 
 // (a window's chances of going over a line at each player's median so far, and what happened)
@@ -337,14 +359,16 @@ export function fitStat(stat, rows, env) {
   if (sorted.length < 300) return null;
   const at = (q) => sorted[Math.floor(sorted.length * q)].date.slice(0, 10);
   const cuts = [at(0.3), at(0.7)];
-  let params = { K: 4, w: 0.2, a: 0.5, b: 0.5, c: 0, ...OPTIONAL, ...(stat.vacated ? { vs: 0 } : {}) };
-  const optional = Object.keys(OPTIONAL).filter((k) => has(stat, k));
-  const keys = [...(env.ctx ? ['K', 'w', 'a', 'b', 'c'] : ['K', 'w', 'a', 'b']), ...optional];
+  const ctxs = env.ctx ? ctxKeys(stat).map((k) => `c_${k}`) : [];
+  let params = { K: 4, w: 0.2, a: 0.5, b: 0.5, ...OPTIONAL, ...Object.fromEntries(ctxs.map((k) => [k, 0])), ...(stat.vacated ? { vs: 0 } : {}) };
+  const optional = [...Object.keys(OPTIONAL).filter((k) => has(stat, k)), ...ctxs];
+  const keys = ['K', 'w', 'a', 'b', ...optional];
+  const allOff = Object.fromEntries(optional.map((k) => [k, offOf(k)]));
   let best = scoreOf(replayStat(stat, sorted, params, env, cuts).out, 1);
   for (let pass = 0; pass < 2; pass++) {
     for (const key of keys) {
       // (the vacated work's strength and its split together: the split means nothing without the strength)
-      const tries = key === 'vc' ? GRID.vc.flatMap((v) => SPLIT.map((vs) => ({ vc: v, vs }))) : GRID[key].map((v) => ({ [key]: v }));
+      const tries = key === 'vc' ? GRID.vc.flatMap((v) => SPLIT.map((vs) => ({ vc: v, vs }))) : (GRID[key] ?? GRID.c).map((v) => ({ [key]: v }));
       for (const t of tries) {
         if (Object.keys(t).every((k) => t[k] === params[k])) continue;
         const tryP = { ...params, ...t };
@@ -382,14 +406,14 @@ export function fitStat(stat, rows, env) {
   let current = heldOut(params);
   const gains = {};
   for (const key of optional) {
-    if (params[key] === OPTIONAL[key]) {
+    if (params[key] === offOf(key)) {
       gains[key] = null;
       continue;
     }
-    const without = heldOut({ ...params, [key]: OPTIONAL[key] });
+    const without = heldOut({ ...params, [key]: offOf(key) });
     gains[key] = Math.round(((without.check?.logLoss ?? 0) - (current.check?.logLoss ?? 0)) * 10000) / 10000;
     if (gains[key] <= 0) {
-      params = { ...params, [key]: OPTIONAL[key], cal: without.cal };
+      params = { ...params, [key]: offOf(key), cal: without.cal };
       current = without;
     }
   }
@@ -401,8 +425,8 @@ export function fitStat(stat, rows, env) {
   } else gains.rk = null;
   params.cal = current.cal;
   const final = replayStat(stat, sorted, params, env, cuts).out;
-  // (the held-out numbers with no matchup terms at all, for the before and after)
-  const base = optional.length ? heldOut({ ...params, ...OPTIONAL }).check : current.check;
+  // (the held-out numbers with no matchup or context terms at all, for the before and after)
+  const base = optional.length ? heldOut({ ...params, ...allOff }).check : current.check;
   // (and every player's held-out games, eligible or not, a sanity check on the history's selection: an NFL
   // game he took under 10 offensive snaps in (a kneel-down, a gadget play: a backup's line no projection is
   // for) left out of it, as the board never posts his prop)
