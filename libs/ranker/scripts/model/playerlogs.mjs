@@ -4,7 +4,11 @@
 //
 //   NFL  nflverse's weekly player stats (stats_player_week_<season>), ESPN ids from nflverse's players file; and
 //        nflverse's snap counts (snap_counts_<season>): each row's offensive snaps (s.snaps), and a row of 0s for
-//        an offensive player who took snaps with no stats (never targeted, never handed the ball: he played)
+//        an offensive player who took snaps with no stats (never targeted, never handed the ball: he played),
+//        for the games the weekly stats have (a game only the snap counts have yet isn't in the history: its
+//        players' stats would read as 0s). A game the stats have and the snap counts don't (they lag, or the
+//        season's file couldn't be read) holds only the players who got the ball: the rows' snapGap says how
+//        many (props.mjs flags the NFL's props, or skips them when it's a season's quarter or more)
 //   NBA  ESPN's box scores: minutes, points, rebounds, assists, threes
 //   NHL  ESPN's box scores: skaters' time on ice, shots on goal, goals and assists; goalies' saves
 //   MLB  StatsAPI: the probable starters' game logs (strikeouts, outs: kept in the context's facts already) and the
@@ -75,6 +79,8 @@ async function nflRows(cfg, history, facts) {
   const espnOfPfr = new Map(known.filter((p) => p.pfr_id && p.pfr_id !== 'NA').map((p) => [p.pfr_id, String(Number(p.espn_id))]));
   const current = Math.max(...history.map((g) => g.season));
   const out = [];
+  // (the games the weekly stats have and the snap counts don't, by season: { season: [missing, of] })
+  const gap = {};
   const cols = ['player_id', 'player_display_name', 'position', 'season', 'week', 'game_id', 'team', 'opponent_team', 'completions', 'attempts', 'passing_yards', 'passing_tds', 'passing_interceptions', 'carries', 'rushing_yards', 'receptions', 'targets', 'receiving_yards'];
   for (let season = cfg.deepen ?? current - 1; season <= current; season++) {
     const stats = await nflverseRows('stats_player', `stats_player_week_${season}.csv.gz`, cols, season === current ? 12 : 24 * 365);
@@ -86,6 +92,15 @@ async function nflRows(cfg, history, facts) {
       if (pid && Number(x.offense_snaps) > 0) snapOf.set(`${x.game_id}|${pid}`, x);
     }
     const seen = new Set();
+    // (the games each file has: a snap row's 0s only for a game the stats have, and the stats' games the snap
+    // counts lack, counted)
+    const statGames = new Set((stats ?? []).filter((s) => byGameId.has(s.game_id)).map((s) => s.game_id));
+    const snapGames = new Set((snaps ?? []).map((x) => x.game_id));
+    const missing = [...statGames].filter((id) => !snapGames.has(id)).length;
+    const ahead = [...snapGames].filter((id) => byGameId.has(id) && !statGames.has(id)).length;
+    if (statGames.size) gap[season] = [missing, statGames.size];
+    if (missing) console.warn(`nfl: the snap counts ${snaps ? `lack ${missing} of ${statGames.size} games` : 'not read'} in ${season}: those games' players without a stat aren't in the history (the props flagged)`);
+    if (ahead) console.log(`nfl: ${ahead} games in ${season}'s snap counts not in its weekly stats yet: left out`);
     for (const s of stats ?? []) {
       const r = byGameId.get(s.game_id);
       const pid = espnOf.get(s.player_id);
@@ -124,7 +139,7 @@ async function nflRows(cfg, history, facts) {
     for (const [key, x] of snapOf) {
       if (seen.has(key) || !['QB', 'RB', 'FB', 'WR', 'TE'].includes(x.position)) continue;
       const r = byGameId.get(x.game_id);
-      if (!r) continue;
+      if (!r || !statGames.has(x.game_id)) continue;
       const home = x.team === r.home_team ? true : x.team === r.away_team ? false : null;
       if (home === null) continue;
       const [own, other] = home ? [r.home_team, r.away_team] : [r.away_team, r.home_team];
@@ -142,6 +157,9 @@ async function nflRows(cfg, history, facts) {
       });
     }
   }
+  // (the gap: the games missing their snap counts, all told and the worst season's share)
+  const seasons = Object.values(gap);
+  out.snapGap = { games: seasons.reduce((t, [m]) => t + m, 0), share: seasons.reduce((t, [m, of]) => Math.max(t, m / of), 0), seasons: gap };
   return out;
 }
 

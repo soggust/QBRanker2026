@@ -17,11 +17,14 @@
 //   player a game (leagues.mjs PROP_CAPS). A whole-number line's push is out of both sides' chances and its stake
 //   comes back in the return (project.mjs lineChances). Cut to 0.5 when the line has moved a lot since it opened,
 //   the player's questionable, a questionable teammate's being in or out moves his share of his group's work,
-//   or (the NFL) his team's roster can't be read; skipped at twice the move or when he's out (or not in a posted
-//   lineup, or not the probable starting pitcher or goalie), when the work his group is missing now differs
-//   from what it was in the games his numbers come from and the projection can't size it (teammates out: his
-//   role up; teammates back from an absence that fed his numbers: his role down), or when its chance is more
-//   than GAP.prop from the book's (the market knowing something it doesn't)
+//   or (the NFL) his team's roster can't be read or the snap counts are missing for some games of the
+//   history; skipped at twice the move or when he's out (or not in a posted lineup, or not the probable
+//   starting pitcher or goalie), when the work his group is missing now differs from what it was in the games
+//   his numbers come from and the projection can't size it (teammates out: his role up; teammates back from an
+//   absence that fed his numbers: his role down), or when its chance is more than GAP.prop from the book's
+//   (the market knowing something it doesn't); the NFL's also when its roster can't be read and his numbers
+//   were made with teammates missing (whether they're back or gone can't be told), or the snap counts are
+//   missing for a season's quarter or more of the history's games
 //
 // The history it's fit on (fitProps): every game a player took the field at the stat's positions, whatever he
 // did in it, as DraftKings grades him (STATS played), and of those the ones a book would have posted his prop
@@ -226,7 +229,7 @@ export function fitProps(sport, rows, expPts, info, facts = null) {
     // (each player's values, by season: his record at a line)
     const values = new Map();
     for (const r of sorted) values.set(r.pid, [...(values.get(r.pid) ?? []), [r.season, Math.max(0, Math.round(r.s[st.key]))]]);
-    out[st.key] = { stat: st, env, model, values, matchups, params: fitted.params, gains: fitted.gains, base: fitted.base, check: fitted.check, checkAll: fitted.checkAll, rows: mine.length, eligible: mine.filter((r) => r.eligible).length, seconds: Math.round((Date.now() - t0) / 100) / 10 };
+    out[st.key] = { stat: st, env, model, values, matchups, params: fitted.params, gains: fitted.gains, base: fitted.base, check: fitted.check, checkAll: fitted.checkAll, snapGap: rows.snapGap ?? null, rows: mine.length, eligible: mine.filter((r) => r.eligible).length, seconds: Math.round((Date.now() - t0) / 100) / 10 };
   }
   return out;
 }
@@ -444,9 +447,19 @@ export function priceProps(sport, game, props, fitted, idx, exp, info, live, tru
     const shareAt = (q) => f.matchups.live(pid, row.team, row.opp, row.pos, game.season, missOf(q)).vacs?.[vs] ?? 0;
     const qShift = f.matchups && prop.stat.vacated && out.questionable.size ? Math.abs(shareAt(1) - shareAt(0)) : 0;
     // (the NFL's roster: without it a teammate who's left counts as here, the work he leaves unseen)
+    // A roster unread can only hide a teammate who's gone, so the work missing now reads low: where his
+    // numbers were made with work missing (the cut then over the cut now by 0.1 or more), the term (or the
+    // guard below) would take him down for a teammate who may never be back; skipped, flagged where it can't
+    // move him
     const noRoster = sport === 'nfl' && !!prop.stat.vacated && !roster;
+    const rosterBlind = noRoster && vacThen - vacNow >= 0.1;
+    // (the NFL's snap counts missing for games of the history (playerlogs.mjs snapGap): those games hold only
+    // the players who got the ball, the fit leaning over; a season's quarter or more of them, skipped)
+    const snapGap = sport === 'nfl' ? f.snapGap : null;
     const gapped = gapGuard('prop', model, fair);
     if (status.skip) guard = { skip: true, why: status.why };
+    else if (snapGap?.share >= 0.25) guard = { skip: true, why: `the snap counts missing for ${snapGap.games} games: the history holds only the players who got the ball` };
+    else if (rosterBlind) guard = { skip: true, why: "his team's roster not read, and his numbers were made with teammates missing: whether they're back or gone can't be told" };
     else if (vacUnsized && vacNow > vacThen) guard = { skip: true, why: `teammates out (${out.names.join(', ') || 'off the roster'}): a role change the model can't size` };
     else if (vacUnsized) guard = { skip: true, why: "teammates back from an absence that fed his recent numbers: a smaller role the model can't size" };
     // (the model's chance far from the book's (desk.mjs GAP.prop): a gap that size is the market knowing
@@ -460,6 +473,7 @@ export function priceProps(sport, game, props, fitted, idx, exp, info, live, tru
     else if (Math.abs(moved) >= limit) guard = { why: `line moved ${moved > 0 ? '+' : ''}${round(moved, 1)} since it opened` };
     else if (status.why) guard = { why: status.why };
     else if (qShift >= 0.15) guard = { why: `teammate questionable (${out.qNames.join(', ') || 'at his position'}): his share depends on it` };
+    else if (snapGap?.games) guard = { why: `the snap counts missing for ${snapGap.games} games: the history holds only the players who got the ball there` };
     else if (noRoster) guard = { why: "his team's roster not read: a teammate who's left can't be told from one who's here" };
     priced.push({
       prop,

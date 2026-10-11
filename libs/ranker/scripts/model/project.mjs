@@ -21,7 +21,8 @@
 //            his position over the league's, to the power tg (a receiving stat)
 //   vacated  the NFL backs' and pass-catchers': his cut of the work his position group is missing (its
 //            regulars not playing, matchups.mjs vacs) over his own, against the cut he had in the games his
-//            numbers come from (weighed as they are: his season's against the K-game prior, his last five by w),
+//            numbers come from (weighed as they are: his season's against the K-game prior, last season's cut
+//            in it where the prior is his own; his last five by w),
 //            to the power vc: ((1 + cut now) / (1 + cut then))^vc. Signed: a starter's work shared out lifts
 //            him, and a starter back from injury takes it back (a fill-in whose last games were the starter's
 //            comes down). How it's shared (vs: in proportion to each one's work, or flatter, to equally, the
@@ -156,11 +157,14 @@ export function makeModel(stat, params, env) {
     const paceF = stat.volume && params.pc ? Math.pow(row.pace ?? 1, params.pc) : 1;
     const tgtF = stat.targets && params.tg ? Math.pow(row.tgt ?? 1, params.tg) : 1;
     // (the work his position group is missing now against what it was missing in the games his numbers come
-    // from, weighed as they are (his season's games against the K-game prior, which had none; his last five by
-    // w): a back whose last games were the injured starter's has them taken back down when the starter returns)
+    // from, weighed as they are (his season's games against the K-game prior, which had last season's: its
+    // average cut where the prior is his own run, the seasons before last counted as none missing; none where
+    // it's the position's; his last five by w): a back whose last games were the injured starter's, this
+    // season or the end of last, has them taken back down when the starter returns)
     const vs = params.vs ?? 0;
     const vacNow = row.vacs?.[vs] ?? 0;
-    const rateVac = (cur.vac?.[vs] ?? 0) / (cur.n + params.K);
+    const priorVac = longN >= 10 ? (prev.vac?.[vs] ?? 0) / longN : 0;
+    const rateVac = ((cur.vac?.[vs] ?? 0) + params.K * priorVac) / (cur.n + params.K);
     const recentVac = cur.recentVac?.length >= 3 ? cur.recentVac.reduce((t, x) => t + (x[vs] ?? 0), 0) / cur.recentVac.length : rateVac;
     const vacHist = (1 - params.w) * rateVac + params.w * recentVac;
     const vacF = stat.vacated && params.vc ? Math.pow((1 + vacNow) / (1 + vacHist), params.vc) : 1;
@@ -212,7 +216,7 @@ export function makeModel(stat, params, env) {
           p = {
             season: row.season,
             cur: fresh(),
-            prev: consecutive ? { n: p.cur.n, sum: p.cur.sum } : { n: 0, sum: 0 },
+            prev: consecutive ? { n: p.cur.n, sum: p.cur.sum, vac: p.cur.vac } : { n: 0, sum: 0 },
             career: consecutive ? before : add(before, p.cur),
           };
         }
@@ -399,7 +403,11 @@ export function fitStat(stat, rows, env) {
   const final = replayStat(stat, sorted, params, env, cuts).out;
   // (the held-out numbers with no matchup terms at all, for the before and after)
   const base = optional.length ? heldOut({ ...params, ...OPTIONAL }).check : current.check;
-  return { params, gains, base, check: current.check, checkAll: check(final.filter((x) => x.win === 2), params), fitN: best.n };
+  // (and every player's held-out games, eligible or not, a sanity check on the history's selection: an NFL
+  // game he took under 10 offensive snaps in (a kneel-down, a gadget play: a backup's line no projection is
+  // for) left out of it, as the board never posts his prop)
+  const all = final.filter((x) => x.win === 2 && !(x.row.s.snaps > 0 && x.row.s.snaps < 10));
+  return { params, gains, base, check: current.check, checkAll: check(all, params), fitN: best.n };
 }
 
 // The check on the held-out games: the projection's error against a plain season average's, and its chance of
