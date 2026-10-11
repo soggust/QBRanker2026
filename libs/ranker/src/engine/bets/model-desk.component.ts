@@ -617,16 +617,16 @@ export class ModelDeskComponent implements OnInit, OnDestroy {
 
   // ---------------------------------------------------------------------------
   // The bet lists by game (desk-columns.ts byGame): a game with more than one bet a row of its own, its bets
-  // under it, folded until it's opened (the games in play open: their meters are the point)
+  // under it, folded until it's opened (In Play's too: it bets a lot of games at once)
   // ---------------------------------------------------------------------------
 
   readonly byGame = byGame;
   readonly gamesBySport = gamesBySport;
-  // (with every sport listed, each sport a row of its own over its games, folded but for the games in play)
+  // (with every sport listed, each sport a row of its own over its games, folded till it's opened)
   private sportsOpen = new Map<string, boolean>();
 
   sportOpen(table: string, s: SportGroup): boolean {
-    return !s.header || (this.sportsOpen.get(`${table}|${s.sport}`) ?? table === 'live');
+    return !s.header || (this.sportsOpen.get(`${table}|${s.sport}`) ?? false);
   }
 
   toggleSport(table: string, s: SportGroup): void {
@@ -635,7 +635,7 @@ export class ModelDeskComponent implements OnInit, OnDestroy {
   private groupsOpen = new Map<string, boolean>();
 
   groupOpen(table: string, g: BetGroup): boolean {
-    return g.bets.length === 1 || (this.groupsOpen.get(`${table}|${g.key}`) ?? table === 'live');
+    return g.bets.length === 1 || (this.groupsOpen.get(`${table}|${g.key}`) ?? false);
   }
 
   toggleGroup(table: string, g: BetGroup): void {
