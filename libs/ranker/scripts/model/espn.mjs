@@ -186,6 +186,16 @@ export async function eventOf(league, id) {
   return c ? { ...h, date: c.date, status: c.status } : null;
 }
 
+// A team's roster now: its players' ESPN ids (every group ESPN lists: offense, defense, special teams, injured
+// reserve); null when it can't be had or looks cut short (under min players): the props then don't count a
+// teammate gone (props.mjs priceProps) and flag it
+export async function roster(league, id, min = 40) {
+  const body = await json(`${ESPN}/${league}/teams/${id}/roster`);
+  const ids = new Set();
+  for (const g of body?.athletes ?? []) for (const a of g.items ?? []) if (a?.id) ids.add(String(a.id));
+  return ids.size >= min ? ids : null;
+}
+
 // The league's injury report: each team's listed players (ESPN's athlete id, name, position, status)
 export async function injuries(league) {
   const body = await json(`${ESPN}/${league}/injuries`);

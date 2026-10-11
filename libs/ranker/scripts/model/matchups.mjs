@@ -15,7 +15,8 @@
 //   targets  the NFL: the share of the targets it allows to wide receivers, tight ends and backs, against the
 //            league's, pulled toward the league's by 60 targets
 //   vacated  the NFL: the work a player's position group is missing: its regulars who aren't playing (not in the
-//            game's logs; at bet time, out or doubtful on the injury report), their recent work (a back's carries
+//            game's logs; at bet time, out or doubtful on the injury report or no longer on the team's roster,
+//            and a questionable one at half), their recent work (a back's carries
 //            and targets, a receiver's or tight end's targets, a game's worth, recent games counting most) over
 //            the recent work of those who are. A back stepping in for a hurt starter gets the starter's share to
 //            share out; a player gone a while fades out of it (his recent work fading game by game he misses), by
@@ -138,26 +139,28 @@ export function nflMatchups(rows, pbp = null) {
   const touches = (r, p) => (p === 'RB' ? (r.s.rushAtt ?? 0) + (r.s.targets ?? 0) : (r.s.targets ?? 0));
   // (the work missing from a player's position group, his cut of it over his own work: the absent regulars'
   // recent work shared among the present players by their recent work to the power g, for g of 1 (in proportion),
-  // 0.5 and 0 (equally: the next man up's cut as big as the starter's); present: who's playing (a set of player
-  // ids), or everyone but out (a set) at bet time)
+  // 0.5 and 0 (equally: the next man up's cut as big as the starter's); missOf(id): how surely a teammate is
+  // missing, 0 to 1: in the history, 1 for one not in the game's logs, 0 for one in them; at bet time, 1 for
+  // one out, doubtful or on IR, or no longer on the team's roster (traded, released: gone from its games as he
+  // is in the history's), a half for one questionable (in the work missing at half, and here at half))
   const SPLITS = [1, 0.5, 0];
   const NONE = SPLITS.map(() => 0);
-  const vacated = (teamId, season, pid, pos, isMissing) => {
+  const vacated = (teamId, season, pid, pos, missOf) => {
     const p = POS(pos);
     if (!p || p === 'QB') return NONE;
     const w = workOf(teamId, season);
     let gone = 0;
     const here = [];
     for (const [id, x] of w.p) {
-      if (x.pos !== p || x.v < 0.5) continue;
-      if (isMissing(id)) {
-        if (x.v >= 1.5) gone += x.v;
-      } else if (String(id) !== String(pid)) here.push(x.v);
+      if (x.pos !== p || x.v < 0.5 || String(id) === String(pid)) continue;
+      const m = Math.min(1, Math.max(0, Number(missOf(id)) || 0));
+      if (m > 0 && x.v >= 1.5) gone += m * x.v;
+      if (m < 1) here.push([x.v, 1 - m]);
     }
     if (!gone) return NONE;
     const own = Math.max(w.p.get(pid)?.v ?? 0, 0.5);
     return SPLITS.map((g) => {
-      const all = here.reduce((t, v) => t + Math.pow(v, g), Math.pow(own, g));
+      const all = here.reduce((t, [v, k]) => t + k * Math.pow(v, g), Math.pow(own, g));
       return Math.round(Math.min(3, (gone * Math.pow(own, g)) / all / Math.max(own, 1)) * 1000) / 1000;
     });
   };
@@ -195,7 +198,7 @@ export function nflMatchups(rows, pbp = null) {
         r.funnel = d.funnel;
         r.pace = d.pace;
         r.tgt = d.tgt;
-        r.vacs = vacated(g.team, g.season, r.pid, r.pos, (id) => !playing.has(id));
+        r.vacs = vacated(g.team, g.season, r.pid, r.pos, (id) => (playing.has(id) ? 0 : 1));
         r.vac = Math.max(...r.vacs);
       }
     }
@@ -252,12 +255,20 @@ export function nflMatchups(rows, pbp = null) {
     i = j;
   }
   return {
-    // (out: the team's players out for the coming game, by id: the work they leave)
-    live: (pid, teamId, oppId, pos, season, out = new Set()) => ({
-      role: roleOf(pid, teamId, season, pos),
-      ...defense(oppId, season, POS(pos)),
-      ...((vacs) => ({ vacs, vac: Math.max(...vacs) }))(out.size ? vacated(teamId, season, pid, pos, (id) => out.has(String(id))) : vacated(teamId, season, pid, pos, () => false)),
-    }),
+    // (missing: how surely each of the team's players is missing the coming game, by id (a function, 0 to 1),
+    // or a set of the ones out: the work they leave)
+    live: (pid, teamId, oppId, pos, season, missing = null) => {
+      const missOf = typeof missing === 'function' ? missing : missing instanceof Set ? (id) => (missing.has(String(id)) ? 1 : 0) : () => 0;
+      const vacs = vacated(teamId, season, pid, pos, missOf);
+      return { role: roleOf(pid, teamId, season, pos), ...defense(oppId, season, POS(pos)), vacs, vac: Math.max(...vacs) };
+    },
+    // (a team's regulars at a position group now: the ones whose recent work counts in the work missing when
+    // they're out (matchups' vacated), by id)
+    regulars: (teamId, season, pos) => {
+      const p = POS(pos);
+      if (!p || p === 'QB') return [];
+      return [...workOf(teamId, season).p].filter(([, x]) => x.pos === p && x.v >= 1.5).map(([id, x]) => ({ id: String(id), v: Math.round(x.v * 10) / 10 }));
+    },
   };
 }
 

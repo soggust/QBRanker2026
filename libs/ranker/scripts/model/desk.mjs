@@ -39,8 +39,10 @@ function fair(a, b) {
 }
 
 // (the most the model's chance may be from the book's fair chance, by market, before the market isn't bet: the
-// lean tapers from half of it; leanOf, gapGuard)
-export const GAP = { spread: 0.12, total: 0.12, ml: 0.15 };
+// lean tapers from half of it; leanOf, gapGuard). A prop's (props.mjs priceProps) the moneyline's: a player's
+// line is the market's read of his role and health, and the model 15 points off it is far more often missing
+// news than an edge
+export const GAP = { spread: 0.12, total: 0.12, ml: 0.15, prop: 0.15 };
 
 // Units for a side, by its Kelly fraction (its expected return over what a unit pays at its price): 0.5 at no
 // edge (every game is bet), up to 3 at the desk's edge scale (the return that tops out at -110; a longer price
@@ -68,8 +70,8 @@ export function leanOf(gap, limit) {
   return Math.sign(gap) * half * Math.max(0, (limit - a) / (limit - half));
 }
 
-// A side's chance at a trust: the book's fair chance and the model's lean, tapered by its market's GAP (a prop
-// has none yet: its whole lean). The one chance choose bets with and fitTrust and the backtest score, so the
+// A side's chance at a trust: the book's fair chance and the model's lean, tapered by its market's GAP (a prop's
+// too). The one chance choose bets with and fitTrust and the backtest score, so the
 // trust is fit on the pricing the desk bets with
 export const chanceAt = (market, fair, model, trust) => fair + trust * leanOf(model - fair, GAP[market]);
 

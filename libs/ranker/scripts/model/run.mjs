@@ -41,7 +41,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { BOOK, GAME_CAP, LEAGUES, PROP_CAPS } from './leagues.mjs';
 import { fitMargins } from './margins.mjs';
-import { eventOf, gameOf, json, linesOf, scoreboard, teamIds, teamSchedule, ymd } from './espn.mjs';
+import { eventOf, gameOf, json, linesOf, roster, scoreboard, teamIds, teamSchedule, ymd } from './espn.mjs';
 import { adjust, expect, fit, fitContext, gateOf, replay, round } from './ratings.mjs';
 import { OPTIONAL, enrich, featurize, gather } from './context.mjs';
 import { RECHECK, finalSummary, postmortems, propPostmortem, recheckSummary, usualRoles } from './postmortem.mjs';
@@ -862,6 +862,13 @@ async function betProps(r) {
   // the start) and once near it (within 2.5 hours, if it has prop bets open: their last line and price before
   // the close, the NFL's CLV); the count kept in .cache/model/odds-props.json)
   const asked = read(PROPS_ASKED, {});
+  // (the NFL's rosters now, each team's once a run: a teammate no longer on it (traded, released) counts as
+  // missing in the work his group leaves, as the history counts him (props.mjs priceProps); one not read, null)
+  const rosters = new Map();
+  const rosterOf = async (team) => {
+    if (!rosters.has(String(team))) rosters.set(String(team), await roster(cfg.league, team).catch(() => null));
+    return rosters.get(String(team));
+  };
   for (const u of r.upcoming) {
     const game = u.game;
     try {
@@ -896,8 +903,11 @@ async function betProps(r) {
       }
       run.games++;
       const { exp, f } = expectFor(r, game);
-      const { priced, bets } = priceProps(sport, game, board_, r.props, idx, exp, f?.info ?? null, r.live.get(game.id), trust, EV_SCALE);
+      const live = sport === 'nfl' ? { ...(r.live.get(game.id) ?? {}), rosters: new Map([[String(game.home), await rosterOf(game.home)], [String(game.away), await rosterOf(game.away)]]) } : r.live.get(game.id);
+      const { priced, bets } = priceProps(sport, game, board_, r.props, idx, exp, f?.info ?? null, live, trust, EV_SCALE);
       run.priced += priced.length;
+      // (the skips by kind: the market-gap guard's counted on its own)
+      for (const x of priced) if (x.guard?.skip) run.skipped = { ...(run.skipped ?? {}), [x.guard.kind ?? 'other']: (run.skipped?.[x.guard.kind ?? 'other'] ?? 0) + 1 };
       run.under += priced.filter((x) => x.side === 'under').length;
       // (the ones at an even line: the ones it could bet)
       const even = priced.filter((x) => !x.guard?.skip);
@@ -968,6 +978,7 @@ async function betProps(r) {
     r.placed.add(id);
   }
   if (run.held) console.log(`${sport}: props held for a later run: ${Object.entries(run.held).map(([why, n]) => `${n} games (${why})`).join(', ')}`);
+  if (run.skipped) console.log(`${sport}: props skipped: ${Object.entries(run.skipped).map(([k, n]) => `${n} ${k === 'gap' ? 'past the market gap' : 'by the other guards'}`).join(', ')}`);
   if (run.priced) console.log(`${sport}: props priced ${run.priced} in ${run.games} games (${Math.round((100 * run.under) / run.priced)}% under; at even lines ${run.even}, ${Math.round((100 * run.evenUnder) / Math.max(1, run.even))}% under), ${(r.pending ?? []).filter((p) => p.bet.market === 'prop').length} to place`);
 }
 
@@ -1029,7 +1040,7 @@ function saveState(r) {
     write(path.join(ROOT, '.cache/model', `dry-${sport}.json`), {
       params: state.params,
       terms: (state.context?.terms ?? []).map((t) => [t.key, t.size, t.kept, t.gain, t.games]),
-      propTypes: state.props?.types?.map((t) => ({ key: t.key, params: t.params, gains: t.gains, base: t.base?.logLoss, check: t.check?.logLoss })) ?? null,
+      propTypes: state.props?.types?.map((t) => ({ key: t.key, params: t.params, gains: t.gains, base: t.base?.logLoss, check: t.check?.logLoss, bias: t.check?.bias, allBias: t.allPlayersBias, rows: t.rows, eligible: t.eligible })) ?? null,
       props: state.props?.types?.map((t) => [t.key, t.params]) ?? null,
       trust: state.trust,
       ...r.snapshot,

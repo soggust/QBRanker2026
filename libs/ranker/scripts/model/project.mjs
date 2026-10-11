@@ -20,8 +20,11 @@
 //            its pace (its opponents' plays over their usual) to the power pc; the share of targets it allows to
 //            his position over the league's, to the power tg (a receiving stat)
 //   vacated  the NFL backs' and pass-catchers': his cut of the work his position group is missing (its
-//            regulars not playing, matchups.mjs vacs) over his own, to the power vc: (1 + cut)^vc, a starter's
-//            work shared out; how it's shared (vs: in proportion to each one's work, or flatter, to equally, the
+//            regulars not playing, matchups.mjs vacs) over his own, against the cut he had in the games his
+//            numbers come from (weighed as they are: his season's against the K-game prior, his last five by w),
+//            to the power vc: ((1 + cut now) / (1 + cut then))^vc. Signed: a starter's work shared out lifts
+//            him, and a starter back from injury takes it back (a fill-in whose last games were the starter's
+//            comes down). How it's shared (vs: in proportion to each one's work, or flatter, to equally, the
 //            next man up's cut as big as anyone's) fit with it (vc 0: left out, kept only if the held-out games
 //            are better with it)
 //   context  one term per stat where the model has it: wind on NFL passing, a backup quarterback throwing to
@@ -29,7 +32,12 @@
 //   scale    the eligible players' total over their total projection on the fit window: what's left of a lean
 //            once the rest is fit, taken out
 //
-// The count's spread: a negative binomial around the projection, its dispersion r fit too (lower: wider).
+// The count's spread: a negative binomial around the projection, its dispersion r fit too (lower: wider), and
+// how it grows with the projection (rk: r x (mu / the average)^rk, a starter's yards tighter around his
+// projection than the plain shape gives; kept only if the held-out games are better with it: rAt). Every
+// setting is scored on the eligible players' games (the ones a book posts props for: props.mjs markEligible,
+// from before each game), not the backups' that are never bet. A whole-number line's push is its own chance,
+// out of both sides (lineChances).
 // Each setting is fit one at a time (twice round) on the middle of the history (30% to 70% of it by date: the
 // first 30% only teaches); the last 30% is never used to fit and is where the projections are checked. Then
 // the chance of going over a line is recalibrated (logistic: cal = [shift, stretch] on its log-odds), fit on
@@ -64,6 +72,25 @@ export function nbOver(line, mu, r) {
   return Math.min(1, Math.max(0, 1 - cdf));
 }
 
+// A stat's dispersion at a projection: r, or where the fit found the spread grows other than as the plain
+// negative binomial's (rk), r x (mu / rm)^rk (rm: the eligible players' average on the fit window): a big
+// projection's count runs tighter around it, as a starter's yards do against a backup's
+export function rAt(params, mu) {
+  if (!params.rk) return params.r;
+  return Math.min(500, Math.max(0.25, params.r * Math.pow(Math.max(mu, 0.05) / (params.rm || 1), params.rk)));
+}
+
+// A line's chances at a projection: over and under with a push left out (each the chance given no push, so
+// they sum to 1), and the push's own chance (a whole-number line: the count landing on it; a half-point line
+// has none). The recalibration (cal) on the over's
+export function lineChances(line, mu, params) {
+  const r = rAt(params, mu);
+  const raw = nbOver(line, mu, r);
+  const push = Number.isInteger(line) && line >= 0 ? Math.min(0.99, Math.exp(nbLog(line, mu, r))) : 0;
+  const over = recal(Math.min(1, raw / (1 - push)), params.cal);
+  return { over, under: 1 - over, push };
+}
+
 // A stat's model under one set of settings: project a row from what's been learned, learn a day's rows
 export function makeModel(stat, params, env) {
   const players = new Map();
@@ -81,7 +108,7 @@ export function makeModel(stat, params, env) {
   const parts = (row) => {
     const pl = players.get(row.pid);
     if (!pl) return null;
-    const cur = pl.season === row.season ? pl.cur : { n: 0, sum: 0, recent: [] };
+    const cur = pl.season === row.season ? pl.cur : { n: 0, sum: 0, recent: [], vac: [0, 0, 0], recentVac: [] };
     const prev = pl.season === row.season ? pl.prev : pl.season === row.season - 1 ? pl.cur : { n: 0, sum: 0 };
     // (the seasons before last, as seen from this one)
     const older =
@@ -128,9 +155,17 @@ export function makeModel(stat, params, env) {
     const funnelF = dir && params.fun ? Math.exp(params.fun * dir * (row.funnel ?? 0)) : 1;
     const paceF = stat.volume && params.pc ? Math.pow(row.pace ?? 1, params.pc) : 1;
     const tgtF = stat.targets && params.tg ? Math.pow(row.tgt ?? 1, params.tg) : 1;
-    const vacF = stat.vacated && params.vc ? Math.pow(1 + (row.vacs?.[params.vs ?? 0] ?? 0), params.vc) : 1;
+    // (the work his position group is missing now against what it was missing in the games his numbers come
+    // from, weighed as they are (his season's games against the K-game prior, which had none; his last five by
+    // w): a back whose last games were the injured starter's has them taken back down when the starter returns)
+    const vs = params.vs ?? 0;
+    const vacNow = row.vacs?.[vs] ?? 0;
+    const rateVac = (cur.vac?.[vs] ?? 0) / (cur.n + params.K);
+    const recentVac = cur.recentVac?.length >= 3 ? cur.recentVac.reduce((t, x) => t + (x[vs] ?? 0), 0) / cur.recentVac.length : rateVac;
+    const vacHist = (1 - params.w) * rateVac + params.w * recentVac;
+    const vacF = stat.vacated && params.vc ? Math.pow((1 + vacNow) / (1 + vacHist), params.vc) : 1;
     const mu = Math.max(0.05, (params.scale ?? 1) * base * Math.pow(opp, params.a) * Math.pow(script, params.b) * Math.exp(params.c * ctx) * funnelF * paceF * tgtF * vacF);
-    return { mu, rate, recent, base, opp, posOpp, roleOpp, role: row.role ?? null, funnel: row.funnel ?? null, funnelF, paceF, tgtF, vac: row.vacs?.[params.vs ?? 0] ?? 0, vacF, script, ctx, prior, games: cur.n, prevGames: prev.n };
+    return { mu, rate, recent, base, opp, posOpp, roleOpp, role: row.role ?? null, funnel: row.funnel ?? null, funnelF, paceF, tgtF, vac: vacNow, vacHist, vacF, script, ctx, prior, games: cur.n, prevGames: prev.n };
   };
   return {
     project: parts,
@@ -169,13 +204,14 @@ export function makeModel(stat, params, env) {
         // (his seasons: this one, last, and the ones before it (career))
         let p = pl;
         const add = (a, b) => ({ n: a.n + b.n, sum: a.sum + b.sum });
-        if (!p) p = { season: row.season, cur: { n: 0, sum: 0, recent: [] }, prev: { n: 0, sum: 0 }, career: { n: 0, sum: 0 } };
+        const fresh = () => ({ n: 0, sum: 0, recent: [], vac: [0, 0, 0], recentVac: [] });
+        if (!p) p = { season: row.season, cur: fresh(), prev: { n: 0, sum: 0 }, career: { n: 0, sum: 0 } };
         else if (p.season !== row.season) {
           const consecutive = p.season === row.season - 1;
           const before = add(p.career, p.prev);
           p = {
             season: row.season,
-            cur: { n: 0, sum: 0, recent: [] },
+            cur: fresh(),
             prev: consecutive ? { n: p.cur.n, sum: p.cur.sum } : { n: 0, sum: 0 },
             career: consecutive ? before : add(before, p.cur),
           };
@@ -183,6 +219,10 @@ export function makeModel(stat, params, env) {
         p.cur.n++;
         p.cur.sum += v;
         p.cur.recent = [...p.cur.recent, v].slice(-5);
+        // (the work his group was missing in each of his games: what his numbers were made with)
+        const vacs = row.vacs ?? [0, 0, 0];
+        p.cur.vac = p.cur.vac.map((x, k) => x + (vacs[k] ?? 0));
+        p.cur.recentVac = [...p.cur.recentVac, vacs].slice(-5);
         players.set(row.pid, p);
         if (row.eligible !== false) {
           const k = posKey(row);
@@ -218,14 +258,23 @@ export function replayStat(stat, rows, params, env, cuts) {
   return { model: m, out };
 }
 
-const R = [1, 1.5, 2.5, 4, 6, 10, 16, 30, 60, 150];
-// (a window's log-likelihood at its best dispersion)
-function scoreOf(out, win) {
-  const list = out.filter((x) => x.win === win);
+const R = [0.5, 0.75, 1, 1.5, 2, 2.5, 3, 4, 6, 8, 10, 16, 30, 60, 150];
+// (the dispersion's growth with the projection tried: rAt)
+const RK = [0.5, 1];
+// (a window's rows the fit scores: the eligible players', the ones a book posts props for and the desk bets,
+// where there are enough; else all)
+const scored = (out, win) => {
+  const all = out.filter((x) => x.win === win);
+  const mine = all.filter((x) => x.row.eligible !== false);
+  return mine.length >= 200 ? mine : all;
+};
+// (a window's log-likelihood at its best dispersion, at a growth rk about rm)
+function scoreOf(out, win, shape = { rk: 0, rm: 1 }) {
+  const list = scored(out, win);
   let best = null;
   for (const r of R) {
     let ll = 0;
-    for (const x of list) ll += nbLog(x.v, x.p.mu, r);
+    for (const x of list) ll += nbLog(x.v, x.p.mu, rAt({ r, ...shape }, x.p.mu));
     if (!best || ll > best.ll) best = { ll, r };
   }
   return { ...best, n: list.length };
@@ -239,7 +288,7 @@ const OPTIONAL = { roleK: Infinity, fun: 0, pc: 0, tg: 0, vc: 0 };
 const has = (stat, key) => (key === 'roleK' ? !!stat.roles : key === 'tg' ? !!stat.targets : key === 'vc' ? !!stat.vacated : !!stat.volume);
 
 // (a window's chances of going over a line at each player's median so far, and what happened)
-function linePairs(list, r) {
+function linePairs(list, params) {
   const hist = new Map();
   const out = [];
   for (const x of [...list].sort((a, b) => a.row.date.localeCompare(b.row.date))) {
@@ -247,7 +296,7 @@ function linePairs(list, r) {
     if (past.length >= 3) {
       const vals = past.sort((a, b) => a - b);
       const line = Math.floor(vals[Math.floor(vals.length / 2)]) + 0.5;
-      out.push({ x, vals, line, p: nbOver(line, x.p.mu, r), over: x.v > line ? 1 : 0 });
+      out.push({ x, vals, line, p: nbOver(line, x.p.mu, rAt(params, x.p.mu)), over: x.v > line ? 1 : 0 });
     }
     hist.set(x.row.pid, [...(hist.get(x.row.pid) ?? []), { season: x.row.season, v: x.v }]);
   }
@@ -301,20 +350,30 @@ export function fitStat(stat, rows, env) {
     }
   }
   params.r = best.r;
+  // (the dispersion's shape: its growth with the projection (rk), each tried at its own best r on the fit
+  // window's eligible players; kept below only if the held-out games are better with it)
+  const firstOut = replayStat(stat, sorted, params, env, cuts).out;
+  const fitVals = scored(firstOut, 1);
+  const rm = fitVals.length ? Math.round((fitVals.reduce((t, x) => t + x.v, 0) / fitVals.length) * 1000) / 1000 : 1;
+  const plain = { r: best.r, rk: 0 };
+  let shape = plain;
+  let shapeLl = best.ll;
+  for (const rk of RK) {
+    const s = scoreOf(firstOut, 1, { rk, rm });
+    if (s.ll > shapeLl) (shapeLl = s.ll), (shape = { r: s.r, rk });
+  }
+  params = { ...params, ...shape, rm };
   // (what's left of a lean on the eligible players once the rest is fit: their total over their projection)
   const fitOut = replayStat(stat, sorted, params, env, cuts).out.filter((x) => x.win === 1 && x.row.eligible !== false);
   const sumMu = fitOut.reduce((t, x) => t + x.p.mu, 0);
   params.scale = sumMu ? Math.round((fitOut.reduce((t, x) => t + x.v, 0) / sumMu) * 1000) / 1000 : 1;
-  const { out } = replayStat(stat, sorted, params, env, cuts);
-  // (the recalibration, fit on the middle window: its teaching games and its fit games, in order)
   // (the recalibration and the check: on the eligible players only, the ones a book posts props for)
-  params.cal = fitRecal(linePairs(out.filter((x) => x.win === 1 && x.row.eligible !== false), params.r));
   // (each matchup term the fit took up, tested on the held-out games: left out unless its log loss on them is
   // lower with it; its gain recorded either way: the held-out log loss without it less with it)
   const heldOut = (p) => {
     const o = replayStat(stat, sorted, p, env, cuts).out;
-    const cal = fitRecal(linePairs(o.filter((x) => x.win === 1 && x.row.eligible !== false), p.r));
-    return { cal, check: check(o.filter((x) => x.win === 2 && x.row.eligible !== false), p.r, cal) };
+    const cal = fitRecal(linePairs(o.filter((x) => x.win === 1 && x.row.eligible !== false), p));
+    return { cal, check: check(o.filter((x) => x.win === 2 && x.row.eligible !== false), { ...p, cal }) };
   };
   let current = heldOut(params);
   const gains = {};
@@ -330,18 +389,24 @@ export function fitStat(stat, rows, env) {
       current = without;
     }
   }
+  // (the dispersion's growth, the same way: the plain negative binomial unless the held-out games say so)
+  if (params.rk) {
+    const without = heldOut({ ...params, ...plain });
+    gains.rk = Math.round(((without.check?.logLoss ?? 0) - (current.check?.logLoss ?? 0)) * 10000) / 10000;
+    if (gains.rk <= 0) (params = { ...params, ...plain }), (current = without);
+  } else gains.rk = null;
   params.cal = current.cal;
   const final = replayStat(stat, sorted, params, env, cuts).out;
   // (the held-out numbers with no matchup terms at all, for the before and after)
   const base = optional.length ? heldOut({ ...params, ...OPTIONAL }).check : current.check;
-  return { params, gains, base, check: current.check, checkAll: check(final.filter((x) => x.win === 2), params.r, params.cal), fitN: best.n };
+  return { params, gains, base, check: current.check, checkAll: check(final.filter((x) => x.win === 2), params), fitN: best.n };
 }
 
 // The check on the held-out games: the projection's error against a plain season average's, and its chance of
 // going over a line at the player's median so far this season against what happened (log loss and Brier),
 // against the plain answer (how often he'd gone over that line this season, pulled a game's worth toward
 // even), with how often it picked the right side and a calibration table
-function check(list, r, cal) {
+function check(list, params) {
   if (!list.length) return null;
   const hist = new Map();
   let mae = 0;
@@ -368,7 +433,7 @@ function check(list, r, cal) {
       nBase++;
       const median = vals[Math.floor(vals.length / 2)];
       const line = Math.floor(median) + 0.5;
-      const p = Math.min(0.995, Math.max(0.005, recal(nbOver(line, x.p.mu, r), cal)));
+      const p = Math.min(0.995, Math.max(0.005, recal(nbOver(line, x.p.mu, rAt(params, x.p.mu)), params.cal)));
       const over = x.v > line ? 1 : 0;
       ll -= Math.log(over ? p : 1 - p);
       brier += (p - over) ** 2;
