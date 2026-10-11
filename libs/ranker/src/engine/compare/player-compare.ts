@@ -338,7 +338,9 @@ export class PlayerCompare {
       careerLines(this.data, this.host.season, position, gsisId)
         .catch(() => [])
         .then((career) => {
-          side.career = career;
+          // (the season it's on ranked as its tile is, with your sliders; the rest with them once the
+          // picker's opened: rankCareer)
+          side.career = career.map((l) => (l.season === side.season ? { ...l, rank: side.rank, of: side.of, pct: side.pct } : l));
           this.arcs = this.buildArcs();
         });
     } catch (err) {
@@ -346,6 +348,43 @@ export class PlayerCompare {
       this.say("Couldn't load that season");
     } finally {
       this.loading--;
+    }
+  }
+
+  // A side's every season ranked with your sliders, as its tile is (careerLines ranks them with the
+  // default ones): when its season picker opens, each season's rows read once (the service keeps them)
+  private ranking = new WeakSet<CompareSide>();
+  async rankCareer(side: CompareSide): Promise<void> {
+    if (!side.career?.length || this.ranking.has(side)) return;
+    this.ranking.add(side);
+    const { host } = this;
+    const lines = await Promise.all(
+      side.career.map(async (l) => {
+        if (l.season === side.season) return { ...l, rank: side.rank, of: side.of, pct: side.pct };
+        try {
+          let list: SkillPlayer[];
+          let player: SkillPlayer | undefined;
+          if (l.season === host.season && side.position === host.position) {
+            list = host.playerList;
+            player = list.find((p) => p.gsisId === side.gsisId);
+          } else {
+            const rows = l.season === host.season ? SKILL_UNITS : await this.data.rows(l.season);
+            player = rows[side.position]?.find((p) => p.gsisId === side.gsisId);
+            if (!player) return l;
+            const context = host.seasonContext(l.season, rows, side.position);
+            list = context.list.includes(player) ? context.list : context.manual ? [...context.list, player] : host.rankedIn(context, [...context.list, player]);
+          }
+          const rank = player ? list.indexOf(player) + 1 : 0;
+          return rank > 0 ? { ...l, rank, of: list.length, pct: rankPct(rank, list.length) } : l;
+        } catch {
+          return l;
+        }
+      }),
+    );
+    // (still the side shown: not one switched away from meanwhile)
+    if (this.sides.includes(side)) {
+      side.career = lines;
+      this.arcs = this.buildArcs();
     }
   }
 
