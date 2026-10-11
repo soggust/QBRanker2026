@@ -2,8 +2,13 @@
 // for, and what each bet was priced on, so a bet whose inputs change before the start is priced again.
 //
 //   phaseOf      a game's phase for its lines or its props: early (before the window: nothing priced or bet),
-//                open (in the window: bet once its news is in), last (inside lastChance: bet with whatever's
-//                known, what's missing flagged, the minimum stake)
+//                open (in the window: bet once its news is in), last (inside the last chance: bet with whatever's
+//                known, what's missing flagged, the minimum stake). The last chance is lastChance or, the runs
+//                coming further apart than that (GitHub's hourly schedule runs hours late at times), 1.5 times
+//                the recent gap between runs (cadenceOf), MAX_LAST hours at most: a game the next run would
+//                likely see only after its start is bet now with what's known, not missed
+//   cadenceOf    the median gap between the recent runs, in hours (run.mjs keeps their times in
+//                .cache/model/runs.json); null with too few
 //   newsMissing  the news a bet waits for that isn't in yet: the NHL's probable goalies (both: a skater's
 //                projection weighs the other side's), MLB's probable starters (a game line both; a pitcher's
 //                prop his own; a batter's the other side's) and posted lineups (a game line both: its platoon
@@ -17,8 +22,10 @@
 //                back and its board unpriced: the NFL's), near the start; or not at all
 //   inputChanges what changed between a bet's inputs and the game's now: a part that's moved to a new value
 //                (or read now where it was unread when the bet was placed: news it was priced without), not one
-//                that's gone blank (a goalie, a starter, a lineup dropped from a source doesn't un-name him: more
-//                likely the source than the news) and not one unread now
+//                that's gone blank (a goalie, a lineup dropped from a source doesn't un-name him: more likely the
+//                source than the news; but an MLB starter gone to none named, StatsAPI read, is the scratch
+//                itself and counts), not a side's whole injury list gone empty in one run (a partial report is
+//                likelier than everyone healed: it counts once a second run agrees) and not one unread now
 //
 // Not in the inputs (they'd churn, or a failed fetch would read as news): the weather's forecast, the flags
 // (each starter's flag comes from the parts above), the rosters (a trade inside the window is rare)
@@ -28,15 +35,47 @@ import { TIMING } from './leagues.mjs';
 
 const HOUR = 36e5;
 
-// (the props' and the context's own words for out and questionable)
-const OUT = /^out|doubtful|injured reserve|suspension/i;
-const QUESTIONABLE = /questionable|day-to-day|game-time/i;
+// (the words for out and questionable, the props', the context's and the inputs' alike (one pattern, so they
+// can't drift apart): ESPN's NBA and NHL reports say Day-To-Day where the NFL's says Questionable)
+export const OUT_STATUS = /^out|doubtful|injured reserve|suspension/i;
+export const Q_STATUS = /questionable|day-to-day|game-time/i;
+const OUT = OUT_STATUS;
+const QUESTIONABLE = Q_STATUS;
 
-// A game's phase for its lines or props, by the time till its start (ms)
-export function phaseOf(sport, kind, until) {
+// (an open bet is priced again on news only this far ahead of its start (a run takes minutes, and a bet taken
+// back that close might not be placed again in time); from then on it's locked, and the Bets page's picks are
+// published then (picks.mjs), never earlier: a published pick is never one the news could still move)
+export const REPRICE_BY = 20 * 60e3;
+// (the most the last chance stretches to, in hours, however far apart the runs come)
+export const MAX_LAST = 12;
+
+// The median gap between the recent runs, in hours (times: their starts, ISO; the last 9, so 8 gaps), or null
+// with fewer than 3
+export function cadenceOf(times) {
+  const t = (times ?? [])
+    .map((x) => Date.parse(x))
+    .filter(Number.isFinite)
+    .sort((a, b) => a - b)
+    .slice(-9);
+  if (t.length < 3) return null;
+  const gaps = t
+    .slice(1)
+    .map((x, i) => (x - t[i]) / HOUR)
+    .sort((a, b) => a - b);
+  const mid = gaps.length / 2;
+  return gaps.length % 2 ? gaps[Math.floor(mid)] : (gaps[mid - 1] + gaps[mid]) / 2;
+}
+
+// (a sport's last chance, in hours: its own, or 1.5 times the runs' recent gap where that's longer, MAX_LAST at
+// most)
+export const lastChanceOf = (sport, gap = null) => Math.max(TIMING[sport]?.lastChance ?? 0, Math.min(MAX_LAST, Number.isFinite(gap) ? 1.5 * gap : 0));
+
+// A game's phase for its lines or props, by the time till its start (ms); gap: the runs' recent gap, in hours
+// (cadenceOf), which can stretch the last chance (and so the window)
+export function phaseOf(sport, kind, until, gap = null) {
   const t = TIMING[sport];
   if (!t) return 'open';
-  if (until <= t.lastChance * HOUR) return 'last';
+  if (until <= lastChanceOf(sport, gap) * HOUR) return 'last';
   if (until <= t[kind] * HOUR) return 'open';
   return 'early';
 }
@@ -150,12 +189,19 @@ const WORDS = { out: 'out list', q: 'questionable list', qb: 'quarterback', g: '
 export function inputChanges(was, now, { game = null, before = null, names = {} } = {}) {
   if (!was || !now) return [];
   const out = [];
+  // (a side's whole injury list gone empty since the run before, which had names on it: a partial report (one
+  // team's entry dropped) is likelier than everyone healed, so it waits for a second run to agree)
+  const vanished = (s) => !!before && now.parts?.[`out:${s}`] === '' && now.parts?.[`q:${s}`] === '' && !!(before[`out:${s}`] || before[`q:${s}`]);
   for (const [key, h] of Object.entries(now.hash)) {
     const then = was[key];
+    const [kind, s] = key.split(':');
+    // (an MLB starter gone to none named with StatsAPI read (unread, the part is null, not '-'): the scratch
+    // itself, news)
+    const scratched = kind === 'sp' && h === '-' && typeof then === 'string' && then !== '-';
     // (unread now, blank now, or not kept then (a bet from before the part was): not a change; unread then
     // and read now is: the news the bet was priced without)
-    if (h === null || h === undefined || then === undefined || h === '-' || h === then) continue;
-    const [kind, s] = key.split(':');
+    if (h === null || h === undefined || then === undefined || (h === '-' && !scratched) || h === then) continue;
+    if ((kind === 'out' || kind === 'q') && vanished(s)) continue;
     const team = game ? (s === 'h' ? game.homeAbbr : game.awayAbbr) : s === 'h' ? 'home' : 'away';
     let detail = '';
     const prev = before?.[key];
@@ -166,6 +212,7 @@ export function inputChanges(was, now, { game = null, before = null, names = {} 
       const left = [...a].filter((x) => !b.has(x)).map((x) => names[x] ?? x);
       detail = [...joined.map((x) => `+${x}`), ...left.map((x) => `-${x}`)].join(', ');
     } else if (kind === 'qb') detail = now.parts[key];
+    else if (scratched) detail = 'none named now';
     else if (kind === 'g' || kind === 'sp') {
       const [id, conf] = String(now.parts[key]).split(' ');
       detail = `${names[id] ?? id}${conf ? ' confirmed' : ''}`;

@@ -1,7 +1,8 @@
 // Player props: DraftKings' board from ESPN's core API (every coming game's props, a page of up to 1,000 at a
 // time), the main line only (one line a player a stat; no milestone ladders, no first or last scorer, no
 // quarter or half lines, no longest-play lines, no anytime touchdown: it has no line), each priced against
-// its projection (project.mjs) and bet like the game markets, but only with an edge.
+// its projection (project.mjs) and bet like the game markets: with an edge at its Kelly stake, without one at
+// the 0.5-unit minimum as an action bet (for the data: its trust and CLV), unless a guard skips it.
 //
 // The board gives each prop's line and where it opened, and for the NBA, NHL and MLB each side's price (a
 // pair of items at the same line: the over first, then the under; their prices are DraftKings', vig and
@@ -53,6 +54,7 @@ import { PROP_BOOKS, SPORT_KEYS, american, call, canSpend, hasKey } from './odds
 import { round } from './ratings.mjs';
 import { ESPN_PROVIDER, ROSTER_MIN, goaliesInOrder } from './espn.mjs';
 import { BOOK } from './leagues.mjs';
+import { OUT_STATUS, Q_STATUS } from './timing.mjs';
 
 const CORE = 'https://sports.core.api.espn.com/v2/sports';
 // (no cap a game: every main-line prop that isn't skipped gets a bet, 0.5u at no edge, like the game markets:
@@ -338,15 +340,19 @@ export function fitProps(sport, rows, expPts, info, facts = null) {
 
 const athletesFile = path.join(CACHE, 'athletes.json');
 let athletes = null;
-const athlete = async (ref) => {
+// (a player cached: read again when his team is neither of the game's (traded, signed elsewhere: otherwise he'd
+// be skipped, or priced on the wrong side's work, script and opponent), at most once a day; at: when read)
+const athlete = async (ref, teams = null) => {
   athletes ??= existsSync(athletesFile) ? JSON.parse(readFileSync(athletesFile, 'utf8')) : {};
   const id = ref.match(/athletes\/(\d+)/)?.[1];
   if (!id) return null;
   const key = `${ref.match(/sports\/(\w+)\/leagues\/(\w+)/)?.slice(1).join('/')}:${id}`;
-  if (!athletes[key]) {
+  const was = athletes[key];
+  const moved = was && teams && !teams.includes(String(was.team)) && !(Date.now() - Date.parse(was.at ?? 0) < 864e5);
+  if (!was || moved) {
     const body = await get(ref.replace('http://', 'https://'));
-    if (!body) return null;
-    athletes[key] = { id, name: body.displayName, pos: body.position?.abbreviation ?? '', team: body.team?.$ref?.match(/teams\/(\d+)/)?.[1] ?? null };
+    if (!body) return was ?? null;
+    athletes[key] = { id, name: body.displayName, pos: body.position?.abbreviation ?? '', team: body.team?.$ref?.match(/teams\/(\d+)/)?.[1] ?? null, at: new Date().toISOString() };
   }
   return athletes[key];
 };
@@ -436,7 +442,7 @@ export async function board(sport, league, game) {
     const line = top[Math.floor((top.length - 1) / 2)];
     const at = list.filter((x) => x.current.target.value === line);
     const it = at[0];
-    const who = await athlete(key.split('|')[0]);
+    const who = await athlete(key.split('|')[0], [String(game.home), String(game.away)]);
     if (!who) return;
     out.push({ athlete: who, stat: STATS[sport].find((s) => s.key === key.split('|')[1]), line, open: it.open?.target?.value ?? null, prices: pricesOf(at) });
   });
@@ -450,11 +456,14 @@ export async function board(sport, league, game) {
 
 // A player's id in the rows (ESPN's for the NFL, NBA and NHL; StatsAPI's for MLB, by his name and team)
 export function rowsIndex(sport, rows) {
+  // (MLB by name key and team, then the name key alone where it's one player's: an accent or a suffix ESPN
+  // writes and StatsAPI doesn't, or the other way, doesn't lose him)
   const byName = new Map();
-  for (const r of rows) byName.set(`${r.name}|${r.team}`, r.pid), byName.set(r.name, byName.get(r.name) === undefined || byName.get(r.name) === r.pid ? r.pid : null);
+  const one = (k, pid) => byName.set(k, byName.get(k) === undefined || byName.get(k) === pid ? pid : null);
+  if (sport === 'mlb') for (const r of rows) byName.set(`${nameKey(r.name)}|${r.team}`, r.pid), one(nameKey(r.name), r.pid);
   const pos = new Map(rows.map((r) => [r.pid, r.pos]));
   return {
-    pid: (a) => (sport === 'mlb' ? (byName.get(`${a.name}|${a.team}`) ?? byName.get(a.name) ?? null) : a.id),
+    pid: (a) => (sport === 'mlb' ? (byName.get(`${nameKey(a.name)}|${a.team}`) ?? byName.get(nameKey(a.name)) ?? null) : a.id),
     pos: (pid) => pos.get(pid) ?? null,
   };
 }
@@ -624,11 +633,10 @@ export function priceProps(sport, game, props, fitted, idx, exp, info, live, tru
 
 // (a team's players out for a coming game, by the injury report: out, doubtful, on IR or suspended; and the
 // questionable ones, counted at half in the work his group is missing)
-const OUT_STATUS = /^out|doubtful|injured reserve|suspension/i;
-const Q_STATUS = /questionable|game-time/i;
+// (timing.mjs's patterns, the context's too: ESPN's NBA and NHL reports say Day-To-Day for questionable)
 // (names: the ones in his group: the NFL's his position, the NHL's forwards or defensemen, the NBA's anyone)
 const groupOf = (sport, pos) => (sport === 'nba' ? 'all' : sport === 'nhl' ? (/^(C|LW|RW|F|W)$/.test(pos) ? 'F' : pos) : pos);
-function outOf(sport, live, team, pos) {
+export function outOf(sport, live, team, pos) {
   const report = (live?.injuries?.get(String(team)) ?? []).filter((p) => p.id);
   const list = report.filter((p) => OUT_STATUS.test(p.status));
   const q = report.filter((p) => !OUT_STATUS.test(p.status) && Q_STATUS.test(p.status));
@@ -650,12 +658,13 @@ function statusOf(sport, prop, live, home, game) {
   }
   if (sport === 'mlb') {
     const names = live?.names ?? [];
-    if (prop.stat.pitcher && names[home ? 0 : 1] && names[home ? 0 : 1] !== a.name) return { skip: true, why: `${a.name} not the probable starter` };
+    // (by name keys, ESPN's against StatsAPI's: an accent or a suffix doesn't make him someone else)
+    if (prop.stat.pitcher && names[home ? 0 : 1] && nameKey(names[home ? 0 : 1]) !== nameKey(a.name)) return { skip: true, why: `${a.name} not the probable starter` };
     const lineup = live?.lineupNames?.[home ? 0 : 1];
-    if (!prop.stat.pitcher && lineup?.length && !lineup.includes(a.name)) return { skip: true, why: `${a.name} not in the posted lineup` };
+    if (!prop.stat.pitcher && lineup?.length && !lineup.some((n) => nameKey(n) === nameKey(a.name))) return { skip: true, why: `${a.name} not in the posted lineup` };
     if (!prop.stat.pitcher && !lineup?.length) return { why: `lineup not posted (${home ? game.homeAbbr : game.awayAbbr})` };
   }
-  if (hurt && /questionable|day-to-day|game-time/i.test(hurt.status)) return { why: `${a.name} ${hurt.status.toLowerCase()}` };
+  if (hurt && Q_STATUS.test(hurt.status)) return { why: `${a.name} ${hurt.status.toLowerCase()}` };
   return {};
 }
 
@@ -755,16 +764,28 @@ async function mlbTotalBases(bet, pk) {
 
 // Whether an NFL player took a snap in a game, by nflverse's snap counts (offense, defense or special teams):
 // true or false once the game's counts are posted (a day or so after it), null before then or without the
-// game's nflverse row (facts.nfl: ESPN game id to it). Each season's counts read once a run
+// game's nflverse row (facts.nfl: ESPN game id to it). He's found by his ids (ESPN's, the bet's athlete, to
+// Pro Football Reference's, the counts' own, by nflverse's player list): one the list maps and who isn't in
+// the game's counts took no snap (false). One the list doesn't map is found by name, and not found that way is
+// unknown (null: the bet waits, then is void), never false: a nickname (Gabe for Gabriel) isn't a player who
+// sat, and a 0 he'd have been graded at only ever wins the under. Each season's counts, and the list, read once
+// a run
 const snapCounts = new Map();
-export async function nflTookSnap(facts, gameId, player) {
+let pfrOfEspn = null;
+export async function nflTookSnap(facts, gameId, player, athleteId = null) {
   const row = facts?.nfl?.get?.(gameId);
   if (!row?.game_id || !row.season) return null;
-  if (!snapCounts.has(row.season)) snapCounts.set(row.season, nflverseRows('snap_counts', `snap_counts_${row.season}.csv.gz`, ['game_id', 'player', 'offense_snaps', 'defense_snaps', 'st_snaps'], 6).catch(() => null));
+  if (!snapCounts.has(row.season)) snapCounts.set(row.season, nflverseRows('snap_counts', `snap_counts_${row.season}.csv.gz`, ['game_id', 'player', 'pfr_player_id', 'offense_snaps', 'defense_snaps', 'st_snaps'], 6).catch(() => null));
   const rows = ((await snapCounts.get(row.season)) ?? []).filter((s) => s.game_id === row.game_id);
   if (!rows.length) return null;
+  pfrOfEspn ??= nflverseRows('players', 'players.csv.gz', ['espn_id', 'pfr_id'], 24 * 7)
+    .then((list) => new Map((list ?? []).filter((p) => p.espn_id && p.espn_id !== 'NA' && p.pfr_id && p.pfr_id !== 'NA').map((p) => [String(Number(p.espn_id)), p.pfr_id])))
+    .catch(() => new Map());
+  const pfr = athleteId === null || athleteId === undefined ? null : ((await pfrOfEspn).get(String(athleteId)) ?? null);
+  const snapped = (s) => (Number(s.offense_snaps) || 0) + (Number(s.defense_snaps) || 0) + (Number(s.st_snaps) || 0) > 0;
+  if (pfr) return rows.filter((s) => s.pfr_player_id === pfr).some(snapped);
   const me = rows.filter((s) => nameKey(s.player) === nameKey(player));
-  return me.some((s) => (Number(s.offense_snaps) || 0) + (Number(s.defense_snaps) || 0) + (Number(s.st_snaps) || 0) > 0);
+  return me.length ? me.some(snapped) : null;
 }
 
 // A prop bet graded: won, lost, pushed (on the line), or void (he didn't play: no action)

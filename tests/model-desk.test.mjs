@@ -8,9 +8,10 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import { ROOT, loadEngine } from './support/engine.mjs';
-import { BANKROLL, decimal, intentOf, outcomeOf, settle, stakeFor } from '../libs/ranker/scripts/model/desk.mjs';
+import { BANKROLL, capGame, decimal, intentOf, makeRoom, outcomeOf, settle, stakeFor } from '../libs/ranker/scripts/model/desk.mjs';
 import { settleProp, statInFinal } from '../libs/ranker/scripts/model/props.mjs';
-import { buildPicks, level, levelOf, TOP } from '../libs/ranker/scripts/model/picks.mjs';
+import { buildPicks, level, levelOf, TOP, unlock } from '../libs/ranker/scripts/model/picks.mjs';
+import { gradedPick } from '../libs/ranker/scripts/accounts/settle-lib.mjs';
 import { BOOK, LEAGUES, PROP_CAPS } from '../libs/ranker/scripts/model/leagues.mjs';
 import { LINE_BOOKS, SPORT_KEYS } from '../libs/ranker/scripts/model/oddsapi.mjs';
 import { ESPN_PROVIDER } from '../libs/ranker/scripts/model/espn.mjs';
@@ -542,7 +543,7 @@ test("picks.mjs bands, by the Kelly score: 5% and up high, 2% medium, under low;
   assert.equal(levelOf({ ev: 0.02 }, 0.07), 'high');
 });
 
-test('buildPicks: the open bets not started, likeliest first, at most TOP, each marked published with its band then', () => {
+test('buildPicks: the open bets not started, likeliest first, at most TOP, each marked shown with its band then, published once locked', () => {
   const now = new Date('2026-10-09T12:00:00Z');
   const future = '2026-10-10T17:00:00Z';
   const bets = [
@@ -561,9 +562,22 @@ test('buildPicks: the open bets not started, likeliest first, at most TOP, each 
   assert.equal(out.picks[2].edge, false);
   assert.ok(out.picks[2].score < 0);
   assert.deepEqual(out.picks[0].teams.map((t) => t.abbr), ['TB', 'DAL']);
-  assert.ok(bets.find((b) => b.id === 'hi').published);
+  // (shown, not yet published: the news can still price it again till REPRICE_BY before the start)
+  assert.ok(bets.find((b) => b.id === 'hi').shown);
+  assert.equal(bets.find((b) => b.id === 'hi').published, undefined);
   assert.equal(bets.find((b) => b.id === 'mid').publishedLevel, 'medium');
   assert.equal(bets.find((b) => b.id === 'started').published, undefined);
+  // (locked: its game 10 minutes off, or started between runs: published at its chance when first shown)
+  const later = new Date('2026-10-10T16:50:00Z');
+  buildPicks('nfl', ledger, { spread: { fitted: true } }, new Map(), later);
+  assert.ok(bets.find((b) => b.id === 'hi').published);
+  assert.equal(bets.find((b) => b.id === 'hi').shown, undefined);
+  assert.equal(bets.find((b) => b.id === 'hi').publishedP, 0.64);
+  bets.find((b) => b.id === 'mid').status = 'won';
+  buildPicks('nfl', ledger, {}, new Map(), new Date('2026-10-11T12:00:00Z'));
+  assert.ok(bets.find((b) => b.id === 'mid').published);
+  // (one never shown isn't published)
+  assert.equal(bets.find((b) => b.id === 'guarded').published, undefined);
   // (the record: the published ones graded, a void prop not counted)
   assert.equal(out.record.graded, 2);
   assert.deepEqual([out.record.overall.wins, out.record.overall.losses, out.record.overall.pushes], [1, 0, 0]);
@@ -571,6 +585,43 @@ test('buildPicks: the open bets not started, likeliest first, at most TOP, each 
   // (and no more than TOP)
   const many = { bets: Array.from({ length: TOP + 9 }, (_, i) => bet({ id: `m${i}`, start: future, p: 0.5 + i / 1000 })) };
   assert.equal(buildPicks('nfl', many, {}, new Map(), now).picks.length, TOP);
+});
+
+test('unlock: a bet published before it was locked (the old rule) made shown again; a locked or graded one stays published', () => {
+  const now = new Date('2026-10-09T12:00:00Z');
+  const ledger = {
+    bets: [
+      bet({ id: 'early', start: '2026-10-10T17:00:00Z', published: true, publishedAt: '2026-10-09T01:00:00Z', publishedP: 0.6 }),
+      bet({ id: 'soon', start: '2026-10-09T12:10:00Z', published: true }),
+      bet({ id: 'done', start: '2026-10-01T17:00:00Z', status: 'won', published: true }),
+    ],
+  };
+  assert.equal(unlock(ledger, now), 1);
+  const [early, soon, done] = ledger.bets;
+  assert.deepEqual([early.published, early.shown, early.publishedP], [undefined, true, 0.6]);
+  assert.ok(soon.published && done.published);
+});
+
+test('makeRoom: earlier action bets taken back as far as the new edge bets need, props first, never an edge or locked one', () => {
+  const props = Array.from({ length: 9 }, (_, i) => ({ id: `p${i}`, market: 'prop', units: 0.5, ev: -0.01 * i, intent: 'action' }));
+  // (4.5u of action props open, a 2u edge spread now: 3 props make the room (5 - 4.5 + 1.5 = 2))
+  const out = makeRoom(props, 2, 5);
+  assert.equal(out.length, 3);
+  assert.deepEqual(out.map((b) => b.id), ['p8', 'p7', 'p6']);
+  const kept = capGame([{ id: 's', market: 'spread', units: 2, ev: 0.05, intent: 'edge' }], 4.5 - 1.5, 5);
+  assert.equal(kept.kept[0].units, 2);
+  // (room enough already, an edge bet open, or the action bets locked: none)
+  assert.deepEqual(makeRoom(props.slice(0, 2), 2, 5), []);
+  assert.deepEqual(makeRoom([{ id: 'e', market: 'spread', units: 4, ev: 0.03, intent: 'edge' }], 2, 5), []);
+  assert.deepEqual(makeRoom(props, 2, 5, () => false), []);
+});
+
+test("gradedPick: the bettor's count for the same player and stat, by its ref or any of the game's; never another player's", () => {
+  const graded = { id: 'g:prop:recYds:7', event: 'g', market: 'prop', propType: 'recYds', athlete: '7', side: 'over', status: 'lost', actual: 0 };
+  const other = { id: 'g:prop:recYds:8', event: 'g', market: 'prop', propType: 'recYds', athlete: '8', status: 'won', actual: 140 };
+  assert.equal(gradedPick({ ref: null, event: 'g', propType: 'recYds', athlete: '7', side: 'under' }, [other, graded]), graded);
+  assert.equal(gradedPick({ ref: other.id, event: 'g', propType: 'recYds', athlete: '7' }, [other, graded]), graded);
+  assert.equal(gradedPick({ ref: null, event: 'g', propType: 'rec', athlete: '7' }, [other, graded]), undefined);
 });
 
 test("leagues: DraftKings is the book everywhere, each league's setup whole, the front's sports and ESPN paths the bettor's", () => {

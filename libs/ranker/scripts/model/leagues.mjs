@@ -46,7 +46,9 @@ export const GAME_CAP = 5;
 //                 Sunday game's Saturday afternoon; the NBA's game-day one)
 //   lastChance    inside it, anything not bet yet is bet with whatever's known, the news it still lacks a
 //                 flag that cuts it to the 0.5-unit minimum (the hourly runs come late or not at all at times:
-//                 the window gives several runs to catch a game, the last chance at least two)
+//                 the window gives several runs to catch a game, the last chance at least two; and when the
+//                 runs come further apart than it, the last chance stretches to 1.5 times their recent gap,
+//                 12 hours at most: timing.mjs cadenceOf, lastChanceOf)
 // A bet placed is priced again whenever what it was priced on changes before the start (timing.mjs inputsOf:
 // the injury report's out and questionable lists, the starters, the goalies, the lineups): taken back and
 // placed again by the model as it is then

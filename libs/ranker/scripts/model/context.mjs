@@ -17,6 +17,7 @@
 import { goaliesInOrder, injuries, summary, teamNames, teamSchedule, gameOf } from './espn.mjs';
 import { RANKER_TERMS, rankerOf } from './teamstats.mjs';
 import { term } from './terms.mjs';
+import { Q_STATUS } from './timing.mjs';
 import { recordBox } from './playerlogs.mjs';
 import { OFFICIAL_TERMS, gatherOfficials, officialsOf, refereesOf } from './officials.mjs';
 import { FOOTBALL_TERMS, WX_COVER, footballOf, gatherFootball } from './football.mjs';
@@ -84,7 +85,8 @@ export const TERMS = {
   ],
 };
 
-const QUESTIONABLE = /questionable|day-to-day|game-time/i;
+// (questionable: timing.mjs's pattern, the props' too; out: theirs and MLB's injured list)
+const QUESTIONABLE = Q_STATUS;
 const OUT = /^out|doubtful|injured reserve|il$|-il|suspension/i;
 
 // ---------------------------------------------------------------------------
@@ -716,11 +718,15 @@ function statusOf(report, teamId, { id, name }) {
 // Starters, per sport: a function of a game that gives its starter terms, what they came from and any
 // worries (flags: a key player questionable, a starter unknown), and learns from it once it's final
 const STARTERS = {
-  // The NFL: whether each side starts its usual quarterback (the one with most of its last 4 starts this season),
+  // The NFL: whether each side starts its usual quarterback (the one with most of its last 4 starts this season;
+  // before its first start, last season's last 4: a team's week 1 is measured against the one it ended with),
   // and if not, how much worse the one starting is: each quarterback's offense's EPA a play on neutral downs in
   // his starts (recent seasons counting most), pulled toward a backup's by 6 starts; the usual one's less the
-  // starter's, over 0.15 (a typical starter against a typical backup), from -1 (better) to 3 (far worse); a
-  // starter not known yet (the usual one out, no one named): a typical backup
+  // starter's, over 0.15 (a typical starter against a typical backup), from -3 (far better: a starter back
+  // from an injury long enough for his backup to become the usual one) to 3 (far worse); a starter not known
+  // yet (the usual one out, no one named): a typical backup. A coming game flagged (the stake cut to the
+  // minimum) where a side's starter isn't its usual one and his own starts are too few to measure him (under
+  // 3), or its usual one is out with no one named, or there's no usual one to measure against
   nfl: (cfg, facts, live) => {
     const starts = new Map();
     const quality = new Map();
@@ -737,19 +743,29 @@ const STARTERS = {
       const one = (team, where) => {
         const qb = row?.[`${where}_qb_id`] || null;
         const name = row?.[`${where}_qb_name`] || null;
-        const mine = (starts.get(team) ?? []).filter((s) => s.season === g.season).slice(-4);
+        const all = starts.get(team) ?? [];
+        const now = all.filter((s) => s.season === g.season);
+        const mine = (now.length ? now : all.filter((s) => s.season === g.season - 1)).slice(-4);
         const tally = new Map();
         for (const s of mine) tally.set(s.qb, (tally.get(s.qb) ?? 0) + 1);
         const usual = [...tally].sort((x, y) => y[1] - x[1])[0]?.[0] ?? null;
         const usualName = mine.findLast((s) => s.qb === usual)?.name ?? null;
         let backup = usual && qb && qb !== usual ? 1 : 0;
+        const abbr = where === 'home' ? g.homeAbbr : g.awayAbbr;
+        let usualOut = false;
         if (l && usual) {
           const st = statusOf(l.injuries, team, { name: usualName });
-          if (st === 'out') backup = 1;
+          if (st === 'out') (backup = 1), (usualOut = true);
           if (st === 'questionable') flags.push(`QB ${usualName} questionable`);
         }
         const starter = backup && qb && qb !== usual ? qb : null;
-        if (backup) backup = Math.round(Math.max(-1, Math.min(3, (qOf(usual) - (starter ? qOf(starter) : BACKUP)) / 0.15)) * 100) / 100;
+        if (backup) backup = Math.round(Math.max(-3, Math.min(3, (qOf(usual) - (starter ? qOf(starter) : BACKUP)) / 0.15)) * 100) / 100;
+        // (a coming game's quarterback the model can't measure well: flagged, the stake cut to the minimum)
+        if (l && !g.final) {
+          if (!usual && qb) flags.push(`QB ${name}: no usual quarterback to measure him against (${abbr})`);
+          else if (starter && (quality.get(starter)?.n ?? 0) < 3) flags.push(`QB ${name ?? 'a backup'} starts for ${usualName}, with too few starts to measure him (${abbr})`);
+          else if (usualOut && !starter) flags.push(`QB ${usualName} out, his starter not named (${abbr})`);
+        }
         return { backup, name: backup && !qb ? null : name, usual: usualName };
       };
       const h = one(g.home, 'home');
@@ -818,6 +834,19 @@ const STARTERS = {
               out += r.eff / 2;
               if (r.eff >= 20) flags.push(`a top player questionable (${where === 'h' ? g.homeAbbr : g.awayAbbr})`);
             }
+          }
+        }
+        // (a coming game: a regular (20+ minutes, 3+ games) gone 10 or more of its games, so off the list above,
+        // and not listed out now: back, maybe, or about to be, and the team's rating learned from the games
+        // without him; nothing here prices his return, so it's flagged, the stake cut to the minimum)
+        if (!g.final && l?.injuries) {
+          const n = played.get(team) ?? 0;
+          for (const id of roster.get(team) ?? []) {
+            const p = players.get(id);
+            if (!p || p.team !== team || p.gp < 3 || p.min / p.gp < 20 || n - p.last < 10) continue;
+            if (statusOf(l.injuries, team, { id }) === 'out') continue;
+            flags.push(`a regular back from ${n - p.last} games out, maybe (${where === 'h' ? g.homeAbbr : g.awayAbbr}): his return not priced`);
+            break;
           }
         }
         return { out: Math.round(out * 10) / 10, players: names.length };

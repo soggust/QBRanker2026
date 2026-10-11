@@ -3,7 +3,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { TIMING, LEAGUES } from '../libs/ranker/scripts/model/leagues.mjs';
-import { inputChanges, inputsOf, newsMissing, phaseOf, propAsk } from '../libs/ranker/scripts/model/timing.mjs';
+import { cadenceOf, inputChanges, inputsOf, lastChanceOf, newsMissing, phaseOf, propAsk } from '../libs/ranker/scripts/model/timing.mjs';
 import { fitTrust } from '../libs/ranker/scripts/model/desk.mjs';
 
 const H = 36e5;
@@ -25,6 +25,42 @@ test('phaseOf: early before the window, open in it, last inside the last chance'
   assert.equal(phaseOf('nfl', 'props', 2 * H), 'last');
   assert.equal(phaseOf('nba', 'props', 7 * H), 'early');
   assert.equal(phaseOf('nba', 'props', 5 * H), 'open');
+});
+
+test('cadenceOf / phaseOf: runs coming further apart than the last chance stretch it (1.5 times the median gap, 12 hours at most)', () => {
+  const at = (hours) => hours.map((h) => new Date(Date.UTC(2026, 9, 9) + h * H).toISOString());
+  assert.equal(cadenceOf(at([0, 1])), null);
+  // (gaps 8.7, 11, 3.9, 5.8, 6.6, 5.3, 3.9, 3.3: the median 5.55)
+  const gap = cadenceOf(at([0, 8.7, 19.7, 23.6, 29.4, 36, 41.3, 45.2, 48.5]));
+  assert.ok(Math.abs(gap - 5.55) < 1e-9);
+  assert.ok(Math.abs(lastChanceOf('mlb', gap) - 8.325) < 1e-9);
+  // (an MLB game 7 hours off: early by the hourly design, but the next run likely comes after its start)
+  assert.equal(phaseOf('mlb', 'lines', 7 * H), 'early');
+  assert.equal(phaseOf('mlb', 'lines', 7 * H, gap), 'last');
+  // (hourly runs: the sport's own)
+  assert.equal(lastChanceOf('nfl', 1), 3);
+  assert.equal(lastChanceOf('nba', 40), 12);
+});
+
+test("inputChanges: an MLB starter scratched to none named is news; a side's whole injury list gone empty waits a run", () => {
+  const was = inputsOf('mlb', game, { pk: 1, hp: '11', ap: '12', names: ['S Eleven', 'S Twelve'], lineups: [['1'], ['2']] }, null);
+  const tbd = inputsOf('mlb', game, { pk: 1, hp: null, ap: '12', lineups: [['1'], ['2']] }, null);
+  assert.deepEqual(
+    inputChanges(was.hash, tbd, { game }).map((c) => c.words),
+    ['HOM starting pitcher (none named now)'],
+  );
+  // (StatsAPI unread: still no change)
+  assert.deepEqual(inputChanges(was.hash, inputsOf('mlb', game, { hp: null }, null, { statsapi: false })), []);
+  const before = inputsOf('nba', game, { injuries: report([{ id: '5', name: 'A Five', status: 'Out' }, { id: '6', name: 'A Six', status: 'Day-To-Day' }], []) }, null);
+  const empty = inputsOf('nba', game, { injuries: report([], []) }, null);
+  assert.deepEqual(inputChanges(before.hash, empty, { game, before: before.parts }), []);
+  // (a second run agreeing: the run before saw it empty too)
+  assert.deepEqual(
+    inputChanges(before.hash, empty, { game, before: empty.parts }).map((c) => c.key),
+    ['out:h', 'q:h'],
+  );
+  // (day-to-day is questionable)
+  assert.equal(before.parts['q:h'], '6');
 });
 
 test('newsMissing: the NHL waits for both goalies; MLB lines for both starters and lineups; a batter for his lineup', () => {

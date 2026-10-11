@@ -165,6 +165,27 @@ export function oneSide(picks, placed = []) {
   });
 }
 
+// The open action bets on a game to take back so its new edge bets fit under the cap: across runs the cap fills
+// first come, first served (an MLB lineup's batter props, 0.5u action bets each, can be placed hours before
+// the game lines wait out the other lineup), so an action bet, with no edge, would otherwise keep an edge bet
+// from the room capGame gives it within a run. open: the game's open bets ({ id, units, ev, intent }); need:
+// the new edge bets' units; takeable(bet): whether it may still be taken back (not locked, run.mjs). The
+// least worth having first (a prop before a game market, the lower return first), only as many as the room
+// needs (all of them, if it needs more: capGame then scales the edge bets into what there is)
+export function makeRoom(open, need, cap, takeable = () => true) {
+  const used = open.reduce((t, b) => t + b.units, 0);
+  let short = need - (cap - used);
+  if (short <= 1e-9) return [];
+  const pool = open.filter((b) => intentOf(b) !== 'edge' && takeable(b)).sort((a, b) => (b.market === 'prop') - (a.market === 'prop') || a.ev - b.ev);
+  const out = [];
+  for (const b of pool) {
+    if (short <= 1e-9) break;
+    out.push(b);
+    short -= b.units;
+  }
+  return out;
+}
+
 // A game's new bets under its cap: the units already open on it (placed) and the new ones' at most cap. Filled
 // in order of worth: the edge bets first, at their full stakes while they fit (over the room on their own,
 // scaled down alike among themselves, by half units, 0.5 the least, the smaller return dropped first); then

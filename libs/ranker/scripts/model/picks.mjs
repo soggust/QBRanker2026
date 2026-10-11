@@ -23,11 +23,36 @@
 //   reason   written from the bet's own numbers: the model's chance against the book's, the price and book,
 //            the projection (a prop's) or the expected score, what the context saw (a backup quarterback, the
 //            weather, a back-to-back, players out, the goalie or pitcher), and a line that's moved its way
-//   record   the picks' own: each bet the page showed is marked published (with its chance then), and the
-//            record is of those only, overall and by band, not of every bet the desk made
+//   record   the picks' own: each bet the page shows is marked shown (with its chance and Kelly score when
+//            first shown, publishedP and publishedKelly), and published once it's locked: REPRICE_BY before its
+//            start (timing.mjs), when the news can no longer price it again, or the first run after the start
+//            if the runs skipped that. The record is of the published ones only, overall and by band, not of
+//            every bet the desk made. Till then a shown bet is the desk's like any other: the news (or --replace)
+//            prices it again, and the page shows the new one; one that falls out of the top before it's locked
+//            loses its shown mark. (Published used to be set the run a bet was first shown, which froze the best
+//            bets at their first price whatever the news: unlock turns those back into shown ones)
 
 import { round } from './ratings.mjs';
 import { decimal, intentOf, record } from './desk.mjs';
+import { REPRICE_BY } from './timing.mjs';
+
+// (a bet locked: its game starts within REPRICE_BY, or has started; nothing prices it again from here)
+const locked = (b, now) => Date.parse(b.start) - now.getTime() <= REPRICE_BY;
+
+// The open bets published before they were locked (under the old rule: published the run they were first
+// shown), turned back into shown ones, their chance and score when shown kept: so the news and --replace can
+// price them again. Returns how many
+export function unlock(ledger, now) {
+  let n = 0;
+  for (const b of ledger.bets) {
+    if (!b.published || b.status !== 'open' || locked(b, now)) continue;
+    b.shown = true;
+    delete b.published;
+    delete b.publishedAt;
+    n++;
+  }
+  return n;
+}
 
 export const TOP = 40;
 // (the confidence bands, by the Kelly score: a bankroll's 5% or more high (the page's LOVE), 2% or more medium (LIKE),
@@ -110,8 +135,14 @@ export function reasonOf(bet, game) {
   // (what the context saw)
   const notes = [];
   const s = c.starters ?? {};
-  if (s.backup?.[0]) notes.push(`${home} starts a backup QB${s.home ? ` (${s.home})` : ''}`);
-  if (s.backup?.[1]) notes.push(`${away} starts a backup QB${s.away ? ` (${s.away})` : ''}`);
+  // (over 0, a worse quarterback than the usual one; under 0, a better one: the starter back from an injury)
+  for (const [i, t, qb] of [
+    [0, home, s.home],
+    [1, away, s.away],
+  ]) {
+    if (s.backup?.[i] > 0) notes.push(`${t} starts a backup QB${qb ? ` (${qb})` : ''}`);
+    else if (s.backup?.[i] < 0) notes.push(`${t} has its better QB back${qb ? ` (${qb})` : ''}`);
+  }
   if (s.missing && (s.missing[0] >= 15 || s.missing[1] >= 15)) {
     for (const [i, t] of [home, away].entries()) if (s.missing[i] >= 15) notes.push(`${t} is missing players worth ${Math.round(s.missing[i])} production a game`);
   }
@@ -148,8 +179,15 @@ function whereOf(bet, game) {
 }
 
 // The sport's picks: its bets on games not started, the best Kelly score first, the top TOP; each one marked
-// published on the ledger (its level then), and the published ones' record
+// shown on the ledger (its level then), published once it's locked, and the published ones' record
 export function buildPicks(sport, ledger, trust, games, now) {
+  // (the ones shown before and locked since (their game within REPRICE_BY, or started between runs, graded
+  // even): published, at their chance and level when first shown)
+  for (const b of ledger.bets) {
+    if (!b.shown || b.published || !locked(b, now)) continue;
+    Object.assign(b, { published: true, publishedAt: now.toISOString() });
+    delete b.shown;
+  }
   const open = ledger.bets.filter((b) => b.status === 'open' && Date.parse(b.start) > now.getTime() && !b.context?.guard);
   // (one a bet: a --dry run prices placed bets again in memory)
   const once = [...new Map(open.map((b) => [b.id, b])).values()];
@@ -160,8 +198,18 @@ export function buildPicks(sport, ledger, trust, games, now) {
   });
   scored.sort((x, y) => y.score - x.score || y.edgeScore - x.edgeScore || x.b.start.localeCompare(y.b.start));
   const top = scored.slice(0, TOP);
+  const inTop = new Set(top.map((x) => x.b));
+  // (one shown before that's dropped out of the top, not yet locked: no longer shown)
+  for (const { b } of scored) {
+    if (inTop.has(b) || !b.shown) continue;
+    for (const k of ['shown', 'publishedP', 'publishedKelly', 'publishedLevel']) delete b[k];
+  }
   for (const { b, score } of top) {
-    if (!b.published) Object.assign(b, { published: true, publishedAt: now.toISOString() });
+    // (shown now; published once locked: at REPRICE_BY before the start, here or the next run)
+    if (locked(b, now)) {
+      if (!b.published) Object.assign(b, { published: true, publishedAt: now.toISOString() });
+      delete b.shown;
+    } else if (!b.published) b.shown = true;
     // (its chance and its Kelly score when shown, and its band: fixed from then on, so the record by band is
     // what the page said at the time)
     if (!Number.isFinite(b.publishedP)) b.publishedP = b.p;

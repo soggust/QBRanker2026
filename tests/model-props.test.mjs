@@ -2,7 +2,7 @@
 // eligible from before the game, the push on a whole-number line, the starting goalie, the work missing.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { STATS, markEligible, markStarters, statInFinal } from '../libs/ranker/scripts/model/props.mjs';
+import { STATS, markEligible, markStarters, outOf, statInFinal } from '../libs/ranker/scripts/model/props.mjs';
 import { lineChances, makeModel, nbOver, rAt } from '../libs/ranker/scripts/model/project.mjs';
 import { nflMatchups } from '../libs/ranker/scripts/model/matchups.mjs';
 import { GAP, chanceAt } from '../libs/ranker/scripts/model/desk.mjs';
@@ -213,4 +213,23 @@ test("the work missing: a core player's one game out counts, a fringe regular's 
   assert.equal(at('d', 'g6').vac, 0);
   assert.ok(at('d', 'g7').vac > 0);
   assert.ok(at('d', 'g8').vac > 0);
+});
+
+test("outOf: a teammate listed Day-To-Day (ESPN's NBA and NHL word) is questionable, counted at half in the work missing; Out is out", () => {
+  const live = {
+    injuries: new Map([
+      [
+        '1',
+        [
+          { id: '5', name: 'A Five', status: 'Day-To-Day', pos: 'G' },
+          { id: '6', name: 'A Six', status: 'Out', pos: 'F' },
+          { id: '7', name: 'A Seven', status: 'Questionable', pos: 'C' },
+        ],
+      ],
+    ]),
+  };
+  const out = outOf('nba', live, '1', 'G');
+  assert.deepEqual([...out.questionable].sort(), ['5', '7']);
+  assert.deepEqual([...out.ids], ['6']);
+  assert.deepEqual(out.qNames.sort(), ['A Five', 'A Seven']);
 });

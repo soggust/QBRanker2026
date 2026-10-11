@@ -14,7 +14,7 @@
 // A bet whose premise broke (any of the first kind) counts less in what the desk learns from its graded
 // bets (DISRUPTED_WEIGHT, in run.mjs): an in-game injury is noise, not evidence against the model. Only an
 // exit that isn't the game's own verdict breaks it: an injury, an ejection. One for how he played is evidence
-// and counts in full (only noted): a goalie pulled after 3 or more goals, a starting pitcher knocked out (4 or
+// and counts in full (only noted): a goalie pulled after 2 or more goals, a starting pitcher knocked out (2 or
 // more runs), a quarterback replaced after 10 or more throws, a player's minutes, time on ice, plate
 // appearances or snaps cut but not to a third of his usual (foul trouble, a benching, a pinch hitter); unless
 // the story says he was hurt or thrown out. An NHL side's starting goalie is the first in net (espn.mjs
@@ -146,8 +146,10 @@ export function eventsOf(sport, game, body, usual) {
       const col = (k, i) => ((s?.labels ?? []).indexOf(k) >= 0 ? s.labels.indexOf(k) : i);
       // (the starter first: ESPN lists a pulled starter after his reliever, espn.mjs goaliesInOrder)
       const list = goaliesInOrder(s?.athletes, body.article?.story).map((a) => ({ name: a.athlete.displayName, min: Number(String(a.stats[toi]).split(':')[0]) || 0, ga: Number(a.stats[col('GA', 0)]) || 0, sa: Number(a.stats[col('SA', 1)]) || 0 }));
-      // (pulled after 3 or more goals: for how he played, noted; with fewer, an injury most likely: broken)
-      if (list.length > 1 && list[1].min >= 5) add(list[0].ga < 3 || hurt(list[0].name), 'goalie', `${list[0].name} pulled (${list[0].ga} goal${list[0].ga === 1 ? '' : 's'} on ${list[0].sa} shots, ${team})`);
+      // (pulled hurt by the story, or after a goal at most (an injury most likely): broken; after 2 or more,
+      // for how he played, noted: that game leans to the over and against his side, and weighing it down would
+      // weigh those results down alike)
+      if (list.length > 1 && list[1].min >= 5) add(list[0].ga <= 1 || hurt(list[0].name), 'goalie', `${list[0].name} pulled (${list[0].ga} goal${list[0].ga === 1 ? '' : 's'} on ${list[0].sa} shots, ${team})`);
     }
     if (sport === 'mlb') {
       const s = p.statistics?.find((x) => x.type === 'pitching' || x.name === 'pitching');
@@ -164,8 +166,9 @@ export function eventsOf(sport, game, body, usual) {
         // (an opener, a reliever starting by design: his appearances before averaged under 3 innings)
         const usualOuts = usual?.outs?.(first.athlete.displayName);
         const opener = usualOuts !== null && usualOuts !== undefined && usualOuts < 9;
-        // (knocked out, 4 or more runs: for how he pitched, noted; with fewer, hurt, thrown out or rained out: broken)
-        add(!opener && (runs < 4 || hurt(first.athlete.displayName)), opener ? 'opener' : 'starter', `${first.athlete.displayName} ${opener ? 'opened' : 'out early'} (${first.stats[ip]} IP${pitches ? `, ${pitches} pitches` : ''}${runs ? `, ${runs} R` : ''}, ${team})`);
+        // (hurt or thrown out by the story, or out early with a run at most (hurt, thrown out or rained out, most
+        // likely): broken; with 2 or more, knocked out for how he pitched: noted)
+        add(!opener && (runs <= 1 || hurt(first.athlete.displayName)), opener ? 'opener' : 'starter', `${first.athlete.displayName} ${opener ? 'opened' : 'out early'} (${first.stats[ip]} IP${pitches ? `, ${pitches} pitches` : ''}${runs ? `, ${runs} R` : ''}, ${team})`);
       }
     }
   }

@@ -164,18 +164,21 @@ export function settlePlayBet(bet, game, { observations = [], propValue, now = D
   return { status: r.status, profit: r.status === 'won' ? toWin(bet.stake, bet.odds) : r.status === 'lost' ? -bet.stake : 0, final: r.final };
 }
 
-// (the bettor's graded pick a prop is settled by: the one its ref names, and only if it's the same stat of the
-// same player; a ref to another pick, one whose player had a big night, would otherwise settle it by that count)
+// (the bettor's graded pick a prop is settled by: the same stat of the same player in the same game, the one
+// its ref names first, else any (the count doesn't depend on the side or the ref: a bet against the bot, or one
+// whose ref isn't the bettor's, is graded by the bettor's count too, its snap counts and all, not the box score
+// alone); never one of another player or stat, whose big night would otherwise settle it. ledgerBets: the
+// game's own (settle.mjs filters by event); one with an event that isn't the bet's is passed over)
 export function gradedPick(bet, ledgerBets) {
-  return (ledgerBets ?? []).find(
-    (b) =>
-      b.id === bet.ref &&
-      b.market === 'prop' &&
-      b.propType === bet.propType &&
-      String(b.athlete) === String(bet.athlete) &&
-      b.status !== 'open' &&
-      b.actual !== undefined,
-  );
+  const same = (b) =>
+    b.market === 'prop' &&
+    b.propType === bet.propType &&
+    String(b.athlete) === String(bet.athlete) &&
+    (b.event === undefined || bet.event === undefined || String(b.event) === String(bet.event)) &&
+    b.status !== 'open' &&
+    b.actual !== undefined;
+  const list = ledgerBets ?? [];
+  return list.find((b) => b.id === bet.ref && same(b)) ?? list.find(same);
 }
 
 // (whether a settled bet pays into the wallet as it is now: the same run (a reload starts another) and placed
