@@ -177,3 +177,40 @@ test("nhlMatchups: a skater's power-play time and his opponent's penalties, from
   assert.ok(CTX.pp({}, true, null, live) > 0);
   assert.equal(CTX.pp({}, true, null, { ...live, ppTime: 0 }), 0);
 });
+
+test("an MLB starter's rest: skipped from LAYOFF days or a debut from May, flagged on a long rest or a late debut", async () => {
+  const { restGuard, LAYOFF, LONG_REST } = await import('../libs/ranker/scripts/model/props.mjs');
+  assert.equal(LAYOFF, 13);
+  assert.equal(LONG_REST, 11);
+  assert.equal(restGuard(5, false, '2026-06-10T23:05Z'), null);
+  assert.equal(restGuard(10, false, '2026-07-18T23:05Z'), null); // (the All-Star break)
+  assert.equal(restGuard(11, false, '2026-06-10T23:05Z'), 'long');
+  assert.equal(restGuard(12, false, '2026-06-10T23:05Z'), 'long');
+  assert.equal(restGuard(13, false, '2026-06-10T23:05Z'), 'layoff'); // (a backdated 15-day IL stint)
+  assert.equal(restGuard(16, false, '2026-06-10T23:05Z'), 'layoff');
+  assert.equal(restGuard(null, true, '2026-03-28T20:05Z'), null);
+  assert.equal(restGuard(null, true, '2026-04-20T20:05Z'), 'late');
+  assert.equal(restGuard(null, true, '2026-05-02T20:05Z'), 'debut');
+});
+
+test("the work missing: a core player's one game out counts, a fringe regular's from his second in a row, history and live alike", async () => {
+  const { nhlMatchups } = await import('../libs/ranker/scripts/model/matchups.mjs');
+  const sk = (pid, toi, game, d) => ({ pid, name: pid, pos: 'D', date: `2025-11-${String(d).padStart(2, '0')}T00:00Z`, season: 2026, team: '1', opp: '2', game, home: true, s: { toi, pptoi: 0, sog: 2, pts: 0 } });
+  // (defensemen: a and b core (18 minutes or more), c a third-pair regular (16: under core, over regular))
+  const pairs = { a: 24, b: 21, c: 16, d: 15 };
+  const rows = [];
+  for (let d = 1; d <= 5; d++) for (const [pid, toi] of Object.entries(pairs)) rows.push(sk(pid, toi, `g${d}`, d));
+  const base = rows.slice();
+  const m0 = nhlMatchups(base);
+  // (live, a fringe regular's first game out on the report: not counted; a core player's: counted)
+  assert.equal(m0.live('d', '1', '2', 'D', 2026, new Set(['c'])).vac, 0);
+  assert.ok(m0.live('d', '1', '2', 'D', 2026, new Set(['a'])).vac > 0);
+  // (game 6: c scratched; game 7: c out again; game 8: a out)
+  for (const g of ['g6', 'g7']) for (const [pid, toi] of Object.entries(pairs)) if (pid !== 'c') rows.push(sk(pid, toi, g, Number(g.slice(1))));
+  for (const [pid, toi] of Object.entries(pairs)) if (pid !== 'a') rows.push(sk(pid, toi, 'g8', 8));
+  nhlMatchups(rows);
+  const at = (pid, game) => rows.find((r) => r.pid === pid && r.game === game);
+  assert.equal(at('d', 'g6').vac, 0);
+  assert.ok(at('d', 'g7').vac > 0);
+  assert.ok(at('d', 'g8').vac > 0);
+});

@@ -19,16 +19,18 @@
 //   the player's questionable, a questionable teammate's being in or out moves his share of his group's work,
 //   an outdoor game's forecast failed (or a retractable roof isn't yet said open or closed) where his
 //   projection weighs the weather (wind, cold, rain), the forecast moves his projection 10% or more, the other
-//   side's starter his projection weighs isn't listed yet (an NHL goalie, an MLB pitcher), or (the
-//   NFL) his team's roster can't be read or the snap counts are missing for some games of the
+//   side's starter his projection weighs isn't listed yet (an NHL goalie, an MLB pitcher), an MLB starter's
+//   first start in LONG_REST days or more or his first of the season from LATE_DEBUT, his team's roster
+//   can't be read (the NFL, NBA, NHL) or (the NFL) the snap counts are missing for some games of the
 //   history; skipped at twice the move or when he's out (or not in a posted lineup, or not the probable
 //   starting pitcher or goalie), an MLB starter's first start in LAYOFF days or more (or his first of the
-//   season from May on: back from injury, his pitch count held down), when the work his group is missing now differs from what it was in the games
-//   his numbers come from and the projection can't size it (teammates out: his role up; teammates back from an
-//   absence that fed his numbers: his role down), or when its chance is more than GAP.prop from the book's
-//   (the market knowing something it doesn't); the NFL's also when its roster can't be read and his numbers
-//   were made with teammates missing (whether they're back or gone can't be told), or the snap counts are
-//   missing for a season's quarter or more of the history's games
+//   season from May on: back from injury, his pitch count held down), when the work his group is missing now
+//   differs from what it was in the games his numbers come from and the projection can't size it (teammates
+//   out: his role up; teammates back from an absence that fed his numbers: his role down), or when its
+//   chance is more than GAP.prop from the book's (the market knowing something it doesn't); also when his
+//   team's roster can't be read and his numbers were made with teammates missing (whether they're back or
+//   gone can't be told), or (the NFL) the snap counts are missing for a season's quarter or more of the
+//   history's games
 //
 // The history it's fit on (fitProps): every game a player took the field at the stat's positions, whatever he
 // did in it, as DraftKings grades him (STATS played), and of those the ones a book would have posted his prop
@@ -44,7 +46,7 @@ import { mlbMatchups, nbaMatchups, nflMatchups, nhlMatchups } from './matchups.m
 import { CACHE, get, nflverseRows, pool } from './sources.mjs';
 import { PROP_BOOKS, SPORT_KEYS, american, call, canSpend, hasKey } from './oddsapi.mjs';
 import { round } from './ratings.mjs';
-import { ESPN_PROVIDER, goaliesInOrder } from './espn.mjs';
+import { ESPN_PROVIDER, ROSTER_MIN, goaliesInOrder } from './espn.mjs';
 import { BOOK } from './leagues.mjs';
 
 const CORE = 'https://sports.core.api.espn.com/v2/sports';
@@ -56,8 +58,27 @@ export const PROP_ODDS = -110;
 // its start, then is no action: the bettor's (run.mjs) and the play-money settler's (settle-lib.mjs) alike, so
 // the same pick never ends one way on the desk and another on a user's account)
 export const PROP_WAIT = 4 * 864e5;
-// (an MLB starter's days since he last pitched at which his start is skipped: a layoff, an injury most likely)
-export const LAYOFF = 20;
+// (an MLB starter's days since he last pitched at which his start is skipped: a layoff, an injury most likely.
+// A 15-day IL stint, backdated, brings him back 13 to 19 days on; a normal turn, the All-Star break or a
+// skipped start, 10 or 11 at most. In 2025-26's starts, 12 to 19 days off threw 0.92 of his usual pitches, a
+// third of them under 0.85, against 1.01 and 12% on normal rest. LONG_REST: from it, flagged (0.5u): 11 and
+// 12 days held a little lower, 0.95 to 0.97)
+export const LAYOFF = 13;
+export const LONG_REST = 11;
+// (his first start of the season from this day on (month-day; opening day's in late March) flagged as late:
+// back from injury maybe; from May on, skipped)
+export const LATE_DEBUT = '04-08';
+// (whether an MLB starter's start is a layoff's or a debut from May on (skip), a long rest's or a late debut's
+// (flag), or none (null): restDays his days since he last pitched this season (null: none yet), debut his first
+// start of it, date the game's)
+export function restGuard(restDays, debut, date) {
+  const md = String(date ?? '').slice(5, 10);
+  if ((restDays ?? 0) >= LAYOFF) return 'layoff';
+  if (debut && md >= '05-01') return 'debut';
+  if ((restDays ?? 0) >= LONG_REST) return 'long';
+  if (debut && md >= LATE_DEBUT) return 'late';
+  return null;
+}
 
 const stat = (key, label, match, extra = {}) => ({ key, label, match, ...extra });
 // (which rows count as a game he played the prop in: every game he took the field at the stat's positions,
@@ -529,21 +550,24 @@ export function priceProps(sport, game, props, fitted, idx, exp, info, live, tru
     const vs = f.params.vs ?? 0;
     const shareAt = (q) => f.matchups.live(pid, row.team, row.opp, row.pos, game.season, missOf(q), extra).vacs?.[vs] ?? 0;
     const qShift = f.matchups && prop.stat.vacated && out.questionable.size ? Math.abs(shareAt(1) - shareAt(0)) : 0;
-    // (the NFL's roster: without it a teammate who's left counts as here, the work he leaves unseen)
+    // (his team's roster (the NFL's, the NBA's, the NHL's: espn.mjs ROSTER_MIN): without it a teammate who's
+    // left counts as here, the work he leaves unseen)
     // A roster unread can only hide a teammate who's gone, so the work missing now reads low: where his
     // numbers were made with work missing (the cut then over the cut now by 0.1 or more), the term (or the
     // guard below) would take him down for a teammate who may never be back; skipped, flagged where it can't
     // move him
-    const noRoster = sport === 'nfl' && !!prop.stat.vacated && !roster;
+    const noRoster = !!ROSTER_MIN[sport] && !!prop.stat.vacated && !roster;
     const rosterBlind = noRoster && vacThen - vacNow >= 0.1;
     // (the NFL's snap counts missing for games of the history (playerlogs.mjs snapGap): those games hold only
     // the players who got the ball, the fit leaning over; a season's quarter or more of them, skipped)
     const snapGap = sport === 'nfl' ? f.snapGap : null;
     const gapped = gapGuard('prop', model, fair);
-    // (an MLB starter back from a long layoff (his first start in LAYOFF days or more this season, or his first
-    // of the season from May on): off the injured list most likely, his pitch count held down in a way his
-    // numbers can't show)
-    const layoff = sport === 'mlb' && prop.stat.pitcher && ((row.restDays ?? 0) >= LAYOFF || (row.debut && Number(String(game.date).slice(5, 7)) >= 5));
+    // (an MLB starter back from a layoff (his first start in LAYOFF days or more this season, or his first of
+    // the season from May on): off the injured list most likely, his pitch count held down in a way his
+    // numbers can't show; skipped. A long rest (LONG_REST days) or a first start of the season from LATE_DEBUT,
+    // flagged)
+    const rest = sport === 'mlb' && prop.stat.pitcher ? restGuard(row.restDays, row.debut, game.date) : null;
+    const layoff = rest === 'layoff' || rest === 'debut';
     // (the other side's starter the projection weighs (the fit kept the term), not named yet: the NHL's goalie
     // (one expected counts: ESPN's usual word till the morning skate), MLB's pitcher; the context assumes one)
     const oppUnknown =
@@ -570,6 +594,8 @@ export function priceProps(sport, game, props, fitted, idx, exp, info, live, tru
     else if (qShift >= 0.15) guard = { why: `teammate questionable (${out.qNames.join(', ') || 'at his position'}): his share depends on it` };
     else if (oppUnknown) guard = { why: sport === 'nhl' ? "no probable goalie listed for the other side: his projection weighs one assumed" : "the other side's starting pitcher not named: his projection weighs him" };
     else if (snapGap?.games) guard = { why: `the snap counts missing for ${snapGap.games} games: the history holds only the players who got the ball there` };
+    else if (rest === 'long') guard = { why: `${a.name}'s first start in ${row.restDays} days: his pitch count may be held down` };
+    else if (rest === 'late') guard = { why: `${a.name}'s first start of the season, late: back from injury maybe, his pitch count may be held down` };
     else if (noRoster) guard = { why: "his team's roster not read: a teammate who's left can't be told from one who's here" };
     priced.push({
       prop,

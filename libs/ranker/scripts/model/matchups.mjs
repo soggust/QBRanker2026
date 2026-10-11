@@ -360,10 +360,35 @@ export function teamWork({ groupOf, measures, regular, floor, rate = 0.35 }) {
       x.v = x.v.map((v, m) => (!Number.isFinite(now[m]) ? v : v === null ? now[m] : v + (now[m] - v) * rate));
       w.p.set(r.pid, x);
     }
-    for (const [id, x] of w.p) if (!played.has(id)) x.v = x.v.map((v) => (v === null ? null : v * (1 - rate)));
+    for (const [id, x] of w.p) {
+      if (played.has(id)) x.out = 0;
+      else (x.v = x.v.map((v) => (v === null ? null : v * (1 - rate)))), (x.out = (x.out ?? 0) + 1);
+    }
   };
-  return { vacated, learn, none: NONE };
+  // (who counts as missing, by what was known before the game: one missing (missOf, 0 to 1) who's a core
+  // player (his first measure core(group) a game or more), or who missed the team's game before too. A fringe
+  // regular's one game out is most often a healthy scratch or a coach's decision, which no injury report
+  // carries: counted in the history, it would hold work missing that a live price never can, the term leaning
+  // every projection down. The same rule for the history (missOf: not in the box score) and a coming game
+  // (missOf: out by the injury report, off the roster), so the two read alike)
+  const gate = (team, season, missOf, core) => {
+    const w = workOf(team, season);
+    return (id) => {
+      const m = Number(missOf(id)) || 0;
+      if (m <= 0) return 0;
+      const x = w.p.get(id);
+      return !x || (x.v[0] ?? 0) >= core(x.g) || (x.out ?? 0) >= 1 ? m : 0;
+    };
+  };
+  const histMiss = (team, season, playing, core) => gate(team, season, (id) => (playing.has(id) ? 0 : 1), core);
+  return { vacated, learn, gate, histMiss, none: NONE };
 }
+
+// (the core players whose one game out counts at once (teamWork gate, the history's and a coming game's alike):
+// the NBA's 24 minutes a game or more, the NHL's forwards' 14 minutes on ice, defensemen's 18; a regular under
+// it, from his second game out in a row)
+export const NBA_CORE = 24;
+export const NHL_CORE = { F: 14, D: 18 };
 
 // (a coming game's teammates missing, as a function of id (0 to 1) from a function, a set or nothing)
 const missFn = (missing) => (typeof missing === 'function' ? missing : missing instanceof Set ? (id) => (missing.has(String(id)) ? 1 : 0) : () => 0);
@@ -374,8 +399,9 @@ export const nbaUsage = (r) => (Number.isFinite(r.s.fga) ? r.s.fga + 0.44 * (r.s
 
 // The NBA's roles: each team's five with the most minutes a game so far (three games or more) among the ones
 // playing its starters (S), the rest its bench (B); and the work missing (teamWork: by minutes, by usage, the
-// whole team one group). The same for a coming game (live: missing, the teammates out by the injury report,
-// none of them a starter)
+// whole team one group; a core player out counts at once, a regular from his second game out in a row:
+// teamWork gate). The same for a coming game (live: missing, the teammates out by the injury report, none of
+// them a starter)
 export function nbaMatchups(rows) {
   const team = new Map();
   const work = teamWork({ groupOf: () => 'all', measures: [(r) => r.s.min, nbaUsage], regular: [15, 8], floor: [10, 6] });
@@ -395,9 +421,10 @@ export function nbaMatchups(rows) {
     for (const list of games.values()) {
       const playing = new Set(list.map((r) => r.pid));
       const out = (id) => !playing.has(id);
+      const miss = work.histMiss(list[0].team, list[0].season, playing, () => NBA_CORE);
       for (const r of list) {
         r.role = roleOf(r.pid, r.team, r.season, out);
-        r.vacs = work.vacated(r.team, r.season, r.pid, r.pos, (id) => (out(id) ? 1 : 0));
+        r.vacs = work.vacated(r.team, r.season, r.pid, r.pos, miss);
         r.vac = Math.max(...r.vacs);
       }
     }
@@ -418,16 +445,17 @@ export function nbaMatchups(rows) {
   return {
     live: (pid, teamId, oppId, pos, season, missing = null) => {
       const missOf = missFn(missing);
-      const vacs = work.vacated(teamId, season, pid, pos, missOf);
+      const vacs = work.vacated(teamId, season, pid, pos, work.gate(teamId, season, missOf, () => NBA_CORE));
       return { role: roleOf(pid, teamId, season, (id) => missOf(id) >= 1), funnel: 0, pace: 1, tgt: 1, vacs, vac: Math.max(...vacs) };
     },
   };
 }
 
-// The NHL's: the work missing (teamWork: by time on ice and by power-play time, forwards and defensemen apart)
-// and the power play (a skater's power-play minutes a game, recent games counting most; his opponent's
-// penalties a game over the league's per team, from the context's box facts: facts.games[id].w, each side's
-// power plays first). The same for a coming game
+// The NHL's: the work missing (teamWork: by time on ice and by power-play time, forwards and defensemen apart;
+// a core skater out counts at once, a regular from his second game out in a row: teamWork gate) and the power
+// play (a skater's power-play minutes a game, recent games counting most; his opponent's penalties a game over
+// the league's per team, from the context's box facts: facts.games[id].w, each side's power plays first). The
+// same for a coming game
 export function nhlMatchups(rows, facts = null) {
   const grp = (pos) => (pos === 'F' || pos === 'D' ? pos : null);
   const work = teamWork({ groupOf: grp, measures: [(r) => r.s.toi, (r) => r.s.pptoi], regular: [10, 1], floor: [8, 0.5] });
@@ -455,9 +483,10 @@ export function nhlMatchups(rows, facts = null) {
     }
     for (const list of games.values()) {
       const playing = new Set(list.map((r) => r.pid));
+      const miss = work.histMiss(list[0].team, list[0].season, playing, (g) => NHL_CORE[g] ?? 0);
       for (const r of list) {
         stamp(r);
-        r.vacs = work.vacated(r.team, r.season, r.pid, r.pos, (id) => (playing.has(id) ? 0 : 1));
+        r.vacs = work.vacated(r.team, r.season, r.pid, r.pos, miss);
         r.vac = Math.max(...r.vacs);
       }
     }
@@ -491,7 +520,7 @@ export function nhlMatchups(rows, facts = null) {
   });
   return {
     live: (pid, teamId, oppId, pos, season, missing = null) => {
-      const vacs = work.vacated(teamId, season, pid, pos, missFn(missing));
+      const vacs = work.vacated(teamId, season, pid, pos, work.gate(teamId, season, missFn(missing), (g) => NHL_CORE[g] ?? 0));
       return { role: null, funnel: 0, pace: 1, tgt: 1, vacs, vac: Math.max(...vacs), ppTime: ppOf(pid), ppOpp: pensOf(oppId, season), ppAvg: lg.pp };
     },
   };
