@@ -17,7 +17,8 @@
 //   player a game (leagues.mjs PROP_CAPS). A whole-number line's push is out of both sides' chances and its stake
 //   comes back in the return (project.mjs lineChances). Cut to 0.5 when the line has moved a lot since it opened,
 //   the player's questionable, a questionable teammate's being in or out moves his share of his group's work,
-//   an outdoor game's forecast failed where his projection weighs the weather (wind, cold, rain), or (the
+//   an outdoor game's forecast failed (or a retractable roof isn't yet said open or closed) where his
+//   projection weighs the weather (wind, cold, rain), the forecast moves his projection 10% or more, or (the
 //   NFL) his team's roster can't be read or the snap counts are missing for some games of the
 //   history; skipped at twice the move or when he's out (or not in a posted lineup, or not the probable
 //   starting pitcher or goalie), when the work his group is missing now differs from what it was in the games
@@ -426,6 +427,10 @@ export function priceProps(sport, game, props, fitted, idx, exp, info, live, tru
     const mu = Math.max(0.05, (f.params.scale ?? 1) * p.base * Math.pow(p.opp, f.params.a) * Math.pow(scriptV, f.params.b) * ctxF * p.funnelF * p.paceF * p.tgtF * (p.vacF ?? 1));
     // (a weather term the fit kept, at an outdoor game whose forecast failed: the projection can't see it)
     const weatherBlind = !!info?.weather?.missing && ctxKeysOf.some((k) => WEATHER_CTX.has(k) && f.params[`c_${k}`]);
+    // (the weather moving his projection 10% or more either way: a forecast's error grows with it, rain's
+    // most of all, and the fit's sizes are from what fell, not what was forecast)
+    const weatherF = ctxFactor(f.stat, f.params, ctxV.map((v, i) => (WEATHER_CTX.has(ctxKeysOf[i]) ? v : 0)));
+    const weatherBig = Math.abs(Math.log(weatherF)) >= 0.1;
     // (the defense against his role this season, whether or not the projection weighs it: its allowed over
     // those players' usual, and its rank in the league, 1 the stingiest)
     let roleRank = null;
@@ -508,6 +513,7 @@ export function priceProps(sport, game, props, fitted, idx, exp, info, live, tru
     else if (Math.abs(moved) >= limit) guard = { why: `line moved ${moved > 0 ? '+' : ''}${round(moved, 1)} since it opened` };
     else if (status.why) guard = { why: status.why };
     else if (weatherBlind) guard = { why: 'no forecast for an outdoor game: the weather its projection weighs unseen' };
+    else if (weatherBig) guard = { why: `the forecast moves his projection ${weatherF > 1 ? '+' : ''}${Math.round((weatherF - 1) * 100)}%: priced off a forecast` };
     else if (qShift >= 0.15) guard = { why: `teammate questionable (${out.qNames.join(', ') || 'at his position'}): his share depends on it` };
     else if (snapGap?.games) guard = { why: `the snap counts missing for ${snapGap.games} games: the history holds only the players who got the ball there` };
     else if (noRoster) guard = { why: "his team's roster not read: a teammate who's left can't be told from one who's here" };

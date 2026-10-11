@@ -37,6 +37,10 @@ export const FOOTBALL_TERMS = [
   term('newCoach', 'starters', 'm', 'New head coach', 'when the other side is in its first four games under a new head coach, less its own'),
 ];
 
+// (the share of the outdoor finals whose rain must be known before the rain and snow are fit: gatherFootball's
+// facts.wxCover)
+export const WX_COVER = 0.95;
+
 // (each team's home clock, by nflverse's team codes, old ones too (Arizona keeps standard time all year); the
 // rest Eastern)
 const CLOCK = {
@@ -200,7 +204,11 @@ export async function gatherFootball(cfg, history, upcoming, facts, live, part) 
   // its finals not asked yet, the newest seasons first. The archive runs a few days behind, so a final is
   // asked once it's 6 days old (till then its rain is unknown: 0, no effect). The archive counts a long range
   // as many calls: 40 asks and a minute a run at most, the rest next run, so the first fill takes a few runs.
-  // A final the archive answered without its hours is null, not asked again)
+  // A final the archive answered without its hours is null, not asked again, once it's 14 days old (well past
+  // the archive's delay; a newer one is asked again next run). Then how much of it is filled: facts.wxCover,
+  // the share of the outdoor finals 14 days old or more with their rain known (context.mjs WEATHER.nfl keeps
+  // the rain and snow out of every fit, the props' too, till it's 95%: a final not filled yet is unknown, not
+  // dry, and a fit on a partly filled history would take its rain games for dry ones)
   if (part === 'precip') {
     const placeOf = new Map(Object.entries(STADIUMS));
     for (const g of history) {
@@ -209,6 +217,7 @@ export async function gatherFootball(cfg, history, upcoming, facts, live, part) 
     }
     for (const [id, f] of Object.entries(facts.fields)) if (f?.at) placeOf.set(id, f.at);
     const ripe = Date.now() - 6 * DAY;
+    const settled = Date.now() - 14 * DAY;
     const wet = new Map();
     for (const g of finals) {
       const r = rows.get(g.id);
@@ -226,11 +235,20 @@ export async function gatherFootball(cfg, history, upcoming, facts, live, part) 
       if (!at) return;
       for (const g of games) {
         const w = at(g.date);
-        facts.wx[g.id] = w ? [w.precip, w.snow] : null;
-        if (w) n++;
+        if (w) (facts.wx[g.id] = [w.precip, w.snow]), n++;
+        else if (Date.parse(g.date) <= settled) facts.wx[g.id] = null;
       }
     });
-    if (asks.length) console.log(`nfl: rain and snow for ${n} finals (${asks.length} of ${wet.size} stadium seasons asked)`);
+    let known = 0;
+    let of = 0;
+    for (const g of finals) {
+      const r = rows.get(g.id);
+      if (!['outdoors', 'open'].includes(r.roof) || Date.parse(g.date) > settled || !placeOf.has(r.stadium_id)) continue;
+      of++;
+      if (facts.wx[g.id]) known++;
+    }
+    facts.wxCover = { share: of ? Math.round((known / of) * 1000) / 1000 : 0, of };
+    if (asks.length || facts.wxCover.share < WX_COVER) console.log(`nfl: rain and snow for ${n} finals (${asks.length} of ${wet.size} stadium seasons asked); ${known} of ${of} outdoor finals known${facts.wxCover.share < WX_COVER ? `, under ${WX_COVER * 100}%: the rain and snow left out of the fits till then` : ''}`);
   }
 }
 

@@ -590,7 +590,21 @@ export class ModelDeskComponent implements OnInit, OnDestroy {
 
   // (a prop type's matchup terms: each one's fitted size, or "left out", and its held-out gain)
   matchupText(t: PropType): string {
-    const names: Record<string, string> = { roleK: 'role split', fun: 'funnel (over expected)', pc: 'pace', tg: 'target share' };
+    const names: Record<string, string> = {
+      roleK: 'role split',
+      fun: 'funnel (over expected)',
+      pc: 'pace',
+      tg: 'target share',
+      vc: 'teammates out (work left)',
+      c_wind: 'wind',
+      c_cold: 'cold',
+      c_precip: 'rain/snow',
+      c_backupQb: 'backup QB',
+      c_usage: 'teammates out',
+      c_b2b: 'back-to-back',
+      c_blowout: 'blowout',
+      c_oppShots: 'opponent shots',
+    };
     return Object.entries(t.gains ?? {})
       .map(([k, g]) => {
         const v = (t.params as unknown as Record<string, number | null>)[k];

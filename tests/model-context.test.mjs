@@ -93,3 +93,36 @@ test("hourAt and fieldKind: a team's own clock at kickoff (Arizona keeps standar
   assert.equal(fieldKind('fieldturf'), 'turf');
   assert.equal(fieldKind(''), null);
 });
+
+test('WEATHER.nfl: rain only once the archive has filled the history, a forecast at half, a retractable roof unknown', async () => {
+  const { WEATHER, FORECAST_WET } = await import('../libs/ranker/scripts/model/context.mjs');
+  const rows = new Map([
+    ['f1', { roof: 'outdoors', temp: '40', wind: '15', stadium_id: 'A' }],
+    ['f2', { roof: 'outdoors', temp: '60', wind: '5', stadium_id: 'A' }],
+    ['c1', { roof: 'outdoors', temp: '', wind: '', stadium_id: 'A' }],
+    ['o1', { roof: 'open', temp: '70', wind: '0', stadium_id: 'R' }],
+    ['c2', { roof: '', temp: '', wind: '', stadium_id: 'R' }],
+  ]);
+  const live = new Map([
+    ['c1', { weather: { temp: 35, wind: 20, precip: 0.4, snow: 0 } }],
+    ['c2', {}],
+  ]);
+  const facts = (share) => ({ nfl: rows, wx: { f1: [0.3, 0] }, wxCover: { share, of: 100 } });
+  // (filled: a final's rain as it fell, one not filled unknown (no effect), a coming game's at half)
+  let w = WEATHER.nfl(facts(0.97), live);
+  assert.equal(w({ id: 'f1', final: true }).terms.precip, 3);
+  assert.equal(w({ id: 'f2', final: true }).terms.precip, 0);
+  assert.equal(w({ id: 'f2', final: true }).info.precip, null);
+  const c = w({ id: 'c1', final: false });
+  assert.equal(c.info.precip, 0.4 * FORECAST_WET);
+  assert.equal(c.info.precipForecast, 0.4);
+  assert.equal(c.terms.precip, 0.4 * FORECAST_WET * 10);
+  // (not filled yet: no rain anywhere, the wind and cold as before)
+  w = WEATHER.nfl(facts(0.5), live);
+  assert.equal(w({ id: 'f1', final: true }).terms.precip, 0);
+  assert.equal(w({ id: 'c1', final: false }).terms.precip, 0);
+  assert.equal(w({ id: 'c1', final: false }).info.rainUnfit, true);
+  assert.equal(w({ id: 'f1', final: true }).terms.wind, 1);
+  // (a coming game under a retractable roof that's been open: unknown, marked missing, no game flag)
+  assert.deepEqual(w({ id: 'c2', final: false }), { info: { roof: 'retractable', missing: true } });
+});

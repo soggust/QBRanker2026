@@ -304,8 +304,9 @@ function scoreOf(out, win, shape = { rk: 0, rm: 1 }) {
   return { ...best, n: list.length };
 }
 
-// (a context term's sizes tried: GRID.c, or its own where it's a power (c_oppShots: a ratio's log))
-const GRID = { K: [2, 4, 8, 16, 32], w: [0, 0.2, 0.4, 0.6], a: [0, 0.5, 1], b: [-0.5, 0, 0.5, 1, 1.5], c: [-0.3, -0.15, -0.07, 0, 0.07, 0.15, 0.3], roleK: [Infinity, 32, 16, 8, 4, 2], fun: [0, 1, 2, 4, 8], pc: [0, 0.5, 1, 1.5], tg: [0, 0.5, 1], vc: [0, 0.25, 0.5, 0.75, 1, 1.25], c_oppShots: [-0.5, 0, 0.25, 0.5, 0.75, 1, 1.25] };
+// (a context term's sizes tried: GRID.c, or its own where it's a power (c_oppShots: a ratio's log) or runs
+// over a wide range (c_precip: 0 to 5, per 0.1 inch: GRID.c's smallest step would be 30% at half an inch))
+const GRID = { K: [2, 4, 8, 16, 32], w: [0, 0.2, 0.4, 0.6], a: [0, 0.5, 1], b: [-0.5, 0, 0.5, 1, 1.5], c: [-0.3, -0.15, -0.07, 0, 0.07, 0.15, 0.3], roleK: [Infinity, 32, 16, 8, 4, 2], fun: [0, 1, 2, 4, 8], pc: [0, 0.5, 1, 1.5], tg: [0, 0.5, 1], vc: [0, 0.25, 0.5, 0.75, 1, 1.25], c_oppShots: [-0.5, 0, 0.25, 0.5, 0.75, 1, 1.25], c_precip: [-0.04, -0.02, -0.01, 0, 0.01, 0.02] };
 // (the vacated work's split, by index into matchups.mjs's: in proportion, flatter, equally; searched with vc)
 const SPLIT = [0, 1, 2];
 // (each matchup term's off setting, and which stats have it; each context term's size (c_<name>) is off at 0)

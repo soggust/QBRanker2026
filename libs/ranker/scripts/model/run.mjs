@@ -704,8 +704,14 @@ function betGames(r) {
     // explains), or a key player questionable, cuts the stake to the minimum; a line that's moved twice that
     // far against it skips the market this run. A moneyline with no spread market to anchor it (margins.mjs
     // mlModel) is bet at the book's chance alone, the minimum, as an action bet)
+    // (an NFL total under the weather the model can't price well: a forecast of a fifth of an inch of rain or
+    // more over the game (the rain term's size is from what fell, and a big forecast's error is big), or a
+    // retractable roof not yet said open or closed (its weather unknown), cut to the minimum too)
+    const wx = sport === 'nfl' ? f?.info.weather : null;
+    const totalWhy = wx?.roof === 'retractable' ? 'a retractable roof not yet said open or closed: its weather unseen' : wx?.precipForecast >= 0.2 ? `${wx.precipForecast} in of rain forecast: a total priced off a forecast's rain` : null;
     const guardFor = (key, pick) => {
-      const g = gapGuard(key, pick.model, pick.fair) ?? guardOf(cfg.guard, key, lines.move, f?.info.flags ?? [], { m: adjM, t: adjT }, params.sigma, pick.side);
+      const flags = [...(f?.info.flags ?? []), ...(key === 'total' && totalWhy ? [totalWhy] : [])];
+      const g = gapGuard(key, pick.model, pick.fair) ?? guardOf(cfg.guard, key, lines.move, flags, { m: adjM, t: adjT }, params.sigma, pick.side);
       if (g?.skip || pick.anchored !== false) return g;
       return { why: [g?.why, 'no spread market to price the moneyline off'].filter(Boolean).join('; ') };
     };

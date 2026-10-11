@@ -19,7 +19,7 @@ import { RANKER_TERMS, rankerOf } from './teamstats.mjs';
 import { term } from './terms.mjs';
 import { recordBox } from './playerlogs.mjs';
 import { OFFICIAL_TERMS, gatherOfficials, officialsOf, refereesOf } from './officials.mjs';
-import { FOOTBALL_TERMS, footballOf, gatherFootball } from './football.mjs';
+import { FOOTBALL_TERMS, WX_COVER, footballOf, gatherFootball } from './football.mjs';
 import { HOCKEY_TERMS, gatherHockey, hockeyOf } from './hockey.mjs';
 import { BASEBALL_TERMS, baseballOf, gatherBaseball } from './baseball.mjs';
 import { DAY, elevations, forecast, geocode, isoDay, miles, mlbHands, mlbPitching, mlbSchedule, nflverseGames, pitchLine, pool } from './sources.mjs';
@@ -80,7 +80,7 @@ export const TERMS = {
     term('pitcherT', 'starters', 't', 'Pitchers (total)', 'to the total per run a 9 innings both starters allow under average'),
     term('temp', 'weather', 't', 'Temperature', 'to the total per 10°F over 70°F (outdoors)'),
     term('windOut', 'weather', 't', 'Wind out', 'to the total per 10 mph blowing out toward center (in: negative)'),
-    term('rain', 'weather', 't', 'Rain', "to the total when it's raining at first pitch (StatsAPI's report; a coming game without one, a tenth of an inch or more forecast over its first hours)"),
+    term('rain', 'weather', 't', 'Rain', "to the total when it's raining at first pitch (StatsAPI's report; a coming game without one posted is none, and flagged when rain is forecast)"),
   ],
 };
 
@@ -466,10 +466,14 @@ async function mlbFacts(history, upcoming, facts, live) {
       if (fc) {
         const toward = ((fc.from ?? 0) + 180) % 360;
         const out = f.az === null || fc.from === null ? 0 : fc.wind * Math.cos(((toward - f.az) * Math.PI) / 180);
-        // (rain: a tenth of an inch or more forecast over its first hours; none forecast or unknown, none)
-        l.w = [fc.temp, Math.round(out * 10) / 10, 0, Number.isFinite(fc.precip) && fc.precip >= 0.1 ? 1 : 0];
+        // (rain: the history's is StatsAPI's report at first pitch, so a game without one posted yet is no
+        // rain (the same thing a forecast can't say); one whose forecast has a tenth of an inch or more over its
+        // first hours, or no rain in it at all, flagged: WEATHER.mlb)
+        l.w = [fc.temp, Math.round(out * 10) / 10, 0, 0];
         l.forecast = fc;
-      }
+        if (!Number.isFinite(fc.precip)) l.weatherMissing = 'its forecast has no rain in it';
+        else if (fc.precip >= 0.1) l.weatherMissing = `rain forecast (${fc.precip} in) and no weather report posted yet`;
+      } else l.weatherMissing = 'no forecast for an open-air park';
     }
   }
   await pitcherLines(history, upcoming, facts, live, today);
@@ -958,34 +962,57 @@ const STARTERS = {
   },
 };
 
+// (the share of a forecast's rain and snow taken as what will fall: half, till past forecasts can be fit)
+export const FORECAST_WET = 0.5;
+
 // Weather, per sport (outdoor games only; anything indoors, under a closed roof or unknown is no effect)
-const WEATHER = {
-  nfl: (facts, live) => (g) => {
-    const row = facts.nfl?.get(g.id);
-    const l = live.get(g.id);
-    const roof = row?.roof ?? '';
-    if (!['outdoors', 'open'].includes(roof)) return row ? { info: { roof: roof || 'unknown' } } : null;
-    const temp = l?.weather ? l.weather.temp : row.temp === '' || row.temp === 'NA' ? null : Number(row.temp);
-    const wind = l?.weather ? l.weather.wind : row.wind === '' || row.wind === 'NA' ? null : Number(row.wind);
-    // (the rain and snow over its window: a final's from the archive (football.mjs facts.wx), a coming game's
-    // from the forecast; unknown, null: no effect, and a coming game's flagged (its forecast failed))
-    const wx = g.final ? facts.wx?.[g.id] : null;
-    const precip = g.final ? (wx?.[0] ?? null) : Number.isFinite(l?.weather?.precip) ? l.weather.precip : null;
-    const snow = g.final ? (wx?.[1] ?? null) : Number.isFinite(l?.weather?.snow) ? l.weather.snow : null;
-    const missing = !g.final && !!l && (!l.weather || !!l.weatherMissing);
-    return {
-      // (rain capped at half an inch and snow at four over the window: past that it's all one storm)
-      terms: { cold: temp === null ? 0 : Math.max(0, 50 - temp) / 10, wind: wind === null ? 0 : Math.max(0, wind - 5) / 10, precip: precip === null ? 0 : Math.min(0.5, precip) * 10, snow: snow === null ? 0 : Math.min(4, snow) },
-      info: { roof, temp, wind, precip, snow, forecast: !!l?.weather, ...(missing ? { missing: true } : {}) },
-      flags: missing ? ['no forecast for an outdoor game: its weather unseen'] : [],
+export const WEATHER = {
+  nfl: (facts, live) => {
+    // (the rain and snow fit only once the archive has filled the history (football.mjs WX_COVER of its
+    // outdoor finals known): till then a final not filled yet would count as a dry one, so they're no effect
+    // anywhere, the props' too)
+    const wet = (facts.wxCover?.share ?? 0) >= WX_COVER;
+    // (the stadiums with a retractable roof: nflverse has a coming game's roof blank there, and their finals
+    // open or closed)
+    const opens = new Set([...(facts.nfl?.values() ?? [])].filter((r) => r.roof === 'open').map((r) => r.stadium_id));
+    return (g) => {
+      const row = facts.nfl?.get(g.id);
+      const l = live.get(g.id);
+      const roof = row?.roof ?? '';
+      // (a coming game under a retractable roof not yet said open or closed: its weather unknown, and marked
+      // missing (no game flag: the roof's usually shut in bad weather) so the props that weigh the weather are
+      // cut, and its total too (run.mjs))
+      if (!g.final && !roof && row && opens.has(row.stadium_id)) return { info: { roof: 'retractable', missing: true } };
+      if (!['outdoors', 'open'].includes(roof)) return row ? { info: { roof: roof || 'unknown' } } : null;
+      const temp = l?.weather ? l.weather.temp : row.temp === '' || row.temp === 'NA' ? null : Number(row.temp);
+      const wind = l?.weather ? l.weather.wind : row.wind === '' || row.wind === 'NA' ? null : Number(row.wind);
+      // (the rain and snow over its window: a final's from the archive (football.mjs facts.wx), a coming game's
+      // from the forecast at FORECAST_WET of what it says (a forecast's rain is far noisier than its wind or
+      // its cold, and a big one comes in smaller on average: the fit's sizes are the archive's, what fell);
+      // unknown, null: no effect, and a coming game's flagged (its forecast failed))
+      const wx = g.final ? facts.wx?.[g.id] : null;
+      const fc = (v) => (Number.isFinite(v) ? Math.round(v * FORECAST_WET * 100) / 100 : null);
+      const precip = !wet ? null : g.final ? (wx?.[0] ?? null) : fc(l?.weather?.precip);
+      const snow = !wet ? null : g.final ? (wx?.[1] ?? null) : fc(l?.weather?.snow);
+      const missing = !g.final && !!l && (!l.weather || !!l.weatherMissing);
+      return {
+        // (rain capped at half an inch and snow at four over the window: past that it's all one storm)
+        terms: { cold: temp === null ? 0 : Math.max(0, 50 - temp) / 10, wind: wind === null ? 0 : Math.max(0, wind - 5) / 10, precip: precip === null ? 0 : Math.min(0.5, precip) * 10, snow: snow === null ? 0 : Math.min(4, snow) },
+        info: { roof, temp, wind, precip, snow, ...(!g.final && Number.isFinite(l?.weather?.precip) ? { precipForecast: l.weather.precip } : {}), forecast: !!l?.weather, ...(wet ? {} : { rainUnfit: true }), ...(missing ? { missing: true } : {}) },
+        flags: missing ? ['no forecast for an outdoor game: its weather unseen'] : [],
+      };
     };
   },
   mlb: (facts, live) => (g) => {
     const f = g.final ? facts.games?.[g.id] : live.get(g.id);
     const w = f?.w;
-    if (!w || w[2]) return w ? { info: { roof: 'closed' } } : null;
-    // (rain: w[3], 1 or 0; a game kept before it was, unknown: none)
+    // (a coming game at an open-air park whose weather can't be fully seen, flagged: its markets at the least
+    // stake)
+    const flags = !g.final && f?.weatherMissing ? [`${f.weatherMissing}: its weather unseen`] : [];
+    if (!w || w[2]) return w ? { info: { roof: 'closed' } } : flags.length ? { info: { missing: true }, flags } : null;
+    // (rain: w[3], 1 or 0, StatsAPI's report at first pitch; a game kept before it was, or a coming one
+    // without a report posted, unknown: none)
     const rain = w[3] === 1 ? 1 : 0;
-    return { terms: { temp: (w[0] - 70) / 10, windOut: w[1] / 10, rain }, info: { temp: w[0], windOut: w[1], rain: w.length > 3 ? !!rain : null, forecast: !!f.forecast } };
+    return { terms: { temp: (w[0] - 70) / 10, windOut: w[1] / 10, rain }, info: { temp: w[0], windOut: w[1], rain: w.length > 3 ? !!rain : null, forecast: !!f.forecast, ...(flags.length ? { missing: true } : {}) }, flags };
   },
 };
