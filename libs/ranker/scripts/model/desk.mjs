@@ -315,7 +315,9 @@ export function voidOf(bet, game, now) {
 // n bets count less each, 1 / (1 + (n - 1)·RHO) (the props of one game share its pace and its script: the
 // design effect of bets that correlated, so 10 on one game weigh as about 2.7; eff, the bets' worth all told).
 // Each bet scored at the chance the desk bets with (chanceAt: the lean tapered past half of GAP), and one past
-// GAP, which the desk never places, left out.
+// GAP, which the desk never places, left out. A bet placed under other timing (tw: run.mjs counts a live bet
+// placed well before its sport's window opens, from before the desk waited for the news, at half) counts for
+// that share of both kinds.
 // Until a market has 40 bets with either, the starting trust.
 const RHO = 0.3;
 export function fitTrust(list, start) {
@@ -333,8 +335,8 @@ export function fitTrust(list, start) {
   const eff = round([...all].reduce((s, b) => s + share(b), 0), 1);
   if (all.size < 40) return { trust: start, n: decided.length, clvN: closed.length, eff, fitted: false };
   // (each piece of evidence's weight: its game's share, halved where the bet has the other kind too)
-  const wResult = (b) => (b.weight ?? 1) * share(b) * (isClosed.has(b) ? 0.5 : 1);
-  const wClose = (b) => share(b) * (isDecided.has(b) ? 0.5 : 1);
+  const wResult = (b) => (b.weight ?? 1) * (b.tw ?? 1) * share(b) * (isClosed.has(b) ? 0.5 : 1);
+  const wClose = (b) => (b.tw ?? 1) * share(b) * (isDecided.has(b) ? 0.5 : 1);
   const n = decided.reduce((s, b) => s + wResult(b), 0) + closed.reduce((s, b) => s + wClose(b), 0);
   let best = { trust: start, loss: Infinity };
   for (let t = 0; t <= 1.0001; t += 0.05) {

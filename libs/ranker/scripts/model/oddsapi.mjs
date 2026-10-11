@@ -14,6 +14,10 @@
 //          day, which it doesn't say; a balance that jumps back up starts a new cycle early); 2,000 credits are
 //          held back, history has its own 6,000 this cycle, and the rest is split a day at a time between lines
 //          and props by what's left and the days left (lines the larger share: they're the last to be cut)
+//   when   (run.mjs) the lines bought only while a game inside its window (leagues.mjs TIMING), its news in
+//          or at its last chance, has a market still to bet (a bet taken back to price again on news among
+//          them); a game's props asked once they're due, near the start, and when they're priced again on news
+//          (PROP_ASKS at most): a game days out buys nothing
 //   cuts   when credits run low: history first, then props, then lines; with none, or no key, or the API down,
 //          the desk prices from ESPN's free board as before
 //

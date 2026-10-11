@@ -1,0 +1,115 @@
+// The desk's timing (libs/ranker/scripts/model/timing.mjs, leagues.mjs TIMING): a game's window and last
+// chance, the news its bets wait for, and the inputs a bet is priced again on. No network: the facts are made up.
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { TIMING, LEAGUES } from '../libs/ranker/scripts/model/leagues.mjs';
+import { inputChanges, inputsOf, newsMissing, phaseOf } from '../libs/ranker/scripts/model/timing.mjs';
+import { fitTrust } from '../libs/ranker/scripts/model/desk.mjs';
+
+const H = 36e5;
+const game = { id: 'g1', home: '1', away: '2', homeAbbr: 'HOM', awayAbbr: 'AWY' };
+
+test('TIMING: every league has a window for its lines and props, the last chance inside both', () => {
+  for (const sport of Object.keys(LEAGUES)) {
+    const t = TIMING[sport];
+    assert.ok(t, sport);
+    for (const kind of ['lines', 'props']) assert.ok(t[kind] > t.lastChance && t.lastChance >= 2, `${sport} ${kind}`);
+    // (the hourly runs come late at times: the last chance gives at least two)
+    assert.ok(t.lastChance >= 2);
+  }
+});
+
+test('phaseOf: early before the window, open in it, last inside the last chance', () => {
+  assert.equal(phaseOf('nfl', 'lines', 48 * H), 'early');
+  assert.equal(phaseOf('nfl', 'lines', 20 * H), 'open');
+  assert.equal(phaseOf('nfl', 'props', 2 * H), 'last');
+  assert.equal(phaseOf('nba', 'props', 7 * H), 'early');
+  assert.equal(phaseOf('nba', 'props', 5 * H), 'open');
+});
+
+test('newsMissing: the NHL waits for both goalies; MLB lines for both starters and lineups; a batter for his lineup', () => {
+  assert.deepEqual(newsMissing('nfl', {}), []);
+  assert.deepEqual(newsMissing('nba', {}, { kind: 'props' }), []);
+  assert.equal(newsMissing('nhl', { home: { id: '9' } }).length, 1);
+  assert.deepEqual(newsMissing('nhl', { home: { id: '9' }, away: { id: '8' } }), []);
+  const mlb = { hp: '11', ap: '12', lineups: [['1', '2'], null] };
+  assert.deepEqual(newsMissing('mlb', mlb, { kind: 'lines' }), ['the lineups not posted']);
+  assert.deepEqual(newsMissing('mlb', mlb, { kind: 'props', home: true }), []);
+  assert.deepEqual(newsMissing('mlb', mlb, { kind: 'props', home: false }), ['his lineup not posted']);
+  assert.deepEqual(newsMissing('mlb', mlb, { kind: 'props', home: false, pitcher: true }), []);
+  assert.deepEqual(newsMissing('mlb', { ap: '12' }, { kind: 'props', home: true, pitcher: true }), ['his start not announced']);
+});
+
+const report = (home, away) =>
+  new Map([
+    ['1', home],
+    ['2', away],
+  ]);
+
+test('inputsOf / inputChanges: a teammate ruled out changes the inputs, with his name; nothing else does', () => {
+  const was = inputsOf('nba', game, { injuries: report([{ id: '5', name: 'A Five', status: 'Questionable' }], []) }, null);
+  const same = inputsOf('nba', game, { injuries: report([{ id: '5', name: 'A Five', status: 'Questionable' }], []) }, null);
+  assert.deepEqual(inputChanges(was.hash, same), []);
+  const now = inputsOf('nba', game, { injuries: report([{ id: '5', name: 'A Five', status: 'Out' }], []) }, null);
+  const changes = inputChanges(was.hash, now, { game, before: was.parts, names: now.names });
+  assert.deepEqual(
+    changes.map((c) => c.key),
+    ['out:h', 'q:h'],
+  );
+  assert.match(changes[0].words, /HOM out list \(\+A Five\)/);
+});
+
+test("inputChanges: an injury report unread this run, or a goalie dropped from the listing, isn't news", () => {
+  const was = inputsOf('nhl', game, { injuries: report([], []), home: { id: '30', name: 'G One', status: 'expected' }, away: { id: '31', name: 'G Two', status: 'expected' } }, null);
+  // (the report failed: unread, not a change)
+  const failed = inputsOf('nhl', game, { injuriesFailed: true, home: { id: '30', name: 'G One', status: 'expected' }, away: { id: '31', name: 'G Two', status: 'expected' } }, null);
+  assert.deepEqual(inputChanges(was.hash, failed), []);
+  // (a goalie no longer listed: not a change)
+  const dropped = inputsOf('nhl', game, { injuries: report([], []), away: { id: '31', name: 'G Two', status: 'expected' } }, null);
+  assert.deepEqual(inputChanges(was.hash, dropped), []);
+  // (a new goalie, or the same one confirmed: a change)
+  const swapped = inputsOf('nhl', game, { injuries: report([], []), home: { id: '32', name: 'G Three', status: 'expected' }, away: { id: '31', name: 'G Two', status: 'confirmed' } }, null);
+  assert.deepEqual(
+    inputChanges(was.hash, swapped, { game, names: swapped.names }).map((c) => c.words),
+    ['HOM goalie (G Three)', 'AWY goalie (G Two confirmed)'],
+  );
+});
+
+test('inputsOf: MLB lineups posted and a starter named are news; StatsAPI unread is not', () => {
+  const was = inputsOf('mlb', game, { pk: 1, hp: '11', ap: null, lineups: null }, null);
+  const posted = inputsOf('mlb', game, { pk: 1, hp: '11', ap: '12', names: [null, 'S Twelve'], lineups: [['1'], ['2']] }, null);
+  assert.deepEqual(
+    inputChanges(was.hash, posted, { game, names: posted.names }).map((c) => c.words),
+    ['HOM lineup (posted)', 'AWY starting pitcher (S Twelve)', 'AWY lineup (posted)'],
+  );
+  const unread = inputsOf('mlb', game, {}, null, { statsapi: false });
+  assert.deepEqual(inputChanges(posted.hash, unread), []);
+  // (a bet from before the inputs were kept: nothing to compare)
+  assert.deepEqual(inputChanges(undefined, posted), []);
+  // (placed with StatsAPI unread, read now: the news it was priced without)
+  assert.deepEqual(
+    inputChanges(unread.hash, posted, { game, names: posted.names }).map((c) => c.key),
+    ['sp:h', 'lu:h', 'sp:a', 'lu:a'],
+  );
+});
+
+test('inputsOf: the NFL quarterback the context priced; nflverse unread is no change', () => {
+  const live = { injuries: report([], []), row: {} };
+  const was = inputsOf('nfl', game, live, { starters: { home: 'Q One', away: 'Q Two', backup: [0, 0] } });
+  const backup = inputsOf('nfl', game, live, { starters: { home: null, away: 'Q Two', backup: [1.2, 0] } });
+  assert.deepEqual(
+    inputChanges(was.hash, backup, { game }).map((c) => c.words),
+    ['HOM quarterback (a backup)'],
+  );
+  assert.deepEqual(inputChanges(was.hash, inputsOf('nfl', game, { injuries: report([], []) }, null)), []);
+});
+
+test('fitTrust: a bet placed under other timing (tw) weighs less', () => {
+  const bets = (tw) =>
+    Array.from({ length: 60 }, (_, i) => ({ id: `b${i}`, event: `e${i}`, market: 'spread', status: i % 3 ? 'won' : 'lost', model: 0.6, fair: 0.5, ...(tw ? { tw } : {}) }));
+  const full = fitTrust(bets(null), 0.5);
+  const half = fitTrust(bets(0.5), 0.5);
+  assert.ok(full.fitted && half.fitted);
+  // (the same results at half weight: the trust's cost counts for more, so it can't be higher)
+  assert.ok(half.trust <= full.trust);
+});

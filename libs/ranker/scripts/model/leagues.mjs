@@ -37,6 +37,26 @@ export const PROP_CAPS = {
 };
 export const GAME_CAP = 5;
 
+// TIMING (run.mjs, timing.mjs): when a coming game is bet, in hours before its start, so its bets wait for the
+// news rather than being locked in days ahead on a guess at who plays.
+//   lines, props  the window: before it, the game's markets (or props) aren't priced or bet at all; inside it
+//                 they're bet once the news each waits for is in (timing.mjs newsMissing: the NHL's probable
+//                 goalies, MLB's probable starters and posted lineups; the NFL's and NBA's wait for the window
+//                 alone, which opens after the injury report that counts: the NFL's final one, Friday's, by a
+//                 Sunday game's Saturday afternoon; the NBA's game-day one)
+//   lastChance    inside it, anything not bet yet is bet with whatever's known, the news it still lacks a
+//                 flag that cuts it to the 0.5-unit minimum (the hourly runs come late or not at all at times:
+//                 the window gives several runs to catch a game, the last chance at least two)
+// A bet placed is priced again whenever what it was priced on changes before the start (timing.mjs inputsOf:
+// the injury report's out and questionable lists, the starters, the goalies, the lineups): taken back and
+// placed again by the model as it is then
+export const TIMING = {
+  nfl: { lines: 26, props: 26, lastChance: 3 },
+  nba: { lines: 6, props: 6, lastChance: 3 },
+  nhl: { lines: 10, props: 10, lastChance: 3 },
+  mlb: { lines: 6, props: 6, lastChance: 2.5 },
+};
+
 export const LEAGUES = {
   nfl: {
     league: 'football/nfl',

@@ -32,6 +32,11 @@
 //   gone can't be told), or (the NFL) the snap counts are missing for a season's quarter or more of the
 //   history's games
 //
+//   when: inside the game's props window (leagues.mjs TIMING; run.mjs betProps), each once the news it waits
+//   for is in (timing.mjs newsMissing: an MLB batter's lineup and the other side's starter, a pitcher's own
+//   start, the NHL's goalies) or at the last chance, flagged at the minimum; priced again, taken back and
+//   placed anew, when the game's inputs change before the start (timing.mjs inputsOf, run.mjs repriceOpen)
+//
 // The history it's fit on (fitProps): every game a player took the field at the stat's positions, whatever he
 // did in it, as DraftKings grades him (STATS played), and of those the ones a book would have posted his prop
 // for by what was known before the game (markEligible: his usage in his games before it), never by the
