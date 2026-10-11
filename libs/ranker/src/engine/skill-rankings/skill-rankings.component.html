@@ -278,7 +278,9 @@
         @for (part of w.parts; track part.key) {
           <div role="listitem" class="why-part" [class.hurts]="part.amount < 0" [title]="part.title">
             <span class="why-bar" aria-hidden="true"><i [style.width.%]="part.width"></i></span>
-            <span class="why-stat">{{ part.label }} @if (part.value) {<em>{{ part.value }}</em>}</span>
+            <!-- (its value, a column of its own so the values line up; then the stat and its place in the list) -->
+            <strong class="why-value">{{ part.value }}</strong>
+            <span class="why-stat">{{ part.label }} @if (part.place) {<small>({{ part.place }})</small>}</span>
             <span class="why-amount">{{ signedScore(part.amount) }}</span>
           </div>
         } @empty {

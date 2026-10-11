@@ -1,6 +1,7 @@
 import type { SkillPlayer, SkillStat, SkillWeights } from '@sport/positions';
 import type { SportSettings } from '@ranker/engine/sport';
 import { SPORT } from '@sport/sport';
+import { ordinal } from '@ranker/core/format';
 
 // Why a row ranks where it does (its rank tile clicked): its score split by stat, and what separates it
 // from the rows beside it. The numbers are the list's own (TabRanker.scores: each stat's standard score
@@ -12,6 +13,8 @@ export interface WhyPart {
   key: string;
   label: string;
   value: string;
+  // (its place in the list on that stat: "3rd", "T-3rd"; none for a stat that's a rank already)
+  place: string | null;
   amount: number;
   width: number;
   // (its hover: the stat written out, the value and its place in the list, the slider, the math)
@@ -99,7 +102,9 @@ export function rankWhy(
   const parts = all.map(([key, amount]) => {
     const stat = statOf.get(key)!;
     const value = valueText(player, stat, reader);
-    return { key, label: label(key), value, amount, width: largest ? (Math.abs(amount) / largest) * 100 : 0, title: partTitle(player, stat, value, amount) };
+    const at = stat.format === 'rank' || stat.format === 'recent' ? null : reader.listRank(player, stat);
+    const place = at ? `${at.tied ? 'T-' : ''}${ordinal(at.rank)}` : null;
+    return { key, label: label(key), value, place, amount, width: largest ? (Math.abs(amount) / largest) * 100 : 0, title: partTitle(player, stat, value, amount) };
   });
 
   const score = total(player);

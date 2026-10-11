@@ -1771,10 +1771,12 @@ section ul li.player:not(.header-row) .count.rank-tile {
 
 // One stat a line: its bar (green helping, red hurting; the largest the full width), name and value, share
 .why-parts {
-  display: flex;
+  // (one grid for every line, each line its row of it: the values' column lines up down the list)
+  align-content: start;
+  display: grid;
   flex: 0 1 auto;
-  flex-direction: column;
-  gap: 3px;
+  gap: 3px 8px;
+  grid-template-columns: 48px max-content minmax(0, 1fr) auto;
   margin: 8px -6px 0 0;
   max-height: min(60vh, 420px);
   min-height: 3em;
@@ -1785,16 +1787,21 @@ section ul li.player:not(.header-row) .count.rank-tile {
   .why-part {
     align-items: center;
     display: grid;
-    gap: 8px;
-    grid-template-columns: 48px 1fr auto;
+    grid-column: 1 / -1;
+    grid-template-columns: subgrid;
   }
 
-  em {
-    color: #fff;
-    font-style: normal;
-    font-weight: 700;
-    margin-left: 3px;
+  .why-empty {
+    grid-column: 1 / -1;
   }
+}
+
+// (a stat's value, left-aligned in its column; its place in the list small after the stat's name)
+.why-value {
+  color: #fff;
+  font-variant-numeric: tabular-nums;
+  font-weight: 800;
+  white-space: nowrap;
 }
 
 .why-bar {
@@ -1823,6 +1830,13 @@ section ul li.player:not(.header-row) .count.rank-tile {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+
+  small {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.85em;
+    font-weight: 600;
+    margin-left: 3px;
+  }
 
   .hurts & {
     color: #ddd;
